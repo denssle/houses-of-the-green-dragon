@@ -5,13 +5,13 @@ import type { Cookies } from '@sveltejs/kit';
 
 const userMap: Map<number, BackendUser> = new Map();
 
-export function getUserForNickAndPW(nicknameS: string, passwordS: string) {
+export function getUserForNickAndPW(nicknameS: string, passwordS: string): User | undefined {
 	return mapBackendUserToUser(
 		userMap.values().find((value) => value.nickname === nicknameS && value.password === passwordS)
 	);
 }
 
-export function validateExtractedUser(currentUser: User | null) {
+export function validateExtractedUser(currentUser: User | null): boolean {
 	return Boolean(currentUser?.id && userMap.has(currentUser.id));
 }
 

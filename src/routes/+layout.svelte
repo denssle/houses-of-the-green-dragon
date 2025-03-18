@@ -18,11 +18,7 @@
 
 <footer>
 	<nav class="flex place-content-around">
-		<a href="/about" class="link">
-			Über die Seite
-		</a>
-		<a href="/impressum" class="link">
-			Impressum
-		</a>
+		<a href="/about" class="link"> Über die Seite </a>
+		<a href="/impressum" class="link"> Impressum </a>
 	</nav>
 </footer>

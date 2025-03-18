@@ -6,12 +6,12 @@
 
 <div class="flex justify-center">
 	<div class="w-sm md:w-md lg:w-lg gap-4">
-
 		<h2>Registrieren</h2>
-		<p class="italic mb-4">Registrieren ist ein langweiliges Wort aber der erste Schritt auf einer langen Reise. </p>
+		<p class="italic mb-4">
+			Registrieren ist ein langweiliges Wort aber der erste Schritt auf einer langen Reise.
+		</p>
 
 		<form method="POST" class="">
-
 			<section class="flex flex-col items-end">
 				<label>
 					Nickname
