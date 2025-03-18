@@ -14,29 +14,29 @@ export const actions = {
 		const dynasty = data.get('dynasty');
 
 		if (!nickname) {
-			return fail(400, { success: false, message: 'Nickname ist erforderlich' });
+			return fail(400, { message: 'Nickname ist erforderlich' });
 		}
 
 		const nicknameS: string = nickname.toString();
 
 		if (userService.nickNameAlreadyUsed(nicknameS)) {
-			return fail(400, { success: false, message: 'Der Nickname ist bereits vergeben' });
+			return fail(400, { message: 'Der Nickname ist bereits vergeben' });
 		}
 
 		if (email && userService.emailAlreadyUsed(email.toString())) {
-			return fail(400, { success: false, message: 'Diese Email wird bereits verwendet' });
+			return fail(400, { message: 'Diese Email wird bereits verwendet' });
 		}
 
 		if (!password) {
-			return fail(400, { success: false, message: 'Password wird benötigt' });
+			return fail(400, { message: 'Password wird benötigt' });
 		}
 
 		if (password && password2 && password.toString() !== password2.toString()) {
-			return fail(400, { success: false, message: 'Passwort muss gleich sein' });
+			return fail(400, { message: 'Passwort muss gleich sein' });
 		}
 
 		if (!dynasty) {
-			return fail(400, { success: false, message: 'Die Dynastie muss gegeben sein' });
+			return fail(400, { message: 'Die Dynastie muss gegeben sein' });
 		}
 
 		const dynastyS: string = dynasty.toString();
@@ -46,6 +46,6 @@ export const actions = {
 			cookies.set('session', userService.createSession(user), { path: '/' });
 			redirect(303, '/');
 		}
-		return fail(500, { success: false, message: 'User anlegen gescheitert!' });
+		return fail(500, { message: 'User anlegen gescheitert!' });
 	}
 } satisfies Actions;

@@ -10,12 +10,12 @@ export const actions = {
 		const password = data.get('password');
 
 		if (!nickname) {
-			return fail(400, { success: false, message: 'Nickname is required' });
+			return fail(400, { message: 'Nickname is required' });
 		}
 		const nicknameS: string = nickname.toString();
 
 		if (!password) {
-			return fail(400, { success: false, message: 'Password is required' });
+			return fail(400, { message: 'Password is required' });
 		}
 		const passwordS: string = password.toString();
 
@@ -27,6 +27,6 @@ export const actions = {
 			redirect(303, '/');
 		}
 
-		return fail(400, { success: false, message: 'Kein User für die Daten gefunden. ' });
+		return fail(400, { message: 'Kein User für die Daten gefunden. ' });
 	}
 } satisfies Actions;

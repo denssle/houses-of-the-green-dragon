@@ -4,33 +4,50 @@
 	let { form }: PageProps = $props();
 </script>
 
-<h2>Register to have fun</h2>
+<div class="flex justify-center">
+	<div class="w-sm md:w-md lg:w-lg gap-4">
 
-<form method="POST">
-	{#if !form?.success}<p>{form?.message}</p>{/if}
-	<label>
-		Nickname
-		<input name="nickname" type="text" required />
-	</label>
+		<h2>Registrieren</h2>
+		<p class="italic mb-4">Registrieren ist ein langweiliges Wort aber der erste Schritt auf einer langen Reise. </p>
 
-	<label>
-		Email
-		<input name="email" type="text" />
-	</label>
+		<form method="POST" class="">
 
-	<label>
-		Password
-		<input name="password" type="password" required />
-	</label>
+			<section class="flex flex-col items-end">
+				<label>
+					Nickname
+					<input name="nickname" type="text" required />
+				</label>
 
-	<label>
-		Password Wiederholung
-		<input name="password2" type="password" required />
-	</label>
+				<label>
+					Email
+					<input name="email" type="text" />
+				</label>
 
-	<label>
-		Name der Dynastie
-		<input name="dynasty" type="text" required />
-	</label>
-	<button type="submit">Register</button>
-</form>
+				<label>
+					Passwort
+					<input name="password" type="password" required />
+				</label>
+
+				<label>
+					Passwort Wiederholung
+					<input name="password2" type="password" required />
+				</label>
+
+				<label>
+					Name der Dynastie
+					<input name="dynasty" type="text" required />
+				</label>
+			</section>
+
+			<section>
+				{#if form?.message}
+					<b>Fehler: {form?.message}</b>
+				{/if}
+			</section>
+
+			<section>
+				<button type="submit">Abschicken</button>
+			</section>
+		</form>
+	</div>
+</div>

@@ -6,18 +6,22 @@
 
 <header class="flex place-content-around">
 	{#each data.sections as section}
-		<a href="/{section.slug}" class="text-blue-600 visited:text-purple-600">{section.title}</a>
+		<a href="/{section.slug}" class="link">{section.title}</a>
 	{/each}
 </header>
+
+<svelte:head>
+	<title>Houses of the green Dragon</title>
+</svelte:head>
 
 {@render children()}
 
 <footer>
 	<nav class="flex place-content-around">
-		<a href="/about" class="text-blue-600 visited:text-purple-600">
+		<a href="/about" class="link">
 			Über die Seite
 		</a>
-		<a href="/impressum" class="text-blue-600 visited:text-purple-600">
+		<a href="/impressum" class="link">
 			Impressum
 		</a>
 	</nav>

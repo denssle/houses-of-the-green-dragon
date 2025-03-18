@@ -2,7 +2,7 @@ import type { LayoutLoad } from './$types';
 
 export const load: LayoutLoad = ({ locals }): { sections: { slug: string; title: string }[] } => {
 	if (locals.currentUser) {
-		const sections: { slug: string; title: string }[] = [{ slug: '', title: 'Home' }];
+		const sections: { slug: string; title: string }[] = [{ slug: '', title: 'Übersicht' }];
 		if (locals.currentCharacter) {
 			sections.push({
 				slug: 'character/' + locals.currentCharacter.id,
@@ -19,8 +19,8 @@ export const load: LayoutLoad = ({ locals }): { sections: { slug: string; title:
 	}
 	return {
 		sections: [
-			{ slug: 'register', title: 'Register' },
-			{ slug: 'login', title: 'Login' }
+			{ slug: 'register', title: 'Registrieren' },
+			{ slug: 'login', title: 'Anmelden' }
 		]
 	};
 };

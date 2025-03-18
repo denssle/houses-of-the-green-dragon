@@ -1,1 +1,13 @@
 @import 'tailwindcss';
+
+input {
+    @apply rounded border border-gray-300 m-2 invalid:border-pink-500 valid:border-green-500;
+}
+
+.link {
+    @apply text-blue-600 visited:text-purple-600;
+}
+
+a, button {
+    @apply rounded border p-2 border-gray-300 my-4 invalid:border-pink-500 valid:border-green-500;
+}
