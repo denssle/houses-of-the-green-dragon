@@ -22,5 +22,15 @@
 		Password
 		<input name="password" type="password" required />
 	</label>
+
+	<label>
+		Password Wiederholung
+		<input name="password2" type="password" required />
+	</label>
+
+	<label>
+		Name der Dynastie
+		<input name="dynasty" type="text" required />
+	</label>
 	<button type="submit">Register</button>
 </form>

@@ -1,6 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
 import * as userService from '$lib/server/service/userService';
+import * as dynastyService from '$lib/server/service/dynastyService';
 import type { Actions } from './$types';
+import type { User } from '$lib/model/user';
 
 export const actions = {
 	default: async ({ cookies, request }) => {
@@ -8,30 +10,42 @@ export const actions = {
 		const nickname = data.get('nickname');
 		const email: string | undefined = data.get('email')?.toString();
 		const password = data.get('password');
+		const password2 = data.get('password2');
+		const dynasty = data.get('dynasty');
 
 		if (!nickname) {
-			return fail(400, { success: false, message: 'Nickname is required' });
+			return fail(400, { success: false, message: 'Nickname ist erforderlich' });
 		}
 
 		const nicknameS: string = nickname.toString();
 
 		if (userService.nickNameAlreadyUsed(nicknameS)) {
-			return fail(400, { success: false, message: 'Nickname is already used' });
+			return fail(400, { success: false, message: 'Der Nickname ist bereits vergeben' });
 		}
 
 		if (email && userService.emailAlreadyUsed(email.toString())) {
-			return fail(400, { success: false, message: 'Email is already used' });
+			return fail(400, { success: false, message: 'Diese Email wird bereits verwendet' });
 		}
 
 		if (!password) {
-			return fail(400, { success: false, message: 'Password is required' });
+			return fail(400, { success: false, message: 'Password wird benötigt' });
 		}
 
-		cookies.set(
-			'session',
-			userService.createSession(userService.createUser(nicknameS, email, password.toString())!),
-			{ path: '/' }
-		);
-		redirect(303, '/');
+		if (password && password2 && password.toString() !== password2.toString()) {
+			return fail(400, { success: false, message: 'Passwort muss gleich sein' });
+		}
+
+		if (!dynasty) {
+			return fail(400, { success: false, message: 'Die Dynastie muss gegeben sein' });
+		}
+
+		const dynastyS: string = dynasty.toString();
+		const user: User | undefined = userService.createUser(nicknameS, email, password.toString());
+		if (user && dynasty) {
+			dynastyService.create(dynastyS, user.id);
+			cookies.set('session', userService.createSession(user), { path: '/' });
+			redirect(303, '/');
+		}
+		return fail(500, { success: false, message: 'User anlegen gescheitert!' });
 	}
 } satisfies Actions;

@@ -4,7 +4,6 @@ import type { User } from '$lib/model/user';
 
 const noAuthURLs: string[] = ['/login', '/register', '/about', '/impressum'];
 
-
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	const pathname: string = event.url.pathname;
 	if (pathname === '/logout') {

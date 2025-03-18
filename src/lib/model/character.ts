@@ -3,4 +3,5 @@ export interface Character {
 	belongsTo: number;
 	title: string;
 	name: string;
+	dynasty: number;
 }
