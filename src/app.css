@@ -9,5 +9,5 @@ input {
 }
 
 a, button {
-    @apply rounded border p-2 border-gray-300 my-4 invalid:border-pink-500 valid:border-green-500;
+    @apply rounded border p-2 border-gray-300 my-4;
 }
