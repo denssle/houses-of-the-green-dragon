@@ -1,6 +1,22 @@
 import type { Character } from '$lib/model/character';
+import * as fileService from '$lib/server/service/fileService';
 
-const characterMap: Map<number, Character> = new Map();
+let characters: Character[] = [];
+
+load();
+
+function load() {
+	fileService.read('CHARACTER', (err, data) => {
+		if (err) {
+			return console.error(err);
+		}
+		characters = JSON.parse(data.toString());
+	});
+}
+
+function write() {
+	fileService.write('CHARACTER', JSON.stringify(characters));
+}
 
 export function create(firstName: string, userId: number, dynastyId: number): Character {
 	const character: Character = {
@@ -10,7 +26,8 @@ export function create(firstName: string, userId: number, dynastyId: number): Ch
 		belongsTo: userId,
 		dynasty: dynastyId
 	};
-	characterMap.set(character.id, character);
+	characters.push(character);
+	write();
 	return character;
 }
 
@@ -18,10 +35,6 @@ function getTitle() {
 	return 'Newbie';
 }
 
-export function getCharacter(id: number): Character | undefined {
-	return characterMap.get(id);
-}
-
 export function getCharacterForUser(id: number): Character | undefined {
-	return characterMap.values().find((character) => character.belongsTo === id);
+	return characters.find((character) => character.belongsTo === id);
 }

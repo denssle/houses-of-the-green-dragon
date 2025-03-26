@@ -12,8 +12,8 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	}
 	const sessionCookie: string | undefined = event.cookies.get('session');
 	const currentUser: User | null = userService.extractUser(sessionCookie);
-	const valid: boolean = userService.validateExtractedUser(currentUser);
-	if (currentUser && valid) {
+	const userExists: boolean = userService.userExists(currentUser);
+	if (currentUser && userExists) {
 		userService.login(event.locals, currentUser);
 	} else {
 		userService.logout(event.locals, event.cookies);
@@ -21,7 +21,7 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	if (noAuthURLs.includes(pathname)) {
 		return resolve(event);
 	} else {
-		if (valid) {
+		if (userExists) {
 			return resolve(event);
 		} else {
 			return new Response('Redirect', { status: 303, headers: { Location: '/login' } });

@@ -40,7 +40,7 @@ export const actions = {
 		}
 
 		const dynastyS: string = dynasty.toString();
-		const user: User | undefined = userService.createUser(nicknameS, email, password.toString());
+		const user: User | undefined = userService.create(nicknameS, email, password.toString());
 		if (user && dynasty) {
 			dynastyService.create(dynastyS, user.id);
 			cookies.set('session', userService.createSession(user), { path: '/' });

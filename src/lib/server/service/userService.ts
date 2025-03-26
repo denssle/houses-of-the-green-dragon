@@ -1,18 +1,34 @@
 import type { User } from '$lib/model/user';
 import type { BackendUser } from '$lib/model/backendUser';
 import * as characterService from '$lib/server/service/characterService';
+import * as fileService from '$lib/server/service/fileService';
 import type { Cookies } from '@sveltejs/kit';
 
-const userMap: Map<number, BackendUser> = new Map();
+let backendUsers: BackendUser[] = [];
+
+load();
+
+function load() {
+	fileService.read('USER', (err, data) => {
+		if (err) {
+			return console.error(err);
+		}
+		backendUsers = JSON.parse(data.toString());
+	});
+}
+
+function write() {
+	fileService.write('USER', JSON.stringify(backendUsers));
+}
 
 export function getUserForNickAndPW(nicknameS: string, passwordS: string): User | undefined {
 	return mapBackendUserToUser(
-		userMap.values().find((value) => value.nickname === nicknameS && value.password === passwordS)
+		backendUsers.find((value) => value.nickname === nicknameS && value.password === passwordS)
 	);
 }
 
-export function validateExtractedUser(currentUser: User | null): boolean {
-	return Boolean(currentUser?.id && userMap.has(currentUser.id));
+export function userExists(currentUser: User | null): boolean {
+	return Boolean(currentUser?.id && backendUsers.find(value => value.id === currentUser.id));
 }
 
 export function extractUser(sessionCookie: string | undefined): User | null {
@@ -23,10 +39,10 @@ export function extractUser(sessionCookie: string | undefined): User | null {
 }
 
 export function nickNameAlreadyUsed(nickname: string): boolean {
-	return Boolean(userMap.values().find((value) => value.nickname === nickname));
+	return Boolean(backendUsers.find((value) => value.nickname === nickname));
 }
 
-export function createUser(
+export function create(
 	nickname: string,
 	email: string | undefined,
 	password: string
@@ -37,7 +53,8 @@ export function createUser(
 		email: email,
 		password: password
 	};
-	userMap.set(newUser.id, newUser);
+	backendUsers.push(newUser);
+	write();
 	return mapBackendUserToUser(newUser);
 }
 
@@ -73,5 +90,5 @@ export function logout(locals: App.Locals, cookies: Cookies) {
 }
 
 export function getUser(userId: number) {
-	return mapBackendUserToUser(userMap.get(userId));
+	return mapBackendUserToUser(backendUsers.find(value => value.id === userId));
 }

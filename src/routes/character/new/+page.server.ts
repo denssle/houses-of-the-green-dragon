@@ -24,7 +24,11 @@ export const actions = {
 			if (userID) {
 				const dynastyForUser = dynastyService.getDynastyForUser(userID);
 				if (dynastyForUser) {
-					locals.currentCharacter = characterService.create(firstName.toString(), userID, dynastyForUser.id);
+					locals.currentCharacter = characterService.create(
+						firstName.toString(),
+						userID,
+						dynastyForUser.id
+					);
 				}
 			}
 		}
