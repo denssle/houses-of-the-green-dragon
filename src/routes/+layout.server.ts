@@ -1,12 +1,14 @@
 import type { LayoutLoad } from './$types';
+import type { Character } from '$lib/model/character';
 
 export const load: LayoutLoad = ({ locals }): { sections: { slug: string; title: string }[] } => {
 	if (locals.currentUser) {
 		const sections: { slug: string; title: string }[] = [{ slug: '', title: 'Übersicht' }];
-		if (locals.currentCharacter) {
+		const character: Character | undefined = locals.currentCharacter;
+		if (character) {
 			sections.push({
-				slug: 'character/' + locals.currentCharacter.id,
-				title: locals.currentCharacter.name
+				slug: 'character/' + character.id,
+				title: character.firstName
 			});
 		} else {
 			sections.push({ slug: 'character/new', title: 'Neuer Charakter' });

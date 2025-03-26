@@ -71,3 +71,7 @@ export function logout(locals: App.Locals, cookies: Cookies) {
 	locals.currentCharacter = undefined;
 	cookies.delete('session', { path: '/' });
 }
+
+export function getUser(userId: number) {
+	return mapBackendUserToUser(userMap.get(userId));
+}

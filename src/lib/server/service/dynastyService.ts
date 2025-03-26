@@ -10,3 +10,8 @@ export function create(name: string, userId: number): void {
 	};
 	dynastyMap.set(newDynasty.id, newDynasty);
 }
+
+
+export function getDynastyForUser(userIDd: number): Dynasty | undefined {
+	return dynastyMap.values().find(value => value.foundedBy === userIDd);
+}

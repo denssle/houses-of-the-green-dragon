@@ -1,13 +1,9 @@
-import { error } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
+import type { PageServerLoad } from '../../../../.svelte-kit/types/src/routes/character/new/$types';
 
-export const load: PageLoad = ({ params }) => {
-	if (params.slug === 'hello-world') {
+export const load: PageServerLoad = async ({ locals }) => {
+	if (locals.currentCharacter) {
 		return {
-			title: 'Hello world!',
-			content: 'Welcome to our blog. Lorem ipsum dolor sit amet...'
+			character: locals.currentCharacter
 		};
 	}
-
-	error(404, 'Not found');
 };

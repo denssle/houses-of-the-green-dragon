@@ -8,7 +8,7 @@
 	<div class="w-sm md:w-md lg:w-lg gap-4">
 		<h2>Registrieren</h2>
 		<p class="italic mb-4">
-			Registrieren ist ein langweiliges Wort aber der erste Schritt auf einer langen Reise.
+			Registrieren ist ein langweiliges Wort aber der erste Schritt auf deiner langen Reise.
 		</p>
 
 		<form method="POST" class="">
