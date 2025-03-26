@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-type POSSIBLE_SERVICES = 'CHARACTER' | 'DYNASTY' | 'USER';
+type POSSIBLE_SERVICES = 'CHARACTER' | 'DYNASTY' | 'USER' | 'BUILDING';
 const PATH = 'static/';
 
 export function read(service: POSSIBLE_SERVICES, callback: (err: any, data: Buffer<ArrayBufferLike>) => void) {

@@ -4,4 +4,6 @@ export interface Character {
 	title: string;
 	firstName: string;
 	dynasty: number;
+	money: bigint;
+	age: bigint;
 }

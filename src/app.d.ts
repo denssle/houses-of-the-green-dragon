@@ -7,7 +7,8 @@ declare global {
 		interface Locals {
 			currentUser: User | undefined;
 			currentCharacter: Character | undefined;
-		} // interface PageData {}
+		}
+		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}
 	}

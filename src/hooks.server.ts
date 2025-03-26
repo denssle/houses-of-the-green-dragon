@@ -10,21 +10,16 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 		userService.logout(event.locals, event.cookies);
 		redirect(303, '/');
 	}
-	const sessionCookie: string | undefined = event.cookies.get('session');
-	const currentUser: User | null = userService.extractUser(sessionCookie);
-	const userExists: boolean = userService.userExists(currentUser);
-	if (currentUser && userExists) {
-		userService.login(event.locals, currentUser);
+	const extractedUser: User | null = userService.extractUser(event.cookies.get('session'));
+	const userExistsAndValid: boolean = userService.userExists(extractedUser);
+	if (extractedUser && userExistsAndValid) {
+		userService.login(event.locals, extractedUser);
 	} else {
 		userService.logout(event.locals, event.cookies);
 	}
-	if (noAuthURLs.includes(pathname)) {
+	if (noAuthURLs.includes(pathname) || userExistsAndValid) {
 		return resolve(event);
 	} else {
-		if (userExists) {
-			return resolve(event);
-		} else {
-			return new Response('Redirect', { status: 303, headers: { Location: '/login' } });
-		}
+		return new Response('Redirect', { status: 303, headers: { Location: '/login' } });
 	}
 };

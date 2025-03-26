@@ -1,4 +1,9 @@
-<h2>Hello world</h2>
-<section>
-	<p>Das is ne coole Seite</p>
-</section>
+<script lang="ts">
+	import type { PageProps } from './$types';
+
+	let { data }: PageProps = $props();
+</script>
+
+<p>{data.character?.firstName} 	</p>
+
+<button>Gebäude bauen</button>
