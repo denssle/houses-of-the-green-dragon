@@ -1,6 +1,6 @@
-import type { BuildingOption } from '$lib/model/buildingOption';
+import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 
-export interface Building extends BuildingOption {
+export interface Building extends BuildingTemplate {
 	id: number;
 	belongsTo: number;
 	name: string;

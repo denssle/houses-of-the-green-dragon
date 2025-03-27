@@ -1,4 +1,4 @@
-export interface BuildingOption {
+export interface BuildingTemplate {
 	optionId: number;
 	initialName: string;
 	price: number;

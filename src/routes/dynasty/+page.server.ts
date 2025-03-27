@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types';
 import * as dynastyService from '$lib/server/service/dynastyService';
 import * as userService from '$lib/server/service/userService';
+import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.currentUser) {
@@ -13,4 +14,5 @@ export const load: PageServerLoad = async ({ locals }) => {
 			};
 		}
 	}
+	error(404, 'Not Found');
 };

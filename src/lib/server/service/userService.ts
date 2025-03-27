@@ -64,7 +64,7 @@ export function createSession(user: User): string {
 
 function mapBackendUserToUser(backend: BackendUser | undefined): User | undefined {
 	if (backend) {
-		return { ...backend };
+		return { id: backend.id, email: backend.email, nickname: backend.nickname };
 	}
 	return undefined;
 }

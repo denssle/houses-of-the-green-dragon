@@ -4,9 +4,9 @@
 	let { data }: PageProps = $props();
 </script>
 
-<p>{data.character?.firstName}  </p>
-<p>{data.character?.age}</p>
-<p>{data.character?.money}</p>
+{#each data.buildings as building}
+	<a href="/building/{building.id}" class="link">{building.name}</a>
+{/each}
 
 <a href="/building/new">Gebäude bauen</a>
 <button>Nächste Runde</button>
