@@ -1,9 +1,9 @@
 export interface Character {
-	id: number;
-	belongsTo: number;
+	id: bigint;
+	belongsTo: bigint;
 	title: string;
 	firstName: string;
-	dynasty: number;
+	dynasty: bigint;
 	money: bigint;
 	age: bigint;
 }

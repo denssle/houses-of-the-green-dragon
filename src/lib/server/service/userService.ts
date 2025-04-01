@@ -48,7 +48,7 @@ export function create(
 	password: string
 ): User | undefined {
 	const newUser: BackendUser = {
-		id: Date.now(),
+		id: BigInt(Date.now()),
 		nickname: nickname,
 		email: email,
 		password: password
@@ -89,6 +89,6 @@ export function logout(locals: App.Locals, cookies: Cookies) {
 	cookies.delete('session', { path: '/' });
 }
 
-export function getUser(userId: number) {
+export function getUser(userId: bigint) {
 	return mapBackendUserToUser(backendUsers.find(value => value.id === userId));
 }

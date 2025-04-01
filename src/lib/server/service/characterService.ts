@@ -18,13 +18,15 @@ function write() {
 	fileService.write('CHARACTER', JSON.stringify(characters));
 }
 
-export function create(firstName: string, userId: number, dynastyId: number): Character {
+export function create(firstName: string, userId: bigint, dynastyId: bigint): Character {
 	const character: Character = {
-		id: Date.now(),
+		id: BigInt(Date.now()),
 		firstName: firstName,
 		title: getTitle(),
 		belongsTo: userId,
-		dynasty: dynastyId
+		dynasty: dynastyId,
+		age: BigInt(10),
+		money: BigInt(10)
 	};
 	characters.push(character);
 	write();
@@ -35,6 +37,6 @@ function getTitle() {
 	return 'Newbie';
 }
 
-export function getCharacterForUser(id: number): Character | undefined {
+export function getCharacterForUser(id: bigint): Character | undefined {
 	return characters.find((character) => character.belongsTo === id);
 }

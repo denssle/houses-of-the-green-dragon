@@ -5,7 +5,7 @@ import * as buildingService from '$lib/server/service/buildingService';
 export const load: PageServerLoad = async ({ params }) => {
 	const id: string = params.building_id;
 	if (id) {
-		const converted = Number.parseInt(id);
+		const converted = BigInt(id);
 		return {
 			building: buildingService.getBuilding(converted)
 		};

@@ -1,5 +1,5 @@
 export interface Dynasty {
-	id: number;
-	foundedBy: number;
+	id: bigint;
+	foundedBy: bigint;
 	name: string;
 }

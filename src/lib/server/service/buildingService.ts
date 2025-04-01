@@ -65,9 +65,9 @@ export function limitReached(option: BuildingTemplate): boolean {
 	return buildings.filter(value => value.optionId === option.optionId).length >= option.limitedTo;
 }
 
-export function build(option: BuildingTemplate, userId: number) {
+export function build(option: BuildingTemplate, userId: bigint) {
 	const building: Building = {
-		id: Date.now(),
+		id: BigInt(Date.now()),
 		belongsTo: userId,
 		name: option.initialName,
 		...option
@@ -77,7 +77,7 @@ export function build(option: BuildingTemplate, userId: number) {
 	return building;
 }
 
-export function getBuilding(id: number): Building | undefined {
+export function getBuilding(id: bigint): Building | undefined {
 	return buildings.find(value => value.id === id);
 }
 

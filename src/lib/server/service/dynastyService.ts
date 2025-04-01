@@ -18,9 +18,9 @@ function write() {
 	fileService.write('DYNASTY', JSON.stringify(dynasties));
 }
 
-export function create(name: string, userId: number): void {
+export function create(name: string, userId: bigint): void {
 	const newDynasty: Dynasty = {
-		id: Date.now(),
+		id: BigInt(Date.now()),
 		name: name,
 		foundedBy: userId
 	};
@@ -28,6 +28,6 @@ export function create(name: string, userId: number): void {
 	write();
 }
 
-export function getDynastyForUser(userIDd: number): Dynasty | undefined {
+export function getDynastyForUser(userIDd: bigint): Dynasty | undefined {
 	return dynasties.find((value) => value.foundedBy === userIDd);
 }
