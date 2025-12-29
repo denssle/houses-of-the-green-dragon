@@ -34,7 +34,8 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			type: 'PUBLIC',
 			description: 'Das Rathaus der Stadt',
 			limited: true,
-			limitedTo: 1
+			limitedTo: 1,
+			actions: ['BECOME_CITIZEN']
 		},
 		{
 			optionId: 1,
@@ -43,7 +44,8 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			type: 'RESIDENCE',
 			description: 'Ein einfaches Wohnhaus',
 			limited: false,
-			limitedTo: 0
+			limitedTo: 0,
+			actions: ['SLEEP']
 		},
 		{
 			optionId: 2,
@@ -52,7 +54,8 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			type: 'CRAFT',
 			description: 'Ein bescheidener Handwerksbetrieb',
 			limited: false,
-			limitedTo: 0
+			limitedTo: 0,
+			actions: ['WORK']
 		}
 	];
 }

@@ -24,7 +24,11 @@ export function create(firstName: string, userId: number, dynastyId: number): Ch
 		firstName: firstName,
 		title: getTitle(),
 		belongsTo: userId,
-		dynasty: dynastyId
+		dynasty: dynastyId,
+		money: 0,
+		age: 10,
+		energy: 10,
+		maxEnergy: 10
 	};
 	characters.push(character);
 	write();
@@ -37,4 +41,12 @@ function getTitle() {
 
 export function getCharacterForUser(id: number): Character | undefined {
 	return characters.find((character) => character.belongsTo === id);
+}
+
+export function getCharacter(id: number) {
+	return characters.find(value => value.id === id);
+}
+
+export function update(character: Character) {
+	characters[characters.findIndex(value => value.id === character.id)] = character;
 }

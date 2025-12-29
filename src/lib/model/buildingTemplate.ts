@@ -1,3 +1,5 @@
+import type { BuildingAction } from '$lib/model/buildingAction';
+
 export interface BuildingTemplate {
 	optionId: number;
 	initialName: string;
@@ -6,4 +8,5 @@ export interface BuildingTemplate {
 	type: 'PUBLIC' | 'RESIDENCE' | 'CRAFT';
 	limited: boolean;
 	limitedTo: number;
+	actions: BuildingAction[];
 }
