@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	// @ts-ignore
 	const id: string = params.building_id;
 	if (id) {
-		const converted = Number.parseInt(id);
+		const converted = BigInt(id);
 		return {
 			building: buildingService.getBuilding(converted)
 		};

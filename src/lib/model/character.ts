@@ -1,11 +1,11 @@
 export interface Character {
-	id: number;
-	belongsTo: number;
+	id: bigint;
+	belongsTo: bigint;
 	title: string;
 	firstName: string;
-	dynasty: number;
-	money: number;
-	age: number;
 	energy: number;
 	maxEnergy: number;
+	dynasty: bigint;
+	money: bigint;
+	age: bigint;
 }
