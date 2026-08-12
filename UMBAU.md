@@ -206,19 +206,33 @@ _Fertig, wenn:_ Die Modelle legen ihre Tabellen an und halten ihre Zusicherungen
 Erledigt; 19 Tests decken alle elf Tabellen ab, dazu Unique-Index, abgewiesene Rollen,
 die Asymmetrie der Beziehungen und die Vorgaben beim Anlegen.
 
-### 1.4 `src/lib/db/db.ts` und Migration `0001-initial-schema.ts`
+### 1.4 `src/lib/db/db.ts` und Migration `0001-initial-schema.ts` ✓
 
-Assoziationen und `startDB()` nach Festival-Vorbild: in Produktion ausschließlich
-`migrator.up()` (umzug, Protokoll in `SequelizeMeta`), in Dev und Tests `sync()`.
-**Ohne** `stampBaselineIfLegacySchema` — das ist dort eine Altlast aus der
+Assoziationen und `startDB()` nach Festival-Vorbild, **ohne**
+`stampBaselineIfLegacySchema` — das ist dort eine Altlast aus der
 `sync({ alter: true })`-Zeit, hier gibt es keine Bestands-Datenbank.
 
-Dazu ein `migrations.spec.ts`, das absichert, dass Migration und Modelle dasselbe
-Schema ergeben.
+**Migrationen laufen auch lokal, nicht nur in Produktion.** Festival teilt hier zwischen
+Produktion (Migration) und allem anderen (`sync()`); weil die lokale Datenbank hier aber
+eine Datei ist und den Neustart überlebt, wäre `sync()` die falsche Wahl: An einer
+bestehenden Tabelle ändert es nichts mehr, eine neue Spalte fehlte stillschweigend.
+Nebenbei wird so jede Migration beim Entwickeln ausgeführt, lange bevor sie die echte
+Welt anfasst. Nur der Testlauf baut das Schema direkt aus den Modellen.
+
+Dazu `migrations.spec.ts`, das Migration und Modelle **Spalte für Spalte** vergleicht —
+Typ, Nullbarkeit, Vorgabewert, Primärschlüssel — und prüft, dass sich alles vollständig
+zurückrollen lässt.
+
+Der Abgleich hat sich sofort bezahlt gemacht: Er fand, dass `db.ts` das `world`-Modell
+nicht importierte. Die Migration legte die Tabelle an, `sync()` kannte sie nicht — ein
+Unterschied, der ohne diesen Test erst in Produktion aufgefallen wäre, und dort als
+fehlende Weltzeit.
 
 _Fertig, wenn:_ `await startDB()` als Top-Level-await in `hooks.server.ts` steht
 (fail-fast: ohne DB darf der Server nicht „erfolgreich“ starten und dann auf jedem
-Request werfen) und `npm run dev` läuft.
+Request werfen) und `npm run dev` läuft. — Erledigt; der Dev-Server legt beim ersten
+Request `.data/dev.sqlite` an, die Migration erzeugt dort alle elf Tabellen samt
+`SequelizeMeta`.
 
 ### 1.5 Services umstellen, `fileService.ts` löschen
 

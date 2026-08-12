@@ -13,7 +13,8 @@ import { env } from '$env/dynamic/private';
  */
 export type DatabaseMode = 'TEST' | 'LOCAL' | 'PRODUCTION';
 
-const LOCAL_STORAGE_PATH = '.data/dev.sqlite';
+/** Die lokale Datenbankdatei. Der Ordner darüber wird in `startDB()` angelegt. */
+export const LOCAL_STORAGE_PATH = '.data/dev.sqlite';
 
 export function detectMode(): DatabaseMode {
 	if (
