@@ -17,9 +17,9 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 		redirect(303, '/');
 	}
 	const extractedUser: User | null = userService.extractUser(event.cookies.get('session'));
-	const userExistsAndValid: boolean = userService.userExists(extractedUser);
+	const userExistsAndValid: boolean = await userService.userExists(extractedUser);
 	if (extractedUser && userExistsAndValid) {
-		userService.login(event.locals, extractedUser);
+		await userService.login(event.locals, extractedUser);
 	} else {
 		userService.logout(event.locals, event.cookies);
 	}

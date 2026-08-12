@@ -11,10 +11,12 @@ alle anderen.
 
 ## Stand
 
-**Prototyp, nicht spielbar.** Registrierung, Anmeldung, Dynastie und Charakteranlage
-funktionieren im Ansatz; Gebäude sind begonnen. Die Entwicklung ruhte und wird gerade
-wieder aufgenommen — beginnend mit dem Umbau der Persistenz, denn der jetzige
-Dateispeicher kann nicht funktionieren (BigInt lässt sich nicht als JSON serialisieren).
+**Frühe Entwicklung, noch kein Spiel.** Phase 1 des Umbaus ist abgeschlossen: Die Daten
+liegen in einer Datenbank statt in Textdateien, die Welt wird beim Start aufgebaut
+(Grünau mit Umland, Grundstücken und Einwohnern), und Registrierung, Dynastie sowie
+Charakteranlage überleben einen Neustart. Als Nächstes wird die Anmeldung gehärtet —
+Passwörter liegen noch im Klartext, das Sitzungs-Cookie ist fälschbar. **Bis das erledigt
+ist, gehört nichts davon auf einen öffentlichen Server.**
 
 ## Dokumente
 
@@ -50,8 +52,9 @@ npm run lint      # Prettier und ESLint prüfen
 npm run format    # Formatierung schreiben
 ```
 
-`npm run check` meldet derzeit sieben Fehler. Sie stammen alle aus dem `bigint`-Problem
-des Prototyps und verschwinden mit Phase 1.3 des Umbaus.
+Für die lokale Entwicklung genügt eine `.env` nach dem Muster von `.env.example` mit
+`MARIA_DB_NAME=dev` — die Daten landen dann in `.data/dev.sqlite` und überleben den
+Neustart.
 
 Die Anwendung läuft später unter einem Unterpfad (`paths.base`), ausgeliefert auf einen
 Uberspace über GitHub Actions.

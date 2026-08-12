@@ -234,7 +234,11 @@ Request werfen) und `npm run dev` läuft. — Erledigt; der Dev-Server legt beim
 Request `.data/dev.sqlite` an, die Migration erzeugt dort alle elf Tabellen samt
 `SequelizeMeta`.
 
-### 1.5 Services umstellen, `fileService.ts` löschen
+### 1.5 Services umstellen, `fileService.ts` löschen ✓
+
+_Ausgeführt nach 1.6:_ Ein Charakter braucht eine Pflicht-Region und einen Geburts-Tick.
+Ohne Welt lässt sich keiner anlegen — und damit wäre das Abnahmekriterium dieses
+Schritts gar nicht erreichbar gewesen.
 
 `userService`, `dynastyService`, `characterService` und `buildingService` von
 Modul-Arrays auf asynchrone Sequelize-Queries. Damit fallen ersatzlos weg:
@@ -244,9 +248,25 @@ Modul-Arrays auf asynchrone Sequelize-Queries. Damit fallen ersatzlos weg:
 - der fehlende `write()`-Aufruf in `characterService.update()`,
 - der Datenspeicher im öffentlich ausgelieferten `static/`-Verzeichnis.
 
-_Fertig, wenn:_ Registrieren → Charakter anlegen → Serverneustart → Charakter ist noch da.
+Die Domänentypen unter `$lib/model/` verlieren dabei ihr `bigint`, und `Building` erbt
+nicht mehr von `BuildingTemplate` — sonst fröre jedes Gebäude beim Bau die damaligen
+Werte ein. Die `convertTo…`-Mapper aus 1.3 kommen jetzt dazu; sie sind zugleich die
+Stelle, an der das Passwort aus der Datenbank **nicht** in die Sicht der Oberfläche
+gelangt.
 
-### 1.6 Weltaufbau (Seed)
+Neu ist ein `worldService`, vorerst nur lesend: Wer den Tick hochzählt, entscheidet 4.1.
+Bis dahin steht die Zeit still, und alles daraus Abgeleitete steht mit ihr.
+
+Bewusst **nicht** hier erledigt: Passwörter liegen weiter im Klartext, das Cookie enthält
+weiterhin den Benutzer als JSON. Beides ist Phase 2. Dieser Schritt tauscht nur den
+Speicher, damit ein Fehlschlag eindeutig einer Ursache zuzuordnen ist.
+
+_Fertig, wenn:_ Registrieren → Charakter anlegen → Serverneustart → Charakter ist noch
+da. — Erledigt und am laufenden Server durchgespielt: Adelbert, 16 Jahre, 10 Münzen,
+48 Aktionspunkte, unverändert nach dem Neustart. Nebenbei ist `npm run check` erstmals
+fehlerfrei (0 statt 7) und `npm run lint` ebenfalls (0 statt 11).
+
+### 1.6 Weltaufbau (Seed) ✓
 
 Ohne Welt kein Spiel: Regionen, ihre Entfernungen, die Grundstücke der Startstadt, die
 Abbauflächen im Umland und eine Grundbevölkerung an Fremd-NPCs müssen angelegt werden.
@@ -262,7 +282,14 @@ Die Umrechnung gehört als benannte Konstante an eine Stelle (`TICKS_PER_YEAR`),
 `48` verstreut in Alterung, Verfall, Wahlperiode und Seed. Es ist die Zahl, die beim
 Balancing am ehesten noch einmal angefasst wird.
 
-_Fertig, wenn:_ Eine frische Datenbank enthält nach dem Start eine bespielbare Stadt.
+Die Welt beginnt nicht bei Tick null, sondern mit **hundert Spieljahren im Rücken**.
+Sonst müssten die Geburtstage der Startbevölkerung negativ sein — und eine Stadt, die es
+angeblich seit gestern gibt, in der aber Fünfzigjährige wohnen, wäre auch erzählerisch
+schief.
+
+_Fertig, wenn:_ Eine frische Datenbank enthält nach dem Start eine bespielbare Stadt. —
+Erledigt: Grünau mit zwölf Baugrundstücken, drei Umlandflächen mit sechs Abbauflächen,
+acht Fremd-NPCs. Läuft bei jedem Serverstart und legt beim zweiten Mal nichts erneut an.
 
 ## Phase 2 — Auth härten
 

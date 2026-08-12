@@ -1,5 +1,7 @@
+/** Das langlebige Spielerobjekt: ein Haus, das seine Charaktere überdauert. */
 export interface Dynasty {
-	id: bigint;
-	foundedBy: bigint;
+	id: string;
 	name: string;
+	foundedBy: string;
+	isExtinct: boolean;
 }

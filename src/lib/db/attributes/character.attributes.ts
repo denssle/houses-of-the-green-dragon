@@ -1,5 +1,6 @@
 import type { Optional } from 'sequelize';
 import type { CharacterRole, Gender } from '$lib/db/attributes/enums';
+import type { Character } from '$lib/model/character';
 
 /**
  * Das sterbliche Gegenstück zur Dynastie.
@@ -47,3 +48,20 @@ export type CharacterCreationAttributes = Optional<
 	| 'spouseId'
 	| 'HomeBuildingId'
 >;
+
+export function convertToCharacter(attributes: CharacterAttributes): Character {
+	return {
+		id: attributes.id,
+		firstName: attributes.firstName,
+		title: attributes.title,
+		role: attributes.role,
+		gender: attributes.gender,
+		actionPoints: attributes.actionPoints,
+		money: attributes.money,
+		birthTick: attributes.birthTick,
+		deathTick: attributes.deathTick,
+		regionId: attributes.RegionId,
+		dynastyId: attributes.DynastyId,
+		homeBuildingId: attributes.HomeBuildingId
+	};
+}

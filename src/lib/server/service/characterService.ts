@@ -1,52 +1,71 @@
+import { randomUUID } from 'node:crypto';
 import type { Character } from '$lib/model/character';
-import * as fileService from '$lib/server/service/fileService';
+import type { Gender } from '$lib/db/attributes/enums';
+import { Character as CharacterModel } from '$lib/db/model/character';
+import { Dynasty as DynastyModel } from '$lib/db/model/dynasty';
+import { convertToCharacter } from '$lib/db/attributes/character.attributes';
+import { findStartRegionId } from '$lib/db/seed';
+import * as worldService from '$lib/server/service/worldService';
+import { AGE_OF_MAJORITY, MAX_ACTION_POINTS, yearsToTicks } from '$lib/game/time';
 
-let characters: Character[] = [];
+/** Was ein Haus seinem ersten Spross mitgibt. */
+const STARTKAPITAL = 10;
 
-load();
-
-function load() {
-	fileService.read('CHARACTER', (err, data) => {
-		if (err) {
-			return console.error(err);
-		}
-		characters = JSON.parse(data.toString());
+export async function create(
+	firstName: string,
+	dynastyId: string,
+	gender: Gender
+): Promise<Character> {
+	const jetzt = await worldService.currentTick();
+	const angelegt = await CharacterModel.create({
+		id: randomUUID(),
+		firstName,
+		role: 'PLAYER',
+		gender,
+		// Der erste Charakter einer Dynastie beginnt erwachsen — sonst müsste man vor dem
+		// ersten Zug ein halbes Kinderleben abwarten. Die folgenden Generationen werden
+		// geboren und wachsen auf.
+		birthTick: jetzt - yearsToTicks(AGE_OF_MAJORITY),
+		lastTickProcessed: jetzt,
+		actionPoints: MAX_ACTION_POINTS,
+		money: STARTKAPITAL,
+		RegionId: await findStartRegionId(),
+		DynastyId: dynastyId
 	});
+	return convertToCharacter(angelegt.dataValues);
 }
 
-function write() {
-	fileService.write('CHARACTER', JSON.stringify(characters));
+/**
+ * Der gespielte Charakter des Benutzers.
+ *
+ * Führt über das Haus, nicht über den Benutzer: Charaktere hängen an der Dynastie, und
+ * die Dynastie am Benutzer. Genau diese Kette macht den Generationenwechsel möglich —
+ * der Benutzer bleibt, der Charakter wird ersetzt.
+ */
+export async function getCharacterForUser(userId: string): Promise<Character | undefined> {
+	const haus = await DynastyModel.findOne({ where: { UserId: userId, isExtinct: false } });
+	if (!haus) return undefined;
+
+	const gefunden = await CharacterModel.findOne({
+		where: { DynastyId: haus.dataValues.id, role: 'PLAYER', deathTick: null }
+	});
+	return gefunden ? convertToCharacter(gefunden.dataValues) : undefined;
 }
 
-export function create(firstName: string, userId: bigint, dynastyId: number): Character {
-	const character: Character = {
-		id: BigInt(Date.now()),
-		firstName: firstName,
-		title: getTitle(),
-		belongsTo: userId,
-		dynasty: BigInt(dynastyId),
-		energy: 10,
-		maxEnergy: 10,
-		age: BigInt(10),
-		money: BigInt(10)
-	};
-	characters.push(character);
-	write();
-	return character;
+export async function getCharacter(characterId: string): Promise<Character | undefined> {
+	const gefunden = await CharacterModel.findByPk(characterId);
+	return gefunden ? convertToCharacter(gefunden.dataValues) : undefined;
 }
 
-function getTitle() {
-	return 'Newbie';
-}
-
-export function getCharacterForUser(id: bigint): Character | undefined {
-	return characters.find((character) => character.belongsTo === id);
-}
-
-export function getCharacter(id: bigint) {
-	return characters.find((value) => value.id === id);
-}
-
-export function update(character: Character) {
-	characters[characters.findIndex((value) => value.id === character.id)] = character;
+export async function update(character: Character): Promise<void> {
+	await CharacterModel.update(
+		{
+			title: character.title,
+			actionPoints: character.actionPoints,
+			money: character.money,
+			deathTick: character.deathTick,
+			HomeBuildingId: character.homeBuildingId
+		},
+		{ where: { id: character.id } }
+	);
 }

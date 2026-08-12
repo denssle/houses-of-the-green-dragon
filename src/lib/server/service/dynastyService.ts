@@ -1,33 +1,33 @@
+import { randomUUID } from 'node:crypto';
 import type { Dynasty } from '$lib/model/dynasty';
-import * as fileService from '$lib/server/service/fileService';
+import { Dynasty as DynastyModel } from '$lib/db/model/dynasty';
+import { convertToDynasty } from '$lib/db/attributes/dynasty.attributes';
+import * as worldService from '$lib/server/service/worldService';
 
-let dynasties: Dynasty[] = [];
-
-load();
-
-function load() {
-	fileService.read('DYNASTY', (err, data) => {
-		if (err) {
-			return console.error(err);
-		}
-		dynasties = JSON.parse(data.toString());
+export async function create(name: string, userId: string): Promise<Dynasty> {
+	const angelegt = await DynastyModel.create({
+		id: randomUUID(),
+		name,
+		UserId: userId,
+		foundedAtTick: await worldService.currentTick()
 	});
+	return convertToDynasty(angelegt.dataValues);
 }
 
-function write() {
-	fileService.write('DYNASTY', JSON.stringify(dynasties));
+/**
+ * Das aktive Haus des Benutzers.
+ *
+ * Ein Benutzer hat mehrere Dynastien über die Zeit — erlischt eine kinderlos, beginnt er
+ * mit einer neuen —, aber höchstens eine lebende. Alle Zugriffe gehen über diese.
+ */
+export async function getDynastyForUser(userId: string): Promise<Dynasty | undefined> {
+	const gefunden = await DynastyModel.findOne({
+		where: { UserId: userId, isExtinct: false }
+	});
+	return gefunden ? convertToDynasty(gefunden.dataValues) : undefined;
 }
 
-export function create(name: string, userId: bigint): void {
-	const newDynasty: Dynasty = {
-		id: BigInt(Date.now()),
-		name: name,
-		foundedBy: userId
-	};
-	dynasties.push(newDynasty);
-	write();
-}
-
-export function getDynastyForUser(userIDd: bigint): Dynasty | undefined {
-	return dynasties.find((value) => value.foundedBy === userIDd);
+export async function getDynasty(dynastyId: string): Promise<Dynasty | undefined> {
+	const gefunden = await DynastyModel.findByPk(dynastyId);
+	return gefunden ? convertToDynasty(gefunden.dataValues) : undefined;
 }

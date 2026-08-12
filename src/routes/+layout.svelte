@@ -5,7 +5,7 @@
 </script>
 
 <header class="flex place-content-around">
-	{#each data.sections as section}
+	{#each data.sections as section (section.slug)}
 		<a href="/{section.slug}" class="link">{section.title}</a>
 	{/each}
 </header>

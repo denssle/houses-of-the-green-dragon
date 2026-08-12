@@ -5,12 +5,11 @@ import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.currentUser) {
-		const dynastyForUser = dynastyService.getDynastyForUser(locals.currentUser.id);
+		const dynastyForUser = await dynastyService.getDynastyForUser(locals.currentUser.id);
 		if (dynastyForUser) {
-			const user = userService.getUser(dynastyForUser.foundedBy);
 			return {
 				dynasty: dynastyForUser,
-				founder: user
+				founder: await userService.getUser(dynastyForUser.foundedBy)
 			};
 		}
 	}

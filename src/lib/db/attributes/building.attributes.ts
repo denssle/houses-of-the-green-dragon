@@ -1,5 +1,6 @@
 import type { Optional } from 'sequelize';
 import type { OwnerType } from '$lib/db/attributes/enums';
+import type { Building } from '$lib/model/building';
 
 /**
  * Ein Bauwerk auf einem Grundstück.
@@ -35,3 +36,17 @@ export type BuildingCreationAttributes = Optional<
 	BuildingAttributes,
 	'level' | 'condition' | 'PlotId' | 'ownerType' | 'OwnerCharacterId' | 'forSalePrice'
 >;
+
+export function convertToBuilding(attributes: BuildingAttributes): Building {
+	return {
+		id: attributes.id,
+		name: attributes.name,
+		optionId: attributes.optionId,
+		level: attributes.level,
+		condition: attributes.condition,
+		plotId: attributes.PlotId,
+		ownerType: attributes.ownerType,
+		ownerCharacterId: attributes.OwnerCharacterId,
+		forSalePrice: attributes.forSalePrice
+	};
+}

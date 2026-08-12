@@ -7,45 +7,38 @@ import type { User } from '$lib/model/user';
 export const actions = {
 	default: async ({ cookies, request }) => {
 		const data = await request.formData();
-		const nickname = data.get('nickname');
-		const email: string | undefined = data.get('email')?.toString();
-		const password = data.get('password');
-		const password2 = data.get('password2');
-		const dynasty = data.get('dynasty');
+		const nickname = data.get('nickname')?.toString();
+		const email = data.get('email')?.toString();
+		const password = data.get('password')?.toString();
+		const password2 = data.get('password2')?.toString();
+		const dynasty = data.get('dynasty')?.toString();
 
 		if (!nickname) {
 			return fail(400, { message: 'Nickname ist erforderlich' });
 		}
-
-		const nicknameS: string = nickname.toString();
-
-		if (userService.nickNameAlreadyUsed(nicknameS)) {
+		if (await userService.nickNameAlreadyUsed(nickname)) {
 			return fail(400, { message: 'Der Nickname ist bereits vergeben' });
 		}
-
-		if (email && userService.emailAlreadyUsed(email.toString())) {
+		if (email && (await userService.emailAlreadyUsed(email))) {
 			return fail(400, { message: 'Diese Email wird bereits verwendet' });
 		}
-
 		if (!password) {
 			return fail(400, { message: 'Password wird benötigt' });
 		}
-
-		if (password && password2 && password.toString() !== password2.toString()) {
+		if (password !== password2) {
 			return fail(400, { message: 'Passwort muss gleich sein' });
 		}
-
 		if (!dynasty) {
 			return fail(400, { message: 'Die Dynastie muss gegeben sein' });
 		}
 
-		const dynastyS: string = dynasty.toString();
-		const user: User | undefined = userService.create(nicknameS, email, password.toString());
-		if (user && dynasty) {
-			dynastyService.create(dynastyS, user.id);
-			cookies.set('session', userService.createSession(user), { path: '/' });
-			redirect(303, '/');
+		const user: User | undefined = await userService.create(nickname, email, password);
+		if (!user) {
+			return fail(500, { message: 'User anlegen gescheitert!' });
 		}
-		return fail(500, { message: 'User anlegen gescheitert!' });
+
+		await dynastyService.create(dynasty, user.id);
+		cookies.set('session', userService.createSession(user), { path: '/' });
+		redirect(303, '/');
 	}
 } satisfies Actions;

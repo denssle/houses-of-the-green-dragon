@@ -1,12 +1,15 @@
-import type { PageServerLoad } from '../../../../.svelte-kit/types/src/routes/character/new/$types';
+import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
+import * as worldService from '$lib/server/service/worldService';
+import { ageInYears } from '$lib/game/time';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	if (locals.currentCharacter) {
-		return {
-			character: locals.currentCharacter
-		};
-	} else {
+	const character = locals.currentCharacter;
+	if (!character) {
 		error(404, 'Not Found');
 	}
+	return {
+		character,
+		age: ageInYears(character.birthTick, await worldService.currentTick())
+	};
 };

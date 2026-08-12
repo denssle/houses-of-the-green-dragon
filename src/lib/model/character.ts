@@ -1,11 +1,23 @@
+import type { CharacterRole, Gender } from '$lib/db/attributes/enums';
+
+/**
+ * Ein Charakter, wie ihn die Anwendung sieht.
+ *
+ * Das Alter steht bewusst nicht darin: Es ergibt sich aus `birthTick` und der aktuellen
+ * Weltzeit (`ageInYears`). Zwei Felder für denselben Sachverhalt gingen auseinander,
+ * sobald die Zeit weiterläuft — und sie läuft weiter, auch wenn niemand hinsieht.
+ */
 export interface Character {
-	id: bigint;
-	belongsTo: bigint;
-	title: string;
+	id: string;
 	firstName: string;
-	energy: number;
-	maxEnergy: number;
-	dynasty: bigint;
-	money: bigint;
-	age: bigint;
+	title: string;
+	role: CharacterRole;
+	gender: Gender;
+	actionPoints: number;
+	money: number;
+	birthTick: number;
+	deathTick: number | null;
+	regionId: string;
+	dynastyId: string | null;
+	homeBuildingId: string | null;
 }

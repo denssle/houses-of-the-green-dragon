@@ -1,36 +1,43 @@
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import * as dynastyService from '$lib/server/service/dynastyService';
 import * as characterService from '$lib/server/service/characterService';
-import { redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
+import { GENDERS, type Gender } from '$lib/db/attributes/enums';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	if (locals.currentUser) {
-		return {
-			dynasty: dynastyService.getDynastyForUser(locals.currentUser.id)
-		};
-	} else {
-		// TODO
-		redirect(303, '/');
+	if (!locals.currentUser) {
+		redirect(303, '/login');
 	}
+	return {
+		dynasty: await dynastyService.getDynastyForUser(locals.currentUser.id)
+	};
 };
 
 export const actions = {
 	default: async ({ request, locals }) => {
 		const data = await request.formData();
-		const firstName = data.get('firstName');
-		const userID = locals.currentUser?.id;
-		// TODO Fehler Handling
-		if (firstName) {
-			if (userID) {
-				const dynastyForUser = dynastyService.getDynastyForUser(userID);
-				if (dynastyForUser) {
-					locals.currentCharacter = characterService.create(
-						firstName.toString(),
-						userID,
-						dynastyForUser.id
-					);
-				}
-			}
+		const firstName = data.get('firstName')?.toString().trim();
+		const gender = data.get('gender')?.toString();
+
+		if (!locals.currentUser) {
+			return fail(401, { message: 'Nicht angemeldet' });
 		}
+		if (!firstName) {
+			return fail(400, { message: 'Ein Vorname wird gebraucht' });
+		}
+		if (!gender || !GENDERS.includes(gender as Gender)) {
+			return fail(400, { message: 'Bitte ein Geschlecht wählen' });
+		}
+
+		const dynasty = await dynastyService.getDynastyForUser(locals.currentUser.id);
+		if (!dynasty) {
+			return fail(400, { message: 'Kein Haus gefunden, dem der Charakter angehören könnte' });
+		}
+		if (await characterService.getCharacterForUser(locals.currentUser.id)) {
+			return fail(400, { message: 'Es lebt bereits ein Charakter dieses Hauses' });
+		}
+
+		const character = await characterService.create(firstName, dynasty.id, gender as Gender);
+		redirect(303, `/character/${character.id}`);
 	}
-};
+} satisfies Actions;

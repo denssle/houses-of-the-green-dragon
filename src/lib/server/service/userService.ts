@@ -1,94 +1,86 @@
+import { randomUUID } from 'node:crypto';
+import type { Cookies } from '@sveltejs/kit';
 import type { User } from '$lib/model/user';
 import type { BackendUser } from '$lib/model/backendUser';
+import { User as UserModel } from '$lib/db/model/user';
+import { convertToBackendUser, convertToUser } from '$lib/db/attributes/user.attributes';
 import * as characterService from '$lib/server/service/characterService';
-import * as fileService from '$lib/server/service/fileService';
-import type { Cookies } from '@sveltejs/kit';
 
-let backendUsers: BackendUser[] = [];
+/**
+ * Hinweis zum Stand: Passwörter liegen hier noch im Klartext, und das Sitzungs-Cookie
+ * enthält weiterhin den Benutzer als JSON. Beides ist in Phase 2 an der Reihe (bcrypt
+ * und ein opakes Token). Dieser Schritt tauscht ausschließlich den Speicher — Dateien
+ * gegen Datenbank —, damit ein Fehlschlag eindeutig einer Ursache zuzuordnen ist.
+ */
 
-load();
-
-function load() {
-	fileService.read('USER', (err, data) => {
-		if (err) {
-			return console.error(err);
-		}
-		backendUsers = JSON.parse(data.toString());
-	});
+export async function getUserForNickAndPW(
+	nickname: string,
+	password: string
+): Promise<User | undefined> {
+	const gefunden = await UserModel.findOne({ where: { nickname, password } });
+	return gefunden ? convertToUser(gefunden.dataValues) : undefined;
 }
 
-function write() {
-	fileService.write('USER', JSON.stringify(backendUsers));
-}
-
-export function getUserForNickAndPW(nicknameS: string, passwordS: string): User | undefined {
-	return mapBackendUserToUser(
-		backendUsers.find((value) => value.nickname === nicknameS && value.password === passwordS)
-	);
-}
-
-export function userExists(currentUser: User | null): boolean {
-	return Boolean(currentUser?.id && backendUsers.find((value) => value.id === currentUser.id));
+export async function userExists(currentUser: User | null): Promise<boolean> {
+	if (!currentUser?.id) return false;
+	return (await UserModel.count({ where: { id: currentUser.id } })) > 0;
 }
 
 export function extractUser(sessionCookie: string | undefined): User | null {
-	if (sessionCookie) {
+	if (!sessionCookie) return null;
+	try {
 		return JSON.parse(sessionCookie);
+	} catch {
+		// Ein unlesbares Cookie ist kein Grund, den Request abzubrechen — es zählt wie
+		// keines.
+		return null;
 	}
-	return null;
 }
 
-export function nickNameAlreadyUsed(nickname: string): boolean {
-	return Boolean(backendUsers.find((value) => value.nickname === nickname));
+export async function nickNameAlreadyUsed(nickname: string): Promise<boolean> {
+	return (await UserModel.count({ where: { nickname } })) > 0;
 }
 
-export function create(
+export async function emailAlreadyUsed(email: string): Promise<boolean> {
+	if (!email) return false;
+	return (await UserModel.count({ where: { email } })) > 0;
+}
+
+export async function create(
 	nickname: string,
 	email: string | undefined,
 	password: string
-): User | undefined {
-	const newUser: BackendUser = {
-		id: BigInt(Date.now()),
-		nickname: nickname,
-		email: email,
-		password: password
-	};
-	backendUsers.push(newUser);
-	write();
-	return mapBackendUserToUser(newUser);
+): Promise<User | undefined> {
+	const angelegt = await UserModel.create({
+		id: randomUUID(),
+		nickname,
+		email: email ?? null,
+		password
+	});
+	return convertToUser(angelegt.dataValues);
+}
+
+export async function getUser(userId: string): Promise<User | undefined> {
+	const gefunden = await UserModel.findByPk(userId);
+	return gefunden ? convertToUser(gefunden.dataValues) : undefined;
+}
+
+export async function getBackendUser(nickname: string): Promise<BackendUser | undefined> {
+	const gefunden = await UserModel.findOne({ where: { nickname } });
+	return gefunden ? convertToBackendUser(gefunden.dataValues) : undefined;
 }
 
 export function createSession(user: User): string {
 	return JSON.stringify(user);
 }
 
-function mapBackendUserToUser(backend: BackendUser | undefined): User | undefined {
-	if (backend) {
-		return { id: backend.id, email: backend.email, nickname: backend.nickname };
-	}
-	return undefined;
+export async function login(locals: App.Locals, currentUser: User): Promise<void> {
+	locals.currentUser = currentUser;
+	locals.currentCharacter = await characterService.getCharacterForUser(currentUser.id);
 }
 
-export function emailAlreadyUsed(s: string): boolean {
-	// TODO implement
-	return false;
-}
-
-export function login(locals: App.Locals, currentUser: User) {
-	locals.currentUser = {
-		id: currentUser.id,
-		email: currentUser.email,
-		nickname: currentUser.nickname
-	};
-	locals.currentCharacter = characterService.getCharacterForUser(currentUser.id);
-}
-
-export function logout(locals: App.Locals, cookies: Cookies) {
+export function logout(locals: App.Locals, cookies: Cookies): void {
 	locals.currentUser = undefined;
 	locals.currentCharacter = undefined;
 	cookies.delete('session', { path: '/' });
-}
-
-export function getUser(userId: bigint) {
-	return mapBackendUserToUser(backendUsers.find((value) => value.id === userId));
 }

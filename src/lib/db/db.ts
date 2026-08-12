@@ -2,6 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { assertDatabaseCredentials, LOCAL_STORAGE_PATH, mode, sequelize } from '$lib/db/sequelize';
 import { createMigrator } from '$lib/db/migrations';
+import { seedWorld } from '$lib/db/seed';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Dynasty } from '$lib/db/model/dynasty';
@@ -110,6 +111,12 @@ export async function startDB(): Promise<void> {
 			await sequelize.sync();
 		} else {
 			await createMigrator(sequelize).up();
+		}
+
+		// Erst danach, und wiederholbar: Ohne Stadt gäbe es keinen Ort, an dem ein
+		// Charakter stehen könnte. Im Testlauf baut jeder Test seine Welt selbst auf.
+		if (mode !== 'TEST') {
+			await seedWorld();
 		}
 
 		dbStarted = true;

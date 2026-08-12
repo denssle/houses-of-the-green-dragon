@@ -1,27 +1,23 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 
-	let { data }: PageProps = $props();
-
-	function build(building: BuildingTemplate) {
-		fetch('/building/new', { method: 'POST', body: JSON.stringify(building) })
-			.then((value) => {
-				console.log('new one ', value);
-			})
-			.catch((reason) => {
-				console.error(reason);
-			});
-	}
+	let { data, form }: PageProps = $props();
 </script>
 
 <h2>Bauen wir was Neues!</h2>
 
-{#each data.buildingsOptions as building}
+{#if form?.message}
+	<p><b>{form.message}</b></p>
+{/if}
+
+{#each data.buildingsOptions as building (building.optionId)}
 	<section>
 		<b>{building.initialName}</b>
 		<i>{building.description}</i>
 		<p>{building.price}</p>
-		<button onclick={() => build(building)}>Das soll es werden!</button>
+		<form method="POST">
+			<input type="hidden" name="optionId" value={building.optionId} />
+			<button type="submit">Das soll es werden!</button>
+		</form>
 	</section>
 {/each}

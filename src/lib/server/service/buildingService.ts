@@ -1,30 +1,14 @@
-import * as fileService from '$lib/server/service/fileService';
+import { randomUUID } from 'node:crypto';
 import type { Building } from '$lib/model/building';
 import type { BuildingTemplate } from '$lib/model/buildingTemplate';
+import { Building as BuildingModel } from '$lib/db/model/building';
+import { convertToBuilding } from '$lib/db/attributes/building.attributes';
+import * as worldService from '$lib/server/service/worldService';
 
-let buildings: Building[] = [];
-
-load();
-
-function load() {
-	try {
-		fileService.read('BUILDING', (err, data) => {
-			if (err) {
-				return console.error(err);
-			}
-			if (data.byteLength) {
-				buildings = JSON.parse(data.toString());
-			}
-		});
-	} catch {
-		console.log('Reading Building failed');
-	}
-}
-
-function write() {
-	fileService.write('BUILDING', JSON.stringify(buildings));
-}
-
+/**
+ * Die Vorlagen bleiben Code und wandern nicht in die Datenbank: Preise, Aktionen und
+ * Grenzen sollen sich ändern lassen, ohne dass Bestandsgebäude davon unberührt bleiben.
+ */
 export function getBuildingOptions(): BuildingTemplate[] {
 	return [
 		{
@@ -61,29 +45,32 @@ export function getBuildingOptions(): BuildingTemplate[] {
 }
 
 export function getBuildingOption(optionId: number): BuildingTemplate | undefined {
-	return getBuildingOptions().find((value) => value.optionId === optionId);
+	return getBuildingOptions().find((option) => option.optionId === optionId);
 }
 
-export function limitReached(option: BuildingTemplate): boolean {
-	return buildings.filter((value) => value.optionId === option.optionId).length >= option.limitedTo;
+export async function limitReached(option: BuildingTemplate): Promise<boolean> {
+	if (!option.limited) return false;
+	return (await BuildingModel.count({ where: { optionId: option.optionId } })) >= option.limitedTo;
 }
 
-export function build(option: BuildingTemplate, userId: bigint) {
-	const building: Building = {
-		id: BigInt(Date.now()),
-		belongsTo: userId,
+export async function build(option: BuildingTemplate, ownerCharacterId: string): Promise<Building> {
+	const angelegt = await BuildingModel.create({
+		id: randomUUID(),
 		name: option.initialName,
-		...option
-	};
-	buildings.push(building);
-	write();
-	return building;
+		optionId: option.optionId,
+		lastConditionTick: await worldService.currentTick(),
+		ownerType: 'CHARACTER',
+		OwnerCharacterId: ownerCharacterId
+	});
+	return convertToBuilding(angelegt.dataValues);
 }
 
-export function getBuilding(id: bigint): Building | undefined {
-	return buildings.find((value) => value.id === id);
+export async function getBuilding(buildingId: string): Promise<Building | undefined> {
+	const gefunden = await BuildingModel.findByPk(buildingId);
+	return gefunden ? convertToBuilding(gefunden.dataValues) : undefined;
 }
 
-export function getBuildings(): Building[] {
-	return buildings;
+export async function getBuildings(): Promise<Building[]> {
+	const alle = await BuildingModel.findAll();
+	return alle.map((eintrag) => convertToBuilding(eintrag.dataValues));
 }

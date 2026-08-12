@@ -1,36 +1,45 @@
-import type { PageServerLoad } from '../../../../.svelte-kit/types/src/routes/character/new/$types';
-import { error } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+import { error, fail } from '@sveltejs/kit';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
 import type { BuildingAction } from '$lib/model/buildingAction';
 
 export const load: PageServerLoad = async ({ params }) => {
-	// @ts-ignore
-	const id: string = params.building_id;
-	if (id) {
-		const converted = BigInt(id);
-		return {
-			building: buildingService.getBuilding(converted)
-		};
+	const building = await buildingService.getBuilding(params.building_id);
+	if (!building) {
+		error(404, 'Not Found');
 	}
-	error(404, 'Not Found');
+	return {
+		building,
+		option: buildingService.getBuildingOption(building.optionId)
+	};
 };
 
 export const actions = {
 	default: async ({ request, params, locals }) => {
-		// @ts-ignore
-		const id: number = Number(params.building_id);
-		const building = buildingService.getBuilding(id);
-		if (building) {
-			request.text().then((value: string) => {
-				const buildingAction: BuildingAction = <BuildingAction>value;
-				if (building?.actions.includes(buildingAction) && locals.currentCharacter?.id) {
-					buildingActionService.doBuildingAction(buildingAction, locals.currentCharacter.id);
-				} else {
-					console.error(403, 'Action not allowed');
-				}
-			});
+		const building = await buildingService.getBuilding(params.building_id);
+		if (!building) {
+			error(404, 'Not Found');
 		}
-		error(404, 'Not Found');
+		if (!locals.currentCharacter) {
+			return fail(401, { message: 'Kein Charakter, der handeln könnte' });
+		}
+
+		const data = await request.formData();
+		const action = data.get('action')?.toString() as BuildingAction;
+		const option = buildingService.getBuildingOption(building.optionId);
+
+		if (!option?.actions.includes(action)) {
+			return fail(403, { message: 'Diese Handlung ist hier nicht möglich' });
+		}
+
+		const ergebnis = await buildingActionService.doBuildingAction(
+			action,
+			locals.currentCharacter.id
+		);
+		if (!ergebnis.success) {
+			return fail(400, { message: 'Die Handlung ist nicht gelungen' });
+		}
+		return { success: true };
 	}
-};
+} satisfies Actions;

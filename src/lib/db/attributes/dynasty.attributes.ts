@@ -1,4 +1,5 @@
 import type { Optional } from 'sequelize';
+import type { Dynasty } from '$lib/model/dynasty';
 
 /**
  * Das langlebige Spielerobjekt. Ein User hat mehrere Dynastien über die Zeit — erlischt
@@ -15,3 +16,12 @@ export interface DynastyAttributes {
 }
 
 export type DynastyCreationAttributes = Optional<DynastyAttributes, 'isExtinct' | 'extinctAtTick'>;
+
+export function convertToDynasty(attributes: DynastyAttributes): Dynasty {
+	return {
+		id: attributes.id,
+		name: attributes.name,
+		foundedBy: attributes.UserId,
+		isExtinct: attributes.isExtinct
+	};
+}
