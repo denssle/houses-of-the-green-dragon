@@ -82,11 +82,30 @@ _Fertig, wenn:_ Der Import in einem Test gegen `:memory:` verbindet. — Erledig
 Weiche ist für alle drei Betriebsarten getestet, ebenso die Fehlermeldung bei fehlenden
 Zugangsdaten. Der Rauchtest aus 1.1 ist damit abgelöst und entfernt.
 
-### 1.3 Attribute und Modelle
+### 1.3 Attribute und Modelle ✓
 
-`src/lib/db/attributes/*.attributes.ts` (Interfaces plus `convertTo…`-Mapper) und
-`src/lib/db/model/*.ts`. Das Schema bildet die Dynastie-Mechanik aus `KONZEPT.md` von
-Anfang an ab — sie nachträglich einzuziehen, hieße jede Tabelle noch einmal anzufassen.
+`src/lib/db/attributes/*.attributes.ts` (Interfaces) und `src/lib/db/model/*.ts`. Das
+Schema bildet die Dynastie-Mechanik aus `KONZEPT.md` von Anfang an ab — sie nachträglich
+einzuziehen, hieße jede Tabelle noch einmal anzufassen.
+
+Die `convertTo…`-Mapper in die Domänentypen kommen erst mit 1.5: Sie müssten heute gegen
+`$lib/model/*` mappen, das noch mit `bigint` arbeitet — genau dem, was dieser Umbau
+beseitigt. Zwei Schritte lang zwei Wahrheiten zu pflegen wäre teurer als der eine Schritt
+später.
+
+Drei Entscheidungen aus der Umsetzung, die im Schema nicht sichtbar sind:
+
+- **Aufzählungen als String-Union mit `validate: { isIn }`**, nicht als
+  `DataTypes.ENUM`. Ein echtes ENUM verhält sich zwischen SQLite und MariaDB verschieden,
+  und genau diese Unterschiede müsste die Migrationsprüfung in 1.4 sonst ausgleichen.
+- **Geld und Kasse als `INTEGER`, nicht `BIGINT`.** MariaDB deckt damit gut zwei
+  Milliarden Münzen ab, was reicht — und `BIGINT` gäbe Sequelize als String zurück, womit
+  genau das Problem zurückkäme, dessentwegen dieser Umbau läuft.
+- **Nullbare Spalten bekommen ausdrücklich `defaultValue: null`.** Ohne das fehlt der
+  Schlüssel auf der Instanz, die `create()` zurückgibt, ganz — sie ist `undefined`,
+  während dieselbe Zeile aus der Datenbank gelesen `null` liefert. Eine Prüfung wie
+  `deathTick === null` wäre damit je nach Herkunft des Objekts falsch. Aufgefallen ist
+  das erst durch die Tests.
 
 | Modell                | Felder                                                                                                                                                                                          | Beziehungen                                                                      |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
@@ -182,6 +201,10 @@ Gegenüber dem heutigen Stand ändert sich zweierlei grundsätzlich:
 `nickname` bekommt einen Unique-Index. Die `nickNameAlreadyUsed()`-Prüfung im Service
 allein ist bei parallelen Requests eine Race Condition; Eindeutigkeit muss die DB
 erzwingen.
+
+_Fertig, wenn:_ Die Modelle legen ihre Tabellen an und halten ihre Zusicherungen. —
+Erledigt; 19 Tests decken alle elf Tabellen ab, dazu Unique-Index, abgewiesene Rollen,
+die Asymmetrie der Beziehungen und die Vorgaben beim Anlegen.
 
 ### 1.4 `src/lib/db/db.ts` und Migration `0001-initial-schema.ts`
 
