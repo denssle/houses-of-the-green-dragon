@@ -1,12 +1,23 @@
 <script lang="ts">
 	import '../app.css';
+	import { enhance } from '$app/forms';
 
 	let { data, children } = $props();
 </script>
 
 <header class="flex place-content-around">
 	{#each data.sections as section (section.slug)}
-		<a href="/{section.slug}" class="link">{section.title}</a>
+		{#if section.slug === 'logout'}
+			<!--
+				Kein Link: Die Seite lädt Links beim Überfahren vor — ein Abmelden hinter
+				einem `href` löste schon die Maus über dem Menüpunkt aus.
+			-->
+			<form method="POST" action="/logout" use:enhance>
+				<button type="submit" class="link">{section.title}</button>
+			</form>
+		{:else}
+			<a href="/{section.slug}" class="link">{section.title}</a>
+		{/if}
 	{/each}
 </header>
 

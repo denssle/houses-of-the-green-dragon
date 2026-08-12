@@ -212,10 +212,18 @@ describe('Karte und Sitzungen', () => {
 		expect(wald.dataValues.treasury).toBeNull();
 	});
 
-	it('hält je Benutzer eine Sitzung, die den opaken Token trägt', async () => {
-		await SessionToken.create({ UserId: 'u-sitzung', token: 'zufallswert' });
+	it('hält je Benutzer eine Sitzung, die den opaken Token und ihre Frist trägt', async () => {
+		const frist = new Date('2026-09-11T00:00:00Z');
+		await SessionToken.create({ UserId: 'u-sitzung', token: 'zufallswert', expiresAt: frist });
 
 		const sitzung = await SessionToken.findByPk('u-sitzung');
 		expect(sitzung?.dataValues.token).toBe('zufallswert');
+		expect(sitzung?.dataValues.expiresAt).toEqual(frist);
+	});
+
+	it('verlangt eine Frist — eine Sitzung ohne Ende gibt es nicht', async () => {
+		await expect(
+			SessionToken.create({ UserId: 'u-fristlos', token: 'ohne-ende' } as never)
+		).rejects.toThrow(ValidationError);
 	});
 });

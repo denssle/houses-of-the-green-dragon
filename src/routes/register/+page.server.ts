@@ -38,7 +38,7 @@ export const actions = {
 		}
 
 		await dynastyService.create(dynasty, user.id);
-		cookies.set('session', userService.createSession(user), { path: '/' });
+		await userService.startSession(user, cookies);
 		redirect(303, '/');
 	}
 } satisfies Actions;

@@ -1,6 +1,5 @@
 import type { Optional } from 'sequelize';
 import type { User } from '$lib/model/user';
-import type { BackendUser } from '$lib/model/backendUser';
 
 export interface UserAttributes {
 	id: string;
@@ -12,8 +11,10 @@ export interface UserAttributes {
 export type UserCreationAttributes = Optional<UserAttributes, 'email'>;
 
 /**
- * In die Sicht der Oberfläche — **ohne Passwort**. Der einzige Weg aus der Datenbank
- * heraus, den Routen und Layouts benutzen dürfen.
+ * In die Sicht der Oberfläche — **ohne Passwort**, und seit Phase 2.1 der einzige Weg
+ * aus der Datenbank heraus. Ein Gegenstück „mit Passwort“ gibt es bewusst nicht mehr:
+ * Der Hash wird dort verglichen, wo die Zeile gelesen wird, und verlässt den Service
+ * nicht.
  */
 export function convertToUser(attributes: UserAttributes): User {
 	return {
@@ -21,9 +22,4 @@ export function convertToUser(attributes: UserAttributes): User {
 		nickname: attributes.nickname,
 		email: attributes.email ?? undefined
 	};
-}
-
-/** Mit Passwort — nur für die Anmeldung innerhalb der Service-Schicht. */
-export function convertToBackendUser(attributes: UserAttributes): BackendUser {
-	return { ...convertToUser(attributes), password: attributes.password };
 }

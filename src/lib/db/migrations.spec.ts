@@ -23,6 +23,24 @@ function spalten(beschreibung: Record<string, unknown>) {
 	);
 }
 
+/**
+ * Name, Eindeutigkeit und Spalten eines Index — mehr macht ihn nicht aus. Seit Phase 2.2
+ * hängt an einem Index echtes Verhalten: Der Sitzungs-Token wird bei jedem Request über
+ * ihn nachgeschlagen.
+ */
+function indizes(beschreibung: unknown) {
+	return (beschreibung as unknown[])
+		.map((index) => {
+			const { name, unique, fields } = index as {
+				name: string;
+				unique: boolean;
+				fields?: { attribute: string }[];
+			};
+			return { name, unique, felder: (fields ?? []).map((feld) => feld.attribute) };
+		})
+		.sort((a, b) => a.name.localeCompare(b.name));
+}
+
 describe('Migration und Modelle ergeben dasselbe Schema', () => {
 	let migriert: Sequelize;
 	let tabellen: string[];
@@ -59,6 +77,15 @@ describe('Migration und Modelle ergeben dasselbe Schema', () => {
 
 			// Der Tabellenname im Vergleich, damit ein Fehlschlag verrät, wo es klemmt.
 			expect({ tabelle, ...ausMigration }).toEqual({ tabelle, ...ausModellen });
+		}
+	});
+
+	it('legt dieselben Indizes an', async () => {
+		for (const tabelle of tabellen) {
+			const ausMigration = indizes(await migriert.getQueryInterface().showIndex(tabelle));
+			const ausModellen = indizes(await sequelize.getQueryInterface().showIndex(tabelle));
+
+			expect({ tabelle, indizes: ausMigration }).toEqual({ tabelle, indizes: ausModellen });
 		}
 	});
 

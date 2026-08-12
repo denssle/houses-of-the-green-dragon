@@ -297,25 +297,72 @@ Der jetzige Stand ist lokal harmlos, muss aber vor jedem Deployment weg: Passwö
 liegen im Klartext, das Session-Cookie ist der JSON-serialisierte User und damit frei
 fälschbar, und `USER.txt` lag im öffentlich erreichbaren `static/`.
 
-### 2.1 bcrypt
+### 2.1 bcrypt ✓
 
 `register` und `loginWithCredentials` mit `hash`/`compare` aus `bcrypt-ts`. Bewusst
-asynchron: bcrypt kostet ~100 ms, die App läuft in einem Node-Prozess — `hashSync`
-legte bei jedem Login alle parallelen Requests still.
+asynchron: bcrypt kostet ~290 ms (reine JS-Umsetzung, zehn Runden), die App läuft in
+einem Node-Prozess — `hashSync` legte bei jedem Login alle parallelen Requests still.
 
-### 2.2 Opakes Session-Token
+Zwei Entscheidungen aus der Umsetzung:
+
+- **Bei unbekanntem Nickname wird gegen einen Blindhash verglichen.** Ohne ihn antwortete
+  die Anmeldung bei unbekannten Namen sofort und bei bekannten erst nach dem Hashen — aus
+  der Zeitdifferenz ließe sich ablesen, welche Namen vergeben sind. Aus demselben Grund
+  ist die Fehlermeldung für falschen Namen und falsches Passwort dieselbe.
+- **`BackendUser` ist ersatzlos weg.** Der Typ existierte, um den Benutzer _mit_ Passwort
+  durch die Schichten zu reichen; jetzt wird der Hash dort verglichen, wo die Zeile
+  gelesen wird, und verlässt den Service nicht mehr.
+
+_Fertig, wenn:_ In der Datenbank steht kein Klartext mehr. — Erledigt. **Achtung für den
+Bestand:** Vorhandene Konten aus der Klartext-Zeit können sich nicht mehr anmelden, weil
+ihr gespeicherter Wert kein Hash ist. Lokal betrifft das den Testbenutzer, in Produktion
+niemanden — dort ist noch nichts ausgeliefert.
+
+### 2.2 Opakes Session-Token ✓
 
 Das Cookie enthält nur ein `crypto.randomUUID()`; die Identität kommt aus der
 `sessionToken`-Tabelle. `hooks.server.ts` ruft `getCurrentUserBySessionToken()` statt
 `JSON.parse(cookie)`. Cookie mit `httpOnly`, `sameSite: 'lax'`, `secure` außerhalb von
 dev und `maxAge`; abgelaufene Token beim Auflösen aufräumen.
 
-_Fertig, wenn:_ Ein von Hand gefälschtes Cookie zu `/login` führt.
+**Die Frist bekommt eine eigene Spalte `expiresAt`** statt aus `updatedAt` erschlossen zu
+werden, wie Festival es macht. Zwei Gründe: Jeder spätere Schreibzugriff auf die Zeile
+verlängerte die Sitzung sonst stillschweigend, und der Zeitstempel gehört Sequelize — er
+lässt sich nicht einmal für einen Test ausdrücklich setzen, `update()` verwirft den Wert
+kommentarlos. Dazu ein **eindeutiger Index auf `token`**: Jeder Request schlägt jetzt über
+diese Spalte nach, ohne Index wäre das ein Tabellenscan je Seitenaufruf. Beides bringt
+Migration `0002-session-expiry.ts`, die die Tabelle dafür neu anlegt — SQLite kann keine
+`NOT NULL`-Spalte ohne Vorgabewert anfügen, und verloren geht dabei nichts, weil die
+Tabelle bis hierher nie beschrieben wurde.
 
-### 2.3 Logout und Rate-Limit
+Der Abgleich in `migrations.spec.ts` vergleicht seitdem auch **Indizes**, nicht nur
+Spalten — sonst wäre genau die Beschleunigung, an der jetzt jeder Request hängt, in
+Produktion still verschwunden. Der Indexname steht deshalb ausdrücklich in den Attributen
+und wird von Modell und Migration geteilt.
+
+_Fertig, wenn:_ Ein von Hand gefälschtes Cookie zu `/login` führt. — Erledigt und am
+laufenden Server durchgespielt: erfundene UUID und ein Cookie im alten JSON-Format landen
+beide auf der Anmeldung.
+
+### 2.3 Logout und Rate-Limit ✓
 
 `/logout` als echte Route statt als Sonderfall im Hook. Dazu ein Login-Rate-Limit —
-Festivals `login-rate-limit.ts` ist direkt übernehmbar.
+Festivals `login-rate-limit.ts` ist direkt übernehmbar (fünf Fehlversuche je IP und
+Nickname in fünfzehn Minuten, gleitendes Fenster im Prozessspeicher).
+
+**Abmelden ist ein POST, kein Link.** Die App lädt Links beim Überfahren vor
+(`data-sveltekit-preload-data="hover"` in der `app.html`) — läge das Abmelden in einem
+`load`, genügte die Maus über dem Menüpunkt, um die Sitzung zu beenden. Der Menüpunkt ist
+deshalb ein kleines Formular mit `use:enhance`; das `load` der Route leitet jeden direkten
+Aufruf um. Nebenbei ist die Abmeldung damit auch nicht mehr von einer fremden Seite
+auslösbar.
+
+Gesperrt wird **vor** der Passwortprüfung, nicht danach: Sonst kostete jeder Versuch
+weiterhin seine 290 ms bcrypt, und das Rate-Limit wäre selbst der Hebel für eine
+Überlastung.
+
+_Fertig, wenn:_ Abmelden beendet die Sitzung auch in der Datenbank und der sechste
+Fehlversuch wird abgewiesen. — Erledigt und am laufenden Server durchgespielt.
 
 ### 2.4 Deployment-Durchstich
 
