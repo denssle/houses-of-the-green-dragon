@@ -1,0 +1,440 @@
+# Konzept
+
+Was das Spiel werden soll — festgehalten, damit die Architekturentscheidungen in
+`UMBAU.md` einen Zweck haben, auf den sie zulaufen.
+
+## Kernidee
+
+**Man spielt eine Dynastie, nicht einen Charakter.** Gespielt wird zwar immer ein
+einzelner Charakter, aber der ist sterblich. Stirbt er, übernimmt eines seiner Kinder.
+Wer zu Lebzeiten keine Nachkommen bekommen hat, hat ein Problem — die Fortpflanzung ist
+kein Beiwerk, sondern die zentrale Überlebensmechanik.
+
+Die übrigen Kinder, die nicht Spielercharakter werden, bleiben als **NPCs** in der Welt:
+als Arbeitskräfte, Kundschaft und — sobald es Politik gibt — als Wähler.
+
+Angesiedelt im Mittelalter. Der Spieler muss sich um das Elementare kümmern: ein Dach
+über dem Kopf, Arbeit oder ein eigener Betrieb, Nahrung, Kleidung.
+
+## Die Säulen
+
+### 1. Lebenszyklus und Erbfolge
+
+Charaktere altern, zeugen Kinder und sterben. Beim Tod des Spielercharakters geht die
+Kontrolle auf einen Erben über; die Dynastie besteht fort, der einzelne Charakter nicht.
+Titel, Besitz und Ansehen müssen dabei einer klaren Erbregel folgen.
+
+Damit wird Zeit zur wichtigsten Ressource: Was man in einem Leben nicht aufgebaut hat,
+muss der Erbe von vorn beginnen. Umgekehrt ist ein gut vorbereiteter Übergang der
+eigentliche Fortschritt über Generationen hinweg.
+
+**Die Erbfolge.** Der Spieler **wählt seinen Erben** unter den eigenen Kindern aus — der
+Übergang ist eine Entscheidung, keine Regel des Zufalls. Männer und Frauen sind dabei
+vollständig gleichberechtigt: Es gibt kein Geschlecht, das erbt, wählt, arbeitet oder ein
+Amt bekleidet, und eines, das es nicht darf. Das ist historisch unsauber und spielerisch
+richtig.
+
+Die **übrigen Kinder erhalten einen Anteil nach Gesetz** — womit das Erbrecht selbst zu
+einem politischen Gegenstand wird: Wie viel dem gewählten Erben bleibt und wie viel unter
+den Geschwistern aufgeteilt wird, ist eine Stellschraube, die der Rat einer Stadt ändern
+kann. Ein Haus, das über Generationen Vermögen bündeln will, hat damit ein Interesse an
+der Gesetzgebung.
+
+**Wer ohne Erben stirbt, dessen Besitz fällt an die öffentliche Hand.** Nicht ins Nichts
+und nicht an einen zufälligen Nachbarn: Häuser, Grundstücke und Vermögen gehen an die
+Stadt, die sie neu vergeben oder verkaufen kann. Das schließt einen Kreis, den knappes
+Bauland sonst offen ließe — die Stadt bekommt zurück, was niemandem mehr gehört, und
+finanziert daraus Öffentliches.
+
+**Die Bevölkerung trägt sich selbst.** NPCs sind keine Kulisse: Sie altern, heiraten,
+bekommen Kinder und sterben wie Spielercharaktere. Dazu kommt der stetige Zufluss aus den
+Häusern der Spieler — wer Kinder bekommt, bekommt in aller Regel mehr, als er zum Erben
+braucht, und die übrigen wandern in den **NPC-Pool**. Aus Spielersicht sind das
+Geschwister, Vettern und Nichten; aus Sicht der Stadt sind es Arbeitskräfte, Kundschaft
+und Wähler. Die Einwohnerzahl ist damit ein Ergebnis des Spiels, keine gesetzte Zahl.
+
+### 2. Die Welt: Karte, Städte und Umland
+
+Das Spiel spielt nicht in *einer* Stadt, sondern in einer **Landschaft**. Eine Stadt hat
+ein Umland, und irgendwo dahinter liegt die nächste.
+
+Das folgt zwingend aus der Knappheit des Baulands: Wenn alle Grundstücke vergeben sind,
+gibt es zwei Auswege — **neues Bauland erschließen** (die Stadt wächst in ihr Umland
+hinein) oder, im Extremfall, **eine neue Stadt gründen**. Beides sind große, teure
+Vorhaben und damit natürliche Fernziele für etablierte Dynastien.
+
+Die Karte trägt außerdem, was die Wirtschaft braucht: **Rohstoffflächen** liegen im
+Umland, nicht in der Stadt. Wald, Steinbruch, Acker, Erzgrube — dort entsteht, was in
+den Handwerkshäusern verarbeitet wird.
+
+**Die Karte ist eine Liste von Orten mit Entfernungen dazwischen**, kein Kachelraster.
+Grünau liegt zwei Ticks vom Eichwald und acht von Falkenstein — das genügt für Reisezeit,
+Transportkosten und Fernhandel, ohne dass jemand Kartografie betreiben müsste. Neue Orte
+anzulegen ist damit eine Zeile, was für eine Welt, die wachsen soll, der entscheidende
+Punkt ist.
+
+Entfernung ist dabei kein Beiwerk, sondern der Preis: Was weiter weg liegt, kostet Zeit
+und Transport. Genau daraus entsteht **Handel zwischen den Städten** — Waren, die hier
+im Überfluss vorhanden und dort knapp sind, lohnen den Weg. Wer eine Karawane schickt,
+bindet Kapital für mehrere Ticks und wettet darauf, dass der Preis am Ziel hält.
+
+### 3. Wirtschaft
+
+Man arbeitet entweder für jemanden oder wird selbst Arbeitgeber. Ein eigener Betrieb
+stellt Waren her, die auf dem **Markt** verkauft werden — an andere Spieler oder an NPCs.
+
+Entscheidend: **alles Hergestellte hat einen Nutzen.** Kleidung schützt, Nahrung ist
+notwendig zum Überleben, Werkzeug steigert die Produktion. Waren sind keine abstrakten
+Punkte, sondern greifen in die Bedürfnisse der Charaktere ein. Damit entsteht echte
+Nachfrage statt eines reinen Zahlenkreislaufs.
+
+Angestellte NPCs (eigene Kinder oder fremde) arbeiten im Betrieb, kosten Lohn und
+erzeugen Wert — das schließt den Kreis zur Familienmechanik: viele Kinder sind
+Arbeitskraft.
+
+**Rohstoffe entstehen nicht aus dem Nichts.** Am Anfang jeder Produktionskette steht
+eine **Abbaufläche** im Umland: Holz aus dem Wald, Stein aus dem Bruch, Getreide vom
+Acker, Erz aus der Grube. Erst was dort gewonnen wurde, kann eine Handwerkshütte
+verarbeiten. Damit hat jede Ware eine nachvollziehbare Herkunft, und Engpässe wirken
+sich die Kette entlang aus — wer den Wald hält, bestimmt den Preis für Bauholz und damit
+mittelbar, was Renovieren kostet.
+
+**Pacht.** Abbauflächen sind knapp wie Bauland, aber sie gehören **der Stadt** und werden
+verpachtet, nicht verkauft. Ein Pachtverhältnis läuft auf Zeit und kostet laufend; wer
+nicht zahlt, verliert es. Das erzeugt drei Dinge, die dem Spiel guttun: eine
+wiederkehrende Belastung, die Besitz zu Verantwortung macht; eine verlässliche Einnahme
+für die Stadtkasse; und eine Vergabe, über die ein gewähltes Amt entscheidet.
+
+Letzteres ist der eigentliche Gewinn: Wer den Wald bekommt, ist eine politische Frage.
+Anders als bei gekauftem Land kann sich die erste Generation nicht dauerhaft alles
+sichern — Pacht läuft aus, und über die Verlängerung entscheidet jemand, den man
+überzeugen (oder wählen lassen) muss.
+
+**Fernhandel.** Waren zwischen Städten zu bewegen kostet Zeit (mehrere Ticks) und Geld.
+Wer richtig einschätzt, wo etwas knapp ist, verdient daran; wer sich verschätzt, sitzt
+auf Ware, die am Zielort niemand braucht. Weil das Spiel ohnehin in Ticks rechnet, ist
+eine unterwegs befindliche Karawane leicht abzubilden — sie kommt an einem bestimmten
+Tick an.
+
+### 4. Gebäude
+
+Gebäude sind kein Beiwerk der Wirtschaft, sondern eigener Spielinhalt. Ein Haus wird
+**errichtet**, es **verfällt**, es will **renoviert** und **verbessert** werden, und es
+lässt sich **kaufen und verkaufen**.
+
+**Wohnhaus und Handwerkshütte** sind die beiden privaten Grundtypen. Das Wohnhaus deckt
+das Bedürfnis nach einem Dach über dem Kopf und bestimmt, wie gut man sich erholt; die
+Handwerkshütte produziert Waren und bietet Arbeitsplätze für Angestellte.
+
+**Öffentliche Gebäude** gehören keinem Charakter, sondern der Stadt: Brunnen, Schule,
+Friedhof, Stadtmauer, Unterkunft für Obdachlose. Sie werden aus der **Stadtkasse**
+bezahlt, also aus Steuern und Pachteinnahmen, und wer sie baut, entscheidet die Politik.
+Damit bekommen Ämter einen sichtbaren Zweck: Ein Bürgermeister hinterlässt Bauwerke.
+
+Ihr Nutzen liegt bei der Allgemeinheit, nicht beim Erbauer — der Brunnen versorgt alle,
+die Schule bildet die Kinder der Stadt, die Mauer schützt jeden hinter ihr.
+
+**Wovor die Mauer schützt: Zufallsereignisse.** Die Welt schlägt gelegentlich zu —
+Räuber überfallen das Umland, eine Seuche geht um, ein Brand greift auf die Nachbarhäuser
+über. Öffentliche Bauten mildern genau das: die Mauer die Räuber, der Brunnen die Seuche,
+und so weiter. Damit haben sie einen messbaren Wert, ohne dass es ein Kampfsystem oder
+Krieg zwischen Städten bräuchte. Für die Politik heißt das: Wer nicht vorsorgt, wird nach
+dem nächsten Unglück abgewählt. Besonders
+wichtig ist die **Unterkunft für Obdachlose**: Wer sein Haus verliert, weil es zur Ruine
+wurde oder er es verkaufen musste, braucht einen Ort, an dem es weitergeht. Ohne ein
+solches Auffangnetz wäre der Verlust des Hauses eine Sackgasse, aus der ein Spieler nicht
+mehr herausfindet — und ausgerechnet die Stadt, die keine Unterkunft baut, verliert ihre
+verarmten Einwohner.
+
+**Der Platz in der Stadt ist begrenzt.** Es gibt eine feste Zahl von **Grundstücken**,
+und sie sind selbst Besitz — getrennt vom Gebäude, das darauf steht. Wer bauen will,
+muss erst ein Grundstück haben, und die sind irgendwann alle vergeben. Erst dadurch
+bekommt der Immobilienhandel Gewicht: Man kauft nicht, weil Bauen teuer wäre, sondern
+weil kein Platz mehr frei ist. Lage wird zum Wert.
+
+**Verfall und Renovierung.** Jedes Gebäude hat einen Zustand, der mit der Zeit sinkt.
+Ein verfallenes Haus wärmt schlecht und eine verfallene Hütte produziert weniger.
+Renovieren kostet Aktionspunkte und Baumaterial — womit Holz und Stein echte Waren mit
+echter Nachfrage werden und das Baugewerbe ein eigener Wirtschaftszweig ist. Der
+laufende Unterhalt, den auch NPCs stemmen müssen, ist genau das: Der Verfall ist die
+Fixkostenseite des Besitzes.
+
+**Wer gar nicht renoviert, verliert das Gebäude.** Am Ende des Verfalls steht die Ruine:
+Das Haus ist weg, das Grundstück bleibt. Das ist die härteste Variante, passt aber zum
+Permadeath der Dynastie — und sie löst nebenbei ein Problem, das begrenzte Grundstücke
+sonst hätten: Ohne Ruinen würden aufgegebene Häuser die Stadt für immer blockieren. So
+gibt die Welt Platz zurück, ohne dass jemand eingreifen muss. Der Zustand muss dafür
+deutlich sichtbar sein, mit Warnung lange bevor es so weit ist.
+
+**Ausbau.** Über die bloße Instandhaltung hinaus lassen sich Gebäude auf höhere Stufen
+bringen: Aus der Hütte wird eine Werkstatt, aus der Werkstatt ein Betrieb mit mehr
+Ausstoß und mehr Arbeitsplätzen; aus der Kate ein Haus, das mehr Menschen beherbergt und
+besser erholt. Ausbau ist die Hauptinvestition, in die ein Spieler seinen Gewinn steckt.
+
+**Handel mit Immobilien.** Grundstücke und Gebäude wechseln den Besitzer — durch Verkauf
+zu einem Festpreis wie alle anderen Waren, oder durch Erbschaft beim Tod des
+Eigentümers. Damit ist Grundbesitz das, was eine Dynastie über Generationen tatsächlich
+aufbaut: Wer erbt, erbt vor allem Mauern.
+
+**Auch NPCs besitzen, bauen und verkaufen.** Sie unterliegen denselben Regeln wie
+Spielercharaktere — sie wohnen in eigenen Häusern, müssen sie instand halten und lassen
+sie verfallen, wenn das Geld nicht reicht. Damit ist der Immobilienmarkt auch dann
+lebendig, wenn wenige Spieler online sind, und ein NPC-Haushalt, der verarmt, gibt
+irgendwann ein Grundstück frei.
+
+### 5. Politik
+
+Spieler können sich für Ämter zur Wahl stellen, andere stimmen ab. Ämter bringen echte
+Macht: Ein Bürgermeister kann Gesetze erlassen, die für alle gelten — Steuern,
+Preisregeln, Bauvorschriften.
+
+Politik ist damit die Ebene, auf der die Wirtschaft von Spielern selbst reguliert wird,
+statt von Balancing-Konstanten im Code.
+
+**Die Stadtkasse ist der Hebel.** Steuern und Pachteinnahmen fließen hinein, öffentliche
+Gebäude und die Erschließung neuen Baulands heraus. Wer ein Amt hält, verwaltet fremdes
+Geld — und entscheidet Fragen, an denen für andere viel hängt: Wer bekommt die Pacht auf
+den Wald? Wird neues Bauland ausgewiesen, und wer darf dort bauen? Bekommt die Stadt eine
+Schule oder eine Mauer?
+
+Da jede Stadt eigene Ämter hat, hat die Gründung einer neuen Stadt auch eine politische
+Seite: Sie schafft ein zweites Machtzentrum, in dem andere Häuser vorn liegen können.
+
+### 6. Beziehungen — der Querschnitt
+
+Jeder Charakter hat zu jedem anderen eine **Beziehung (Zuneigung)**, gleich ob NPC oder
+Spielercharakter. Im Normalfall ist sie neutral und verschiebt sich durch Interaktion:
+freundliches oder feindliches Handeln, Verwandtschaft, Anstellung, gezahlte Löhne,
+erlassene Gesetze.
+
+Diese eine Mechanik trägt zwei andere:
+
+- **Heirat setzt eine gute Beziehung voraus** — man wirbt erst, dann heiratet man. Damit
+  ist die Fortpflanzung, also das Überleben der Dynastie, an soziales Spiel gekoppelt
+  und nicht an einen Knopfdruck.
+- **Heiraten zwei Spielerhäuser, entscheidet der Zufall über jedes Kind.** Welchem der
+  beiden Häuser ein Kind zugeschlagen wird, ist ein Münzwurf — kein Geschlecht „heiratet
+  hinein“ und gibt sein Haus auf. Beide Spieler haben dieselbe Aussicht auf einen Erben,
+  und keiner muss fürchten, mit der Ehe seine Dynastie zu beenden. Bei einer Ehe mit einem
+  NPC ohne Haus fallen alle Kinder an das Haus des Spielers.
+- **NPCs wählen nach Zuneigung.** Es gibt kein separates Wahlkampfsystem: Wer über
+  Generationen Beziehungen gepflegt, anständig entlohnt und die Familie vergrößert hat,
+  hat Stimmen. Wer die Stadt gegen sich aufgebracht hat, verliert sie.
+
+Damit ist die Beziehungstabelle keine Nebensache, sondern nach dem Charakter selbst das
+wichtigste Datum im Spiel.
+
+**Der Grundwert ist ein Ausgangspunkt, keine Untergrenze.** Verwandte starten
+sympathisch, aber wer seine Kinder schlecht behandelt, zieht die Beziehung ins Negative
+bis zum offenen Hass. Umgekehrt kann man Fremde zu Verbündeten machen. Nichts an der
+Herkunft legt eine Beziehung fest.
+
+### Beziehungen zwischen Dynastien
+
+Über den einzelnen Charakteren stehen **Beziehungen zwischen den Häusern**. Damit lassen
+sich verfeindete Adelsgeschlechter abbilden: Wer in eine Familie hineingeboren wird,
+erbt zwar nicht die persönlichen Beziehungen seiner Eltern — aber er erbt deren Feinde
+und Freunde als Vorzeichen.
+
+Die Zuneigung zwischen zwei Charakteren setzt sich damit aus drei Schichten zusammen:
+
+1. **Verwandtschaft** — der Bonus aus dem Stammbaum
+2. **Haus zu Haus** — die Fehde oder Freundschaft der Dynastien
+3. **Person zu Person** — was die beiden konkret miteinander erlebt haben
+
+Die persönliche Schicht sticht dabei die anderen: Man kann sich mit einem Mitglied des
+verfeindeten Hauses anfreunden — Romeo und Julia bleiben möglich, sind aber ein Kampf
+gegen den Strom.
+
+## Was das für das Datenmodell heißt
+
+Das Schema in Phase 1 des Umbauplans bildet die Grundzüge bereits ab, damit sie nicht
+nachträglich in jede Tabelle eingezogen werden müssen:
+
+- `dynasty` ist das langlebige Spielerobjekt, `character` das sterbliche. Der User hängt
+  an der Dynastie, nicht am Charakter. Weil eine erloschene Dynastie einen Neuanfang
+  erlaubt, hat ein User **mehrere** Dynastien über die Zeit — davon genau eine aktive.
+- `character` braucht `birthTick`/`deathTick`, eine `role` (gespielt oder NPC), `gender`,
+  den Aufenthaltsort sowie `motherId`/`fatherId` und `spouseId` als Selbstreferenzen für
+  Stammbaum und Ehe.
+- Das Aktionsbudget hängt am Charakter (`actionPoints`, `lastTickProcessed`), die
+  Weltzeit an einer eigenen, einzeiligen Tabelle. Nachgerechnet wird beim Zugriff, nicht
+  in einem Durchlauf über alle Charaktere. Den Tick selbst zählt dagegen ein laufender
+  Takt hoch — er ist der einzige Hintergrundprozess, den das Spiel braucht, und er treibt
+  auch NPC-Handeln, Ereignisse und Wahlperioden.
+- `building` trennt Eigentümer (`OwnerCharacterId`) von Nutzern — Bewohner und
+  Angestellte hängen als Referenz am Charakter. Dazu `condition`, `lastConditionTick`
+  und `level`: Der Verfall wird wie Zuneigung und Aktionsbudget beim Lesen nachgerechnet,
+  nicht in einem Durchlauf über alle Gebäude.
+- `plot` ist eigenständig, weil das Grundstück den Verfall des Gebäudes überdauert. Es
+  hat einen Eigentümer, eine Lage und höchstens ein Gebäude. Wird ein Haus zur Ruine,
+  verschwindet das `building`, die `plot`-Zeile bleibt. Dieselbe Tabelle trägt auch die
+  Abbauflächen im Umland — ein Grundstück ist entweder Bauland oder Rohstofffläche.
+- `region` bildet die Karte: Städte und Umlandflächen als Orte, dazu `regionLink` mit der
+  Entfernung in Ticks als Verbindung zwischen zweien. Keine Koordinaten, keine Kacheln. Jeder `plot` liegt in einer Region, jeder Charakter hält sich in einer auf.
+  Eine Stadt führt zusätzlich eine **Stadtkasse**.
+- Öffentliche Gebäude sind normale `building`-Zeilen **ohne** Eigentümer-Charakter,
+  dafür mit Bezug zur Stadt. Kein zweites Gebäudesystem — dieselben Regeln für Bau,
+  Verfall und Renovierung, nur eine andere Kasse.
+- `lease` hält Pachtverhältnisse (Fläche, Pächter, Rate, seit wann, bis wann bezahlt).
+  Die fällige Zahlung ergibt sich wie alles andere aus den verstrichenen Ticks. Eine
+  Abbaufläche hat damit keinen privaten Eigentümer, sondern höchstens einen Pächter.
+- `event` protokolliert Zufallsereignisse (Ort, Art, Tick, Auswirkung), damit sie in der
+  Stadtchronik sichtbar sind — ein Unglück, von dem niemand erfährt, hat politisch keine
+  Folgen.
+- `shipment` bildet unterwegs befindliche Ware ab: Herkunft, Ziel, Ankunfts-Tick,
+  Eigentümer, Ladung. Passt bruchlos ins Tick-Modell — vor dem Ankunfts-Tick ist die Ware
+  schlicht nicht verfügbar.
+- Ämter hängen an einer Stadt, nicht an der Welt: Jede Stadt wählt ihre eigenen.
+- Verkaufsangebote sind ein nullbarer Preis an `plot` beziehungsweise `building` — kein
+  eigenes Auktionswesen, passend zum Festpreisprinzip.
+
+- `relationship` (fromCharacterId, toCharacterId, affection) hält die Zuneigung.
+  **Nur Abweichungen vom Grundwert werden gespeichert** — bei n Charakteren gäbe es
+  sonst n² Zeilen, die zu 95 % nichts aussagen. Der Grundwert ist neutral, bei
+  Verwandten der Verwandtschaftsbonus; er wird aus dem Stammbaum **berechnet, nicht
+  gespeichert**, und gilt automatisch, sobald keine Zeile existiert. Die Richtung ist
+  bewusst asymmetrisch: A kann B schätzen, ohne dass es erwidert wird.
+- `dynastyRelationship` (fromDynastyId, toDynastyId, standing) hält die Fehde oder
+  Freundschaft zwischen Häusern — ebenfalls spärlich gespeichert. Sie geht als Schicht in
+  den Grundwert der persönlichen Beziehung ein, ist also kein zweites, getrenntes System.
+- Der Verfall der Zuneigung braucht keinen eigenen Durchlauf: Aus `lastChangedTick` und
+  dem aktuellen Tick lässt er sich beim Lesen ausrechnen. Zeilen, die dabei auf dem
+  Grundwert ankommen, werden beim nächsten Schreibzugriff gelöscht. Das hält die Tabelle
+  klein, räumt aber nicht von selbst auf, was niemand mehr anfasst — ein gelegentlicher
+  Aufräumlauf bleibt sinnvoll. Für `dynastyRelationship` gilt dasselbe: Auch Fehden
+  klingen ab, wenn sie niemand nährt.
+
+Später hinzu kommen:
+
+- `item` / `itemTemplate` und `inventory` für Waren, Bedürfnisse und Verschleiß
+- `marketOffer` für Angebote, plus Transaktionshistorie
+- `employment` für Anstellungsverhältnisse mit Lohn
+- `marriage` beziehungsweise ein Partnerfeld am Charakter
+- `office`, `election`, `vote` und `law` für die politische Ebene
+
+## Getroffene Entscheidungen
+
+**Zeitmodell: Hybrid aus Weltzeit und Aktionsbudget.** Die Welt läuft in Echtzeit auf
+einer gemeinsamen Zeitachse — ein globaler Tick treibt Alterung, Produktion, Lohn und
+Wahlperioden. Handlungen kosten aber kein Echtzeitfenster, sondern Punkte aus einem
+Kontingent, das pro Tick nachwächst und sich bis zu einer Obergrenze ansammelt. Wer
+zwei Tage nicht spielt, verliert nicht den Anschluss, muss aber auch nicht im Minutentakt
+klicken.
+
+**Die Zeit läuft weiter, auch wenn niemand spielt.** Die Welt ist kein Spielstand, der
+beim Aufrufen fortgesetzt wird — sie hat einen eigenen Takt. Das ist die Voraussetzung
+dafür, dass Wirtschaft, Wahlen und Nachbarschaft überhaupt eine gemeinsame Gegenwart
+haben.
+
+Daraus folgt eine Zweiteilung, die für die Umsetzung wichtiger ist als für das Spiel:
+Was **einen einzelnen Charakter** betrifft — nachwachsende Aktionspunkte, verfallende
+Zuneigung, verfallende Gebäude, auflaufende Pacht —, wird beim Zugriff aus den
+verstrichenen Ticks nachgerechnet. Was **die Welt als Ganzes** betrifft — der Tick selbst,
+das Handeln der NPCs, Zufallsereignisse, das Ende einer Wahlperiode —, braucht einen
+laufenden Takt, der auch dann arbeitet, wenn niemand angemeldet ist. Ein NPC, den niemand
+anschaut, muss trotzdem Brot kaufen; sonst bricht die Nachfrage weg, auf der die
+Wirtschaft steht.
+
+**Tod ohne Erben: Die Dynastie erlischt.** Stirbt der Spielercharakter kinderlos, ist
+das Haus am Ende; der Spieler beginnt mit einer neuen Dynastie bei null, sein Besitz
+fällt an die Stadt. Harter Schnitt, maximaler Druck auf die Fortpflanzung — sie ist damit
+tatsächlich die zentrale Überlebensmechanik und nicht nur eine Empfehlung.
+
+**NPCs sind indirekt anweisbar.** Man kann eigene Kinder anstellen, verheiraten oder ins
+Amt schicken, steuert sie aber nicht direkt. Sie handeln nach eigenen Regeln. Damit
+bleibt der eine sterbliche Spielercharakter der Mittelpunkt, statt dass man faktisch ein
+halbes Dutzend Figuren parallel spielt.
+
+**Wahlrecht: Jeder Charakter stimmt ab, NPCs nach Zuneigung.** Die Stimme hängt an der
+Person, nicht an der Dynastie, und NPCs entscheiden anhand ihrer Beziehung zu den
+Kandidaten. Dass damit Hausmacht zählt — viele Kinder, viele gut behandelte Angestellte —
+ist gewollt und mittelalterlich stimmig.
+
+**NPCs sind vollwertige Marktteilnehmer.** Sie müssen ihre Bedürfnisse genauso decken wie
+Spieler: essen, sich kleiden, wohnen. Damit entsteht die Nachfrage von selbst und die
+Wirtschaft läuft auch bei wenigen aktiven Spielern weiter — ein künstlicher Preisboden
+erübrigt sich. Voraussetzung: NPCs haben eigenes Geld (Lohn) und geben es aus.
+
+**Zuneigung verfällt Richtung Neutralität.** Liebe wie Hass wollen genährt werden —
+ungepflegt wird man sich mit der Zeit schlicht egal. Beziehungen sind damit kein einmal
+erworbener Besitz, sondern laufender Aufwand, und keine Dynastie kann ihre Machtbasis
+dauerhaft einfrieren. Darüber liegt ein **Verwandtschaftsbonus**: Verwandte finden
+einander von Haus aus sympathisch, ohne dass dafür interagiert werden müsste.
+
+**Persönliche Beziehungen werden nicht vererbt — Hausbeziehungen schon.** Ein Kind
+startet gegenüber jedem Fremden bei null und muss sich seine Verbündeten selbst
+erarbeiten. Was es erbt, ist der Stand seines Hauses zu den anderen Häusern. Das hält
+die Beziehungstabelle bei jeder Geburt schlank und trennt sauber, was persönlich ist
+und was Familiensache.
+
+**Mehrfachaccounts sind verboten.** Weil Stimmen, Arbeitskraft und Nachfrage an Personen
+hängen, wäre ein zweiter Account sonst schlicht die stärkste Spielstrategie. Das ist eine
+Regel, kein Feature: Sie gehört in die Spielregeln und in die Nutzungsbedingungen,
+durchgesetzt wird sie durch Auffälligkeitsprüfung und Sperre. Praktische Folge fürs
+Projekt: Registrierungs- und Anmeldedaten müssen so protokolliert werden, dass Verdacht
+überhaupt prüfbar ist — und das wiederum gehört in die Datenschutzerklärung.
+
+**NPCs unterliegen denselben Regeln wie Spielercharaktere.** Ein NPC hat kein
+unerschöpfliches Geld: Er arbeitet für Lohn, muss seine Hütte unterhalten und kann
+deshalb schlicht nicht jeden Preis für Brot zahlen. Seine Zahlungsbereitschaft ergibt
+sich aus dem, was nach den Fixkosten übrig ist — ein Getreidemonopol kann die Stadt
+also nicht beliebig auspressen, sondern stößt an echte Budgets. Kein Sonderfall-Code
+für NPCs: dieselben Bedürfnisse, dieselben Kosten, dieselbe Kasse.
+
+**Gehandelt wird zu Festpreisen aus dem Laden heraus.** Der Verkäufer legt den Preis
+fest und stellt die Ware in seinen Betrieb; wer vorbeikommt, kauft oder lässt es. Preise
+bewegen sich, weil Verkäufer sie anpassen — kein Orderbuch, kein Matching.
+
+Ausschlaggebend ist nicht nur das Setting, sondern dass das Spiel asynchron läuft: Bei
+einem Tick-Modell sind selten viele gleichzeitig online, und ein Orderbuch braucht
+Gegenparteien in derselben Stunde. Ein Laden verkauft auch nachts. Nebenbei nutzt das
+die Gebäudemechanik, die es schon gibt — man geht zum Betrieb eines anderen Spielers.
+
+NPCs kaufen nach einer einfachen Regel: das billigste erreichbare Angebot, das ihr
+Budget nach Fixkosten hergibt. Auktionen für Einzelstücke (Grundstücke, Ämter, Erbmasse)
+lassen sich später ergänzen, ohne den Alltagshandel anzufassen.
+
+**Hausbeziehungen entstehen auf zwei Wegen.** Zum einen wachsen sie **natürlich**: Jede
+persönliche Beziehung zwischen Mitgliedern zweier Häuser schiebt deren Verhältnis um
+einen Bruchteil mit. Wo sich über Jahre genug Leute in die Haare geraten, entsteht eine
+Fehde, ohne dass jemand sie ausgerufen hätte.
+
+Zum anderen kann das **Familienoberhaupt — also der Spielercharakter — sie erklären**:
+Fehde ansagen, Frieden schließen, ein Bündnis eingehen. Das ist eine sichtbare,
+öffentliche Handlung mit sofortiger Wirkung auf alle Mitglieder, sie kostet
+Aktionspunkte, und sie ist die eigentliche Außenpolitik einer Dynastie.
+
+Beides zusammen heißt: Ein Haus kann in eine Feindschaft hineinrutschen, ohne sie
+gewollt zu haben — und ein Oberhaupt kann sie beenden oder eskalieren. Genau die
+Dynamik, die verfeindete Adelshäuser interessant macht.
+
+## Zuschnitt: was zuerst gebaut wird
+
+Die Welt ist damit größer, als sie in einem Zug zu bauen wäre. Der Zuschnitt trennt
+deshalb, was von Anfang an im **Datenmodell** stehen muss, von dem, was als **Spielinhalt**
+später dazukommt — das Modell nachträglich umzubauen ist teuer, ein weiterer Ort auf der
+Karte dagegen billig.
+
+Von Anfang an im Modell: `region` mit Entfernungen, `plot` mit Regionsbezug und Typ,
+Stadtkasse, Gebäude ohne privaten Eigentümer. Auch wenn die Welt zunächst nur aus einer
+Stadt und ein paar Umlandflächen besteht — die Struktur muss die zweite Stadt schon
+hergeben.
+
+Als Spielinhalt später: Fernhandel zwischen Städten, Gründung neuer Städte, Erschließung
+neuen Baulands, der volle Katalog öffentlicher Gebäude. Das sind Fernziele für etablierte
+Dynastien und werden erst gebraucht, wenn überhaupt jemand so weit ist.
+
+## Offene Entscheidungen
+
+Sie stehen vollständig in **`OFFENE_PUNKTE.md`**, jeweils mit dem Zeitpunkt, zu dem sie
+spätestens fallen müssen — von der Zeitskala (fällig noch vor Phase 1) über die Folgen
+ungedeckter Bedürfnisse, Krankheiten und Kämpfe bis zu Wahlalter, Steuerarten und den
+Startbedingungen für neue Spieler.
+
+Hier bewusst nicht wiederholt, damit die Listen nicht auseinanderlaufen.
+
+Eine Annahme sei festgehalten, weil sie sonst später als Lücke auffällt: Jeder Charakter
+gehört zu einer Dynastie — auch NPC-Kinder gehören zum Haus ihrer Eltern. Nur
+Fremd-NPCs, die die Welt zum Start bevölkern, stehen ohne Haus da; bei ihnen entfällt
+die mittlere Schicht der Zuneigung.
