@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { sequelize } from '$lib/db/sequelize';
 import '$lib/db/db';
 import { findStartRegionId, seedWorld, WORLD_STARTS_AT_TICK } from '$lib/db/seed';
+import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
@@ -46,8 +47,10 @@ describe('Weltaufbau', () => {
 		const abbau = await Plot.findAll({ where: { type: 'RESOURCE' } });
 
 		expect(bauland).toHaveLength(12);
-		// Noch nie vergeben — wer bauen will, muss erst eines erwerben.
-		expect(bauland.every((p) => p.dataValues.ownerType === 'NONE')).toBe(true);
+		// Zehn nie vergeben — wer bauen will, muss erst eines erwerben. Die zwei übrigen
+		// trägt die Stadt selbst.
+		expect(bauland.filter((p) => p.dataValues.ownerType === 'NONE')).toHaveLength(10);
+		expect(bauland.filter((p) => p.dataValues.ownerType === 'CITY')).toHaveLength(2);
 		// Umland gehört der Stadt und wird verpachtet, nicht verkauft.
 		expect(abbau.every((p) => p.dataValues.ownerType === 'CITY')).toBe(true);
 		expect(abbau.map((p) => p.dataValues.resourceType).sort()).toEqual([
@@ -58,6 +61,18 @@ describe('Weltaufbau', () => {
 			'WOOD',
 			'WOOD'
 		]);
+	});
+
+	it('gibt der Stadt ein Rathaus und einen Betrieb, in dem Neulinge arbeiten können', async () => {
+		const städtisch = await Building.findAll({ where: { ownerType: 'CITY' } });
+
+		expect(städtisch.map((b) => b.dataValues.name).sort()).toEqual([
+			'Rathaus',
+			'Städtische Schmiede'
+		]);
+		// Beide stehen auf einem Grundstück — sie belegen knappen Platz wie jedes andere
+		// Haus auch.
+		expect(städtisch.every((b) => b.dataValues.PlotId !== null)).toBe(true);
 	});
 
 	it('bevölkert die Stadt mit erwachsenen Fremden ohne Haus', async () => {

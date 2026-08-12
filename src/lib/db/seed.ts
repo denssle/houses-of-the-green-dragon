@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
@@ -33,6 +34,20 @@ const UMLAND = [
 /** Die Gassen der Startstadt. Je Eintrag entstehen vier Grundstücke. */
 const GASSEN = ['Am Markt', 'Gerbergasse', 'Töpferweg'] as const;
 
+/**
+ * Was der Stadt von Anfang an gehört.
+ *
+ * Ohne diese beiden Häuser wäre die Welt eine Sackgasse: Wer neu anfängt, hat zehn
+ * Münzen und findet nichts, womit er mehr verdienen könnte — kein Betrieb, keine Arbeit,
+ * kein Grundstück in Reichweite. Das Konzept nennt genau diesen Weg für Neulinge: als
+ * Angestellter anfangen und Geld verdienen. Die städtische Schmiede ist der Anfang davon
+ * (siehe Punkt 14 in `OFFENE_PUNKTE.md`, der die Starthilfe endgültig regelt).
+ */
+const STADTGEBAEUDE = [
+	{ optionId: 0, name: 'Rathaus', adresse: 'Am Markt 1' },
+	{ optionId: 2, name: 'Städtische Schmiede', adresse: 'Am Markt 2' }
+] as const;
+
 /** Fremde NPCs, die die Stadt von Anfang an bevölkern — Kundschaft, Arbeitskraft, Wähler. */
 const BEVOELKERUNG = [
 	{ firstName: 'Alheid', gender: 'FEMALE', age: 52 },
@@ -65,6 +80,22 @@ export async function seedWorld(): Promise<boolean> {
 				RegionId: stadtId
 			});
 		}
+	}
+
+	for (const bauwerk of STADTGEBAEUDE) {
+		const grundstück = await Plot.findOne({ where: { address: bauwerk.adresse } });
+		if (!grundstück) continue;
+		// Das Grundstück gehört der Stadt, nicht niemandem: Es ist vergeben, nur eben an
+		// die Allgemeinheit.
+		await grundstück.update({ ownerType: 'CITY' });
+		await Building.create({
+			id: randomUUID(),
+			name: bauwerk.name,
+			optionId: bauwerk.optionId,
+			lastConditionTick: jetzt,
+			PlotId: grundstück.dataValues.id,
+			ownerType: 'CITY'
+		});
 	}
 
 	for (const ort of UMLAND) {

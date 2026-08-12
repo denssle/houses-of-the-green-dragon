@@ -1,37 +1,42 @@
+import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as buildingService from '$lib/server/service/buildingService';
-import { fail, redirect } from '@sveltejs/kit';
+import * as plotService from '$lib/server/service/plotService';
+import { actionMessage } from '$lib/actionMessage';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+	const character = locals.currentCharacter;
+	const eigene = character ? await plotService.getPlotsOfCharacter(character.id) : [];
 	return {
-		buildingsOptions: buildingService.getBuildingOptions()
+		buildingsOptions: buildingService.getBuildingOptions(),
+		// Nur unbebaute eigene Grundstücke — auf ein besetztes passt kein zweites Haus.
+		freePlots: eigene.filter((plot) => !plot.hasBuilding)
 	};
 };
 
 export const actions = {
 	default: async ({ request, locals }) => {
-		const data = await request.formData();
-		const optionId = Number(data.get('optionId'));
 		const character = locals.currentCharacter;
-
 		if (!character) {
 			return fail(401, { message: 'Kein Charakter, der bauen könnte' });
 		}
+
+		const data = await request.formData();
+		const optionId = Number(data.get('optionId'));
+		const plotId = data.get('plotId')?.toString();
 
 		const option = buildingService.getBuildingOption(optionId);
 		if (!option) {
 			return fail(400, { message: 'Bauoption nicht gefunden' });
 		}
-		// Die Prüfung ist im Prototyp invertiert und das Geld wird nie abgezogen; beides
-		// richtet Phase 3.2 samt Transaktion und Grundstücksprüfung.
-		if (option.price > character.money) {
-			return fail(400, { message: 'Nicht genug Geld' });
-		}
-		if (await buildingService.limitReached(option)) {
-			return fail(400, { message: 'Limit für dieses Gebäude erreicht' });
+		if (!plotId) {
+			return fail(400, { message: 'Wähle zuerst ein Grundstück' });
 		}
 
-		const building = await buildingService.build(option, character.id);
-		redirect(303, `/building/${building.id}`);
+		const ergebnis = await buildingService.build(option, character.id, plotId);
+		if (!ergebnis.ok) {
+			return fail(400, { message: actionMessage(ergebnis.reason) });
+		}
+		redirect(303, `/building/${ergebnis.building.id}`);
 	}
 } satisfies Actions;

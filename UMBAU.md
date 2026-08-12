@@ -387,7 +387,7 @@ _Fertig, wenn:_ Registrieren und Anmelden funktionieren auf dem Server, nicht nu
 Die Gebäude-Aktionen funktionieren derzeit überhaupt nicht. Erst danach lohnt der
 Ausbau in Richtung Konzept.
 
-### 3.1 Form-Actions statt roher `fetch`
+### 3.1 Form-Actions statt roher `fetch` ✓
 
 `building/new/+page.svelte` und `building/[building_id]/+page.svelte` auf
 `<form method="POST" use:enhance>` umstellen. Erst dann kommen `fail()` und `redirect()`
@@ -395,7 +395,12 @@ Ausbau in Richtung Konzept.
 abgewartete `request.text().then(...)` durch `await` ersetzen und das unbedingte
 `error(404)` am Ende entfernen — es wirft heute in jedem Fall, auch im Erfolgsfall.
 
-### 3.2 Bauen korrekt
+_Zum größten Teil schon mit 1.5 erledigt_, als die Routen auf die Services umgestellt
+wurden: Die rohen `fetch`-Aufrufe, das nicht abgewartete `request.text()` und das
+unbedingte `error(404)` sind seitdem weg. Nachgezogen wurde hier nur noch `use:enhance`
+— ohne das lädt jeder Fehlschlag die Seite neu und wirft die Eingaben weg.
+
+### 3.2 Bauen korrekt ✓
 
 Die Preisprüfung ist invertiert (`option.price >= character.money` verbietet den Kauf,
 wenn man genug hat). Geld wird zudem nie abgezogen. Beides in einer **Transaktion**:
@@ -403,17 +408,62 @@ Geld abziehen und Gebäude anlegen, oder keins von beidem. `limitReached()` zäh
 die DB. Dazu kommt die Grundstücksprüfung — gebaut wird auf einem freien eigenen `plot`,
 nicht ins Leere.
 
-### 3.3 Aktionen als reine Logik
+Die Grundstücksprüfung zog eine Lücke nach sich: Alle zwölf Baugrundstücke gehörten
+niemandem, und es gab keinen Weg, eines zu bekommen — die Prüfung hätte also jeden Bau
+abgewiesen. **Der Kauf ist deshalb eine eigene Handlung** (`/plot`), nicht ein
+Nebeneffekt des Bauens: Das Konzept trennt Grundstück und Gebäude ausdrücklich, und 4.5
+braucht den Handel damit ohnehin einzeln. Das Geld geht an die **Stadtkasse** — die Stadt
+gibt den Boden her, und ihre Kasse ist ab 4.7 der politische Hebel.
 
-`WORK`, `SLEEP` und `BECOME_CITIZEN` ausformulieren — die Regeln als reine Funktionen in
-`buildingAction.logic.ts` mit Vitest-Specs, die Persistenz daneben im Service. Das ist
-Festivals `.logic`/`.service`-Trennung und hier besonders wertvoll, weil Spielbalance
-sich ständig ändert und genau diese Regeln testbar bleiben müssen.
+Gesperrt wird die Charakterzeile, und zusätzlich die Grundstückszeile: Die eine Sperre
+verhindert, dass dieselbe Münze zweimal ausgegeben wird, die andere, dass dasselbe
+Grundstück zweimal verkauft wird. Unter SQLite laufen Schreibvorgänge ohnehin
+nacheinander, `lock` wird dort stillschweigend ignoriert — in Produktion wirkt es.
 
-### 3.4 Charakterseite ausbauen
+`limitReached()` zählt **je Stadt**, nicht je Welt: Ein Rathaus gehört in jede Stadt.
+Die Region ergibt sich aus dem Grundstück, auf dem das Gebäude steht.
+
+### 3.3 Aktionen als reine Logik ✓
+
+`WORK` ausformulieren — die Regeln als reine Funktionen in `buildingAction.logic.ts` mit
+Vitest-Specs, die Persistenz daneben im Service. Das ist Festivals `.logic`/`.service`-
+Trennung und hier besonders wertvoll, weil Spielbalance sich ständig ändert und genau
+diese Regeln testbar bleiben müssen.
+
+**`SLEEP` und `BECOME_CITIZEN` sind entfallen.** Beides waren Prototyp-Reste, die dem
+Konzept widersprechen: Aktionspunkte wachsen je Tick von selbst nach, womit Schlafen
+nichts bewirkte, und ein Bürgerrecht kennt das Konzept nicht — jeder Charakter hat eine
+Stimme. Erholung bekommt mit den Bedürfnissen aus 4.6 eine Wirkung; dann kommt sie
+wieder, dann aber mit Folgen.
+
+Der **Lohn steht in der Gebäudevorlage**, nicht als Konstante in der Logik: So zahlt die
+Schmiede mehr als die Kate, und eine Balancing-Änderung gilt sofort für alle Betriebe.
+Ein Anstellungsverhältnis mit Vertrag und Laufzeit kommt erst mit 4.6; bis dahin arbeitet
+man tageweise dort, wo man steht. Die Fehlschläge tragen einen **Code, keinen Satz** — die
+Formulierung steht in `$lib/actionMessage.ts`, sonst wäre sie an jeder Route neu
+ausgeschrieben.
+
+**Der Weltaufbau bekommt zwei städtische Gebäude.** Ohne sie ist die Welt eine Sackgasse:
+Wer neu anfängt, hat zehn Münzen, ein Grundstück kostet vierzig, und es gab keinen
+Betrieb, in dem sich etwas verdienen ließe. Rathaus und städtische Schmiede stehen auf
+regulären Grundstücken und belegen damit knappen Platz wie jedes andere Haus. Die
+endgültige Starthilfe regelt Punkt 14 in `OFFENE_PUNKTE.md`.
+
+_Fertig, wenn:_ Registrieren → arbeiten → Grundstück kaufen → bauen läuft durch. —
+Erledigt und am laufenden Server durchgespielt: Ermenrich verdient sich in 44 Schichten
+132 Münzen, kauft „Am Markt 4“ und stellt sein Wohnhaus darauf.
+
+### 3.4 Charakterseite ausbauen ✓
 
 Energie, Geld, Alter, Wohnort, Arbeitsplatz und Besitz anzeigen statt nur Name und
 Titel.
+
+**Der Arbeitsplatz fehlt mit Absicht:** Ein Anstellungsverhältnis gibt es erst mit 4.6,
+bis dahin ist schlicht nichts anzuzeigen. Dafür steht dort jetzt der Aufenthaltsort, der
+Bestand an Grundstücken und Gebäuden und das Zuhause. Wer sein erstes Wohnhaus baut,
+zieht dabei ein — sonst stünde er mit einem eigenen Haus in der Stadt und trotzdem als
+obdachlos auf seiner Seite; ein Umzug als eigene Handlung lohnt erst, wenn es mehrere
+Häuser zur Wahl gibt.
 
 ## Phase 4 — Konzept umsetzen
 

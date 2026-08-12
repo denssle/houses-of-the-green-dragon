@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
@@ -10,14 +11,29 @@
 	<p><b>{form.message}</b></p>
 {/if}
 
-{#each data.buildingsOptions as building (building.optionId)}
-	<section>
-		<b>{building.initialName}</b>
-		<i>{building.description}</i>
-		<p>{building.price}</p>
-		<form method="POST">
-			<input type="hidden" name="optionId" value={building.optionId} />
-			<button type="submit">Das soll es werden!</button>
-		</form>
-	</section>
-{/each}
+{#if data.freePlots.length === 0}
+	<p>
+		<i>Dir gehört kein freies Grundstück.</i>
+		<a href="/plot" class="link">Erst eines kaufen</a> — gebaut wird nicht ins Leere.
+	</p>
+{:else}
+	{#each data.buildingsOptions as building (building.optionId)}
+		<section>
+			<b>{building.initialName}</b>
+			<i>{building.description}</i>
+			<p>{building.price} Münzen</p>
+			<form method="POST" use:enhance>
+				<input type="hidden" name="optionId" value={building.optionId} />
+				<label>
+					Grundstück
+					<select name="plotId">
+						{#each data.freePlots as plot (plot.id)}
+							<option value={plot.id}>{plot.address}</option>
+						{/each}
+					</select>
+				</label>
+				<button type="submit">Das soll es werden!</button>
+			</form>
+		</section>
+	{/each}
+{/if}

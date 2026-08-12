@@ -1,5 +1,6 @@
 import type { Optional } from 'sequelize';
 import type { RegionType } from '$lib/db/attributes/enums';
+import type { Region } from '$lib/model/region';
 
 /**
  * Ein Ort auf der Karte — eine Stadt oder eine Umlandfläche.
@@ -16,3 +17,12 @@ export interface RegionAttributes {
 }
 
 export type RegionCreationAttributes = Optional<RegionAttributes, 'treasury'>;
+
+export function convertToRegion(attributes: RegionAttributes): Region {
+	return {
+		id: attributes.id,
+		name: attributes.name,
+		type: attributes.type,
+		treasury: attributes.treasury
+	};
+}

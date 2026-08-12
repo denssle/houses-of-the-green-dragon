@@ -113,6 +113,12 @@ vorbehalten sein kann.
 
 Ohne Antwort hat das Spiel ein Zeitfenster, nach dem es für Neue unspielbar wird.
 
+**Vorläufig entschieden (Phase 3.3):** Die Startstadt hat eine **städtische Schmiede**, in
+der jeder arbeiten kann. Damit ist der Grundweg wenigstens begehbar — 44 Schichten
+reichen für ein Grundstück und ein Wohnhaus. Das ersetzt die Antwort nicht: Sobald es
+Anstellungsverhältnisse (4.6) und eine echte Bevölkerungsdynamik gibt, muss geklärt sein,
+ob dieser Betrieb bleibt, wem er gehört und was ein Neuling sonst noch mitbekommt.
+
 ## Laufend
 
 ### 15. Weltinhalte

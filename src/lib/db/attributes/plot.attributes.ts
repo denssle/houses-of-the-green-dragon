@@ -1,5 +1,6 @@
 import type { Optional } from 'sequelize';
 import type { OwnerType, PlotType, ResourceType } from '$lib/db/attributes/enums';
+import type { Plot } from '$lib/model/plot';
 
 /**
  * Ein Grundstück — Bauland in der Stadt oder Abbaufläche im Umland.
@@ -27,3 +28,16 @@ export type PlotCreationAttributes = Optional<
 	PlotAttributes,
 	'resourceType' | 'ownerType' | 'OwnerCharacterId' | 'forSalePrice'
 >;
+
+export function convertToPlot(attributes: PlotAttributes): Plot {
+	return {
+		id: attributes.id,
+		address: attributes.address,
+		type: attributes.type,
+		resourceType: attributes.resourceType,
+		regionId: attributes.RegionId,
+		ownerType: attributes.ownerType,
+		ownerCharacterId: attributes.OwnerCharacterId,
+		forSalePrice: attributes.forSalePrice
+	};
+}
