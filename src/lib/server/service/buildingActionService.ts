@@ -1,7 +1,10 @@
 import type { BuildingAction } from '$lib/model/buildingAction';
 import * as characterService from '$lib/server/service/characterService';
 
-export function doBuildingAction(action: BuildingAction, charakterId: number): { success: boolean } {
+export function doBuildingAction(
+	action: BuildingAction,
+	charakterId: number
+): { success: boolean } {
 	const character = characterService.getCharacter(charakterId);
 	if (!character) {
 		return { success: false };

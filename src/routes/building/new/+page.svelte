@@ -6,10 +6,10 @@
 
 	function build(building: BuildingTemplate) {
 		fetch('/building/new', { method: 'POST', body: JSON.stringify(building) })
-			.then(value => {
+			.then((value) => {
 				console.log('new one ', value);
 			})
-			.catch(reason => {
+			.catch((reason) => {
 				console.error(reason);
 			});
 	}

@@ -44,9 +44,9 @@ export function getCharacterForUser(id: bigint): Character | undefined {
 }
 
 export function getCharacter(id: bigint) {
-	return characters.find(value => value.id === id);
+	return characters.find((value) => value.id === id);
 }
 
 export function update(character: Character) {
-	characters[characters.findIndex(value => value.id === character.id)] = character;
+	characters[characters.findIndex((value) => value.id === character.id)] = character;
 }

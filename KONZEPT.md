@@ -55,7 +55,7 @@ und Wähler. Die Einwohnerzahl ist damit ein Ergebnis des Spiels, keine gesetzte
 
 ### 2. Die Welt: Karte, Städte und Umland
 
-Das Spiel spielt nicht in *einer* Stadt, sondern in einer **Landschaft**. Eine Stadt hat
+Das Spiel spielt nicht in _einer_ Stadt, sondern in einer **Landschaft**. Eine Stadt hat
 ein Umland, und irgendwo dahinter liegt die nächste.
 
 Das folgt zwingend aus der Knappheit des Baulands: Wenn alle Grundstücke vergeben sind,
@@ -325,15 +325,15 @@ klicken.
 **Die Zeitskala: ein Tick ist eine Stunde, ein Spieljahr zwei Tage.** Daraus ergibt sich
 alles Weitere:
 
-| Größe | Wert |
-| --- | --- |
-| 1 Tick | 1 Stunde Echtzeit |
-| 1 Spieljahr | 48 Ticks = 2 Realtage |
-| Lebenserwartung (~70 Jahre) | ~3360 Ticks = gut 4 Monate |
-| Volljährigkeit (16 Jahre) | nach 32 Realtagen |
-| Aktionspunkte | 1 je Tick, Deckel 48 (zwei Tage Vorrat) |
-| Wahlperiode (5 Jahre) | 10 Realtage |
-| Verfall bis zur Ruine (~25 Jahre) | 50 Realtage, Warnung ab der Hälfte |
+| Größe                             | Wert                                    |
+| --------------------------------- | --------------------------------------- |
+| 1 Tick                            | 1 Stunde Echtzeit                       |
+| 1 Spieljahr                       | 48 Ticks = 2 Realtage                   |
+| Lebenserwartung (~70 Jahre)       | ~3360 Ticks = gut 4 Monate              |
+| Volljährigkeit (16 Jahre)         | nach 32 Realtagen                       |
+| Aktionspunkte                     | 1 je Tick, Deckel 48 (zwei Tage Vorrat) |
+| Wahlperiode (5 Jahre)             | 10 Realtage                             |
+| Verfall bis zur Ruine (~25 Jahre) | 50 Realtage, Warnung ab der Hälfte      |
 
 Der Stundentakt macht die Aktionspunkte unmittelbar verständlich — einer pro Stunde — und
 der Deckel von 48 entspricht genau den zwei Tagen Abwesenheit, die niemanden abhängen

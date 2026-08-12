@@ -61,11 +61,11 @@ export function getBuildingOptions(): BuildingTemplate[] {
 }
 
 export function getBuildingOption(optionId: number): BuildingTemplate | undefined {
-	return getBuildingOptions().find(value => value.optionId === optionId);
+	return getBuildingOptions().find((value) => value.optionId === optionId);
 }
 
 export function limitReached(option: BuildingTemplate): boolean {
-	return buildings.filter(value => value.optionId === option.optionId).length >= option.limitedTo;
+	return buildings.filter((value) => value.optionId === option.optionId).length >= option.limitedTo;
 }
 
 export function build(option: BuildingTemplate, userId: bigint) {
@@ -81,7 +81,7 @@ export function build(option: BuildingTemplate, userId: bigint) {
 }
 
 export function getBuilding(id: bigint): Building | undefined {
-	return buildings.find(value => value.id === id);
+	return buildings.find((value) => value.id === id);
 }
 
 export function getBuildings(): Building[] {

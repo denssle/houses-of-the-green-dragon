@@ -28,7 +28,7 @@ export function getUserForNickAndPW(nicknameS: string, passwordS: string): User 
 }
 
 export function userExists(currentUser: User | null): boolean {
-	return Boolean(currentUser?.id && backendUsers.find(value => value.id === currentUser.id));
+	return Boolean(currentUser?.id && backendUsers.find((value) => value.id === currentUser.id));
 }
 
 export function extractUser(sessionCookie: string | undefined): User | null {
@@ -90,5 +90,5 @@ export function logout(locals: App.Locals, cookies: Cookies) {
 }
 
 export function getUser(userId: bigint) {
-	return mapBackendUserToUser(backendUsers.find(value => value.id === userId));
+	return mapBackendUserToUser(backendUsers.find((value) => value.id === userId));
 }

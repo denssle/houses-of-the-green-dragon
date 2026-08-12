@@ -4,22 +4,22 @@ Alles, was noch entschieden oder entworfen werden muss, mit dem Zeitpunkt, zu de
 spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 `UMBAU.md`.
 
-| # | Punkt | Fällig vor | Art |
-| --- | --- | --- | --- |
-| 3 | Tick-Nachholen nach Serverausfall: nachrechnen oder überspringen | 4.1 | Entscheidung |
-| 4 | Folgen ungedeckter Bedürfnisse | 4.6 | Entscheidung |
-| 5 | Krankheiten: Ursachen, Verlauf, Heilung | 4.6 | Entwurf |
-| 6 | Kämpfe und Verletzungen | 4.6 | Entwurf |
-| 7 | Verhaltensregeln der NPCs | 4.4 / 4.6 | Entwurf |
-| 8 | Pachtvertrag beim Tod des Pächters | 4.6 | Entscheidung |
-| 9 | Wahlalter | 4.7 | Entscheidung |
-| 10 | Amtsnachfolge beim Tod des Amtsinhabers | 4.7 | Entscheidung |
-| 11 | Steuerarten | 4.7 | Entscheidung |
-| 12 | Katalog öffentlicher Gebäude, davon welche ein Grundstück belegen | 4.7 | Entwurf |
-| 13 | Verfahren zur Erschließung neuen Baulands | 4.9 | Entscheidung |
-| 14 | Startbedingungen für neue Spieler | erster öffentlicher Betrieb | Entscheidung |
-| 15 | Weltinhalte: Orts-, Waren- und Gebäudekatalog | laufend | Entwurf |
-| 16 | Balancing im engeren Sinn | laufend | laufend |
+| #   | Punkt                                                             | Fällig vor                  | Art          |
+| --- | ----------------------------------------------------------------- | --------------------------- | ------------ |
+| 3   | Tick-Nachholen nach Serverausfall: nachrechnen oder überspringen  | 4.1                         | Entscheidung |
+| 4   | Folgen ungedeckter Bedürfnisse                                    | 4.6                         | Entscheidung |
+| 5   | Krankheiten: Ursachen, Verlauf, Heilung                           | 4.6                         | Entwurf      |
+| 6   | Kämpfe und Verletzungen                                           | 4.6                         | Entwurf      |
+| 7   | Verhaltensregeln der NPCs                                         | 4.4 / 4.6                   | Entwurf      |
+| 8   | Pachtvertrag beim Tod des Pächters                                | 4.6                         | Entscheidung |
+| 9   | Wahlalter                                                         | 4.7                         | Entscheidung |
+| 10  | Amtsnachfolge beim Tod des Amtsinhabers                           | 4.7                         | Entscheidung |
+| 11  | Steuerarten                                                       | 4.7                         | Entscheidung |
+| 12  | Katalog öffentlicher Gebäude, davon welche ein Grundstück belegen | 4.7                         | Entwurf      |
+| 13  | Verfahren zur Erschließung neuen Baulands                         | 4.9                         | Entscheidung |
+| 14  | Startbedingungen für neue Spieler                                 | erster öffentlicher Betrieb | Entscheidung |
+| 15  | Weltinhalte: Orts-, Waren- und Gebäudekatalog                     | laufend                     | Entwurf      |
+| 16  | Balancing im engeren Sinn                                         | laufend                     | laufend      |
 
 Nichts steht mehr vor Phase 1: **Zeitskala** (1 Tick = 1 Stunde, 48 Ticks = 1 Spieljahr)
 und **URL-Struktur** (Unterpfad mit `paths.base`, wie bei Festival) sind entschieden und
