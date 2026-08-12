@@ -356,6 +356,26 @@ laufenden Takt, der auch dann arbeitet, wenn niemand angemeldet ist. Ein NPC, de
 anschaut, muss trotzdem Brot kaufen; sonst bricht die Nachfrage weg, auf der die
 Wirtschaft steht.
 
+**War der Server aus, wird die verpasste Zeit übersprungen, nicht nachgerechnet.** Die
+Weltuhr springt auf die Echtzeit vor — sonst drifteten Spielzeit und Kalender mit jedem
+Ausfall weiter auseinander —, aber niemand bekommt etwas für sie: Kein Aktionspunkt
+wächst nach, kein Gebäude verfällt, kein NPC handelt. Die Ausfallzeit hat für alles
+Handelnde schlicht nicht stattgefunden.
+
+Zweierlei folgt daraus, was leicht zu verwechseln ist. Erstens ist das etwas anderes, als
+den Rückstand aller einzukassieren: Wer zwei Tage nicht hereingeschaut hat, während der
+Server lief, hat seine Aktionspunkte rechtmäßig angesammelt und behält sie — verschoben
+wird nur **um** die Ausfallzeit, nicht **auf** die neue Weltzeit. Zweitens altert man
+trotzdem: Das Alter hängt am Geburts-Tick und damit an der Uhr. Ein Charakter, dessen
+Alter beim Ausfall stehenbliebe, machte die Generationenfolge von der
+Serververfügbarkeit abhängig.
+
+Dass übersprungen und nicht nachgerechnet wird, ist die billigere Wahl — ein
+Bulk-Update, gleich teuer für eine Stunde wie für eine Woche, ohne Schleife und ohne
+Deckelung. Sie ist auch die ehrlichere: Eine Welt, die nach dem Neustart drei Tage in
+Zeitraffer abarbeitet, träfe Entscheidungen für Spieler, die dabei nicht zusehen
+konnten.
+
 **Tod ohne Erben: Die Dynastie erlischt.** Stirbt der Spielercharakter kinderlos, ist
 das Haus am Ende; der Spieler beginnt mit einer neuen Dynastie bei null, sein Besitz
 fällt an die Stadt. Harter Schnitt, maximaler Druck auf die Fortpflanzung — sie ist damit

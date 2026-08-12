@@ -1,9 +1,10 @@
 import { type Transaction } from 'sequelize';
 import type { BuildingAction } from '$lib/model/buildingAction';
 import { sequelize } from '$lib/db/sequelize';
-import { Character as CharacterModel } from '$lib/db/model/character';
 import { work, type ActionFailureReason } from '$lib/game/buildingAction.logic';
 import * as buildingService from '$lib/server/service/buildingService';
+import * as characterService from '$lib/server/service/characterService';
+import * as worldService from '$lib/server/service/worldService';
 
 /**
  * Die Gebäudehandlungen: Regeln in `buildingAction.logic.ts`, Persistenz hier.
@@ -36,11 +37,12 @@ async function arbeiten(characterId: string, buildingId: string): Promise<Action
 		return { ok: false, reason: 'NOT_A_WORKPLACE' };
 	}
 
+	const tick = await worldService.currentTick();
+
 	return sequelize.transaction(async (t: Transaction) => {
-		const arbeiter = await CharacterModel.findByPk(characterId, {
-			transaction: t,
-			lock: t.LOCK.UPDATE
-		});
+		// Erst nachwachsen lassen, dann abrechnen: Sonst ginge eine Schicht gegen den
+		// Stand von gestern, und wer lange nicht da war, könnte gar nicht arbeiten.
+		const arbeiter = await characterService.loadForAction(characterId, tick, t);
 		if (!arbeiter) return { ok: false, reason: 'NOT_A_WORKPLACE' } as const;
 
 		const ergebnis = work(

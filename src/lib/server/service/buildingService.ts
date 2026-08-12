@@ -4,10 +4,10 @@ import type { Building } from '$lib/model/building';
 import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 import { sequelize } from '$lib/db/sequelize';
 import { Building as BuildingModel } from '$lib/db/model/building';
-import { Character as CharacterModel } from '$lib/db/model/character';
 import { Plot as PlotModel } from '$lib/db/model/plot';
 import { convertToBuilding } from '$lib/db/attributes/building.attributes';
 import { build as buildLogic, type ActionFailureReason } from '$lib/game/buildingAction.logic';
+import * as characterService from '$lib/server/service/characterService';
 import * as worldService from '$lib/server/service/worldService';
 
 /**
@@ -93,11 +93,10 @@ export async function build(
 	characterId: string,
 	plotId: string
 ): Promise<BuildResult> {
+	const tick = await worldService.currentTick();
+
 	return sequelize.transaction(async (t: Transaction) => {
-		const bauherr = await CharacterModel.findByPk(characterId, {
-			transaction: t,
-			lock: t.LOCK.UPDATE
-		});
+		const bauherr = await characterService.loadForAction(characterId, tick, t);
 		if (!bauherr) return { ok: false, reason: 'PLOT_NOT_OWNED' } as const;
 
 		const grundstück = await PlotModel.findByPk(plotId, { transaction: t, lock: t.LOCK.UPDATE });
@@ -123,7 +122,7 @@ export async function build(
 				id: randomUUID(),
 				name: option.initialName,
 				optionId: option.optionId,
-				lastConditionTick: await worldService.currentTick(),
+				lastConditionTick: tick,
 				PlotId: plotId,
 				ownerType: 'CHARACTER',
 				OwnerCharacterId: characterId

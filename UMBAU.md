@@ -469,7 +469,7 @@ Häuser zur Wahl gibt.
 
 Ab hier wird gebaut, nicht repariert. Inhaltliche Grundlage: `KONZEPT.md`.
 
-**4.1 Zeit.** Zwei Teile, die man auseinanderhalten muss.
+**4.1 Zeit.** ✓ Zwei Teile, die man auseinanderhalten muss.
 
 _Die Rechnung:_ `tick.logic.ts` als reine Funktion — aus `world.currentTick` und
 `character.lastTickProcessed` ergibt sich, wie viele Aktionspunkte nachwachsen
@@ -480,14 +480,39 @@ _Der Takt:_ Ein Prozess, der `world.currentTick` hochzählt, auch wenn niemand a
 ist — die Welt läuft weiter (siehe `KONZEPT.md`). Auf einem Uberspace mit einem einzigen
 Node-Prozess ist ein Intervall im Server der einfachste Weg; ein Cron gegen einen
 geschützten Endpunkt wäre die robustere Variante, weil er einen hängenden Prozess
-sichtbar macht. Zwei Dinge muss er können: **nachholen**, wenn der Server eine Weile aus
-war (aus `lastTickAt` ergibt sich, wie viele Ticks fehlen), und dabei **deckeln**, damit
-ein dreitägiger Ausfall nicht tausende Ticks in einer Schleife abarbeitet. Was beim
-Nachholen tatsächlich passieren soll — alles nachrechnen oder stillschweigend
-überspringen — ist eine Entscheidung, die hier fällt.
+sichtbar macht. **Entschieden für das Intervall** — der Cron lohnt sich, sobald ein
+stehengebliebener Takt jemandem auffiele. Nachgesehen wird jede Minute, weitergestellt
+stündlich.
+
+**Verpasste Ticks werden übersprungen** (die Entscheidung aus Punkt 3 der offenen Punkte,
+jetzt in `KONZEPT.md`). Damit fällt die geplante Deckelung ersatzlos weg: Es gibt keine
+Schleife über die fehlenden Ticks, sondern ein Bulk-Update — gleich teuer für eine Stunde
+wie für eine Woche.
+
+Drei Dinge, die sich erst beim Bauen zeigten:
+
+- **Verschoben wird _um_ die Ausfallzeit, nicht _auf_ die neue Weltzeit.** Der erste Wurf
+  setzte `lastTickProcessed` für alle auf den neuen Tick — und hätte damit auch das
+  Aktionsbudget einkassiert, das jemand rechtmäßig angesammelt hat, während der Server
+  lief. Richtig ist ein `increment` um die Zahl der verpassten Ticks. Dasselbe gilt für
+  `lastConditionTick`: Ein Ausfall darf keine Häuser verfallen lassen.
+- **Der Ankerpunkt wandert um volle Ticks, nicht auf „jetzt“.** Sonst ginge bei jedem
+  Durchlauf der angebrochene Rest verloren und die Weltzeit bliebe langsam, aber stetig
+  hinter der Echtzeit zurück. Ein Test lässt den Takt deshalb im 40-Minuten-Rhythmus über
+  einen Tag laufen und besteht auf genau 24 Ticks.
+- **Das Nachwachsen muss auch _innerhalb_ der Handlungs-Transaktionen greifen**, nicht nur
+  beim Anzeigen. Sonst rechnet eine Schicht gegen den Stand von gestern, und wer lange
+  nicht da war, könnte trotz vollem Vorrat nicht arbeiten. `characterService.loadForAction()`
+  ist deshalb der gemeinsame Einstieg für alles, was Ressourcen verbraucht: erst sperren,
+  dann nachwachsen, dann abrechnen.
 
 Ab diesem Takt hängen später auch NPC-Handeln (4.6), Ereignisse (4.8) und das Ende von
 Wahlperioden (4.7) — alles, was passieren muss, ohne dass jemand hinschaut.
+
+_Fertig, wenn:_ Die Uhr läuft ohne Zutun weiter und ein Ausfall verschenkt nichts. —
+Erledigt und am laufenden Server nachgestellt: Weltuhr um drei Stunden zurückdatiert,
+Server gestartet, Uhr springt um drei Ticks (zwei davon verpasst), der Ankerpunkt wandert
+exakt drei Stunden, und der Charakter mit zehn Ticks rechtmäßigem Rückstand behält sie.
 
 **4.2 Lebenszyklus.** Alterung aus `birthTick`, Sterbewahrscheinlichkeit, Tod des
 Spielercharakters, **Erbenwahl durch den Spieler** unter den eigenen Kindern, gesetzlicher

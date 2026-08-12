@@ -6,7 +6,6 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 
 | #   | Punkt                                                             | Fällig vor                  | Art          |
 | --- | ----------------------------------------------------------------- | --------------------------- | ------------ |
-| 3   | Tick-Nachholen nach Serverausfall: nachrechnen oder überspringen  | 4.1                         | Entscheidung |
 | 4   | Folgen ungedeckter Bedürfnisse                                    | 4.6                         | Entscheidung |
 | 5   | Krankheiten: Ursachen, Verlauf, Heilung                           | 4.6                         | Entwurf      |
 | 6   | Kämpfe und Verletzungen                                           | 4.6                         | Entwurf      |
@@ -21,20 +20,13 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 15  | Weltinhalte: Orts-, Waren- und Gebäudekatalog                     | laufend                     | Entwurf      |
 | 16  | Balancing im engeren Sinn                                         | laufend                     | laufend      |
 
-Nichts steht mehr vor Phase 1: **Zeitskala** (1 Tick = 1 Stunde, 48 Ticks = 1 Spieljahr)
-und **URL-Struktur** (Unterpfad mit `paths.base`, wie bei Festival) sind entschieden und
-in `KONZEPT.md` beziehungsweise `UMBAU.md` festgehalten. Die Umsetzung kann beginnen.
+Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 48 Ticks =
+1 Spieljahr), **URL-Struktur** (Unterpfad mit `paths.base`, wie bei Festival) und mit
+Phase 4.1 das **Tick-Nachholen** — verpasste Ticks werden übersprungen, die Weltuhr
+springt trotzdem vor, und niemand bekommt etwas für die Ausfallzeit. Alles drei steht in
+`KONZEPT.md` beziehungsweise `UMBAU.md`.
 
 ## Vor Phase 4
-
-### 3. Tick-Nachholen
-
-War der Server eine Weile aus, fehlen Ticks. Werden sie **nachgerechnet** (die Welt holt
-auf: NPCs handeln, Ereignisse treten ein, Charaktere altern) oder **übersprungen** (die
-Zeit springt, nichts passiert dazwischen)? Nachrechnen ist stimmiger und teurer,
-Überspringen billiger und ungerecht gegenüber dem, der gerade produzierte. In jedem Fall
-braucht es eine Deckelung, damit ein dreitägiger Ausfall nicht tausende Ticks in einer
-Schleife abarbeitet.
 
 ### 4. Folgen ungedeckter Bedürfnisse
 

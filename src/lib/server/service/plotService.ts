@@ -1,13 +1,14 @@
 import { Op, type Transaction } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 import { Building as BuildingModel } from '$lib/db/model/building';
-import { Character as CharacterModel } from '$lib/db/model/character';
 import { Plot as PlotModel } from '$lib/db/model/plot';
 import { Region as RegionModel } from '$lib/db/model/region';
 import type { Plot } from '$lib/model/plot';
 import { convertToPlot } from '$lib/db/attributes/plot.attributes';
 import { buyPlot as buyPlotLogic, type ActionFailureReason } from '$lib/game/buildingAction.logic';
 import { PLOT_PRICE } from '$lib/game/economy';
+import * as characterService from '$lib/server/service/characterService';
+import * as worldService from '$lib/server/service/worldService';
 
 /** Was von einem Grundstück auf einer Liste steht. */
 export interface PlotOnList extends Plot {
@@ -59,11 +60,10 @@ export type BuyResult = { ok: true; plot: Plot } | { ok: false; reason: ActionFa
  * SQLite laufen Schreibvorgänge ohnehin nacheinander, die Sperren wirken in Produktion.
  */
 export async function buyPlot(plotId: string, characterId: string): Promise<BuyResult> {
+	const tick = await worldService.currentTick();
+
 	return sequelize.transaction(async (t: Transaction) => {
-		const käufer = await CharacterModel.findByPk(characterId, {
-			transaction: t,
-			lock: t.LOCK.UPDATE
-		});
+		const käufer = await characterService.loadForAction(characterId, tick, t);
 		if (!käufer) return { ok: false, reason: 'PLOT_NOT_OWNED' } as const;
 
 		const grundstück = await PlotModel.findByPk(plotId, { transaction: t, lock: t.LOCK.UPDATE });

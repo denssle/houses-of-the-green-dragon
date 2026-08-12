@@ -14,6 +14,9 @@
 /** Wie viel Echtzeit ein Tick umfasst. */
 export const HOURS_PER_TICK = 1;
 
+/** Dasselbe in Millisekunden — das Maß, in dem der Takt rechnet. */
+export const MS_PER_TICK = HOURS_PER_TICK * 60 * 60 * 1000;
+
 /** Ein Spieljahr in Ticks. 48 Ticks = 2 Realtage. */
 export const TICKS_PER_YEAR = 48;
 
