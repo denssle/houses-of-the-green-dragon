@@ -58,14 +58,29 @@ wie bei Festival. Danach: keine Lücken mehr.
 
 _Fertig, wenn:_ `npm run test:unit` grün ist. — Erledigt, zwei Tests laufen.
 
-### 1.2 `src/lib/db/sequelize.ts`
+### 1.2 `src/lib/db/sequelize.ts` ✓
 
-Von Festival übernehmen: `isTestOrLocal`-Weiche und `assertDatabaseCredentials()` als
-**Funktion**, nicht als Prüfung auf Modulebene — `vite build` importiert die
-Servermodule in seiner Analysephase, ein Fehler beim Import bräche sonst schon den
-Build in der CI ab, die die Zugangsdaten gar nicht kennt.
+Von Festival übernommen: die Weiche zwischen den Betriebsarten und
+`assertDatabaseCredentials()` als **Funktion**, nicht als Prüfung auf Modulebene — `vite
+build` importiert die Servermodule in seiner Analysephase, ein Fehler beim Import bräche
+sonst schon den Build in der CI ab, die die Zugangsdaten gar nicht kennt.
 
-_Fertig, wenn:_ Der Import in einem Test gegen `:memory:` verbindet.
+**Abweichend von Festival drei statt zwei Betriebsarten.** Dort teilt sich die Welt in
+„Test oder lokal“ (SQLite im Arbeitsspeicher) und Produktion. Hier ist der lokale Fall
+ein eigener und schreibt in eine **Datei** unter `.data/dev.sqlite`: Dies ist ein Spiel
+mit gewachsener Welt — wer lokal eine Stadt aufbaut, Charaktere altern lässt und dann den
+Server neu startet, will sie wiederfinden. Nur der Testlauf beginnt bei null.
+
+Die Entscheidung für den lokalen Modus verlangt ein ausdrückliches `MARIA_DB_NAME=dev`
+und ergibt sich **nicht** daraus, dass Zugangsdaten fehlen. Sonst liefe eine Produktion
+mit nicht geladener `.env` scheinbar erfolgreich an und schriebe die Welt in eine Datei,
+die das nächste Deploy mitnimmt. Fehlende Zugangsdaten müssen laut sein, nicht bequem.
+
+Dazu `.env.example` als Vorlage und `/.data/` in der `.gitignore`.
+
+_Fertig, wenn:_ Der Import in einem Test gegen `:memory:` verbindet. — Erledigt; die
+Weiche ist für alle drei Betriebsarten getestet, ebenso die Fehlermeldung bei fehlenden
+Zugangsdaten. Der Rauchtest aus 1.1 ist damit abgelöst und entfernt.
 
 ### 1.3 Attribute und Modelle
 
