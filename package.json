@@ -12,7 +12,11 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"audit fix": "npm audit fix"
+		"test:unit": "vitest"
+	},
+	"overrides": {
+		"cookie": "^0.7.0",
+		"uuid": "^11.1.1"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
@@ -28,11 +32,19 @@
 		"globals": "^16.0.0",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
+		"sqlite3": "^6.0.1",
 		"svelte": "^5.23.1",
 		"svelte-check": "^4.1.5",
 		"tailwindcss": "^4.0.14",
 		"typescript": "^5.8.2",
 		"typescript-eslint": "^8.20.0",
-		"vite": "^6.2.2"
+		"vite": "^6.2.2",
+		"vitest": "^4.1.10"
+	},
+	"dependencies": {
+		"bcrypt-ts": "^9.0.2",
+		"mariadb": "^3.5.3",
+		"sequelize": "^6.37.8",
+		"umzug": "^3.8.3"
 	}
 }

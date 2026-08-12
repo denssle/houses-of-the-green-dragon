@@ -32,7 +32,7 @@ Tests mit Vitest und Playwright — dieselbe Architektur wie im Nachbarprojekt `
 
 ## Entwicklung
 
-Voraussetzung ist Node 22.
+Voraussetzung ist Node 22 oder neuer.
 
 ```bash
 npm install
@@ -42,12 +42,16 @@ npm run dev
 Weitere Skripte:
 
 ```bash
+npm run test:unit # Tests (Vitest, alle src/**/*.spec.ts)
 npm run build     # Produktionsbuild
 npm run preview   # Produktionsbuild lokal ansehen
 npm run check     # Typprüfung (svelte-check)
 npm run lint      # Prettier und ESLint prüfen
 npm run format    # Formatierung schreiben
 ```
+
+`npm run check` meldet derzeit sieben Fehler. Sie stammen alle aus dem `bigint`-Problem
+des Prototyps und verschwinden mit Phase 1.3 des Umbaus.
 
 Die Anwendung läuft später unter einem Unterpfad (`paths.base`), ausgeliefert auf einen
 Uberspace über GitHub Actions.

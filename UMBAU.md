@@ -28,23 +28,35 @@ entschieden ist, sammelt `OFFENE_PUNKTE.md`.
 - **Das Schema wächst mit den Phasen.** Phase 1 legt das Fundament, aber 4.6 bis 4.9
   bringen eigene Tabellen (`item`, `employment`, `lease`, `office`, `shipment`, `event`)
   und damit eigene Migrationen. Das ist der Normalfall, kein Planungsfehler — nur die
-  *Struktur* (Karte, Grundstücke, Dynastie, Rollen) muss von Anfang an stehen, weil sie
+  _Struktur_ (Karte, Grundstücke, Dynastie, Rollen) muss von Anfang an stehen, weil sie
   sich quer durch alle Abfragen zieht.
 
 ## Phase 1 — Fundament: Persistenz
 
 Das ist der eigentliche Blocker. Solange er steht, ist jede Spiellogik auf Sand gebaut.
 
-### 1.1 Abhängigkeiten und Konfiguration
+### 1.1 Abhängigkeiten und Konfiguration ✓
 
 ```
 npm i sequelize mariadb umzug bcrypt-ts
 npm i -D vitest sqlite3
 ```
 
-Dazu `vitest.config.ts` und `"test:unit": "vitest"` in der `package.json`.
+Dazu `vitest.config.ts` (mit dem `sveltekit()`-Plugin, sonst lassen sich `$lib`-Importe
+in Tests nicht auflösen) und `"test:unit": "vitest"` in der `package.json`.
 
-*Fertig, wenn:* `npm run test:unit` mit einem Dummy-Test grün ist.
+Der erste Test ist bewusst kein Platzhalter, sondern ein Rauchtest der Werkzeugkette:
+Verbindung zu In-Memory-SQLite, Tabelle anlegen, schreiben, lesen. `sqlite3` ist ein
+natives Modul und damit die Stelle, an der ein Setup unter Windows scheitert — ohne
+diesen Test fiele das erst in 1.2 auf, vermischt mit echten Modellfehlern.
+
+**Dabei mit erledigt:** Der Bestand hatte 19 gemeldete Sicherheitslücken, darunter eine
+XSS-Lücke in `@sveltejs/kit ≤ 2.70.2` — also im Framework, das die App ausliefert, nicht
+bloß im Werkzeug. `npm audit fix` (ohne `--force`) räumt das im Rahmen der Semver-Bereiche
+ab; die letzten Meldungen zu `cookie` und `uuid` verschwinden über einen `overrides`-Block
+wie bei Festival. Danach: keine Lücken mehr.
+
+_Fertig, wenn:_ `npm run test:unit` grün ist. — Erledigt, zwei Tests laufen.
 
 ### 1.2 `src/lib/db/sequelize.ts`
 
@@ -53,7 +65,7 @@ Von Festival übernehmen: `isTestOrLocal`-Weiche und `assertDatabaseCredentials(
 Servermodule in seiner Analysephase, ein Fehler beim Import bräche sonst schon den
 Build in der CI ab, die die Zugangsdaten gar nicht kennt.
 
-*Fertig, wenn:* Der Import in einem Test gegen `:memory:` verbindet.
+_Fertig, wenn:_ Der Import in einem Test gegen `:memory:` verbindet.
 
 ### 1.3 Attribute und Modelle
 
@@ -61,19 +73,19 @@ Build in der CI ab, die die Zugangsdaten gar nicht kennt.
 `src/lib/db/model/*.ts`. Das Schema bildet die Dynastie-Mechanik aus `KONZEPT.md` von
 Anfang an ab — sie nachträglich einzuziehen, hieße jede Tabelle noch einmal anzufassen.
 
-| Modell | Felder | Beziehungen |
-| --- | --- | --- |
-| `user` | id (UUID, PK), nickname (**unique**), email, password | hasOne sessionToken, **hasMany** dynasty |
-| `sessionToken` | UserId (PK), token | belongsTo user |
-| `dynasty` | id, name, UserId, isExtinct, foundedAtTick, extinctAtTick | belongsTo user, hasMany character |
-| `character` | id, firstName, title, role (`PLAYER`, `NPC`), actionPoints, lastTickProcessed, money, birthTick, deathTick, gender, RegionId, DynastyId (nullbar), motherId, fatherId, spouseId, HomeBuildingId | belongsTo dynasty, region und building (Wohnen), self-referencing Eltern und Ehe |
-| `relationship` | fromCharacterId, toCharacterId (zusammen PK), affection, lastChangedTick | zweimal belongsTo character |
-| `dynastyRelationship` | fromDynastyId, toDynastyId (zusammen PK), standing, lastChangedTick | zweimal belongsTo dynasty |
-| `region` | id, name, type (`CITY`, `FOREST`, `QUARRY`, `FIELD`, `MINE`), treasury (nur Städte) | hasMany plot, hasMany character |
-| `regionLink` | fromRegionId, toRegionId (zusammen PK), distanceInTicks | zweimal belongsTo region |
-| `plot` | id, address, type (`BUILDING_LAND`, `RESOURCE`), resourceType, RegionId, ownerType (`CHARACTER`, `CITY`, `NONE`), OwnerCharacterId (nullbar), forSalePrice (nullbar) | belongsTo region und character, hasOne building |
-| `building` | id, name, optionId, level, condition, lastConditionTick, PlotId (nullbar), ownerType (`CHARACTER`, `CITY`), OwnerCharacterId (nullbar), forSalePrice (nullbar) | belongsTo plot und character |
-| `world` | id (immer 1), currentTick, lastTickAt | — |
+| Modell                | Felder                                                                                                                                                                                          | Beziehungen                                                                      |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `user`                | id (UUID, PK), nickname (**unique**), email, password                                                                                                                                           | hasOne sessionToken, **hasMany** dynasty                                         |
+| `sessionToken`        | UserId (PK), token                                                                                                                                                                              | belongsTo user                                                                   |
+| `dynasty`             | id, name, UserId, isExtinct, foundedAtTick, extinctAtTick                                                                                                                                       | belongsTo user, hasMany character                                                |
+| `character`           | id, firstName, title, role (`PLAYER`, `NPC`), actionPoints, lastTickProcessed, money, birthTick, deathTick, gender, RegionId, DynastyId (nullbar), motherId, fatherId, spouseId, HomeBuildingId | belongsTo dynasty, region und building (Wohnen), self-referencing Eltern und Ehe |
+| `relationship`        | fromCharacterId, toCharacterId (zusammen PK), affection, lastChangedTick                                                                                                                        | zweimal belongsTo character                                                      |
+| `dynastyRelationship` | fromDynastyId, toDynastyId (zusammen PK), standing, lastChangedTick                                                                                                                             | zweimal belongsTo dynasty                                                        |
+| `region`              | id, name, type (`CITY`, `FOREST`, `QUARRY`, `FIELD`, `MINE`), treasury (nur Städte)                                                                                                             | hasMany plot, hasMany character                                                  |
+| `regionLink`          | fromRegionId, toRegionId (zusammen PK), distanceInTicks                                                                                                                                         | zweimal belongsTo region                                                         |
+| `plot`                | id, address, type (`BUILDING_LAND`, `RESOURCE`), resourceType, RegionId, ownerType (`CHARACTER`, `CITY`, `NONE`), OwnerCharacterId (nullbar), forSalePrice (nullbar)                            | belongsTo region und character, hasOne building                                  |
+| `building`            | id, name, optionId, level, condition, lastConditionTick, PlotId (nullbar), ownerType (`CHARACTER`, `CITY`), OwnerCharacterId (nullbar), forSalePrice (nullbar)                                  | belongsTo plot und character                                                     |
+| `world`               | id (immer 1), currentTick, lastTickAt                                                                                                                                                           | —                                                                                |
 
 Gegenüber dem heutigen Stand ändert sich zweierlei grundsätzlich:
 
@@ -166,7 +178,7 @@ Assoziationen und `startDB()` nach Festival-Vorbild: in Produktion ausschließli
 Dazu ein `migrations.spec.ts`, das absichert, dass Migration und Modelle dasselbe
 Schema ergeben.
 
-*Fertig, wenn:* `await startDB()` als Top-Level-await in `hooks.server.ts` steht
+_Fertig, wenn:_ `await startDB()` als Top-Level-await in `hooks.server.ts` steht
 (fail-fast: ohne DB darf der Server nicht „erfolgreich“ starten und dann auf jedem
 Request werfen) und `npm run dev` läuft.
 
@@ -180,7 +192,7 @@ Modul-Arrays auf asynchrone Sequelize-Queries. Damit fallen ersatzlos weg:
 - der fehlende `write()`-Aufruf in `characterService.update()`,
 - der Datenspeicher im öffentlich ausgelieferten `static/`-Verzeichnis.
 
-*Fertig, wenn:* Registrieren → Charakter anlegen → Serverneustart → Charakter ist noch da.
+_Fertig, wenn:_ Registrieren → Charakter anlegen → Serverneustart → Charakter ist noch da.
 
 ### 1.6 Weltaufbau (Seed)
 
@@ -198,7 +210,7 @@ Die Umrechnung gehört als benannte Konstante an eine Stelle (`TICKS_PER_YEAR`),
 `48` verstreut in Alterung, Verfall, Wahlperiode und Seed. Es ist die Zahl, die beim
 Balancing am ehesten noch einmal angefasst wird.
 
-*Fertig, wenn:* Eine frische Datenbank enthält nach dem Start eine bespielbare Stadt.
+_Fertig, wenn:_ Eine frische Datenbank enthält nach dem Start eine bespielbare Stadt.
 
 ## Phase 2 — Auth härten
 
@@ -219,7 +231,7 @@ Das Cookie enthält nur ein `crypto.randomUUID()`; die Identität kommt aus der
 `JSON.parse(cookie)`. Cookie mit `httpOnly`, `sameSite: 'lax'`, `secure` außerhalb von
 dev und `maxAge`; abgelaufene Token beim Auflösen aufräumen.
 
-*Fertig, wenn:* Ein von Hand gefälschtes Cookie zu `/login` führt.
+_Fertig, wenn:_ Ein von Hand gefälschtes Cookie zu `/login` führt.
 
 ### 2.3 Logout und Rate-Limit
 
@@ -242,7 +254,7 @@ Ressource auf und ein Datenrequest landet nicht auf der Login-Seite. Nicht weil 
 weil sich Deploy-Probleme sonst am Ende alle gleichzeitig einstellen — und der Base-Path
 zieht sich durch jeden Redirect, den Phase 3 und 4 hinzufügen.
 
-*Fertig, wenn:* Registrieren und Anmelden funktionieren auf dem Server, nicht nur lokal.
+_Fertig, wenn:_ Registrieren und Anmelden funktionieren auf dem Server, nicht nur lokal.
 
 ## Phase 3 — Spielkern reparieren
 
@@ -283,12 +295,12 @@ Ab hier wird gebaut, nicht repariert. Inhaltliche Grundlage: `KONZEPT.md`.
 
 **4.1 Zeit.** Zwei Teile, die man auseinanderhalten muss.
 
-*Die Rechnung:* `tick.logic.ts` als reine Funktion — aus `world.currentTick` und
+_Die Rechnung:_ `tick.logic.ts` als reine Funktion — aus `world.currentTick` und
 `character.lastTickProcessed` ergibt sich, wie viele Aktionspunkte nachwachsen
 (gedeckelt) und was sonst fällig ist. Alles Weitere hängt daran, deshalb zuerst und mit
 gründlichen Specs.
 
-*Der Takt:* Ein Prozess, der `world.currentTick` hochzählt, auch wenn niemand angemeldet
+_Der Takt:_ Ein Prozess, der `world.currentTick` hochzählt, auch wenn niemand angemeldet
 ist — die Welt läuft weiter (siehe `KONZEPT.md`). Auf einem Uberspace mit einem einzigen
 Node-Prozess ist ein Intervall im Server der einfachste Weg; ein Cron gegen einen
 geschützten Endpunkt wäre die robustere Variante, weil er einen hängenden Prozess
