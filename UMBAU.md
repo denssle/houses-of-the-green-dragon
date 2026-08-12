@@ -190,8 +190,13 @@ Als eigenes, **idempotentes** Skript — mehrfach ausgeführt darf es keine zwei
 anlegen —, das dieselbe Funktion auch für Tests bereitstellt.
 
 Das ist der erste Punkt, an dem die Zeitskala gebraucht wird: Die Startbevölkerung
-braucht Geburtsticks, und die ergeben nur Sinn, wenn feststeht, wie viele Ticks ein
-Lebensjahr sind (siehe offene Entscheidungen in `KONZEPT.md`).
+braucht Geburtsticks. Maßstab ist **1 Tick = 1 Stunde, 48 Ticks = 1 Spieljahr** (siehe
+`KONZEPT.md`) — die Altersverteilung der Fremd-NPCs ergibt sich daraus als Rückrechnung
+vom Start-Tick.
+
+Die Umrechnung gehört als benannte Konstante an eine Stelle (`TICKS_PER_YEAR`), nicht als
+`48` verstreut in Alterung, Verfall, Wahlperiode und Seed. Es ist die Zahl, die beim
+Balancing am ehesten noch einmal angefasst wird.
 
 *Fertig, wenn:* Eine frische Datenbank enthält nach dem Start eine bespielbare Stadt.
 
@@ -225,7 +230,15 @@ Festivals `login-rate-limit.ts` ist direkt übernehmbar.
 
 Hier einmal komplett ausliefern, obwohl Phase 5 das eigentlich abhandelt:
 `adapter-node`, MariaDB auf dem Uberspace, Migrationen gegen die echte Datenbank,
-Base-Path, `/api/health`, der rsync-Workflow. Nicht weil die App fertig wäre, sondern
+Base-Path, `/api/health`, der rsync-Workflow.
+
+Die App läuft unter einem **Unterpfad** wie Festival — also `paths.base` in der
+`svelte.config.js` setzen und auf dem Host `uberspace web backend set /<pfad>` **ohne**
+`--remove-prefix`, damit der Präfix unverändert an die App durchreicht. Festivals
+`hooks.server.ts` zeigt die beiden Fallen: `event.url.pathname` enthält den Präfix (vor
+dem Vergleich mit `noAuthURLs` abschneiden), und ein Location-Header braucht
+`${base}/login` statt `resolve()` — sonst löst der Browser relativ zur angefragten
+Ressource auf und ein Datenrequest landet nicht auf der Login-Seite. Nicht weil die App fertig wäre, sondern
 weil sich Deploy-Probleme sonst am Ende alle gleichzeitig einstellen — und der Base-Path
 zieht sich durch jeden Redirect, den Phase 3 und 4 hinzufügen.
 

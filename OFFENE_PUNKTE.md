@@ -6,8 +6,6 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 
 | # | Punkt | Fällig vor | Art |
 | --- | --- | --- | --- |
-| 1 | Zeitskala: Tick-Länge, Ticks je Lebensjahr, Lebenserwartung | **1.6 Weltaufbau** | Entscheidung |
-| 2 | URL-Struktur: eigene Domain oder Unterpfad | **2.4 Deploy-Durchstich** | Entscheidung |
 | 3 | Tick-Nachholen nach Serverausfall: nachrechnen oder überspringen | 4.1 | Entscheidung |
 | 4 | Folgen ungedeckter Bedürfnisse | 4.6 | Entscheidung |
 | 5 | Krankheiten: Ursachen, Verlauf, Heilung | 4.6 | Entwurf |
@@ -23,26 +21,9 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 15 | Weltinhalte: Orts-, Waren- und Gebäudekatalog | laufend | Entwurf |
 | 16 | Balancing im engeren Sinn | laufend | laufend |
 
-## Vor Phase 1
-
-### 1. Zeitskala
-
-Wie lang ist ein Tick in Echtzeit? Wie viele Ticks ergeben ein Lebensjahr, wie viele ein
-ganzes Leben? Das ist keine Balancing-Frage, sondern entscheidet, ob ein Spieler den
-Generationenwechsel — den Kern des Spiels — überhaupt je erlebt. Bei einem Spieljahr pro
-realer Woche säße man über ein Jahr an einem Charakter.
-
-Gebraucht wird die Antwort schon beim **Weltaufbau (1.6)**: Die Startbevölkerung braucht
-Geburtsticks, und die ergeben ohne Maßstab keinen Sinn.
-
-## Vor Phase 2
-
-### 2. URL-Struktur
-
-Läuft das Spiel unter einer eigenen Domain oder unter einem Unterpfad? Bei einem
-Unterpfad muss der Base-Path von Anfang an gesetzt sein — er zieht sich durch den Hook
-und jeden Redirect, den die Phasen 3 und 4 hinzufügen. Nachträglich ist das eine
-Fleißarbeit quer durch die App.
+Nichts steht mehr vor Phase 1: **Zeitskala** (1 Tick = 1 Stunde, 48 Ticks = 1 Spieljahr)
+und **URL-Struktur** (Unterpfad mit `paths.base`, wie bei Festival) sind entschieden und
+in `KONZEPT.md` beziehungsweise `UMBAU.md` festgehalten. Die Umsetzung kann beginnen.
 
 ## Vor Phase 4
 

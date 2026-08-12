@@ -322,6 +322,26 @@ Kontingent, das pro Tick nachwächst und sich bis zu einer Obergrenze ansammelt.
 zwei Tage nicht spielt, verliert nicht den Anschluss, muss aber auch nicht im Minutentakt
 klicken.
 
+**Die Zeitskala: ein Tick ist eine Stunde, ein Spieljahr zwei Tage.** Daraus ergibt sich
+alles Weitere:
+
+| Größe | Wert |
+| --- | --- |
+| 1 Tick | 1 Stunde Echtzeit |
+| 1 Spieljahr | 48 Ticks = 2 Realtage |
+| Lebenserwartung (~70 Jahre) | ~3360 Ticks = gut 4 Monate |
+| Volljährigkeit (16 Jahre) | nach 32 Realtagen |
+| Aktionspunkte | 1 je Tick, Deckel 48 (zwei Tage Vorrat) |
+| Wahlperiode (5 Jahre) | 10 Realtage |
+| Verfall bis zur Ruine (~25 Jahre) | 50 Realtage, Warnung ab der Hälfte |
+
+Der Stundentakt macht die Aktionspunkte unmittelbar verständlich — einer pro Stunde — und
+der Deckel von 48 entspricht genau den zwei Tagen Abwesenheit, die niemanden abhängen
+sollen. Die Jahreslänge ist die eigentliche Stellschraube: Bei einem Spieljahr pro
+Realtag stirbt der Charakter, bevor sich ein Betrieb amortisiert; bei vier Tagen erlebt
+ein Spieler im ersten Jahr nur einen einzigen Erbfall. Zwei Tage lassen Raum, ein Leben
+aufzubauen, und trotzdem mehrere Generationen im Jahr zu erleben.
+
 **Die Zeit läuft weiter, auch wenn niemand spielt.** Die Welt ist kein Spielstand, der
 beim Aufrufen fortgesetzt wird — sie hat einen eigenen Takt. Das ist die Voraussetzung
 dafür, dass Wirtschaft, Wahlen und Nachbarschaft überhaupt eine gemeinsame Gegenwart
