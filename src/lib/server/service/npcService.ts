@@ -12,6 +12,7 @@ import * as characterService from '$lib/server/service/characterService';
 import * as familyService from '$lib/server/service/familyService';
 import * as needService from '$lib/server/service/needService';
 import * as relationshipService from '$lib/server/service/relationshipService';
+import * as tradeService from '$lib/server/service/tradeService';
 
 /**
  * NPCs handeln.
@@ -63,11 +64,27 @@ async function ausfuehren(npcId: string, tick: number): Promise<NpcAction> {
 			await needService.eatItem(npcId, 'BREAD');
 			return 'EAT';
 
-		case 'BUY_FOOD':
-			// So viel, wie die Rücklage hergibt, aber mindestens eins — ein NPC, der jede
-			// Stunde einzeln zum Kornspeicher läuft, füllt das Log und sonst nichts.
+		case 'BUY_FOOD': {
+			// **Zuerst beim Nachbarn.** Das billigste Angebot in der Stadt geht dem
+			// Kornspeicher vor — sonst bliebe die Krücke aus 4.6a für immer die einzige
+			// Quelle, und ein Bäcker fände nie einen Kunden.
+			//
+			// Die Menge muss dabei **am Preis des Angebots** hängen und nicht am
+			// Kornspeicherpreis: Sonst versucht ein NPC mit zwanzig Münzen fünf Laibe zu
+			// sechs zu kaufen, scheitert am Geld und landet doch wieder beim Amt. Genau
+			// so ist es beim ersten Durchlauf passiert.
+			const angebot = lage.cheapestBread;
+			if (angebot && angebot.quantity > 0 && angebot.pricePerUnit > 0) {
+				const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
+				const wieviel: number = Math.min(5, angebot.quantity, bezahlbar);
+				if (wieviel > 0) {
+					const gekauft = await tradeService.buyFromOffer(npcId, angebot.id, wieviel);
+					if (gekauft.ok) return 'BUY_FOOD';
+				}
+			}
 			await needService.buyFromGranary(npcId, 'BREAD', Math.max(1, Math.min(5, lage.leisten)));
 			return 'BUY_FOOD';
+		}
 
 		case 'WORK':
 			if (lage.workplaceId) {
@@ -106,6 +123,8 @@ async function lageAufnehmen(
 			homeId?: string;
 			matchId?: string;
 			leisten: number;
+			money: number;
+			cheapestBread?: { id: string; quantity: number; pricePerUnit: number };
 	  }
 	| undefined
 > {
@@ -131,6 +150,8 @@ async function lageAufnehmen(
 
 	return {
 		leisten: Math.floor(werte.money / brot.basePrice),
+		money: werte.money,
+		cheapestBread: await tradeService.cheapestOffer(werte.RegionId, 'BREAD', npcId),
 		workplaceId: arbeitsplatz,
 		homeId: unterkunft,
 		matchId: partner,

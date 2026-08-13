@@ -7,6 +7,9 @@ import type { BuildingAction } from '$lib/model/buildingAction';
 import { actionMessage } from '$lib/actionMessage';
 import * as productionService from '$lib/server/service/productionService';
 import { getItemTemplate } from '$lib/model/itemTemplate';
+import * as tradeService from '$lib/server/service/tradeService';
+import * as needService from '$lib/server/service/needService';
+import { STALL_FEE } from '$lib/game/trade.logic';
 import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
 import { levelOf, maxLevel, upgradePrice } from '$lib/model/buildingTemplate';
 
@@ -43,6 +46,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					cost: option.recipe.actionPointCost
 				}
 			: undefined,
+		// Jedes Handelshaus ist zugleich Verkaufsstelle — Lager und Preisschilder gehoeren
+		// deshalb auf die Gebaeudeseite und nicht in eine eigene Ecke.
+		stock: await tradeService.getBuildingStock(params.building_id),
+		offers: await tradeService.getOffersAt(params.building_id, locals.currentCharacter?.id),
+		myStock: locals.currentCharacter ? await needService.getStock(locals.currentCharacter.id) : [],
+		isMarket: building.optionId === tradeService.MARKET_OPTION_ID,
+		stallFee: STALL_FEE,
 		renovationCost: Math.ceil(CONDITION_MAX - building.condition) * RENOVATION_COST_PER_POINT
 	};
 };
@@ -129,6 +139,54 @@ export const actions = {
 		return {
 			message: `${ergebnis.produced} ${getItemTemplate(ergebnis.itemId)?.name ?? ''} hergestellt.`
 		};
+	},
+
+	stockIn: async ({ request, params, locals }) => {
+		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
+		const data = await request.formData();
+		const itemId = data.get('itemId')?.toString();
+		const menge = Number(data.get('quantity') ?? 0);
+		if (!itemId) return fail(400, { message: 'Was denn?' });
+
+		const ergebnis = await tradeService.moveToStock(
+			locals.currentCharacter.id,
+			params.building_id,
+			itemId,
+			menge
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: menge > 0 ? 'Eingelagert.' : 'Ausgelagert.' };
+	},
+
+	sellOffer: async ({ request, params, locals }) => {
+		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
+		const data = await request.formData();
+		const itemId = data.get('itemId')?.toString();
+		const menge = Number(data.get('quantity') ?? 0);
+		const preis = Number(data.get('price') ?? 0);
+		if (!itemId) return fail(400, { message: 'Was denn?' });
+
+		const ergebnis = await tradeService.placeOffer(
+			locals.currentCharacter.id,
+			params.building_id,
+			itemId,
+			menge,
+			preis
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: 'Das Preisschild hängt.' };
+	},
+
+	buyOffer: async ({ request, locals }) => {
+		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
+		const data = await request.formData();
+		const offerId = data.get('offerId')?.toString();
+		const menge = Number(data.get('quantity') ?? 1);
+		if (!offerId) return fail(400, { message: 'Welches Angebot?' });
+
+		const ergebnis = await tradeService.buyFromOffer(locals.currentCharacter.id, offerId, menge);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `${menge} gekauft.` };
 	},
 
 	buy: async ({ params, locals }) => {

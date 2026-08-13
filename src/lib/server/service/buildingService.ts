@@ -75,6 +75,16 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			]
 		},
 		{
+			optionId: 6,
+			initialName: 'Marktplatz',
+			type: 'PUBLIC',
+			description: 'Wo jeder seinen Stand aufschlagen darf — gegen Standgeld.',
+			limited: true,
+			limitedTo: 1,
+			actions: [],
+			levels: [{ price: 0, name: 'Marktplatz' }]
+		},
+		{
 			optionId: 4,
 			initialName: 'Mühle',
 			type: 'CRAFT',

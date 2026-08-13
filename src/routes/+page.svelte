@@ -41,5 +41,6 @@
 	<a href="{base}/building/new" class="link">Gebäude bauen</a> ·
 	<a href="{base}/people" class="link">Leute</a> ·
 	<a href="{base}/granary" class="link">Kornspeicher</a> ·
-	<a href="{base}/land" class="link">Umland</a>
+	<a href="{base}/land" class="link">Umland</a> ·
+	<a href="{base}/market" class="link">Markt</a>
 </p>

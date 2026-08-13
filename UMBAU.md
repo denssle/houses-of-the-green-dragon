@@ -1025,7 +1025,40 @@ _Fertig, wenn:_ Brot hat eine Herkunft. — Erledigt und am gebauten Server durc
 Mühlenfeld gepachtet, 96 Getreide geerntet, in der eigenen Mühle zu Mehl gemahlen, in der
 eigenen Bäckerei zu 28 Broten gebacken, satt geworden.
 
-**4.6d Handel und Anstellung.** `itemTemplate`/`inventory` mit echtem Nutzen (Nahrung, Kleidung,
+**4.6d Handel.** ✓ **Jedes Handelshaus ist zugleich Verkaufsstelle.** Der Marktplatz ist
+deshalb kein zweites System, sondern ein öffentliches Gebäude mit einer anderen Regel
+darüber, wer dort ein Preisschild aushängen darf: im eigenen Laden nur der Eigentümer, am
+Markt jeder. Eine Tabelle, zwei Regeln.
+
+_Entschieden:_ Die Ware liegt im **Betriebslager**, nicht in der Kammer des Eigentümers.
+Das macht aus einem Gebäude ein Ding mit eigener Bilanz — und vor allem den Ort, in den
+ab der Anstellung fremde Hände produzieren. Ohne ihn wäre ein Betrieb nur ein
+Schaufenster.
+
+_Entschieden:_ Am Marktplatz kostet ein Stand **Standgeld** an die Stadt, im eigenen
+Laden nichts. Damit hat Grundbesitz einen weiteren Wert, die Stadtkasse eine Einnahme,
+und der Neuling ohne Haus trotzdem einen Weg.
+
+Die Ware wandert beim Aushängen **ins Angebot** und nicht daneben: aus dem Betriebslager
+im eigenen Laden, aus der eigenen Habe am Markt. Damit kann niemand dieselben zehn Laibe
+an drei Ständen gleichzeitig anbieten, und ein Kauf braucht keine zweite Prüfung, ob es
+sie noch gibt. Zurückgezogen geht sie dorthin zurück, wo sie herkam.
+
+**NPCs kaufen jetzt beim billigsten Angebot** und erst dann beim Kornspeicher. Damit
+findet ein Bäcker Kundschaft, und die Krücke aus 4.6a wird zum Notnagel.
+
+Ein Fehler beim Durchspielen, und ein lehrreicher: Die NPCs kauften weiter beim Amt,
+obwohl ein Angebot dahing. Ich hatte die **Menge am Kornspeicherpreis** gerechnet und
+dann versucht, so viele beim Bäcker zu kaufen — bei sechs statt vier Münzen scheiterte das
+am Geld, und sie fielen auf die Krücke zurück. Die Menge muss am Preis des Angebots
+hängen, an dem gekauft wird.
+
+_Fertig, wenn:_ Ein Spielerbetrieb kann die Stadt ernähren. — Erledigt und am gebauten
+Server durchgespielt: zwanzig Brote zu sechs Münzen in der eigenen Bäckerei ausgehängt,
+nach ein paar Herzschlägen ausverkauft, 120 Münzen eingenommen. Die Stadtkasse wuchs
+dabei nur um einen einzigen Kornspeicherkauf.
+
+**4.6e Anstellung.** `employment` mit Lohn und Laufzeit — der Rest von 4.6. (Nahrung, Kleidung,
 Werkzeug, **Baumaterial**), Bedürfnisse als Modifikatoren, `employment` mit Lohn, Produktion im Betrieb.
 Der Handel läuft über **Festpreis-Angebote am Gebäude** (`shopOffer`: BuildingId, itemId,
 Preis, Menge) — ein Kauf ist eine Transaktion, kein Matching. **NPC-Konsum gehört in

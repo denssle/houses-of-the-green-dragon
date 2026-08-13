@@ -71,7 +71,87 @@
 	</form>
 {/each}
 
+<section>
+	<h3>{data.isMarket ? 'Stände' : 'Zu haben'}</h3>
+	{#if data.offers.length === 0}
+		<p><i>Hier hängt gerade kein Preisschild.</i></p>
+	{:else}
+		<ul>
+			{#each data.offers as angebot (angebot.id)}
+				<li>
+					{angebot.quantity} × {angebot.itemName} für {angebot.pricePerUnit} Münzen
+					<small>— {angebot.sellerName}</small>
+					{#if !angebot.mine}
+						<form method="POST" action="?/buyOffer" use:enhance>
+							<input type="hidden" name="offerId" value={angebot.id} />
+							<input type="number" name="quantity" min="1" max={angebot.quantity} value="1" />
+							<button type="submit">Kaufen</button>
+						</form>
+					{/if}
+				</li>
+			{/each}
+		</ul>
+	{/if}
+
+	<!--
+		Im eigenen Laden kommt die Ware aus dem Betriebslager, am Marktplatz aus der
+		eigenen Kammer — deshalb stehen hier zwei verschiedene Listen zur Auswahl.
+	-->
+	{#if data.isMarket || data.mine}
+		{@const quelle = data.isMarket ? data.myStock : data.stock}
+		{#if quelle.length === 0}
+			<p>
+				<i>
+					{data.isMarket
+						? 'Du hast nichts dabei, was du anbieten könntest.'
+						: 'Das Lager ist leer — leg erst etwas hinein.'}
+				</i>
+			</p>
+		{:else}
+			{#each quelle as posten (posten.itemId)}
+				<form method="POST" action="?/sellOffer" use:enhance>
+					<input type="hidden" name="itemId" value={posten.itemId} />
+					<label>
+						{posten.name} ({posten.quantity} da), Menge
+						<input type="number" name="quantity" min="1" max={posten.quantity} value="1" />
+					</label>
+					<label>
+						zu je
+						<input type="number" name="price" min="0" step="1" value="5" />
+					</label>
+					<button type="submit">
+						Anbieten{data.isMarket ? ` (${data.stallFee} Münzen Standgeld)` : ''}
+					</button>
+				</form>
+			{/each}
+		{/if}
+	{/if}
+</section>
+
 {#if data.mine}
+	<section>
+		<h3>Betriebslager</h3>
+		{#if data.stock.length === 0}
+			<p><i>Nichts eingelagert.</i></p>
+		{:else}
+			<ul>
+				{#each data.stock as posten (posten.itemId)}
+					<li>{posten.quantity} × {posten.name}</li>
+				{/each}
+			</ul>
+		{/if}
+		{#each data.myStock as posten (posten.itemId)}
+			<form method="POST" action="?/stockIn" use:enhance>
+				<input type="hidden" name="itemId" value={posten.itemId} />
+				<label>
+					{posten.name} einlagern ({posten.quantity} in der Kammer)
+					<input type="number" name="quantity" min="1" max={posten.quantity} value="1" />
+				</label>
+				<button type="submit">Einlagern</button>
+			</form>
+		{/each}
+	</section>
+
 	<section>
 		<h3>Instandhaltung</h3>
 		{#if data.building.condition < 100}

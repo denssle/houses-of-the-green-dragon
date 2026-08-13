@@ -14,6 +14,7 @@ import { Relationship } from '$lib/db/model/relationship';
 import { SessionToken } from '$lib/db/model/sessionToken';
 import { Inventory } from '$lib/db/model/inventory';
 import { Lease } from '$lib/db/model/lease';
+import { BuildingStock, ShopOffer } from '$lib/db/model/shop';
 import { Skill } from '$lib/db/model/skill';
 import { User } from '$lib/db/model/user';
 // Ohne Assoziationen, aber der Import muss sein: Nur registrierte Modelle legt `sync()`
@@ -78,6 +79,11 @@ Character.hasMany(Skill, { foreignKey: 'CharacterId', onDelete: 'CASCADE', as: '
 // das regelt 4.2, hier nur die Verbindung.
 Character.hasMany(Inventory, { foreignKey: 'CharacterId', onDelete: 'CASCADE', as: 'items' });
 // Pacht: eine Flaeche, ein Paechter. Beim Tod faellt sie an die Stadt zurueck (4.2).
+// Jedes Handelshaus ist zugleich Verkaufsstelle: Lager und Preisschilder haengen am
+// Gebaeude. Wird es zur Ruine, verschwindet beides mit ihm.
+Building.hasMany(BuildingStock, { foreignKey: 'BuildingId', onDelete: 'CASCADE', as: 'stock' });
+Building.hasMany(ShopOffer, { foreignKey: 'BuildingId', onDelete: 'CASCADE', as: 'offers' });
+
 Plot.hasOne(Lease, { foreignKey: 'PlotId', onDelete: 'CASCADE', as: 'lease' });
 Lease.belongsTo(Plot, { foreignKey: 'PlotId', as: 'plot' });
 Skill.belongsTo(Character, { foreignKey: 'CharacterId', as: 'character' });

@@ -556,6 +556,12 @@ erworbener Besitz, sondern laufender Aufwand, und keine Dynastie kann ihre Macht
 dauerhaft einfrieren. Darüber liegt ein **Verwandtschaftsbonus**: Verwandte finden
 einander von Haus aus sympathisch, ohne dass dafür interagiert werden müsste.
 
+**Jedes Handelshaus ist zugleich Verkaufsstelle.** Wer produziert, verkauft dort, wo er
+produziert — der Marktplatz ist kein zweites System, sondern ein öffentliches Gebäude mit
+einer anderen Regel darüber, wer ein Preisschild aushängen darf: im eigenen Laden nur der
+Eigentümer, am Markt jeder, gegen Standgeld an die Stadt. Damit hat ein eigenes Haus
+einen Wert über die Produktion hinaus, und wer noch keines hat, kommt trotzdem zum Zug.
+
 **Die Pacht endet mit dem Pächter.** Stirbt er, fällt die Fläche an die Stadt zurück und
 wird neu vergeben — der Erbe muss sich bewerben wie jeder andere. Genau das unterscheidet
 Pacht von Eigentum: Wer den Wald hält, hält ihn nicht über Generationen, und die Politik
