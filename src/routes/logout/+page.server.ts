@@ -1,3 +1,4 @@
+import { base } from '$app/paths';
 import { redirect } from '@sveltejs/kit';
 import * as userService from '$lib/server/service/userService';
 import type { Actions, PageServerLoad } from './$types';
@@ -9,12 +10,12 @@ import type { Actions, PageServerLoad } from './$types';
  * zu beenden. Aus demselben Grund ist es auch nicht per fremder Seite auslösbar.
  */
 export const load: PageServerLoad = () => {
-	redirect(303, '/');
+	redirect(303, `${base}/`);
 };
 
 export const actions = {
 	default: async ({ cookies, locals }) => {
 		await userService.logout(locals, cookies);
-		redirect(303, '/login');
+		redirect(303, `${base}/login`);
 	}
 } satisfies Actions;

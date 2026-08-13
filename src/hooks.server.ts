@@ -1,4 +1,5 @@
 import type { Handle } from '@sveltejs/kit';
+import { base } from '$app/paths';
 import * as userService from '$lib/server/service/userService';
 import type { User } from '$lib/model/user';
 import { startDB } from '$lib/db/db';
@@ -16,7 +17,18 @@ startTicker();
 const noAuthURLs: string[] = ['/login', '/register', '/about', '/impressum'];
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
-	const pathname: string = event.url.pathname;
+	// Die App läuft unter einem Base-Pfad (siehe svelte.config.js), und der Uberspace
+	// reicht ihn unverändert durch — `event.url.pathname` enthält ihn also. Einmal
+	// abschneiden, damit alle Vergleiche unten mit den route-eigenen Pfaden arbeiten
+	// ('/drachen/login' → '/login'). Lokal ist `base` leer, die Zeile ändert dort nichts.
+	const pathname: string = event.url.pathname.slice(base.length) || '/';
+
+	// Der Bereitschaftscheck läuft vor der Sitzungsauflösung: Er soll gerade dann noch
+	// antworten, wenn die Datenbank nicht erreichbar ist — die Auflösung unten würde in
+	// dem Fall selbst werfen und den Check unbrauchbar machen.
+	if (pathname === '/api/health') {
+		return resolve(event);
+	}
 
 	// Die Identität kommt ausschließlich aus der Sitzungstabelle. Das Cookie ist ein
 	// Nachschlagschlüssel ohne eigene Aussage — wer es selbst schreibt, landet hier bei
@@ -35,5 +47,10 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	if (noAuthURLs.includes(pathname) || currentUser) {
 		return resolve(event);
 	}
-	return new Response('Redirect', { status: 303, headers: { Location: '/login' } });
+	// Bewusst `${base}` und ein absoluter Pfad: Ein Location-Header wird vom Browser
+	// gegen die angefragte Ressource aufgelöst. Bei einem Datenrequest (etwa
+	// /drachen/dynasty/__data.json) landete ein relativer Pfad damit nicht auf der
+	// Anmeldeseite. In SvelteKits eigenem `redirect()` ist das anders — dort wird gegen
+	// die Request-URL aufgelöst.
+	return new Response('Redirect', { status: 303, headers: { Location: `${base}/login` } });
 };

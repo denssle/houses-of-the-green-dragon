@@ -1,3 +1,4 @@
+import { base } from '$app/paths';
 import { fail, redirect } from '@sveltejs/kit';
 import * as userService from '$lib/server/service/userService';
 import * as dynastyService from '$lib/server/service/dynastyService';
@@ -39,6 +40,6 @@ export const actions = {
 
 		await dynastyService.create(dynasty, user.id);
 		await userService.startSession(user, cookies);
-		redirect(303, '/');
+		redirect(303, `${base}/`);
 	}
 } satisfies Actions;

@@ -1,3 +1,4 @@
+import { base } from '$app/paths';
 import type { Actions, PageServerLoad } from './$types';
 import * as dynastyService from '$lib/server/service/dynastyService';
 import * as characterService from '$lib/server/service/characterService';
@@ -6,7 +7,7 @@ import { GENDERS, type Gender } from '$lib/db/attributes/enums';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.currentUser) {
-		redirect(303, '/login');
+		redirect(303, `${base}/login`);
 	}
 	return {
 		dynasty: await dynastyService.getDynastyForUser(locals.currentUser.id)
@@ -38,6 +39,6 @@ export const actions = {
 		}
 
 		const character = await characterService.create(firstName, dynasty.id, gender as Gender);
-		redirect(303, `/character/${character.id}`);
+		redirect(303, `${base}/character/${character.id}`);
 	}
 } satisfies Actions;

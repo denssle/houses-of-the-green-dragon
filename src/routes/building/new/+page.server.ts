@@ -1,3 +1,4 @@
+import { base } from '$app/paths';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as buildingService from '$lib/server/service/buildingService';
@@ -37,6 +38,6 @@ export const actions = {
 		if (!ergebnis.ok) {
 			return fail(400, { message: actionMessage(ergebnis.reason) });
 		}
-		redirect(303, `/building/${ergebnis.building.id}`);
+		redirect(303, `${base}/building/${ergebnis.building.id}`);
 	}
 } satisfies Actions;

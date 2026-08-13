@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
@@ -14,7 +15,7 @@
 {#if data.freePlots.length === 0}
 	<p>
 		<i>Dir gehört kein freies Grundstück.</i>
-		<a href="/plot" class="link">Erst eines kaufen</a> — gebaut wird nicht ins Leere.
+		<a href="{base}/plot" class="link">Erst eines kaufen</a> — gebaut wird nicht ins Leere.
 	</p>
 {:else}
 	{#each data.buildingsOptions as building (building.optionId)}

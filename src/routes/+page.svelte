@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -15,12 +16,12 @@
 {:else}
 	<ul>
 		{#each data.buildings as building (building.id)}
-			<li><a href="/building/{building.id}" class="link">{building.name}</a></li>
+			<li><a href="{base}/building/{building.id}" class="link">{building.name}</a></li>
 		{/each}
 	</ul>
 {/if}
 
 <p>
-	<a href="/plot" class="link">Grundstücke</a> ·
-	<a href="/building/new" class="link">Gebäude bauen</a>
+	<a href="{base}/plot" class="link">Grundstücke</a> ·
+	<a href="{base}/building/new" class="link">Gebäude bauen</a>
 </p>

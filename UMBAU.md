@@ -364,7 +364,7 @@ weiterhin seine 290 ms bcrypt, und das Rate-Limit wäre selbst der Hebel für ei
 _Fertig, wenn:_ Abmelden beendet die Sitzung auch in der Datenbank und der sechste
 Fehlversuch wird abgewiesen. — Erledigt und am laufenden Server durchgespielt.
 
-### 2.4 Deployment-Durchstich
+### 2.4 Deployment-Durchstich ✓
 
 Hier einmal komplett ausliefern, obwohl Phase 5 das eigentlich abhandelt:
 `adapter-node`, MariaDB auf dem Uberspace, Migrationen gegen die echte Datenbank,
@@ -380,7 +380,41 @@ Ressource auf und ein Datenrequest landet nicht auf der Login-Seite. Nicht weil 
 weil sich Deploy-Probleme sonst am Ende alle gleichzeitig einstellen — und der Base-Path
 zieht sich durch jeden Redirect, den Phase 3 und 4 hinzufügen.
 
+Der Pfad ist **`/drachen`** auf Port **5174** — 5173 gehört Festival. Beide Fallen aus
+Festivals Hook sind übernommen; dazu kam eine dritte, die dort anders gelöst ist:
+Ohne `ORIGIN` hält SvelteKit die Anfrage für `http://localhost:5174`, der
+`Origin`-Header des Browsers passt nicht dazu, und **jedes Formular** wird mit 403
+abgewiesen. Festival schaltet dafür den CSRF-Schutz ab (`trustedOrigins: ['*']`); hier
+steht stattdessen die richtige Herkunft im Startkommando, der Schutz bleibt an. Am
+gebauten Server nachgestellt: mit passendem Origin 200, mit fremdem 403.
+
+Eine vierte zeigte sich erst am Artefakt: `/drachen` ohne Schrägstrich am Ende ergibt
+einen 308 auf `/drachen/`. Die Links auf die Übersicht schreiben ihn deshalb mit. In
+SvelteKits `redirect()` hilft das nicht — es normalisiert den Schrägstrich weg, ein
+Redirect auf die Übersicht kostet also einen zusätzlichen Sprung. Nicht schön, aber
+harmlos: 308 ist dauerhaft und wird vom Browser gemerkt.
+
+`/api/health` prüft nicht nur, dass der Prozess lauscht: Ein `curl` gegen `/` liefert
+auch bei toter Datenbank eine Antwort, nämlich den Redirect zur Anmeldung. Der Check
+setzt ein `SELECT` ab, meldet offene Migrationen und liest die **Weltuhr** — steht
+`currentTick`, läuft der Takt nicht, und die Welt steht still, obwohl der Server
+antwortet.
+
+Der Rauchtest (`scripts/smoke-test.sh`, im CI vor dem Deploy) startet das gebaute
+Artefakt gegen eine echte MariaDB, weil Vitest über SQLite läuft und damit weder
+`node build` noch den MariaDB-Zweig anfasst. Zweites Szenario ist bewusst der
+**Neustart gegen die bestehende Datenbank**: Der Weltaufbau läuft bei jedem Start mit,
+und verdoppelte er das Bauland, fiele das sonst erst in Produktion auf.
+
+Der Deploy sichert die Datenbank, **bevor** er einspielt — `startDB()` migriert beim
+Start, ein Fehlschlag träfe also eine Welt, die sich nicht wiederherstellen lässt.
+
+Die Handgriffe auf dem Host stehen in `DEPLOYMENT.md`.
+
 _Fertig, wenn:_ Registrieren und Anmelden funktionieren auf dem Server, nicht nur lokal.
+— Repo-Seite erledigt und am gebauten Artefakt durchgespielt (Registrieren, Anmelden,
+Abmelden, Bereitschaftscheck, CSRF). Die einmalige Einrichtung auf dem Uberspace
+(Datenbank, Dienst, Backend, Secrets) steht aus.
 
 ## Phase 3 — Spielkern reparieren
 

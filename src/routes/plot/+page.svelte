@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
@@ -23,7 +24,7 @@
 					{#if plot.hasBuilding}
 						— bebaut
 					{:else}
-						— frei, <a href="/building/new" class="link">hier lässt sich bauen</a>
+						— frei, <a href="{base}/building/new" class="link">hier lässt sich bauen</a>
 					{/if}
 				</li>
 			{/each}

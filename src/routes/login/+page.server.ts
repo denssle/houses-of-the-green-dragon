@@ -1,3 +1,4 @@
+import { base } from '$app/paths';
 import { fail, redirect } from '@sveltejs/kit';
 import * as userService from '$lib/server/service/userService';
 import { loginRateLimiter } from '$lib/server/service/loginRateLimit';
@@ -37,6 +38,6 @@ export const actions = {
 		loginRateLimiter.reset(key);
 		await userService.startSession(user, cookies);
 		await userService.login(locals, user);
-		redirect(303, '/');
+		redirect(303, `${base}/`);
 	}
 } satisfies Actions;
