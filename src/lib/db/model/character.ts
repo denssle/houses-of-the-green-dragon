@@ -55,7 +55,11 @@ export const Character: ModelStatic<Model<CharacterAttributes, CharacterCreation
 			greed: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
 			sociability: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
 			ambition: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
-			agreeableness: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 }
+			agreeableness: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+			// Saettigung und Stichtag gehoeren zusammen wie condition und lastConditionTick
+			// beim Gebaeude: gerechnet beim Lesen, geschrieben nur beim Essen.
+			satiety: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 100 },
+			lastNeedTick: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 }
 		},
 		{ timestamps: true }
 	);

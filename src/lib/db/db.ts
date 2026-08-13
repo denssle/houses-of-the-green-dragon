@@ -12,6 +12,7 @@ import { Region } from '$lib/db/model/region';
 import { RegionLink } from '$lib/db/model/regionLink';
 import { Relationship } from '$lib/db/model/relationship';
 import { SessionToken } from '$lib/db/model/sessionToken';
+import { Inventory } from '$lib/db/model/inventory';
 import { Skill } from '$lib/db/model/skill';
 import { User } from '$lib/db/model/user';
 // Ohne Assoziationen, aber der Import muss sein: Nur registrierte Modelle legt `sync()`
@@ -72,6 +73,9 @@ Character.belongsTo(Building, { foreignKey: 'HomeBuildingId', as: 'home' });
 // Was einer kann. Stirbt er, verschwindet es mit ihm — weitergegeben wird nur, was er
 // zu Lebzeiten gelehrt hat (siehe skill.logic.ts).
 Character.hasMany(Skill, { foreignKey: 'CharacterId', onDelete: 'CASCADE', as: 'skills' });
+// Was jemand besitzt. Stirbt er, faellt es mit dem uebrigen Nachlass an den Erben --
+// das regelt 4.2, hier nur die Verbindung.
+Character.hasMany(Inventory, { foreignKey: 'CharacterId', onDelete: 'CASCADE', as: 'items' });
 Skill.belongsTo(Character, { foreignKey: 'CharacterId', as: 'character' });
 
 // Beziehungen sind gerichtet, deshalb zweimal derselbe Partner mit unterschiedlicher

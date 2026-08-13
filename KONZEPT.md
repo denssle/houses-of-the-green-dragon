@@ -550,6 +550,17 @@ erworbener Besitz, sondern laufender Aufwand, und keine Dynastie kann ihre Macht
 dauerhaft einfrieren. Darüber liegt ein **Verwandtschaftsbonus**: Verwandte finden
 einander von Haus aus sympathisch, ohne dass dafür interagiert werden müsste.
 
+**Not nimmt zuerst Kraft, dann Leben.** Wer hungert, sammelt weniger Aktionspunkte; erst
+bei anhaltender Not steigt das Sterberisiko, und dann deutlich. Die Staffelung ist
+Absicht: Sie gibt eine Vorwarnung, die der Spieler selbst verschuldet hat, statt ihn ohne
+Ansage zu töten — bei Permadeath der Unterschied zwischen einer harten Regel und einer
+unfairen. Wer gar nichts mehr isst, stirbt binnen etwa eines Spieltages, und zwar in
+jedem Alter: Die Not hat ein eigenes Risiko und ist kein Faktor auf das des Alters.
+
+**Vier Realtage ohne Nahrung.** Essen ist etwas, das man alle paar Tage regelt, nicht
+täglich — wer übers Wochenende nicht hereinschaut, kommt nicht hungernd zurück. Dieselbe
+Größenordnung wie das Aktionsbudget, das über zwei Tage anwächst.
+
 **Jeder Charakter hat eine Persönlichkeit, und sie ändert sich nie.** Sechs Achsen,
 vererbt von den Eltern mit Streuung, festgelegt bei der Geburt. Aus ihnen leiten NPCs ab,
 was sie wollen — statt aus einer Regel je Lage. Beim Spielercharakter beschreibt sie, statt

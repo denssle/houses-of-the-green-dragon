@@ -12,6 +12,7 @@ import { convertToCharacter } from '$lib/db/attributes/character.attributes';
 import { findStartRegionId } from '$lib/db/seed';
 import * as worldService from '$lib/server/service/worldService';
 import { regrownActionPoints } from '$lib/game/tick.logic';
+import { actionPointFactor, currentSatiety, SATIETY_MAX } from '$lib/game/need.logic';
 import { randomPersonality } from '$lib/game/personality.logic';
 import { AGE_OF_MAJORITY, MAX_ACTION_POINTS, yearsToTicks } from '$lib/game/time';
 
@@ -36,6 +37,10 @@ export async function create(
 		lastTickProcessed: jetzt,
 		actionPoints: MAX_ACTION_POINTS,
 		money: STARTKAPITAL,
+		// Satt in die Welt: Der Stichtag ist jetzt, nicht null — sonst haette der Erste
+		// seit Weltbeginn gehungert.
+		satiety: SATIETY_MAX,
+		lastNeedTick: jetzt,
 		RegionId: await findStartRegionId(),
 		DynastyId: dynastyId,
 		// Der Stammvater eines Hauses hat keine Eltern, von denen er etwas erben könnte —
@@ -62,10 +67,23 @@ async function nachwachsenLassen(
 	tick: number,
 	transaction?: Transaction
 ): Promise<void> {
-	const gewachsen: number = regrownActionPoints(
+	// Hunger senkt die **Obergrenze**, nicht den Zufluss: Die Rechnung bleibt damit ueber
+	// beliebige Tick-Abstaende exakt, und niemandem wird genommen, was er sich satt
+	// erarbeitet hat.
+	const grenze: number = Math.floor(
+		MAX_ACTION_POINTS *
+			actionPointFactor(
+				currentSatiety(instanz.dataValues.satiety, instanz.dataValues.lastNeedTick, tick)
+			)
+	);
+	const gewachsen: number = Math.max(
 		instanz.dataValues.actionPoints,
-		instanz.dataValues.lastTickProcessed,
-		tick
+		regrownActionPoints(
+			instanz.dataValues.actionPoints,
+			instanz.dataValues.lastTickProcessed,
+			tick,
+			grenze
+		)
 	);
 	if (
 		gewachsen === instanz.dataValues.actionPoints &&

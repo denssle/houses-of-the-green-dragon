@@ -59,7 +59,16 @@ export function deathProbabilityPerTick(age: number): number {
  *
  * Der Zufall kommt als Parameter herein, damit die Regel prüfbar bleibt — ein Test soll
  * das Sterben erzwingen oder ausschließen können, ohne den Zufallsgenerator zu ersetzen.
+ *
+ * `extraRiskPerYear` nimmt auf, was neben dem Alter tötet — heute die Not (4.6a), später
+ * Krankheit und Verletzung. **Addiert, nicht multipliziert:** Vor vierzig ist das
+ * Altersrisiko null, und jedes Vielfache von null bliebe null. Wer verhungert, stirbt
+ * auch mit zwanzig.
  */
-export function diesThisTick(age: number, roll: number): boolean {
-	return roll < deathProbabilityPerTick(age);
+export function diesThisTick(age: number, roll: number, extraRiskPerYear = 0): boolean {
+	const proJahr: number = Math.min(1, deathProbabilityPerYear(age) + Math.max(0, extraRiskPerYear));
+	if (proJahr <= 0) return false;
+	if (proJahr >= 1) return true;
+
+	return roll < 1 - Math.pow(1 - proJahr, 1 / TICKS_PER_YEAR);
 }

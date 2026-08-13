@@ -891,7 +891,56 @@ Gebaut ist bisher **eine** Wirkung: Frost verteuert Bauarbeiten um ein Viertel. 
 Saison und Winterkleidung gehören zu 4.6, wo es Waren gibt, die man ernten und tragen
 kann.
 
-**4.6 Wirtschaft.** `itemTemplate`/`inventory` mit echtem Nutzen (Nahrung, Kleidung,
+**4.6 ist kein Schritt, sondern vier.** So, wie er unten steht, enthält er Waren,
+Bedürfnisse, Anstellung, Produktion, Pacht, Läden und NPC-Konsum — jedes davon mit
+eigenen offenen Fragen. Geteilt in **4.6a** (Waren und Bedürfnisse), **4.6b** (Produktion
+und Pacht), **4.6c** (Handel) und **4.6d** (Anstellung).
+
+Nebenbei eine Korrektur am Zuschnitt: Die Punkte 5 (Krankheiten) und 6 (Kämpfe) galten
+als „fällig vor 4.6". Das stimmt nicht — sie werden für **einzelne Waren** gebraucht
+(Heiltrank, Gift, Rüstung), nicht für die Wirtschaft selbst. Fällig sind sie vor diesen
+Waren, und die kommen ohnehin zuletzt.
+
+**4.6a Waren und Bedürfnisse.** ✓ `itemTemplate` als Code, `inventory` spärlich, Hunger
+als faul ausgewertete Sättigung, Essen als Handlung. Dazu der **städtische
+Kornspeicher** — eine Krücke wie die städtische Schmiede aus 3.3, bis es mit 4.6b Bauern
+und mit 4.6c Läden gibt. Ohne eine Quelle für Nahrung verhungerte die Stadt, bevor die
+Produktion gebaut wäre.
+
+_Entschieden (Punkt 4):_ **Gestaffelt — erst Leistung, dann Leben.** Wer hungert, sammelt
+zuerst weniger Aktionspunkte; erst weiter unten steigt das Sterberisiko. Das gibt eine
+Vorwarnung, die der Spieler selbst verschuldet hat, statt ihn ohne Ansage zu töten — bei
+Permadeath der Unterschied zwischen einer harten und einer unfairen Regel.
+
+_Entschieden:_ **Vier Realtage bis zum Verhungern** (hundert Ticks, zwei Spieljahre).
+Essen ist damit etwas, das man alle paar Tage regelt; wer übers Wochenende nicht
+hereinschaut, kommt nicht hungernd zurück. Ein Test hält genau das fest.
+
+Vier Dinge, die sich beim Bauen zeigten:
+
+- **Die Not braucht ein eigenes Sterberisiko, keinen Faktor.** Der naheliegende Weg wäre,
+  das Altersrisiko zu vervielfachen — und wäre falsch: Vor vierzig ist es null, und jedes
+  Vielfache von null bleibt null. Ein Zwanzigjähriger hätte nicht verhungern können,
+  ausgerechnet der, den es am ehesten trifft. Jetzt addiert sich die Not, und die
+  Todesabfrage muss beide Wege kennen.
+- **`NaN` lief in die höchste Gefahr.** Die Abfrage lud die Sättigungsspalte nicht mit,
+  `undefined` wurde zu `NaN`, und `NaN` fiel durch jeden Vergleich hindurch bis zum
+  Höchstrisiko: Beim ersten Testlauf starben die Alten reihenweise. Dieselbe Klasse wie
+  das `NaN` in der Weltuhr aus 4.2 — die Funktion fängt es jetzt selbst ab.
+- **Jeder neu angelegte Charakter startete hungernd.** `lastNeedTick` steht per Vorgabe
+  auf null, und die Sättigung rechnet gegen die Weltzeit: Ein Neugeborener war rechnerisch
+  seit Weltbeginn ohne Nahrung. Betraf alle drei Anlegestellen — Spielercharakter,
+  Neugeborene und Weltaufbau.
+- **Hunger senkt die Obergrenze, nicht den Zufluss.** Beim Zufluss müsste man wissen, wie
+  satt jemand in der Zwischenzeit war; die Rechnung wäre nur noch näherungsweise richtig.
+  Über die Obergrenze bleibt sie exakt — und niemandem wird genommen, was er sich satt
+  erarbeitet hat.
+
+_Fertig, wenn:_ Hunger tut weh, Essen hilft, und die Stadt hat eine Quelle dafür. —
+Erledigt und am gebauten Server durchgespielt: fünf Brote für zwanzig Münzen, nach
+siebzig Ticks ohne Mahlzeit „hungrig (30 von 100)", ein Laib brachte auf 70 zurück.
+
+**4.6 Wirtschaft** _(der Rest: 4.6b bis 4.6d)_**.** `itemTemplate`/`inventory` mit echtem Nutzen (Nahrung, Kleidung,
 Werkzeug, **Baumaterial**), Bedürfnisse als Modifikatoren, `employment` mit Lohn, Produktion im Betrieb.
 Der Handel läuft über **Festpreis-Angebote am Gebäude** (`shopOffer`: BuildingId, itemId,
 Preis, Menge) — ein Kauf ist eine Transaktion, kein Matching. **NPC-Konsum gehört in

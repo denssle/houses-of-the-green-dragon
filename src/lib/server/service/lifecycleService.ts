@@ -7,6 +7,11 @@ import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
 import { chooseHeir, type Child, splitEstate } from '$lib/game/inheritance.logic';
 import { diesThisTick, MORTALITY_ONSET_AGE } from '$lib/game/mortality.logic';
+import {
+	currentSatiety,
+	starvationRiskPerYear,
+	TICKS_BEFORE_STARVATION_POSSIBLE
+} from '$lib/game/need.logic';
 import { personalityLabel } from '$lib/game/personality.logic';
 import { ageInYears, yearsToTicks } from '$lib/game/time';
 
@@ -48,17 +53,28 @@ export async function reapTheDead(
 	const alt = await Character.findAll({
 		where: {
 			deathTick: null,
-			// Wer jünger ist, hat ein Risiko von null — die Zeile spart den Wurf für die
-			// gesamte junge Bevölkerung, und das ist die Mehrheit.
-			birthTick: { [Op.lte]: tick - yearsToTicks(MORTALITY_ONSET_AGE) }
+			// Zwei Wege ins Grab, und die Abfrage muss beide kennen: das Alter und die Not.
+			// Wer jung und satt ist, hat ein Risiko von null — das spart den Wurf fuer die
+			// Mehrheit der Bevoelkerung. Die zweite Zeile ist bewusst grosszuegig: Sie holt,
+			// wer laenger nicht gegessen hat, die genaue Rechnung folgt in JavaScript.
+			[Op.or]: [
+				{ birthTick: { [Op.lte]: tick - yearsToTicks(MORTALITY_ONSET_AGE) } },
+				{ lastNeedTick: { [Op.lte]: tick - TICKS_BEFORE_STARVATION_POSSIBLE } }
+			]
 		},
-		attributes: ['id', 'birthTick']
+		attributes: ['id', 'birthTick', 'satiety', 'lastNeedTick']
 	});
 
 	const gestorben: Death[] = [];
 	for (const kandidat of alt) {
 		const alter: number = ageInYears(kandidat.dataValues.birthTick, tick);
-		if (!diesThisTick(alter, roll())) continue;
+		// Die Not addiert sich zum Alter, sie vervielfacht es nicht: Vor vierzig ist das
+		// Altersrisiko null, und jedes Vielfache von null bliebe null. Wer verhungert,
+		// stirbt auch mit zwanzig.
+		const not: number = starvationRiskPerYear(
+			currentSatiety(kandidat.dataValues.satiety, kandidat.dataValues.lastNeedTick, tick)
+		);
+		if (!diesThisTick(alter, roll(), not)) continue;
 
 		// Jeder Todesfall in eigener Transaktion: Ein Fehler beim Nachlass des einen darf
 		// die übrigen nicht mitreißen.

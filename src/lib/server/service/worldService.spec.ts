@@ -32,6 +32,8 @@ async function charakter(actionPoints: number, lastTickProcessed: number): Promi
 		gender: 'MALE',
 		birthTick: 0,
 		lastTickProcessed,
+		satiety: 100,
+		lastNeedTick: 1000,
 		actionPoints,
 		money: 0,
 		RegionId: stadtId
@@ -126,11 +128,26 @@ describe('Weltzeit', () => {
 
 		it('deckelt den Vorrat', async () => {
 			const adelbert = await charakter(10, 1000);
-			await weltzeit(1000 + 5 * MAX_ACTION_POINTS, START);
+			const spaeter: number = 1000 + 5 * MAX_ACTION_POINTS;
+			// Satt bleiben: Sonst greift der halbierte Deckel des Hungernden, und der Test
+			// prüfte etwas anderes, als er behauptet.
+			await CharacterModel.update({ lastNeedTick: spaeter }, { where: { id: adelbert } });
+			await weltzeit(spaeter, START);
 
 			const geladen = await characterService.getCharacter(adelbert);
 
 			expect(geladen?.actionPoints).toBe(MAX_ACTION_POINTS);
+		});
+
+		it('deckelt beim Hungernden früher', async () => {
+			// Not nimmt keine Kraft weg, sie hält den Vorrat klein: Wer nichts isst, sammelt
+			// nur noch die Hälfte an.
+			const adelbert = await charakter(10, 1000);
+			await weltzeit(1000 + 5 * MAX_ACTION_POINTS, START);
+
+			const geladen = await characterService.getCharacter(adelbert);
+
+			expect(geladen?.actionPoints).toBe(MAX_ACTION_POINTS / 2);
 		});
 
 		it('ändert nichts, wenn kein Tick vergangen ist', async () => {

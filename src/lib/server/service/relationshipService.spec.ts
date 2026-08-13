@@ -30,6 +30,8 @@ async function person(name: string, extras: Record<string, unknown> = {}): Promi
 		gender: 'FEMALE',
 		birthTick: JETZT - yearsToTicks(30),
 		lastTickProcessed: JETZT,
+		satiety: 100,
+		lastNeedTick: JETZT,
 		RegionId: stadtId,
 		...extras
 	});

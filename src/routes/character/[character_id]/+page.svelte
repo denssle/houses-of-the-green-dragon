@@ -31,6 +31,11 @@
 	<dt>Aktionspunkte</dt>
 	<dd>{data.character.actionPoints} von {data.maxActionPoints}</dd>
 
+	<dt>Zustand</dt>
+	<dd>
+		{#if data.hunger}{data.hunger.label} <small>({data.hunger.satiety} von 100)</small>{/if}
+	</dd>
+
 	<dt>Wesensart</dt>
 	<dd>
 		{data.nature}

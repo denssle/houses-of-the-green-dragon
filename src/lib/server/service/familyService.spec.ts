@@ -40,6 +40,8 @@ async function person(
 		gender: 'FEMALE',
 		birthTick: JETZT - yearsToTicks(alter),
 		lastTickProcessed: JETZT,
+		satiety: 100,
+		lastNeedTick: JETZT,
 		actionPoints: 48,
 		RegionId: stadtId,
 		...extras

@@ -43,6 +43,8 @@ export interface CharacterAttributes {
 	sociability: number;
 	ambition: number;
 	agreeableness: number;
+	satiety: number;
+	lastNeedTick: number;
 	HomeBuildingId: string | null;
 }
 
@@ -66,6 +68,8 @@ export type CharacterCreationAttributes = Optional<
 	| 'sociability'
 	| 'ambition'
 	| 'agreeableness'
+	| 'satiety'
+	| 'lastNeedTick'
 	| 'HomeBuildingId'
 >;
 

@@ -18,6 +18,7 @@ import {
 	isDue
 } from '$lib/game/family.logic';
 import { residentsAt } from '$lib/game/building.logic';
+import { SATIETY_MAX } from '$lib/game/need.logic';
 import { inheritPersonality, type Personality } from '$lib/game/personality.logic';
 import { AGE_OF_MAJORITY, ageInYears, yearsToTicks } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
@@ -260,6 +261,9 @@ async function zurWeltBringen(
 				gender: geschlecht,
 				birthTick: tick,
 				lastTickProcessed: tick,
+				// Ein Saeugling wird gestillt: satt zur Welt, Stichtag jetzt.
+				satiety: SATIETY_MAX,
+				lastNeedTick: tick,
 				actionPoints: 0,
 				money: 0,
 				RegionId: mutter.dataValues.RegionId,

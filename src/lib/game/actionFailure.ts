@@ -31,4 +31,6 @@ export type ActionFailureReason =
 	| 'NOT_FOR_SALE'
 	| 'ALREADY_OWNED'
 	| 'NOTHING_TO_LEARN'
-	| 'TEACHER_TOO_TIRED';
+	| 'TEACHER_TOO_TIRED'
+	| 'NOT_EDIBLE'
+	| 'NOT_IN_STOCK';

@@ -6,9 +6,8 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 
 | #   | Punkt                                                             | Fällig vor                  | Art          |
 | --- | ----------------------------------------------------------------- | --------------------------- | ------------ |
-| 4   | Folgen ungedeckter Bedürfnisse                                    | 4.6                         | Entscheidung |
-| 5   | Krankheiten: Ursachen, Verlauf, Heilung                           | 4.6                         | Entwurf      |
-| 6   | Kämpfe und Verletzungen                                           | 4.6                         | Entwurf      |
+| 5   | Krankheiten: Ursachen, Verlauf, Heilung                           | Heiltrank (4.6c)            | Entwurf      |
+| 6   | Kämpfe und Verletzungen                                           | Waffen und Gift (4.6c)      | Entwurf      |
 | 7   | Verhaltensregeln der NPCs                                         | 4.4 / 4.6                   | Entwurf      |
 | 8   | Pachtvertrag beim Tod des Pächters                                | 4.6                         | Entscheidung |
 | 9   | Wahlalter                                                         | 4.7                         | Entscheidung |
@@ -24,19 +23,14 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
 `paths.base`, wie bei Festival), mit Phase 4.5a der **Fertigkeitenkatalog** samt
-Übungskurve und den Grenzen der Lehre, und mit Phase 4.1 das **Tick-Nachholen** —
+Übungskurve und den Grenzen der Lehre, mit Phase 4.6a die **Folgen ungedeckter
+Bedürfnisse** (gestaffelt: erst Leistung, dann Leben), und mit Phase 4.1 das
+**Tick-Nachholen** —
 verpasste Ticks werden übersprungen, die Weltuhr springt trotzdem vor, und niemand
 bekommt etwas für die Ausfallzeit. Alles steht in `KONZEPT.md` beziehungsweise
 `UMBAU.md`.
 
 ## Vor Phase 4
-
-### 4. Folgen ungedeckter Bedürfnisse
-
-Hunger, Kälte, kein Dach über dem Kopf — was genau passiert? Weniger Aktionspunkte,
-Krankheit, am Ende Tod? Bei Permadeath ist das eine der folgenreichsten Regeln des
-Spiels, und sie hängt eng an Punkt 1: Wie schnell etwas eskaliert, ergibt nur im
-Verhältnis zur Tick-Länge Sinn.
 
 ### 5. Krankheiten
 
