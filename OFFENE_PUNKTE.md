@@ -12,6 +12,8 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung | 4.8                          | Entwurf      |
 | 13  | Verfahren zur Erschließung neuen Baulands                | 4.9                          | Entscheidung |
 | 14  | Startbedingungen für neue Spieler                        | erster öffentlicher Betrieb  | Entscheidung |
+| 21  | Schule: Wirkung, Kosten und wer darüber entscheidet      | 4.7e                         | Entscheidung |
+| 22  | Umfang, Aufbewahrung und Sichtbarkeit der Chronik        | 4.7d                         | Entwurf      |
 | 20  | Verschleiß von Gegenständen                              | Kleidung und Werkzeug (4.6c) | Entwurf      |
 | 15  | Weltinhalte: Berufe, Waren und Rezepte                   | laufend                      | Entwurf      |
 | 16  | Balancing im engeren Sinn                                | laufend                      | laufend      |
@@ -89,12 +91,20 @@ Ein Rathaus, das zusammenfällt, nähme der Stadt die Wahl, und neu bauen kann e
 Der Bürgermeister richtet sie aus der Stadtkasse her; ein NPC im Amt tut das von selbst,
 sobald ein Bau unter die halbe Güte fällt.
 
+**Entschieden (4.7e, noch nicht gebaut):** Von jeder Art darf es **mehrere** geben. Die
+Begrenzung auf eins war eine Startannahme: Ein Rathaus je Stadt ist richtig, eine einzige
+Unterkunft nicht. Wächst die Bevölkerung, braucht sie mehr Dach. Einmalig bleiben nur die
+Bauten, die die Stadt als Ganzes betreffen — Rathaus, Marktplatz, Mauer. Die Grenze ist
+damit nicht mehr das Limit, sondern die Knappheit: Bauland, Kasse und der Unterhalt, denn
+drei Unterkünfte sind drei Bauten, die verfallen.
+
 Offen bleibt der **Katalog**: Welche Bauten gibt es noch, was kosten sie, was bewirken
-sie? Schule und Brunnen konkurrieren mit Wohnhäusern um knappes Bauland (eine echte
+sie? Brunnen und Schule konkurrieren mit Wohnhäusern um knappes Bauland (eine echte
 politische Abwägung), eine Stadtmauer umschließt dagegen die ganze Region und braucht
 deshalb eine eigene Regel. Und ihr **Ausbau**: Bisher hat das Wachhaus eine Stufe und
 damit eine Stelle — wer eine größere Wache will, müsste ausbauen können, und das kann
-heute nur ein privater Eigentümer.
+heute nur ein privater Eigentümer. Ausbauen oder ein zweites danebenstellen sind zwei
+Wege zum selben Ziel; vermutlich braucht es nur einen.
 
 Der Prüfstein ist derselbe wie bei Waren und Fertigkeiten: **Wo wirkt der Bau?** Ein
 Brunnen gegen Seuchen setzt Punkt 5 voraus, eine Mauer gegen Räuber die Ereignisse aus
@@ -188,6 +198,55 @@ Zustand je Stück heißt eine Zeile je Stück — bei Brot wäre das absurd, bei
 richtig. Vermutlich läuft es auf eine Trennung hinaus: Verbrauchsgüter bleiben eine Menge,
 Ausrüstung wird einzeln geführt. Diese Entscheidung fällt spätestens mit der ersten Ware,
 die länger hält als ein Bissen.
+
+### 21. Schule und Bildung
+
+Die Schule ist der erste öffentliche Bau, für den der **Bürger** zahlt und nicht die
+Stadt: Wer sein Kind hinschickt, zahlt Schulgeld. Damit bekommt die Kindheit einen
+Inhalt — bisher ist sie eine Wartezeit bis zur Volljährigkeit — und der Spieler eine
+Ausgabe, die sich erst in der nächsten Generation auszahlt. Genau darum geht es in einem
+Dynastiespiel: Man investiert in jemanden, den man später selbst spielt.
+
+Zu entscheiden ist die **Wirkung**. Drei Wege, mit unterschiedlichen Folgen:
+
+- **Ein Vorsprung beim Start.** Das Kind beginnt sein Erwachsenenleben mit Übung in
+  einer Fertigkeit statt bei null. Einfach, einmalig wirksam, und der Nutzen ist sofort
+  ablesbar.
+- **Schneller lernen, lebenslang.** Wer zur Schule ging, sammelt Übung schneller. Wirkt
+  über das ganze Leben und trifft damit die Aussage besser — Bildung als Zinseszins.
+  Braucht aber ein dauerhaftes Merkmal am Charakter.
+- **Beides in kleinen Dosen.** Realistisch und zwei Stellschrauben, wo eine reichte.
+
+Daran hängen weitere Fragen: Kostet der Schulbesuch das Kind **Aktionspunkte** (dann
+konkurriert Lernen mit Arbeiten, was der schönere Konflikt wäre) oder nur Geld? Wer
+entscheidet über den Besuch — der Spieler für seine Kinder, aber was tun NPC-Eltern?
+Geizige schicken niemanden, ehrgeizige alle: Die Persönlichkeitsachsen aus 4.4a liegen
+bereit. Und setzt der Bürgermeister das Schulgeld als Gesetz (dann ist Bildung ein
+politischer Streitpunkt) oder steht es fest?
+
+Der Prüfstein bleibt: **Wo wirkt es?** Ohne Fertigkeiten (4.5a ✓) hätte eine Schule
+nichts, worauf sie wirken könnte — die Voraussetzung steht also.
+
+### 22. Umfang und Aufbewahrung der Chronik
+
+Die Chronik aus 4.7d hält fest, was geschehen ist. Zu entscheiden ist, **wie viel** und
+**wie lange**.
+
+Eine Welt mit hundert Einwohnern erzeugt über Generationen sehr viele Zeilen; jede
+Anstellung, jeder Kauf, jede Renovierung mitzuschreiben ergäbe ein Protokoll, in dem
+niemand mehr etwas findet. Die Auswahl ist deshalb die eigentliche Entwurfsarbeit:
+Geburt, Ehe, Tod, Erbfall, Wahl, Amtshandlung und Neubau sind Ereignisse, an die man sich
+erinnert. Ob eine Anstellung dazugehört, hängt daran, ob sie jemanden außer den zwei
+Beteiligten interessiert.
+
+Dazu die Aufbewahrung: Alles behalten (die Chronik wächst unbegrenzt), nach Jahren
+löschen (dann geht die Familiengeschichte verloren, die den Reiz ausmacht) oder
+**verdichten** — Lebensereignisse dauerhaft, Alltägliches nach einigen Spieljahren weg.
+Der dritte Weg ist vermutlich der richtige und der aufwendigste.
+
+Und die **Sichtbarkeit**: Ist alles öffentlich? Eine Stadt, in der jeder jede Geburt und
+jeden Todesfall erfährt, ist stimmig; eine, in der jeder sieht, wer wen angestellt hat,
+vielleicht auch — aber es gibt Ereignisse, die einem Haus gehören und nicht dem Markt.
 
 ### 16. Balancing
 

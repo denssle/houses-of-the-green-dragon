@@ -1248,9 +1248,68 @@ Stadtkasse, wirksam gegen Raub und Räuberzüge. Ob sie ein Amt, eine Anstellung
 beides ist, steht als Punkt 19 offen — davon hängt ab, ob sie in `office` gehört oder in
 `employment`.
 
+**4.7d Die Chronik.** Ein Buch, in dem steht, was geschehen ist: Geburten, Hochzeiten,
+Todesfälle, Wahlergebnisse, neue Gebäude, angetretene Stellen.
+
+**Der Grund ist nicht Zierde, sondern Sichtbarkeit.** Die Welt läuft weiter, während
+niemand zusieht — das ist ihr größter Vorzug und zugleich ihr Problem: Wer nach zwei Tagen
+wiederkommt, findet eine veränderte Stadt vor und erfährt nirgends, was sie verändert hat.
+Heute steht all das ausschließlich im Serverlog, wo es kein Spieler je sieht. Ein
+Unglück, von dem niemand erfährt, hat keine Folgen; eine Hochzeit, von der niemand
+erfährt, auch nicht.
+
+**Ein Ereignis ist eine Zeile, kein Text.** Art, Tick, Ort und die Beteiligten als
+Kennungen — der Satz entsteht erst beim Anzeigen, wie bei den Fehlergründen in
+`actionFailure.ts`. Sonst fröre jede Meldung ihre damalige Formulierung ein, und beim
+ersten Umbenennen stünde in der Chronik ein Name, den es nicht mehr gibt.
+
+Geschrieben wird dort, wo das Ereignis entsteht — in den Diensten, nicht im Takt: Eine
+Hochzeit kann ein Spieler auslösen, eine Geburt der Takt, eine Anstellung beides. Die
+Chronik ist damit die erste Stelle, an der alle Wege zusammenlaufen.
+
+Angezeigt wird sie **dreifach gefiltert**: die Stadt (was hier geschah), das Haus (was
+uns betrifft) und die Person (ihr Lebenslauf). Dieselben Zeilen, drei Fragen. Der
+Lebenslauf ist dabei der Nebengewinn, der den Stammbaum ergänzt: Wann wurde sie geboren,
+wen hat sie geheiratet, welches Amt hatte sie, woran ist sie gestorben.
+
+Offen ist, **wie lange** aufbewahrt wird und wer welche Einträge sehen darf — beides in
+Punkt 22.
+
+_Fertig, wenn:_ Ein Spieler, der zwei Tage weg war, kann nachlesen, was inzwischen
+geschehen ist.
+
+**4.7e Schulen und eine wachsende Stadt.** Der Katalog öffentlicher Bauten wird länger,
+und die Stadt darf von jeder Art **mehrere** haben.
+
+**Die Begrenzung auf eins war eine Startannahme, keine Regel.** Ein Rathaus je Stadt ist
+richtig; eine einzige Unterkunft ist es nicht. Wächst die Bevölkerung, braucht sie mehr
+Dach, und ein Bürgermeister, der zusehen muss, wie Leute obdachlos bleiben, weil das
+Limit bei eins steht, verwaltet eine Regel statt einer Stadt. Künftig gilt: **einmalig**
+sind nur die Bauten, die die Stadt als Ganzes betreffen (Rathaus, Marktplatz, Mauer);
+alles andere darf so oft stehen, wie die Kasse es hergibt und Bauland da ist.
+
+Das verschiebt die Grenze vom Limit auf die Knappheit — und genau dorthin gehört sie: Was
+die Stadt bebaut, kann kein Spieler mehr kaufen, und was sie unterhält, kostet dauerhaft.
+Eine Stadt mit drei Unterkünften hat drei Bauten, die verfallen.
+
+**Die Schule** ist der erste Bau, für den der Bürger selbst zahlt. Wer sein Kind
+hinschickt, zahlt Schulgeld an die Stadt; das Kind lernt schneller oder beginnt sein
+Erwachsenenleben nicht bei null. Damit bekommt die Kindheit zum ersten Mal einen Inhalt
+— bisher ist sie eine Wartezeit bis zur Volljährigkeit — und der Spieler eine Ausgabe,
+die sich erst in der nächsten Generation auszahlt. Das ist genau die Art Entscheidung,
+um die es in einem Dynastiespiel geht: Man investiert in jemanden, den man später selbst
+spielt.
+
+Die Wirkung hängt an den Fertigkeiten aus 4.5a und ist in Punkt 21 zu entscheiden. Der
+Grundgedanke: Schule ersetzt nicht das Üben, sie verkürzt es — und was ein Kind gelernt
+hat, kann ihm niemand nehmen.
+
+_Fertig, wenn:_ Eine wachsende Stadt kann sich ein zweites Dach bauen, und ein Spieler
+kann Geld für die Zukunft seines Kindes ausgeben.
+
 **4.8 Ereignisse.** Räuber, Seuche, Brand als Zufallsereignisse am Tick, gemildert durch
-öffentliche Bauten (Mauer, Brunnen) **und durch die Wache aus 4.7**. Protokolliert in `event` und sichtbar als
-Stadtchronik — ein Unglück, von dem niemand erfährt, hat politisch keine Folgen. Bewusst
+öffentliche Bauten (Mauer, Brunnen) **und durch die Wache aus 4.7**. Protokolliert in der Chronik aus 4.7d — ein
+Unglück, von dem niemand erfährt, hat politisch keine Folgen. Bewusst
 nach der Politik, weil erst dann etwas da ist, das schützen kann.
 
 **4.9 Ausdehnung.** Fernhandel mit `shipment` (Ankunfts-Tick statt Fortbewegung),

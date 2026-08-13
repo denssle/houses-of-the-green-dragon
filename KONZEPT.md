@@ -424,6 +424,38 @@ das Feste am Charakter — was einer erlebt, verschiebt seine Beziehungen und se
 nicht seine Anlagen. Wer anders handeln soll, muss ein anderer sein, und dafür gibt es
 den Generationenwechsel.
 
+### 10. Bildung — was man einem Kind mitgibt
+
+**Die Kindheit ist kein Wartezimmer.** Bis zur Volljährigkeit kann ein Charakter wenig;
+das soll so bleiben, aber die Zeit soll nicht folgenlos vergehen. Wer sein Kind zur
+Schule schickt, zahlt dafür — und bekommt einen Erwachsenen, der nicht bei null anfängt.
+
+Das ist die Ausgabe mit der längsten Verzögerung im ganzen Spiel: Sie zahlt sich erst in
+der nächsten Generation aus, und zwar bei dem Charakter, den man dann selbst spielt.
+Genau darin liegt der Reiz — ein Haus, das über Generationen in seine Kinder investiert,
+steht nach hundert Jahren anders da als eines, das jede Münze sofort verbraucht hat.
+
+Die Schule gehört der Stadt, das Schulgeld fließt in die Stadtkasse. Damit hat die
+Bildung eine politische Seite: Wie viele Schulen sich eine Stadt leistet, ob das
+Schulgeld hoch oder niedrig ist, wer es sich leisten kann — das entscheidet ein
+gewähltes Amt und nicht der Code.
+
+### 11. Die Chronik — damit die Welt erzählbar bleibt
+
+**Die Welt läuft weiter, während niemand zusieht.** Das ist ihr größter Vorzug und ihr
+größtes Problem: Wer nach zwei Tagen wiederkommt, findet eine veränderte Stadt vor und
+weiß nicht, was sie verändert hat. Wer gestorben ist, wer geheiratet hat, wer gewählt
+wurde, was gebaut wurde.
+
+Deshalb führt jede Stadt eine Chronik: Geburten, Hochzeiten, Todesfälle, Erbfälle,
+Wahlen, neue Bauten, Unglücke. Dieselben Zeilen beantworten drei Fragen, je nachdem,
+wonach man filtert — was geschah in der Stadt, was betraf mein Haus, was hat diese Person
+erlebt. Der Lebenslauf eines Charakters ist damit kein eigenes System, sondern eine Sicht
+auf die Chronik: geboren, verheiratet, im Amt, gestorben.
+
+Und sie hat eine politische Seite: Ein Unglück, von dem niemand erfährt, hat keine
+Folgen. Wer ein Amt hält, wird an dem gemessen, was in der Chronik steht.
+
 ## Was das für das Datenmodell heißt
 
 Das Schema in Phase 1 des Umbauplans bildet die Grundzüge bereits ab, damit sie nicht
