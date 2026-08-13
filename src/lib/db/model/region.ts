@@ -14,7 +14,8 @@ export const Region: ModelStatic<Model<RegionAttributes, RegionCreationAttribute
 			name: { type: DataTypes.STRING, allowNull: false },
 			type: { type: DataTypes.STRING, allowNull: false, validate: { isIn: [[...REGION_TYPES]] } },
 			// Nur Städte führen eine Kasse; bei Umlandflächen bleibt das Feld leer.
-			treasury: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
+			treasury: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
+			lastTaxTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
 		},
 		{ timestamps: true }
 	);

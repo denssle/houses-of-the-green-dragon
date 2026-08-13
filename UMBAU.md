@@ -1142,6 +1142,47 @@ _Fertig, wenn:_ Die Stadt hat ohne Zutun eines Spielers einen Bürgermeister. �
 Amtszeit, Wahlzettel und Stadtkasse. **Macht** hat das Amt noch keine — die kommt mit den
 Gesetzen (4.7b) und den öffentlichen Bauten (4.7c).
 
+**4.7b Gesetze und Steuern.** ✓ Das Amt bekommt Macht.
+
+**Ein Gesetz erfindet keine Regel, es setzt eine Zahl.** Jede Gesetzesart zeigt auf eine
+Stellschraube, die es ohnehin schon gibt: den Zehnt auf die Ernte, das Standgeld am
+Markt, die Verkaufssteuer auf jeden Kauf, die Grundsteuer auf Besitz. Der Bürgermeister
+verschiebt sie, mehr nicht. Ein Gesetz als freier Effekt wäre für jede Art ein Sonderfall
+im Code, und nach fünf Gesetzen wüsste niemand mehr, was zusammen mit was gilt.
+
+**Gespeichert wird der Vorgang, nicht der Zustand.** Jeder Erlass ist eine eigene Zeile
+mit Tick und Urheber; es gilt der jüngste je Art — dieselbe Bauart wie beim Amt aus 4.7a.
+Der Gewinn ist derselbe und obendrein die Chronik: Wer hat wann die Steuern erhöht, und
+wie ist ihm die nächste Wahl bekommen? Ohne jeden Erlass gilt der Rückfallwert, und der
+ist der bisherige Wert der Konstante. Deshalb ändert 4.7b für sich genommen nichts.
+
+**Die Grenzen sind die Verfassung.** Sie stehen im Code und nicht zur Abstimmung: Ein
+Zehnt von hundert Prozent wäre das Ende der Wirtschaft, und zwar unwiderruflich, weil
+danach niemand mehr genug hätte, um zu handeln. Nach unten ist überall die Null erlaubt —
+ein Bürgermeister darf die Stadt aushungern, das ist eine politische Entscheidung und
+keine kaputte. Zwischen den Grenzen wird nichts geprüft: Der Erlass gilt sofort, ohne
+Vorlauf und ohne Bestätigung. Missbrauch wird nicht verhindert, sondern bestraft — bei
+der nächsten Wahl.
+
+Die **Verkaufssteuer** kommt oben auf den Preis, statt vom Erlös abgezogen zu werden: Der
+Verkäufer bekommt, was am Schild steht. Andersherum wäre jede Steuererhöhung eine
+Enteignung dessen, der seinen Preis nie gesenkt hat.
+
+Die **Grundsteuer** (Punkt 11) ist die einzige Abgabe, die an der Zeit hängt statt an
+einer Handlung — und deshalb die einzige, die einen Durchlauf braucht: einmal im
+Spieljahr über die Grundstücke einer Stadt. Sie trifft die Besitzenden und nicht die
+Neulinge, und sie macht Horten teuer; das war der Grund für die Wahl. Wer nicht zahlen
+kann, zahlt, was er hat — der Rest wird **erlassen** und nicht als Schuld vorgetragen.
+Eine Steuerschuld ohne Vollstreckung wäre nur eine Zahl, die wächst und nie etwas tut;
+die Zwangsversteigerung gehört zur Erschließung von Bauland (Punkt 13). Bei einem
+Serverausfall fällt die Erhebung aus, statt nachgeholt zu werden — dieselbe Regel wie beim
+Nachwachsen und beim Sterben.
+
+_Fertig, wenn:_ Ein Bürgermeister kann etwas erlassen, das alle spüren. — Erledigt und am
+gebauten Server durchgespielt: Verkaufssteuer auf zehn Prozent erlassen, ein Zehnt von 90
+Prozent abgewiesen („So weit reicht die Macht des Amtes nicht"), dann fünf Brote zu sechs
+Münzen gekauft — der Bäcker bekam 30, die Stadtkasse 3, der Käufer zahlte 33.
+
 **4.7 Politik und Stadtkasse.** `office`, `election`, `vote`, `law` — **je Stadt**, nicht
 je Welt. Jeder Charakter hat eine Stimme, NPCs entscheiden anhand ihrer Zuneigung zu den
 Kandidaten; ein eigenes Wahlkampfsystem braucht es dadurch nicht. Gesetze als

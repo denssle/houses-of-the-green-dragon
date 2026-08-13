@@ -2,6 +2,7 @@ import * as worldService from '$lib/server/service/worldService';
 import * as familyService from '$lib/server/service/familyService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
 import * as electionService from '$lib/server/service/electionService';
+import * as lawService from '$lib/server/service/lawService';
 import * as npcService from '$lib/server/service/npcService';
 import { findStartRegionId } from '$lib/db/seed';
 
@@ -88,6 +89,16 @@ async function schlagen(): Promise<void> {
 		if (wahl.closed) {
 			console.info(
 				`Wahl ausgezaehlt: ${wahl.closed.votes} Stimmen auf ${wahl.closed.candidates} Kandidaten.`
+			);
+		}
+
+		// Die Grundsteuer ist die einzige Abgabe, die an der Zeit haengt statt an einer
+		// Handlung — deshalb braucht sie als einzige einen Durchlauf. Einmal im Spieljahr.
+		const steuer = await lawService.collectPropertyTax(stadtId, geschehen.currentTick);
+		if (steuer) {
+			console.info(
+				`Grundsteuer: ${steuer.collected} Muenzen von ${steuer.payers} Besitzern` +
+					(steuer.shortfall > 0 ? `, ${steuer.shortfall} nicht eintreibbar.` : '.')
 			);
 		}
 

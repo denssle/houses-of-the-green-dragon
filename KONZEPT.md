@@ -225,6 +225,23 @@ Stirbt er, ist der Zweitplatzierte der Beste unter den Lebenden und damit im Amt
 dass beim Sterben etwas nachgetragen werden müsste. Neu gewählt wird erst, wenn die
 Amtszeit abläuft oder von der Wahlliste niemand mehr lebt.
 
+**Ein Gesetz erfindet keine Regel, es setzt eine Zahl.** Jede Gesetzesart zeigt auf eine
+Stellschraube, die es ohnehin gibt — Zehnt, Standgeld, Verkaufssteuer, Grundsteuer. Der
+Bürgermeister verschiebt sie; die Regel selbst bleibt an ihrer Stelle. Gespeichert wird
+jeder Erlass einzeln, es gilt der jüngste, und daraus fällt die Chronik ab: Wer hat wann
+was erhöht?
+
+Die **Grenzen stehen im Code und nicht zur Abstimmung**. Ein Zehnt von hundert Prozent
+wäre das Ende der Wirtschaft und nicht mehr rückgängig zu machen. Nach unten ist überall
+die Null erlaubt: Eine Stadt aushungern zu lassen ist eine politische Entscheidung, keine
+kaputte. Zwischen den Grenzen gilt ein Erlass sofort — Missbrauch wird nicht verhindert,
+sondern abgewählt.
+
+Die **Grundsteuer** trifft den Besitz statt den Ertrag und ist die einzige Abgabe, die an
+der Zeit hängt: einmal im Spieljahr, je Grundstück. Sie macht Horten teuer. Wer nicht
+zahlen kann, zahlt, was er hat; der Rest wird erlassen, denn eine Schuld ohne
+Vollstreckung wäre nur eine Zahl, die wächst.
+
 **Es zählen Köpfe, nicht Münzen.** Jeder Erwachsene der Stadt hat eine Stimme; Besitz
 gibt keine. Wer politisch etwas will, braucht deshalb Leute: Kinder, Angestellte,
 Verbündete. NPCs stimmen für den, zu dem sie die größte Zuneigung haben — ein eigenes

@@ -10,6 +10,7 @@ import { seasonOf } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as needService from '$lib/server/service/needService';
+import * as lawService from '$lib/server/service/lawService';
 import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
 
@@ -184,7 +185,9 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 		);
 		if (!ergebnis.ok) return ergebnis;
 
-		const zehnt: number = titheOn(ergebnis.produced);
+		// Der Zehnt ist seit 4.7b ein Gesetz: Der Satz kommt aus der Stadt, nicht aus dem Code.
+		const zehntsatz: number = await lawService.rate(flaeche.dataValues.RegionId, 'TITHE', t);
+		const zehnt: number = titheOn(ergebnis.produced, zehntsatz);
 		const behalten: number = ergebnis.produced - zehnt;
 
 		await baeuerin.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });

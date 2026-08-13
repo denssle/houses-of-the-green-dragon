@@ -88,4 +88,52 @@
 	</section>
 {/if}
 
+<section>
+	<h3>Gesetze</h3>
+	<p>
+		<small>
+			Ein Gesetz erfindet keine Regel, es setzt eine Zahl — und zwar eine, die es im Spiel ohnehin
+			schon gibt. Was der Bürgermeister erlässt, gilt ab sofort.
+		</small>
+	</p>
+	<ul>
+		{#each data.laws as gesetz (gesetz.kind)}
+			<li>
+				<b>{gesetz.name}:</b>
+				{gesetz.value}{gesetz.unit === 'PERCENT' ? ' %' : ' Münzen'} — {gesetz.description}.
+				{#if data.holder?.mine}
+					<form method="POST" action="?/enact" use:enhance>
+						<input type="hidden" name="kind" value={gesetz.kind} />
+						<input
+							type="number"
+							name="value"
+							value={gesetz.value}
+							min={gesetz.min}
+							max={gesetz.max}
+							aria-label="Neuer Satz für {gesetz.name}"
+						/>
+						<button type="submit">Erlassen</button>
+						<small>höchstens {gesetz.max}</small>
+					</form>
+				{/if}
+			</li>
+		{/each}
+	</ul>
+
+	{#if data.chronicle.length > 0}
+		<h3>Was bisher erlassen wurde</h3>
+		<ul>
+			{#each data.chronicle as eintrag (eintrag.kind + eintrag.enactedTick)}
+				<li>
+					<small>
+						Jahr {eintrag.year}: {eintrag.name} auf {eintrag.value}{eintrag.unit === 'PERCENT'
+							? ' %'
+							: ' Münzen'}{#if eintrag.enactedBy}, erlassen von {eintrag.enactedBy}{/if}.
+					</small>
+				</li>
+			{/each}
+		</ul>
+	{/if}
+</section>
+
 <p><a href="{base}/" class="link">Zurück in die Stadt</a></p>

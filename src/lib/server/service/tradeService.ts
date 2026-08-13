@@ -11,6 +11,7 @@ import { buy, offer as offerLogic, type ShopKind, shopKindFor } from '$lib/game/
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
+import * as lawService from '$lib/server/service/lawService';
 import * as needService from '$lib/server/service/needService';
 import * as worldService from '$lib/server/service/worldService';
 
@@ -161,6 +162,8 @@ export async function placeOffer(
 
 	const art: ShopKind = shopKindFor(laden, sellerId);
 	const tick: number = await worldService.currentTick();
+	// Der Satz ist ein Gesetz, kein Literal — der Buergermeister kann ihn verschoben haben.
+	const standgeld: number = laden.regionId ? await lawService.rate(laden.regionId, 'STALL_FEE') : 0;
 
 	return sequelize.transaction(async (t: Transaction) => {
 		const verkaeufer = await characterService.loadForAction(sellerId, tick, t);
@@ -176,7 +179,8 @@ export async function placeOffer(
 			art,
 			vorrat,
 			quantity,
-			pricePerUnit
+			pricePerUnit,
+			standgeld
 		);
 		if (!geplant.ok) return geplant;
 
@@ -258,6 +262,11 @@ export async function buyFromOffer(
 		const kaeufer = await characterService.loadForAction(buyerId, tick, t);
 		if (!kaeufer) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
+		const laden = await alsLaden(angebot.dataValues.BuildingId);
+		const steuersatz: number = laden?.regionId
+			? await lawService.rate(laden.regionId, 'SALES_TAX', t)
+			: 0;
+
 		const ergebnis = buy(
 			{ id: buyerId, money: kaeufer.dataValues.money },
 			{
@@ -265,7 +274,8 @@ export async function buyFromOffer(
 				quantity: angebot.dataValues.quantity,
 				pricePerUnit: angebot.dataValues.pricePerUnit
 			},
-			wanted
+			wanted,
+			steuersatz
 		);
 		if (!ergebnis.ok) return ergebnis;
 
@@ -275,6 +285,14 @@ export async function buyFromOffer(
 			where: { id: angebot.dataValues.SellerCharacterId },
 			transaction: t
 		});
+		// Der Verkäufer bekommt, was am Schild steht; die Steuer zahlt der Käufer obendrauf.
+		if (ergebnis.tax > 0 && laden?.regionId) {
+			await Region.increment('treasury', {
+				by: ergebnis.tax,
+				where: { id: laden.regionId },
+				transaction: t
+			});
+		}
 		await needService.changeStock(buyerId, angebot.dataValues.itemId, wanted, t);
 
 		// Ein leeres Angebot verschwindet — wie Beziehungen und Vorräte, die auf null

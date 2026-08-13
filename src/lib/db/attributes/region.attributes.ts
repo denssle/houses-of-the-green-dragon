@@ -14,9 +14,11 @@ export interface RegionAttributes {
 	name: string;
 	type: RegionType;
 	treasury: number | null;
+	/** Wann zuletzt Grundsteuer erhoben wurde. Leer, solange nie erhoben wurde. */
+	lastTaxTick: number | null;
 }
 
-export type RegionCreationAttributes = Optional<RegionAttributes, 'treasury'>;
+export type RegionCreationAttributes = Optional<RegionAttributes, 'treasury' | 'lastTaxTick'>;
 
 export function convertToRegion(attributes: RegionAttributes): Region {
 	return {

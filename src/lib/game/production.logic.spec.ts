@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { produce, type Recipe, TITHE, titheOn, yieldOf } from '$lib/game/production.logic';
+import { produce, type Recipe, titheOn, yieldOf } from '$lib/game/production.logic';
+import { LAW_RULES } from '$lib/game/law.logic';
+
+/** Der Zehnt ist seit 4.7b ein Gesetz; ohne Erlass gilt der Rueckfallwert. */
+const ZEHNT: number = LAW_RULES.TITHE.fallback;
 
 const ERNTE: Recipe = {
 	input: [],
@@ -88,13 +92,13 @@ describe('Herstellen', () => {
 
 	describe('der Zehnt', () => {
 		it('nimmt einen Bruchteil der Ernte', () => {
-			expect(titheOn(20)).toBe(Math.floor(20 * TITHE));
+			expect(titheOn(20, ZEHNT)).toBe(2);
 		});
 
 		it('lässt kleine Ernten unbehelligt', () => {
 			// Abgerundet: Wer eine Handvoll erntet, zahlt nichts. Das ist die Kehrseite
 			// davon, den Ertrag zu besteuern statt die Zeit.
-			expect(titheOn(5)).toBe(0);
+			expect(titheOn(5, ZEHNT)).toBe(0);
 		});
 	});
 });

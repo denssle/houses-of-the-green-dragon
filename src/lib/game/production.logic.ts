@@ -1,3 +1,4 @@
+import { taxOn } from '$lib/game/law.logic';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import type { SkillType } from '$lib/game/skill.logic';
 import { skillFactor } from '$lib/game/skill.logic';
@@ -92,10 +93,9 @@ export function produce(
  * Schleife: Wer nichts erntet, zahlt nichts — wer viel erntet, zahlt viel. Er trifft
  * damit den Ertrag statt der Zeit, was für einen Acker sogar treffender ist.
  *
- * Die zeitabhängige Pacht kommt zurück, sobald es Ämter gibt, die sie eintreiben (4.7).
+ * Seit 4.7b ist der Satz ein **Gesetz** und kommt von außen herein; die laufende
+ * Belastung gibt es daneben als Grundsteuer, und die trifft den Besitz statt den Ertrag.
  */
-export const TITHE = 0.1;
-
-export function titheOn(harvest: number): number {
-	return Math.floor(harvest * TITHE);
+export function titheOn(harvest: number, percent: number): number {
+	return taxOn(harvest, percent);
 }

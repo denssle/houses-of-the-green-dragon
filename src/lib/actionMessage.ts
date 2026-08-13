@@ -39,7 +39,9 @@ const SAETZE: Record<ActionFailureReason, string> = {
 	EMPLOYER_BROKE: 'Der Betrieb kann den Lohn nicht zahlen.',
 	NO_ELECTION: 'Es wird gerade nicht gewählt.',
 	ALREADY_STANDING: 'Du stehst bereits auf dem Wahlzettel.',
-	ALREADY_VOTED: 'Du hast deine Stimme schon abgegeben.'
+	ALREADY_VOTED: 'Du hast deine Stimme schon abgegeben.',
+	NOT_IN_OFFICE: 'Dazu müsstest du das Amt innehaben.',
+	OUT_OF_BOUNDS: 'So weit reicht die Macht des Amtes nicht.'
 };
 
 export function actionMessage(reason: ActionFailureReason): string {

@@ -10,7 +10,7 @@ import { getItemTemplate } from '$lib/model/itemTemplate';
 import * as tradeService from '$lib/server/service/tradeService';
 import * as needService from '$lib/server/service/needService';
 import * as employmentService from '$lib/server/service/employmentService';
-import { STALL_FEE } from '$lib/game/trade.logic';
+import * as lawService from '$lib/server/service/lawService';
 import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
 import { levelOf, maxLevel, upgradePrice } from '$lib/model/buildingTemplate';
 
@@ -53,7 +53,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		offers: await tradeService.getOffersAt(params.building_id, locals.currentCharacter?.id),
 		myStock: locals.currentCharacter ? await needService.getStock(locals.currentCharacter.id) : [],
 		isMarket: building.optionId === tradeService.MARKET_OPTION_ID,
-		stallFee: STALL_FEE,
+		// Der Satz gilt je Stadt, und der Betrachter steht in einer — seine ist die richtige.
+		stallFee: locals.currentCharacter
+			? await lawService.rate(locals.currentCharacter.regionId, 'STALL_FEE')
+			: 0,
 		staff: await employmentService.getStaff(params.building_id),
 		renovationCost: Math.ceil(CONDITION_MAX - building.condition) * RENOVATION_COST_PER_POINT
 	};

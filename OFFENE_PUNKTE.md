@@ -4,24 +4,26 @@ Alles, was noch entschieden oder entworfen werden muss, mit dem Zeitpunkt, zu de
 spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 `UMBAU.md`.
 
-| #   | Punkt                                                             | Fällig vor                  | Art          |
-| --- | ----------------------------------------------------------------- | --------------------------- | ------------ |
-| 5   | Krankheiten: Ursachen, Verlauf, Heilung                           | Heiltrank (4.6c)            | Entwurf      |
-| 6   | Kämpfe und Verletzungen                                           | Waffen und Gift (4.6c)      | Entwurf      |
-| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                 | 4.7 / Punkt 6               | Entwurf      |
-| 11  | Steuerarten                                                       | 4.7                         | Entscheidung |
-| 12  | Katalog öffentlicher Gebäude, davon welche ein Grundstück belegen | 4.7                         | Entwurf      |
-| 19  | Stadtwache: Amt, Anstellung oder beides                           | 4.7                         | Entscheidung |
-| 13  | Verfahren zur Erschließung neuen Baulands                         | 4.9                         | Entscheidung |
-| 14  | Startbedingungen für neue Spieler                                 | erster öffentlicher Betrieb | Entscheidung |
-| 15  | Weltinhalte: Berufe, Waren und Rezepte                            | laufend                     | Entwurf      |
-| 16  | Balancing im engeren Sinn                                         | laufend                     | laufend      |
+| #   | Punkt                                                             | Fällig vor                   | Art          |
+| --- | ----------------------------------------------------------------- | ---------------------------- | ------------ |
+| 5   | Krankheiten: Ursachen, Verlauf, Heilung                           | Heiltrank (4.6c)             | Entwurf      |
+| 6   | Kämpfe und Verletzungen                                           | Waffen und Gift (4.6c)       | Entwurf      |
+| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                 | 4.7 / Punkt 6                | Entwurf      |
+| 12  | Katalog öffentlicher Gebäude, davon welche ein Grundstück belegen | 4.7                          | Entwurf      |
+| 19  | Stadtwache: Amt, Anstellung oder beides                           | 4.7                          | Entscheidung |
+| 13  | Verfahren zur Erschließung neuen Baulands                         | 4.9                          | Entscheidung |
+| 14  | Startbedingungen für neue Spieler                                 | erster öffentlicher Betrieb  | Entscheidung |
+| 20  | Verschleiß von Gegenständen                                       | Kleidung und Werkzeug (4.6c) | Entwurf      |
+| 15  | Weltinhalte: Berufe, Waren und Rezepte                            | laufend                      | Entwurf      |
+| 16  | Balancing im engeren Sinn                                         | laufend                      | laufend      |
 
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
 `paths.base`, wie bei Festival), mit Phase 4.5a der **Fertigkeitenkatalog** samt
 Übungskurve und den Grenzen der Lehre, mit Phase 4.6c der **Pachtvertrag im Erbfall**
-(er fällt an die Stadt zurück), mit Phase 4.7a das **Wahlalter** (die Volljährigkeit, dieselbe Grenze wie fürs Heiraten
+(er fällt an die Stadt zurück), mit Phase 4.7b die **Steuerarten** (die vorhandenen Sätze werden zu Gesetzen, dazu eine
+Grundsteuer je Grundstück und Spieljahr — sie trifft die Besitzenden statt die Neulinge
+und macht Horten teuer), mit Phase 4.7a das **Wahlalter** (die Volljährigkeit, dieselbe Grenze wie fürs Heiraten
 und Arbeiten) und die **Amtsnachfolge** (der Zweitplatzierte rückt nach — und zwar ohne
 dass etwas nachrücken müsste, weil der Amtsinhaber aus der letzten Wahl gerechnet wird),
 mit Phase 4.6a die **Folgen ungedeckter
@@ -76,12 +78,6 @@ Nahrung ist, renovieren, ausbauen, ein Grundstück kaufen, sich anstellen lassen
 
 Und die indirekten Befehle an eigene Geschwister-NPCs (anstellen, verheiraten, ins Amt
 schicken) fehlen weiterhin — sie brauchen Anstellung (4.6c) und Ämter (4.7).
-
-### 11. Steuerarten
-
-Die Stadtkasse ist als Hebel beschrieben, ihre Einnahmeseite nicht. Kopfsteuer,
-Grundsteuer, Handelssteuer? Jede erzeugt andere Anreize: Kopfsteuer trifft kinderreiche
-Häuser, Grundsteuer die Besitzenden, Handelssteuer die Betriebe.
 
 ### 12. Katalog öffentlicher Gebäude
 
@@ -167,6 +163,33 @@ Systemen, die es noch nicht gibt:
 
 Was auf nichts wartet, lässt sich mit 4.6 sofort bauen; der Rest kommt, wenn sein System
 kommt. Eine Ware ohne Wirkung wird nicht gebaut.
+
+### 20. Verschleiß von Gegenständen
+
+**Nicht nur Häuser verfallen, sondern auch alles, was man besitzt.** Ohne das kauft
+niemand ein zweites Mal: Ein Mantel, ein Hammer und ein Schwert werden einmal gekauft und
+halten ewig, und damit bricht die Nachfrage ein, sobald jeder einmal ausgestattet ist.
+Der Schneider hätte nach einer Generation nichts mehr zu tun. Der Verfall ist also keine
+Strafe, sondern die **Voraussetzung dafür, dass Handwerk ein Beruf bleibt** und nicht ein
+einmaliger Auftrag.
+
+Zu entscheiden ist, woran der Verschleiß hängt. Drei Möglichkeiten, mit unterschiedlichen
+Folgen:
+
+- **An der Zeit.** Ein Mantel hält so viele Spieljahre, dann ist er hin. Gleiche Bauart
+  wie beim Gebäude (4.5), lässt sich träge rechnen — aber er verschleißt auch in der
+  Truhe, was seltsam ist.
+- **Am Gebrauch.** Ein Werkzeug verliert bei jeder Schicht etwas, Kleidung bei jedem
+  Winter, eine Waffe bei jedem Kampf. Trifft die Sache genauer und braucht eine Zählung
+  je Stück statt je Stapel — der Vorrat ist heute eine Menge, kein Bestand einzelner
+  Dinge.
+- **Beides.** Realistisch und zwei Regeln, wo eine reichen könnte.
+
+Daran hängt die größere Frage: **Bleiben Gegenstände Stapel oder werden sie einzeln?** Ein
+Zustand je Stück heißt eine Zeile je Stück — bei Brot wäre das absurd, bei einem Schwert
+richtig. Vermutlich läuft es auf eine Trennung hinaus: Verbrauchsgüter bleiben eine Menge,
+Ausrüstung wird einzeln geführt. Diese Entscheidung fällt spätestens mit der ersten Ware,
+die länger hält als ein Bissen.
 
 ### 16. Balancing
 

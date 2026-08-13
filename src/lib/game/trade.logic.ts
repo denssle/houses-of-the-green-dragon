@@ -1,4 +1,5 @@
 import type { ActionFailureReason } from '$lib/game/actionFailure';
+import { taxOn } from '$lib/game/law.logic';
 import { canAfford } from '$lib/game/economy';
 
 /**
@@ -15,8 +16,12 @@ import { canAfford } from '$lib/game/economy';
  * jeder — gegen Standgeld.
  */
 
-/** Was die Stadt für einen Stand am Markt nimmt. */
-export const STALL_FEE = 2;
+/**
+ * Was die Stadt für einen Stand am Markt nimmt, und was sie am Kauf mitverdient.
+ *
+ * Beides sind seit 4.7b **Gesetze**: Der Satz kommt von außen herein, weil ihn der
+ * Bürgermeister verschieben kann. Die Regel bleibt hier, die Zahl nicht.
+ */
 
 /** Wer wo anbieten darf. */
 export type ShopKind = 'OWN' | 'MARKET' | 'FORBIDDEN';
@@ -37,8 +42,8 @@ export function shopKindFor(
 	return 'FORBIDDEN';
 }
 
-export function stallFeeFor(kind: ShopKind): number {
-	return kind === 'MARKET' ? STALL_FEE : 0;
+export function stallFeeFor(kind: ShopKind, stallFee: number): number {
+	return kind === 'MARKET' ? stallFee : 0;
 }
 
 export type OfferOutcome =
@@ -58,7 +63,8 @@ export function offer(
 	kind: ShopKind,
 	available: number,
 	quantity: number,
-	pricePerUnit: number
+	pricePerUnit: number,
+	stallFee: number
 ): OfferOutcome {
 	if (kind === 'FORBIDDEN') return { ok: false, reason: 'PLOT_NOT_OWNED' };
 	if (!Number.isInteger(quantity) || quantity < 1) return { ok: false, reason: 'NOTHING_TO_DO' };
@@ -67,14 +73,14 @@ export function offer(
 	}
 	if (available < quantity) return { ok: false, reason: 'NOT_IN_STOCK' };
 
-	const standgeld: number = stallFeeFor(kind);
+	const standgeld: number = stallFeeFor(kind, stallFee);
 	if (!canAfford(seller.money, standgeld)) return { ok: false, reason: 'NOT_ENOUGH_MONEY' };
 
 	return { ok: true, sellerMoney: seller.money - standgeld, fee: standgeld };
 }
 
 export type PurchaseOutcome =
-	| { ok: true; total: number; buyerMoney: number; remaining: number }
+	| { ok: true; total: number; tax: number; buyerMoney: number; remaining: number }
 	| { ok: false; reason: ActionFailureReason };
 
 /**
@@ -87,19 +93,25 @@ export type PurchaseOutcome =
 export function buy(
 	buyer: { id: string; money: number },
 	offerRow: { sellerId: string; quantity: number; pricePerUnit: number },
-	wanted: number
+	wanted: number,
+	salesTaxPercent: number
 ): PurchaseOutcome {
 	if (offerRow.sellerId === buyer.id) return { ok: false, reason: 'ALREADY_OWNED' };
 	if (!Number.isInteger(wanted) || wanted < 1) return { ok: false, reason: 'NOTHING_TO_DO' };
 	if (offerRow.quantity < wanted) return { ok: false, reason: 'NOT_IN_STOCK' };
 
 	const summe: number = offerRow.pricePerUnit * wanted;
-	if (!canAfford(buyer.money, summe)) return { ok: false, reason: 'NOT_ENOUGH_MONEY' };
+	// Die Steuer kommt **oben drauf**, sie wird nicht vom Preis abgezogen: Der Verkäufer
+	// bekommt, was am Schild steht, der Käufer zahlt mehr. Andersherum wäre jede
+	// Steuererhöhung eine Enteignung des Verkäufers, der seinen Preis nie gesenkt hat.
+	const steuer: number = taxOn(summe, salesTaxPercent);
+	if (!canAfford(buyer.money, summe + steuer)) return { ok: false, reason: 'NOT_ENOUGH_MONEY' };
 
 	return {
 		ok: true,
 		total: summe,
-		buyerMoney: buyer.money - summe,
+		tax: steuer,
+		buyerMoney: buyer.money - summe - steuer,
 		remaining: offerRow.quantity - wanted
 	};
 }

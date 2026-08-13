@@ -2,7 +2,7 @@ import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as tradeService from '$lib/server/service/tradeService';
 import { actionMessage } from '$lib/actionMessage';
-import { STALL_FEE } from '$lib/game/trade.logic';
+import * as lawService from '$lib/server/service/lawService';
 
 /**
  * Der Markt einer Stadt — alle Preisschilder auf einen Blick.
@@ -19,7 +19,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	return {
 		offers: await tradeService.getOffersInRegion(character.regionId, character.id),
-		stallFee: STALL_FEE,
+		stallFee: await lawService.rate(character.regionId, 'STALL_FEE'),
+		salesTax: await lawService.rate(character.regionId, 'SALES_TAX'),
 		money: character.money
 	};
 };

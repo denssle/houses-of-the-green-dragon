@@ -41,4 +41,6 @@ export type ActionFailureReason =
 	| 'EMPLOYER_BROKE'
 	| 'NO_ELECTION'
 	| 'ALREADY_STANDING'
-	| 'ALREADY_VOTED';
+	| 'ALREADY_VOTED'
+	| 'NOT_IN_OFFICE'
+	| 'OUT_OF_BOUNDS';
