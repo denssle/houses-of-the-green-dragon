@@ -52,6 +52,32 @@ mysql -e "SHOW DATABASES;"
 Tabellen anlegen ist nicht nötig — `startDB()` führt beim ersten Start die Migrationen
 aus und danach den Weltaufbau.
 
+**Wenn `mysql` mit „Access denied for user 'enzlor'@'localhost'" abbricht**, liegt es
+nicht am Konto, sondern an `~/.my.cnf`: Dort holt sich der Client Benutzer und Passwort,
+wenn keine auf der Kommandozeile stehen. Ein veraltetes Passwort darin fällt lange nicht
+auf, weil die Anwendungen ihre eigenen `.env`-Dateien benutzen — bis jemand `mysql` ohne
+Argumente aufruft. Das gültige Passwort steht in `~/festival-app/.env`; die Datei daraus
+erzeugen, statt es abzutippen:
+
+```
+pw=$(sed -n 's/^MARIA_DB_PASSWORD=//p' ~/festival-app/.env | tr -d '"'"'"'\r')
+printf '[client]\nuser = enzlor\npassword = "%s"\n' "$pw" > ~/.my.cnf
+chmod 600 ~/.my.cnf
+unset pw
+mysql -e "SELECT CURRENT_USER();"
+```
+
+Das ist keine Randnotiz: Der Sicherungsschritt in `deploy.yml` ruft `mysqldump` **ohne**
+Zugangsdaten auf, gerade damit kein Passwort im Workflow steht. Ist `~/.my.cnf` falsch,
+scheitert jeder Deploy an der Sicherung — was besser ist als das Gegenteil, aber man
+sucht den Fehler zunächst am falschen Ende.
+
+Zwei Fallen beim Inhalt: MySQL liest Optionsdateien nach eigenen Regeln, `#` beginnt
+darin einen Kommentar und ein Rückwärtsschrägstrich eine Escape-Sequenz. Und `CURRENT_USER()`
+meldet `enzlor@%` — das `%` ist der Platzhalter für „von überall", kein beschädigtes
+Zeichen. Die Fehlermeldung nennt dagegen `@'localhost'`, weil sie die versuchte Herkunft
+angibt und nicht das gefundene Konto.
+
 ### 3. Verzeichnis und `.env`
 
 ```
