@@ -183,3 +183,23 @@ die letzten 14 Stück. Das ist die halbe Miete; ein regelmäßiger Cron-Dump und
 
 Die Produktionsdatenbank ist das wertvollste Artefakt des Projekts: Sie enthält
 Generationen von Spielzeit, die sich nicht wiederherstellen lassen.
+
+## Der Seed läuft nur einmal — Bestandswelten brauchen Migrationen
+
+`seedWorld()` legt an, was eine **leere** Welt braucht, und sieht eine bestehende nie
+wieder. Alles, was später in den Seed kommt, fehlt in einer laufenden Welt für immer.
+
+Beim Deploy nach Phase 4.8 fiel das auf: Die Produktionswelt stammte aus Phase 2.4 und
+hatte deshalb weder **Unterkunft** (seit 4.4 im Seed) noch **Marktplatz** (seit 4.6d).
+Ohne Unterkunft hat niemand ein Dach, und ohne Dach kommen keine Kinder — die Stadt starb
+still aus: neun Einwohner, keine Geburt in fünf Spieljahren. Zu sehen war das nur, weil
+nach dem Deploy jemand hineingeschaut hat.
+
+**Die Regel daraus:** Wer den Seed erweitert, schreibt eine Migration dazu. Sie muss
+idempotent sein (was schon steht, bleibt) und in einer frischen Welt nichts tun — dort
+erledigt es der Seed. Muster: `0015-missing-city-buildings.ts`.
+
+**Und beim Deploy nicht nur auf `/api/health` schauen.** Der Endpunkt meldet, dass die
+Datenbank antwortet und keine Migration aussteht — nicht, ob die Welt noch lebt. Ein Blick
+auf die Einwohnerzahl und die letzten Chronikeinträge kostet eine Minute und hätte diesen
+Fehler vier Phasen früher gefunden.
