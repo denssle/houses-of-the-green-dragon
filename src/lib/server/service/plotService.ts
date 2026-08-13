@@ -2,11 +2,13 @@ import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { Op, type Transaction } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 import { Building as BuildingModel } from '$lib/db/model/building';
+import { Character as CharacterModel } from '$lib/db/model/character';
 import { Plot as PlotModel } from '$lib/db/model/plot';
 import { Region as RegionModel } from '$lib/db/model/region';
 import type { Plot } from '$lib/model/plot';
 import { convertToPlot } from '$lib/db/attributes/plot.attributes';
 import { buyPlot as buyPlotLogic } from '$lib/game/buildingAction.logic';
+import { purchase } from '$lib/game/building.logic';
 import { PLOT_PRICE } from '$lib/game/economy';
 import * as characterService from '$lib/server/service/characterService';
 import * as worldService from '$lib/server/service/worldService';
@@ -96,4 +98,85 @@ export async function buyPlot(plotId: string, characterId: string): Promise<BuyR
 
 		return { ok: true, plot: convertToPlot(grundstück.dataValues) } as const;
 	});
+}
+
+// --- Handel unter Charakteren ---------------------------------------------------------
+
+export type PlotTradeResult = { ok: true } | { ok: false; reason: ActionFailureReason };
+
+/**
+ * Ein Preisschild an ein eigenes Grundstück hängen — oder es mit `null` abnehmen.
+ *
+ * Verkaufen heißt, einen Preis zu setzen: kein Auktionswesen, passend zum
+ * Festpreisprinzip und zum asynchronen Spiel. Ein bebautes Grundstück wird über das
+ * Gebäude verkauft, nicht hier — sonst stünde jemandes Haus auf fremdem Boden.
+ */
+export async function setPlotPrice(
+	characterId: string,
+	plotId: string,
+	price: number | null
+): Promise<PlotTradeResult> {
+	const grundstück = await PlotModel.findByPk(plotId);
+	if (!grundstück || grundstück.dataValues.OwnerCharacterId !== characterId) {
+		return { ok: false, reason: 'PLOT_NOT_OWNED' };
+	}
+	const bebaut = await BuildingModel.count({ where: { PlotId: plotId } });
+	if (bebaut > 0) {
+		return { ok: false, reason: 'PLOT_ALREADY_BUILT' };
+	}
+
+	await grundstück.update({ forSalePrice: price });
+	return { ok: true };
+}
+
+/** Ein Grundstück kaufen, das jemand zum Verkauf gestellt hat. */
+export async function buyFromOwner(characterId: string, plotId: string): Promise<PlotTradeResult> {
+	const tick: number = await worldService.currentTick();
+
+	return sequelize.transaction(async (t: Transaction) => {
+		const grundstück = await PlotModel.findByPk(plotId, {
+			transaction: t,
+			lock: t.LOCK.UPDATE
+		});
+		if (!grundstück) return { ok: false, reason: 'NOT_FOR_SALE' } as const;
+
+		const käufer = await characterService.loadForAction(characterId, tick, t);
+		if (!käufer) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+
+		const ergebnis = purchase(
+			{ id: characterId, money: käufer.dataValues.money },
+			{
+				ownerId: grundstück.dataValues.OwnerCharacterId,
+				forSalePrice: grundstück.dataValues.forSalePrice
+			}
+		);
+		if (!ergebnis.ok) return ergebnis;
+
+		const verkäuferId: string | null = grundstück.dataValues.OwnerCharacterId;
+		await käufer.update({ money: ergebnis.buyerMoney }, { transaction: t });
+		if (verkäuferId) {
+			await CharacterModel.increment('money', {
+				by: ergebnis.price,
+				where: { id: verkäuferId },
+				transaction: t
+			});
+		}
+		await grundstück.update(
+			{ OwnerCharacterId: characterId, ownerType: 'CHARACTER', forSalePrice: null },
+			{ transaction: t }
+		);
+		return { ok: true } as const;
+	});
+}
+
+/** Was in dieser Stadt an Boden zum Verkauf steht. */
+export async function getPlotsForSale(regionId: string): Promise<PlotOnList[]> {
+	const alle = await PlotModel.findAll({
+		where: {
+			RegionId: regionId,
+			ownerType: 'CHARACTER',
+			forSalePrice: { [Op.ne]: null }
+		}
+	});
+	return withBuildings(alle.map((eintrag) => convertToPlot(eintrag.dataValues)));
 }

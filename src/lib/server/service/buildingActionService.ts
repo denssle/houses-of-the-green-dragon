@@ -52,7 +52,9 @@ async function arbeiten(characterId: string, buildingId: string): Promise<Action
 				money: arbeiter.dataValues.money,
 				regionId: arbeiter.dataValues.RegionId
 			},
-			{ regionId, template: option }
+			// Zustand und Ausbaustufe kommen aus dem Gebäude, das `getBuilding` bereits mit
+			// verrechnetem Verfall geliefert hat — eine verfallene Hütte zahlt weniger.
+			{ regionId, template: option, level: gebäude.level, condition: gebäude.condition }
 		);
 		if (!ergebnis.ok) return ergebnis;
 

@@ -17,6 +17,7 @@ import {
 	court,
 	isDue
 } from '$lib/game/family.logic';
+import { residentsAt } from '$lib/game/building.logic';
 import { inheritPersonality, type Personality } from '$lib/game/personality.logic';
 import { ageInYears } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
@@ -355,12 +356,14 @@ export async function freierWohnraum(homeBuildingId: string | null): Promise<num
 	if (!gebaeude) return null;
 
 	const vorlage = buildingService.getBuildingOption(gebaeude.dataValues.optionId);
-	if (!vorlage?.residents) return null;
+	if (!vorlage) return null;
+	const plaetze: number = residentsAt(vorlage, gebaeude.dataValues.level);
+	if (plaetze === 0) return null;
 
 	const bewohner: number = await Character.count({
 		where: { HomeBuildingId: homeBuildingId, deathTick: null }
 	});
-	return Math.max(0, vorlage.residents - bewohner);
+	return Math.max(0, plaetze - bewohner);
 }
 
 // --- Anzeigen ------------------------------------------------------------------------

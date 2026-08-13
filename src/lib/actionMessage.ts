@@ -23,7 +23,11 @@ const SAETZE: Record<ActionFailureReason, string> = {
 	CLOSE_KIN: 'Ihr seid zu nah verwandt.',
 	SAME_GENDER: 'Aus dieser Verbindung gingen keine Kinder hervor.',
 	NO_PROPOSAL: 'Es liegt kein Antrag vor.',
-	NO_ROOM: 'Im Haus ist kein Platz mehr.'
+	NO_ROOM: 'Im Haus ist kein Platz mehr.',
+	NOTHING_TO_DO: 'Daran gibt es nichts zu tun.',
+	MAX_LEVEL: 'Weiter lässt sich hier nicht ausbauen.',
+	NOT_FOR_SALE: 'Das steht nicht zum Verkauf.',
+	ALREADY_OWNED: 'Das gehört dir bereits.'
 };
 
 export function actionMessage(reason: ActionFailureReason): string {

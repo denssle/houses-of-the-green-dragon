@@ -1,25 +1,68 @@
 import type { BuildingAction } from '$lib/model/buildingAction';
 
+/**
+ * Eine Ausbaustufe.
+ *
+ * Aus der Kate wird ein Haus, aus der Hütte eine Werkstatt: Jede Stufe hat ihren eigenen
+ * Namen, ihren Preis und ihre Wirkung. Die erste Stufe ist der Neubau — ihr Preis ist
+ * das, was das Gebäude überhaupt kostet.
+ */
+export interface BuildingLevel {
+	/** Was es kostet, diese Stufe zu erreichen. Bei Stufe 1: der Neubau. */
+	price: number;
+	/** Wie diese Stufe heißt — „Kate", „Haus", „Großhaus". */
+	name: string;
+	/**
+	 * Wie viele Menschen hier wohnen können. Fehlt der Wert, ist das Gebäude kein
+	 * Zuhause. Die Zahl ist die Bremse der Bevölkerung: Kinder kommen nur, wo Platz ist
+	 * (siehe `family.logic.ts`) — wer wachsen will, muss ausbauen.
+	 */
+	residents?: number;
+	/**
+	 * Was der Betrieb je eingesetztem Aktionspunkt zahlt. Fehlt der Wert, ist das
+	 * Gebäude kein Arbeitsplatz.
+	 */
+	wagePerActionPoint?: number;
+}
+
 export interface BuildingTemplate {
 	optionId: number;
 	initialName: string;
-	price: number;
 	description: string;
 	type: 'PUBLIC' | 'RESIDENCE' | 'CRAFT';
 	limited: boolean;
 	limitedTo: number;
 	actions: BuildingAction[];
 	/**
-	 * Was der Betrieb je eingesetztem Aktionspunkt zahlt. Fehlt der Wert, ist das Gebäude
-	 * kein Arbeitsplatz. Der Lohn steht hier und nicht als Konstante in der Logik, damit
-	 * die Schmiede mehr zahlen kann als die Kate — und damit eine Balancing-Änderung
-	 * sofort für alle Betriebe gilt, auch für längst gebaute.
+	 * Die Ausbaustufen, aufsteigend. Steht hier und nicht in der Datenbank: Sonst fröre
+	 * jedes Gebäude beim Bau die damaligen Werte ein, und eine Balancing-Änderung
+	 * erreichte den Bestand nie.
 	 */
-	wagePerActionPoint?: number;
-	/**
-	 * Wie viele Menschen hier wohnen koennen. Fehlt der Wert, ist das Gebaeude kein
-	 * Zuhause. Die Zahl ist die Bremse der Bevoelkerung: Kinder kommen nur, wo Platz ist
-	 * (siehe family.logic.ts) — wer wachsen will, muss ausbauen.
-	 */
-	residents?: number;
+	levels: BuildingLevel[];
+}
+
+/**
+ * Die Stufe eines Gebäudes — eins-basiert, wie sie in der Datenbank steht.
+ *
+ * Begrenzt auf das, was die Vorlage hergibt: Ein Gebäude mit einer Stufe, die es nicht
+ * mehr gibt (weil jemand die Vorlage gekürzt hat), fällt auf die höchste vorhandene
+ * zurück, statt die Anzeige zu sprengen.
+ */
+export function levelOf(template: BuildingTemplate, level: number): BuildingLevel {
+	const index: number = Math.min(Math.max(1, level), template.levels.length) - 1;
+	return template.levels[index];
+}
+
+export function maxLevel(template: BuildingTemplate): number {
+	return template.levels.length;
+}
+
+/** Was der Neubau kostet. */
+export function buildPrice(template: BuildingTemplate): number {
+	return template.levels[0].price;
+}
+
+/** Was der nächste Ausbau kostet — `undefined`, wenn die Höchststufe erreicht ist. */
+export function upgradePrice(template: BuildingTemplate, currentLevel: number): number | undefined {
+	return template.levels[currentLevel]?.price;
 }

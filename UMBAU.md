@@ -762,7 +762,7 @@ _Fertig, wenn:_ Jeder Charakter hat Anlagen, Kinder erben sie, und die Erbfolge 
 ausgewürfelt, Reinhild ist „die Friedfertige", ihr Sohn Ingram steht als „der Faule" in
 der Erbfolge.
 
-**4.5 Gebäude und Grundstücke.** `building.logic.ts`: Zustand aus verstrichenen Ticks,
+**4.5 Gebäude und Grundstücke.** ✓ `building.logic.ts`: Zustand aus verstrichenen Ticks,
 Renovieren, Ausbaustufen, Übergang zur Ruine. Dazu Grundstücke als knappes Gut, An- und
 Verkauf von `plot` und `building` über den nullbaren `forSalePrice`, Besitzübergang beim
 Erbfall (greift zurück auf 4.2).
@@ -771,6 +771,44 @@ Zwei Dinge, die hier leicht untergehen: Die Ruinen-Prüfung muss **an jeder Lade
 greifen, nicht nur auf der Gebäudeseite — sonst hängt es vom Zufall ab, wann ein Haus
 zusammenfällt. Und Renovieren kostet zunächst nur Geld; die Kopplung an Baumaterial
 kommt mit 4.6 dazu, sobald es Waren gibt.
+
+_Entschieden:_ **Ruine nach zwanzig Spieljahren** ohne jede Pflege — vierzig Realtage.
+Renovieren wird damit zu einer Sache von drei, vier Mal im Leben statt zur Wochenaufgabe,
+und ein geerbtes Haus ist ein echtes Erbe und kein Sanierungsfall.
+
+_Entschieden:_ Beim Wohnhaus **Kate 4 → Haus 6 → Großhaus 9** Bewohner. Spürbare Sprünge,
+aber kein Vervielfachen: Wer viele Kinder will, muss zweimal ausbauen — und danach ein
+zweites Grundstück kaufen. So bleibt knappes Bauland die härtere Grenze und nicht der
+Ausbau der bequeme Ausweg.
+
+Der Verfall ist bewusst **linear** und nicht exponentiell wie die Zuneigung. Dort nähert
+sich der Wert einem Grundwert an, hier soll ein Ende stehen: die Ruine. Eine Kurve, die
+sich der Null nur nähert, käme nie an — und dann gäbe die Welt kein Bauland zurück.
+
+Vier Dinge, die sich beim Bauen zeigten:
+
+- **Der Zustand mindert den Lohn, aber nie auf null.** Eine verfallene Hütte produziert
+  weniger — sonst wäre der Verfall erst am Ende spürbar. Ein Aktionspunkt, der gar nichts
+  einbringt, wäre allerdings ein Verlust ohne Ansage; deshalb bleibt mindestens eine
+  Münze übrig, solange überhaupt gezahlt wird.
+- **Ein Ausbau macht das alte Gemäuer nicht neu.** Wer ein verfallenes Haus ausbaut, hat
+  ein größeres verfallenes Haus. Deshalb rührt der Ausbau `lastConditionTick` nicht an —
+  im Gegensatz zur Renovierung, wo genau das Vergessen dieser Zeile die Renovierung im
+  selben Moment wieder verbraucht hätte.
+- **Der Bewohner-Fremdschlüssel trägt nicht.** `ON DELETE SET NULL` greift nur, wenn die
+  Datenbank Fremdschlüssel durchsetzt, und SQLite tut das nur mit eingeschaltetem Pragma.
+  Die Bewohner werden deshalb ausdrücklich ausgetragen, bevor die Zeile verschwindet.
+- **Öffentliche Gebäude verfallen vorläufig nicht.** Ohne diese Ausnahme wäre die
+  städtische Schmiede nach zwanzig Jahren eine Ruine — und mit ihr der einzige Weg, auf
+  dem ein Neuling überhaupt Geld verdienen kann. Ihre Instandhaltung ist eine
+  Amtshandlung aus der Stadtkasse, und die gibt es erst mit 4.7.
+
+_Fertig, wenn:_ Häuser verfallen, lassen sich renovieren, ausbauen und verkaufen, und am
+Ende steht die Ruine. — Erledigt und am gebauten Server durchgespielt: Ein Wohnhaus stand
+nach zehn Jahren bei genau 50, die Renovierung kostete die fehlenden 50 Punkte zu zwei
+Münzen, der Ausbau machte aus der Kate ein Haus, und nach weiteren 25 Jahren waren alle
+drei Privathäuser der Welt Ruinen — Grundstücke beim Eigentümer, Bewohner ohne Dach,
+Rathaus und städtische Schmiede unversehrt.
 
 **4.5a Fertigkeiten.** `skill.logic.ts`: Übung in Stufen umrechnen, steigender Aufwand je
 Stufe, Wirkung einer Stufe auf Ertrag und Erfolg. Dazu die `skill`-Tabelle (spärlich —

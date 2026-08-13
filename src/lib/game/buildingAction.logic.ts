@@ -1,4 +1,5 @@
-import type { BuildingTemplate } from '$lib/model/buildingTemplate';
+import { type BuildingTemplate, buildPrice } from '$lib/model/buildingTemplate';
+import { wageAt } from '$lib/game/building.logic';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { canAfford } from '$lib/game/economy';
 
@@ -39,9 +40,13 @@ export type WorkOutcome =
  */
 export function work(
 	worker: Worker,
-	workplace: { regionId: string; template: BuildingTemplate }
+	workplace: { regionId: string; template: BuildingTemplate; level: number; condition: number }
 ): WorkOutcome {
-	if (!workplace.template.wagePerActionPoint) {
+	// Der Lohn hängt an drei Dingen: an der Vorlage, an der Ausbaustufe und am Zustand.
+	// Eine verfallene Hütte produziert weniger — damit ist der Verfall nicht erst am
+	// Ende spürbar, sondern die ganze Zeit über.
+	const lohn: number = wageAt(workplace.template, workplace.level, workplace.condition);
+	if (lohn === 0) {
 		return { ok: false, reason: 'NOT_A_WORKPLACE' };
 	}
 	// Wer in Grünau steht, kann nicht im Eichwald arbeiten. Wege kosten Zeit (4.9), aber
@@ -53,7 +58,7 @@ export function work(
 		return { ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' };
 	}
 
-	const earned: number = workplace.template.wagePerActionPoint * WORK_ACTION_POINT_COST;
+	const earned: number = lohn * WORK_ACTION_POINT_COST;
 	return {
 		ok: true,
 		actionPoints: worker.actionPoints - WORK_ACTION_POINT_COST,
@@ -98,10 +103,11 @@ export function build(
 	if (limitReached) {
 		return { ok: false, reason: 'LIMIT_REACHED' };
 	}
-	if (!canAfford(builder.money, template.price)) {
+	if (!canAfford(builder.money, buildPrice(template))) {
 		return { ok: false, reason: 'NOT_ENOUGH_MONEY' };
 	}
-	return { ok: true, money: builder.money - template.price, spent: template.price };
+	const preis: number = buildPrice(template);
+	return { ok: true, money: builder.money - preis, spent: preis };
 }
 
 // --- Grundstück kaufen ---------------------------------------------------------------

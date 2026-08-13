@@ -25,4 +25,8 @@ export type ActionFailureReason =
 	| 'CLOSE_KIN'
 	| 'SAME_GENDER'
 	| 'NO_PROPOSAL'
-	| 'NO_ROOM';
+	| 'NO_ROOM'
+	| 'NOTHING_TO_DO'
+	| 'MAX_LEVEL'
+	| 'NOT_FOR_SALE'
+	| 'ALREADY_OWNED';

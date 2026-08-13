@@ -5,25 +5,41 @@ import * as buildingActionService from '$lib/server/service/buildingActionServic
 import * as plotService from '$lib/server/service/plotService';
 import type { BuildingAction } from '$lib/model/buildingAction';
 import { actionMessage } from '$lib/actionMessage';
+import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
+import { levelOf, maxLevel, upgradePrice } from '$lib/model/buildingTemplate';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const building = await buildingService.getBuilding(params.building_id);
 	if (!building) {
+		// Auch der Weg, auf dem eine Ruine sichtbar wird: `getBuilding` hat sie soeben
+		// abgeräumt, und wer den Link im Lesezeichen hatte, findet nichts mehr vor.
 		error(404, 'Not Found');
 	}
+
+	const option = buildingService.getBuildingOption(building.optionId);
+	const gehoertMir: boolean =
+		locals.currentCharacter !== undefined &&
+		building.ownerCharacterId === locals.currentCharacter.id;
+
 	return {
 		building,
-		option: buildingService.getBuildingOption(building.optionId),
-		plot: building.plotId ? await plotService.getPlot(building.plotId) : undefined
+		option,
+		plot: building.plotId ? await plotService.getPlot(building.plotId) : undefined,
+		mine: gehoertMir,
+		levelName: option ? levelOf(option, building.level).name : undefined,
+		maxLevel: option ? maxLevel(option) : 1,
+		upgradeCost: option ? upgradePrice(option, building.level) : undefined,
+		// Was eine Renovierung jetzt kostete — sichtbar, damit man abwägen kann, ob man
+		// sie noch aufschiebt.
+		renovationCost: Math.ceil(CONDITION_MAX - building.condition) * RENOVATION_COST_PER_POINT
 	};
 };
 
 export const actions = {
-	default: async ({ request, params, locals }) => {
+	/** Die Handlungen aus der Vorlage — heute nur Arbeiten. */
+	act: async ({ request, params, locals }) => {
 		const building = await buildingService.getBuilding(params.building_id);
-		if (!building) {
-			error(404, 'Not Found');
-		}
+		if (!building) error(404, 'Not Found');
 		if (!locals.currentCharacter) {
 			return fail(401, { message: 'Kein Charakter, der handeln könnte' });
 		}
@@ -45,5 +61,62 @@ export const actions = {
 			return fail(400, { message: actionMessage(ergebnis.reason) });
 		}
 		return { message: `Feierabend. ${ergebnis.earned} Münzen verdient.` };
+	},
+
+	renovate: async ({ params, locals }) => {
+		if (!locals.currentCharacter) {
+			return fail(401, { message: 'Kein Charakter, der renovieren könnte' });
+		}
+		const ergebnis = await buildingService.renovateBuilding(
+			locals.currentCharacter.id,
+			params.building_id
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `Renoviert. ${ergebnis.spent} Münzen für Material und Handwerk.` };
+	},
+
+	upgrade: async ({ params, locals }) => {
+		if (!locals.currentCharacter) {
+			return fail(401, { message: 'Kein Charakter, der bauen könnte' });
+		}
+		const ergebnis = await buildingService.upgradeBuilding(
+			locals.currentCharacter.id,
+			params.building_id
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `Ausgebaut. ${ergebnis.spent} Münzen verbaut.` };
+	},
+
+	sell: async ({ request, params, locals }) => {
+		if (!locals.currentCharacter) {
+			return fail(401, { message: 'Kein Charakter, der verkaufen könnte' });
+		}
+		const roh = (await request.formData()).get('price')?.toString();
+		const preis: number | null = roh ? Number(roh) : null;
+		if (preis !== null && (!Number.isInteger(preis) || preis < 0)) {
+			return fail(400, { message: 'Der Preis muss eine ganze Zahl sein.' });
+		}
+
+		const ergebnis = await buildingService.setBuildingPrice(
+			locals.currentCharacter.id,
+			params.building_id,
+			preis
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return {
+			message: preis === null ? 'Das Haus steht nicht mehr zum Verkauf.' : 'Preis gesetzt.'
+		};
+	},
+
+	buy: async ({ params, locals }) => {
+		if (!locals.currentCharacter) {
+			return fail(401, { message: 'Kein Charakter, der kaufen könnte' });
+		}
+		const ergebnis = await buildingService.buyBuilding(
+			locals.currentCharacter.id,
+			params.building_id
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `Gekauft für ${ergebnis.spent} Münzen — samt Grundstück.` };
 	}
 } satisfies Actions;

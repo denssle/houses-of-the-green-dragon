@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { buildPrice } from '$lib/model/buildingTemplate';
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
@@ -22,7 +23,7 @@
 		<section>
 			<b>{building.initialName}</b>
 			<i>{building.description}</i>
-			<p>{building.price} Münzen</p>
+			<p>{buildPrice(building)} Münzen</p>
 			<form method="POST" use:enhance>
 				<input type="hidden" name="optionId" value={building.optionId} />
 				<label>

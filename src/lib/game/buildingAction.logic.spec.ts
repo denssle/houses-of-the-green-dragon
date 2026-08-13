@@ -5,32 +5,40 @@ import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 const SCHMIEDE: BuildingTemplate = {
 	optionId: 2,
 	initialName: 'Schmiede',
-	price: 250,
 	description: 'Ein bescheidener Handwerksbetrieb',
 	type: 'CRAFT',
 	limited: false,
 	limitedTo: 0,
 	actions: ['WORK'],
-	wagePerActionPoint: 3
+	levels: [{ price: 250, name: 'Schmiede', wagePerActionPoint: 3 }]
 };
 
-const WOHNHAUS: BuildingTemplate = { ...SCHMIEDE, optionId: 1, price: 100, type: 'RESIDENCE' };
-delete WOHNHAUS.wagePerActionPoint;
+const WOHNHAUS: BuildingTemplate = {
+	...SCHMIEDE,
+	optionId: 1,
+	type: 'RESIDENCE',
+	levels: [{ price: 100, name: 'Kate', residents: 4 }]
+};
 
 const RATHAUS: BuildingTemplate = {
 	...WOHNHAUS,
 	optionId: 0,
-	price: 0,
 	type: 'PUBLIC',
 	limited: true,
-	limitedTo: 1
+	limitedTo: 1,
+	levels: [{ price: 0, name: 'Rathaus' }]
 };
 
 const IN_GRUENAU = { actionPoints: 10, money: 50, regionId: 'gruenau' };
 
 describe('Arbeiten', () => {
 	it('tauscht Aktionspunkte gegen den Lohn des Betriebs', () => {
-		const ergebnis = work(IN_GRUENAU, { regionId: 'gruenau', template: SCHMIEDE });
+		const ergebnis = work(IN_GRUENAU, {
+			regionId: 'gruenau',
+			template: SCHMIEDE,
+			level: 1,
+			condition: 100
+		});
 
 		expect(ergebnis).toEqual({
 			ok: true,
@@ -41,13 +49,23 @@ describe('Arbeiten', () => {
 	});
 
 	it('weist ab, wo es nichts zu verdienen gibt', () => {
-		const ergebnis = work(IN_GRUENAU, { regionId: 'gruenau', template: WOHNHAUS });
+		const ergebnis = work(IN_GRUENAU, {
+			regionId: 'gruenau',
+			template: WOHNHAUS,
+			level: 1,
+			condition: 100
+		});
 
 		expect(ergebnis).toEqual({ ok: false, reason: 'NOT_A_WORKPLACE' });
 	});
 
 	it('weist ab, wer anderswo steht', () => {
-		const ergebnis = work(IN_GRUENAU, { regionId: 'eichwald', template: SCHMIEDE });
+		const ergebnis = work(IN_GRUENAU, {
+			regionId: 'eichwald',
+			template: SCHMIEDE,
+			level: 1,
+			condition: 100
+		});
 
 		expect(ergebnis).toEqual({ ok: false, reason: 'WRONG_REGION' });
 	});
@@ -55,7 +73,12 @@ describe('Arbeiten', () => {
 	it('weist ab, wem die Kraft fehlt', () => {
 		const erschöpft = { ...IN_GRUENAU, actionPoints: 0 };
 
-		const ergebnis = work(erschöpft, { regionId: 'gruenau', template: SCHMIEDE });
+		const ergebnis = work(erschöpft, {
+			regionId: 'gruenau',
+			template: SCHMIEDE,
+			level: 1,
+			condition: 100
+		});
 
 		expect(ergebnis).toEqual({ ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' });
 	});
@@ -63,7 +86,7 @@ describe('Arbeiten', () => {
 	it('lässt den Zustand unangetastet, wenn die Handlung scheitert', () => {
 		const vorher = { ...IN_GRUENAU };
 
-		work(vorher, { regionId: 'eichwald', template: SCHMIEDE });
+		work(vorher, { regionId: 'eichwald', template: SCHMIEDE, level: 1, condition: 100 });
 
 		expect(vorher).toEqual(IN_GRUENAU);
 	});

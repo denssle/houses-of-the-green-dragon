@@ -11,17 +11,73 @@ import * as buildingService from '$lib/server/service/buildingService';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
 import * as plotService from '$lib/server/service/plotService';
 import { PLOT_PRICE } from '$lib/game/economy';
+import * as familyService from '$lib/server/service/familyService';
+import { World } from '$lib/db/model/world';
+import { WORLD_ID } from '$lib/db/attributes/world.attributes';
+import { CONDITION_MAX, YEARS_TO_RUIN } from '$lib/game/building.logic';
+import { yearsToTicks } from '$lib/game/time';
 
 /**
  * Phase 3.2 und 3.3 gegen eine echte Datenbank: Was die Logik entscheidet, muss auch
  * geschrieben werden — vollständig oder gar nicht.
  */
 
+const JETZT = 10_000;
+let stadtId: string;
+
+async function person(name: string, extras: Record<string, unknown> = {}): Promise<string> {
+	const id = randomUUID();
+	await CharacterModel.create({
+		id,
+		firstName: name,
+		role: 'PLAYER',
+		gender: 'FEMALE',
+		birthTick: JETZT - yearsToTicks(30),
+		lastTickProcessed: JETZT,
+		actionPoints: 48,
+		money: 5000,
+		RegionId: stadtId,
+		...extras
+	});
+	return id;
+}
+
+/** Ein Gebäude auf eigenem Grund, mit dem angegebenen Stand. */
+async function haus(
+	besitzerId: string | null,
+	extras: Record<string, unknown> = {}
+): Promise<string> {
+	const plotId = randomUUID();
+	await PlotModel.create({
+		id: plotId,
+		address: `Baugasse ${plotId.slice(0, 4)}`,
+		type: 'BUILDING_LAND',
+		RegionId: stadtId,
+		ownerType: besitzerId ? 'CHARACTER' : 'CITY',
+		OwnerCharacterId: besitzerId
+	});
+	const id = randomUUID();
+	await BuildingModel.create({
+		id,
+		name: 'Wohnhaus',
+		optionId: 1,
+		condition: CONDITION_MAX,
+		lastConditionTick: JETZT,
+		PlotId: plotId,
+		ownerType: besitzerId ? 'CHARACTER' : 'CITY',
+		OwnerCharacterId: besitzerId,
+		...extras
+	});
+	return id;
+}
+
+async function weltzeit(tick: number): Promise<void> {
+	await World.update({ currentTick: tick }, { where: { id: WORLD_ID } });
+}
+
 const SCHMIEDE = 2;
 const WOHNHAUS = 1;
 const RATHAUS = 0;
-
-let stadtId: string;
 
 /** Ein Spielercharakter in der Startstadt mit dem gegebenen Vermögen. */
 async function charakterMitGeld(money: number): Promise<string> {
@@ -244,6 +300,170 @@ describe('Bauen und Arbeiten', () => {
 			);
 
 			expect(ergebnis).toEqual({ ok: false, reason: 'NOT_A_WORKPLACE' });
+		});
+	});
+});
+
+describe('Gebäude über die Zeit', () => {
+	beforeAll(async () => {
+		await sequelize.sync();
+		await seedWorld();
+		stadtId = await findStartRegionId();
+	});
+
+	beforeEach(async () => {
+		await weltzeit(JETZT);
+		await BuildingModel.destroy({ where: { ownerType: 'CHARACTER' } });
+		await PlotModel.destroy({ where: { ownerType: 'CHARACTER' } });
+		await CharacterModel.destroy({ where: {} });
+	});
+
+	describe('der Verfall', () => {
+		it('zeigt beim Lesen den gealterten Zustand', async () => {
+			const besitzer = await person('Besitzer');
+			const id = await haus(besitzer);
+			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN / 2));
+
+			expect((await buildingService.getBuilding(id))?.condition).toBe(50);
+		});
+
+		it('schreibt beim Lesen nichts fort', async () => {
+			// Wie bei der Zuneigung: Wer oft nachsieht, findet dasselbe vor.
+			const besitzer = await person('Besitzer');
+			const id = await haus(besitzer);
+			await weltzeit(JETZT + yearsToTicks(5));
+
+			for (let i = 0; i < 3; i++) await buildingService.getBuilding(id);
+
+			const zeile = await BuildingModel.findByPk(id);
+			expect(zeile!.dataValues.condition).toBe(CONDITION_MAX);
+			expect(zeile!.dataValues.lastConditionTick).toBe(JETZT);
+		});
+
+		it('lässt öffentliche Gebäude vorläufig unberührt', async () => {
+			// Ohne diese Ausnahme verfiele die städtische Schmiede — und mit ihr der
+			// einzige Weg, auf dem ein Neuling Geld verdienen kann. Die Instandhaltung aus
+			// der Stadtkasse kommt mit 4.7.
+			const id = await haus(null);
+			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN * 3));
+
+			expect((await buildingService.getBuilding(id))?.condition).toBe(CONDITION_MAX);
+		});
+	});
+
+	describe('die Ruine', () => {
+		it('lässt das Gebäude verschwinden, das Grundstück bleibt', async () => {
+			const besitzer = await person('Besitzer');
+			const id = await haus(besitzer);
+			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN));
+
+			expect(await buildingService.getBuilding(id)).toBeUndefined();
+			expect(await BuildingModel.findByPk(id)).toBeNull();
+			// Genau so gibt die Welt Bauland zurück.
+			expect(await PlotModel.count({ where: { OwnerCharacterId: besitzer } })).toBe(1);
+		});
+
+		it('greift auch, wenn nur die Liste geladen wird', async () => {
+			// Sonst hinge es vom Zufall ab, wann ein Haus zusammenfällt.
+			const besitzer = await person('Besitzer');
+			await haus(besitzer);
+			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN));
+
+			expect(await buildingService.getBuildingsOfCharacter(besitzer)).toHaveLength(0);
+			expect(await BuildingModel.count({ where: { ownerType: 'CHARACTER' } })).toBe(0);
+		});
+
+		it('lässt die Bewohner ohne Dach zurück', async () => {
+			const besitzer = await person('Besitzer');
+			const id = await haus(besitzer);
+			await CharacterModel.update({ HomeBuildingId: id }, { where: { id: besitzer } });
+			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN));
+
+			await buildingService.getBuilding(id);
+
+			const danach = await CharacterModel.findByPk(besitzer);
+			expect(danach!.dataValues.HomeBuildingId).toBeNull();
+		});
+	});
+
+	describe('renovieren', () => {
+		it('setzt den Zustand zurück und den Stichtag mit', async () => {
+			const besitzer = await person('Besitzer');
+			const id = await haus(besitzer);
+			const spaeter: number = JETZT + yearsToTicks(10);
+			await weltzeit(spaeter);
+
+			expect(await buildingService.renovateBuilding(besitzer, id)).toMatchObject({ ok: true });
+
+			// Ohne den Stichtag liefe der Verfall ab dem alten Datum weiter — die
+			// Renovierung wäre im selben Moment wieder verbraucht.
+			expect((await buildingService.getBuilding(id))?.condition).toBe(CONDITION_MAX);
+		});
+
+		it('gehört dem Eigentümer', async () => {
+			const besitzer = await person('Besitzer');
+			const fremder = await person('Fremder');
+			const id = await haus(besitzer);
+			await weltzeit(JETZT + yearsToTicks(10));
+
+			expect(await buildingService.renovateBuilding(fremder, id)).toEqual({
+				ok: false,
+				reason: 'PLOT_NOT_OWNED'
+			});
+		});
+	});
+
+	describe('ausbauen', () => {
+		it('hebt die Stufe und damit den Wohnraum', async () => {
+			const besitzer = await person('Besitzer');
+			const id = await haus(besitzer);
+
+			expect(await familyService.freierWohnraum(id)).toBe(4);
+
+			expect(await buildingService.upgradeBuilding(besitzer, id)).toMatchObject({ ok: true });
+
+			// Genau hier hängt die Bevölkerungsgrenze aus 4.4: Wer wachsen will, baut aus.
+			expect(await familyService.freierWohnraum(id)).toBe(6);
+		});
+
+		it('macht das alte Gemäuer nicht neu', async () => {
+			const besitzer = await person('Besitzer');
+			const id = await haus(besitzer);
+			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN / 2));
+
+			await buildingService.upgradeBuilding(besitzer, id);
+
+			expect((await buildingService.getBuilding(id))?.condition).toBe(50);
+		});
+	});
+
+	describe('verkaufen', () => {
+		it('lässt Geld, Gebäude und Grundstück auf einmal wechseln', async () => {
+			const verkäufer = await person('Verkäufer');
+			const käufer = await person('Käufer');
+			const id = await haus(verkäufer);
+			await buildingService.setBuildingPrice(verkäufer, id, 300);
+
+			expect(await buildingService.buyBuilding(käufer, id)).toMatchObject({ ok: true });
+
+			const gebäude = await BuildingModel.findByPk(id);
+			expect(gebäude!.dataValues.OwnerCharacterId).toBe(käufer);
+			expect(gebäude!.dataValues.forSalePrice).toBeNull();
+			// Das Grundstück wandert mit — ein Haus auf fremdem Boden wäre eine Pacht.
+			expect(await PlotModel.count({ where: { OwnerCharacterId: käufer } })).toBe(1);
+			expect((await CharacterModel.findByPk(verkäufer))!.dataValues.money).toBe(5300);
+			expect((await CharacterModel.findByPk(käufer))!.dataValues.money).toBe(4700);
+		});
+
+		it('geht nicht ohne Preisschild', async () => {
+			const verkäufer = await person('Verkäufer');
+			const käufer = await person('Käufer');
+			const id = await haus(verkäufer);
+
+			expect(await buildingService.buyBuilding(käufer, id)).toEqual({
+				ok: false,
+				reason: 'NOT_FOR_SALE'
+			});
 		});
 	});
 });

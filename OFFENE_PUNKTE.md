@@ -114,6 +114,13 @@ Häuser, Grundsteuer die Besitzenden, Handelssteuer die Betriebe.
 
 ### 12. Katalog öffentlicher Gebäude
 
+**Vorläufig entschieden (Phase 4.5):** Öffentliche Gebäude **verfallen nicht**. Ohne
+diese Ausnahme wäre die städtische Schmiede nach zwanzig Spieljahren eine Ruine — und mit
+ihr der einzige Weg, auf dem ein Neuling Geld verdienen kann. Sobald die Stadtkasse eine
+Amtshandlung „instandhalten" kennt (4.7), gehört die Ausnahme wieder weg: Ein Rathaus,
+das niemand pflegt, soll verfallen dürfen, und ein Bürgermeister, der es verfallen lässt,
+soll abgewählt werden.
+
 Welche gibt es, was kosten sie, was bewirken sie genau — und welche belegen ein
 Grundstück? Schule und Brunnen konkurrieren dann mit Wohnhäusern um knappes Bauland
 (eine echte politische Abwägung), eine Stadtmauer umschließt dagegen die ganze Region.
