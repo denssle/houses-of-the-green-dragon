@@ -12,6 +12,7 @@ import { convertToCharacter } from '$lib/db/attributes/character.attributes';
 import { findStartRegionId } from '$lib/db/seed';
 import * as worldService from '$lib/server/service/worldService';
 import { regrownActionPoints } from '$lib/game/tick.logic';
+import { randomPersonality } from '$lib/game/personality.logic';
 import { AGE_OF_MAJORITY, MAX_ACTION_POINTS, yearsToTicks } from '$lib/game/time';
 
 /** Was ein Haus seinem ersten Spross mitgibt. */
@@ -36,7 +37,10 @@ export async function create(
 		actionPoints: MAX_ACTION_POINTS,
 		money: STARTKAPITAL,
 		RegionId: await findStartRegionId(),
-		DynastyId: dynastyId
+		DynastyId: dynastyId,
+		// Der Stammvater eines Hauses hat keine Eltern, von denen er etwas erben könnte —
+		// also gewürfelt. Ab der zweiten Generation vererbt `familyService` die Anlagen.
+		...randomPersonality(Math.random)
 	});
 	return convertToCharacter(angelegt.dataValues);
 }

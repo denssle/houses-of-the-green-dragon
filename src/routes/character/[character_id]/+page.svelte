@@ -31,6 +31,15 @@
 	<dt>Aktionspunkte</dt>
 	<dd>{data.character.actionPoints} von {data.maxActionPoints}</dd>
 
+	<dt>Wesensart</dt>
+	<dd>
+		{data.nature}
+		<!--
+			Keine Zahlen: Sechs Werte zwischen -100 und +100 lüden dazu ein, den passenden
+			Erben auszurechnen. Ein Wort sagt, worauf man sich einstellen muss.
+		-->
+	</dd>
+
 	<dt>Familienstand</dt>
 	<dd>
 		{#if data.spouse}
@@ -98,7 +107,7 @@
 		<ul>
 			{#each data.children as kind (kind.id)}
 				<li>
-					{kind.firstName}, {kind.age} Jahre
+					{kind.firstName}, {kind.age} Jahre — <i>{kind.nature}</i>
 					{#if kind.isHeir}
 						<b>— dein Erbe</b>
 						<form method="POST" action="?/heir" use:enhance>

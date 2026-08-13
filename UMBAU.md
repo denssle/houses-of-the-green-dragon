@@ -718,7 +718,7 @@ Spielercharakter einen Antrag gemacht, der liegen blieb. Eine hochschwangere Rei
 brachte beim nächsten Herzschlag Ingram zur Welt — der steht jetzt im Stammbaum, in der
 Erbfolge und in der Einwohnerzahl.
 
-**4.4a Persönlichkeit.** Sechs Achsen am Charakter, vererbt mit Streuung, festgelegt bei
+**4.4a Persönlichkeit.** ✓ Sechs Achsen am Charakter, vererbt mit Streuung, festgelegt bei
 der Geburt; `personality.logic.ts` für Vererbung und Etikett; Anzeige auf der
 Charakterseite und **in der Erbfolge**, wo sie sofort etwas ändert.
 
@@ -737,6 +737,30 @@ Geburtsdatums.
 Für den Bestand — die acht Fremd-NPCs aus dem Weltaufbau und die vorhandenen
 Spielercharaktere — bleibt nur Würfeln. Das ist vertretbar: Sie sind die erste Generation,
 sie haben keine Eltern, von denen sie etwas erben könnten.
+
+Drei Dinge, die sich beim Bauen zeigten:
+
+- **Die Migration darf die Spiellogik nicht importieren.** Sie würfelt den Bestand aus,
+  und die Zahlen dafür stehen in ihr ausgeschrieben — nicht als Aufruf von
+  `randomPersonality()`. Eine Migration muss in fünf Jahren noch dasselbe tun; importierte
+  Logik entwickelt sich mit dem Spiel weiter und veränderte diesen Schritt rückwirkend.
+- **Der Mittelwert dreier Würfe statt eines einzelnen.** Das ergibt eine Glockenkurve
+  statt einer Gleichverteilung. Sonst wäre ein Charakter mit +95 Gier so häufig wie einer
+  mit 0, und eine Stadt voller Extreme ist keine Bevölkerung, sondern ein Panoptikum. Am
+  ausgewürfelten Bestand nachgezählt: Werte um die Mitte überwiegen deutlich.
+- **Ein Wort je Richtung genügt.** Im Deutschen dekliniert sich das Adjektiv schwach —
+  „der Gierige" und „die Gierige" sind dieselbe Form, nur der Artikel unterscheidet sich.
+  Damit braucht es keinen zweiten Satz Formen, der beim Erweitern vergessen würde.
+
+Eine Ungenauigkeit bleibt und ist bewusst in Kauf genommen: Ingram, das erste in dieser
+Welt geborene Kind, hat gewürfelte statt geerbter Anlagen — er kam vor der Migration zur
+Welt, seine Eltern hatten damals selbst noch keine. Genau dieser Fall wäre bei jedem
+weiteren Kind entstanden, hätte der Schritt bis 4.6 gewartet.
+
+_Fertig, wenn:_ Jeder Charakter hat Anlagen, Kinder erben sie, und die Erbfolge zeigt sie.
+— Erledigt und am gebauten Server durchgespielt: Die Migration hat zehn Charaktere
+ausgewürfelt, Reinhild ist „die Friedfertige", ihr Sohn Ingram steht als „der Faule" in
+der Erbfolge.
 
 **4.5 Gebäude und Grundstücke.** `building.logic.ts`: Zustand aus verstrichenen Ticks,
 Renovieren, Ausbaustufen, Übergang zur Ruine. Dazu Grundstücke als knappes Gut, An- und

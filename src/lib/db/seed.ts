@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { randomPersonality } from '$lib/game/personality.logic';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
@@ -135,8 +136,11 @@ export async function seedWorld(): Promise<boolean> {
 			gender: person.gender,
 			birthTick: jetzt - person.age * TICKS_PER_YEAR,
 			lastTickProcessed: jetzt,
-			RegionId: stadtId
+			RegionId: stadtId,
 			// Ohne Dynastie: Fremd-NPCs gehören zu keinem Haus.
+			// Die Anlagen gewürfelt — sie sind die erste Generation und haben niemanden,
+			// von dem sie etwas erben könnten.
+			...randomPersonality(Math.random)
 		});
 	}
 

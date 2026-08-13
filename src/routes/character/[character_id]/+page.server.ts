@@ -7,6 +7,7 @@ import * as plotService from '$lib/server/service/plotService';
 import * as regionService from '$lib/server/service/regionService';
 import * as worldService from '$lib/server/service/worldService';
 import { deathProbabilityPerYear } from '$lib/game/mortality.logic';
+import { personalityLabel } from '$lib/game/personality.logic';
 import { ageInYears, MAX_ACTION_POINTS } from '$lib/game/time';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -25,6 +26,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	return {
 		character,
 		age: alter,
+		nature: personalityLabel(character.personality, character.gender),
 		// Nicht die Zahl, sondern ob überhaupt eines besteht: Ein Prozentwert lüde dazu
 		// ein, den Tod auszurechnen statt sich auf ihn vorzubereiten.
 		mortal: deathProbabilityPerYear(alter) > 0,

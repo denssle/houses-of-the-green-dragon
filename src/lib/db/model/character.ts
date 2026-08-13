@@ -46,7 +46,16 @@ export const Character: ModelStatic<Model<CharacterAttributes, CharacterCreation
 			// Ein offener Heiratsantrag. NPCs brauchen ihn nicht — sie entscheiden sofort —,
 			// aber zwei Spieler sind selten zugleich online.
 			proposedToId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
-			HomeBuildingId: { type: DataTypes.STRING, allowNull: true, defaultValue: null }
+			HomeBuildingId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
+			// Die Grundpersoenlichkeit: sechs Achsen, festgelegt bei der Geburt, nie wieder
+			// geaendert. Direkt am Charakter statt in einer eigenen Tabelle — jeder hat genau
+			// einen Satz, und die Kandidatensuche ab 4.7 will danach sortieren koennen.
+			courage: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+			diligence: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+			greed: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+			sociability: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+			ambition: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+			agreeableness: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 }
 		},
 		{ timestamps: true }
 	);

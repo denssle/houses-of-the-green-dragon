@@ -7,6 +7,7 @@ import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
 import { chooseHeir, type Child, splitEstate } from '$lib/game/inheritance.logic';
 import { diesThisTick, MORTALITY_ONSET_AGE } from '$lib/game/mortality.logic';
+import { personalityLabel } from '$lib/game/personality.logic';
 import { ageInYears, yearsToTicks } from '$lib/game/time';
 
 /**
@@ -152,6 +153,13 @@ export interface ChildOnList {
 	firstName: string;
 	age: number;
 	isHeir: boolean;
+	/**
+	 * Das Etikett der Anlagen — „die Gierige", „der Fleißige".
+	 *
+	 * Steht hier, weil es die Erbenwahl von einer Frage des Geburtsdatums zu einer
+	 * Entscheidung macht: der gierige Älteste oder die fleißige Zweite?
+	 */
+	nature: string;
 }
 
 /** Die lebenden Kinder mit Namen und Alter, für die Erbenwahl. */
@@ -171,7 +179,18 @@ export async function getChildren(characterId: string, tick: number): Promise<Ch
 		id: kind.dataValues.id,
 		firstName: kind.dataValues.firstName,
 		age: ageInYears(kind.dataValues.birthTick, tick),
-		isHeir: kind.dataValues.id === eltern.dataValues.heirId
+		isHeir: kind.dataValues.id === eltern.dataValues.heirId,
+		nature: personalityLabel(
+			{
+				courage: kind.dataValues.courage,
+				diligence: kind.dataValues.diligence,
+				greed: kind.dataValues.greed,
+				sociability: kind.dataValues.sociability,
+				ambition: kind.dataValues.ambition,
+				agreeableness: kind.dataValues.agreeableness
+			},
+			kind.dataValues.gender
+		)
 	}));
 }
 

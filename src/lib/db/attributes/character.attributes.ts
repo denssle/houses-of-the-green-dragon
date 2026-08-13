@@ -37,6 +37,12 @@ export interface CharacterAttributes {
 	pregnantSinceTick: number | null;
 	pregnantByFatherId: string | null;
 	proposedToId: string | null;
+	courage: number;
+	diligence: number;
+	greed: number;
+	sociability: number;
+	ambition: number;
+	agreeableness: number;
 	HomeBuildingId: string | null;
 }
 
@@ -54,6 +60,12 @@ export type CharacterCreationAttributes = Optional<
 	| 'pregnantSinceTick'
 	| 'pregnantByFatherId'
 	| 'proposedToId'
+	| 'courage'
+	| 'diligence'
+	| 'greed'
+	| 'sociability'
+	| 'ambition'
+	| 'agreeableness'
 	| 'HomeBuildingId'
 >;
 
@@ -72,6 +84,14 @@ export function convertToCharacter(attributes: CharacterAttributes): Character {
 		dynastyId: attributes.DynastyId,
 		homeBuildingId: attributes.HomeBuildingId,
 		spouseId: attributes.spouseId,
-		pregnantSinceTick: attributes.pregnantSinceTick
+		pregnantSinceTick: attributes.pregnantSinceTick,
+		personality: {
+			courage: attributes.courage,
+			diligence: attributes.diligence,
+			greed: attributes.greed,
+			sociability: attributes.sociability,
+			ambition: attributes.ambition,
+			agreeableness: attributes.agreeableness
+		}
 	};
 }

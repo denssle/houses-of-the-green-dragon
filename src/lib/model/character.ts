@@ -1,4 +1,5 @@
 import type { CharacterRole, Gender } from '$lib/db/attributes/enums';
+import type { Personality } from '$lib/game/personality.logic';
 
 /**
  * Ein Charakter, wie ihn die Anwendung sieht.
@@ -23,4 +24,6 @@ export interface Character {
 	spouseId: string | null;
 	/** Seit wann schwanger — null heisst: nicht. Steht hier, weil die Anzeige es zeigt. */
 	pregnantSinceTick: number | null;
+	/** Die Anlagen. Festgelegt bei der Geburt, unveraenderlich. */
+	personality: Personality;
 }

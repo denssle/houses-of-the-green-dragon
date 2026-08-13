@@ -17,6 +17,7 @@ import {
 	court,
 	isDue
 } from '$lib/game/family.logic';
+import { inheritPersonality, type Personality } from '$lib/game/personality.logic';
 import { ageInYears } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
@@ -268,6 +269,14 @@ async function zurWeltBringen(
 				),
 				motherId: mutter.dataValues.id,
 				fatherId: vaterId,
+				// Die Anlagen: Mittelwert der Eltern plus Streuung. Deshalb steht dieser
+				// Schritt vor 4.5 — jedes Kind, das ohne sie zur Welt käme, müsste sie
+				// später erfunden bekommen statt vererbt.
+				...inheritPersonality(
+					anlagenVon(mutter.dataValues),
+					vater ? anlagenVon(vater.dataValues) : null,
+					roll
+				),
 				// Das Kind wohnt, wo die Mutter wohnt. Der Platz dafür war die
 				// Voraussetzung der Empfängnis — er ist also da.
 				HomeBuildingId: mutter.dataValues.HomeBuildingId
@@ -278,6 +287,18 @@ async function zurWeltBringen(
 	});
 
 	return { childId: kindId, name, motherId: mutter.dataValues.id };
+}
+
+/** Die sechs Achsen aus einer Datenbankzeile herausgeschält. */
+function anlagenVon(werte: CharacterAttributes): Personality {
+	return {
+		courage: werte.courage,
+		diligence: werte.diligence,
+		greed: werte.greed,
+		sociability: werte.sociability,
+		ambition: werte.ambition,
+		agreeableness: werte.agreeableness
+	};
 }
 
 /**

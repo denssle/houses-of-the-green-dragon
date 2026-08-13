@@ -14,6 +14,7 @@ import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as familyService from '$lib/server/service/familyService';
 import * as relationshipService from '$lib/server/service/relationshipService';
 import { MARRIAGE_MIN_AFFECTION, PREGNANCY_TICKS } from '$lib/game/family.logic';
+import { INHERITANCE_SPREAD } from '$lib/game/personality.logic';
 import { yearsToTicks } from '$lib/game/time';
 
 /**
@@ -273,6 +274,23 @@ describe('Familie', () => {
 
 			expect((await stand(births[0].childId)).DynastyId).toBe(hausId);
 			expect((await stand(sie)).DynastyId).toBe(hausId);
+		});
+
+		it('erben die Anlagen ihrer Eltern', async () => {
+			// Der Grund, warum dieser Schritt vor 4.5 stand: Ein Kind, das ohne Anlagen zur
+			// Welt kommt, müsste sie später erfunden bekommen statt vererbt.
+			const { sie, er } = await paar();
+			await Character.update({ diligence: 80, greed: -60 }, { where: { id: sie } });
+			await Character.update({ diligence: 60, greed: -80 }, { where: { id: er } });
+
+			await familyService.advanceFamilies(JETZT, () => 0);
+			const { births } = await familyService.advanceFamilies(JETZT + PREGNANCY_TICKS, () => 0.99);
+			const kind = await stand(births[0].childId);
+
+			// Mittel 70 beziehungsweise -70, plus Streuung von höchstens 30.
+			expect(kind.diligence).toBeGreaterThanOrEqual(70 - INHERITANCE_SPREAD);
+			expect(kind.diligence).toBeLessThanOrEqual(100);
+			expect(kind.greed).toBeLessThanOrEqual(-70 + INHERITANCE_SPREAD);
 		});
 
 		it('wachsen ohne Haus als Fremde auf', async () => {
