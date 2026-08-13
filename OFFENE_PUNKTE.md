@@ -8,7 +8,7 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | --- | ----------------------------------------------------------------- | --------------------------- | ------------ |
 | 5   | Krankheiten: Ursachen, Verlauf, Heilung                           | Heiltrank (4.6c)            | Entwurf      |
 | 6   | Kämpfe und Verletzungen                                           | Waffen und Gift (4.6c)      | Entwurf      |
-| 7   | Verhaltensregeln der NPCs                                         | 4.4 / 4.6                   | Entwurf      |
+| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                 | 4.7 / Punkt 6               | Entwurf      |
 | 8   | Pachtvertrag beim Tod des Pächters                                | 4.6                         | Entscheidung |
 | 9   | Wahlalter                                                         | 4.7                         | Entscheidung |
 | 10  | Amtsnachfolge beim Tod des Amtsinhabers                           | 4.7                         | Entscheidung |
@@ -61,27 +61,20 @@ aus 4.9 oder wenigstens den Transport innerhalb einer Region. Ohne das gibt es n
 
 ### 7. Verhaltensregeln der NPCs
 
-NPCs sind indirekt anweisbar und handeln sonst selbst. Auszuarbeiten, was „selbst“
-heißt: Wie suchen sie Arbeit, wann heiraten sie, wie wählen sie ihren Einkauf, wann
-renovieren sie, wann geben sie auf? Muss durch dieselbe Logik laufen wie
-Spielerhandlungen, ist aber eigener Entwurfsaufwand.
+**Zum großen Teil erledigt (Phase 4.6b).** NPCs essen, arbeiten, ziehen unter ein Dach
+und werben — entschieden aus den Persönlichkeitsachsen, nicht aus einer Regel je Lage.
+Die Kadenz ist entschieden: **so oft wie Spielercharaktere**, also über dasselbe
+Aktionsbudget gedrosselt. Ein eigener Test lässt die Welt fünf Spieljahre ohne Spieler
+laufen.
 
-**Das Woher steht inzwischen fest:** aus der **Persönlichkeit** (siehe `KONZEPT.md`,
-Abschnitt 9). Sechs Achsen bei der Geburt, jede Entscheidung eine gewichtete Summe daraus
-— statt einer Regel je Lage.
+Offen bleiben die Gewichte der übrigen drei Achsen — **Mut**, **Ehrgeiz** und
+**Verträglichkeit** tragen noch keine Handlung. Sie bekommen sie mit den Systemen, zu
+denen sie gehören: Kampf und Wachdienst (Punkt 6), Kandidatur und Ämter (4.7), Fehde und
+Nachgeben (4.7). Dazu kommen die Handlungen, die es noch nicht gibt: einkaufen, was nicht
+Nahrung ist, renovieren, ausbauen, ein Grundstück kaufen, sich anstellen lassen.
 
-Offen bleibt damit nicht mehr das Prinzip, sondern die Rechnung: **welche Achse mit
-welchem Gewicht** in welche Entscheidung eingeht, und was ein NPC überhaupt zur Auswahl
-hat. „Arbeitet er heute?" ist eine Schwelle auf Fleiß; „welchen Lohn zahlt er?" eine auf
-Gier; „stellt er sich zur Wahl?" eine auf Ehrgeiz. Jede dieser Schwellen ist eine
-Balancing-Zahl, und sie fallen mit den Handlungen, zu denen sie gehören — also verteilt
-über 4.6 und 4.7, nicht in einem Zug.
-
-Ein Punkt, der dabei leicht untergeht: NPCs handeln **nicht jeden Tick**. Ein Durchlauf
-über alle Einwohner je Stunde wird teuer, sobald die Stadt wächst. Wie oft ein NPC
-tatsächlich zum Zug kommt — jeden Tick, einmal am Spieltag, gestaffelt über die
-Bevölkerung — gehört zu dieser Frage dazu und hat mehr Einfluss auf die Serverlast als
-alles andere in Phase 4.
+Und die indirekten Befehle an eigene Geschwister-NPCs (anstellen, verheiraten, ins Amt
+schicken) fehlen weiterhin — sie brauchen Anstellung (4.6c) und Ämter (4.7).
 
 ### 8. Pachtvertrag im Erbfall
 

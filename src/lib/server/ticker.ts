@@ -1,6 +1,7 @@
 import * as worldService from '$lib/server/service/worldService';
 import * as familyService from '$lib/server/service/familyService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
+import * as npcService from '$lib/server/service/npcService';
 
 /**
  * Der Herzschlag der Welt.
@@ -64,6 +65,14 @@ async function schlagen(): Promise<void> {
 		const familie = await familyService.advanceFamilies(geschehen.currentTick);
 		for (const geburt of familie.births) {
 			console.info(`${geburt.name} ist zur Welt gekommen.`);
+		}
+
+		// Handeln vor dem Sterben: Wer noch ein Brot in der Kammer hat, soll es essen
+		// duerfen, bevor der Wuerfel ueber ihn entscheidet. Andersherum verhungerten
+		// Leute mit vollem Vorrat.
+		const npcs = await npcService.actForNpcs(geschehen.currentTick);
+		if (npcs.acted > 0) {
+			console.info(`${npcs.acted} Einwohner haben gehandelt:`, npcs.byAction);
 		}
 
 		for (const fall of await lifecycleService.reapTheDead(geschehen.currentTick)) {

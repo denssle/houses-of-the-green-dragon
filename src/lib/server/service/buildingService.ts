@@ -44,6 +44,19 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			levels: [{ price: 0, name: 'Rathaus' }]
 		},
 		{
+			optionId: 3,
+			initialName: 'Unterkunft',
+			type: 'PUBLIC',
+			description: 'Ein Dach für die, die keines haben.',
+			limited: true,
+			limitedTo: 1,
+			actions: [],
+			// Aus dem Konzept: Wer sein Haus verliert, braucht einen Ort, an dem es
+			// weitergeht. Ohne ein Auffangnetz wäre Obdachlosigkeit eine Sackgasse — und
+			// seit 4.6a auch ein Todesurteil, weil ohne Wohnraum keine Kinder kommen.
+			levels: [{ price: 0, name: 'Unterkunft', residents: 20 }]
+		},
+		{
 			optionId: 1,
 			initialName: 'Wohnhaus',
 			type: 'RESIDENCE',

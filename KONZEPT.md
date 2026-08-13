@@ -529,6 +529,12 @@ das Haus am Ende; der Spieler beginnt mit einer neuen Dynastie bei null, sein Be
 fällt an die Stadt. Harter Schnitt, maximaler Druck auf die Fortpflanzung — sie ist damit
 tatsächlich die zentrale Überlebensmechanik und nicht nur eine Empfehlung.
 
+**NPCs handeln so oft wie Spielercharaktere.** Sie haben dasselbe Aktionsbudget, dieselben
+Kosten und dieselben Regeln — es gibt keine eigene Taktung für die Simulation. Wer nichts
+mehr hat, tut nichts mehr, und damit drosselt sich der Weltlauf von selbst. Ein zweiter
+Satz Regeln für NPCs würde von dem der Spieler abdriften, und dann wüsste niemand mehr,
+ob eine Beobachtung an der Welt liegt oder an zwei verschiedenen Rechnungen.
+
 **NPCs sind indirekt anweisbar.** Man kann eigene Kinder anstellen, verheiraten oder ins
 Amt schicken, steuert sie aber nicht direkt. Sie handeln nach eigenen Regeln. Damit
 bleibt der eine sterbliche Spielercharakter der Mittelpunkt, statt dass man faktisch ein

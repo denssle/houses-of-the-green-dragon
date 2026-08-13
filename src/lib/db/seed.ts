@@ -47,7 +47,8 @@ const GASSEN = ['Am Markt', 'Gerbergasse', 'Töpferweg'] as const;
  */
 const STADTGEBAEUDE = [
 	{ optionId: 0, name: 'Rathaus', adresse: 'Am Markt 1' },
-	{ optionId: 2, name: 'Städtische Schmiede', adresse: 'Am Markt 2' }
+	{ optionId: 2, name: 'Städtische Schmiede', adresse: 'Am Markt 2' },
+	{ optionId: 3, name: 'Städtische Unterkunft', adresse: 'Am Markt 3' }
 ] as const;
 
 /** Fremde NPCs, die die Stadt von Anfang an bevölkern — Kundschaft, Arbeitskraft, Wähler. */

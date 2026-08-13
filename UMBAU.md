@@ -940,7 +940,49 @@ _Fertig, wenn:_ Hunger tut weh, Essen hilft, und die Stadt hat eine Quelle dafü
 Erledigt und am gebauten Server durchgespielt: fünf Brote für zwanzig Münzen, nach
 siebzig Ticks ohne Mahlzeit „hungrig (30 von 100)", ein Laib brachte auf 70 zurück.
 
-**4.6 Wirtschaft** _(der Rest: 4.6b bis 4.6d)_**.** `itemTemplate`/`inventory` mit echtem Nutzen (Nahrung, Kleidung,
+**4.6b NPCs handeln.** ✓ Vorgezogen, und zwar dringend: Mit 4.6a bekam **jeder** Charakter
+Hunger — aber nur Spieler konnten essen. Ein Verhungernder trägt 4,5 % Risiko je Tick;
+nach drei Realtagen leben noch 3,6 %. Die Welt hätte sich binnen einer Woche entvölkert,
+und keine der damals 319 Prüfungen hätte angeschlagen.
+
+Der eigentliche Fehler lag nicht in der Umsetzung, sondern in der Reihenfolge: eine
+Anforderung an alle stellen und die Fähigkeit, sie zu erfüllen, nur der einen Hälfte
+geben. Dasselbe galt still schon länger für Ehe und Wohnraum, nur ohne tödliche Folge.
+
+_Entschieden:_ **NPCs kommen so oft zum Zug wie Spielercharaktere.** Damit ist die
+Kadenz keine eigene Regel, sondern die schon vorhandene: dasselbe Aktionsbudget,
+dieselben Kosten. Wer nichts mehr hat, tut nichts mehr — ein Punkt je Tick ist die
+natürliche Bremse, und die teuerste Schleife im Spiel drosselt sich selbst.
+
+`npc.logic.ts` entscheidet als reine Funktion, `npcService.ts` führt aus. Die Rangfolge
+ist Dringlichkeit, nicht Willkür: erst überleben, dann ein Dach, dann eine Familie.
+**Innerhalb** jeder Stufe entscheidet die Persönlichkeit aus 4.4a, ob und wie früh — nicht,
+was zuerst kommt. Ein Träger stirbt nicht am Hunger, weil er faul ist; er kümmert sich nur
+später darum. Drei der sechs Achsen tragen damit endlich eine Handlung: Fleiß das Essen
+und Arbeiten, Gier die Rücklage, Geselligkeit das Werben.
+
+Dazu die **städtische Unterkunft** aus dem Konzept — zwanzig Plätze, der Stadt gehörend.
+Ohne Wohnraum keine Kinder (4.4), und ohne Kinder keine Bevölkerung. Die dritte Krücke
+dieser Art nach Schmiede und Kornspeicher, und wie diese vermerkt.
+
+Zwei Dinge, die sich beim Bauen zeigten:
+
+- **NPCs entschieden auf Grundlage veralteter Aktionspunkte.** Der gespeicherte Stand ist
+  der von der letzten Handlung; wer nichts tat, stand auf null und kam nie wieder zum Zug.
+  Beim ersten Simulationslauf starb die Stadt trotzdem aus. Der Einstieg muss derselbe
+  sein wie beim Spieler: erst nachwachsen lassen, dann entscheiden.
+- **Auch der Trägste muss für sein Essen arbeiten.** Ein Fleiß-Schwellenwert vor der
+  Arbeit machte Faulheit zum Todesurteil statt zur Eigenart. Wer hungert und nichts hat,
+  arbeitet — die Persönlichkeit entscheidet erst darüber, wie viel er darüber hinaus
+  zurücklegt.
+
+Der Nachweis steht als eigener Test: `selfSustaining.spec.ts` lässt die Welt **fünf
+Spieljahre ohne einen einzigen Spieler** laufen und prüft, dass danach noch jemand lebt,
+niemand hungert, geheiratet wurde, Geld verdient wurde, jemand unter dem Dach der Stadt
+wohnt und Kinder geboren sind, die nicht aus dem Weltaufbau stammen. Ein Test, der kein
+Verhalten prüft, sondern ein Zusammenspiel — genau die Lücke, durch die 4.6a gefallen ist.
+
+**4.6c Wirtschaft** _(Produktion, Pacht, Handel, Anstellung)_**.** `itemTemplate`/`inventory` mit echtem Nutzen (Nahrung, Kleidung,
 Werkzeug, **Baumaterial**), Bedürfnisse als Modifikatoren, `employment` mit Lohn, Produktion im Betrieb.
 Der Handel läuft über **Festpreis-Angebote am Gebäude** (`shopOffer`: BuildingId, itemId,
 Preis, Menge) — ein Kauf ist eine Transaktion, kein Matching. **NPC-Konsum gehört in

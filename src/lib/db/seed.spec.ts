@@ -47,10 +47,10 @@ describe('Weltaufbau', () => {
 		const abbau = await Plot.findAll({ where: { type: 'RESOURCE' } });
 
 		expect(bauland).toHaveLength(12);
-		// Zehn nie vergeben — wer bauen will, muss erst eines erwerben. Die zwei übrigen
-		// trägt die Stadt selbst.
-		expect(bauland.filter((p) => p.dataValues.ownerType === 'NONE')).toHaveLength(10);
-		expect(bauland.filter((p) => p.dataValues.ownerType === 'CITY')).toHaveLength(2);
+		// Neun nie vergeben — wer bauen will, muss erst eines erwerben. Die drei übrigen
+		// trägt die Stadt selbst: Rathaus, Schmiede und Unterkunft.
+		expect(bauland.filter((p) => p.dataValues.ownerType === 'NONE')).toHaveLength(9);
+		expect(bauland.filter((p) => p.dataValues.ownerType === 'CITY')).toHaveLength(3);
 		// Umland gehört der Stadt und wird verpachtet, nicht verkauft.
 		expect(abbau.every((p) => p.dataValues.ownerType === 'CITY')).toBe(true);
 		expect(abbau.map((p) => p.dataValues.resourceType).sort()).toEqual([
@@ -63,14 +63,15 @@ describe('Weltaufbau', () => {
 		]);
 	});
 
-	it('gibt der Stadt ein Rathaus und einen Betrieb, in dem Neulinge arbeiten können', async () => {
+	it('gibt der Stadt ein Rathaus, einen Betrieb und ein Dach für Obdachlose', async () => {
 		const städtisch = await Building.findAll({ where: { ownerType: 'CITY' } });
 
 		expect(städtisch.map((b) => b.dataValues.name).sort()).toEqual([
 			'Rathaus',
-			'Städtische Schmiede'
+			'Städtische Schmiede',
+			'Städtische Unterkunft'
 		]);
-		// Beide stehen auf einem Grundstück — sie belegen knappen Platz wie jedes andere
+		// Alle drei stehen auf einem Grundstück — sie belegen knappen Platz wie jedes andere
 		// Haus auch.
 		expect(städtisch.every((b) => b.dataValues.PlotId !== null)).toBe(true);
 	});
