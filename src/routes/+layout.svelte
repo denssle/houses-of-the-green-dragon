@@ -18,7 +18,7 @@
 			</form>
 		{:else}
 			<!-- Der Schrägstrich am Ende gehört dazu: Die Übersicht hat einen leeren Slug,
-			     und SvelteKit leitet `/drachen` mit 308 auf `/drachen/` um — ohne ihn
+			     und SvelteKit leitet `/houses` mit 308 auf `/houses/` um — ohne ihn
 			     ginge jeder Klick auf die Übersicht über einen zusätzlichen Umweg. -->
 			<a href="{base}/{section.slug}" class="link">{section.title}</a>
 		{/if}

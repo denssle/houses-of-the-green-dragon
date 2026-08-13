@@ -40,14 +40,14 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY_PRIVATE }}
           script: |
             set -e
-            mkdir -p "$HOME/backups/drachen"
-            ziel="$HOME/backups/drachen/vor-deploy-$(date +%Y%m%d-%H%M%S).sql.gz"
+            mkdir -p "$HOME/backups/houses"
+            ziel="$HOME/backups/houses/vor-deploy-$(date +%Y%m%d-%H%M%S).sql.gz"
             # Zugangsdaten kommen aus ~/.my.cnf des Uberspace-Benutzers, stehen also
             # nicht im Workflow.
-            mysqldump --single-transaction "${{ secrets.UBERSPACE_USER }}_drachen" | gzip > "$ziel"
+            mysqldump --single-transaction "${{ secrets.UBERSPACE_USER }}_houses" | gzip > "$ziel"
             echo "Sicherung: $ziel ($(du -h "$ziel" | cut -f1))"
             # Aufbewahrung: die letzten 14 Sicherungen bleiben liegen.
-            ls -1t "$HOME/backups/drachen"/vor-deploy-*.sql.gz | tail -n +15 | xargs -r rm --
+            ls -1t "$HOME/backups/houses"/vor-deploy-*.sql.gz | tail -n +15 | xargs -r rm --
 
       - name: rsync
         uses: burnett01/rsync-deployments@7.1.0
@@ -61,7 +61,7 @@ jobs:
           # NICHT ~/html — das ist der Apache-Docroot, in dem ein anderes Projekt liegt.
           # Die App wird ohnehin von Node auf Port 5174 ausgeliefert, nicht von Apache;
           # im Docroot wäre nebenbei der komplette Quellbaum öffentlich lesbar.
-          remote_path: /home/${{ secrets.UBERSPACE_USER }}/drachen-app/
+          remote_path: /home/${{ secrets.UBERSPACE_USER }}/houses-app/
           remote_host: ${{ secrets.UBERSPACE_HOST }}
           remote_user: ${{ secrets.UBERSPACE_USER }}
           remote_key: ${{ secrets.DEPLOY_KEY_PRIVATE }}
@@ -75,7 +75,7 @@ jobs:
           username: ${{ secrets.UBERSPACE_USER }}
           key: ${{ secrets.DEPLOY_KEY_PRIVATE }}
           script: |
-            cd "$HOME/drachen-app" || exit 1
+            cd "$HOME/houses-app" || exit 1
             # Die .env liegt nur auf dem Host (gitignored, per --exclude geschützt) —
             # fehlt sie, startet `node --env-file=.env build` gar nicht erst. Vorher
             # prüfen, damit der Grund sofort dasteht statt erst nach dem Zeitlimit.
@@ -87,20 +87,20 @@ jobs:
             # Nur `dependencies`: adapter-node hält sie extern, sie müssen also im
             # node_modules des Hosts liegen.
             npm ci --omit=dev
-            # Der Supervisor-Dienst "drachen" führt `npm run start-server` im
-            # Verzeichnis ~/drachen-app aus (~/etc/services.d/drachen.ini).
-            supervisorctl restart drachen
+            # Der Supervisor-Dienst "houses" führt `npm run start-server` im
+            # Verzeichnis ~/houses-app aus (~/etc/services.d/houses.ini).
+            supervisorctl restart houses
             # Bereitschaft statt bloßer Erreichbarkeit: /api/health setzt ein SELECT ab,
             # meldet offene Migrationen und liest die Weltuhr. Ein curl gegen / lieferte
             # auch bei toter Datenbank eine Antwort — nämlich den Redirect zur Anmeldung.
             for i in $(seq 1 40); do
-              if antwort=$(curl -fsS http://localhost:5174/drachen/api/health); then
+              if antwort=$(curl -fsS http://localhost:5174/houses/api/health); then
                 echo "Dienst ist bereit (nach ~$((i * 3))s): $antwort"
                 exit 0
               fi
               sleep 3
             done
             echo "Der Dienst wurde nach dem Neustart nicht bereit."
-            echo "Letzte Antwort: $(curl -sS -o - -w ' [HTTP %{http_code}]' http://localhost:5174/drachen/api/health || echo 'keine Verbindung')"
-            echo "Details im Log: supervisorctl tail -100 drachen"
+            echo "Letzte Antwort: $(curl -sS -o - -w ' [HTTP %{http_code}]' http://localhost:5174/houses/api/health || echo 'keine Verbindung')"
+            echo "Details im Log: supervisorctl tail -100 houses"
             exit 1

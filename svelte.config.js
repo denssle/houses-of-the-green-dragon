@@ -12,16 +12,16 @@ const config = {
 		// bei jedem Neustart.
 		adapter: adapter(),
 		paths: {
-			// Die App wird unter https://enzlor.uber.space/drachen ausgeliefert; die Wurzel
+			// Die App wird unter https://enzlor.uber.space/houses ausgeliefert; die Wurzel
 			// der Domain gehört einem anderen Projekt. SvelteKit stellt diesen Präfix allen
 			// Asset- und Formular-URLs voran, im Markup gehört er deshalb NICHT noch einmal
 			// hingeschrieben — dort `{base}/…` aus '$app/paths' verwenden, das ist lokal
 			// leer und in Produktion der Präfix.
 			//
 			// Auf dem Host reicht der Präfix unverändert an die App durch
-			// (`uberspace web backend set /drachen`, ohne --remove-prefix), weshalb
+			// (`uberspace web backend set /houses`, ohne --remove-prefix), weshalb
 			// `event.url.pathname` in hooks.server.ts ihn ebenfalls enthält.
-			base: '/drachen'
+			base: '/houses'
 		}
 	}
 };

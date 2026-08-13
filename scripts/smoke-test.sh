@@ -15,21 +15,21 @@
 # Voraussetzungen: erreichbare MariaDB, gebautes build/, `mysql`-Client im PATH.
 # Lokal etwa mit:
 #   docker run -d --rm -p 3306:3306 -e MARIADB_ROOT_PASSWORD=root \
-#     -e MARIADB_DATABASE=drachen_prod -e MARIADB_USER=drachen \
-#     -e MARIADB_PASSWORD=drachenpw --name drachen-smoke mariadb:11
+#     -e MARIADB_DATABASE=houses_prod -e MARIADB_USER=houses \
+#     -e MARIADB_PASSWORD=housespw --name houses-smoke mariadb:11
 #   npm run build && bash scripts/smoke-test.sh
 
 set -euo pipefail
 
 # Der effektive Datenbankname ist MARIA_DB_USER + '_' + MARIA_DB_NAME (siehe
-# sequelize.ts), hier also "drachen_prod". MARIA_DB_NAME darf NICHT 'dev' sein — sonst
+# sequelize.ts), hier also "houses_prod". MARIA_DB_NAME darf NICHT 'dev' sein — sonst
 # schaltet die App auf SQLite um und der Test prüfte nichts.
-DB_USER="${MARIA_DB_USER:-drachen}"
-DB_PASSWORD="${MARIA_DB_PASSWORD:-drachenpw}"
+DB_USER="${MARIA_DB_USER:-houses}"
+DB_PASSWORD="${MARIA_DB_PASSWORD:-housespw}"
 DB_NAME="${MARIA_DB_NAME:-prod}"
 DB_HOST="${DB_HOST:-127.0.0.1}"
 FULL_DB_NAME="${DB_USER}_${DB_NAME}"
-HEALTH_URL="http://localhost:5174/drachen/api/health"
+HEALTH_URL="http://localhost:5174/houses/api/health"
 
 server_pid=""
 env_backup=""

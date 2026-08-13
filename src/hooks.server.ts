@@ -20,7 +20,7 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	// Die App läuft unter einem Base-Pfad (siehe svelte.config.js), und der Uberspace
 	// reicht ihn unverändert durch — `event.url.pathname` enthält ihn also. Einmal
 	// abschneiden, damit alle Vergleiche unten mit den route-eigenen Pfaden arbeiten
-	// ('/drachen/login' → '/login'). Lokal ist `base` leer, die Zeile ändert dort nichts.
+	// ('/houses/login' → '/login'). Lokal ist `base` leer, die Zeile ändert dort nichts.
 	const pathname: string = event.url.pathname.slice(base.length) || '/';
 
 	// Der Bereitschaftscheck läuft vor der Sitzungsauflösung: Er soll gerade dann noch
@@ -49,7 +49,7 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	}
 	// Bewusst `${base}` und ein absoluter Pfad: Ein Location-Header wird vom Browser
 	// gegen die angefragte Ressource aufgelöst. Bei einem Datenrequest (etwa
-	// /drachen/dynasty/__data.json) landete ein relativer Pfad damit nicht auf der
+	// /houses/dynasty/__data.json) landete ein relativer Pfad damit nicht auf der
 	// Anmeldeseite. In SvelteKits eigenem `redirect()` ist das anders — dort wird gegen
 	// die Request-URL aufgelöst.
 	return new Response('Redirect', { status: 303, headers: { Location: `${base}/login` } });

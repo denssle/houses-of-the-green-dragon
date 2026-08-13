@@ -41,9 +41,9 @@ jobs:
         env:
           MARIADB_ROOT_PASSWORD: root
           # Der effektive Name ist MARIA_DB_USER + '_' + MARIA_DB_NAME (sequelize.ts).
-          MARIADB_DATABASE: drachen_prod
-          MARIADB_USER: drachen
-          MARIADB_PASSWORD: drachenpw
+          MARIADB_DATABASE: houses_prod
+          MARIADB_USER: houses
+          MARIADB_PASSWORD: housespw
         ports:
           - 3306:3306
         options: >-

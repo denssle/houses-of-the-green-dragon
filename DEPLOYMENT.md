@@ -2,9 +2,9 @@
 
 Die App läuft auf dem Uberspace als eigenständiger Node-Prozess (`adapter-node`,
 `node build`), gehalten vom Supervisor, erreichbar unter
-**https://enzlor.uber.space/drachen** auf **Port 5174**.
+**https://enzlor.uber.space/houses** auf **Port 5174**.
 
-Sie liegt in `~/drachen-app`, **nicht** in `~/html`: Der Docroot gehört einem anderen
+Sie liegt in `~/houses-app`, **nicht** in `~/html`: Der Docroot gehört einem anderen
 Projekt, dessen rsync mit `--delete` und ohne `--exclude` arbeitet — genau so ist bei
 Festival schon einmal eine Anwendung samt `.env` verschwunden. Nebenbei wäre dort der
 komplette Quellbaum öffentlich lesbar.
@@ -22,7 +22,7 @@ ausgeliefert.
 
 Der Deploy sichert zuerst die Datenbank, spielt dann per rsync ein, installiert auf dem
 Host die Produktionsabhängigkeiten, startet den Dienst neu und wartet auf
-`/drachen/api/health`.
+`/houses/api/health`.
 
 ## Einmalige Einrichtung auf dem Host
 
@@ -42,10 +42,10 @@ Muss zur `node-version` in den Workflows passen — `build/` wird gebaut und ung
 
 Uberspace erlaubt nur Datenbanken mit dem Benutzernamen als Präfix. Der Code setzt den
 Namen als `MARIA_DB_USER + '_' + MARIA_DB_NAME` zusammen (`src/lib/db/sequelize.ts`),
-aus `drachen` wird also `enzlor_drachen`:
+aus `houses` wird also `enzlor_houses`:
 
 ```
-mysql -e "CREATE DATABASE enzlor_drachen CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -e "CREATE DATABASE enzlor_houses CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -e "SHOW DATABASES;"
 ```
 
@@ -55,14 +55,14 @@ aus und danach den Weltaufbau.
 ### 3. Verzeichnis und `.env`
 
 ```
-mkdir -p ~/drachen-app
+mkdir -p ~/houses-app
 grep -A2 '\[client\]' ~/.my.cnf        # Benutzer und Passwort stehen hier
-cat > ~/drachen-app/.env <<'EOF'
+cat > ~/houses-app/.env <<'EOF'
 MARIA_DB_USER=enzlor
 MARIA_DB_PASSWORD=…
-MARIA_DB_NAME=drachen
+MARIA_DB_NAME=houses
 EOF
-chmod 600 ~/drachen-app/.env
+chmod 600 ~/houses-app/.env
 ```
 
 Diese Datei lebt **nur** auf dem Server. Sie ist in `.gitignore` und im rsync per
@@ -72,12 +72,20 @@ klaren Meldung ab, statt in ein Zeitlimit zu laufen.
 `MARIA_DB_NAME` darf hier **nicht** `dev` sein: Das ist das ausdrückliche Bekenntnis zu
 SQLite und würde die Welt in eine Datei schreiben, die der nächste Deploy wegräumt.
 
+**Festivals `.env` ist keine Vorlage zum Kopieren.** Benutzer und Passwort stimmen —
+Uberspace vergibt genau einen MariaDB-Benutzer je Account, beide Projekte teilen ihn
+sich. Aber Festival trägt dort `MARIA_DB_NAME=prod`, und das ergibt `enzlor_prod`. Eins
+zu eins übernommen liefe dieses Spiel in Festivals Datenbank: Sequelize legte seine
+Tabellen daneben, die Migrationen schrieben in ein fremdes Schema, und Festivals
+Sicherungen enthielten plötzlich fremde Daten. Die einzige Zeile, die sich unterscheiden
+muss, ist zugleich die einzige, die die beiden Projekte auseinanderhält.
+
 ### 4. Supervisor-Dienst
 
 ```
-cat > ~/etc/services.d/drachen.ini <<'EOF'
-[program:drachen]
-directory=%(ENV_HOME)s/drachen-app
+cat > ~/etc/services.d/houses.ini <<'EOF'
+[program:houses]
+directory=%(ENV_HOME)s/houses-app
 command=npm run start-server
 autostart=yes
 autorestart=yes
@@ -88,7 +96,7 @@ EOF
 
 supervisorctl reread
 supervisorctl update
-supervisorctl status drachen
+supervisorctl status houses
 ```
 
 `start-server` setzt `PORT=5174`, `ORIGIN=https://enzlor.uber.space` und lädt die `.env`
@@ -105,7 +113,7 @@ richtige Herkunft, der Schutz bleibt an.
 ### 5. Webserver
 
 ```
-uberspace web backend set /drachen --http --port 5174
+uberspace web backend set /houses --http --port 5174
 uberspace web backend list
 ```
 
@@ -130,10 +138,10 @@ stehen — für Festival liegt er dort schon, derselbe Schlüssel trägt auch di
 ## Nachsehen, wenn etwas klemmt
 
 ```
-curl -s https://enzlor.uber.space/drachen/api/health
-supervisorctl status drachen
-supervisorctl tail -100 drachen
-supervisorctl tail -100 drachen stderr
+curl -s https://enzlor.uber.space/houses/api/health
+supervisorctl status houses
+supervisorctl tail -100 houses
+supervisorctl tail -100 houses stderr
 ```
 
 Der Bereitschaftscheck ist die erste Adresse: Er antwortet mit 503, wenn die Datenbank
@@ -143,7 +151,7 @@ ist der Prozess zwar da, aber die Welt steht still.
 
 ## Datensicherung
 
-Der Deploy legt vor jedem Einspielen einen Dump unter `~/backups/drachen/` ab und hält
+Der Deploy legt vor jedem Einspielen einen Dump unter `~/backups/houses/` ab und hält
 die letzten 14 Stück. Das ist die halbe Miete; ein regelmäßiger Cron-Dump und ein
 **ausprobierter** Rückweg fehlen noch — beides gehört zu Phase 5.3.
 
