@@ -11,6 +11,17 @@
 	<p><i>Stadtkasse: {data.region.treasury} Münzen</i></p>
 {/if}
 
+{#if data.population}
+	<p>
+		<i>
+			{data.population.living} Einwohner, davon {data.population.children}
+			{data.population.children === 1 ? 'Kind' : 'Kinder'} —
+			{data.population.births} geboren und {data.population.deaths} gestorben in den letzten
+			{data.population.overYears} Jahren.
+		</i>
+	</p>
+{/if}
+
 {#if data.buildings.length === 0}
 	<p><i>Noch steht hier nichts.</i></p>
 {:else}

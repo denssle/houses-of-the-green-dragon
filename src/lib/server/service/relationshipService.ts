@@ -138,6 +138,11 @@ export interface PersonOnList {
 	/** Wie **er** zu dir steht — nicht umgekehrt. */
 	affectionToYou: string;
 	kinship: Kinship;
+	/** Anderweitig vergeben — dann erübrigt sich das Werben. */
+	married: boolean;
+	isSpouse: boolean;
+	/** Er hat dir einen Antrag gemacht und wartet auf Antwort. */
+	hasProposedToYou: boolean;
 }
 
 /**
@@ -165,7 +170,10 @@ export async function getNeighbours(
 			firstName: person.dataValues.firstName,
 			title: person.dataValues.title,
 			affectionToYou: affectionLabel(stand.affection),
-			kinship: stand.kinship
+			kinship: stand.kinship,
+			married: person.dataValues.spouseId !== null,
+			isSpouse: person.dataValues.spouseId === characterId,
+			hasProposedToYou: person.dataValues.proposedToId === characterId
 		});
 	}
 	return liste;

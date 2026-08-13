@@ -29,6 +29,34 @@
 	</form>
 {/if}
 
+{#if data.tree.length > 0}
+	<section>
+		<h3>Stammbaum</h3>
+		<!--
+			Bewusst eine Liste und kein gezeichneter Baum: Die Verwandtschaft steht als
+			Text daneben, und das trägt, solange ein Haus wenige Generationen umfasst.
+			Eine echte Darstellung mit Linien lohnt erst, wenn es etwas zu verzweigen
+			gibt — dann aber gern.
+		-->
+		<ul>
+			{#each data.tree as person (person.id)}
+				{@const eltern = data.tree.filter(
+					(m) => m.id === person.motherId || m.id === person.fatherId
+				)}
+				<li>
+					{#if person.isPlayed}<b>{person.firstName}</b>{:else}{person.firstName}{/if}
+					— {person.age} Jahre{person.alive ? '' : ', gestorben'}
+					{#if eltern.length > 0}
+						<small>Kind von {eltern.map((e) => e.firstName).join(' und ')}</small>
+					{:else}
+						<small>Beginn der Linie</small>
+					{/if}
+				</li>
+			{/each}
+		</ul>
+	</section>
+{/if}
+
 {#if data.former.length > 0}
 	<section>
 		<h3>Erloschene Häuser</h3>

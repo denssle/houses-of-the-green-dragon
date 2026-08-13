@@ -2,7 +2,9 @@ import { base } from '$app/paths';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as dynastyService from '$lib/server/service/dynastyService';
+import * as familyService from '$lib/server/service/familyService';
 import * as userService from '$lib/server/service/userService';
+import * as worldService from '$lib/server/service/worldService';
 
 /**
  * Das Haus — oder, wenn es erloschen ist, der Weg zu einem neuen.
@@ -20,6 +22,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 	return {
 		dynasty: lebend,
 		founder: lebend ? await userService.getUser(lebend.foundedBy) : undefined,
+		tree: lebend
+			? await familyService.getFamilyTree(lebend.id, await worldService.currentTick())
+			: [],
 		// Die Ahnengalerie: erloschene Häuser desselben Spielers.
 		former: (await dynastyService.getDynastiesForUser(locals.currentUser.id)).filter(
 			(haus) => haus.isExtinct

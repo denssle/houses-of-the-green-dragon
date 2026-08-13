@@ -1,5 +1,6 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import * as characterService from '$lib/server/service/characterService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
 import * as plotService from '$lib/server/service/plotService';
@@ -32,7 +33,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		home: zuhause,
 		plots: await plotService.getPlotsOfCharacter(character.id),
 		buildings: eigeneGebäude,
-		children: await lifecycleService.getChildren(character.id, jetzt)
+		children: await lifecycleService.getChildren(character.id, jetzt),
+		spouse: character.spouseId ? await characterService.getCharacter(character.spouseId) : undefined
 	};
 };
 

@@ -34,6 +34,9 @@ export interface CharacterAttributes {
 	fatherId: string | null;
 	spouseId: string | null;
 	heirId: string | null;
+	pregnantSinceTick: number | null;
+	pregnantByFatherId: string | null;
+	proposedToId: string | null;
 	HomeBuildingId: string | null;
 }
 
@@ -48,6 +51,9 @@ export type CharacterCreationAttributes = Optional<
 	| 'fatherId'
 	| 'spouseId'
 	| 'heirId'
+	| 'pregnantSinceTick'
+	| 'pregnantByFatherId'
+	| 'proposedToId'
 	| 'HomeBuildingId'
 >;
 
@@ -64,6 +70,8 @@ export function convertToCharacter(attributes: CharacterAttributes): Character {
 		deathTick: attributes.deathTick,
 		regionId: attributes.RegionId,
 		dynastyId: attributes.DynastyId,
-		homeBuildingId: attributes.HomeBuildingId
+		homeBuildingId: attributes.HomeBuildingId,
+		spouseId: attributes.spouseId,
+		pregnantSinceTick: attributes.pregnantSinceTick
 	};
 }

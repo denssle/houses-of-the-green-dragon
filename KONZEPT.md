@@ -465,6 +465,13 @@ erworbener Besitz, sondern laufender Aufwand, und keine Dynastie kann ihre Macht
 dauerhaft einfrieren. Darüber liegt ein **Verwandtschaftsbonus**: Verwandte finden
 einander von Haus aus sympathisch, ohne dass dafür interagiert werden müsste.
 
+**Kinder kommen von selbst, aber nur wo Platz ist.** Ein verheiratetes Paar im
+fruchtbaren Alter bekommt Nachwuchs, ohne dass jemand einen Knopf drückt — dieselbe Regel
+für Spieler und NPCs, sonst laufen zwei Simulationen nebeneinander her. Gebremst wird
+über den **Wohnraum**: Kinder kommen nur, wo ein Platz frei ist. Damit hängt die
+Geburtenrate an den Bauwerken, knappes Bauland wirkt bis in die Kinderstube, und eine
+volle Stadt stagniert von selbst, statt bis zum Kollaps zu wachsen.
+
 **Können wird nicht vererbt, sondern gelehrt.** Fertigkeiten sterben mit dem Charakter;
 weitergegeben wird nur, was der Meister zu Lebzeiten unterrichtet hat, und Lehre kostet
 beide Seiten Zeit. Damit ist die Ausbildung des Erben eine Investition wie jede andere —

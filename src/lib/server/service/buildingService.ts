@@ -33,6 +33,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			initialName: 'Wohnhaus',
 			type: 'RESIDENCE',
 			description: 'Ein einfaches Wohnhaus',
+			residents: 4,
 			limited: false,
 			limitedTo: 0,
 			actions: []

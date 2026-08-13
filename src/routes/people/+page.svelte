@@ -39,10 +39,40 @@
 					>({person.title}{VERWANDT[person.kinship] ? `, ${VERWANDT[person.kinship]}` : ''})</small
 				>
 				— {person.affectionToYou}
+				{#if person.isSpouse}
+					<b>— dein Ehepartner</b>
+				{:else if person.married}
+					<small>— anderweitig verheiratet</small>
+				{/if}
+
 				<form method="POST" action="?/visit" use:enhance>
 					<input type="hidden" name="personId" value={person.id} />
-					<button type="submit">Zeit verbringen ({data.cost} AP)</button>
+					<button type="submit">Zeit verbringen ({data.visitCost} AP)</button>
 				</form>
+
+				<!--
+					Werben und Antrag nur dort, wo sie überhaupt etwas werden können. Die
+					Regeln prüft der Server noch einmal — hier geht es nur darum, keine
+					Knöpfe anzubieten, die immer scheitern.
+				-->
+				{#if !data.married && !person.married && person.kinship === 'NONE'}
+					<form method="POST" action="?/court" use:enhance>
+						<input type="hidden" name="personId" value={person.id} />
+						<button type="submit">Werben ({data.courtCost} AP)</button>
+					</form>
+					<form method="POST" action="?/propose" use:enhance>
+						<input type="hidden" name="personId" value={person.id} />
+						<button type="submit">Um die Hand anhalten</button>
+					</form>
+				{/if}
+
+				{#if person.hasProposedToYou}
+					<b>{person.firstName} hat dir einen Antrag gemacht.</b>
+					<form method="POST" action="?/accept" use:enhance>
+						<input type="hidden" name="personId" value={person.id} />
+						<button type="submit">Annehmen</button>
+					</form>
+				{/if}
 			</li>
 		{/each}
 	</ul>

@@ -39,6 +39,13 @@ export const Character: ModelStatic<Model<CharacterAttributes, CharacterCreation
 			// Der benannte Erbe. Leer heisst nicht erblos, sondern unbenannt — dann greift
 			// die gesetzliche Reihenfolge (siehe inheritance.logic.ts).
 			heirId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
+			// Schwangerschaft: seit wann und von wem. Zwei Spalten statt einer Tabelle, weil
+			// es je Frau hoechstens eine zugleich gibt — und weil die Geburt sie wieder leert.
+			pregnantSinceTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
+			pregnantByFatherId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
+			// Ein offener Heiratsantrag. NPCs brauchen ihn nicht — sie entscheiden sofort —,
+			// aber zwei Spieler sind selten zugleich online.
+			proposedToId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
 			HomeBuildingId: { type: DataTypes.STRING, allowNull: true, defaultValue: null }
 		},
 		{ timestamps: true }

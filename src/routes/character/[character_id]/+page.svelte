@@ -31,6 +31,18 @@
 	<dt>Aktionspunkte</dt>
 	<dd>{data.character.actionPoints} von {data.maxActionPoints}</dd>
 
+	<dt>Familienstand</dt>
+	<dd>
+		{#if data.spouse}
+			verheiratet mit {data.spouse.firstName}
+			{#if data.character.pregnantSinceTick !== null}
+				<b>— ein Kind ist unterwegs</b>
+			{/if}
+		{:else}
+			<i>unverheiratet</i>
+		{/if}
+	</dd>
+
 	<dt>Zuhause</dt>
 	<dd>
 		{#if data.home}

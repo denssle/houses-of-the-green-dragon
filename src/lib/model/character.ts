@@ -20,4 +20,7 @@ export interface Character {
 	regionId: string;
 	dynastyId: string | null;
 	homeBuildingId: string | null;
+	spouseId: string | null;
+	/** Seit wann schwanger — null heisst: nicht. Steht hier, weil die Anzeige es zeigt. */
+	pregnantSinceTick: number | null;
 }

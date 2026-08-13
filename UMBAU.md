@@ -661,7 +661,7 @@ _Fertig, wenn:_ Zuneigung entsteht, verfällt und schlägt auf die Häuser durch
 das Nachsehen sie verändert. — Erledigt und am gebauten Server durchgespielt: fünf
 Besuche machten aus „gleichgültig" eine „Freundschaft" und kosteten fünf Aktionspunkte.
 
-**4.4 Familie und Bevölkerung.** Werben, Heirat, Zeugung, Geburt; Geschwister als NPCs
+**4.4 Familie und Bevölkerung.** ✓ Werben, Heirat, Zeugung, Geburt; Geschwister als NPCs
 mit indirekten Befehlen (anstellen, verheiraten, ins Amt schicken) und einfachen
 Eigenregeln. Bei einer Ehe zweier Spielerhäuser entscheidet ein Münzwurf je Kind, welchem
 Haus es zufällt.
@@ -672,6 +672,51 @@ dazu kommen die überzähligen Kinder der Spielerhäuser. Das gehört an den Wel
 langfristig schrumpft oder explodiert, nimmt Wirtschaft und Politik den Boden. Eine
 einfache Statistik über Einwohner, Geburten und Tote je Stadt gehört deshalb gleich mit
 dazu.
+
+_Entschieden:_ Kinder kommen **von selbst am Takt**, bei Verheirateten im fruchtbaren
+Alter. Nicht als Handlung mit Aktionspunkten — sonst bräuchten NPCs eine eigene Regel,
+die dasselbe nachbildet, und zwei Simulationen nebeneinander machen Balancing unmöglich.
+Der Spieler entscheidet über die Ehe, nicht über jedes Kind.
+
+_Entschieden:_ **Wohnraum begrenzt die Bevölkerung.** Kinder kommen nur, wo Platz ist —
+vier in einem Wohnhaus. Damit hängt die Geburtenrate an den Bauwerken aus 4.5, und
+knappes Bauland wirkt bis in die Kinderstube: Eine volle Stadt stagniert von selbst,
+statt bis zum Kollaps zu wachsen. Nahrung als zusätzliche Bremse kommt mit 4.6 dazu.
+
+Vier Dinge, die sich beim Bauen zeigten:
+
+- **Erst gebären, dann empfangen.** Andersherum belegte das Neugeborene sofort den Platz,
+  über den die nächste Empfängnis entscheidet — die Geburtenrate hinge dann an der
+  Reihenfolge zweier Schleifen statt an der Welt.
+- **Ein Antrag endet auf zwei Arten.** Bei einem NPC steht die Ehe sofort, bei einem
+  Spielercharakter liegt der Antrag und wartet. Am laufenden Server fiel auf, dass die
+  Meldung beides gleich nannte — „Der Antrag ist gestellt", obwohl schon geheiratet war.
+- **Bei der Annahme wird alles noch einmal geprüft.** Zwischen Antrag und Annahme können
+  Jahre liegen: Der andere kann inzwischen anderweitig geheiratet haben, die Zuneigung
+  kann verfallen sein, einer kann tot sein.
+- **Gefragt ist, wie der Umworbene zum Werbenden steht** — nicht umgekehrt. Wer heiratet,
+  muss gewollt sein, nicht wollen. Die Beziehung aus 4.3 ist gerichtet, und hier zeigt
+  sich, warum das keine Spitzfindigkeit war.
+
+Die Verwandtenehe ist ausgeschlossen, und zwar über dieselbe `kinshipBetween` aus 4.3:
+Jede erkannte Verwandtschaft verbietet die Ehe. Weil der Stammbaum nur bis zu den
+Großeltern reicht, dürfen Vettern heiraten — mittelalterlich zutreffend und eine Suche
+über beliebig viele Generationen gespart.
+
+Der **Stammbaum** steht auf der Dynastieseite und führt die Toten mit: Ein Stammbaum, der
+nur die Lebenden zeigt, ist eine Anwesenheitsliste. Bewusst eine Liste mit
+„Kind von …" statt gezeichneter Linien — das lohnt erst, wenn es etwas zu verzweigen gibt.
+
+Die **Bevölkerungsstatistik** kommt ohne eigene Tabelle aus: Geburten und Tote ergeben
+sich aus `birthTick` und `deathTick`. Ein Protokoll wäre eine zweite Wahrheit, die mit
+der ersten auseinanderlaufen kann.
+
+_Fertig, wenn:_ Zwei heiraten, bekommen Kinder, und die Stadt trägt sich selbst. —
+Erledigt und am gebauten Server durchgespielt: viermal geworben (aus „gleichgültig" wurde
+„Verbundenheit"), einem NPC einen Antrag gemacht und sofort geheiratet, einem
+Spielercharakter einen Antrag gemacht, der liegen blieb. Eine hochschwangere Reinhild
+brachte beim nächsten Herzschlag Ingram zur Welt — der steht jetzt im Stammbaum, in der
+Erbfolge und in der Einwohnerzahl.
 
 **4.5 Gebäude und Grundstücke.** `building.logic.ts`: Zustand aus verstrichenen Ticks,
 Renovieren, Ausbaustufen, Übergang zur Ruine. Dazu Grundstücke als knappes Gut, An- und

@@ -16,7 +16,14 @@ const SAETZE: Record<ActionFailureReason, string> = {
 	PLOT_ALREADY_BUILT: 'Auf dem Grundstück steht schon ein Gebäude.',
 	LIMIT_REACHED: 'Von dieser Art gibt es in der Stadt bereits genug.',
 	SAME_PERSON: 'Mit sich selbst schließt man keine Freundschaft.',
-	NO_SUCH_PERSON: 'Diese Person gibt es nicht — oder nicht mehr.'
+	NO_SUCH_PERSON: 'Diese Person gibt es nicht — oder nicht mehr.',
+	TOO_YOUNG: 'Dafür ist eines von euch noch zu jung.',
+	ALREADY_MARRIED: 'Eines von euch ist bereits verheiratet.',
+	TOO_LITTLE_AFFECTION: 'So weit seid ihr noch nicht — wirb weiter.',
+	CLOSE_KIN: 'Ihr seid zu nah verwandt.',
+	SAME_GENDER: 'Aus dieser Verbindung gingen keine Kinder hervor.',
+	NO_PROPOSAL: 'Es liegt kein Antrag vor.',
+	NO_ROOM: 'Im Haus ist kein Platz mehr.'
 };
 
 export function actionMessage(reason: ActionFailureReason): string {

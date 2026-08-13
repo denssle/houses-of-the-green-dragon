@@ -1,4 +1,5 @@
 import * as worldService from '$lib/server/service/worldService';
+import * as familyService from '$lib/server/service/familyService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
 
 /**
@@ -57,6 +58,14 @@ async function schlagen(): Promise<void> {
 		// stattgefunden, und dazu gehört das Sterben. Sonst raffte ein Wochenendausfall
 		// beim Neustart eine halbe Generation dahin — für Spieler, die nicht zusehen
 		// konnten.
+		// Erst geboren werden, dann sterben. Andersherum käme ein Kind zur Welt, dessen
+		// Mutter im selben Herzschlag schon tot ist — möglich in der Wirklichkeit, aber
+		// hier nur verwirrend, weil beides im selben Log stünde.
+		const familie = await familyService.advanceFamilies(geschehen.currentTick);
+		for (const geburt of familie.births) {
+			console.info(`${geburt.name} ist zur Welt gekommen.`);
+		}
+
 		for (const fall of await lifecycleService.reapTheDead(geschehen.currentTick)) {
 			console.info(
 				`${fall.name} ist mit ${fall.age} Jahren gestorben` +
