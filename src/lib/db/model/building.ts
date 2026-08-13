@@ -35,7 +35,9 @@ export const Building: ModelStatic<Model<BuildingAttributes, BuildingCreationAtt
 				validate: { isIn: [[...OWNER_TYPES]] }
 			},
 			OwnerCharacterId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
-			forSalePrice: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
+			forSalePrice: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
+			// Der Aushang. Was ein bestehendes Verhaeltnis zahlt, steht in employments.
+			offeredWage: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
 		},
 		{ timestamps: true }
 	);

@@ -33,7 +33,10 @@ const SAETZE: Record<ActionFailureReason, string> = {
 	NOT_EDIBLE: 'Das kann man nicht essen.',
 	NOT_IN_STOCK: 'Davon hast du nichts mehr.',
 	WRONG_SEASON: 'Dafür ist jetzt nicht die Jahreszeit.',
-	NOT_LEASED: 'Die Fläche ist nicht deine — pachte sie erst.'
+	NOT_LEASED: 'Die Fläche ist nicht deine — pachte sie erst.',
+	NO_JOB_OFFERED: 'Hier wird niemand gesucht.',
+	ALREADY_EMPLOYED: 'Du hast bereits eine Anstellung.',
+	EMPLOYER_BROKE: 'Der Betrieb kann den Lohn nicht zahlen.'
 };
 
 export function actionMessage(reason: ActionFailureReason): string {

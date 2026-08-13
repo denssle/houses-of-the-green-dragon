@@ -20,7 +20,15 @@ import { SATIETY_COMFORTABLE, SATIETY_WEAKENED } from '$lib/game/need.logic';
  * sie gehören.
  */
 
-export const NPC_ACTIONS = ['EAT', 'BUY_FOOD', 'WORK', 'MOVE_IN', 'COURT', 'IDLE'] as const;
+export const NPC_ACTIONS = [
+	'EAT',
+	'BUY_FOOD',
+	'TAKE_JOB',
+	'WORK',
+	'MOVE_IN',
+	'COURT',
+	'IDLE'
+] as const;
 export type NpcAction = (typeof NPC_ACTIONS)[number];
 
 /** Der Zustand, aus dem heraus ein NPC entscheidet. */
@@ -38,6 +46,10 @@ export interface NpcState {
 	isAdult: boolean;
 	/** Steht ein Arbeitsplatz offen, an dem er verdienen könnte? */
 	workAvailable: boolean;
+	/** Hat er eine feste Anstellung? */
+	hasJob: boolean;
+	/** Bietet jemand mehr als die Tagelöhnerei? */
+	betterJobAvailable: boolean;
 	/** Gibt es jemanden, um den er werben könnte? */
 	matchAvailable: boolean;
 	/** Was ein Stück Nahrung kostet. */
@@ -85,7 +97,11 @@ export function decideNpcAction(state: NpcState): NpcAction {
 	// 2. Nachschub, solange das Geld reicht.
 	if (hungrig && state.money >= state.foodPrice) return 'BUY_FOOD';
 
-	// 3. Verdienen. Wer hungert und nichts hat, arbeitet — unabhängig von seinem Fleiß.
+	// 3. Eine feste Stelle nehmen, wenn sie mehr bringt als die Tagelöhnerei. Kostet
+	//    nichts und wirkt ab der nächsten Schicht — deshalb vor dem Arbeiten.
+	if (!state.hasJob && state.betterJobAvailable && state.isAdult) return 'TAKE_JOB';
+
+	// 4. Verdienen. Wer hungert und nichts hat, arbeitet — unabhängig von seinem Fleiß.
 	//    Sonst verhungerte der Träge zuverlässig, und Faulheit wäre keine Eigenart mehr,
 	//    sondern ein Todesurteil.
 	if (state.workAvailable && state.actionPoints > 0) {
@@ -93,11 +109,11 @@ export function decideNpcAction(state: NpcState): NpcAction {
 		if (state.money < desiredReserve(state.personality, state.foodPrice)) return 'WORK';
 	}
 
-	// 4. Ein Dach. Kostet nichts und ist die Voraussetzung für alles Weitere — ohne
+	// 5. Ein Dach. Kostet nichts und ist die Voraussetzung für alles Weitere — ohne
 	//    Wohnraum keine Kinder (4.4).
 	if (!state.hasHome && state.homeAvailable) return 'MOVE_IN';
 
-	// 5. Eine Familie. Der Gesellige wirbt, der Eigenbrötler seltener — aber auch er
+	// 6. Eine Familie. Der Gesellige wirbt, der Eigenbrötler seltener — aber auch er
 	//    kommt irgendwann dazu, sonst stürbe seine Linie an seinem Wesen.
 	if (
 		!state.isMarried &&

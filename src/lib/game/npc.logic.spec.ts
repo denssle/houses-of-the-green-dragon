@@ -27,6 +27,8 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		isMarried: true,
 		isAdult: true,
 		workAvailable: true,
+		hasJob: false,
+		betterJobAvailable: false,
 		matchAvailable: true,
 		foodPrice: 4,
 		...werte
@@ -68,6 +70,17 @@ describe('Was ein NPC tut', () => {
 
 		it('sucht ein Dach, sobald der Hunger gestillt ist', () => {
 			expect(decideNpcAction(zufrieden({ hasHome: false }))).toBe('MOVE_IN');
+		});
+
+		it('nimmt eine Stelle, die mehr bringt als die Tagelöhnerei', () => {
+			expect(decideNpcAction(zufrieden({ betterJobAvailable: true }))).toBe('TAKE_JOB');
+		});
+
+		it('sieht sich nicht um, wer schon eine Stelle hat', () => {
+			// Ein NPC, der jede Stunde den Arbeitgeber wechselt, wäre kein Handwerker.
+			const angestellt = zufrieden({ hasJob: true, betterJobAvailable: true });
+
+			expect(decideNpcAction(angestellt)).toBe('IDLE');
 		});
 
 		it('wirbt, wenn alles andere geregelt ist', () => {

@@ -125,6 +125,11 @@ vorbehalten sein kann.
 
 Ohne Antwort hat das Spiel ein Zeitfenster, nach dem es für Neue unspielbar wird.
 
+**Stand nach Phase 4.6:** Der Grundweg ist begehbar geworden — es gibt Arbeit gegen Lohn,
+Waren mit Herkunft, Läden und Anstellung. Die städtische Schmiede ist damit die letzte
+Stelle, an der Geld ohne Deckung entsteht, und kann fallen, sobald genug private Betriebe
+stehen. Was ein Neuling **mitbekommt**, ist damit aber immer noch nicht entschieden.
+
 **Vorläufig entschieden (Phase 3.3):** Die Startstadt hat eine **städtische Schmiede**, in
 der jeder arbeiten kann. Damit ist der Grundweg wenigstens begehbar — 44 Schichten
 reichen für ein Grundstück und ein Wohnhaus. Das ersetzt die Antwort nicht: Sobald es

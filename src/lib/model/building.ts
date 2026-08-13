@@ -18,4 +18,6 @@ export interface Building {
 	ownerType: OwnerType;
 	ownerCharacterId: string | null;
 	forSalePrice: number | null;
+	/** Der Aushang: was der Betrieb kuenftigen Angestellten bietet. */
+	offeredWage: number | null;
 }

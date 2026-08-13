@@ -13,6 +13,8 @@ import * as familyService from '$lib/server/service/familyService';
 import * as needService from '$lib/server/service/needService';
 import * as relationshipService from '$lib/server/service/relationshipService';
 import * as tradeService from '$lib/server/service/tradeService';
+import * as employmentService from '$lib/server/service/employmentService';
+import { isWorthTaking } from '$lib/game/employment.logic';
 
 /**
  * NPCs handeln.
@@ -28,6 +30,13 @@ import * as tradeService from '$lib/server/service/tradeService';
  * gehört er gestaffelt oder auf einen eigenen Prozess. Der Punkt, an dem es weh tut,
  * liegt bei einigen tausend Einwohnern, und bis dahin ist die Einfachheit mehr wert.
  */
+
+/**
+ * Was die staedtische Schmiede zahlt — die Messlatte, ab der sich eine feste Stelle
+ * lohnt. Steht hier, weil es eine Eigenschaft der Kruecke ist und nicht der Anstellung:
+ * Faellt die Schmiede weg, faellt auch diese Zahl.
+ */
+const TAGELOHN = 3;
 
 /** Was ein Durchlauf bewirkt hat — fürs Log und die Tests. */
 export interface NpcTick {
@@ -86,8 +95,16 @@ async function ausfuehren(npcId: string, tick: number): Promise<NpcAction> {
 			return 'BUY_FOOD';
 		}
 
+		case 'TAKE_JOB':
+			if (lage.jobId) await employmentService.takeJob(npcId, lage.jobId);
+			return 'TAKE_JOB';
+
 		case 'WORK':
-			if (lage.workplaceId) {
+			// Wer eine Stelle hat, arbeitet dort — der Ertrag geht in den Betrieb, der Lohn
+			// an ihn. Nur wer keine hat, verdingt sich tageweise.
+			if (lage.state.hasJob) {
+				await employmentService.workForEmployer(npcId);
+			} else if (lage.workplaceId) {
 				await buildingActionService.doBuildingAction('WORK', npcId, lage.workplaceId);
 			}
 			return 'WORK';
@@ -122,6 +139,7 @@ async function lageAufnehmen(
 			workplaceId?: string;
 			homeId?: string;
 			matchId?: string;
+			jobId?: string;
 			leisten: number;
 			money: number;
 			cheapestBread?: { id: string; quantity: number; pricePerUnit: number };
@@ -145,6 +163,11 @@ async function lageAufnehmen(
 		.reduce((summe, posten) => summe + posten.quantity, 0);
 
 	const arbeitsplatz = await freierArbeitsplatz(werte.RegionId);
+	const stelle = await employmentService.getJobOf(npcId);
+	// Wer schon eine Stelle hat, sieht sich nicht um — ein NPC, der jede Stunde den
+	// Arbeitgeber wechselt, wäre kein Handwerker, sondern ein Flattermann.
+	const offen = stelle ? [] : await employmentService.getOpenJobs(werte.RegionId, npcId);
+	const besser = offen.filter((angebot) => isWorthTaking(angebot.wage, TAGELOHN))[0];
 	const unterkunft = werte.HomeBuildingId ? undefined : await freierWohnplatz(werte.RegionId);
 	const partner = werte.spouseId ? undefined : await naechsterPartner(npc.dataValues, tick);
 
@@ -155,6 +178,7 @@ async function lageAufnehmen(
 		workplaceId: arbeitsplatz,
 		homeId: unterkunft,
 		matchId: partner,
+		jobId: besser?.buildingId,
 		state: {
 			personality: {
 				courage: werte.courage,
@@ -172,7 +196,9 @@ async function lageAufnehmen(
 			homeAvailable: unterkunft !== undefined,
 			isMarried: werte.spouseId !== null,
 			isAdult: ageInYears(werte.birthTick, tick) >= AGE_OF_MAJORITY,
-			workAvailable: arbeitsplatz !== undefined,
+			workAvailable: arbeitsplatz !== undefined || stelle !== undefined,
+			hasJob: stelle !== undefined,
+			betterJobAvailable: besser !== undefined,
 			matchAvailable: partner !== undefined,
 			foodPrice: brot.basePrice
 		}

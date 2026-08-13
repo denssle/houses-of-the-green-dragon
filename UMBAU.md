@@ -1058,7 +1058,40 @@ Server durchgespielt: zwanzig Brote zu sechs Münzen in der eigenen Bäckerei au
 nach ein paar Herzschlägen ausverkauft, 120 Münzen eingenommen. Die Stadtkasse wuchs
 dabei nur um einen einzigen Kornspeicherkauf.
 
-**4.6e Anstellung.** `employment` mit Lohn und Laufzeit — der Rest von 4.6. (Nahrung, Kleidung,
+**4.6e Anstellung.** ✓ Bis hierher war ein Betrieb ein **Werkzeug** — wer mahlte, mahlte
+sein eigenes Getreide. Jetzt ist er ein **Arbeitgeber**: Der Angestellte setzt seine
+Aktionspunkte ein, der Ertrag geht ins Betriebslager, der Lohn aus der Kasse des
+Eigentümers an ihn.
+
+Damit hat Geld zum ersten Mal einen **Ursprung mit Deckung**. Die städtische Schmiede
+zahlt aus dem Nichts — ein privater Betrieb kann nur zahlen, was er hat. Die Prüfung
+darauf steht **vor** dem Verbrauch der Aktionspunkte: Ein Angestellter, der umsonst
+arbeitet, weil die Kasse leer war, hätte seinen Tag verloren, ohne es vorher wissen zu
+können.
+
+Der **Aushang** steht am Gebäude, der **vereinbarte Lohn** am Verhältnis. Senkt der
+Eigentümer morgen den Aushang, gilt das für den Nächsten — nicht rückwirkend für den, der
+schon da ist. Stellen gibt es je Ausbaustufe eine: Wer mehr Hände will, muss ausbauen,
+dieselbe Leiter wie beim Wohnraum und derselbe Grund.
+
+NPCs nehmen eine Stelle, wenn sie mehr bringt als die Tagelöhnerei in der städtischen
+Schmiede — und sehen sich danach nicht mehr um. Ein NPC, der jede Stunde den Arbeitgeber
+wechselt, wäre kein Handwerker, sondern ein Flattermann.
+
+_Fertig, wenn:_ Ein Betrieb kann Leute beschäftigen. — Erledigt und am gebauten Server
+durchgespielt: Aushang zu fünf Münzen, Gertrud stellte sich von selbst ein, verarbeitete
+zwei Mehl aus dem Betriebslager zu zwei Broten und bekam ihren Lohn aus Gerlints Kasse
+(1560 → 1555).
+
+**Damit ist Phase 4.6 abgeschlossen.** Der Kreis steht: Ein Acker wird gepachtet,
+Getreide geerntet, in der Mühle gemahlen, in der Bäckerei gebacken — von Angestellten,
+die dafür Lohn bekommen —, im selben Haus verkauft und von jemandem gegessen, der das
+Geld dafür anderswo verdient hat.
+
+Von den drei Krücken kann jetzt die **städtische Schmiede** fallen, sobald genug private
+Betriebe stehen; sie ist die einzige Stelle, an der Geld ohne Deckung entsteht. Der
+**Kornspeicher** ist bereits zum Notnagel geworden. Die **nicht verfallenden öffentlichen
+Gebäude** warten auf 4.7. (Nahrung, Kleidung,
 Werkzeug, **Baumaterial**), Bedürfnisse als Modifikatoren, `employment` mit Lohn, Produktion im Betrieb.
 Der Handel läuft über **Festpreis-Angebote am Gebäude** (`shopOffer`: BuildingId, itemId,
 Preis, Menge) — ein Kauf ist eine Transaktion, kein Matching. **NPC-Konsum gehört in

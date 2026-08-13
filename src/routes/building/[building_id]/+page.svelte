@@ -60,7 +60,12 @@
 		<form method="POST" action="?/craft" use:enhance>
 			<button type="submit">Arbeiten ({data.recipe.cost} AP)</button>
 		</form>
-		<p><small>Aus eigenem Vorrat, auf eigene Rechnung — Anstellung kommt mit 4.6d.</small></p>
+		<p>
+			<small
+				>Aus eigenem Vorrat, auf eigene Rechnung. Wer für dich arbeitet, produziert dagegen ins
+				Betriebslager.</small
+			>
+		</p>
 	</section>
 {/if}
 
@@ -172,6 +177,32 @@
 		{:else}
 			<p><i>Weiter lässt sich hier nicht ausbauen.</i></p>
 		{/if}
+	</section>
+
+	<section>
+		<h3>Leute</h3>
+		{#if data.staff.length === 0}
+			<p><i>Hier arbeitet niemand für dich.</i></p>
+		{:else}
+			<ul>
+				{#each data.staff as person (person.id)}
+					<li>{person.name} — {person.wage} Münzen je Aktionspunkt</li>
+				{/each}
+			</ul>
+		{/if}
+		<form method="POST" action="?/hire" use:enhance>
+			<label>
+				Aushang: Lohn je Aktionspunkt
+				<input type="number" name="wage" min="1" step="1" value={data.building.offeredWage} />
+			</label>
+			<button type="submit">Suchen</button>
+		</form>
+		<p>
+			<small>
+				Der Lohn kommt aus deiner Kasse. Ist sie leer, arbeitet niemand — und du merkst es daran,
+				dass nichts ins Lager kommt.
+			</small>
+		</p>
 	</section>
 
 	<section>

@@ -9,6 +9,7 @@ import * as productionService from '$lib/server/service/productionService';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import * as tradeService from '$lib/server/service/tradeService';
 import * as needService from '$lib/server/service/needService';
+import * as employmentService from '$lib/server/service/employmentService';
 import { STALL_FEE } from '$lib/game/trade.logic';
 import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
 import { levelOf, maxLevel, upgradePrice } from '$lib/model/buildingTemplate';
@@ -53,6 +54,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		myStock: locals.currentCharacter ? await needService.getStock(locals.currentCharacter.id) : [],
 		isMarket: building.optionId === tradeService.MARKET_OPTION_ID,
 		stallFee: STALL_FEE,
+		staff: await employmentService.getStaff(params.building_id),
 		renovationCost: Math.ceil(CONDITION_MAX - building.condition) * RENOVATION_COST_PER_POINT
 	};
 };
@@ -187,6 +189,20 @@ export const actions = {
 		const ergebnis = await tradeService.buyFromOffer(locals.currentCharacter.id, offerId, menge);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return { message: `${menge} gekauft.` };
+	},
+
+	hire: async ({ request, params, locals }) => {
+		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
+		const roh = (await request.formData()).get('wage')?.toString();
+		const lohn: number | null = roh ? Number(roh) : null;
+
+		const ergebnis = await employmentService.offerJob(
+			locals.currentCharacter.id,
+			params.building_id,
+			lohn
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: lohn === null ? 'Der Aushang ist ab.' : 'Der Aushang hängt.' };
 	},
 
 	buy: async ({ params, locals }) => {

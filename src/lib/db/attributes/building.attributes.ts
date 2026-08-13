@@ -30,6 +30,8 @@ export interface BuildingAttributes {
 	ownerType: OwnerType;
 	OwnerCharacterId: string | null;
 	forSalePrice: number | null;
+	/** Der Aushang: was der Betrieb kuenftigen Angestellten bietet. */
+	offeredWage: number | null;
 }
 
 export type BuildingCreationAttributes = Optional<
@@ -47,6 +49,7 @@ export function convertToBuilding(attributes: BuildingAttributes): Building {
 		plotId: attributes.PlotId,
 		ownerType: attributes.ownerType,
 		ownerCharacterId: attributes.OwnerCharacterId,
-		forSalePrice: attributes.forSalePrice
+		forSalePrice: attributes.forSalePrice,
+		offeredWage: attributes.offeredWage
 	};
 }

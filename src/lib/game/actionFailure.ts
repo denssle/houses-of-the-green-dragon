@@ -35,4 +35,7 @@ export type ActionFailureReason =
 	| 'NOT_EDIBLE'
 	| 'NOT_IN_STOCK'
 	| 'WRONG_SEASON'
-	| 'NOT_LEASED';
+	| 'NOT_LEASED'
+	| 'NO_JOB_OFFERED'
+	| 'ALREADY_EMPLOYED'
+	| 'EMPLOYER_BROKE';

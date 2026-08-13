@@ -556,6 +556,12 @@ erworbener Besitz, sondern laufender Aufwand, und keine Dynastie kann ihre Macht
 dauerhaft einfrieren. Darüber liegt ein **Verwandtschaftsbonus**: Verwandte finden
 einander von Haus aus sympathisch, ohne dass dafür interagiert werden müsste.
 
+**Lohn hat eine Deckung.** Wer Angestellte hat, zahlt sie aus seiner eigenen Kasse; ist
+sie leer, arbeitet niemand. Damit entsteht Geld nicht mehr aus dem Nichts, sondern
+wechselt den Besitzer — und ein Betrieb, der sich nicht trägt, verliert seine Leute,
+bevor er seinen Eigentümer ruiniert. Was Angestellte herstellen, gehört dem Betrieb; was
+sie bekommen, ist Lohn.
+
 **Jedes Handelshaus ist zugleich Verkaufsstelle.** Wer produziert, verkauft dort, wo er
 produziert — der Marktplatz ist kein zweites System, sondern ein öffentliches Gebäude mit
 einer anderen Regel darüber, wer ein Preisschild aushängen darf: im eigenen Laden nur der
