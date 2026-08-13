@@ -410,10 +410,15 @@ Start, ein Fehlschlag träfe also eine Welt, die sich nicht wiederherstellen lä
 
 Die Handgriffe auf dem Host stehen in `DEPLOYMENT.md`.
 
+Ein Stolperstein saß nicht im Code: `~/.my.cnf` auf dem Uberspace trug ein veraltetes
+Passwort. Das fällt lange nicht auf, weil beide Anwendungen ihre eigene `.env` benutzen —
+aber `mysqldump` im Deploy verlässt sich darauf, gerade damit kein Passwort im Workflow
+steht. Notiert in `DEPLOYMENT.md`.
+
 _Fertig, wenn:_ Registrieren und Anmelden funktionieren auf dem Server, nicht nur lokal.
-— Repo-Seite erledigt und am gebauten Artefakt durchgespielt (Registrieren, Anmelden,
-Abmelden, Bereitschaftscheck, CSRF). Die einmalige Einrichtung auf dem Uberspace
-(Datenbank, Dienst, Backend, Secrets) steht aus.
+— **Erledigt.** Unter https://enzlor.uber.space/houses/ läuft die Welt gegen MariaDB,
+ohne offene Migrationen, mit laufender Weltuhr. Registrieren, Anmelden, alle Seiten und
+eine Arbeitsschicht am lebenden Server durchgespielt; Festival blieb unberührt.
 
 ## Phase 3 — Spielkern reparieren
 
