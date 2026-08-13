@@ -1267,6 +1267,12 @@ Geschrieben wird dort, wo das Ereignis entsteht — in den Diensten, nicht im Ta
 Hochzeit kann ein Spieler auslösen, eine Geburt der Takt, eine Anstellung beides. Die
 Chronik ist damit die erste Stelle, an der alle Wege zusammenlaufen.
 
+**Die Stadtsicht steht ohne Anmeldung offen.** Sie ist das Schaufenster der Welt: Wer
+hereinschaut, soll sehen, dass hier etwas geschieht — wer geboren wurde, wer gewählt
+wurde, wo es gebrannt hat —, bevor er sich für ein Konto entscheidet. Eine Stadtchronik,
+die man nur als Bürger lesen darf, wäre auch inhaltlich verkehrt herum. Die persönlichen
+Sichten bleiben angemeldeten Spielern vorbehalten, weil es sonst nichts zu filtern gäbe.
+
 Angezeigt wird sie **dreifach gefiltert**: die Stadt (was hier geschah), das Haus (was
 uns betrifft) und die Person (ihr Lebenslauf). Dieselben Zeilen, drei Fragen. Der
 Lebenslauf ist dabei der Nebengewinn, der den Stammbaum ergänzt: Wann wurde sie geboren,

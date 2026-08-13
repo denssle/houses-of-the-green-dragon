@@ -14,14 +14,27 @@ await startDB();
 // es eine Welt gibt.
 startTicker();
 
-const noAuthURLs: string[] = ['/login', '/register', '/about', '/impressum'];
+/**
+ * Was ohne Anmeldung offensteht.
+ *
+ * Die **Chronik** gehört ausdrücklich dazu: Sie ist das Schaufenster der Welt. Wer
+ * hereinschaut, soll sehen, dass hier etwas geschieht — wer geboren wurde, wer gewählt
+ * wurde, wo es gebrannt hat —, bevor er sich für ein Konto entscheidet. Eine Stadtchronik,
+ * die man nur als Bürger lesen darf, wäre auch inhaltlich verkehrt herum.
+ */
+const noAuthURLs: string[] = ['/login', '/register', '/about', '/impressum', '/chronicle'];
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	// Die App läuft unter einem Base-Pfad (siehe svelte.config.js), und der Uberspace
 	// reicht ihn unverändert durch — `event.url.pathname` enthält ihn also. Einmal
 	// abschneiden, damit alle Vergleiche unten mit den route-eigenen Pfaden arbeiten
 	// ('/houses/login' → '/login'). Lokal ist `base` leer, die Zeile ändert dort nichts.
-	const pathname: string = event.url.pathname.slice(base.length) || '/';
+	const roh: string = event.url.pathname.slice(base.length) || '/';
+	// Eine Client-Navigation fragt nicht die Seite an, sondern ihre Daten
+	// ('/chronicle/__data.json'). Ohne diesen Schnitt gälte die Freigabe nur für den
+	// ersten Aufruf über die Adresszeile, und ein Klick auf denselben Link führte zur
+	// Anmeldung — ein Fehler, der sich nur im Browser zeigt, nie im curl.
+	const pathname: string = roh.replace(/\/__data\.json$/, '') || '/';
 
 	// Der Bereitschaftscheck läuft vor der Sitzungsauflösung: Er soll gerade dann noch
 	// antworten, wenn die Datenbank nicht erreichbar ist — die Auflösung unten würde in

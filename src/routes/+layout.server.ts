@@ -4,6 +4,8 @@ export const load: LayoutServerLoad = ({ locals }) => {
 	if (!locals.currentUser) {
 		return {
 			sections: [
+				// Die Chronik steht auch Gästen offen — sie ist das Schaufenster der Welt.
+				{ slug: 'chronicle', title: 'Chronik' },
 				{ slug: 'register', title: 'Registrieren' },
 				{ slug: 'login', title: 'Anmelden' }
 			]
