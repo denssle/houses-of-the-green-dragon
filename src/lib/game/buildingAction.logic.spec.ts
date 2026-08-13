@@ -29,7 +29,7 @@ const RATHAUS: BuildingTemplate = {
 	levels: [{ price: 0, name: 'Rathaus' }]
 };
 
-const IN_GRUENAU = { actionPoints: 10, money: 50, regionId: 'gruenau' };
+const IN_GRUENAU = { actionPoints: 10, money: 50, regionId: 'gruenau', skillLevel: 0 };
 
 describe('Arbeiten', () => {
 	it('tauscht Aktionspunkte gegen den Lohn des Betriebs', () => {
@@ -89,6 +89,35 @@ describe('Arbeiten', () => {
 		work(vorher, { regionId: 'eichwald', template: SCHMIEDE, level: 1, condition: 100 });
 
 		expect(vorher).toEqual(IN_GRUENAU);
+	});
+});
+
+describe('Können beim Arbeiten', () => {
+	it('hebt den Lohn schon auf der zweiten Stufe sichtbar', () => {
+		// Der Grund für das Runden statt Abrunden: Sonst blieben die ersten drei Stufen
+		// ohne jede Wirkung, und zwanzig Schichten Arbeit sähen aus wie nichts.
+		const ungelernt = work(IN_GRUENAU, {
+			regionId: 'gruenau',
+			template: SCHMIEDE,
+			level: 1,
+			condition: 100
+		});
+		const geuebt = work(
+			{ ...IN_GRUENAU, skillLevel: 2 },
+			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 }
+		);
+
+		expect(ungelernt.ok && ungelernt.earned).toBe(3);
+		expect(geuebt.ok && geuebt.earned).toBe(4);
+	});
+
+	it('verdoppelt den Lohn auf der Höchststufe', () => {
+		const meister = work(
+			{ ...IN_GRUENAU, skillLevel: 10 },
+			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 }
+		);
+
+		expect(meister.ok && meister.earned).toBe(6);
 	});
 });
 

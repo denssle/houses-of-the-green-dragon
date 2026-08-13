@@ -2,6 +2,7 @@ import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as familyService from '$lib/server/service/familyService';
 import * as regionService from '$lib/server/service/regionService';
+import * as skillService from '$lib/server/service/skillService';
 import * as relationshipService from '$lib/server/service/relationshipService';
 import * as worldService from '$lib/server/service/worldService';
 import { actionMessage } from '$lib/actionMessage';
@@ -19,10 +20,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 		visitCost: SOCIALIZE_ACTION_POINT_COST,
 		courtCost: COURT_ACTION_POINT_COST,
 		married: character.spouseId !== null,
-		people: await relationshipService.getNeighbours(
-			character.id,
-			character.regionId,
-			await worldService.currentTick()
+		people: await mitLehrangeboten(
+			await relationshipService.getNeighbours(
+				character.id,
+				character.regionId,
+				await worldService.currentTick()
+			),
+			character.id
 		)
 	};
 };
@@ -38,7 +42,44 @@ async function gegenueber(
 	return { ich: locals.currentCharacter.id, anderer };
 }
 
+/**
+ * Reicht zu jedem Nachbarn nach, was er lehren könnte.
+ *
+ * Gezeigt wird nur, was tatsächlich etwas brächte — ein Knopf, der immer scheitert, ist
+ * schlimmer als keiner.
+ */
+async function mitLehrangeboten(
+	leute: relationshipService.PersonOnList[],
+	schuelerId: string
+): Promise<(relationshipService.PersonOnList & { lessons: skillService.Lesson[] })[]> {
+	const angereichert = [];
+	for (const person of leute) {
+		angereichert.push({ ...person, lessons: await skillService.getLessons(person.id, schuelerId) });
+	}
+	return angereichert;
+}
+
 export const actions = {
+	learn: async ({ request, locals }) => {
+		if (!locals.currentCharacter) {
+			return fail(401, { message: 'Kein Charakter, der lernen könnte' });
+		}
+		// Der Body lässt sich nur einmal lesen — deshalb hier nicht über `gegenueber`,
+		// das ihn für sich verbraucht.
+		const data = await request.formData();
+		const meisterId = data.get('personId')?.toString();
+		const art = data.get('skill')?.toString();
+		if (!meisterId || !art) return fail(400, { message: 'Bei wem denn, und was?' });
+
+		const ergebnis = await skillService.learnFrom(
+			locals.currentCharacter.id,
+			meisterId,
+			art as skillService.Lesson['type']
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: 'Eine Lehrstunde genommen.' };
+	},
+
 	visit: async ({ request, locals }) => {
 		const beide = await gegenueber(locals, request);
 		if (!beide) return fail(400, { message: 'Wen denn?' });

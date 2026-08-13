@@ -27,7 +27,9 @@ const SAETZE: Record<ActionFailureReason, string> = {
 	NOTHING_TO_DO: 'Daran gibt es nichts zu tun.',
 	MAX_LEVEL: 'Weiter lässt sich hier nicht ausbauen.',
 	NOT_FOR_SALE: 'Das steht nicht zum Verkauf.',
-	ALREADY_OWNED: 'Das gehört dir bereits.'
+	ALREADY_OWNED: 'Das gehört dir bereits.',
+	NOTHING_TO_LEARN: 'Bei ihm oder ihr ist nichts mehr zu lernen.',
+	TEACHER_TOO_TIRED: 'Der Meister hat heute keine Zeit mehr.'
 };
 
 export function actionMessage(reason: ActionFailureReason): string {

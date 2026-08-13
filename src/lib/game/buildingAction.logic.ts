@@ -1,5 +1,6 @@
 import { type BuildingTemplate, buildPrice } from '$lib/model/buildingTemplate';
 import { wageAt } from '$lib/game/building.logic';
+import { skillFactor } from '$lib/game/skill.logic';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { canAfford } from '$lib/game/economy';
 
@@ -24,6 +25,8 @@ export interface Worker {
 	actionPoints: number;
 	money: number;
 	regionId: string;
+	/** Die Stufe der Fertigkeit, die dieser Betrieb verlangt — null bei Ungelernten. */
+	skillLevel: number;
 }
 
 export type WorkOutcome =
@@ -42,13 +45,18 @@ export function work(
 	worker: Worker,
 	workplace: { regionId: string; template: BuildingTemplate; level: number; condition: number }
 ): WorkOutcome {
-	// Der Lohn hängt an drei Dingen: an der Vorlage, an der Ausbaustufe und am Zustand.
-	// Eine verfallene Hütte produziert weniger — damit ist der Verfall nicht erst am
-	// Ende spürbar, sondern die ganze Zeit über.
-	const lohn: number = wageAt(workplace.template, workplace.level, workplace.condition);
-	if (lohn === 0) {
+	// Der Lohn hängt an vier Dingen: an der Vorlage, an der Ausbaustufe, am Zustand und
+	// am Können des Arbeiters. Eine verfallene Hütte produziert weniger, ein Meister
+	// mehr — damit ist die Schicht nicht mehr für jeden dieselbe.
+	const grundlohn: number = wageAt(workplace.template, workplace.level, workplace.condition);
+	if (grundlohn === 0) {
 		return { ok: false, reason: 'NOT_A_WORKPLACE' };
 	}
+	// Gerundet und nicht abgerundet: Bei einem Grundlohn von 3 Münzen verschluckte das
+	// Abrunden die ersten drei Stufen vollständig — wer zwanzig Schichten gearbeitet hat,
+	// verdiente noch immer dasselbe und sähe für seine Mühe nichts. Am laufenden Server
+	// aufgefallen, und es ist kein Rechenfehler, sondern eine Frage der Rückmeldung.
+	const lohn: number = Math.max(1, Math.round(grundlohn * skillFactor(worker.skillLevel)));
 	// Wer in Grünau steht, kann nicht im Eichwald arbeiten. Wege kosten Zeit (4.9), aber
 	// die Prüfung gibt es ab heute — sonst gewöhnt sich die Oberfläche an das Gegenteil.
 	if (worker.regionId !== workplace.regionId) {

@@ -6,6 +6,7 @@ import {
 	upgradePrice
 } from '$lib/model/buildingTemplate';
 import { canAfford } from '$lib/game/economy';
+import { costFactor } from '$lib/game/skill.logic';
 import { TICKS_PER_YEAR } from '$lib/game/time';
 
 /**
@@ -102,7 +103,7 @@ export type RenovationOutcome =
  * einer Produktionskette, die es noch nicht gibt.
  */
 export function renovate(
-	owner: { actionPoints: number; money: number },
+	owner: { actionPoints: number; money: number; buildingSkill: number },
 	condition: number
 ): RenovationOutcome {
 	if (condition >= CONDITION_MAX) {
@@ -113,7 +114,11 @@ export function renovate(
 	}
 
 	const fehlt: number = Math.ceil(CONDITION_MAX - condition);
-	const kosten: number = fehlt * RENOVATION_COST_PER_POINT;
+	// Wer bauen kann, renoviert billiger — bis zur Hälfte. Das ist die zweite Art, wie
+	// Können wirkt: nicht nur mehr verdienen, sondern weniger ausgeben.
+	const kosten: number = Math.ceil(
+		fehlt * RENOVATION_COST_PER_POINT * costFactor(owner.buildingSkill)
+	);
 	if (!canAfford(owner.money, kosten)) {
 		return { ok: false, reason: 'NOT_ENOUGH_MONEY' };
 	}

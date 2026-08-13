@@ -63,6 +63,22 @@
 </dl>
 
 <section>
+	<h3>Können</h3>
+	{#if data.skills.length === 0}
+		<p><i>Noch nichts gelernt. Wer arbeitet, wird besser.</i></p>
+	{:else}
+		<ul>
+			{#each data.skills as fertigkeit (fertigkeit.type)}
+				<li>
+					{fertigkeit.name} — Stufe {fertigkeit.level}
+					<small>({fertigkeit.towardsNext} % bis zur nächsten)</small>
+				</li>
+			{/each}
+		</ul>
+	{/if}
+</section>
+
+<section>
 	<h3>Besitz</h3>
 	{#if data.plots.length === 0 && data.buildings.length === 0}
 		<p><i>Noch gehört dir nichts.</i></p>

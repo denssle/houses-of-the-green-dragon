@@ -29,4 +29,6 @@ export type ActionFailureReason =
 	| 'NOTHING_TO_DO'
 	| 'MAX_LEVEL'
 	| 'NOT_FOR_SALE'
-	| 'ALREADY_OWNED';
+	| 'ALREADY_OWNED'
+	| 'NOTHING_TO_LEARN'
+	| 'TEACHER_TOO_TIRED';

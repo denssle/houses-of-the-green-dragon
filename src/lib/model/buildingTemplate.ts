@@ -1,4 +1,5 @@
 import type { BuildingAction } from '$lib/model/buildingAction';
+import type { SkillType } from '$lib/game/skill.logic';
 
 /**
  * Eine Ausbaustufe.
@@ -39,6 +40,11 @@ export interface BuildingTemplate {
 	 * erreichte den Bestand nie.
 	 */
 	levels: BuildingLevel[];
+	/**
+	 * Welche Fertigkeit eine Schicht hier schult — und die den Lohn hebt. Fehlt sie, ist
+	 * die Arbeit ungelernt und Koennen aendert nichts daran.
+	 */
+	skill?: SkillType;
 }
 
 /**

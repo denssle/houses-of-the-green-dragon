@@ -2,9 +2,10 @@ import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { type Transaction } from 'sequelize';
 import type { BuildingAction } from '$lib/model/buildingAction';
 import { sequelize } from '$lib/db/sequelize';
-import { work } from '$lib/game/buildingAction.logic';
+import { work, WORK_ACTION_POINT_COST } from '$lib/game/buildingAction.logic';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
+import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
 
 /**
@@ -50,7 +51,10 @@ async function arbeiten(characterId: string, buildingId: string): Promise<Action
 			{
 				actionPoints: arbeiter.dataValues.actionPoints,
 				money: arbeiter.dataValues.money,
-				regionId: arbeiter.dataValues.RegionId
+				regionId: arbeiter.dataValues.RegionId,
+				// Ungelernte Arbeit gibt es auch: Fehlt der Vorlage eine Fertigkeit, zählt
+				// Können hier nicht.
+				skillLevel: option.skill ? await skillService.getLevel(characterId, option.skill, t) : 0
 			},
 			// Zustand und Ausbaustufe kommen aus dem Gebäude, das `getBuilding` bereits mit
 			// verrechnetem Verfall geliefert hat — eine verfallene Hütte zahlt weniger.
@@ -62,6 +66,11 @@ async function arbeiten(characterId: string, buildingId: string): Promise<Action
 			{ actionPoints: ergebnis.actionPoints, money: ergebnis.money },
 			{ transaction: t }
 		);
+		// In derselben Transaktion: Wer eine Schicht arbeitet, ohne dafür besser zu
+		// werden, hätte einen Aktionspunkt umsonst ausgegeben.
+		if (option.skill) {
+			await skillService.addPractice(characterId, option.skill, WORK_ACTION_POINT_COST, t);
+		}
 		return { ok: true, earned: ergebnis.earned } as const;
 	});
 }

@@ -43,7 +43,7 @@ const SCHMIEDE: BuildingTemplate = {
 	]
 };
 
-const REICH = { actionPoints: 48, money: 10_000 };
+const REICH = { actionPoints: 48, money: 10_000, buildingSkill: 0 };
 
 describe('Gebäude', () => {
 	describe('der Verfall', () => {
@@ -129,16 +129,26 @@ describe('Gebäude', () => {
 			expect(frueh.ok && spaet.ok && frueh.spent < spaet.spent).toBe(true);
 		});
 
+		it('wird billiger, wer bauen kann', () => {
+			const ungelernt = renovate(REICH, 50);
+			const meister = renovate({ ...REICH, buildingSkill: 10 }, 50);
+
+			// Halber Preis bei voller Meisterschaft — mehr nicht, sonst wäre es umsonst.
+			expect(ungelernt.ok && meister.ok && meister.spent).toBe(
+				ungelernt.ok ? ungelernt.spent / 2 : 0
+			);
+		});
+
 		it('weist ein Haus in bestem Zustand ab', () => {
 			expect(renovate(REICH, CONDITION_MAX)).toEqual({ ok: false, reason: 'NOTHING_TO_DO' });
 		});
 
 		it('scheitert an Kraft und Geld', () => {
-			expect(renovate({ actionPoints: 1, money: 10_000 }, 50)).toEqual({
+			expect(renovate({ actionPoints: 1, money: 10_000, buildingSkill: 0 }, 50)).toEqual({
 				ok: false,
 				reason: 'NOT_ENOUGH_ACTION_POINTS'
 			});
-			expect(renovate({ actionPoints: 48, money: 5 }, 50)).toEqual({
+			expect(renovate({ actionPoints: 48, money: 5, buildingSkill: 0 }, 50)).toEqual({
 				ok: false,
 				reason: 'NOT_ENOUGH_MONEY'
 			});

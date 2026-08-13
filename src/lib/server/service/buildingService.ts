@@ -8,13 +8,22 @@ import { Building as BuildingModel } from '$lib/db/model/building';
 import { Plot as PlotModel } from '$lib/db/model/plot';
 import { convertToBuilding } from '$lib/db/attributes/building.attributes';
 import { build as buildLogic } from '$lib/game/buildingAction.logic';
-import { currentCondition, isRuin, purchase, renovate, upgrade } from '$lib/game/building.logic';
+import {
+	currentCondition,
+	isRuin,
+	purchase,
+	renovate,
+	RENOVATION_ACTION_POINT_COST,
+	upgrade,
+	UPGRADE_ACTION_POINT_COST
+} from '$lib/game/building.logic';
 import { Character as CharacterModel } from '$lib/db/model/character';
 import type {
 	BuildingAttributes,
 	BuildingCreationAttributes
 } from '$lib/db/attributes/building.attributes';
 import * as characterService from '$lib/server/service/characterService';
+import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
 
 /**
@@ -59,6 +68,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			limited: false,
 			limitedTo: 0,
 			actions: ['WORK'],
+			skill: 'SMITHING',
 			levels: [
 				{ price: 250, name: 'Schmiede', wagePerActionPoint: 3 },
 				{ price: 400, name: 'Werkstatt', wagePerActionPoint: 5 },
@@ -305,7 +315,8 @@ export async function renovateBuilding(
 		const ergebnis = renovate(
 			{
 				actionPoints: eigentümer.dataValues.actionPoints,
-				money: eigentümer.dataValues.money
+				money: eigentümer.dataValues.money,
+				buildingSkill: await skillService.getLevel(characterId, 'CONSTRUCTION', t)
 			},
 			zustandVon(gebäude, tick)
 		);
@@ -321,6 +332,8 @@ export async function renovateBuilding(
 			{ condition: ergebnis.condition, lastConditionTick: tick },
 			{ transaction: t }
 		);
+		// Renovieren schult das Bauen — vier Aktionspunkte, vier Uebungen.
+		await skillService.addPractice(characterId, 'CONSTRUCTION', RENOVATION_ACTION_POINT_COST, t);
 		return { ok: true, spent: ergebnis.spent } as const;
 	});
 }
@@ -363,6 +376,7 @@ export async function upgradeBuilding(
 		// Der Zustand bleibt, wie er war — ein Anbau macht das alte Gemäuer nicht neu.
 		// Deshalb wird hier auch `lastConditionTick` nicht angefasst.
 		await gebäude.update({ level: ergebnis.level }, { transaction: t });
+		await skillService.addPractice(characterId, 'CONSTRUCTION', UPGRADE_ACTION_POINT_COST, t);
 		return { ok: true, spent: ergebnis.spent } as const;
 	});
 }

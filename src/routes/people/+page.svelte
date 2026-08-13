@@ -66,6 +66,16 @@
 					</form>
 				{/if}
 
+				{#each person.lessons as lehre (lehre.type)}
+					<form method="POST" action="?/learn" use:enhance>
+						<input type="hidden" name="personId" value={person.id} />
+						<input type="hidden" name="skill" value={lehre.type} />
+						<button type="submit">
+							{lehre.name} lernen ({lehre.fee} Münzen, bis Stufe {lehre.upTo})
+						</button>
+					</form>
+				{/each}
+
 				{#if person.hasProposedToYou}
 					<b>{person.firstName} hat dir einen Antrag gemacht.</b>
 					<form method="POST" action="?/accept" use:enhance>

@@ -3,6 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import * as characterService from '$lib/server/service/characterService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
+import * as skillService from '$lib/server/service/skillService';
 import * as plotService from '$lib/server/service/plotService';
 import * as regionService from '$lib/server/service/regionService';
 import * as worldService from '$lib/server/service/worldService';
@@ -36,6 +37,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		plots: await plotService.getPlotsOfCharacter(character.id),
 		buildings: eigeneGebäude,
 		children: await lifecycleService.getChildren(character.id, jetzt),
+		skills: await skillService.getSkills(character.id),
 		spouse: character.spouseId ? await characterService.getCharacter(character.spouseId) : undefined
 	};
 };

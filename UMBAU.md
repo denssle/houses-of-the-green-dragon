@@ -810,7 +810,7 @@ Münzen, der Ausbau machte aus der Kate ein Haus, und nach weiteren 25 Jahren wa
 drei Privathäuser der Welt Ruinen — Grundstücke beim Eigentümer, Bewohner ohne Dach,
 Rathaus und städtische Schmiede unversehrt.
 
-**4.5a Fertigkeiten.** `skill.logic.ts`: Übung in Stufen umrechnen, steigender Aufwand je
+**4.5a Fertigkeiten.** ✓ `skill.logic.ts`: Übung in Stufen umrechnen, steigender Aufwand je
 Stufe, Wirkung einer Stufe auf Ertrag und Erfolg. Dazu die `skill`-Tabelle (spärlich —
 wer nie geschmiedet hat, hat keine Zeile) und die **Lehre** als Handlung, die bei Meister
 und Schüler Aktionspunkte kostet.
@@ -828,8 +828,45 @@ Zweitens: Fertigkeiten greifen dort ein, wo heute Pauschalen stehen. `work()` gi
 denselben Lohn aus der Gebäudevorlage; das wird zur Rechnung aus Vorlage **und** Können.
 Die Vorlage bleibt die Obergrenze — eine Kate wirft auch beim Meister wenig ab.
 
-Der Katalog und die Wirkung je Stufe sind Punkt 17 der offenen Punkte, die Grenzen der
-Lehre Punkt 18. Beide müssen vor diesem Schritt fallen.
+_Entschieden:_ **Zehn Stufen, Verdopplung je Stufe ab fünf Übungen.** Stufe 10 kostet
+insgesamt 2.555 Übungen — ein Charakter sammelt von der Volljährigkeit bis zum mittleren
+Sterbealter rund 2.600 Aktionspunkte, Meisterschaft ist also buchstäblich ein Lebenswerk.
+Stufe 6 kostet 155 und läuft nebenbei mit. Zwei Tests halten genau das fest, statt nur
+die Formel zu prüfen.
+
+_Entschieden:_ **Jeder darf lehren, gegen Geld, und der Schüler bleibt zwei Stufen
+zurück.** Nicht nur die eigenen Kinder: Ein Neuling ohne Familie hätte sonst keinen
+Zugang zu Können, und die Startbedingungen (Punkt 14) sind ohnehin die empfindlichste
+Stelle des Spiels. Das Lehrgeld geht an den Meister — damit hat Meisterschaft ein
+Einkommen jenseits der Werkbank, und die Zunft entsteht von selbst, ohne dass es sie als
+eigenes System geben müsste.
+
+Der Katalog beginnt bewusst mit **zwei** Fertigkeiten, und beide wirken heute schon:
+**Schmieden** hebt den Lohn, **Bauen** senkt die Renovierungskosten. Handel (4.6),
+Redekunst (4.7) und Kämpfen (Punkt 6) kommen mit den Handlungen, zu denen sie gehören —
+eine Fertigkeit ohne Wirkung wäre eine Zahl, die niemand liest. Dasselbe Maß, das schon
+bei den Persönlichkeitsachsen galt.
+
+Drei Dinge, die sich beim Bauen zeigten:
+
+- **Abrunden verschluckte die ersten drei Stufen.** Bei einem Grundlohn von drei Münzen
+  ist `floor(3 × 1,3)` wieder drei: Nach zwanzig Schichten stand am laufenden Server
+  immer noch „Feierabend. 3 Münzen verdient." Kein Rechenfehler, aber eine Rückmeldung,
+  die dem Spieler seine Mühe verschweigt. Jetzt wird gerundet, und Stufe 2 ist sichtbar.
+- **Eine Lehrstunde springt über mehrere Stufen.** Zwanzig Übungen auf einmal reichen auf
+  den unteren Stufen für zwei oder drei Sprünge — die Schleife in `practice()` ist
+  deshalb keine Zierde, sondern verhindert, dass der Überschuss verfällt.
+- **Übung über der Höchststufe verfällt.** Sonst ließe sie sich horten und beim nächsten
+  Anheben der Obergrenze schlagartig einlösen.
+
+Eigene Tabelle statt Spalten am Charakter — anders als bei der Persönlichkeit, wo es
+genau einen Satz Werte gibt: Der Fertigkeitenkatalog wächst, und als Spalten hieße jede
+neue Fertigkeit eine Migration am Charakter.
+
+_Fertig, wenn:_ Arbeit macht besser, Können zahlt sich aus, und ein Meister kann lehren.
+— Erledigt und am gebauten Server durchgespielt: Zwanzig Schichten brachten Reinhild auf
+Schmieden Stufe 3, der Lohn stieg von 3 auf 4 Münzen; eine Lehrstunde bei Adelbert
+(Stufe 9) kostete 45 Münzen und hob sie in einem Zug auf Stufe 4.
 
 **4.6 Wirtschaft.** `itemTemplate`/`inventory` mit echtem Nutzen (Nahrung, Kleidung,
 Werkzeug, **Baumaterial**), Bedürfnisse als Modifikatoren, `employment` mit Lohn, Produktion im Betrieb.
