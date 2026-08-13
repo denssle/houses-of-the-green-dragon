@@ -9,6 +9,9 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 4   | Folgen ungedeckter Bedürfnisse                                    | 4.6                         | Entscheidung |
 | 5   | Krankheiten: Ursachen, Verlauf, Heilung                           | 4.6                         | Entwurf      |
 | 6   | Kämpfe und Verletzungen                                           | 4.6                         | Entwurf      |
+| 17  | Fertigkeitenkatalog und Wirkung je Stufe                          | 4.5a                        | Entwurf      |
+| 18  | Lehre: Grenzen und wer lehren darf                                | 4.5a                        | Entscheidung |
+| 19  | Stadtwache: Amt, Anstellung oder beides                           | 4.7                         | Entscheidung |
 | 7   | Verhaltensregeln der NPCs                                         | 4.4 / 4.6                   | Entwurf      |
 | 8   | Pachtvertrag beim Tod des Pächters                                | 4.6                         | Entscheidung |
 | 9   | Wahlalter                                                         | 4.7                         | Entscheidung |
@@ -49,6 +52,18 @@ verschieben. Zu entwerfen: Wer darf wen angreifen, was schützt (Wachen, Mauern,
 was kostet es an Aktionspunkten und Ansehen, und wie verhindert man, dass Stärkere
 Schwächere beliebig zurichten — gerade Neulinge. Am Rand hängt daran auch, ob Mord ein
 Weg ist, an ein Erbe oder ein Amt zu kommen.
+
+**Die Auflösung steht inzwischen fest:** über die Fertigkeit **Kämpfen** (siehe
+`KONZEPT.md`, Abschnitt 7). Damit ist geklärt, _womit_ gekämpft wird — nicht aber, was
+dabei herauskommt. Offen bleiben die Anlässe (Überfall auf einen Transport, Raub, Streit
+mit der Konkurrenz, Dienst in der Stadtwache), der Ausgang bei ungleichen Stufen und
+die Frage, ob ein Kampf tödlich enden kann. Letzteres hängt unmittelbar an 4.2: Ein Tod
+durch Gewalt läuft durch dieselbe Erbfolge wie der Tod durch Alter, und damit wäre Mord
+tatsächlich ein Weg an ein Erbe.
+
+Wichtig für den Zuschnitt: Der Raub braucht Ware, die unterwegs ist — also `shipment`
+aus 4.9 oder wenigstens den Transport innerhalb einer Region. Ohne das gibt es nichts zu
+überfallen.
 
 ### 7. Verhaltensregeln der NPCs
 
@@ -110,6 +125,48 @@ der jeder arbeiten kann. Damit ist der Grundweg wenigstens begehbar — 44 Schic
 reichen für ein Grundstück und ein Wohnhaus. Das ersetzt die Antwort nicht: Sobald es
 Anstellungsverhältnisse (4.6) und eine echte Bevölkerungsdynamik gibt, muss geklärt sein,
 ob dieser Betrieb bleibt, wem er gehört und was ein Neuling sonst noch mitbekommt.
+
+## Fertigkeiten
+
+### 17. Katalog und Wirkung
+
+Welche Fertigkeiten gibt es? Naheliegend sind die Handwerke (Schmied, Zimmerer, Bauer,
+Weber), dazu Handel, Heilkunst, Kämpfen und Redekunst. Zu entwerfen ist weniger die
+Liste als die **Wirkung**: Was genau tut eine Stufe? Mehr Ausstoß je Aktionspunkt,
+bessere Qualität, geringerer Materialverbrauch, höherer Lohn — jede Antwort erzeugt
+andere Anreize, und mehrere gleichzeitig machen die Zahlen unlesbar.
+
+Dazu die Kurve selbst: Wie viel Übung kostet eine Stufe, wie viele Stufen gibt es, und
+wie viele Leben braucht die höchste? Bei 48 Aktionspunkten am Tag und einem Leben von
+rund siebzig Spieljahren ist das nachrechenbar — und sollte nachgerechnet werden, bevor
+die erste Zahl im Code steht.
+
+Ein Sonderfall wartet am Anfang: Solange niemand lehren kann, beginnt **jeder** bei null.
+Die erste Generation einer Welt hat keine Meister, bei denen sie lernen könnte.
+
+### 18. Lehre: Grenzen und Berechtigung
+
+Entschieden ist, dass Können nur durch Lehre über den Tod hinauskommt. Offen ist das
+Wie: Wie weit bleibt der Schüler hinter dem Meister zurück, und ist das eine feste
+Differenz oder eine Obergrenze? Darf nur der eigene Nachwuchs lernen, oder auch
+Angestellte und Fremde gegen Geld — Letzteres wäre eine Zunft und ein eigener
+Wirtschaftszweig. Und kann ein Schüler mehrere Meister haben?
+
+Am Rand hängt daran die **Schule** als öffentliches Gebäude (Punkt 12): Wenn die Stadt
+Grundbildung stellt, ist das die Antwort auf den Sonderfall aus Punkt 17 — und eine
+politische Ausgabe mit sichtbarem Nutzen.
+
+## Vor der Politik
+
+### 19. Stadtwache
+
+Ist die Wache ein **Amt** (gewählt, aus der Stadtkasse bezahlt, einer), eine
+**Anstellung** (mehrere, vom Amtsinhaber eingestellt) oder beides — ein Hauptmann mit
+Leuten? Davon hängt ab, ob sie in `office` gehört oder in `employment`, und ob ihre
+Stärke eine politische Entscheidung ist oder das Ergebnis eines Arbeitsmarkts.
+
+Berührt Punkt 12 (Katalog öffentlicher Gebäude: braucht die Wache ein Wachhaus?) und
+Punkt 6 (wogegen genau schützt sie).
 
 ## Laufend
 

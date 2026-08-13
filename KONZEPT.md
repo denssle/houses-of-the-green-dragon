@@ -265,6 +265,44 @@ Die persönliche Schicht sticht dabei die anderen: Man kann sich mit einem Mitgl
 verfeindeten Hauses anfreunden — Romeo und Julia bleiben möglich, sind aber ein Kampf
 gegen den Strom.
 
+### 7. Fertigkeiten — der zweite Querschnitt
+
+Ein Charakter ist nicht nur, was er besitzt, sondern was er **kann**. Fertigkeiten
+wachsen durch Ausübung und machen aus austauschbaren Figuren Fachleute: Der eine ist
+Schmied geworden, der andere Händler, der dritte taugt zum Kämpfen.
+
+Sie greifen überall dort ein, wo bisher eine Pauschale steht. Eine Schicht in der
+Schmiede bringt heute für jeden gleich viel; mit Fertigkeiten hängt der Ertrag daran, wer
+am Amboss steht. Dasselbe gilt für Bauqualität, Handelsspanne und Heilkunst.
+
+**Spezialisierung entsteht aus Aufwand, nicht aus einer Regel.** Jede Stufe kostet
+deutlich mehr Übung als die vorige. Damit kann jeder alles ein bisschen, aber niemand
+alles gut — und zwar ohne eine Obergrenze, die von außen sagt, was man zu wählen hat. Wer
+Meister werden will, gibt dafür ein Leben aus; wer sich breit aufstellt, bleibt überall
+mittelmäßig. Das ist dieselbe Abwägung, die knappes Bauland beim Besitz erzwingt, nur für
+die Zeit.
+
+**Fertigkeiten sterben mit dem Charakter — außer sie wurden gelehrt.** Der Erbe bekommt
+die Mauern, den Boden und das Geld, aber nicht das Können. Wer will, dass sein Handwerk
+das Haus überdauert, muss zu Lebzeiten **ausbilden**: Lehre kostet Aktionspunkte bei
+beiden, beim Meister wie beim Schüler, und der Schüler bleibt unter dem Meister.
+
+Das macht aus dem Generationenwechsel eine Vorbereitung statt einer Formel. Wer plötzlich
+stirbt, hinterlässt eine Werkstatt, die niemand bedienen kann — genau die Dramatik, die
+Permadeath tragen soll. Und es gibt der Lehre einen Platz im Spiel: Sie ist Zeit, die man
+in die nächste Generation steckt, statt in die eigene Werkstatt.
+
+**Kämpfen ist eine Fertigkeit wie jede andere.** Sie entscheidet den Überfall auf einen
+Händler, die Verteidigung dagegen, den Streit mit der Konkurrenz und den Dienst in der
+**Stadtwache** — die damit ein öffentliches Amt mit klarem Zweck wird, bezahlt aus der
+Stadtkasse. Raub ist ein gangbarer Weg, kein Ausrutscher: Wer Ware transportiert, trägt
+ein Risiko, und wer Wachen bezahlt, senkt es.
+
+Damit bekommen zwei Dinge nachträglich einen Boden. Die Zufallsereignisse aus Abschnitt 4
+(Räuber im Umland) sind nicht mehr nur Wetter, gegen das eine Mauer hilft, sondern etwas,
+gegen das auch Menschen etwas ausrichten. Und die Politik bekommt eine Ausgabe, deren
+Nutzen jeder sofort spürt.
+
 ## Was das für das Datenmodell heißt
 
 Das Schema in Phase 1 des Umbauplans bildet die Grundzüge bereits ab, damit sie nicht
@@ -331,6 +369,12 @@ Später hinzu kommen:
 - `employment` für Anstellungsverhältnisse mit Lohn
 - `marriage` beziehungsweise ein Partnerfeld am Charakter
 - `office`, `election`, `vote` und `law` für die politische Ebene
+- `skill` (CharacterId, type, level, progress) für das Können. **Ebenfalls spärlich**:
+  Wer eine Fertigkeit nie ausgeübt hat, hat dazu keine Zeile — bei einem Dutzend
+  Fertigkeiten und einer wachsenden Bevölkerung wäre alles andere Ballast. Der Fortschritt
+  innerhalb einer Stufe gehört mitgespeichert, weil er sich anders als Zuneigung und
+  Verfall **nicht** aus der Zeit ableiten lässt: Er hängt daran, was jemand getan hat,
+  nicht daran, wie lange er es nicht getan hat.
 
 ## Getroffene Entscheidungen
 
@@ -420,6 +464,15 @@ ungepflegt wird man sich mit der Zeit schlicht egal. Beziehungen sind damit kein
 erworbener Besitz, sondern laufender Aufwand, und keine Dynastie kann ihre Machtbasis
 dauerhaft einfrieren. Darüber liegt ein **Verwandtschaftsbonus**: Verwandte finden
 einander von Haus aus sympathisch, ohne dass dafür interagiert werden müsste.
+
+**Können wird nicht vererbt, sondern gelehrt.** Fertigkeiten sterben mit dem Charakter;
+weitergegeben wird nur, was der Meister zu Lebzeiten unterrichtet hat, und Lehre kostet
+beide Seiten Zeit. Damit ist die Ausbildung des Erben eine Investition wie jede andere —
+und ein plötzlicher Tod trifft nicht nur den Besitz, sondern das Handwerk.
+
+**Spezialisierung kommt aus steigendem Aufwand, nicht aus einer Obergrenze.** Jede Stufe
+kostet deutlich mehr Übung als die vorige. Jeder kann alles ein bisschen, niemand alles
+gut — ohne dass eine Regel vorschreibt, was zu wählen ist.
 
 **Persönliche Beziehungen werden nicht vererbt — Hausbeziehungen schon.** Ein Kind
 startet gegenüber jedem Fremden bei null und muss sich seine Verbündeten selbst

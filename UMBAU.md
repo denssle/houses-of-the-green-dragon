@@ -683,6 +683,27 @@ greifen, nicht nur auf der Gebäudeseite — sonst hängt es vom Zufall ab, wann
 zusammenfällt. Und Renovieren kostet zunächst nur Geld; die Kopplung an Baumaterial
 kommt mit 4.6 dazu, sobald es Waren gibt.
 
+**4.5a Fertigkeiten.** `skill.logic.ts`: Übung in Stufen umrechnen, steigender Aufwand je
+Stufe, Wirkung einer Stufe auf Ertrag und Erfolg. Dazu die `skill`-Tabelle (spärlich —
+wer nie geschmiedet hat, hat keine Zeile) und die **Lehre** als Handlung, die bei Meister
+und Schüler Aktionspunkte kostet.
+
+Die krumme Nummer ist Absicht: Der Schritt gehört **zwischen 4.5 und 4.6**, weil Lohn und
+Ausstoß ab 4.6 an ihm hängen. Ein Umnummerieren würde fünfzehn Verweise in Codekommentaren
+entwerten, die auf 4.6 und 4.7 zeigen — und die sind mehr wert als eine glatte Reihe.
+
+Für die Umsetzung wichtig: Der Fortschritt innerhalb einer Stufe lässt sich **nicht** faul
+beim Lesen nachrechnen, anders als Aktionsbudget, Zuneigung und Verfall. Er hängt daran,
+was jemand getan hat, nicht daran, wie viel Zeit vergangen ist — also wird bei jeder
+Handlung geschrieben. Das ist die erste Stelle im Spiel, an der das nötig ist.
+
+Zweitens: Fertigkeiten greifen dort ein, wo heute Pauschalen stehen. `work()` gibt jedem
+denselben Lohn aus der Gebäudevorlage; das wird zur Rechnung aus Vorlage **und** Können.
+Die Vorlage bleibt die Obergrenze — eine Kate wirft auch beim Meister wenig ab.
+
+Der Katalog und die Wirkung je Stufe sind Punkt 17 der offenen Punkte, die Grenzen der
+Lehre Punkt 18. Beide müssen vor diesem Schritt fallen.
+
 **4.6 Wirtschaft.** `itemTemplate`/`inventory` mit echtem Nutzen (Nahrung, Kleidung,
 Werkzeug, **Baumaterial**), Bedürfnisse als Modifikatoren, `employment` mit Lohn, Produktion im Betrieb.
 Der Handel läuft über **Festpreis-Angebote am Gebäude** (`shopOffer`: BuildingId, itemId,
@@ -711,8 +732,13 @@ Dazu die Stadtkasse: Steuern und Pacht hinein, öffentliche Gebäude heraus. Die
 Pachtvergabe ist die erste echte Amtshandlung mit Verteilungswirkung — sie verbindet 4.6
 mit der Politik.
 
+Dazu die **Stadtwache** als erstes Amt mit unmittelbar spürbarem Nutzen: bezahlt aus der
+Stadtkasse, wirksam gegen Raub und Räuberzüge. Ob sie ein Amt, eine Anstellung oder
+beides ist, steht als Punkt 19 offen — davon hängt ab, ob sie in `office` gehört oder in
+`employment`.
+
 **4.8 Ereignisse.** Räuber, Seuche, Brand als Zufallsereignisse am Tick, gemildert durch
-öffentliche Bauten (Mauer, Brunnen). Protokolliert in `event` und sichtbar als
+öffentliche Bauten (Mauer, Brunnen) **und durch die Wache aus 4.7**. Protokolliert in `event` und sichtbar als
 Stadtchronik — ein Unglück, von dem niemand erfährt, hat politisch keine Folgen. Bewusst
 nach der Politik, weil erst dann etwas da ist, das schützen kann.
 
@@ -773,6 +799,10 @@ Nicht beliebig: Phase 1 vor 2 (die Session-Tabelle braucht die DB), 1 und 2 vor 
 (sonst entsteht Spiellogik auf Datei-Persistenz, die gleich wieder umgeschrieben wird).
 Innerhalb von Phase 3 sind 3.1 bis 3.3 eine Einheit. Der Aufwandsschwerpunkt liegt auf
 Phase 1; danach ist der Rest gut geschnittene Fleißarbeit.
+
+**4.5a gehört vor 4.6**, auch wenn die Nummer es nicht sofort verrät: Ab der Wirtschaft
+hängen Lohn und Ausstoß an Fertigkeiten, und die nachträglich in eine fertige Produktion
+einzuziehen hieße, jede Formel noch einmal aufzumachen.
 
 Zwei Dinge stehen bewusst früher, als es die Gliederung nahelegt: der
 **Deployment-Durchstich** (2.4), weil sich Deploy-Probleme sonst am Ende häufen, und der
