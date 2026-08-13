@@ -1248,7 +1248,7 @@ Stadtkasse, wirksam gegen Raub und Räuberzüge. Ob sie ein Amt, eine Anstellung
 beides ist, steht als Punkt 19 offen — davon hängt ab, ob sie in `office` gehört oder in
 `employment`.
 
-**4.7d Die Chronik.** Ein Buch, in dem steht, was geschehen ist: Geburten, Hochzeiten,
+**4.7d Die Chronik.** ✓ Ein Buch, in dem steht, was geschehen ist: Geburten, Hochzeiten,
 Todesfälle, Wahlergebnisse, neue Gebäude, angetretene Stellen.
 
 **Der Grund ist nicht Zierde, sondern Sichtbarkeit.** Die Welt läuft weiter, während
@@ -1272,13 +1272,22 @@ uns betrifft) und die Person (ihr Lebenslauf). Dieselben Zeilen, drei Fragen. De
 Lebenslauf ist dabei der Nebengewinn, der den Stammbaum ergänzt: Wann wurde sie geboren,
 wen hat sie geheiratet, welches Amt hatte sie, woran ist sie gestorben.
 
-Offen ist, **wie lange** aufbewahrt wird und wer welche Einträge sehen darf — beides in
-Punkt 22.
+**Festgehalten wird vorerst alles, und alles ist öffentlich.** Solange die Welt eine
+Testumgebung ist, wiegt Vollständigkeit schwerer als Ordnung: Was nicht mitgeschrieben
+wurde, lässt sich nicht nachträglich beschaffen, und woran niemand denkt, fehlt später am
+meisten. Verdichten und verbergen kann man immer noch — dann aber mit Daten in der Hand
+statt mit einer Vermutung darüber, was interessant gewesen wäre.
 
 _Fertig, wenn:_ Ein Spieler, der zwei Tage weg war, kann nachlesen, was inzwischen
-geschehen ist.
+geschehen ist. — Erledigt. Vierzehn Ereignisarten werden mitgeschrieben, von der Geburt
+bis zum Schultag; die Seite zeigt sie in drei Sichten, und der Lebenslauf auf der
+Charakterseite ist dieselbe Abfrage mit einem anderen Filter.
 
-**4.7e Schulen und eine wachsende Stadt.** Der Katalog öffentlicher Bauten wird länger,
+Ein Kniff verdient eine Notiz: **Ein Fehler beim Schreiben kippt die Handlung nicht.** Wer
+heiratet, ist verheiratet, auch wenn die Chronik gerade klemmt — `record` schluckt und
+protokolliert. Andersherum hinge das Spiel an seinem Protokoll.
+
+**4.7e Schulen und eine wachsende Stadt.** ✓ Der Katalog öffentlicher Bauten wird länger,
 und die Stadt darf von jeder Art **mehrere** haben.
 
 **Die Begrenzung auf eins war eine Startannahme, keine Regel.** Ein Rathaus je Stadt ist
@@ -1300,12 +1309,28 @@ die sich erst in der nächsten Generation auszahlt. Das ist genau die Art Entsch
 um die es in einem Dynastiespiel geht: Man investiert in jemanden, den man später selbst
 spielt.
 
-Die Wirkung hängt an den Fertigkeiten aus 4.5a und ist in Punkt 21 zu entscheiden. Der
-Grundgedanke: Schule ersetzt nicht das Üben, sie verkürzt es — und was ein Kind gelernt
-hat, kann ihm niemand nehmen.
+**Die Schule ist ein Lehrmeister, den sich jeder leisten kann.** Sie erfindet keine neue
+Mechanik: Ein Schultag ist eine Lehrstunde nach den Regeln aus 4.5a, und er kostet das
+Kind **Aktionspunkte wie Arbeit**. Damit steht Lernen gegen Verdienen — der Konflikt, der
+die Entscheidung erst zu einer macht. Wer sein Kind lernen lässt, verzichtet auf dessen
+Hände.
+
+Damit eine Schule unterrichten kann, braucht sie **Lehrer**: angestellt wie die Wache,
+bezahlt aus der Stadtkasse. Was ein Kind lernen kann, hängt deshalb daran, wen die Stadt
+gewinnt — eine Schule ohne Lehrer ist ein leeres Haus, und ein Lehrer kann nur
+weitergeben, was er selbst beherrscht.
+
+Das **Schulgeld ist ein Gesetz** (4.7b). Der Bürgermeister setzt es; steht es auf null,
+zahlt die Stadt die Bildung ihrer Kinder ganz allein. Damit ist Bildung ein politischer
+Streitpunkt und keine Konstante: Eine Stadt kann sich entscheiden, arme Kinder
+auszubilden — und die Steuern dafür bei denen zu holen, die es sich leisten können.
 
 _Fertig, wenn:_ Eine wachsende Stadt kann sich ein zweites Dach bauen, und ein Spieler
-kann Geld für die Zukunft seines Kindes ausgeben.
+kann Geld für die Zukunft seines Kindes ausgeben. — Erledigt und am gebauten Server
+durchgespielt: Schule für 350 Münzen errichtet, eine Schmiedin mit Stufe 6 als Lehrerin
+angestellt, den zehnjährigen Tilman hingeschickt. Der Tag kostete ihn zwei Aktionspunkte,
+seinen Vater drei Münzen Schulgeld an die Stadt — und die Lehrerin zwei Aktionspunkte,
+aber keinen Verdienst: Sie bekommt ihren Sold aus der Stadtkasse.
 
 **4.8 Ereignisse.** Räuber, Seuche, Brand als Zufallsereignisse am Tick, gemildert durch
 öffentliche Bauten (Mauer, Brunnen) **und durch die Wache aus 4.7**. Protokolliert in der Chronik aus 4.7d — ein

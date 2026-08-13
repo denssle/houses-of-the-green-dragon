@@ -23,6 +23,7 @@ import { inheritPersonality, type Personality } from '$lib/game/personality.logi
 import { AGE_OF_MAJORITY, ageInYears, yearsToTicks } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
+import * as chronicleService from '$lib/server/service/chronicleService';
 import * as relationshipService from '$lib/server/service/relationshipService';
 import * as worldService from '$lib/server/service/worldService';
 import { NEUGEBORENE } from '$lib/db/names';
@@ -193,6 +194,11 @@ async function trauen(oneId: string, otherId: string, tick: number): Promise<voi
 			{ where: { id: otherId }, transaction: t }
 		);
 	});
+	const paar = await Character.findByPk(oneId, { attributes: ['id', 'RegionId'] });
+	await chronicleService.record('MARRIAGE', paar?.dataValues.RegionId ?? null, tick, {
+		subjectId: oneId,
+		objectId: otherId
+	});
 	// Eine Ehe ist ein Ereignis zwischen den Häusern, nicht nur zwischen zwei Menschen.
 	await relationshipService.changeAffection(oneId, otherId, 20, tick);
 	await relationshipService.changeAffection(otherId, oneId, 20, tick);
@@ -289,6 +295,13 @@ async function zurWeltBringen(
 			{ transaction: t }
 		);
 		await mutter.update({ pregnantSinceTick: null, pregnantByFatherId: null }, { transaction: t });
+		await chronicleService.record(
+			'BIRTH',
+			mutter.dataValues.RegionId,
+			tick,
+			{ subjectId: kindId, objectId: mutter.dataValues.id, dynastyId: mutter.dataValues.DynastyId },
+			t
+		);
 	});
 
 	return { childId: kindId, name, motherId: mutter.dataValues.id };

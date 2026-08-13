@@ -228,3 +228,45 @@
 		</form>
 	</section>
 {/if}
+
+{#if data.school}
+	<section>
+		<h3>Unterricht</h3>
+		{#if data.school.teachers.length === 0}
+			<p>
+				<i>
+					Niemand unterrichtet hier. Eine Schule ohne Lehrer ist ein leeres Haus — der Bürgermeister
+					müsste eine Stelle ausschreiben.
+				</i>
+			</p>
+		{:else if data.school.children.length === 0}
+			<p><i>Du hast keine Kinder, die hier lernen könnten.</i></p>
+		{:else}
+			<p>
+				Ein Schultag kostet {data.school.fee}
+				{data.school.fee === 1 ? 'Münze' : 'Münzen'} Schulgeld
+				{#if data.school.fee === 0}<i>— die Stadt zahlt</i>{/if} und einen Teil der Kraft deines Kindes.
+			</p>
+			{#each data.school.teachers as lehrer (lehrer.characterId + lehrer.skill)}
+				<form method="POST" action="?/school" use:enhance>
+					<input type="hidden" name="skill" value={lehrer.skill} />
+					<label>
+						{lehrer.skillName} bei {lehrer.name} (bis Stufe {lehrer.upTo}) —
+						<select name="childId" aria-label="Kind für {lehrer.skillName}">
+							{#each data.school.children as kind (kind.id)}
+								<option value={kind.id}>{kind.firstName}, {kind.age} Jahre</option>
+							{/each}
+						</select>
+					</label>
+					<button type="submit">Hinschicken</button>
+				</form>
+			{/each}
+		{/if}
+		<p>
+			<small>
+				Was ein Kind hier lernt, kann ihm niemand nehmen — und es zahlt sich erst aus, wenn es
+				erwachsen ist. Wer sein Kind lernen lässt, verzichtet solange auf dessen Hände.
+			</small>
+		</p>
+	</section>
+{/if}

@@ -1,3 +1,5 @@
+import * as chronicleService from '$lib/server/service/chronicleService';
+import { chronicleMessage } from '$lib/chronicleMessage';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as characterService from '$lib/server/service/characterService';
@@ -10,7 +12,7 @@ import * as regionService from '$lib/server/service/regionService';
 import * as worldService from '$lib/server/service/worldService';
 import { deathProbabilityPerYear } from '$lib/game/mortality.logic';
 import { personalityLabel } from '$lib/game/personality.logic';
-import { ageInYears, MAX_ACTION_POINTS } from '$lib/game/time';
+import { ageInYears, MAX_ACTION_POINTS, yearOf } from '$lib/game/time';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const character = locals.currentCharacter;
@@ -40,7 +42,18 @@ export const load: PageServerLoad = async ({ locals }) => {
 		children: await lifecycleService.getChildren(character.id, jetzt),
 		skills: await skillService.getSkills(character.id),
 		hunger: await needService.getHunger(character.id, jetzt),
-		spouse: character.spouseId ? await characterService.getCharacter(character.spouseId) : undefined
+		spouse: character.spouseId
+			? await characterService.getCharacter(character.spouseId)
+			: undefined,
+		// Der Lebenslauf ist kein eigenes System, sondern die Chronik nach dieser Person
+		// gefiltert: geboren, verheiratet, im Amt, gestorben.
+		life: (await chronicleService.getChronicle({ characterId: character.id, limit: 12 })).map(
+			(eintrag) => ({
+				id: eintrag.id,
+				text: chronicleMessage(eintrag),
+				year: yearOf(eintrag.tick)
+			})
+		)
 	};
 };
 

@@ -12,8 +12,7 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung | 4.8                          | Entwurf      |
 | 13  | Verfahren zur Erschließung neuen Baulands                | 4.9                          | Entscheidung |
 | 14  | Startbedingungen für neue Spieler                        | erster öffentlicher Betrieb  | Entscheidung |
-| 21  | Schule: Wirkung, Kosten und wer darüber entscheidet      | 4.7e                         | Entscheidung |
-| 22  | Umfang, Aufbewahrung und Sichtbarkeit der Chronik        | 4.7d                         | Entwurf      |
+| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche            | 4.8 / Punkt 6                | Entwurf      |
 | 20  | Verschleiß von Gegenständen                              | Kleidung und Werkzeug (4.6c) | Entwurf      |
 | 15  | Weltinhalte: Berufe, Waren und Rezepte                   | laufend                      | Entwurf      |
 | 16  | Balancing im engeren Sinn                                | laufend                      | laufend      |
@@ -22,7 +21,10 @@ Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 5
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
 `paths.base`, wie bei Festival), mit Phase 4.5a der **Fertigkeitenkatalog** samt
 Übungskurve und den Grenzen der Lehre, mit Phase 4.6c der **Pachtvertrag im Erbfall**
-(er fällt an die Stadt zurück), mit Phase 4.7c die **Stadtwache** (eine Anstellung, kein Amt: Der Bürgermeister setzt
+(er fällt an die Stadt zurück), mit Phase 4.7e die **Wirkung der Schule** (sie kostet das Kind Aktionspunkte wie Arbeit
+und wirkt wie ein Lehrmeister; Lehrer sind aus öffentlicher Hand bezahlt, das Schulgeld
+ist ein Gesetz), mit Phase 4.7d der **Umfang der Chronik** (im Testbetrieb wird alles
+festgehalten), mit Phase 4.7c die **Stadtwache** (eine Anstellung, kein Amt: Der Bürgermeister setzt
 den Sold aus, die Stadtkasse zahlt ihn — damit ist ihre Stärke eine Haushaltsfrage und
 keine Verfassungsfrage) und der **Verfall öffentlicher Bauten** (sie verfallen wie
 private, stürzen aber nicht ein), mit Phase 4.7b die **Steuerarten** (die vorhandenen Sätze werden zu Gesetzen, dazu eine
@@ -199,54 +201,32 @@ richtig. Vermutlich läuft es auf eine Trennung hinaus: Verbrauchsgüter bleiben
 Ausrüstung wird einzeln geführt. Diese Entscheidung fällt spätestens mit der ersten Ware,
 die länger hält als ein Bissen.
 
-### 21. Schule und Bildung
+### 23. Räuber als Beruf
 
-Die Schule ist der erste öffentliche Bau, für den der **Bürger** zahlt und nicht die
-Stadt: Wer sein Kind hinschickt, zahlt Schulgeld. Damit bekommt die Kindheit einen
-Inhalt — bisher ist sie eine Wartezeit bis zur Volljährigkeit — und der Spieler eine
-Ausgabe, die sich erst in der nächsten Generation auszahlt. Genau darum geht es in einem
-Dynastiespiel: Man investiert in jemanden, den man später selbst spielt.
+**Ein Beruf, den man ergreift wie jeden anderen.** Wer ihn wählt, baut eine Bande auf —
+das sind Angestellte wie in jeder Werkstatt, nur ist der Ertrag nicht Ware, sondern
+Beute: Überfälle auf Händler, Einbrüche in Häuser und Betriebe.
 
-Zu entscheiden ist die **Wirkung**. Drei Wege, mit unterschiedlichen Folgen:
+Das Schöne daran ist, dass es fast nichts Neues braucht. Bande = `employment`, Unterschlupf
+= ein Gebäude, Beute = Waren und Münzen, die den Besitzer wechseln. Was fehlt, ist der
+Ausgang: Ob ein Überfall gelingt, entscheidet der Kampf (Punkt 6), und wogegen er sich
+richtet, entscheiden die Ereignisse aus 4.8. Deshalb steht der Räuber hinter beiden.
 
-- **Ein Vorsprung beim Start.** Das Kind beginnt sein Erwachsenenleben mit Übung in
-  einer Fertigkeit statt bei null. Einfach, einmalig wirksam, und der Nutzen ist sofort
-  ablesbar.
-- **Schneller lernen, lebenslang.** Wer zur Schule ging, sammelt Übung schneller. Wirkt
-  über das ganze Leben und trifft damit die Aussage besser — Bildung als Zinseszins.
-  Braucht aber ein dauerhaftes Merkmal am Charakter.
-- **Beides in kleinen Dosen.** Realistisch und zwei Stellschrauben, wo eine reichte.
+Zu entwerfen ist vor allem das **Gegengewicht**. Ein Beruf, der nimmt, statt herzustellen,
+braucht ein Risiko, sonst ist er die dominante Strategie:
 
-Daran hängen weitere Fragen: Kostet der Schulbesuch das Kind **Aktionspunkte** (dann
-konkurriert Lernen mit Arbeiten, was der schönere Konflikt wäre) oder nur Geld? Wer
-entscheidet über den Besuch — der Spieler für seine Kinder, aber was tun NPC-Eltern?
-Geizige schicken niemanden, ehrgeizige alle: Die Persönlichkeitsachsen aus 4.4a liegen
-bereit. Und setzt der Bürgermeister das Schulgeld als Gesetz (dann ist Bildung ein
-politischer Streitpunkt) oder steht es fest?
+- Die **Stadtwache** (4.7c ✓) ist das offensichtliche — sie wartet seit ihrem Bau auf
+  genau diese Aufgabe.
+- **Zuneigung und Ruf**: Wer beim Rauben erkannt wird, verliert sie bei den Bestohlenen
+  und ihren Häusern. Das trifft einen Räuber dort, wo es weh tut: bei der nächsten Wahl
+  und bei der Partnersuche.
+- **Verfolgung**: Was passiert mit einem überführten Räuber? Kerker, Pranger, Verbannung
+  — und wer spricht das Urteil? Naheliegend der Bürgermeister, womit das Amt seine dritte
+  Aufgabe bekäme.
 
-Der Prüfstein bleibt: **Wo wirkt es?** Ohne Fertigkeiten (4.5a ✓) hätte eine Schule
-nichts, worauf sie wirken könnte — die Voraussetzung steht also.
-
-### 22. Umfang und Aufbewahrung der Chronik
-
-Die Chronik aus 4.7d hält fest, was geschehen ist. Zu entscheiden ist, **wie viel** und
-**wie lange**.
-
-Eine Welt mit hundert Einwohnern erzeugt über Generationen sehr viele Zeilen; jede
-Anstellung, jeder Kauf, jede Renovierung mitzuschreiben ergäbe ein Protokoll, in dem
-niemand mehr etwas findet. Die Auswahl ist deshalb die eigentliche Entwurfsarbeit:
-Geburt, Ehe, Tod, Erbfall, Wahl, Amtshandlung und Neubau sind Ereignisse, an die man sich
-erinnert. Ob eine Anstellung dazugehört, hängt daran, ob sie jemanden außer den zwei
-Beteiligten interessiert.
-
-Dazu die Aufbewahrung: Alles behalten (die Chronik wächst unbegrenzt), nach Jahren
-löschen (dann geht die Familiengeschichte verloren, die den Reiz ausmacht) oder
-**verdichten** — Lebensereignisse dauerhaft, Alltägliches nach einigen Spieljahren weg.
-Der dritte Weg ist vermutlich der richtige und der aufwendigste.
-
-Und die **Sichtbarkeit**: Ist alles öffentlich? Eine Stadt, in der jeder jede Geburt und
-jeden Todesfall erfährt, ist stimmig; eine, in der jeder sieht, wer wen angestellt hat,
-vielleicht auch — aber es gibt Ereignisse, die einem Haus gehören und nicht dem Markt.
+Offen ist auch, ob NPCs den Beruf ergreifen. Die Persönlichkeitsachsen liegen bereit —
+Mut und Verträglichkeit warten seit 4.4a auf eine Handlung, und Rauben wäre für beide
+die natürlichste.
 
 ### 16. Balancing
 

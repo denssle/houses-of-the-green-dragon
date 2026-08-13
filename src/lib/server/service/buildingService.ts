@@ -1,3 +1,4 @@
+import * as chronicleService from '$lib/server/service/chronicleService';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { randomUUID } from 'node:crypto';
 import { type Model, Op, type Transaction } from 'sequelize';
@@ -50,8 +51,13 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			initialName: 'Unterkunft',
 			type: 'PUBLIC',
 			description: 'Ein Dach für die, die keines haben.',
-			limited: true,
-			limitedTo: 1,
+			// **Mehrfach erlaubt.** Die Begrenzung auf eins war eine Startannahme: Wächst die
+			// Stadt, braucht sie mehr Dach, und ein Bürgermeister, der zusehen muss, wie
+			// Leute obdachlos bleiben, weil eine Zahl im Code auf eins steht, verwaltet eine
+			// Regel statt einer Stadt. Einmalig bleibt nur, was die Stadt als Ganzes
+			// betrifft — Rathaus, Marktplatz, später die Mauer.
+			limited: false,
+			limitedTo: 0,
 			actions: [],
 			// Aus dem Konzept: Wer sein Haus verliert, braucht einen Ort, an dem es
 			// weitergeht. Ohne ein Auffangnetz wäre Obdachlosigkeit eine Sackgasse — und
@@ -81,8 +87,8 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			initialName: 'Wachhaus',
 			type: 'PUBLIC',
 			description: 'Wo die Stadtwache sitzt — bezahlt aus der Stadtkasse.',
-			limited: true,
-			limitedTo: 1,
+			limited: false,
+			limitedTo: 0,
 			actions: [],
 			// **Der Lohn steht hier nur, damit es überhaupt ein Arbeitsplatz ist.** Was ein
 			// Wächter wirklich bekommt, setzt der Bürgermeister als Aushang — der Sold ist
@@ -91,6 +97,18 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			// Eine Stufe, eine Stelle: Der Ausbau öffentlicher Bauten hängt an Punkt 12 und
 			// kommt mit ihm. Lieber eine Wache als drei Stufen, die niemand erreichen kann.
 			levels: [{ price: 300, name: 'Wachhaus', wagePerActionPoint: 3 }]
+		},
+		{
+			optionId: 8,
+			initialName: 'Schule',
+			type: 'PUBLIC',
+			description: 'Wo Kinder lernen, was sie als Erwachsene können sollen.',
+			limited: false,
+			limitedTo: 0,
+			actions: [],
+			// Der Lohn steht hier, damit die Schule ein Arbeitsplatz ist; was ein Lehrer
+			// bekommt, setzt der Bürgermeister als Aushang — wie bei der Wache.
+			levels: [{ price: 350, name: 'Schule', wagePerActionPoint: 4 }]
 		},
 		{
 			optionId: 6,
@@ -242,6 +260,14 @@ export async function build(
 			{ transaction: t }
 		);
 
+		await chronicleService.record(
+			'BUILDING_BUILT',
+			grundstück.dataValues.RegionId,
+			tick,
+			{ subjectId: characterId, buildingId: angelegt.dataValues.id },
+			t
+		);
+
 		// Wer sein erstes Wohnhaus baut, zieht ein. Ohne diese Zeile stünde er mit einem
 		// eigenen Haus in der Stadt und trotzdem als obdachlos auf seiner Seite — ein
 		// Umzug als eigene Handlung lohnt erst, wenn es mehrere Häuser zur Wahl gibt.
@@ -321,6 +347,18 @@ async function zurRuineWerden(
 		await CharacterModel.update(
 			{ HomeBuildingId: null },
 			{ where: { HomeBuildingId: instanz.dataValues.id }, transaction: t }
+		);
+		// Vor dem Löschen eintragen: Danach ist die Kennung des Gebäudes nirgends mehr
+		// nachzuschlagen, und ein Haus, das spurlos verschwindet, ist keine Geschichte.
+		const grundstueck = instanz.dataValues.PlotId
+			? await PlotModel.findByPk(instanz.dataValues.PlotId, { transaction: t })
+			: null;
+		await chronicleService.record(
+			'BUILDING_RUINED',
+			grundstueck?.dataValues.RegionId ?? null,
+			instanz.dataValues.lastConditionTick,
+			{ buildingId: instanz.dataValues.id, subjectId: instanz.dataValues.OwnerCharacterId },
+			t
 		);
 		await instanz.destroy({ transaction: t });
 	});
@@ -620,6 +658,13 @@ export async function renovatePublicBuilding(
 			{ transaction: t }
 		);
 		await skillService.addPractice(characterId, 'CONSTRUCTION', RENOVATION_ACTION_POINT_COST, t);
+		await chronicleService.record(
+			'BUILDING_RENOVATED',
+			regionId,
+			tick,
+			{ subjectId: characterId, buildingId, value: ergebnis.spent },
+			t
+		);
 		return { ok: true, spent: ergebnis.spent } as const;
 	});
 }
@@ -694,6 +739,13 @@ export async function buildPublicBuilding(
 				ownerType: 'CITY'
 			},
 			{ transaction: t }
+		);
+		await chronicleService.record(
+			'BUILDING_BUILT',
+			regionId,
+			tick,
+			{ subjectId: characterId, buildingId: angelegt.dataValues.id },
+			t
 		);
 		return { ok: true, building: convertToBuilding(angelegt.dataValues) } as const;
 	});

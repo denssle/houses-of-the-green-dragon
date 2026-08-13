@@ -1,3 +1,4 @@
+import * as chronicleService from '$lib/server/service/chronicleService';
 import { Op, type Transaction } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 import { Building } from '$lib/db/model/building';
@@ -138,10 +139,37 @@ export async function die(characterId: string, tick: number): Promise<Death | nu
 			t
 		);
 
+		const alter: number = ageInYears(tot.dataValues.birthTick, tick);
+		await chronicleService.record(
+			'DEATH',
+			tot.dataValues.RegionId,
+			tick,
+			{ subjectId: characterId, dynastyId: tot.dataValues.DynastyId, value: alter },
+			t
+		);
+		if (erbeId) {
+			await chronicleService.record(
+				'INHERITANCE',
+				tot.dataValues.RegionId,
+				tick,
+				{ subjectId: characterId, objectId: erbeId, value: geteilt.heir },
+				t
+			);
+		}
+		if (erloschen) {
+			await chronicleService.record(
+				'DYNASTY_EXTINCT',
+				tot.dataValues.RegionId,
+				tick,
+				{ dynastyId: erloschen },
+				t
+			);
+		}
+
 		return {
 			characterId,
 			name: tot.dataValues.firstName,
-			age: ageInYears(tot.dataValues.birthTick, tick),
+			age: alter,
 			heirId: erbeId,
 			extinctDynastyId: erloschen
 		};

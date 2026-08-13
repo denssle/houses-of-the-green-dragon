@@ -1,3 +1,4 @@
+import * as chronicleService from '$lib/server/service/chronicleService';
 import { randomUUID } from 'node:crypto';
 import { Op } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
@@ -162,6 +163,7 @@ export async function advanceElections(
 		termEndsTick: null,
 		closed: false
 	});
+	await chronicleService.record('ELECTION_OPENED', regionId, tick, { detail: office });
 	return { opened: true };
 }
 
@@ -189,6 +191,11 @@ async function auszaehlen(
 		{ where: { id: electionId } }
 	);
 
+	await chronicleService.record('ELECTION_CLOSED', regionId, tick, {
+		subjectId: rang[0] ?? null,
+		value: stimmen,
+		detail: 'MAYOR'
+	});
 	return { winner: rang[0], votes: stimmen, candidates: rang.length };
 }
 

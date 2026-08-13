@@ -11,6 +11,11 @@ import * as tradeService from '$lib/server/service/tradeService';
 import * as needService from '$lib/server/service/needService';
 import * as employmentService from '$lib/server/service/employmentService';
 import * as lawService from '$lib/server/service/lawService';
+import * as worldService from '$lib/server/service/worldService';
+import * as lifecycleService from '$lib/server/service/lifecycleService';
+import * as schoolService from '$lib/server/service/schoolService';
+import type { SkillType } from '$lib/game/skill.logic';
+import { AGE_OF_MAJORITY } from '$lib/game/time';
 import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
 import { levelOf, maxLevel, upgradePrice } from '$lib/model/buildingTemplate';
 
@@ -58,6 +63,21 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			? await lawService.rate(locals.currentCharacter.regionId, 'STALL_FEE')
 			: 0,
 		staff: await employmentService.getStaff(params.building_id),
+		// Die Schule: wer hier unterrichtet, was ein Tag kostet und welche eigenen Kinder
+		// man hinschicken könnte.
+		school:
+			building.optionId === schoolService.SCHOOL_OPTION_ID && locals.currentCharacter
+				? {
+						teachers: await schoolService.getTeachers(params.building_id),
+						fee: await lawService.rate(locals.currentCharacter.regionId, 'SCHOOL_FEE'),
+						children: (
+							await lifecycleService.getChildren(
+								locals.currentCharacter.id,
+								await worldService.currentTick()
+							)
+						).filter((kind) => kind.age < AGE_OF_MAJORITY)
+					}
+				: undefined,
 		renovationCost: Math.ceil(CONDITION_MAX - building.condition) * RENOVATION_COST_PER_POINT
 	};
 };
@@ -218,5 +238,32 @@ export const actions = {
 		);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return { message: `Gekauft für ${ergebnis.spent} Münzen — samt Grundstück.` };
+	},
+
+	/**
+	 * Ein Kind zur Schule schicken.
+	 *
+	 * Bezahlt wird vom Elternteil, nicht vom Kind: Ein Kind hat selten eigenes Geld, und
+	 * die Ausgabe soll dort anfallen, wo die Entscheidung getroffen wird.
+	 */
+	school: async ({ request, params, locals }) => {
+		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
+
+		const daten = await request.formData();
+		const childId = daten.get('childId')?.toString();
+		const skill = daten.get('skill')?.toString() as SkillType | undefined;
+		if (!childId || !skill) return fail(400, { message: 'Wer soll was lernen?' });
+
+		const ergebnis = await schoolService.attend(
+			childId,
+			params.building_id,
+			skill,
+			locals.currentCharacter.id
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+
+		const kosten: string =
+			ergebnis.fee > 0 ? `${ergebnis.fee} Münzen Schulgeld.` : 'auf Kosten der Stadt.';
+		return { message: `Ein Schultag bei ${ergebnis.teacher} — ${kosten}` };
 	}
 } satisfies Actions;

@@ -27,6 +27,7 @@ import { yearsToTicks } from '$lib/game/time';
  */
 
 const WACHHAUS = 7;
+const RATHAUS = 0;
 const JETZT = 10_000;
 /** So weit verfallen, dass ein NPC-Buergermeister eingreift — unter der halben Guete. */
 const VERFALLEN: number = yearsToTicks(YEARS_TO_RUIN * 0.75);
@@ -254,13 +255,26 @@ describe('Öffentliche Bauten', () => {
 			});
 		});
 
-		it('baut kein zweites Wachhaus', async () => {
+		it('baut so viele Wachhäuser, wie die Stadt braucht', async () => {
+			// Seit 4.7e ist die Begrenzung auf eins weg: Wächst die Stadt, braucht sie mehr
+			// Dach und mehr Wache. Einmalig bleibt nur, was die Stadt als Ganzes betrifft.
 			const buergermeister = await person('Amtsperson');
 			await insAmt(buergermeister);
 			await buildingService.buildPublicBuilding(buergermeister, WACHHAUS, await stadtgrund());
 
 			expect(
 				await buildingService.buildPublicBuilding(buergermeister, WACHHAUS, await stadtgrund())
+			).toMatchObject({ ok: true });
+		});
+
+		it('baut kein zweites Rathaus', async () => {
+			// Was die Stadt als Ganzes betrifft, gibt es einmal — sonst hätte sie zwei Räte.
+			const buergermeister = await person('Amtsperson');
+			await insAmt(buergermeister);
+			await stadtgrund(RATHAUS);
+
+			expect(
+				await buildingService.buildPublicBuilding(buergermeister, RATHAUS, await stadtgrund())
 			).toEqual({ ok: false, reason: 'LIMIT_REACHED' });
 		});
 

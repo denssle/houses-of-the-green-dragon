@@ -16,7 +16,7 @@ import type { ActionFailureReason } from '$lib/game/actionFailure';
  * verlor er darüber die nächste Wahl?
  */
 
-export const LAW_KINDS = ['TITHE', 'STALL_FEE', 'SALES_TAX', 'PROPERTY_TAX'] as const;
+export const LAW_KINDS = ['TITHE', 'STALL_FEE', 'SALES_TAX', 'PROPERTY_TAX', 'SCHOOL_FEE'] as const;
 export type LawKind = (typeof LAW_KINDS)[number];
 
 /** Prozent vom Wert oder Münzen je Stück — davon hängt ab, wie man es anzeigt. */
@@ -72,6 +72,14 @@ export const LAW_RULES: Record<LawKind, LawRule> = {
 		description: 'Was ein Grundstück seinen Besitzer je Spieljahr kostet',
 		unit: 'COIN',
 		fallback: 0,
+		min: 0,
+		max: 20
+	},
+	SCHOOL_FEE: {
+		name: 'Schulgeld',
+		description: 'Was ein Schultag die Eltern kostet',
+		unit: 'COIN',
+		fallback: 3,
 		min: 0,
 		max: 20
 	}

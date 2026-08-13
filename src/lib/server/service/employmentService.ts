@@ -1,3 +1,4 @@
+import * as chronicleService from '$lib/server/service/chronicleService';
 import { type Transaction } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
@@ -117,6 +118,18 @@ export async function takeJob(characterId: string, buildingId: string): Promise<
 				sinceTick: tick
 			},
 			{ transaction: t }
+		);
+		await chronicleService.record(
+			'JOB_TAKEN',
+			(await regionOf(buildingId)) ?? null,
+			tick,
+			{
+				subjectId: characterId,
+				objectId: gebaeude.dataValues.OwnerCharacterId,
+				buildingId,
+				value: gebaeude.dataValues.offeredWage
+			},
+			t
 		);
 		return { ok: true } as const;
 	});

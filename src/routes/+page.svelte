@@ -44,5 +44,6 @@
 	<a href="{base}/land" class="link">Umland</a> ·
 	<a href="{base}/market" class="link">Markt</a> ·
 	<a href="{base}/jobs" class="link">Arbeit</a> ·
-	<a href="{base}/council" class="link">Rathaus</a>
+	<a href="{base}/council" class="link">Rathaus</a> ·
+	<a href="{base}/chronicle" class="link">Chronik</a>
 </p>

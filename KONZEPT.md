@@ -435,6 +435,15 @@ der nächsten Generation aus, und zwar bei dem Charakter, den man dann selbst sp
 Genau darin liegt der Reiz — ein Haus, das über Generationen in seine Kinder investiert,
 steht nach hundert Jahren anders da als eines, das jede Münze sofort verbraucht hat.
 
+**Die Schule ist ein Lehrmeister, den sich jeder leisten kann.** Sie erfindet keine
+eigene Mechanik: Ein Schultag ist eine Lehrstunde, der Lehrer muss zwei Stufen über dem
+Kind stehen, und er kostet das Kind Aktionspunkte wie Arbeit. Damit steht Lernen gegen
+Verdienen — erst dadurch wird die Entscheidung zu einer.
+
+Was ein Kind lernen kann, hängt daran, wen die Stadt als Lehrer gewinnt: Eine Schule ohne
+Lehrer ist ein leeres Haus, und ein Lehrer gibt nur weiter, was er selbst beherrscht.
+Bezahlt wird er aus der Stadtkasse, wie die Wache.
+
 Die Schule gehört der Stadt, das Schulgeld fließt in die Stadtkasse. Damit hat die
 Bildung eine politische Seite: Wie viele Schulen sich eine Stadt leistet, ob das
 Schulgeld hoch oder niedrig ist, wer es sich leisten kann — das entscheidet ein

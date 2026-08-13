@@ -156,3 +156,14 @@
 	4.6 (`employment` mit Lohn und Laufzeit). Bis dahin arbeitet man tageweise dort, wo
 	man gerade steht — es gibt schlicht nichts anzuzeigen.
 -->
+
+{#if data.life.length > 0}
+	<section>
+		<h3>Lebenslauf</h3>
+		<ul>
+			{#each data.life as eintrag (eintrag.id)}
+				<li><small>Jahr {eintrag.year}:</small> {eintrag.text}</li>
+			{/each}
+		</ul>
+	</section>
+{/if}

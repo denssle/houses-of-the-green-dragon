@@ -15,6 +15,7 @@ import { SessionToken } from '$lib/db/model/sessionToken';
 import { Inventory } from '$lib/db/model/inventory';
 import { Lease } from '$lib/db/model/lease';
 import { Candidacy, Election, Vote } from '$lib/db/model/election';
+import { Event } from '$lib/db/model/event';
 import { Law } from '$lib/db/model/law';
 import { Employment } from '$lib/db/model/employment';
 import { BuildingStock, ShopOffer } from '$lib/db/model/shop';
@@ -95,6 +96,9 @@ Election.hasMany(Candidacy, { foreignKey: 'ElectionId', onDelete: 'CASCADE', as:
 Election.hasMany(Vote, { foreignKey: 'ElectionId', onDelete: 'CASCADE', as: 'votes' });
 // Gesetze gelten je Stadt. Verschwindet sie, verschwinden ihre Erlasse mit ihr.
 Region.hasMany(Law, { foreignKey: 'RegionId', onDelete: 'CASCADE', as: 'laws' });
+// Die Chronik haengt an der Stadt, aber an nichts sonst: Ihre uebrigen Kennungen sind
+// bewusst keine Fremdschluessel — ein Eintrag soll den Tod und den Abriss ueberdauern.
+Region.hasMany(Event, { foreignKey: 'RegionId', onDelete: 'CASCADE', as: 'events' });
 
 Plot.hasOne(Lease, { foreignKey: 'PlotId', onDelete: 'CASCADE', as: 'lease' });
 Lease.belongsTo(Plot, { foreignKey: 'PlotId', as: 'plot' });

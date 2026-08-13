@@ -1,3 +1,4 @@
+import * as chronicleService from '$lib/server/service/chronicleService';
 import { randomUUID } from 'node:crypto';
 import { Op, type Transaction } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
@@ -87,6 +88,11 @@ export async function enact(
 		value,
 		enactedTick: tick,
 		EnactedByCharacterId: characterId
+	});
+	await chronicleService.record('LAW_ENACTED', regionId, tick, {
+		subjectId: characterId,
+		value,
+		detail: kind
 	});
 	return { ok: true };
 }
