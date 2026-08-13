@@ -19,7 +19,7 @@ import {
 } from '$lib/game/family.logic';
 import { residentsAt } from '$lib/game/building.logic';
 import { inheritPersonality, type Personality } from '$lib/game/personality.logic';
-import { ageInYears } from '$lib/game/time';
+import { AGE_OF_MAJORITY, ageInYears, yearsToTicks } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as relationshipService from '$lib/server/service/relationshipService';
@@ -432,12 +432,16 @@ export async function getPopulation(
 	tick: number,
 	overYears: number = 5
 ): Promise<Population> {
-	const seit: number = tick - overYears * 48;
+	const seit: number = tick - yearsToTicks(overYears);
 
 	const [lebend, kinder, geburten, tote] = await Promise.all([
 		Character.count({ where: { RegionId: regionId, deathTick: null } }),
 		Character.count({
-			where: { RegionId: regionId, deathTick: null, birthTick: { [Op.gt]: tick - 16 * 48 } }
+			where: {
+				RegionId: regionId,
+				deathTick: null,
+				birthTick: { [Op.gt]: tick - yearsToTicks(AGE_OF_MAJORITY) }
+			}
 		}),
 		Character.count({ where: { RegionId: regionId, birthTick: { [Op.gte]: seit } } }),
 		Character.count({ where: { RegionId: regionId, deathTick: { [Op.gte]: seit } } })

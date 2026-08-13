@@ -25,6 +25,7 @@ import type {
 import * as characterService from '$lib/server/service/characterService';
 import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
+import { seasonOf } from '$lib/game/time';
 
 /**
  * Die Vorlagen bleiben Code und wandern nicht in die Datenbank: Preise, Aktionen und
@@ -318,7 +319,8 @@ export async function renovateBuilding(
 				money: eigentümer.dataValues.money,
 				buildingSkill: await skillService.getLevel(characterId, 'CONSTRUCTION', t)
 			},
-			zustandVon(gebäude, tick)
+			zustandVon(gebäude, tick),
+			seasonOf(tick)
 		);
 		if (!ergebnis.ok) return ergebnis;
 
@@ -365,7 +367,8 @@ export async function upgradeBuilding(
 				money: eigentümer.dataValues.money
 			},
 			vorlage,
-			gebäude.dataValues.level
+			gebäude.dataValues.level,
+			seasonOf(tick)
 		);
 		if (!ergebnis.ok) return ergebnis;
 

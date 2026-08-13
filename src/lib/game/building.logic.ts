@@ -7,7 +7,7 @@ import {
 } from '$lib/model/buildingTemplate';
 import { canAfford } from '$lib/game/economy';
 import { costFactor } from '$lib/game/skill.logic';
-import { TICKS_PER_YEAR } from '$lib/game/time';
+import { buildingCostFactor, type Season, TICKS_PER_YEAR } from '$lib/game/time';
 
 /**
  * Verfall, Renovierung und Ausbau — als reine Rechnung.
@@ -104,7 +104,8 @@ export type RenovationOutcome =
  */
 export function renovate(
 	owner: { actionPoints: number; money: number; buildingSkill: number },
-	condition: number
+	condition: number,
+	season: Season
 ): RenovationOutcome {
 	if (condition >= CONDITION_MAX) {
 		return { ok: false, reason: 'NOTHING_TO_DO' };
@@ -117,7 +118,7 @@ export function renovate(
 	// Wer bauen kann, renoviert billiger — bis zur Hälfte. Das ist die zweite Art, wie
 	// Können wirkt: nicht nur mehr verdienen, sondern weniger ausgeben.
 	const kosten: number = Math.ceil(
-		fehlt * RENOVATION_COST_PER_POINT * costFactor(owner.buildingSkill)
+		fehlt * RENOVATION_COST_PER_POINT * costFactor(owner.buildingSkill) * buildingCostFactor(season)
 	);
 	if (!canAfford(owner.money, kosten)) {
 		return { ok: false, reason: 'NOT_ENOUGH_MONEY' };
@@ -152,15 +153,18 @@ export type UpgradeOutcome =
 export function upgrade(
 	owner: { actionPoints: number; money: number },
 	template: BuildingTemplate,
-	currentLevel: number
+	currentLevel: number,
+	season: Season
 ): UpgradeOutcome {
 	if (currentLevel >= maxLevel(template)) {
 		return { ok: false, reason: 'MAX_LEVEL' };
 	}
-	const preis: number | undefined = upgradePrice(template, currentLevel);
-	if (preis === undefined) {
+	const grundpreis: number | undefined = upgradePrice(template, currentLevel);
+	if (grundpreis === undefined) {
 		return { ok: false, reason: 'MAX_LEVEL' };
 	}
+	// Frost verzoegert den Bau und verteuert ihn — Renovierung wie Ausbau.
+	const preis: number = Math.ceil(grundpreis * buildingCostFactor(season));
 	if (owner.actionPoints < UPGRADE_ACTION_POINT_COST) {
 		return { ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' };
 	}

@@ -112,7 +112,7 @@ describe('Gebäude', () => {
 
 	describe('renovieren', () => {
 		it('bringt auf Anfang und kostet nach dem, was fehlt', () => {
-			const ergebnis = renovate(REICH, 60);
+			const ergebnis = renovate(REICH, 60, 'SPRING');
 
 			expect(ergebnis).toMatchObject({
 				ok: true,
@@ -123,15 +123,15 @@ describe('Gebäude', () => {
 		});
 
 		it('lohnt sich früh: wer wartet, zahlt mehr', () => {
-			const frueh = renovate(REICH, 90);
-			const spaet = renovate(REICH, 20);
+			const frueh = renovate(REICH, 90, 'SPRING');
+			const spaet = renovate(REICH, 20, 'SPRING');
 
 			expect(frueh.ok && spaet.ok && frueh.spent < spaet.spent).toBe(true);
 		});
 
 		it('wird billiger, wer bauen kann', () => {
-			const ungelernt = renovate(REICH, 50);
-			const meister = renovate({ ...REICH, buildingSkill: 10 }, 50);
+			const ungelernt = renovate(REICH, 50, 'SPRING');
+			const meister = renovate({ ...REICH, buildingSkill: 10 }, 50, 'SPRING');
 
 			// Halber Preis bei voller Meisterschaft — mehr nicht, sonst wäre es umsonst.
 			expect(ungelernt.ok && meister.ok && meister.spent).toBe(
@@ -139,16 +139,30 @@ describe('Gebäude', () => {
 			);
 		});
 
+		it('kostet im Winter mehr', () => {
+			const sommer = renovate(REICH, 50, 'SUMMER');
+			const winter = renovate(REICH, 50, 'WINTER');
+
+			// Ein Viertel Aufschlag — spuerbar genug, um Renovierungen in den Herbst zu
+			// legen, klein genug, dass niemand ein Vierteljahr warten muss.
+			expect(sommer.ok && winter.ok && winter.spent).toBe(
+				sommer.ok ? Math.ceil(sommer.spent * 1.25) : 0
+			);
+		});
+
 		it('weist ein Haus in bestem Zustand ab', () => {
-			expect(renovate(REICH, CONDITION_MAX)).toEqual({ ok: false, reason: 'NOTHING_TO_DO' });
+			expect(renovate(REICH, CONDITION_MAX, 'SPRING')).toEqual({
+				ok: false,
+				reason: 'NOTHING_TO_DO'
+			});
 		});
 
 		it('scheitert an Kraft und Geld', () => {
-			expect(renovate({ actionPoints: 1, money: 10_000, buildingSkill: 0 }, 50)).toEqual({
+			expect(renovate({ actionPoints: 1, money: 10_000, buildingSkill: 0 }, 50, 'SPRING')).toEqual({
 				ok: false,
 				reason: 'NOT_ENOUGH_ACTION_POINTS'
 			});
-			expect(renovate({ actionPoints: 48, money: 5, buildingSkill: 0 }, 50)).toEqual({
+			expect(renovate({ actionPoints: 48, money: 5, buildingSkill: 0 }, 50, 'SPRING')).toEqual({
 				ok: false,
 				reason: 'NOT_ENOUGH_MONEY'
 			});
@@ -157,7 +171,7 @@ describe('Gebäude', () => {
 
 	describe('ausbauen', () => {
 		it('hebt die Stufe und kostet den Preis der neuen', () => {
-			const ergebnis = upgrade(REICH, WOHNHAUS, 1);
+			const ergebnis = upgrade(REICH, WOHNHAUS, 1, 'SPRING');
 
 			expect(ergebnis).toMatchObject({
 				ok: true,
@@ -168,12 +182,12 @@ describe('Gebäude', () => {
 		});
 
 		it('endet bei der höchsten Stufe', () => {
-			expect(upgrade(REICH, WOHNHAUS, 3)).toEqual({ ok: false, reason: 'MAX_LEVEL' });
-			expect(upgrade(REICH, SCHMIEDE, 2)).toEqual({ ok: false, reason: 'MAX_LEVEL' });
+			expect(upgrade(REICH, WOHNHAUS, 3, 'SPRING')).toEqual({ ok: false, reason: 'MAX_LEVEL' });
+			expect(upgrade(REICH, SCHMIEDE, 2, 'SPRING')).toEqual({ ok: false, reason: 'MAX_LEVEL' });
 		});
 
 		it('scheitert am Geld', () => {
-			expect(upgrade({ actionPoints: 48, money: 10 }, WOHNHAUS, 1)).toEqual({
+			expect(upgrade({ actionPoints: 48, money: 10 }, WOHNHAUS, 1, 'SPRING')).toEqual({
 				ok: false,
 				reason: 'NOT_ENOUGH_MONEY'
 			});

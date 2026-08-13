@@ -11,6 +11,10 @@
 	<p><i>Stadtkasse: {data.region.treasury} Münzen</i></p>
 {/if}
 
+{#if data.world}
+	<p><i>{data.world.season} im Jahr {data.world.year}.</i></p>
+{/if}
+
 {#if data.population}
 	<p>
 		<i>

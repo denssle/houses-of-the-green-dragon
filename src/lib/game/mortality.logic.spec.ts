@@ -29,7 +29,7 @@ describe('Sterberisiko', () => {
 
 	describe('je Tick', () => {
 		it('ergibt über ein Jahr wieder das Jahresrisiko', () => {
-			// Der Kern der Umrechnung: 48 Ticks überlebt heißt ein Jahr überlebt.
+			// Der Kern der Umrechnung: Ein Jahr Ticks überlebt heißt ein Jahr überlebt.
 			for (const alter of [45, 60, 70, 85]) {
 				const proTick: number = deathProbabilityPerTick(alter);
 				const ueberlebt: number = Math.pow(1 - proTick, TICKS_PER_YEAR);

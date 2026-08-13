@@ -18,15 +18,16 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 19  | Stadtwache: Amt, Anstellung oder beides                           | 4.7                         | Entscheidung |
 | 13  | Verfahren zur Erschließung neuen Baulands                         | 4.9                         | Entscheidung |
 | 14  | Startbedingungen für neue Spieler                                 | erster öffentlicher Betrieb | Entscheidung |
-| 15  | Weltinhalte: Orts-, Waren- und Gebäudekatalog                     | laufend                     | Entwurf      |
+| 15  | Weltinhalte: Berufe, Waren und Rezepte                            | laufend                     | Entwurf      |
 | 16  | Balancing im engeren Sinn                                         | laufend                     | laufend      |
 
-Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 48 Ticks =
-1 Spieljahr), **URL-Struktur** (Unterpfad mit `paths.base`, wie bei Festival) und mit
-Phase 4.5a der **Fertigkeitenkatalog** samt Übungskurve und den Grenzen der Lehre; dazu mit
-Phase 4.1 das **Tick-Nachholen** — verpasste Ticks werden übersprungen, die Weltuhr
-springt trotzdem vor, und niemand bekommt etwas für die Ausfallzeit. Alles drei steht in
-`KONZEPT.md` beziehungsweise `UMBAU.md`.
+Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
+1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
+`paths.base`, wie bei Festival), mit Phase 4.5a der **Fertigkeitenkatalog** samt
+Übungskurve und den Grenzen der Lehre, und mit Phase 4.1 das **Tick-Nachholen** —
+verpasste Ticks werden übersprungen, die Weltuhr springt trotzdem vor, und niemand
+bekommt etwas für die Ausfallzeit. Alles steht in `KONZEPT.md` beziehungsweise
+`UMBAU.md`.
 
 ## Vor Phase 4
 
@@ -72,7 +73,7 @@ renovieren sie, wann geben sie auf? Muss durch dieselbe Logik laufen wie
 Spielerhandlungen, ist aber eigener Entwurfsaufwand.
 
 **Das Woher steht inzwischen fest:** aus der **Persönlichkeit** (siehe `KONZEPT.md`,
-Abschnitt 8). Sechs Achsen bei der Geburt, jede Entscheidung eine gewichtete Summe daraus
+Abschnitt 9). Sechs Achsen bei der Geburt, jede Entscheidung eine gewichtete Summe daraus
 — statt einer Regel je Lage.
 
 Offen bleibt damit nicht mehr das Prinzip, sondern die Rechnung: **welche Achse mit
@@ -163,11 +164,33 @@ Punkt 6 (wogegen genau schützt sie).
 
 ## Laufend
 
-### 15. Weltinhalte
+### 15. Weltinhalte: Berufe, Waren und Rezepte
 
 Ortsnamen und Karte der Startregion, Warenkatalog mit Produktionsketten,
-Gebäudekatalog mit Ausbaustufen. Kein Entscheidungs-, sondern Fleißaufwand — wächst mit
-den Phasen 4.5 und 4.6.
+Gebäudekatalog mit Ausbaustufen. Überwiegend Fleißaufwand — wächst mit den Phasen 4.5
+und 4.6.
+
+**Die Richtung steht** (siehe `KONZEPT.md`, Abschnitt 8): Aus Fertigkeiten werden
+Berufe, jeder Beruf hat sein Gebäude und seine Rezepte. Skizziert sind der **Schmied**
+(Waffen, Rüstungen, Alltagsgerät aus Metall), der **Alchemist** (Heiltrank, Duftwasser,
+Gift) und der **Schneider** (Kleidung gegen Kälte, Kleidung für den Umgang mit anderen).
+Weitere kommen dazu.
+
+Der Prüfstein bleibt derselbe wie bei Fertigkeiten und Persönlichkeitsachsen: **Wo wirkt
+die Ware?** Deshalb ist dieser Punkt nicht so unabhängig, wie er aussieht — er hängt an
+Systemen, die es noch nicht gibt:
+
+| Ware                    | wirkt auf             | wartet auf              |
+| ----------------------- | --------------------- | ----------------------- |
+| Heiltrank               | Krankheit             | Punkt 5                 |
+| Gift, Rüstung           | Kampf                 | Punkt 6                 |
+| Duftwasser              | Zuneigung beim Werben | nichts — 4.3 steht      |
+| Winterkleidung          | Krankheit, Kälte      | Punkt 5, Jahreszeiten ✓ |
+| Kleidung fürs Auftreten | Zuneigung             | nichts — 4.3 steht      |
+| Werkzeug                | Produktion            | 4.6                     |
+
+Was auf nichts wartet, lässt sich mit 4.6 sofort bauen; der Rest kommt, wenn sein System
+kommt. Eine Ware ohne Wirkung wird nicht gebaut.
 
 ### 16. Balancing
 

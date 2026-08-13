@@ -274,7 +274,7 @@ Als eigenes, **idempotentes** Skript — mehrfach ausgeführt darf es keine zwei
 anlegen —, das dieselbe Funktion auch für Tests bereitstellt.
 
 Das ist der erste Punkt, an dem die Zeitskala gebraucht wird: Die Startbevölkerung
-braucht Geburtsticks. Maßstab ist **1 Tick = 1 Stunde, 48 Ticks = 1 Spieljahr** (siehe
+braucht Geburtsticks. Maßstab ist **1 Tick = 1 Stunde, 50 Ticks = 1 Spieljahr** (siehe
 `KONZEPT.md`) — die Altersverteilung der Fremd-NPCs ergibt sich daraus als Rückrechnung
 vom Start-Tick.
 
@@ -867,6 +867,29 @@ _Fertig, wenn:_ Arbeit macht besser, Können zahlt sich aus, und ein Meister kan
 — Erledigt und am gebauten Server durchgespielt: Zwanzig Schichten brachten Reinhild auf
 Schmieden Stufe 3, der Lohn stieg von 3 auf 4 Münzen; eine Lehrstunde bei Adelbert
 (Stufe 9) kostete 45 Münzen und hob sie in einem Zug auf Stufe 4.
+
+**4.5b Jahreszeiten.** ✓ Frühling, Sommer, Herbst und Winter als **reine Rechnung** aus
+der Weltuhr — keine Spalte, kein Takt, keine zweite Wahrheit neben `currentTick`.
+
+Vorgezogen aus demselben Grund wie 4.5a: Ab 4.6 hängen Ernte, Bedürfnisse und Preise an
+der Jahreszeit. Sie nachträglich in fertige Formeln einzuziehen hieße, jede einzelne
+wieder aufzumachen.
+
+**Das Spieljahr ist dabei von 48 auf 50 Ticks gewachsen.** Bei achtundvierzig Stunden
+wäre ein Jahr exakt zwei Realtage — und damit läge jede Uhrzeit für immer an derselben
+Stelle des Kalenders: Wer täglich um sieben spielt, sähe bis in alle Ewigkeit dieselben
+zwei Jahreszeiten und kaufte nie Winterkleidung. Nachgerechnet: bei 48 Ticks **nie** alle
+vier, bei 50 nach fünfzehn Tagen, bei 60 nach fünf. Fünfzig ist der Kompromiss, der die
+Zeitskala kaum anfasst; zwei Tests halten beides fest — dass es wandert und dass es bei
+48 stehenbliebe.
+
+Die Änderung war ein Einzeiler, weil `TICKS_PER_YEAR` sauber zentralisiert war: 293 Tests
+liefen unverändert durch. Zwei Stellen hatten die 48 doch ausgeschrieben, beide in der
+Bevölkerungsstatistik aus 4.4 — genau die Art Rest, die eine solche Änderung findet.
+
+Gebaut ist bisher **eine** Wirkung: Frost verteuert Bauarbeiten um ein Viertel. Ernte zur
+Saison und Winterkleidung gehören zu 4.6, wo es Waren gibt, die man ernten und tragen
+kann.
 
 **4.6 Wirtschaft.** `itemTemplate`/`inventory` mit echtem Nutzen (Nahrung, Kleidung,
 Werkzeug, **Baumaterial**), Bedürfnisse als Modifikatoren, `employment` mit Lohn, Produktion im Betrieb.

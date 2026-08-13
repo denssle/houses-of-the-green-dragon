@@ -303,7 +303,43 @@ Damit bekommen zwei Dinge nachträglich einen Boden. Die Zufallsereignisse aus A
 gegen das auch Menschen etwas ausrichten. Und die Politik bekommt eine Ausgabe, deren
 Nutzen jeder sofort spürt.
 
-### 8. Persönlichkeit — woher NPCs ihre Ziele nehmen
+### 8. Berufe, Waren und Jahreszeiten
+
+Aus den Fertigkeiten werden **Berufe**, und jeder Beruf stellt Waren her, die anderswo im
+Spiel etwas bewirken. Der Schmied macht Waffen und Rüstungen, aber auch Alltagsgerät aus
+Metall. Der Alchemist braut Heiltränke gegen Krankheit, Duftwasser fürs Werben und Gift
+für den Kampf. Der Schneider näht Kleidung, die im Winter vor Krankheit schützt und im
+Umgang mit anderen hilft. Weitere kommen dazu.
+
+**Der Prüfstein für jede Ware ist dieselbe Frage wie bei Fertigkeiten und
+Persönlichkeitsachsen: Wo wirkt sie?** Ein Gegenstand, der nur Geld in Punkte verwandelt,
+ist Dekoration. Ein Heiltrank braucht Krankheiten (offener Punkt 5), Gift braucht Kämpfe
+(Punkt 6), Duftwasser wirkt auf die Zuneigung aus Abschnitt 6, Winterkleidung auf die
+Jahreszeit. Genau deshalb hängt der Warenkatalog an diesen Systemen und nicht umgekehrt —
+was keine Wirkung hat, wird nicht gebaut.
+
+Damit greifen die Waren in **alle** bestehenden Mechaniken hinein statt in eine eigene:
+Rüstung und Gift in den Kampf, Duftwasser ins Werben, Heiltrank in die Sterblichkeit,
+Kleidung in Krankheit und Umgang, Werkzeug in die Produktion.
+
+**Die Jahreszeiten.** Das Jahr hat Frühling, Sommer, Herbst und Winter, und sie sind
+keine Kulisse: Getreide wächst nur zur Saison, der Winter verlangt Kleidung und Heizung,
+Frost verteuert Bauarbeiten. Daraus entsteht der Wirtschaftszyklus, den ein Markt ohne
+Saison nicht hat — Vorratshaltung, Preisschwankungen und ein Grund, im Herbst zu
+renovieren statt im Januar.
+
+Die Jahreszeit braucht **keine eigene Ablage**: Sie ergibt sich aus dem Stand der Weltuhr
+innerhalb des Jahres. Eine gespeicherte Jahreszeit wäre eine zweite Wahrheit neben
+`currentTick` und liefe irgendwann damit auseinander.
+
+Ein Detail, das dabei über die Länge des Spieljahres entschieden hat: Wäre ein Jahr genau
+achtundvierzig Stunden, läge jede Uhrzeit für immer an derselben Stelle des Kalenders —
+wer täglich um sieben spielt, sähe bis in alle Ewigkeit dieselben zwei Jahreszeiten und
+kaufte nie Winterkleidung. Ein Jahr von **fünfzig** Stunden lässt den Kalender durch den
+Tagesablauf wandern; nach gut zwei Wochen hat auch der Gewohnheitsspieler alles einmal
+erlebt.
+
+### 9. Persönlichkeit — woher NPCs ihre Ziele nehmen
 
 NPCs sind keine Kulisse, sondern Marktteilnehmer, Wähler und Nachbarn. Damit sie handeln
 können, ohne dass für jede Lage eine Regel geschrieben wird, bekommt **jeder Charakter
@@ -440,7 +476,7 @@ alles Weitere:
 | Größe                             | Wert                                    |
 | --------------------------------- | --------------------------------------- |
 | 1 Tick                            | 1 Stunde Echtzeit                       |
-| 1 Spieljahr                       | 48 Ticks = 2 Realtage                   |
+| 1 Spieljahr                       | 50 Ticks = gut 2 Realtage               |
 | Lebenserwartung (~70 Jahre)       | ~3360 Ticks = gut 4 Monate              |
 | Volljährigkeit (16 Jahre)         | nach 32 Realtagen                       |
 | Aktionspunkte                     | 1 je Tick, Deckel 48 (zwei Tage Vorrat) |
