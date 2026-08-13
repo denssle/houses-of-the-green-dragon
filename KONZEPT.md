@@ -449,7 +449,24 @@ Bildung eine politische Seite: Wie viele Schulen sich eine Stadt leistet, ob das
 Schulgeld hoch oder niedrig ist, wer es sich leisten kann — das entscheidet ein
 gewähltes Amt und nicht der Code.
 
-### 11. Die Chronik — damit die Welt erzählbar bleibt
+### 11. Unglücke — was einem zustoßen kann
+
+**Die Welt nimmt auch.** Raubzüge und Brände treffen die Stadt, ohne dass jemand etwas
+falsch gemacht hätte: Ein Unglück verschiebt Münzen, räumt ein Lager oder setzt ein Haus
+in Brand. Das ist der Gegenspieler zum Aufbauen — ohne ihn wäre Wohlstand eine Einbahn,
+und eine Mauer, eine Wache oder ein Brunnen hätten keinen Zweck.
+
+**Getroffen wird, wo etwas zu holen ist.** Wer viel hat, ist das lohnendere Ziel; wer
+nichts hat, lohnt den Weg nicht. Das ist nicht nur stimmig, sondern nötig — sonst würde
+ein Unglück die Armen aus dem Spiel drängen, statt die Reichen zu beschäftigen. Aus
+demselben Grund bleibt der Vorrat in der eigenen Kammer unangetastet: Er ist das, was
+zwischen einem Charakter und dem Verhungern steht.
+
+**Schutz ist eine laufende Ausgabe, kein Zustand.** Jeder Wächter senkt die Gefahr, keiner
+schafft sie ab. Damit ist Sicherheit etwas, das eine Stadt sich Jahr für Jahr leisten
+muss — und der Bürgermeister, der die Wache streicht, spart sichtbar und zahlt später.
+
+### 12. Die Chronik — damit die Welt erzählbar bleibt
 
 **Die Welt läuft weiter, während niemand zusieht.** Das ist ihr größter Vorzug und ihr
 größtes Problem: Wer nach zwei Tagen wiederkommt, findet eine veränderte Stadt vor und

@@ -2,6 +2,7 @@ import type { EventKind } from '$lib/game/chronicle.logic';
 import { LAW_RULES, type LawKind } from '$lib/game/law.logic';
 import { OFFICE_NAMES, type Office } from '$lib/game/election.logic';
 import { SKILL_NAMES, type SkillType } from '$lib/game/skill.logic';
+import { getItemTemplate } from '$lib/model/itemTemplate';
 
 /**
  * Die Sätze zur Chronik.
@@ -61,6 +62,17 @@ export function chronicleMessage(entry: ChronicleLine): string {
 			return `${wer} hat eine Stelle in ${haus} angetreten.`;
 		case 'JOB_ENDED':
 			return `${wer} arbeitet nicht mehr in ${haus}.`;
+		case 'RAID':
+			// Was geraubt wurde, sagt `detail`: eine Ware, „Münzen" oder die Stadtkasse.
+			if (entry.detail === 'TREASURY') {
+				return `Räuber haben die Stadtkasse geplündert — ${entry.value ?? 0} Münzen.`;
+			}
+			if (entry.building) {
+				return `In ${haus} wurde eingebrochen: ${entry.value ?? 0} ${beute(entry.detail)}.`;
+			}
+			return `${wer} wurde überfallen und um ${entry.value ?? 0} ${beute(entry.detail)} gebracht.`;
+		case 'FIRE':
+			return `In ${haus} hat es gebrannt — der Zustand fiel um ${entry.value ?? 0}.`;
 		case 'SCHOOL_ATTENDED':
 			// Über den Lehrer und nicht über das Haus: „in Schule" bräuchte einen Artikel,
 			// und der hinge am Namen, den der Bürgermeister vergeben hat.
@@ -76,6 +88,12 @@ function amt(detail: string | null): string {
 function gesetz(detail: string | null): string {
 	if (detail && detail in LAW_RULES) return LAW_RULES[detail as LawKind].name;
 	return 'ein Gesetz';
+}
+
+/** Was erbeutet wurde — Münzen oder eine Ware aus dem Katalog. */
+function beute(detail: string | null): string {
+	if (!detail || detail === 'MONEY') return 'Münzen';
+	return getItemTemplate(detail)?.name ?? 'Waren';
 }
 
 function fach(detail: string | null): string {

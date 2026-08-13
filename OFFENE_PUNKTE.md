@@ -4,18 +4,19 @@ Alles, was noch entschieden oder entworfen werden muss, mit dem Zeitpunkt, zu de
 spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 `UMBAU.md`.
 
-| #   | Punkt                                                    | Fällig vor                   | Art          |
-| --- | -------------------------------------------------------- | ---------------------------- | ------------ |
-| 5   | Krankheiten: Ursachen, Verlauf, Heilung                  | Heiltrank (4.6c)             | Entwurf      |
-| 6   | Kämpfe und Verletzungen                                  | Waffen und Gift (4.6c)       | Entwurf      |
-| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit        | 4.7 / Punkt 6                | Entwurf      |
-| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung | 4.8                          | Entwurf      |
-| 13  | Verfahren zur Erschließung neuen Baulands                | 4.9                          | Entscheidung |
-| 14  | Startbedingungen für neue Spieler                        | erster öffentlicher Betrieb  | Entscheidung |
-| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche            | 4.8 / Punkt 6                | Entwurf      |
-| 20  | Verschleiß von Gegenständen                              | Kleidung und Werkzeug (4.6c) | Entwurf      |
-| 15  | Weltinhalte: Berufe, Waren und Rezepte                   | laufend                      | Entwurf      |
-| 16  | Balancing im engeren Sinn                                | laufend                      | laufend      |
+| #   | Punkt                                                                                | Fällig vor                   | Art          |
+| --- | ------------------------------------------------------------------------------------ | ---------------------------- | ------------ |
+| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                              | Heiltrank (4.6c)             | Entwurf      |
+| 6   | Kämpfe und Verletzungen                                                              | Waffen und Gift (4.6c)       | Entwurf      |
+| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                    | 4.7 / Punkt 6                | Entwurf      |
+| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                             | 4.8                          | Entwurf      |
+| 13  | Verfahren zur Erschließung neuen Baulands                                            | 4.9                          | Entscheidung |
+| 14  | Startbedingungen für neue Spieler                                                    | erster öffentlicher Betrieb  | Entscheidung |
+| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche (die Zufalls-Raubzüge stehen seit 4.8) | 4.8 / Punkt 6                | Entwurf      |
+| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
+| 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
+| 15  | Weltinhalte: Berufe, Waren und Rezepte                                               | laufend                      | Entwurf      |
+| 16  | Balancing im engeren Sinn                                                            | laufend                      | laufend      |
 
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
@@ -109,8 +110,9 @@ heute nur ein privater Eigentümer. Ausbauen oder ein zweites danebenstellen sin
 Wege zum selben Ziel; vermutlich braucht es nur einen.
 
 Der Prüfstein ist derselbe wie bei Waren und Fertigkeiten: **Wo wirkt der Bau?** Ein
-Brunnen gegen Seuchen setzt Punkt 5 voraus, eine Mauer gegen Räuber die Ereignisse aus
-4.8.
+Brunnen gegen Seuchen setzt Punkt 5 voraus; eine Mauer gegen Räuber und ein Löschteich
+gegen Brände hätten seit 4.8 dagegen sofort eine Wirkung — die Unglücke sind da, nur
+fehlt bisher jeder Bau, der gegen sie hilft. Die Wache ist der einzige.
 
 ### 13. Erschließung neuen Baulands
 
@@ -173,6 +175,25 @@ Systemen, die es noch nicht gibt:
 
 Was auf nichts wartet, lässt sich mit 4.6 sofort bauen; der Rest kommt, wenn sein System
 kommt. Eine Ware ohne Wirkung wird nicht gebaut.
+
+### 24. NPC-Eltern und die Schule
+
+Der Schulbesuch ist bisher eine **Spielerhandlung**: Ein Spieler schickt seine Kinder
+hin, NPC-Eltern schicken niemanden. Damit bleibt die Bildung ein Vorrecht der Häuser, die
+jemand spielt — und eine Schule, die der Bürgermeister für die Stadt gebaut hat, steht die
+meiste Zeit leer.
+
+Nachzutragen ist die Regel, nach der ein NPC entscheidet. Die Persönlichkeitsachsen aus
+4.4a liegen bereit und sagen unterschiedliche Dinge: **Ehrgeiz** spricht dafür (wer nach
+oben will, will es auch für seine Kinder), **Geiz** dagegen (Schulgeld ist Geld, das jetzt
+weg ist und erst in Jahren wiederkommt), **Fleiß** ist zweischneidig — ein fleißiger Vater
+könnte sein Kind ebenso gut arbeiten lassen, denn der Schultag kostet dieselben
+Aktionspunkte.
+
+Zu klären ist außerdem, **wovon es sonst abhängt**: vom Vermögen (wer nichts hat, kann
+nicht), vom Schulgeld (ein Bürgermeister, der es auf null setzt, sollte einen sichtbaren
+Zulauf sehen — das ist der Reiz an der Stellschraube) und davon, ob überhaupt ein Lehrer
+da ist, der etwas beibringen kann.
 
 ### 20. Verschleiß von Gegenständen
 

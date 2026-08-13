@@ -3,6 +3,7 @@ import * as familyService from '$lib/server/service/familyService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as electionService from '$lib/server/service/electionService';
+import * as hazardService from '$lib/server/service/hazardService';
 import * as lawService from '$lib/server/service/lawService';
 import * as npcService from '$lib/server/service/npcService';
 import { findStartRegionId } from '$lib/db/seed';
@@ -109,6 +110,18 @@ async function schlagen(): Promise<void> {
 			console.info(
 				`Grundsteuer: ${steuer.collected} Muenzen von ${steuer.payers} Besitzern` +
 					(steuer.shortfall > 0 ? `, ${steuer.shortfall} nicht eintreibbar.` : '.')
+			);
+		}
+
+		// Unglueck: hoechstens eins je Herzschlag. Vor dem Sterben, damit ein Ueberfall
+		// noch in die Chronik kommt, ehe das Opfer stirbt — und nach dem Handeln, damit
+		// niemand um Geld gebracht wird, das er in derselben Stunde noch ausgeben wollte.
+		const unglueck = await hazardService.strike(stadtId, geschehen.currentTick);
+		if (unglueck) {
+			console.info(
+				unglueck.kind === 'RAID'
+					? `Raubzug: ${unglueck.what} um ${unglueck.value} erleichtert.`
+					: `Brand in ${unglueck.what} — Zustand um ${unglueck.value} gefallen.`
 			);
 		}
 

@@ -1332,10 +1332,46 @@ angestellt, den zehnjährigen Tilman hingeschickt. Der Tag kostete ihn zwei Akti
 seinen Vater drei Münzen Schulgeld an die Stadt — und die Lehrerin zwei Aktionspunkte,
 aber keinen Verdienst: Sie bekommt ihren Sold aus der Stadtkasse.
 
-**4.8 Ereignisse.** Räuber, Seuche, Brand als Zufallsereignisse am Tick, gemildert durch
-öffentliche Bauten (Mauer, Brunnen) **und durch die Wache aus 4.7**. Protokolliert in der Chronik aus 4.7d — ein
-Unglück, von dem niemand erfährt, hat politisch keine Folgen. Bewusst
-nach der Politik, weil erst dann etwas da ist, das schützen kann.
+**4.8 Unglücke.** ✓ Raub und Brand am Tick, gemildert durch die Wache aus 4.7c.
+
+**Ein Unglück erfindet keinen Zustand, es nimmt von dem, was da ist.** Der Raub
+verschiebt Münzen und Waren, der Brand senkt einen Gebäudezustand — beides Größen, die es
+seit 4.5 und 4.6 gibt. Deshalb ist ein Unglück sofort spürbar und braucht keine eigene
+Buchhaltung: Wer bestohlen wird, kann weniger kaufen; wessen Werkstatt brennt, produziert
+weniger, bis jemand sie herrichtet.
+
+**Es trifft, wo etwas zu holen ist.** Die Zielauswahl ist nach Beutewert gewichtet — wer
+das Zehnfache besitzt, wird zehnmal so wahrscheinlich heimgesucht. Das ist stimmig und
+zugleich der Schutz gegen die Todesspirale: Ein Räuber, der dem Verhungernden das letzte
+Brot nimmt, macht aus einer Notlage eine Sackgasse. Wer nichts hat, lohnt den Weg nicht.
+
+Geraubt wird aus **allen drei Töpfen zugleich** — Stadtkasse, Habe der Leute,
+Betriebslager. Sie stehen in derselben Liste, gewichtet nach Wert; damit braucht es keine
+Regel darüber, wie oft welche Art an der Reihe ist, und ein volles Lager ist von selbst
+das lohnendere Ziel als eine leere Kammer. Ausgenommen bleibt der **persönliche Vorrat**:
+Das Brot in der Kammer ist das, was zwischen einem Charakter und dem Verhungern steht
+(4.6a) — es zu nehmen wäre kein Verlust, sondern ein Todesurteil mit Umweg.
+
+**Die Wache bekommt endlich ihre Aufgabe.** Jeder angestellte Wächter drittelt die
+verbleibende Gefahr, aber niemand kommt auf null: Eine Stadt, die sich vollständig
+freikaufen kann, hätte das Problem gelöst statt es zu verwalten, und die Wache wäre eine
+einmalige Ausgabe. So bleibt sie eine laufende — und der Bürgermeister muss die Steuern
+dafür rechtfertigen. Im Rathaus steht die Zahl, damit ihr Sold einen sichtbaren Gegenwert
+hat. Gegen Feuer hilft sie nicht; dafür bräuchte es einen Brunnen (Punkt 12).
+
+Ein Brand legt **kein Haus in Schutt und Asche**: Er nimmt ein Drittel des Zustands. Den
+Rest erledigt der Verfall, wenn niemand herrichtet — ein Feuer, das ein Lebenswerk in
+einem Tick auslöscht, wäre keine Wendung, sondern eine Strafe.
+
+Beides steht in der Chronik aus 4.7d. Ein Unglück, von dem niemand erfährt, hat
+politisch keine Folgen.
+
+_Fertig, wenn:_ Die Wache ist ihren Sold wert. — Erledigt und am gebauten Server
+durchgespielt (mit hochgesetzter Wahrscheinlichkeit, sonst hätte der Test Tage gedauert):
+„Raubzug: Gerlint um 385 erleichtert" stand im Log und als Satz in der Chronik.
+
+Die **Seuche** fehlt mit Absicht: Ohne Krankheitssystem (Punkt 5) wäre sie nur ein
+Zufallstod, und den gibt es schon. Sie kommt mit ihrem System.
 
 **4.9 Ausdehnung.** Fernhandel mit `shipment` (Ankunfts-Tick statt Fortbewegung),
 Erschließung neuen Baulands aus der Stadtkasse, Gründung einer zweiten Stadt. Fernziele
