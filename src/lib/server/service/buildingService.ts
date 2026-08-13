@@ -75,6 +75,48 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			]
 		},
 		{
+			optionId: 4,
+			initialName: 'Mühle',
+			type: 'CRAFT',
+			description: 'Mahlt Getreide zu Mehl.',
+			limited: false,
+			limitedTo: 0,
+			actions: [],
+			skill: 'BAKING',
+			recipe: {
+				input: [{ itemId: 'GRAIN', quantity: 3 }],
+				outputItemId: 'FLOUR',
+				baseOutput: 2,
+				actionPointCost: 1,
+				skill: 'BAKING'
+			},
+			levels: [
+				{ price: 200, name: 'Handmühle' },
+				{ price: 350, name: 'Wassermühle' }
+			]
+		},
+		{
+			optionId: 5,
+			initialName: 'Bäckerei',
+			type: 'CRAFT',
+			description: 'Backt aus Mehl Brot.',
+			limited: false,
+			limitedTo: 0,
+			actions: [],
+			skill: 'BAKING',
+			recipe: {
+				input: [{ itemId: 'FLOUR', quantity: 2 }],
+				outputItemId: 'BREAD',
+				baseOutput: 3,
+				actionPointCost: 1,
+				skill: 'BAKING'
+			},
+			levels: [
+				{ price: 220, name: 'Backhaus' },
+				{ price: 400, name: 'Bäckerei' }
+			]
+		},
+		{
 			optionId: 2,
 			initialName: 'Schmiede',
 			type: 'CRAFT',

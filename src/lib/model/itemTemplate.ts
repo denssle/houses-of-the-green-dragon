@@ -26,6 +26,20 @@ export interface ItemTemplate {
 
 const WAREN: ItemTemplate[] = [
 	{
+		itemId: 'GRAIN',
+		name: 'Getreide',
+		description: 'Roggen vom Acker, ungemahlen.',
+		// Der Preis ist der, zu dem die Stadt notfalls einspringt — ein Anhaltspunkt fuer
+		// die Kette, kein Marktpreis. Den setzen ab 4.6d die Verkaeufer selbst.
+		basePrice: 1
+	},
+	{
+		itemId: 'FLOUR',
+		name: 'Mehl',
+		description: 'Fein gemahlener Roggen.',
+		basePrice: 2
+	},
+	{
 		itemId: 'BREAD',
 		name: 'Brot',
 		description: 'Ein Laib grobes Roggenbrot.',

@@ -48,6 +48,22 @@
 	{/if}
 </dl>
 
+{#if data.recipe}
+	<section>
+		<h3>Herstellen</h3>
+		<p>
+			<i>
+				{data.recipe.input.map((z) => `${z.quantity} × ${z.name}`).join(', ')} → {data.recipe
+					.output}
+			</i>
+		</p>
+		<form method="POST" action="?/craft" use:enhance>
+			<button type="submit">Arbeiten ({data.recipe.cost} AP)</button>
+		</form>
+		<p><small>Aus eigenem Vorrat, auf eigene Rechnung — Anstellung kommt mit 4.6d.</small></p>
+	</section>
+{/if}
+
 {#each data.option?.actions ?? [] as action (action)}
 	<form method="POST" action="?/act" use:enhance>
 		<input type="hidden" name="action" value={action} />

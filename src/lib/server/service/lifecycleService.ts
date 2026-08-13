@@ -3,6 +3,7 @@ import { sequelize } from '$lib/db/sequelize';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Dynasty } from '$lib/db/model/dynasty';
+import { Lease } from '$lib/db/model/lease';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
 import { chooseHeir, type Child, splitEstate } from '$lib/game/inheritance.logic';
@@ -124,6 +125,10 @@ export async function die(characterId: string, tick: number): Promise<Death | nu
 		} else {
 			await anDieStadt(tot.dataValues.RegionId, geteilt.toCity, characterId, t);
 		}
+
+		// Die Pacht faellt an die Stadt zurueck (Punkt 8): Genau das unterscheidet sie von
+		// Eigentum — sonst sicherte sich die erste Generation die guten Flaechen auf Dauer.
+		await Lease.destroy({ where: { CharacterId: characterId }, transaction: t });
 
 		const erloschen: string | null = await hausFortfuehren(
 			tot.dataValues.DynastyId,

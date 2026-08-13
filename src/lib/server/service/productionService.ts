@@ -1,0 +1,260 @@
+import { type Transaction } from 'sequelize';
+import type { ActionFailureReason } from '$lib/game/actionFailure';
+import { sequelize } from '$lib/db/sequelize';
+import { Lease } from '$lib/db/model/lease';
+import { Plot } from '$lib/db/model/plot';
+import { Region } from '$lib/db/model/region';
+import { produce, type Recipe, titheOn } from '$lib/game/production.logic';
+import { getItemTemplate } from '$lib/model/itemTemplate';
+import { seasonOf } from '$lib/game/time';
+import * as buildingService from '$lib/server/service/buildingService';
+import * as characterService from '$lib/server/service/characterService';
+import * as needService from '$lib/server/service/needService';
+import * as skillService from '$lib/server/service/skillService';
+import * as worldService from '$lib/server/service/worldService';
+
+/**
+ * Die Produktionskette: pachten, ernten, mahlen, backen.
+ *
+ * **Auf eigene Rechnung.** Wer mahlt, mahlt sein eigenes Getreide und behält das Mehl;
+ * der Vorrat des Handwerkers ist der Zwischenspeicher. Ein Betrieb, der Angestellte für
+ * Lohn arbeiten lässt und den Ertrag behält, braucht Anstellungsverhältnisse — die
+ * kommen mit 4.6d. Bis dahin ist die Mühle ein Werkzeug, kein Arbeitgeber.
+ *
+ * Damit hat Brot zum ersten Mal eine Herkunft. Der städtische Kornspeicher bleibt
+ * vorerst, weil sonst niemand über die erste Ernte käme — aber er ist ab jetzt der
+ * Notnagel und nicht mehr die einzige Quelle.
+ */
+
+export type ProductionResult =
+	| { ok: true; produced: number; itemId: string; tithe?: number }
+	| { ok: false; reason: ActionFailureReason };
+
+/**
+ * Das Rezept einer Abbaufläche.
+ *
+ * Steht hier und nicht in der Fläche: Was ein Acker hergibt, ist Weltinhalt wie eine
+ * Gebäudevorlage — er soll sich ändern lassen, ohne dass Bestandsflächen die alten Werte
+ * einfrieren.
+ */
+const ABBAU: Record<string, Recipe> = {
+	GRAIN: {
+		input: [],
+		outputItemId: 'GRAIN',
+		baseOutput: 6,
+		actionPointCost: 1,
+		skill: 'FARMING',
+		// Getreide gibt es zur Ernte, nicht im Januar. Die erste Wirkung der Jahreszeiten,
+		// die etwas erzeugt statt nur etwas zu verteuern.
+		seasons: ['SUMMER', 'AUTUMN']
+	}
+	// Holz, Stein und Erz fehlen mit Absicht: Sie hätten heute keine Verwendung, und eine
+	// Ware ohne Wirkung ist Dekoration — dieselbe Regel wie bei Fertigkeiten und
+	// Persönlichkeitsachsen. Sie kommen mit dem Baumaterial für die Renovierung und mit
+	// dem Schmiedehandwerk.
+};
+
+export function harvestRecipe(resourceType: string | null): Recipe | undefined {
+	const rezept: Recipe | undefined = resourceType ? ABBAU[resourceType] : undefined;
+	// Eine Ernte, deren Ertrag nicht im Warenkatalog steht, landete zwar im Vorrat, wäre
+	// dort aber unsichtbar: `getStock` lässt unbekannte Waren fallen. Genau so sind
+	// einmal dreißig Stämme Holz entstanden, die niemand je zu sehen bekam.
+	if (rezept && !getItemTemplate(rezept.outputItemId)) return undefined;
+	return rezept;
+}
+
+// --- Pacht ---------------------------------------------------------------------------
+
+/** Was es kostet, eine Fläche zu pachten. Der laufende Anteil ist der Zehnt. */
+export const LEASE_FEE = 20;
+
+export type LeaseResult = { ok: true } | { ok: false; reason: ActionFailureReason };
+
+/**
+ * Eine Abbaufläche pachten.
+ *
+ * Der Eintritt kostet einmalig, der Betrieb laufend — über den **Zehnt** auf jede Ernte
+ * statt über eine Uhr. Damit braucht es keinen Durchlauf über alle Pachtverhältnisse je
+ * Tick, und wer nichts erntet, zahlt nichts. Die zeitabhängige Pacht kommt zurück,
+ * sobald es Ämter gibt, die sie eintreiben (4.7).
+ */
+export async function leasePlot(characterId: string, plotId: string): Promise<LeaseResult> {
+	const tick: number = await worldService.currentTick();
+
+	return sequelize.transaction(async (t: Transaction) => {
+		const flaeche = await Plot.findByPk(plotId, { transaction: t, lock: t.LOCK.UPDATE });
+		if (!flaeche || flaeche.dataValues.type !== 'RESOURCE') {
+			return { ok: false, reason: 'NOT_LEASED' } as const;
+		}
+
+		const vergeben = await Lease.findOne({ where: { PlotId: plotId }, transaction: t });
+		if (vergeben) return { ok: false, reason: 'PLOT_NOT_OWNED' } as const;
+
+		const paechter = await characterService.loadForAction(characterId, tick, t);
+		if (!paechter) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+		if (paechter.dataValues.money < LEASE_FEE) {
+			return { ok: false, reason: 'NOT_ENOUGH_MONEY' } as const;
+		}
+
+		await paechter.update({ money: paechter.dataValues.money - LEASE_FEE }, { transaction: t });
+		await Region.increment('treasury', {
+			by: LEASE_FEE,
+			where: { id: flaeche.dataValues.RegionId },
+			transaction: t
+		});
+		await Lease.create(
+			{ PlotId: plotId, CharacterId: characterId, sinceTick: tick },
+			{ transaction: t }
+		);
+		return { ok: true } as const;
+	});
+}
+
+/**
+ * Beim Tod fällt jede Pacht an die Stadt zurück (Punkt 8).
+ *
+ * Genau das unterscheidet Pacht von Eigentum — sonst wäre sie gekauftes Land mit
+ * Extraschritten, und die erste Generation sicherte sich die guten Flächen auf Dauer.
+ * Wird aus `lifecycleService` gerufen, damit der Erbfall an einer Stelle bleibt.
+ */
+export async function releaseLeases(characterId: string, t?: Transaction): Promise<void> {
+	await Lease.destroy({ where: { CharacterId: characterId }, transaction: t });
+}
+
+/** Die Flächen einer Region samt Pächter — für die Anzeige. */
+export interface LeasableArea {
+	plotId: string;
+	address: string;
+	resourceType: string | null;
+	leasedByMe: boolean;
+	leased: boolean;
+}
+
+export async function getAreas(characterId: string): Promise<LeasableArea[]> {
+	const flaechen = await Plot.findAll({ where: { type: 'RESOURCE' } });
+
+	const liste: LeasableArea[] = [];
+	for (const flaeche of flaechen) {
+		const pacht = await Lease.findOne({ where: { PlotId: flaeche.dataValues.id } });
+		liste.push({
+			plotId: flaeche.dataValues.id,
+			address: flaeche.dataValues.address,
+			resourceType: flaeche.dataValues.resourceType,
+			leasedByMe: pacht?.dataValues.CharacterId === characterId,
+			leased: pacht !== null
+		});
+	}
+	return liste;
+}
+
+// --- Ernten --------------------------------------------------------------------------
+
+/**
+ * Auf einer gepachteten Fläche ernten.
+ *
+ * Der Zehnt geht in Münzen an die Stadt, nicht in Ware — die Stadtkasse ist ein
+ * Geldbetrag, und ein Kornspeicher voller Naturalien wäre ein zweites Lagerwesen.
+ */
+export async function harvest(characterId: string, plotId: string): Promise<ProductionResult> {
+	const tick: number = await worldService.currentTick();
+
+	const flaeche = await Plot.findByPk(plotId);
+	const rezept: Recipe | undefined = harvestRecipe(flaeche?.dataValues.resourceType ?? null);
+	if (!flaeche || !rezept) return { ok: false, reason: 'NOT_LEASED' };
+
+	const pacht = await Lease.findOne({ where: { PlotId: plotId } });
+	if (pacht?.dataValues.CharacterId !== characterId) {
+		return { ok: false, reason: 'NOT_LEASED' };
+	}
+
+	return sequelize.transaction(async (t: Transaction) => {
+		const baeuerin = await characterService.loadForAction(characterId, tick, t);
+		if (!baeuerin) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+
+		const ergebnis = produce(
+			{
+				actionPoints: baeuerin.dataValues.actionPoints,
+				skillLevel: await skillService.getLevel(characterId, rezept.skill, t)
+			},
+			rezept,
+			{},
+			// Ein Acker hat keinen Zustand wie ein Gebäude — er trägt immer voll.
+			100,
+			seasonOf(tick)
+		);
+		if (!ergebnis.ok) return ergebnis;
+
+		const zehnt: number = titheOn(ergebnis.produced);
+		const behalten: number = ergebnis.produced - zehnt;
+
+		await baeuerin.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
+		await needService.changeStock(characterId, rezept.outputItemId, behalten, t);
+		await skillService.addPractice(characterId, rezept.skill, rezept.actionPointCost, t);
+
+		if (zehnt > 0) {
+			const wert: number = zehnt * (getItemTemplate(rezept.outputItemId)?.basePrice ?? 0);
+			if (wert > 0) {
+				await Region.increment('treasury', {
+					by: wert,
+					where: { id: flaeche.dataValues.RegionId },
+					transaction: t
+				});
+			}
+		}
+
+		return { ok: true, produced: behalten, itemId: rezept.outputItemId, tithe: zehnt } as const;
+	});
+}
+
+// --- Verarbeiten ---------------------------------------------------------------------
+
+/**
+ * In einem Betrieb aus eigenem Vorrat etwas herstellen.
+ *
+ * Der Betrieb muss einem gehören oder der Stadt: In einer fremden Werkstatt arbeitet man
+ * nicht ungefragt. Städtische Betriebe stehen allen offen — dieselbe Rolle wie die
+ * städtische Schmiede für den Neuling.
+ */
+export async function craft(characterId: string, buildingId: string): Promise<ProductionResult> {
+	const tick: number = await worldService.currentTick();
+
+	const gebaeude = await buildingService.getBuilding(buildingId);
+	const vorlage = gebaeude ? buildingService.getBuildingOption(gebaeude.optionId) : undefined;
+	const rezept: Recipe | undefined = vorlage?.recipe;
+	if (!gebaeude || !rezept) return { ok: false, reason: 'NOTHING_TO_DO' };
+
+	const fremd: boolean =
+		gebaeude.ownerType === 'CHARACTER' && gebaeude.ownerCharacterId !== characterId;
+	if (fremd) return { ok: false, reason: 'PLOT_NOT_OWNED' };
+
+	return sequelize.transaction(async (t: Transaction) => {
+		const handwerker = await characterService.loadForAction(characterId, tick, t);
+		if (!handwerker) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+
+		const vorrat: Record<string, number> = {};
+		for (const posten of await needService.getStock(characterId)) {
+			vorrat[posten.itemId] = posten.quantity;
+		}
+
+		const ergebnis = produce(
+			{
+				actionPoints: handwerker.dataValues.actionPoints,
+				skillLevel: await skillService.getLevel(characterId, rezept.skill, t)
+			},
+			rezept,
+			vorrat,
+			gebaeude.condition,
+			seasonOf(tick)
+		);
+		if (!ergebnis.ok) return ergebnis;
+
+		for (const zutat of rezept.input) {
+			await needService.changeStock(characterId, zutat.itemId, -zutat.quantity, t);
+		}
+		await needService.changeStock(characterId, rezept.outputItemId, ergebnis.produced, t);
+		await handwerker.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
+		await skillService.addPractice(characterId, rezept.skill, rezept.actionPointCost, t);
+
+		return { ok: true, produced: ergebnis.produced, itemId: rezept.outputItemId } as const;
+	});
+}

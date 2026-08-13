@@ -31,7 +31,9 @@ const SAETZE: Record<ActionFailureReason, string> = {
 	NOTHING_TO_LEARN: 'Bei ihm oder ihr ist nichts mehr zu lernen.',
 	TEACHER_TOO_TIRED: 'Der Meister hat heute keine Zeit mehr.',
 	NOT_EDIBLE: 'Das kann man nicht essen.',
-	NOT_IN_STOCK: 'Davon hast du nichts mehr.'
+	NOT_IN_STOCK: 'Davon hast du nichts mehr.',
+	WRONG_SEASON: 'Dafür ist jetzt nicht die Jahreszeit.',
+	NOT_LEASED: 'Die Fläche ist nicht deine — pachte sie erst.'
 };
 
 export function actionMessage(reason: ActionFailureReason): string {

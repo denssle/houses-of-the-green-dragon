@@ -1,5 +1,6 @@
 import type { BuildingAction } from '$lib/model/buildingAction';
 import type { SkillType } from '$lib/game/skill.logic';
+import type { Recipe } from '$lib/game/production.logic';
 
 /**
  * Eine Ausbaustufe.
@@ -45,6 +46,8 @@ export interface BuildingTemplate {
 	 * die Arbeit ungelernt und Koennen aendert nichts daran.
 	 */
 	skill?: SkillType;
+	/** Was sich hier herstellen laesst — leer bei Wohnhaus und Rathaus. */
+	recipe?: Recipe;
 }
 
 /**

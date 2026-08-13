@@ -5,6 +5,8 @@ import * as buildingActionService from '$lib/server/service/buildingActionServic
 import * as plotService from '$lib/server/service/plotService';
 import type { BuildingAction } from '$lib/model/buildingAction';
 import { actionMessage } from '$lib/actionMessage';
+import * as productionService from '$lib/server/service/productionService';
+import { getItemTemplate } from '$lib/model/itemTemplate';
 import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
 import { levelOf, maxLevel, upgradePrice } from '$lib/model/buildingTemplate';
 
@@ -31,6 +33,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		upgradeCost: option ? upgradePrice(option, building.level) : undefined,
 		// Was eine Renovierung jetzt kostete — sichtbar, damit man abwägen kann, ob man
 		// sie noch aufschiebt.
+		recipe: option?.recipe
+			? {
+					input: option.recipe.input.map((zutat) => ({
+						name: getItemTemplate(zutat.itemId)?.name ?? zutat.itemId,
+						quantity: zutat.quantity
+					})),
+					output: getItemTemplate(option.recipe.outputItemId)?.name ?? option.recipe.outputItemId,
+					cost: option.recipe.actionPointCost
+				}
+			: undefined,
 		renovationCost: Math.ceil(CONDITION_MAX - building.condition) * RENOVATION_COST_PER_POINT
 	};
 };
@@ -105,6 +117,17 @@ export const actions = {
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return {
 			message: preis === null ? 'Das Haus steht nicht mehr zum Verkauf.' : 'Preis gesetzt.'
+		};
+	},
+
+	craft: async ({ params, locals }) => {
+		if (!locals.currentCharacter) {
+			return fail(401, { message: 'Kein Charakter, der arbeiten könnte' });
+		}
+		const ergebnis = await productionService.craft(locals.currentCharacter.id, params.building_id);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return {
+			message: `${ergebnis.produced} ${getItemTemplate(ergebnis.itemId)?.name ?? ''} hergestellt.`
 		};
 	},
 

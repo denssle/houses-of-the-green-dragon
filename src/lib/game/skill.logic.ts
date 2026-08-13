@@ -21,16 +21,19 @@ import type { ActionFailureReason } from '$lib/game/actionFailure';
 /**
  * Die Fertigkeiten, die es gibt.
  *
- * Bewusst nur zwei zum Anfang, und beide mit einer Wirkung, die es heute schon gibt.
- * Handel (4.6), Redekunst (4.7) und Kämpfen (offener Punkt 6) kommen mit den Handlungen,
- * zu denen sie gehören — eine Fertigkeit ohne Wirkung wäre eine Zahl, die niemand liest.
+ * Jede mit einer Wirkung, die es heute schon gibt: Schmieden hebt den Lohn, Bauen senkt
+ * die Renovierungskosten, Ackerbau und Backen den Ertrag ihrer Rezepte. Handel (4.6d),
+ * Redekunst (4.7) und Kämpfen (offener Punkt 6) kommen mit den Handlungen, zu denen sie
+ * gehören — eine Fertigkeit ohne Wirkung wäre eine Zahl, die niemand liest.
  */
-export const SKILL_TYPES = ['SMITHING', 'CONSTRUCTION'] as const;
+export const SKILL_TYPES = ['SMITHING', 'CONSTRUCTION', 'FARMING', 'BAKING'] as const;
 export type SkillType = (typeof SKILL_TYPES)[number];
 
 export const SKILL_NAMES: Record<SkillType, string> = {
 	SMITHING: 'Schmieden',
-	CONSTRUCTION: 'Bauen'
+	CONSTRUCTION: 'Bauen',
+	FARMING: 'Ackerbau',
+	BAKING: 'Backen'
 };
 
 /** Die höchste erreichbare Stufe. */

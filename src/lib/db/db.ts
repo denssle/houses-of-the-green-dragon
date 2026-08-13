@@ -13,6 +13,7 @@ import { RegionLink } from '$lib/db/model/regionLink';
 import { Relationship } from '$lib/db/model/relationship';
 import { SessionToken } from '$lib/db/model/sessionToken';
 import { Inventory } from '$lib/db/model/inventory';
+import { Lease } from '$lib/db/model/lease';
 import { Skill } from '$lib/db/model/skill';
 import { User } from '$lib/db/model/user';
 // Ohne Assoziationen, aber der Import muss sein: Nur registrierte Modelle legt `sync()`
@@ -76,6 +77,9 @@ Character.hasMany(Skill, { foreignKey: 'CharacterId', onDelete: 'CASCADE', as: '
 // Was jemand besitzt. Stirbt er, faellt es mit dem uebrigen Nachlass an den Erben --
 // das regelt 4.2, hier nur die Verbindung.
 Character.hasMany(Inventory, { foreignKey: 'CharacterId', onDelete: 'CASCADE', as: 'items' });
+// Pacht: eine Flaeche, ein Paechter. Beim Tod faellt sie an die Stadt zurueck (4.2).
+Plot.hasOne(Lease, { foreignKey: 'PlotId', onDelete: 'CASCADE', as: 'lease' });
+Lease.belongsTo(Plot, { foreignKey: 'PlotId', as: 'plot' });
 Skill.belongsTo(Character, { foreignKey: 'CharacterId', as: 'character' });
 
 // Beziehungen sind gerichtet, deshalb zweimal derselbe Partner mit unterschiedlicher

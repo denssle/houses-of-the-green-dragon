@@ -9,7 +9,6 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 5   | Krankheiten: Ursachen, Verlauf, Heilung                           | Heiltrank (4.6c)            | Entwurf      |
 | 6   | Kämpfe und Verletzungen                                           | Waffen und Gift (4.6c)      | Entwurf      |
 | 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                 | 4.7 / Punkt 6               | Entwurf      |
-| 8   | Pachtvertrag beim Tod des Pächters                                | 4.6                         | Entscheidung |
 | 9   | Wahlalter                                                         | 4.7                         | Entscheidung |
 | 10  | Amtsnachfolge beim Tod des Amtsinhabers                           | 4.7                         | Entscheidung |
 | 11  | Steuerarten                                                       | 4.7                         | Entscheidung |
@@ -23,7 +22,8 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
 `paths.base`, wie bei Festival), mit Phase 4.5a der **Fertigkeitenkatalog** samt
-Übungskurve und den Grenzen der Lehre, mit Phase 4.6a die **Folgen ungedeckter
+Übungskurve und den Grenzen der Lehre, mit Phase 4.6c der **Pachtvertrag im Erbfall**
+(er fällt an die Stadt zurück), mit Phase 4.6a die **Folgen ungedeckter
 Bedürfnisse** (gestaffelt: erst Leistung, dann Leben), und mit Phase 4.1 das
 **Tick-Nachholen** —
 verpasste Ticks werden übersprungen, die Weltuhr springt trotzdem vor, und niemand
@@ -75,12 +75,6 @@ Nahrung ist, renovieren, ausbauen, ein Grundstück kaufen, sich anstellen lassen
 
 Und die indirekten Befehle an eigene Geschwister-NPCs (anstellen, verheiraten, ins Amt
 schicken) fehlen weiterhin — sie brauchen Anstellung (4.6c) und Ämter (4.7).
-
-### 8. Pachtvertrag im Erbfall
-
-Geht eine `lease` auf den Erben über, fällt sie an die Stadt zurück, oder wird sie neu
-ausgeschrieben? Betrifft auch: Was passiert mit der Ernte oder dem Betrieb auf der
-Fläche?
 
 ### 9. Wahlalter
 

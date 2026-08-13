@@ -40,5 +40,6 @@
 	<a href="{base}/plot" class="link">Grundstücke</a> ·
 	<a href="{base}/building/new" class="link">Gebäude bauen</a> ·
 	<a href="{base}/people" class="link">Leute</a> ·
-	<a href="{base}/granary" class="link">Kornspeicher</a>
+	<a href="{base}/granary" class="link">Kornspeicher</a> ·
+	<a href="{base}/land" class="link">Umland</a>
 </p>

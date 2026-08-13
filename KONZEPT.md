@@ -556,6 +556,11 @@ erworbener Besitz, sondern laufender Aufwand, und keine Dynastie kann ihre Macht
 dauerhaft einfrieren. Darüber liegt ein **Verwandtschaftsbonus**: Verwandte finden
 einander von Haus aus sympathisch, ohne dass dafür interagiert werden müsste.
 
+**Die Pacht endet mit dem Pächter.** Stirbt er, fällt die Fläche an die Stadt zurück und
+wird neu vergeben — der Erbe muss sich bewerben wie jeder andere. Genau das unterscheidet
+Pacht von Eigentum: Wer den Wald hält, hält ihn nicht über Generationen, und die Politik
+hat regelmäßig etwas zu verteilen.
+
 **Not nimmt zuerst Kraft, dann Leben.** Wer hungert, sammelt weniger Aktionspunkte; erst
 bei anhaltender Not steigt das Sterberisiko, und dann deutlich. Die Staffelung ist
 Absicht: Sie gibt eine Vorwarnung, die der Spieler selbst verschuldet hat, statt ihn ohne

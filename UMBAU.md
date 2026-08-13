@@ -982,7 +982,50 @@ niemand hungert, geheiratet wurde, Geld verdient wurde, jemand unter dem Dach de
 wohnt und Kinder geboren sind, die nicht aus dem Weltaufbau stammen. Ein Test, der kein
 Verhalten prüft, sondern ein Zusammenspiel — genau die Lücke, durch die 4.6a gefallen ist.
 
-**4.6c Wirtschaft** _(Produktion, Pacht, Handel, Anstellung)_**.** `itemTemplate`/`inventory` mit echtem Nutzen (Nahrung, Kleidung,
+**4.6c Produktion und Pacht.** ✓ Getreide, Mehl, Brot — die erste Kette mit
+nachvollziehbarer Herkunft. Abbauflächen werden **gepachtet**, nicht gekauft; Mühle und
+Bäckerei sind Gebäudevorlagen mit einem Rezept.
+
+_Entschieden (Punkt 8):_ **Die Pacht fällt beim Tod an die Stadt zurück.** Genau das
+unterscheidet sie von Eigentum — sonst wäre sie gekauftes Land mit Extraschritten, die
+erste Generation sicherte sich die guten Flächen auf Dauer, und die Politik ab 4.7 hätte
+nichts mehr zu vergeben.
+
+_Abweichung mit Ansage:_ Die Pacht ist im Konzept eine **laufende** Belastung. Laufend
+hieße ein Durchlauf über alle Pachtverhältnisse je Tick — die zweite teure Schleife nach
+den NPCs. Der **Zehnt** auf jede Ernte erreicht dasselbe ohne sie: Wer nichts erntet,
+zahlt nichts; wer viel erntet, zahlt viel. Er trifft den Ertrag statt der Zeit, was für
+einen Acker sogar treffender ist. Die zeitabhängige Pacht kommt zurück, sobald es Ämter
+gibt, die sie eintreiben (4.7).
+
+**Gearbeitet wird auf eigene Rechnung.** Wer mahlt, mahlt sein eigenes Getreide und
+behält das Mehl; der Vorrat des Handwerkers ist der Zwischenspeicher. Ein Betrieb, der
+Angestellte für Lohn arbeiten lässt und den Ertrag behält, braucht
+Anstellungsverhältnisse — die kommen mit 4.6d. Bis dahin ist die Mühle ein Werkzeug,
+kein Arbeitgeber.
+
+Der Ertrag hängt an drei Dingen, die alle schon da waren: dem Rezept, dem **Können**
+(4.5a) und dem **Zustand** des Betriebs (4.5). Die Ernte zusätzlich an der
+**Jahreszeit** — Getreide gibt es im Sommer und Herbst, sonst nicht. Das ist die erste
+Wirkung der Jahreszeiten, die etwas **erzeugt** statt nur etwas zu verteuern, und damit
+der Grund für Vorratshaltung.
+
+Ein Fund beim Durchspielen: Ein Wald ließ sich pachten und warf **Holz** ab — das im
+Warenkatalog nicht steht. `changeStock` legte es brav ab, `getStock` ließ es
+stillschweigend fallen: dreißig Stämme, die niemand je zu sehen bekam. Holz, Stein und Erz
+fehlen jetzt bewusst, bis sie eine Verwendung haben, und `harvestRecipe` weist ein Rezept
+ab, dessen Ertrag nicht im Katalog steht. Dieselbe Regel wie bei Fertigkeiten und
+Persönlichkeitsachsen — nur diesmal mit einem Wächter dahinter.
+
+**Was noch fehlt:** NPCs nehmen an der Kette nicht teil. Sie arbeiten weiter für Lohn und
+kaufen beim Kornspeicher. Ohne Markt könnte ein NPC-Bäcker nur sich selbst versorgen —
+das löst sich mit 4.6d, und dann kann auch der Kornspeicher verschwinden.
+
+_Fertig, wenn:_ Brot hat eine Herkunft. — Erledigt und am gebauten Server durchgespielt:
+Mühlenfeld gepachtet, 96 Getreide geerntet, in der eigenen Mühle zu Mehl gemahlen, in der
+eigenen Bäckerei zu 28 Broten gebacken, satt geworden.
+
+**4.6d Handel und Anstellung.** `itemTemplate`/`inventory` mit echtem Nutzen (Nahrung, Kleidung,
 Werkzeug, **Baumaterial**), Bedürfnisse als Modifikatoren, `employment` mit Lohn, Produktion im Betrieb.
 Der Handel läuft über **Festpreis-Angebote am Gebäude** (`shopOffer`: BuildingId, itemId,
 Preis, Menge) — ein Kauf ist eine Transaktion, kein Matching. **NPC-Konsum gehört in
