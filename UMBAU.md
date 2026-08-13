@@ -1109,6 +1109,39 @@ mit laufender Rate, die sich aus den verstrichenen Ticks ergibt, Gewinnung von H
 Stein, Getreide und Erz, Verarbeitung in der Handwerkshütte. Erst damit hat Baumaterial
 eine Herkunft und die Renovierungskosten aus 4.5 einen echten Preis.
 
+**4.7a Ämter und Wahlen.** ✓ Die Stadt wählt sich einen Bürgermeister.
+
+**Es gibt keine Ämtertabelle.** Wer das Amt innehat, wird gerechnet und nicht gespeichert:
+Es ist der bestplatzierte Kandidat der letzten abgeschlossenen Wahl, der noch lebt. Das
+ist die eine Entscheidung, an der hier alles hängt. Punkt 10 fragte, was beim Tod des
+Amtsinhabers geschieht — mit dieser Bauart ist die Antwort keine Sonderbehandlung,
+sondern dieselbe Rechnung: Der Zweitplatzierte rückt nach, weil er nach dem Toten der
+Beste ist. Es gibt kein Ereignis, das beim Sterben mitlaufen müsste, und keine zweite
+Ablage, die vom Wahlergebnis abweichen könnte.
+
+**Es zählen Köpfe, nicht Münzen.** Jeder Erwachsene hat eine Stimme — nicht der
+Grundbesitz, nicht das Haus. Wahlberechtigt ab der Volljährigkeit (Punkt 9): dieselbe
+Grenze wie fürs Heiraten, Arbeiten und Erben, eine Zahl weniger, die man kennen muss, und
+keine Wahl, die gewinnt, wer die meisten Kleinkinder hat. Damit ist die Hausmacht der
+Hebel: viele Kinder, gut behandelte Angestellte, gepflegte Beziehungen. NPCs wählen den,
+zu dem sie die größte Zuneigung haben — deshalb braucht es kein eigenes Wahlkampfsystem.
+
+Der Ehrgeiz aus 4.4a bekommt hier endlich eine Handlung: NPCs über der Schwelle stellen
+sich von selbst auf. Bleibt der Zettel trotzdem leer, wird beim Auszählen der
+Ehrgeizigste aufgestellt, den es gibt — eine kleine Stadt stünde sonst ohne Bürgermeister
+da, bis der Zufall einen Ehrgeizigen gebiert. Genau das passierte im ersten Anlauf: Unter
+den acht Gründern lag niemand über der Schwelle von 40, und die Wahl lief dreimal ins
+Leere. Die Schwelle liegt jetzt bei 30, der Notnagel dahinter.
+
+Amtszeit fünf Spieljahre (zehn Realtage), Wahlkampf ein Spieljahr — lang genug, dass auch
+wählen kann, wer nur alle paar Tage hereinschaut. Zwischenstände sind sichtbar: Ein
+Wahlkampf, in dem niemand weiß, wo er steht, ist keiner.
+
+_Fertig, wenn:_ Die Stadt hat ohne Zutun eines Spielers einen Bürgermeister. — Erledigt;
+`selfSustaining.spec.ts` prüft es über fünf Spieljahre mit, und das Rathaus zeigt Amt,
+Amtszeit, Wahlzettel und Stadtkasse. **Macht** hat das Amt noch keine — die kommt mit den
+Gesetzen (4.7b) und den öffentlichen Bauten (4.7c).
+
 **4.7 Politik und Stadtkasse.** `office`, `election`, `vote`, `law` — **je Stadt**, nicht
 je Welt. Jeder Charakter hat eine Stimme, NPCs entscheiden anhand ihrer Zuneigung zu den
 Kandidaten; ein eigenes Wahlkampfsystem braucht es dadurch nicht. Gesetze als

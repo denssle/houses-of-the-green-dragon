@@ -9,8 +9,6 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 5   | Krankheiten: Ursachen, Verlauf, Heilung                           | Heiltrank (4.6c)            | Entwurf      |
 | 6   | Kämpfe und Verletzungen                                           | Waffen und Gift (4.6c)      | Entwurf      |
 | 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                 | 4.7 / Punkt 6               | Entwurf      |
-| 9   | Wahlalter                                                         | 4.7                         | Entscheidung |
-| 10  | Amtsnachfolge beim Tod des Amtsinhabers                           | 4.7                         | Entscheidung |
 | 11  | Steuerarten                                                       | 4.7                         | Entscheidung |
 | 12  | Katalog öffentlicher Gebäude, davon welche ein Grundstück belegen | 4.7                         | Entwurf      |
 | 19  | Stadtwache: Amt, Anstellung oder beides                           | 4.7                         | Entscheidung |
@@ -23,7 +21,10 @@ Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 5
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
 `paths.base`, wie bei Festival), mit Phase 4.5a der **Fertigkeitenkatalog** samt
 Übungskurve und den Grenzen der Lehre, mit Phase 4.6c der **Pachtvertrag im Erbfall**
-(er fällt an die Stadt zurück), mit Phase 4.6a die **Folgen ungedeckter
+(er fällt an die Stadt zurück), mit Phase 4.7a das **Wahlalter** (die Volljährigkeit, dieselbe Grenze wie fürs Heiraten
+und Arbeiten) und die **Amtsnachfolge** (der Zweitplatzierte rückt nach — und zwar ohne
+dass etwas nachrücken müsste, weil der Amtsinhaber aus der letzten Wahl gerechnet wird),
+mit Phase 4.6a die **Folgen ungedeckter
 Bedürfnisse** (gestaffelt: erst Leistung, dann Leben), und mit Phase 4.1 das
 **Tick-Nachholen** —
 verpasste Ticks werden übersprungen, die Weltuhr springt trotzdem vor, und niemand
@@ -75,17 +76,6 @@ Nahrung ist, renovieren, ausbauen, ein Grundstück kaufen, sich anstellen lassen
 
 Und die indirekten Befehle an eigene Geschwister-NPCs (anstellen, verheiraten, ins Amt
 schicken) fehlen weiterhin — sie brauchen Anstellung (4.6c) und Ämter (4.7).
-
-### 9. Wahlalter
-
-Ab welchem Alter stimmt ein Charakter ab? Ohne Untergrenze gewinnt, wer die meisten
-Kleinkinder hat.
-
-### 10. Amtsnachfolge
-
-Stirbt der Amtsinhaber: Neuwahl, Nachrücken des Zweitplatzierten, oder erbt der Erbe das
-Amt? Letzteres wäre mittelalterlich stimmig und politisch heikel — beides spricht dafür,
-es bewusst zu entscheiden.
 
 ### 11. Steuerarten
 

@@ -1,7 +1,9 @@
 import * as worldService from '$lib/server/service/worldService';
 import * as familyService from '$lib/server/service/familyService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
+import * as electionService from '$lib/server/service/electionService';
 import * as npcService from '$lib/server/service/npcService';
+import { findStartRegionId } from '$lib/db/seed';
 
 /**
  * Der Herzschlag der Welt.
@@ -73,6 +75,20 @@ async function schlagen(): Promise<void> {
 		const npcs = await npcService.actForNpcs(geschehen.currentTick);
 		if (npcs.acted > 0) {
 			console.info(`${npcs.acted} Einwohner haben gehandelt:`, npcs.byAction);
+		}
+
+		// Politik: eine Wahl ausrufen oder auszaehlen. Passiert alle fuenf Spieljahre und
+		// ist deshalb billig, auch wenn es hier in der Schleife steht.
+		const stadtId: string = await findStartRegionId();
+		const wahl = await electionService.advanceElections(stadtId, geschehen.currentTick);
+		if (wahl.opened) {
+			console.info('Eine Wahl ist ausgerufen.');
+			await electionService.npcsStandForElection(stadtId, geschehen.currentTick);
+		}
+		if (wahl.closed) {
+			console.info(
+				`Wahl ausgezaehlt: ${wahl.closed.votes} Stimmen auf ${wahl.closed.candidates} Kandidaten.`
+			);
 		}
 
 		for (const fall of await lifecycleService.reapTheDead(geschehen.currentTick)) {

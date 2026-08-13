@@ -36,7 +36,10 @@ const SAETZE: Record<ActionFailureReason, string> = {
 	NOT_LEASED: 'Die Fläche ist nicht deine — pachte sie erst.',
 	NO_JOB_OFFERED: 'Hier wird niemand gesucht.',
 	ALREADY_EMPLOYED: 'Du hast bereits eine Anstellung.',
-	EMPLOYER_BROKE: 'Der Betrieb kann den Lohn nicht zahlen.'
+	EMPLOYER_BROKE: 'Der Betrieb kann den Lohn nicht zahlen.',
+	NO_ELECTION: 'Es wird gerade nicht gewählt.',
+	ALREADY_STANDING: 'Du stehst bereits auf dem Wahlzettel.',
+	ALREADY_VOTED: 'Du hast deine Stimme schon abgegeben.'
 };
 
 export function actionMessage(reason: ActionFailureReason): string {

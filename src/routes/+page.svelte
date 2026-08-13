@@ -43,5 +43,6 @@
 	<a href="{base}/granary" class="link">Kornspeicher</a> ·
 	<a href="{base}/land" class="link">Umland</a> ·
 	<a href="{base}/market" class="link">Markt</a> ·
-	<a href="{base}/jobs" class="link">Arbeit</a>
+	<a href="{base}/jobs" class="link">Arbeit</a> ·
+	<a href="{base}/council" class="link">Rathaus</a>
 </p>

@@ -5,7 +5,8 @@ import '$lib/db/db';
 import { Character } from '$lib/db/model/character';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
-import { seedWorld } from '$lib/db/seed';
+import { findStartRegionId, seedWorld } from '$lib/db/seed';
+import * as electionService from '$lib/server/service/electionService';
 import * as familyService from '$lib/server/service/familyService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
 import * as npcService from '$lib/server/service/npcService';
@@ -48,6 +49,9 @@ async function weltLaufenLassen(ticks: number, wuerfel: () => number): Promise<v
 		// Dieselbe Reihenfolge wie im Takt: geboren werden, handeln, sterben.
 		await familyService.advanceFamilies(jetzt, wuerfel);
 		await npcService.actForNpcs(jetzt);
+		const stadtId: string = await findStartRegionId();
+		const wahl = await electionService.advanceElections(stadtId, jetzt);
+		if (wahl.opened) await electionService.npcsStandForElection(stadtId, jetzt);
 		await lifecycleService.reapTheDead(jetzt, wuerfel);
 	}
 }
@@ -142,5 +146,15 @@ describe('Die Welt trägt sich selbst', () => {
 		}
 
 		expect(bereit.length).toBeGreaterThan(0);
+	});
+
+	it('wählt sich ohne Zutun einen Bürgermeister', async () => {
+		// Der Beleg, dass die Politik aus 4.7a ohne Spieler läuft: Die Wahl wird vom Takt
+		// ausgerufen, ehrgeizige NPCs stellen sich auf, alle anderen stimmen nach Zuneigung
+		// ab — und am Ende führt jemand die Stadt.
+		const stadtId: string = await findStartRegionId();
+		const inhaber = await electionService.getHolder(stadtId);
+
+		expect(inhaber).toBeDefined();
 	});
 });

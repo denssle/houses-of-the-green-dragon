@@ -14,6 +14,7 @@ import { Relationship } from '$lib/db/model/relationship';
 import { SessionToken } from '$lib/db/model/sessionToken';
 import { Inventory } from '$lib/db/model/inventory';
 import { Lease } from '$lib/db/model/lease';
+import { Candidacy, Election, Vote } from '$lib/db/model/election';
 import { Employment } from '$lib/db/model/employment';
 import { BuildingStock, ShopOffer } from '$lib/db/model/shop';
 import { Skill } from '$lib/db/model/skill';
@@ -86,6 +87,11 @@ Building.hasMany(BuildingStock, { foreignKey: 'BuildingId', onDelete: 'CASCADE',
 Building.hasMany(ShopOffer, { foreignKey: 'BuildingId', onDelete: 'CASCADE', as: 'offers' });
 // Faellt der Betrieb zur Ruine, enden die Anstellungen mit ihm.
 Building.hasMany(Employment, { foreignKey: 'BuildingId', onDelete: 'CASCADE', as: 'staff' });
+
+// Aemter haengen an einer Stadt, nicht an der Welt: Jede waehlt ihre eigenen.
+Region.hasMany(Election, { foreignKey: 'RegionId', onDelete: 'CASCADE', as: 'elections' });
+Election.hasMany(Candidacy, { foreignKey: 'ElectionId', onDelete: 'CASCADE', as: 'candidates' });
+Election.hasMany(Vote, { foreignKey: 'ElectionId', onDelete: 'CASCADE', as: 'votes' });
 
 Plot.hasOne(Lease, { foreignKey: 'PlotId', onDelete: 'CASCADE', as: 'lease' });
 Lease.belongsTo(Plot, { foreignKey: 'PlotId', as: 'plot' });

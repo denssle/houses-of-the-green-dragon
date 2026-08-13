@@ -38,4 +38,7 @@ export type ActionFailureReason =
 	| 'NOT_LEASED'
 	| 'NO_JOB_OFFERED'
 	| 'ALREADY_EMPLOYED'
-	| 'EMPLOYER_BROKE';
+	| 'EMPLOYER_BROKE'
+	| 'NO_ELECTION'
+	| 'ALREADY_STANDING'
+	| 'ALREADY_VOTED';

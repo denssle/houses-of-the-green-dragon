@@ -219,6 +219,18 @@ Schule oder eine Mauer?
 Da jede Stadt eigene Ämter hat, hat die Gründung einer neuen Stadt auch eine politische
 Seite: Sie schafft ein zweites Machtzentrum, in dem andere Häuser vorn liegen können.
 
+**Das Amt ist gerechnet, nicht gespeichert.** Bürgermeister ist der bestplatzierte
+Kandidat der letzten Wahl, der noch lebt. Daraus ergibt sich die Nachfolge von selbst:
+Stirbt er, ist der Zweitplatzierte der Beste unter den Lebenden und damit im Amt — ohne
+dass beim Sterben etwas nachgetragen werden müsste. Neu gewählt wird erst, wenn die
+Amtszeit abläuft oder von der Wahlliste niemand mehr lebt.
+
+**Es zählen Köpfe, nicht Münzen.** Jeder Erwachsene der Stadt hat eine Stimme; Besitz
+gibt keine. Wer politisch etwas will, braucht deshalb Leute: Kinder, Angestellte,
+Verbündete. NPCs stimmen für den, zu dem sie die größte Zuneigung haben — ein eigenes
+Wahlkampfsystem gibt es nicht, weil die Beziehungen bereits eines sind. Und wer selbst
+antritt, wählt sich selbst.
+
 ### 6. Beziehungen — der Querschnitt
 
 Jeder Charakter hat zu jedem anderen eine **Beziehung (Zuneigung)**, gleich ob NPC oder
