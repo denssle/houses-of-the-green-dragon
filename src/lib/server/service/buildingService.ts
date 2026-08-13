@@ -2,7 +2,7 @@ import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { randomUUID } from 'node:crypto';
 import { type Model, Op, type Transaction } from 'sequelize';
 import type { Building } from '$lib/model/building';
-import type { BuildingTemplate } from '$lib/model/buildingTemplate';
+import { type BuildingTemplate, levelOf } from '$lib/model/buildingTemplate';
 import { sequelize } from '$lib/db/sequelize';
 import { Building as BuildingModel } from '$lib/db/model/building';
 import { Plot as PlotModel } from '$lib/db/model/plot';
@@ -22,7 +22,9 @@ import type {
 	BuildingAttributes,
 	BuildingCreationAttributes
 } from '$lib/db/attributes/building.attributes';
+import { Region as RegionModel } from '$lib/db/model/region';
 import * as characterService from '$lib/server/service/characterService';
+import * as electionService from '$lib/server/service/electionService';
 import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
 import { seasonOf } from '$lib/game/time';
@@ -73,6 +75,22 @@ export function getBuildingOptions(): BuildingTemplate[] {
 				{ price: 150, name: 'Haus', residents: 6 },
 				{ price: 400, name: 'Großhaus', residents: 9 }
 			]
+		},
+		{
+			optionId: 7,
+			initialName: 'Wachhaus',
+			type: 'PUBLIC',
+			description: 'Wo die Stadtwache sitzt — bezahlt aus der Stadtkasse.',
+			limited: true,
+			limitedTo: 1,
+			actions: [],
+			// **Der Lohn steht hier nur, damit es überhaupt ein Arbeitsplatz ist.** Was ein
+			// Wächter wirklich bekommt, setzt der Bürgermeister als Aushang — der Sold ist
+			// eine Amtsentscheidung und keine Konstante.
+			//
+			// Eine Stufe, eine Stelle: Der Ausbau öffentlicher Bauten hängt an Punkt 12 und
+			// kommt mit ihm. Lieber eine Wache als drei Stufen, die niemand erreichen kann.
+			levels: [{ price: 300, name: 'Wachhaus', wagePerActionPoint: 3 }]
 		},
 		{
 			optionId: 6,
@@ -256,7 +274,13 @@ async function mitZustand(
 ): Promise<Building | null> {
 	const zustand: number = zustandVon(instanz, tick);
 
-	if (isRuin(zustand)) {
+	// **Öffentliche Gebäude stürzen nicht ein.** Sie verfallen wie alles andere und werden
+	// dabei immer nutzloser — aber sie verschwinden nicht. Der Unterschied hat einen
+	// Grund: Ein eingestürztes Rathaus nähme der Stadt die Wahl, eine eingestürzte
+	// Unterkunft setzte alle Obdachlosen auf die Straße, und beides wäre nicht
+	// wiedergutzumachen, weil neu bauen niemand kann. Verwahrlost und herrichtbar ist die
+	// Strafe für ein schlechtes Amt; unwiederbringlich zerstört wäre das Ende der Stadt.
+	if (isRuin(zustand) && instanz.dataValues.ownerType !== 'CITY') {
 		await zurRuineWerden(instanz);
 		return null;
 	}
@@ -266,16 +290,16 @@ async function mitZustand(
 /**
  * Der rechnerische Zustand einer Gebäudezeile.
  *
- * **Öffentliche Gebäude verfallen vorläufig nicht.** Ihre Instandhaltung ist eine
- * Amtshandlung aus der Stadtkasse, und die gibt es erst mit 4.7. Ohne diese Ausnahme
- * verfiele die städtische Schmiede in zwanzig Spieljahren zur Ruine — und mit ihr der
- * einzige Weg, auf dem ein Neuling überhaupt Geld verdienen kann.
+ * Seit 4.7c verfallen **auch öffentliche Gebäude**, nach derselben Regel wie private:
+ * Der Zustand senkt den Ertrag, die Unterkunft bietet weniger Platz, die Schmiede zahlt
+ * weniger. Damit hat der Bürgermeister eine Aufgabe und die Stadtkasse einen Zweck.
+ * Bis dahin waren sie ausgenommen, weil es niemanden gab, der sie hätte instand setzen
+ * können.
  */
 function zustandVon(
 	instanz: Model<BuildingAttributes, BuildingCreationAttributes>,
 	tick: number
 ): number {
-	if (instanz.dataValues.ownerType === 'CITY') return instanz.dataValues.condition;
 	return currentCondition(instanz.dataValues.condition, instanz.dataValues.lastConditionTick, tick);
 }
 
@@ -528,4 +552,218 @@ export async function getBuildingsForSale(regionId: string): Promise<Building[]>
 		include: [{ model: PlotModel, as: 'plot', where: { RegionId: regionId }, required: true }]
 	});
 	return lebende(alle, await worldService.currentTick());
+}
+
+/**
+ * Ein öffentliches Gebäude herrichten — die erste Amtshandlung mit Kosten.
+ *
+ * **Der Bürgermeister setzt seine Zeit ein, die Stadt ihr Geld.** Die Aktionspunkte
+ * kommen von ihm, weil auch das Beauftragen von Handwerkern ein Tag Arbeit ist; die
+ * Münzen kommen aus der Stadtkasse, weil es ihr Haus ist. Damit hat das Amt zum ersten
+ * Mal einen Ausgabengrund — und die Stadtkasse einen Zweck jenseits des Hortens.
+ *
+ * Sein Bau-Können zählt dabei mit, wie bei jeder Renovierung: Ein Bürgermeister, der das
+ * Handwerk versteht, bekommt für dasselbe Geld mehr.
+ */
+export async function renovatePublicBuilding(
+	characterId: string,
+	buildingId: string
+): Promise<MaintenanceResult> {
+	const tick: number = await worldService.currentTick();
+	const gebäudeZeile = await BuildingModel.findByPk(buildingId);
+	if (!gebäudeZeile || gebäudeZeile.dataValues.ownerType !== 'CITY') {
+		return { ok: false, reason: 'PLOT_NOT_OWNED' };
+	}
+
+	// Ein Bauwerk ohne Grundstück (eine Stadtmauer etwa) gehört keiner Stadt und kann
+	// deshalb auch nicht aus ihrer Kasse hergerichtet werden.
+	const plotId: string | null = gebäudeZeile.dataValues.PlotId;
+	if (!plotId) return { ok: false, reason: 'PLOT_NOT_OWNED' };
+
+	const grundstueck = await PlotModel.findByPk(plotId);
+	const regionId: string | undefined = grundstueck?.dataValues.RegionId;
+	if (!regionId) return { ok: false, reason: 'PLOT_NOT_OWNED' };
+
+	// Der Amtsinhaber wird gerechnet, nicht gespeichert (4.7a) — hier wird er gefragt.
+	const inhaber = await electionService.getHolder(regionId);
+	if (inhaber?.characterId !== characterId) return { ok: false, reason: 'NOT_IN_OFFICE' };
+
+	return sequelize.transaction(async (t: Transaction) => {
+		const gebäude = await BuildingModel.findByPk(buildingId, {
+			transaction: t,
+			lock: t.LOCK.UPDATE
+		});
+		if (!gebäude) return { ok: false, reason: 'PLOT_NOT_OWNED' } as const;
+
+		const stadt = await RegionModel.findByPk(regionId, { transaction: t, lock: t.LOCK.UPDATE });
+		if (!stadt) return { ok: false, reason: 'PLOT_NOT_OWNED' } as const;
+
+		const amtsperson = await characterService.loadForAction(characterId, tick, t);
+		if (!amtsperson) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+
+		// Dieselbe Rechnung wie bei einem privaten Haus — nur zahlt eine andere Kasse.
+		const ergebnis = renovate(
+			{
+				actionPoints: amtsperson.dataValues.actionPoints,
+				money: stadt.dataValues.treasury ?? 0,
+				buildingSkill: await skillService.getLevel(characterId, 'CONSTRUCTION', t)
+			},
+			zustandVon(gebäude, tick),
+			seasonOf(tick)
+		);
+		if (!ergebnis.ok) return ergebnis;
+
+		await amtsperson.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
+		await stadt.update({ treasury: ergebnis.money }, { transaction: t });
+		await gebäude.update(
+			{ condition: ergebnis.condition, lastConditionTick: tick },
+			{ transaction: t }
+		);
+		await skillService.addPractice(characterId, 'CONSTRUCTION', RENOVATION_ACTION_POINT_COST, t);
+		return { ok: true, spent: ergebnis.spent } as const;
+	});
+}
+
+/**
+ * Was die Stadt an Häusern hat und wie es darum steht — die Liste für das Rathaus.
+ *
+ * Ohne sie fiele der Verfall erst auf, wenn die Unterkunft niemanden mehr aufnimmt.
+ */
+export async function getPublicBuildings(regionId: string): Promise<Building[]> {
+	const alle = await getBuildingsInRegion(regionId);
+	return alle.filter((haus) => haus.ownerType === 'CITY');
+}
+
+/**
+ * Ein öffentliches Gebäude errichten — die zweite Amtshandlung mit Kosten.
+ *
+ * Auf einem Grundstück, das der Stadt gehört und noch frei ist, bezahlt aus der
+ * Stadtkasse. Damit hat das Amt neben der Instandhaltung auch etwas zu **schaffen**, und
+ * die Stadtkasse ist kein Sparstrumpf mehr.
+ *
+ * Nur öffentliche Vorlagen: Ein Bürgermeister, der auf Stadtkosten eine Bäckerei baut,
+ * hätte sich einen Betrieb geschenkt, den er nicht bezahlt hat.
+ */
+export async function buildPublicBuilding(
+	characterId: string,
+	optionId: number,
+	plotId: string
+): Promise<BuildResult> {
+	const tick: number = await worldService.currentTick();
+	const vorlage = getBuildingOption(optionId);
+	if (!vorlage || vorlage.type !== 'PUBLIC') return { ok: false, reason: 'NOT_FOR_SALE' };
+
+	return sequelize.transaction(async (t: Transaction) => {
+		const grundstueck = await PlotModel.findByPk(plotId, { transaction: t, lock: t.LOCK.UPDATE });
+		// Eigener Grund oder herrenloser — fremder nie. Ein Bürgermeister, der auf dem
+		// Grundstück eines anderen Hauses baute, wäre eine Enteignung, und die braucht
+		// mehr als eine Amtshandlung.
+		if (!grundstueck || grundstueck.dataValues.ownerType === 'CHARACTER') {
+			return { ok: false, reason: 'PLOT_NOT_OWNED' } as const;
+		}
+
+		const regionId: string = grundstueck.dataValues.RegionId;
+		const inhaber = await electionService.getHolder(regionId);
+		if (inhaber?.characterId !== characterId)
+			return { ok: false, reason: 'NOT_IN_OFFICE' } as const;
+
+		const schonBebaut = await BuildingModel.count({ where: { PlotId: plotId }, transaction: t });
+		if (schonBebaut > 0) return { ok: false, reason: 'PLOT_ALREADY_BUILT' } as const;
+		if (await limitReached(vorlage, regionId, t)) {
+			return { ok: false, reason: 'LIMIT_REACHED' } as const;
+		}
+
+		const stadt = await RegionModel.findByPk(regionId, { transaction: t, lock: t.LOCK.UPDATE });
+		const kasse: number = stadt?.dataValues.treasury ?? 0;
+		const preis: number = levelOf(vorlage, 1).price;
+		if (kasse < preis) return { ok: false, reason: 'NOT_ENOUGH_MONEY' } as const;
+
+		await stadt!.update({ treasury: kasse - preis }, { transaction: t });
+		// Herrenloser Grund wird mit dem Bau zu staedtischem: Er ist vergeben, nur eben an
+		// die Allgemeinheit — dieselbe Regel wie beim Seed.
+		if (grundstueck.dataValues.ownerType !== 'CITY') {
+			await grundstueck.update({ ownerType: 'CITY' }, { transaction: t });
+		}
+		const angelegt = await BuildingModel.create(
+			{
+				id: randomUUID(),
+				name: vorlage.initialName,
+				optionId,
+				lastConditionTick: tick,
+				PlotId: plotId,
+				ownerType: 'CITY'
+			},
+			{ transaction: t }
+		);
+		return { ok: true, building: convertToBuilding(angelegt.dataValues) } as const;
+	});
+}
+
+/**
+ * Worauf ein Bürgermeister bauen könnte.
+ *
+ * Städtischer Grund **und** herrenloser: Was innerhalb der Stadt niemandem gehört, steht
+ * der Allgemeinheit offen. Ohne das könnte kein Bürgermeister je etwas errichten — die
+ * vier Plätze am Markt sind vom ersten Tag an bebaut, und alles andere ist unverkauftes
+ * Bauland.
+ *
+ * Das ist eine Verteilungsentscheidung mit Widerstand: Jedes Grundstück, das die Stadt
+ * bebaut, kann kein Spieler mehr kaufen. Genau darüber soll gestritten werden.
+ */
+export async function getFreeCityPlots(
+	regionId: string
+): Promise<{ id: string; address: string }[]> {
+	const flaechen = await PlotModel.findAll({
+		where: { RegionId: regionId, ownerType: { [Op.in]: ['CITY', 'NONE'] } }
+	});
+
+	const frei: { id: string; address: string }[] = [];
+	for (const flaeche of flaechen) {
+		const bebaut = await BuildingModel.count({ where: { PlotId: flaeche.dataValues.id } });
+		if (bebaut === 0) {
+			frei.push({ id: flaeche.dataValues.id, address: flaeche.dataValues.address });
+		}
+	}
+	return frei;
+}
+
+/**
+ * Ab welchem Zustand ein NPC-Bürgermeister von sich aus herrichten lässt.
+ *
+ * Bei der Hälfte: früh genug, dass die Stadt nie wirklich verwahrlost, spät genug, dass
+ * die Kasse nicht für ein paar Kratzer geplündert wird.
+ */
+export const MAYOR_MAINTAINS_BELOW = 50;
+
+/**
+ * Der Amtsinhaber kümmert sich — sofern er ein NPC ist.
+ *
+ * **Ohne das verfiele jede Stadt, in der gerade kein Spieler regiert.** Und das wäre der
+ * Normalfall: Die Welt läuft weiter, wenn niemand zusieht, und ein NPC-Bürgermeister, der
+ * seine Stadt zusehends verrotten lässt, wäre kein Amtsinhaber, sondern eine Kulisse.
+ *
+ * Ein Spieler im Amt bekommt diese Hilfe **nicht**: Er soll es selbst tun, sonst wäre die
+ * Amtshandlung nur eine Schaltfläche, die etwas erledigt, das ohnehin passiert.
+ */
+// Die Weltzeit liest `renovatePublicBuilding` selbst — hier braucht es sie nicht.
+export async function maintainAsNpcMayor(
+	regionId: string
+): Promise<{ building: string; spent: number } | undefined> {
+	const inhaber = await electionService.getHolder(regionId);
+	if (!inhaber) return undefined;
+
+	const amtsperson = await CharacterModel.findByPk(inhaber.characterId);
+	if (!amtsperson || amtsperson.dataValues.role !== 'NPC') return undefined;
+
+	// Das schlechteste zuerst: Wer wenig Geld hat, soll es dort einsetzen, wo es am
+	// meisten fehlt.
+	const oeffentliche = await getPublicBuildings(regionId);
+	const schlechtestes = oeffentliche
+		.filter((haus) => haus.condition < MAYOR_MAINTAINS_BELOW)
+		.sort((a, b) => a.condition - b.condition)[0];
+	if (!schlechtestes) return undefined;
+
+	const ergebnis = await renovatePublicBuilding(inhaber.characterId, schlechtestes.id);
+	if (!ergebnis.ok) return undefined;
+	return { building: schlechtestes.name, spent: ergebnis.spent };
 }

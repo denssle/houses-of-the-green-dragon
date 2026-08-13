@@ -1,6 +1,7 @@
 import * as worldService from '$lib/server/service/worldService';
 import * as familyService from '$lib/server/service/familyService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as electionService from '$lib/server/service/electionService';
 import * as lawService from '$lib/server/service/lawService';
 import * as npcService from '$lib/server/service/npcService';
@@ -89,6 +90,15 @@ async function schlagen(): Promise<void> {
 		if (wahl.closed) {
 			console.info(
 				`Wahl ausgezaehlt: ${wahl.closed.votes} Stimmen auf ${wahl.closed.candidates} Kandidaten.`
+			);
+		}
+
+		// Ein NPC im Amt laesst herrichten, was verfaellt. Ohne das verrottete jede Stadt,
+		// in der gerade kein Spieler regiert — und das ist der Normalfall.
+		const gepflegt = await buildingService.maintainAsNpcMayor(stadtId);
+		if (gepflegt) {
+			console.info(
+				`Der Buergermeister liess ${gepflegt.building} herrichten (${gepflegt.spent} Muenzen).`
 			);
 		}
 

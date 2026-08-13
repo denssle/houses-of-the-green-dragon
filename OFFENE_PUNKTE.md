@@ -4,24 +4,26 @@ Alles, was noch entschieden oder entworfen werden muss, mit dem Zeitpunkt, zu de
 spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 `UMBAU.md`.
 
-| #   | Punkt                                                             | Fällig vor                   | Art          |
-| --- | ----------------------------------------------------------------- | ---------------------------- | ------------ |
-| 5   | Krankheiten: Ursachen, Verlauf, Heilung                           | Heiltrank (4.6c)             | Entwurf      |
-| 6   | Kämpfe und Verletzungen                                           | Waffen und Gift (4.6c)       | Entwurf      |
-| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                 | 4.7 / Punkt 6                | Entwurf      |
-| 12  | Katalog öffentlicher Gebäude, davon welche ein Grundstück belegen | 4.7                          | Entwurf      |
-| 19  | Stadtwache: Amt, Anstellung oder beides                           | 4.7                          | Entscheidung |
-| 13  | Verfahren zur Erschließung neuen Baulands                         | 4.9                          | Entscheidung |
-| 14  | Startbedingungen für neue Spieler                                 | erster öffentlicher Betrieb  | Entscheidung |
-| 20  | Verschleiß von Gegenständen                                       | Kleidung und Werkzeug (4.6c) | Entwurf      |
-| 15  | Weltinhalte: Berufe, Waren und Rezepte                            | laufend                      | Entwurf      |
-| 16  | Balancing im engeren Sinn                                         | laufend                      | laufend      |
+| #   | Punkt                                                    | Fällig vor                   | Art          |
+| --- | -------------------------------------------------------- | ---------------------------- | ------------ |
+| 5   | Krankheiten: Ursachen, Verlauf, Heilung                  | Heiltrank (4.6c)             | Entwurf      |
+| 6   | Kämpfe und Verletzungen                                  | Waffen und Gift (4.6c)       | Entwurf      |
+| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit        | 4.7 / Punkt 6                | Entwurf      |
+| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung | 4.8                          | Entwurf      |
+| 13  | Verfahren zur Erschließung neuen Baulands                | 4.9                          | Entscheidung |
+| 14  | Startbedingungen für neue Spieler                        | erster öffentlicher Betrieb  | Entscheidung |
+| 20  | Verschleiß von Gegenständen                              | Kleidung und Werkzeug (4.6c) | Entwurf      |
+| 15  | Weltinhalte: Berufe, Waren und Rezepte                   | laufend                      | Entwurf      |
+| 16  | Balancing im engeren Sinn                                | laufend                      | laufend      |
 
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
 `paths.base`, wie bei Festival), mit Phase 4.5a der **Fertigkeitenkatalog** samt
 Übungskurve und den Grenzen der Lehre, mit Phase 4.6c der **Pachtvertrag im Erbfall**
-(er fällt an die Stadt zurück), mit Phase 4.7b die **Steuerarten** (die vorhandenen Sätze werden zu Gesetzen, dazu eine
+(er fällt an die Stadt zurück), mit Phase 4.7c die **Stadtwache** (eine Anstellung, kein Amt: Der Bürgermeister setzt
+den Sold aus, die Stadtkasse zahlt ihn — damit ist ihre Stärke eine Haushaltsfrage und
+keine Verfassungsfrage) und der **Verfall öffentlicher Bauten** (sie verfallen wie
+private, stürzen aber nicht ein), mit Phase 4.7b die **Steuerarten** (die vorhandenen Sätze werden zu Gesetzen, dazu eine
 Grundsteuer je Grundstück und Spieljahr — sie trifft die Besitzenden statt die Neulinge
 und macht Horten teuer), mit Phase 4.7a das **Wahlalter** (die Volljährigkeit, dieselbe Grenze wie fürs Heiraten
 und Arbeiten) und die **Amtsnachfolge** (der Zweitplatzierte rückt nach — und zwar ohne
@@ -79,18 +81,24 @@ Nahrung ist, renovieren, ausbauen, ein Grundstück kaufen, sich anstellen lassen
 Und die indirekten Befehle an eigene Geschwister-NPCs (anstellen, verheiraten, ins Amt
 schicken) fehlen weiterhin — sie brauchen Anstellung (4.6c) und Ämter (4.7).
 
-### 12. Katalog öffentlicher Gebäude
+### 12. Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung
 
-**Vorläufig entschieden (Phase 4.5):** Öffentliche Gebäude **verfallen nicht**. Ohne
-diese Ausnahme wäre die städtische Schmiede nach zwanzig Spieljahren eine Ruine — und mit
-ihr der einzige Weg, auf dem ein Neuling Geld verdienen kann. Sobald die Stadtkasse eine
-Amtshandlung „instandhalten" kennt (4.7), gehört die Ausnahme wieder weg: Ein Rathaus,
-das niemand pflegt, soll verfallen dürfen, und ein Bürgermeister, der es verfallen lässt,
-soll abgewählt werden.
+**Entschieden (Phase 4.7c):** Öffentliche Gebäude verfallen wie private — der Zustand
+senkt den Ertrag, die Unterkunft nimmt weniger Leute auf. Einstürzen können sie nicht:
+Ein Rathaus, das zusammenfällt, nähme der Stadt die Wahl, und neu bauen kann es niemand.
+Der Bürgermeister richtet sie aus der Stadtkasse her; ein NPC im Amt tut das von selbst,
+sobald ein Bau unter die halbe Güte fällt.
 
-Welche gibt es, was kosten sie, was bewirken sie genau — und welche belegen ein
-Grundstück? Schule und Brunnen konkurrieren dann mit Wohnhäusern um knappes Bauland
-(eine echte politische Abwägung), eine Stadtmauer umschließt dagegen die ganze Region.
+Offen bleibt der **Katalog**: Welche Bauten gibt es noch, was kosten sie, was bewirken
+sie? Schule und Brunnen konkurrieren mit Wohnhäusern um knappes Bauland (eine echte
+politische Abwägung), eine Stadtmauer umschließt dagegen die ganze Region und braucht
+deshalb eine eigene Regel. Und ihr **Ausbau**: Bisher hat das Wachhaus eine Stufe und
+damit eine Stelle — wer eine größere Wache will, müsste ausbauen können, und das kann
+heute nur ein privater Eigentümer.
+
+Der Prüfstein ist derselbe wie bei Waren und Fertigkeiten: **Wo wirkt der Bau?** Ein
+Brunnen gegen Seuchen setzt Punkt 5 voraus, eine Mauer gegen Räuber die Ereignisse aus
+4.8.
 
 ### 13. Erschließung neuen Baulands
 
@@ -123,16 +131,6 @@ Anstellungsverhältnisse (4.6) und eine echte Bevölkerungsdynamik gibt, muss ge
 ob dieser Betrieb bleibt, wem er gehört und was ein Neuling sonst noch mitbekommt.
 
 ## Vor der Politik
-
-### 19. Stadtwache
-
-Ist die Wache ein **Amt** (gewählt, aus der Stadtkasse bezahlt, einer), eine
-**Anstellung** (mehrere, vom Amtsinhaber eingestellt) oder beides — ein Hauptmann mit
-Leuten? Davon hängt ab, ob sie in `office` gehört oder in `employment`, und ob ihre
-Stärke eine politische Entscheidung ist oder das Ergebnis eines Arbeitsmarkts.
-
-Berührt Punkt 12 (Katalog öffentlicher Gebäude: braucht die Wache ein Wachhaus?) und
-Punkt 6 (wogegen genau schützt sie).
 
 ## Laufend
 

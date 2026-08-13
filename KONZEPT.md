@@ -225,6 +225,18 @@ Stirbt er, ist der Zweitplatzierte der Beste unter den Lebenden und damit im Amt
 dass beim Sterben etwas nachgetragen werden müsste. Neu gewählt wird erst, wenn die
 Amtszeit abläuft oder von der Wahlliste niemand mehr lebt.
 
+**Öffentliche Bauten verfallen wie private.** Der Zustand senkt, was sie taugen — die
+Unterkunft nimmt weniger Leute auf, die Schmiede zahlt weniger. Der Bürgermeister richtet
+sie aus der Stadtkasse her; damit hat das Amt eine Aufgabe, an der man es messen kann.
+Einstürzen können sie nicht: Ein Rathaus, das zusammenfällt, nähme der Stadt die Wahl,
+und neu bauen kann es niemand.
+
+**Die Stadtwache ist eine Anstellung, kein Amt.** Der Bürgermeister setzt den Sold aus,
+die Stadtkasse zahlt ihn. Ihre Stärke ist damit eine Haushaltsfrage: Wer eine große Wache
+will, muss die Steuern dafür erheben — und beides bei derselben Wahl verantworten. Die
+Stadt ist dabei ein Arbeitgeber wie jeder andere; wer nicht zahlen kann, dessen Schicht
+findet nicht statt. Der Amtsinhaber selbst kann keine städtische Stelle antreten.
+
 **Ein Gesetz erfindet keine Regel, es setzt eine Zahl.** Jede Gesetzesart zeigt auf eine
 Stellschraube, die es ohnehin gibt — Zehnt, Standgeld, Verkaufssteuer, Grundsteuer. Der
 Bürgermeister verschiebt sie; die Regel selbst bleibt an ihrer Stelle. Gespeichert wird

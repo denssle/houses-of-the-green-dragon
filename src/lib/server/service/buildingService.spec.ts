@@ -342,14 +342,17 @@ describe('Gebäude über die Zeit', () => {
 			expect(zeile!.dataValues.lastConditionTick).toBe(JETZT);
 		});
 
-		it('lässt öffentliche Gebäude vorläufig unberührt', async () => {
-			// Ohne diese Ausnahme verfiele die städtische Schmiede — und mit ihr der
-			// einzige Weg, auf dem ein Neuling Geld verdienen kann. Die Instandhaltung aus
-			// der Stadtkasse kommt mit 4.7.
+		it('lässt öffentliche Gebäude verfallen, aber nicht einstürzen', async () => {
+			// Seit 4.7c gilt für sie dieselbe Regel wie für private — der Zustand senkt den
+			// Ertrag, und der Bürgermeister hat eine Aufgabe. Einstürzen dürfen sie
+			// trotzdem nicht: Ein eingestürztes Rathaus nähme der Stadt die Wahl, eine
+			// eingestürzte Unterkunft setzte alle Obdachlosen auf die Straße — und neu
+			// bauen kann keiner von beidem.
 			const id = await haus(null);
 			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN * 3));
 
-			expect((await buildingService.getBuilding(id))?.condition).toBe(CONDITION_MAX);
+			expect((await buildingService.getBuilding(id))?.condition).toBe(0);
+			expect(await BuildingModel.findByPk(id)).not.toBeNull();
 		});
 	});
 

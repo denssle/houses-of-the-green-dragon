@@ -89,6 +89,70 @@
 {/if}
 
 <section>
+	<h3>Was der Stadt gehört</h3>
+	<ul>
+		{#each data.publicBuildings as haus (haus.id)}
+			<li>
+				<a href="{base}/building/{haus.id}" class="link">{haus.name}</a> — Zustand
+				{haus.condition} von 100.
+				{#if data.holder?.mine && haus.condition < 100}
+					<form method="POST" action="?/renovate" use:enhance>
+						<input type="hidden" name="buildingId" value={haus.id} />
+						<button type="submit">Herrichten ({haus.renovationCost} Münzen)</button>
+					</form>
+				{/if}
+				{#if haus.employer}
+					{#if haus.offeredWage === null}
+						<i>Niemand ist angestellt.</i>
+					{:else}
+						<i>Sold: {haus.offeredWage} je Aktionspunkt.</i>
+					{/if}
+					{#if data.holder?.mine}
+						<form method="POST" action="?/pay" use:enhance>
+							<input type="hidden" name="buildingId" value={haus.id} />
+							<input
+								type="number"
+								name="wage"
+								value={haus.offeredWage ?? 3}
+								min="1"
+								aria-label="Sold für {haus.name}"
+							/>
+							<button type="submit">Sold aussetzen</button>
+						</form>
+					{/if}
+				{/if}
+			</li>
+		{/each}
+	</ul>
+	<p>
+		<small>
+			Öffentliche Bauten verfallen wie jedes andere Haus, und ein verfallenes taugt entsprechend
+			weniger — die Unterkunft nimmt weniger Leute auf, die Schmiede wirft weniger ab. Einstürzen
+			können sie nicht: Ein Rathaus, das zusammenfällt, nähme der Stadt die Wahl.
+		</small>
+	</p>
+
+	{#if data.holder?.mine && data.buildable.length > 0 && data.freePlots.length > 0}
+		<h3>Bauen lassen</h3>
+		{#each data.buildable as vorlage (vorlage.optionId)}
+			<form method="POST" action="?/buildPublic" use:enhance>
+				<input type="hidden" name="optionId" value={vorlage.optionId} />
+				<label>
+					{vorlage.name} ({vorlage.price} Münzen) —
+					<select name="plotId" aria-label="Grundstück für {vorlage.name}">
+						{#each data.freePlots as flaeche (flaeche.id)}
+							<option value={flaeche.id}>{flaeche.address}</option>
+						{/each}
+					</select>
+				</label>
+				<button type="submit">Errichten</button>
+				<small>{vorlage.description}</small>
+			</form>
+		{/each}
+	{/if}
+</section>
+
+<section>
 	<h3>Gesetze</h3>
 	<p>
 		<small>

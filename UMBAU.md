@@ -1091,7 +1091,7 @@ Geld dafür anderswo verdient hat.
 Von den drei Krücken kann jetzt die **städtische Schmiede** fallen, sobald genug private
 Betriebe stehen; sie ist die einzige Stelle, an der Geld ohne Deckung entsteht. Der
 **Kornspeicher** ist bereits zum Notnagel geworden. Die **nicht verfallenden öffentlichen
-Gebäude** warten auf 4.7. (Nahrung, Kleidung,
+Gebäude** warten auf 4.7 — und sind dort mit 4.7c gefallen. (Nahrung, Kleidung,
 Werkzeug, **Baumaterial**), Bedürfnisse als Modifikatoren, `employment` mit Lohn, Produktion im Betrieb.
 Der Handel läuft über **Festpreis-Angebote am Gebäude** (`shopOffer`: BuildingId, itemId,
 Preis, Menge) — ein Kauf ist eine Transaktion, kein Matching. **NPC-Konsum gehört in
@@ -1182,6 +1182,56 @@ _Fertig, wenn:_ Ein Bürgermeister kann etwas erlassen, das alle spüren. — Er
 gebauten Server durchgespielt: Verkaufssteuer auf zehn Prozent erlassen, ein Zehnt von 90
 Prozent abgewiesen („So weit reicht die Macht des Amtes nicht"), dann fünf Brote zu sechs
 Münzen gekauft — der Bäcker bekam 30, die Stadtkasse 3, der Käufer zahlte 33.
+
+**4.7c Öffentliche Bauten und Stadtwache.** ✓ Das Amt bekommt Aufgaben und Ausgaben.
+
+**Die letzte der drei Krücken fällt.** Öffentliche Gebäude verfallen seit diesem Schritt
+wie private — dieselbe Regel, kein Sonderfall: Der Zustand senkt den Ertrag, die
+Unterkunft nimmt weniger Leute auf, die Schmiede zahlt weniger. Bis hierher waren sie
+ausgenommen, weil es niemanden gab, der sie hätte herrichten können; jetzt gibt es ihn.
+
+**Einstürzen können sie trotzdem nicht.** Das ist der eine Unterschied, und er hat einen
+Grund: Ein eingestürztes Rathaus nähme der Stadt die Wahl, eine eingestürzte Unterkunft
+setzte alle Obdachlosen auf die Straße — und beides wäre unwiederbringlich, weil neu
+bauen niemand kann. Verwahrlost und herrichtbar ist die Strafe für ein schlechtes Amt;
+unwiederbringlich zerstört wäre das Ende der Stadt.
+
+Dazu eine Migration, die den Verfall **ab jetzt** beginnen lässt: Ohne sie rechnete die
+neue Regel die ganze bisherige Weltzeit nachträglich in Verfall um, und die Stadt wäre in
+dem Moment halb verrottet, in dem jemand den Code einspielt. Eine Regel gilt ab ihrer
+Einführung, nicht davor.
+
+**Zwei Amtshandlungen mit Kosten.** Herrichten und Errichten: Die Aktionspunkte kommen
+vom Bürgermeister, die Münzen aus der Stadtkasse. Damit ist die Kasse zum ersten Mal kein
+Sparstrumpf. Gebaut werden darf auf städtischem **und auf herrenlosem** Grund — ohne das
+könnte niemand je etwas errichten, weil die vier Plätze am Markt vom ersten Tag an bebaut
+sind. Das ist eine Verteilungsentscheidung mit Widerstand: Jedes Grundstück, das die
+Stadt nimmt, kann kein Spieler mehr kaufen. Fremder Grund bleibt tabu — eine Enteignung
+braucht mehr als eine Amtshandlung.
+
+**Ein NPC im Amt kümmert sich von selbst**, sobald ein Bau unter die halbe Güte fällt.
+Ohne das verrottete jede Stadt, in der gerade kein Spieler regiert — und das ist der
+Normalfall. Ein Spieler im Amt bekommt diese Hilfe nicht: Er soll es selbst tun, sonst
+wäre die Amtshandlung nur eine Schaltfläche, die erledigt, was ohnehin geschieht.
+
+**Die Stadtwache ist eine Anstellung, kein Amt** (Punkt 19). Der Bürgermeister setzt den
+Sold aus, die Stadtkasse zahlt ihn — damit ist die Stärke der Wache eine Haushaltsfrage
+und keine Verfassungsfrage, und sie braucht keinen eigenen Weg: Die Stadt ist einfach ein
+Arbeitgeber wie jeder andere, nur steht ihr Geld in `treasury` statt in `money`. Es gilt
+dieselbe Regel wie überall — **wer nicht zahlen kann, dessen Schicht findet nicht statt**.
+Ein Schlupfloch fiel beim Durchspielen auf und ist geschlossen: Der Amtsinhaber kann
+keine städtische Stelle antreten, sonst setzte er sich den Höchstsold aus und hobe ihn
+selbst ab.
+
+**Was die Wache noch nicht kann, ist wirken.** Sie schützt vor nichts, weil es noch
+nichts gibt, wovor man schützen müsste — Raub und Räuber kommen mit 4.8. Das steht gegen
+unseren eigenen Grundsatz, nichts ohne Wirkung zu bauen, und ist eine bewusste Ausnahme
+auf einen Schritt: Ab 4.8 hat sie ihre Aufgabe.
+
+_Fertig, wenn:_ Der Bürgermeister kann Geld ausgeben und die Stadt spürt es. — Erledigt
+und am gebauten Server durchgespielt: Wachhaus für 300 Münzen auf herrenlosem Grund
+errichtet, Sold auf 4 Münzen gesetzt, Dienst angetreten, eine Schicht geschoben — 4
+Münzen aus der Stadtkasse an den Wächter.
 
 **4.7 Politik und Stadtkasse.** `office`, `election`, `vote`, `law` — **je Stadt**, nicht
 je Welt. Jeder Charakter hat eine Stimme, NPCs entscheiden anhand ihrer Zuneigung zu den

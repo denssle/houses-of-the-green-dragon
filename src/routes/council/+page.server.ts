@@ -1,12 +1,39 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as electionService from '$lib/server/service/electionService';
+import * as employmentService from '$lib/server/service/employmentService';
 import * as lawService from '$lib/server/service/lawService';
 import * as worldService from '$lib/server/service/worldService';
 import { actionMessage } from '$lib/actionMessage';
+import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
 import { OFFICE_NAMES } from '$lib/game/election.logic';
 import { LAW_KINDS, type LawKind, LAW_RULES } from '$lib/game/law.logic';
 import { ticksToYears, yearOf } from '$lib/game/time';
+
+/**
+ * Was der Bürgermeister überhaupt noch errichten kann.
+ *
+ * Was es einmal je Stadt gibt und schon steht, gehört nicht auf die Liste — eine
+ * Schaltfläche, die verlässlich mit einer Fehlermeldung antwortet, ist keine Handlung.
+ */
+async function baubar(regionId: string) {
+	const vorlagen = buildingService
+		.getBuildingOptions()
+		.filter((vorlage) => vorlage.type === 'PUBLIC' && vorlage.levels[0].price > 0);
+
+	const offen = [];
+	for (const vorlage of vorlagen) {
+		if (await buildingService.limitReached(vorlage, regionId)) continue;
+		offen.push({
+			optionId: vorlage.optionId,
+			name: vorlage.initialName,
+			description: vorlage.description,
+			price: vorlage.levels[0].price
+		});
+	}
+	return offen;
+}
 
 /** Wer die Stadt führt — und ob man gerade etwas daran ändern kann. */
 export const load: PageServerLoad = async ({ locals }) => {
@@ -42,6 +69,20 @@ export const load: PageServerLoad = async ({ locals }) => {
 			...LAW_RULES[kind],
 			value: saetze[kind]
 		})),
+		// Die öffentlichen Bauten und ihr Zustand. Ohne diese Liste fiele der Verfall erst
+		// auf, wenn die Unterkunft niemanden mehr aufnimmt.
+		publicBuildings: (await buildingService.getPublicBuildings(character.regionId)).map((haus) => ({
+			id: haus.id,
+			name: haus.name,
+			condition: haus.condition,
+			offeredWage: haus.offeredWage,
+			employer: buildingService.getBuildingOption(haus.optionId)?.levels[0]?.wagePerActionPoint
+				? true
+				: false,
+			renovationCost: Math.ceil(CONDITION_MAX - haus.condition) * RENOVATION_COST_PER_POINT
+		})),
+		freePlots: await buildingService.getFreeCityPlots(character.regionId),
+		buildable: await baubar(character.regionId),
 		chronicle: (await lawService.chronicle(character.regionId, 8)).map((eintrag) => ({
 			...eintrag,
 			name: LAW_RULES[eintrag.kind].name,
@@ -93,5 +134,50 @@ export const actions = {
 		const regel = LAW_RULES[kind];
 		const wert: string = regel.unit === 'PERCENT' ? `${value} %` : `${value} Münzen`;
 		return { message: `${regel.name}: ${wert}, ab sofort.` };
+	},
+
+	renovate: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const buildingId = (await request.formData()).get('buildingId')?.toString();
+		if (!buildingId) return fail(400, { message: 'Welches Haus?' });
+
+		const ergebnis = await buildingService.renovatePublicBuilding(character.id, buildingId);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `Hergerichtet. ${ergebnis.spent} Münzen aus der Stadtkasse.` };
+	},
+
+	buildPublic: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const daten = await request.formData();
+		const optionId = Number(daten.get('optionId'));
+		const plotId = daten.get('plotId')?.toString();
+		if (!plotId || !Number.isInteger(optionId)) return fail(400, { message: 'Was und wo?' });
+
+		const ergebnis = await buildingService.buildPublicBuilding(character.id, optionId, plotId);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `${ergebnis.building.name} steht.` };
+	},
+
+	// Der Sold der Wache ist eine Amtsentscheidung: derselbe Aushang wie bei jedem
+	// Betrieb, nur zahlt die Stadtkasse.
+	pay: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const daten = await request.formData();
+		const buildingId = daten.get('buildingId')?.toString();
+		const roh = daten.get('wage')?.toString();
+		if (!buildingId) return fail(400, { message: 'Für welches Haus?' });
+
+		const wage: number | null = roh === undefined || roh === '' ? null : Number(roh);
+		const ergebnis = await employmentService.offerJob(character.id, buildingId, wage);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return {
+			message: wage === null ? 'Der Aushang ist abgenommen.' : `Sold: ${wage} je Aktionspunkt.`
+		};
 	}
 } satisfies Actions;

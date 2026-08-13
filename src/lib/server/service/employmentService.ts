@@ -8,7 +8,10 @@ import { canTakeJob, positionsAt, workShift } from '$lib/game/employment.logic';
 import { yieldOf } from '$lib/game/production.logic';
 import { AGE_OF_MAJORITY, ageInYears, seasonOf } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
+import { Region } from '$lib/db/model/region';
+import { Plot } from '$lib/db/model/plot';
 import * as characterService from '$lib/server/service/characterService';
+import * as electionService from '$lib/server/service/electionService';
 import * as skillService from '$lib/server/service/skillService';
 import * as tradeService from '$lib/server/service/tradeService';
 import * as worldService from '$lib/server/service/worldService';
@@ -34,7 +37,16 @@ export async function offerJob(
 	wage: number | null
 ): Promise<EmploymentResult> {
 	const gebaeude = await Building.findByPk(buildingId);
-	if (!gebaeude || gebaeude.dataValues.OwnerCharacterId !== ownerId) {
+	if (!gebaeude) return { ok: false, reason: 'PLOT_NOT_OWNED' };
+
+	// Bei einem staedtischen Gebaeude setzt der Amtsinhaber den Aushang: Der Sold der
+	// Wache ist eine Amtsentscheidung, kein Gesetz und keine Konstante. Damit braucht die
+	// Stadt keinen eigenen Anstellungsweg — sie ist einfach ein Arbeitgeber wie andere.
+	if (gebaeude.dataValues.ownerType === 'CITY') {
+		const regionId: string | undefined = await regionOf(buildingId);
+		const inhaber = regionId ? await electionService.getHolder(regionId) : undefined;
+		if (inhaber?.characterId !== ownerId) return { ok: false, reason: 'NOT_IN_OFFICE' };
+	} else if (gebaeude.dataValues.OwnerCharacterId !== ownerId) {
 		return { ok: false, reason: 'PLOT_NOT_OWNED' };
 	}
 	if (wage !== null && (!Number.isInteger(wage) || wage < 1)) {
@@ -58,6 +70,18 @@ export async function takeJob(characterId: string, buildingId: string): Promise<
 
 		const bewerber = await Character.findByPk(characterId, { transaction: t });
 		if (!bewerber) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+
+		// **Der Amtsinhaber tritt keine städtische Stelle an.** Sonst setzte er sich selbst
+		// den Höchstsold aus und hobe ihn ab — die Stadtkasse wäre eine zweite Börse. Bei
+		// einem privaten Betrieb erledigt das `canTakeJob` über den Eigentümer; ein
+		// städtischer hat keinen, also wird hier gefragt, wer das Sagen hat.
+		if (gebaeude.dataValues.ownerType === 'CITY') {
+			const regionId: string | undefined = await regionOf(buildingId);
+			const inhaber = regionId ? await electionService.getHolder(regionId) : undefined;
+			if (inhaber?.characterId === characterId) {
+				return { ok: false, reason: 'ALREADY_OWNED' } as const;
+			}
+		}
 
 		const belegt: number = await Employment.count({
 			where: { BuildingId: buildingId },
@@ -123,7 +147,9 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 
 	const gebaeude = await buildingService.getBuilding(stelle.dataValues.BuildingId);
 	const vorlage = gebaeude ? buildingService.getBuildingOption(gebaeude.optionId) : undefined;
-	if (!gebaeude || !vorlage || !gebaeude.ownerCharacterId) {
+	// Ein städtisches Gebäude hat keinen Eigentümer und ist trotzdem ein Arbeitgeber —
+	// deshalb wird hier nur noch geprüft, ob es das Gebäude überhaupt noch gibt.
+	if (!gebaeude || !vorlage) {
 		// Der Betrieb ist verschwunden — zur Ruine geworden oder verkauft. Die Stelle
 		// endet mit ihm.
 		await endEmployment(employeeId);
@@ -135,11 +161,8 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 
 	return sequelize.transaction(async (t: Transaction) => {
 		const angestellter = await characterService.loadForAction(employeeId, tick, t);
-		const arbeitgeber = await Character.findByPk(gebaeude.ownerCharacterId!, {
-			transaction: t,
-			lock: t.LOCK.UPDATE
-		});
-		if (!angestellter || !arbeitgeber) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+		const kasse = await kasseVon(gebaeude.id, gebaeude.ownerCharacterId, t);
+		if (!angestellter || !kasse) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
 		const koennen: number = rezept ? await skillService.getLevel(employeeId, rezept.skill, t) : 0;
 		const menge: number = rezept ? yieldOf(rezept, koennen, gebaeude.condition) : 0;
@@ -149,7 +172,7 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 				actionPoints: angestellter.dataValues.actionPoints,
 				money: angestellter.dataValues.money
 			},
-			{ money: arbeitgeber.dataValues.money },
+			{ money: kasse.money },
 			stelle.dataValues.wagePerActionPoint,
 			kosten,
 			menge
@@ -178,7 +201,7 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 			},
 			{ transaction: t }
 		);
-		await arbeitgeber.update({ money: ergebnis.employerMoney }, { transaction: t });
+		await kasse.zahle(ergebnis.employerMoney, t);
 
 		return {
 			ok: true,
@@ -205,8 +228,8 @@ export async function getOpenJobs(regionId: string, seekerId?: string): Promise<
 
 	const stellen: JobOnList[] = [];
 	for (const eintrag of gebaeude) {
-		if (eintrag.offeredWage === null || eintrag.ownerCharacterId === null) continue;
-		if (eintrag.ownerCharacterId === seekerId) continue;
+		if (eintrag.offeredWage === null) continue;
+		if (eintrag.ownerCharacterId !== null && eintrag.ownerCharacterId === seekerId) continue;
 
 		const vorlage = buildingService.getBuildingOption(eintrag.optionId);
 		if (!vorlage) continue;
@@ -215,13 +238,17 @@ export async function getOpenJobs(regionId: string, seekerId?: string): Promise<
 		const frei: number = positionsAt(vorlage, eintrag.level) - belegt;
 		if (frei <= 0) continue;
 
-		const chef = await Character.findByPk(eintrag.ownerCharacterId);
+		const chef = eintrag.ownerCharacterId
+			? await Character.findByPk(eintrag.ownerCharacterId)
+			: null;
 		stellen.push({
 			buildingId: eintrag.id,
 			buildingName: eintrag.name,
 			wage: eintrag.offeredWage,
 			free: frei,
-			employerName: chef?.dataValues.firstName ?? 'jemand'
+			// Bei einem staedtischen Betrieb ist die Stadt der Arbeitgeber, kein Mensch.
+			employerName:
+				chef?.dataValues.firstName ?? (eintrag.ownerCharacterId ? 'jemand' : 'der Stadt')
 		});
 	}
 	return stellen.sort((a, b) => b.wage - a.wage);
@@ -264,4 +291,58 @@ export async function getStaff(
 /** Die Jahreszeit gehört zur Schicht, sobald ein Rezept sie verlangt. */
 export function currentSeason(tick: number) {
 	return seasonOf(tick);
+}
+
+/** In welcher Stadt ein Gebäude steht — über sein Grundstück. */
+async function regionOf(buildingId: string): Promise<string | undefined> {
+	const gebaeude = await Building.findByPk(buildingId);
+	if (!gebaeude?.dataValues.PlotId) return undefined;
+	const grundstueck = await Plot.findByPk(gebaeude.dataValues.PlotId);
+	return grundstueck?.dataValues.RegionId;
+}
+
+/**
+ * Die Kasse, aus der ein Arbeitgeber zahlt.
+ *
+ * Ein privater Betrieb zahlt aus der Kasse seines Eigentümers, ein städtischer aus der
+ * Stadtkasse. Beides ist derselbe Vorgang mit derselben Regel — **wer nicht zahlen kann,
+ * dessen Schicht findet nicht statt** —, nur steht das Geld an einer anderen Stelle. Ohne
+ * diese Unterscheidung müsste die Stadt einen eigenen Anstellungsweg bekommen, und
+ * spätestens beim zweiten öffentlichen Arbeitgeber liefen die beiden auseinander.
+ */
+interface Arbeitgeberkasse {
+	money: number;
+	zahle: (rest: number, t: Transaction) => Promise<void>;
+}
+
+async function kasseVon(
+	buildingId: string,
+	ownerCharacterId: string | null,
+	t: Transaction
+): Promise<Arbeitgeberkasse | undefined> {
+	if (ownerCharacterId) {
+		const chef = await Character.findByPk(ownerCharacterId, {
+			transaction: t,
+			lock: t.LOCK.UPDATE
+		});
+		if (!chef) return undefined;
+		return {
+			money: chef.dataValues.money,
+			zahle: async (rest, transaction) => {
+				await chef.update({ money: rest }, { transaction });
+			}
+		};
+	}
+
+	const regionId: string | undefined = await regionOf(buildingId);
+	if (!regionId) return undefined;
+	const stadt = await Region.findByPk(regionId, { transaction: t, lock: t.LOCK.UPDATE });
+	if (!stadt || stadt.dataValues.treasury === null) return undefined;
+
+	return {
+		money: stadt.dataValues.treasury,
+		zahle: async (rest, transaction) => {
+			await stadt.update({ treasury: rest }, { transaction });
+		}
+	};
 }
