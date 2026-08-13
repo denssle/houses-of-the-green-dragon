@@ -718,6 +718,26 @@ Spielercharakter einen Antrag gemacht, der liegen blieb. Eine hochschwangere Rei
 brachte beim nächsten Herzschlag Ingram zur Welt — der steht jetzt im Stammbaum, in der
 Erbfolge und in der Einwohnerzahl.
 
+**4.4a Persönlichkeit.** Sechs Achsen am Charakter, vererbt mit Streuung, festgelegt bei
+der Geburt; `personality.logic.ts` für Vererbung und Etikett; Anzeige auf der
+Charakterseite und **in der Erbfolge**, wo sie sofort etwas ändert.
+
+**Der Zeitpunkt ist der Punkt.** Was hier entsteht, sind Anlagen bei der Geburt — jeder
+Charakter, der ohne sie zur Welt kommt, braucht sie später nachgereicht, und dann sind
+es erfundene Zahlen statt vererbter. Seit 4.4 werden Kinder geboren; jeder Tag ohne
+diesen Schritt vergrößert den Bestand, für den nichts Besseres bleibt als Würfeln. Das
+ist der ganze Grund, warum er vor 4.5 steht und nicht bei 4.6.
+
+**Gebaut wird nur die eine Hälfte:** die Anlagen und ihre Vererbung. Was NPCs damit
+_tun_, gehört zu 4.6 — vorher gibt es kaum Entscheidungen, die sie treffen könnten. Die
+Achsen ohne Verhalten sind trotzdem kein toter Wert: Sie stehen ab sofort in der
+Erbfolge, und damit ist die Wahl des Erben nicht mehr allein eine Frage des
+Geburtsdatums.
+
+Für den Bestand — die acht Fremd-NPCs aus dem Weltaufbau und die vorhandenen
+Spielercharaktere — bleibt nur Würfeln. Das ist vertretbar: Sie sind die erste Generation,
+sie haben keine Eltern, von denen sie etwas erben könnten.
+
 **4.5 Gebäude und Grundstücke.** `building.logic.ts`: Zustand aus verstrichenen Ticks,
 Renovieren, Ausbaustufen, Übergang zur Ruine. Dazu Grundstücke als knappes Gut, An- und
 Verkauf von `plot` und `building` über den nullbaren `forSalePrice`, Besitzübergang beim

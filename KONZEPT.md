@@ -303,6 +303,50 @@ Damit bekommen zwei Dinge nachträglich einen Boden. Die Zufallsereignisse aus A
 gegen das auch Menschen etwas ausrichten. Und die Politik bekommt eine Ausgabe, deren
 Nutzen jeder sofort spürt.
 
+### 8. Persönlichkeit — woher NPCs ihre Ziele nehmen
+
+NPCs sind keine Kulisse, sondern Marktteilnehmer, Wähler und Nachbarn. Damit sie handeln
+können, ohne dass für jede Lage eine Regel geschrieben wird, bekommt **jeder Charakter
+bei der Geburt eine Grundpersönlichkeit** — ein paar Anlagen, aus denen sich ableitet,
+was er will und wie er es angeht.
+
+Sie besteht aus wenigen Achsen mit Zahlen, nicht aus einem Katalog benannter
+Eigenschaften. Der Unterschied ist kein Geschmack: Mit Achsen wird jede Entscheidung eine
+gewichtete Summe, und eine neue Handlung braucht neue Gewichte statt einer Verzweigung
+über jede denkbare Eigenschaft. Sichtbar wird trotzdem ein Wort — das Etikett ergibt sich
+aus dem stärksten Ausschlag, „Cunne, die Gierige".
+
+Sechs Achsen, jede mit mindestens einer Entscheidung, die an ihr hängt:
+
+| Achse               | von … bis                    | entscheidet über                              |
+| ------------------- | ---------------------------- | --------------------------------------------- |
+| **Mut**             | vorsichtig ↔ verwegen       | Kampf, Raub, Wachdienst, Fernhandel           |
+| **Fleiß**           | träge ↔ fleißig             | wie viel des Aktionsbudgets eingesetzt wird   |
+| **Gier**            | genügsam ↔ gierig           | Preise, gezahlte Löhne, Sparen statt Ausgeben |
+| **Geselligkeit**    | eigenbrötlerisch ↔ gesellig | Werben, Besuche, Aufwand für Beziehungen      |
+| **Ehrgeiz**         | bescheiden ↔ ehrgeizig      | Kandidatur, Ausbau, Bauten fürs Ansehen       |
+| **Verträglichkeit** | streitsüchtig ↔ friedfertig | Fehde, feindliche Handlungen, Nachgeben       |
+
+Eine Achse, an der keine Entscheidung hängt, gehört nicht dazu — sie wäre ein Wert, den
+niemand liest.
+
+**Jeder bekommt eine, auch der Spielercharakter.** Beim NPC steuert sie das Handeln, beim
+Spieler beschreibt sie nur — zwingen soll sie ihn nicht. Aber sie ist auch bei ihm nicht
+folgenlos: Sie macht die **Erbenwahl** zu einer echten Entscheidung. Der gierige Älteste
+oder die fleißige Zweite? Bis heute war das Geburtsdatum die einzige Frage. Und es bleibt
+eine Mechanik statt zweier — ein System, das nur für die halbe Welt gilt, driftet
+unweigerlich von der anderen Hälfte ab.
+
+**Vererbt wird mit Streuung:** der Mittelwert beider Eltern plus Zufall. Damit hat die
+Partnerwahl eine Ebene mehr — wer einen brauchbaren Erben will, heiratet nicht irgendwen —
+und Geschwister ähneln einander, ohne dass sich etwas festfährt. Gewissheit gibt es
+keine: Aus zwei Fleißigen kann ein Faulpelz werden, nur seltener.
+
+**Die Persönlichkeit ändert sich nicht.** Anders als Zuneigung und Fertigkeiten ist sie
+das Feste am Charakter — was einer erlebt, verschiebt seine Beziehungen und sein Können,
+nicht seine Anlagen. Wer anders handeln soll, muss ein anderer sein, und dafür gibt es
+den Generationenwechsel.
+
 ## Was das für das Datenmodell heißt
 
 Das Schema in Phase 1 des Umbauplans bildet die Grundzüge bereits ab, damit sie nicht
@@ -369,6 +413,11 @@ Später hinzu kommen:
 - `employment` für Anstellungsverhältnisse mit Lohn
 - `marriage` beziehungsweise ein Partnerfeld am Charakter
 - `office`, `election`, `vote` und `law` für die politische Ebene
+- Die **Persönlichkeit** als sechs Zahlen direkt am `character` — nicht als eigene
+  Tabelle und nicht als JSON-Feld. Jeder Charakter hat genau einen Satz, er entsteht bei
+  der Geburt und ändert sich nie; eine Tabelle brächte einen Verbund für jeden Zugriff,
+  ein JSON-Feld nähme die Möglichkeit, danach zu sortieren. Und genau das wird gebraucht:
+  „Wer ist der Ehrgeizigste in der Stadt" ist die Kandidatensuche für 4.7.
 - `skill` (CharacterId, type, level, progress) für das Können. **Ebenfalls spärlich**:
   Wer eine Fertigkeit nie ausgeübt hat, hat dazu keine Zeile — bei einem Dutzend
   Fertigkeiten und einer wachsenden Bevölkerung wäre alles andere Ballast. Der Fortschritt
@@ -464,6 +513,11 @@ ungepflegt wird man sich mit der Zeit schlicht egal. Beziehungen sind damit kein
 erworbener Besitz, sondern laufender Aufwand, und keine Dynastie kann ihre Machtbasis
 dauerhaft einfrieren. Darüber liegt ein **Verwandtschaftsbonus**: Verwandte finden
 einander von Haus aus sympathisch, ohne dass dafür interagiert werden müsste.
+
+**Jeder Charakter hat eine Persönlichkeit, und sie ändert sich nie.** Sechs Achsen,
+vererbt von den Eltern mit Streuung, festgelegt bei der Geburt. Aus ihnen leiten NPCs ab,
+was sie wollen — statt aus einer Regel je Lage. Beim Spielercharakter beschreibt sie, statt
+zu zwingen, macht die Erbenwahl aber zu mehr als einer Frage des Geburtsdatums.
 
 **Kinder kommen von selbst, aber nur wo Platz ist.** Ein verheiratetes Paar im
 fruchtbaren Alter bekommt Nachwuchs, ohne dass jemand einen Knopf drückt — dieselbe Regel

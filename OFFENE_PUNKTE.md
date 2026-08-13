@@ -72,6 +72,23 @@ heißt: Wie suchen sie Arbeit, wann heiraten sie, wie wählen sie ihren Einkauf,
 renovieren sie, wann geben sie auf? Muss durch dieselbe Logik laufen wie
 Spielerhandlungen, ist aber eigener Entwurfsaufwand.
 
+**Das Woher steht inzwischen fest:** aus der **Persönlichkeit** (siehe `KONZEPT.md`,
+Abschnitt 8). Sechs Achsen bei der Geburt, jede Entscheidung eine gewichtete Summe daraus
+— statt einer Regel je Lage.
+
+Offen bleibt damit nicht mehr das Prinzip, sondern die Rechnung: **welche Achse mit
+welchem Gewicht** in welche Entscheidung eingeht, und was ein NPC überhaupt zur Auswahl
+hat. „Arbeitet er heute?" ist eine Schwelle auf Fleiß; „welchen Lohn zahlt er?" eine auf
+Gier; „stellt er sich zur Wahl?" eine auf Ehrgeiz. Jede dieser Schwellen ist eine
+Balancing-Zahl, und sie fallen mit den Handlungen, zu denen sie gehören — also verteilt
+über 4.6 und 4.7, nicht in einem Zug.
+
+Ein Punkt, der dabei leicht untergeht: NPCs handeln **nicht jeden Tick**. Ein Durchlauf
+über alle Einwohner je Stunde wird teuer, sobald die Stadt wächst. Wie oft ein NPC
+tatsächlich zum Zug kommt — jeden Tick, einmal am Spieltag, gestaffelt über die
+Bevölkerung — gehört zu dieser Frage dazu und hat mehr Einfluss auf die Serverlast als
+alles andere in Phase 4.
+
 ### 8. Pachtvertrag im Erbfall
 
 Geht eine `lease` auf den Erben über, fällt sie an die Stadt zurück, oder wird sie neu
