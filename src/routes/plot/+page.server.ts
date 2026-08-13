@@ -1,6 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as buildingService from '$lib/server/service/buildingService';
+import * as auctionService from '$lib/server/service/auctionService';
 import * as plotService from '$lib/server/service/plotService';
 import { actionMessage } from '$lib/actionMessage';
 import { PLOT_PRICE } from '$lib/game/economy';
@@ -13,6 +14,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			ownedPlots: [],
 			plotsForSale: [],
 			buildingsForSale: [],
+			auctions: [],
 			price: PLOT_PRICE
 		};
 	}
@@ -22,6 +24,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		// Was andere abgeben: Boden ohne Haus und Haus samt Boden.
 		plotsForSale: await plotService.getPlotsForSale(character.regionId),
 		buildingsForSale: await buildingService.getBuildingsForSale(character.regionId),
+		// Neu erschlossenes Land geht nicht in den Verkauf, sondern unter den Hammer.
+		auctions: await auctionService.getOpenAuctions(character.regionId, character.id),
 		price: PLOT_PRICE
 	};
 };
@@ -77,5 +81,19 @@ export const actions = {
 		const ergebnis = await plotService.buyFromOwner(character.id, plotId);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return { message: 'Der Boden gehört jetzt dir.' };
+	},
+
+	bid: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Kein Charakter, der bieten könnte' });
+
+		const daten = await request.formData();
+		const auctionId = daten.get('auctionId')?.toString();
+		const amount = Number(daten.get('amount'));
+		if (!auctionId) return fail(400, { message: 'Auf welches Grundstück?' });
+
+		const ergebnis = await auctionService.bid(character.id, auctionId, amount);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `Dein Gebot steht: ${amount} Münzen.` };
 	}
 } satisfies Actions;

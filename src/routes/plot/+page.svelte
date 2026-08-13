@@ -79,6 +79,48 @@
 </section>
 
 <section>
+	{#if data.auctions.length > 0}
+		<section>
+			<h3>Unter dem Hammer</h3>
+			<p>
+				<i>
+					Neu erschlossenes Land verkauft die Stadt nicht, sie versteigert es — wer am meisten
+					bietet, baut.
+				</i>
+			</p>
+			<ul>
+				{#each data.auctions as auktion (auktion.id)}
+					<li>
+						<b>{auktion.address}</b> —
+						{#if auktion.highest === null}
+							noch kein Gebot
+						{:else}
+							{auktion.highest} Münzen von {auktion.highestBidderName}{#if auktion.mine}
+								<b> (du)</b>{/if}
+						{/if}
+						<form method="POST" action="?/bid" use:enhance>
+							<input type="hidden" name="auctionId" value={auktion.id} />
+							<input
+								type="number"
+								name="amount"
+								value={auktion.nextBid}
+								min={auktion.nextBid}
+								aria-label="Gebot für {auktion.address}"
+							/>
+							<button type="submit">Bieten</button>
+						</form>
+					</li>
+				{/each}
+			</ul>
+			<p>
+				<small>
+					Gezahlt wird erst beim Zuschlag. Wer bis dahin sein Geld ausgegeben hat, wird übergangen —
+					der Nächstbietende bekommt es.
+				</small>
+			</p>
+		</section>
+	{/if}
+
 	<h3>Freies Bauland</h3>
 	<p><i>Was die Stadt noch nie vergeben hat — {data.price} Münzen je Grundstück.</i></p>
 	{#if data.freeLand.length === 0}

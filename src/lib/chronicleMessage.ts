@@ -73,6 +73,10 @@ export function chronicleMessage(entry: ChronicleLine): string {
 			return `${wer} wurde überfallen und um ${entry.value ?? 0} ${beute(entry.detail)} gebracht.`;
 		case 'FIRE':
 			return `In ${haus} hat es gebrannt — der Zustand fiel um ${entry.value ?? 0}.`;
+		case 'LAND_DEVELOPED':
+			return `${wer} hat ${entry.value ?? 0} neue Grundstücke ausweisen lassen.`;
+		case 'AUCTION_WON':
+			return `${wer} hat ein Grundstück ersteigert — für ${entry.value ?? 0} Münzen.`;
 		case 'SCHOOL_ATTENDED':
 			// Über den Lehrer und nicht über das Haus: „in Schule" bräuchte einen Artikel,
 			// und der hinge am Namen, den der Bürgermeister vergeben hat.

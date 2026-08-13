@@ -1,3 +1,4 @@
+import { Auction } from '$lib/db/model/auction';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { Op, type Transaction } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
@@ -29,10 +30,29 @@ async function withBuildings(plots: Plot[]): Promise<PlotOnList[]> {
 	return plots.map((plot) => ({ ...plot, hasBuilding: belegt.has(plot.id) }));
 }
 
-/** Nie vergebenes Bauland in der Region — das, was sich kaufen lässt. */
+/**
+ * Nie vergebenes Bauland in der Region — das, was sich zum Festpreis kaufen lässt.
+ *
+ * **Ohne die Grundstücke, auf die gerade geboten wird.** Neu erschlossenes Land gehört
+ * zunächst niemandem und stünde deshalb hier mit; wer wollte, könnte es für den alten
+ * Festpreis mitnehmen, statt zu bieten — und die Versteigerung wäre eine Zierde. Beim
+ * Durchspielen stand genau das auf der Seite: dasselbe Grundstück zweimal, einmal für 40
+ * Münzen, einmal unter dem Hammer.
+ */
 export async function getFreeBuildingLand(regionId: string): Promise<PlotOnList[]> {
+	const versteigert = await Auction.findAll({
+		where: { RegionId: regionId, closed: false },
+		attributes: ['PlotId']
+	});
+	const unterDemHammer: string[] = versteigert.map((zeile) => zeile.dataValues.PlotId);
+
 	const gefunden = await PlotModel.findAll({
-		where: { RegionId: regionId, type: 'BUILDING_LAND', ownerType: 'NONE' },
+		where: {
+			RegionId: regionId,
+			type: 'BUILDING_LAND',
+			ownerType: 'NONE',
+			...(unterDemHammer.length > 0 ? { id: { [Op.notIn]: unterDemHammer } } : {})
+		},
 		order: [['address', 'ASC']]
 	});
 	return withBuildings(gefunden.map((eintrag) => convertToPlot(eintrag.dataValues)));
@@ -71,6 +91,15 @@ export async function buyPlot(plotId: string, characterId: string): Promise<BuyR
 
 		const grundstück = await PlotModel.findByPk(plotId, { transaction: t, lock: t.LOCK.UPDATE });
 		if (!grundstück) return { ok: false, reason: 'PLOT_NOT_OWNED' } as const;
+
+		// Nicht nur aus der Liste nehmen, sondern den Weg selbst versperren: Die Liste ist
+		// die Anzeige, und wer die Kennung kennt, käme sonst über das Formular doch zum
+		// Festpreis an ein Grundstück, um das gerade geboten wird.
+		const laeuft: number = await Auction.count({
+			where: { PlotId: plotId, closed: false },
+			transaction: t
+		});
+		if (laeuft > 0) return { ok: false, reason: 'NOT_FOR_SALE' } as const;
 
 		const ergebnis = buyPlotLogic(
 			{ money: käufer.dataValues.money, regionId: käufer.dataValues.RegionId },

@@ -43,4 +43,5 @@ export type ActionFailureReason =
 	| 'ALREADY_STANDING'
 	| 'ALREADY_VOTED'
 	| 'NOT_IN_OFFICE'
-	| 'OUT_OF_BOUNDS';
+	| 'OUT_OF_BOUNDS'
+	| 'BID_TOO_LOW';

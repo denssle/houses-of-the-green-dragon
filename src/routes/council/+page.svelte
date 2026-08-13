@@ -159,6 +159,35 @@
 	{/if}
 </section>
 
+{#if data.holder?.mine}
+	<section>
+		<h3>Bauland erschließen</h3>
+		<p>
+			Die Stadt zahlt {data.development.costPerPlot} Münzen je Grundstück; was dabei entsteht, wird versteigert.
+			{#if data.development.running > 0}
+				Zurzeit laufen {data.development.running} Versteigerungen.
+			{/if}
+		</p>
+		<form method="POST" action="?/develop" use:enhance>
+			<input
+				type="number"
+				name="count"
+				value="1"
+				min="1"
+				max={data.development.max}
+				aria-label="Wie viele Grundstücke"
+			/>
+			<button type="submit">Ausweisen lassen</button>
+		</form>
+		<p>
+			<small>
+				Ein sicheres Geschäft ist es nicht: Sind alle satt, bleibt die Stadt auf den Kosten sitzen.
+				Ist Bauland knapp, bringt die Versteigerung ein Vielfaches.
+			</small>
+		</p>
+	</section>
+{/if}
+
 <section>
 	<h3>Gesetze</h3>
 	<p>

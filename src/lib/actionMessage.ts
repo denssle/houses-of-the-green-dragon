@@ -41,7 +41,8 @@ const SAETZE: Record<ActionFailureReason, string> = {
 	ALREADY_STANDING: 'Du stehst bereits auf dem Wahlzettel.',
 	ALREADY_VOTED: 'Du hast deine Stimme schon abgegeben.',
 	NOT_IN_OFFICE: 'Dazu müsstest du das Amt innehaben.',
-	OUT_OF_BOUNDS: 'So weit reicht die Macht des Amtes nicht.'
+	OUT_OF_BOUNDS: 'So weit reicht die Macht des Amtes nicht.',
+	BID_TOO_LOW: 'Damit ist niemand zu überbieten.'
 };
 
 export function actionMessage(reason: ActionFailureReason): string {

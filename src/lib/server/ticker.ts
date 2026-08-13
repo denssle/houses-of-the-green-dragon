@@ -1,6 +1,7 @@
 import * as worldService from '$lib/server/service/worldService';
 import * as familyService from '$lib/server/service/familyService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
+import * as auctionService from '$lib/server/service/auctionService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as electionService from '$lib/server/service/electionService';
 import * as hazardService from '$lib/server/service/hazardService';
@@ -100,6 +101,14 @@ async function schlagen(): Promise<void> {
 		if (gepflegt) {
 			console.info(
 				`Der Buergermeister liess ${gepflegt.building} herrichten (${gepflegt.spent} Muenzen).`
+			);
+		}
+
+		// Faellige Versteigerungen zuschlagen. Wie die Wahl selten und deshalb billig.
+		const auktionen = await auctionService.advanceAuctions(stadtId, geschehen.currentTick);
+		if (auktionen.closed > 0) {
+			console.info(
+				`${auktionen.closed} Versteigerungen beendet, ${auktionen.awarded} mit Zuschlag.`
 			);
 		}
 

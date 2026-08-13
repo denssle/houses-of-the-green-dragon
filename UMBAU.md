@@ -1379,10 +1379,44 @@ durchgespielt (mit hochgesetzter Wahrscheinlichkeit, sonst hätte der Test Tage 
 Die **Seuche** fehlt mit Absicht: Ohne Krankheitssystem (Punkt 5) wäre sie nur ein
 Zufallstod, und den gibt es schon. Sie kommt mit ihrem System.
 
-**4.9 Ausdehnung.** Fernhandel mit `shipment` (Ankunfts-Tick statt Fortbewegung),
-Erschließung neuen Baulands aus der Stadtkasse, Gründung einer zweiten Stadt. Fernziele
-für etablierte Dynastien — das Datenmodell trägt sie ab Phase 1, gebraucht werden sie
-erst, wenn jemand so weit ist.
+**4.9a Bauland erschließen und versteigern.** ✓ Die Stadt wächst — und die Vergabe wird
+politisch.
+
+**Erschließen ist eine Amtshandlung, die Vergabe ein Wettbewerb.** Der Bürgermeister lässt
+aus der Stadtkasse Grundstücke ausweisen; was dabei entsteht, geht nicht in den Verkauf,
+sondern unter den Hammer. Damit hat die Stadtkasse zum ersten Mal eine Einnahme, die
+größer sein kann als die Ausgabe — wie viel, entscheidet die Knappheit. Erschließen ist
+deshalb kein sicheres Geschäft: Sind alle satt, bleibt die Stadt auf den Kosten sitzen.
+
+**Der Zuschlag ist eine Rechnung, kein gespeicherter Zustand** — das höchste Gebot, dessen
+Bieter noch zahlen kann. Wer bis dahin sein Geld ausgegeben hat, wird übergangen, und der
+Nächste rückt nach. Dieselbe Bauart wie bei der Amtsnachfolge (4.7a), und derselbe Gewinn:
+Es braucht keine Reservierung, die mitgeführt werden müsste, und keinen Zustand, der von
+der Wirklichkeit abweichen kann. Wer bietet, ohne zu zahlen, verliert nichts außer dem
+Zuschlag — die einzige Strafe, die ohne ein Schuldrecht auskommt.
+
+Ein Mindestschritt von fünf Münzen hält die Sache in Gang: Ohne ihn endete jede
+Versteigerung in einem Wettlauf um einzelne Münzen, und bei Spielern, die zu
+verschiedenen Zeiten online sind, gewönne schlicht der, der zuletzt hereinschaut. NPCs
+bieten mit, sonst bekäme die Stadt für ihr Land nie mehr als das Mindestgebot — aber nur
+ein Viertel ihres Vermögens und nur, wenn sie noch kein Grundstück haben.
+
+_Fertig, wenn:_ Die Stadt kann wachsen, und das Wachstum bringt ihr etwas ein. — Erledigt
+und am gebauten Server durchgespielt: zwei Grundstücke für 120 Münzen ausgewiesen, 40
+geboten, ein zu niedriges Nachgebot abgewiesen, der Takt schlug zu — „Brunnenweg 1" für 40
+Münzen, beides in der Chronik.
+
+**Beim Durchspielen fiel ein Loch auf:** Die versteigerten Grundstücke standen zugleich
+als freies Bauland zum Festpreis da — wer wollte, kaufte für 40, statt zu bieten, und die
+Versteigerung wäre eine Zierde gewesen. Jetzt sind sie aus der Liste **und** aus dem
+Kaufweg genommen: Die Liste ist die Anzeige, aber wer die Kennung kennt, käme sonst über
+das Formular doch heran.
+
+**4.9b Fernhandel und weitere Städte.** Waren zwischen Orten bewegen (`shipment` mit
+Ankunfts-Tick statt Fortbewegung), Gründung einer zweiten Stadt. Fernziele für etablierte
+Dynastien — und die Voraussetzung dafür, dass ein Räuber jemanden unterwegs überfallen
+kann (Punkt 23). Die zweite Stadt ist der größere Brocken: Alles, was heute stillschweigend
+„die Startstadt" annimmt, muss dann zwei Orte vertragen.
 
 ## Phase 5 — Aufräumen und Ausliefern
 

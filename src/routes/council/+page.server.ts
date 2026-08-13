@@ -1,5 +1,6 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import * as auctionService from '$lib/server/service/auctionService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as electionService from '$lib/server/service/electionService';
 import * as employmentService from '$lib/server/service/employmentService';
@@ -9,6 +10,7 @@ import * as worldService from '$lib/server/service/worldService';
 import { actionMessage } from '$lib/actionMessage';
 import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
 import { OFFICE_NAMES } from '$lib/game/election.logic';
+import { DEVELOPMENT_COST_PER_PLOT, MAX_PLOTS_PER_DEVELOPMENT } from '$lib/game/auction.logic';
 import { LAW_KINDS, type LawKind, LAW_RULES } from '$lib/game/law.logic';
 import { ticksToYears, yearOf } from '$lib/game/time';
 
@@ -85,6 +87,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 		// Was die Wache bringt, in einer Zahl: Ohne sie wäre ihr Sold eine Ausgabe ohne
 		// sichtbaren Gegenwert — und der erste Bürgermeister, der spart, hätte recht.
 		safety: await hazardService.getSafety(character.regionId),
+		// Erschließen: was es kostet und wie viel auf einmal geht.
+		development: {
+			costPerPlot: DEVELOPMENT_COST_PER_PLOT,
+			max: MAX_PLOTS_PER_DEVELOPMENT,
+			running: (await auctionService.getOpenAuctions(character.regionId)).length
+		},
 		freePlots: await buildingService.getFreeCityPlots(character.regionId),
 		buildable: await baubar(character.regionId),
 		chronicle: (await lawService.chronicle(character.regionId, 8)).map((eintrag) => ({
@@ -182,6 +190,22 @@ export const actions = {
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return {
 			message: wage === null ? 'Der Aushang ist abgenommen.' : `Sold: ${wage} je Aktionspunkt.`
+		};
+	},
+
+	develop: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const count = Number((await request.formData()).get('count'));
+		const ergebnis = await auctionService.developLand(character.id, character.regionId, count);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return {
+			message:
+				ergebnis.plots +
+				' Grundstücke ausgewiesen für ' +
+				ergebnis.spent +
+				' Münzen — sie gehen unter den Hammer.'
 		};
 	}
 } satisfies Actions;

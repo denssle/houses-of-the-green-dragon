@@ -10,7 +10,6 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 6   | Kämpfe und Verletzungen                                                              | Waffen und Gift (4.6c)       | Entwurf      |
 | 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                    | 4.7 / Punkt 6                | Entwurf      |
 | 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                             | 4.8                          | Entwurf      |
-| 13  | Verfahren zur Erschließung neuen Baulands                                            | 4.9                          | Entscheidung |
 | 14  | Startbedingungen für neue Spieler                                                    | erster öffentlicher Betrieb  | Entscheidung |
 | 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche (die Zufalls-Raubzüge stehen seit 4.8) | 4.8 / Punkt 6                | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
@@ -22,7 +21,9 @@ Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 5
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
 `paths.base`, wie bei Festival), mit Phase 4.5a der **Fertigkeitenkatalog** samt
 Übungskurve und den Grenzen der Lehre, mit Phase 4.6c der **Pachtvertrag im Erbfall**
-(er fällt an die Stadt zurück), mit Phase 4.7e die **Wirkung der Schule** (sie kostet das Kind Aktionspunkte wie Arbeit
+(er fällt an die Stadt zurück), mit Phase 4.9a das **Verfahren zur Erschließung** (eine Amtshandlung aus der Stadtkasse,
+die Vergabe per Versteigerung — gezahlt wird erst beim Zuschlag, und wer dann nicht kann,
+wird übergangen), mit Phase 4.7e die **Wirkung der Schule** (sie kostet das Kind Aktionspunkte wie Arbeit
 und wirkt wie ein Lehrmeister; Lehrer sind aus öffentlicher Hand bezahlt, das Schulgeld
 ist ein Gesetz), mit Phase 4.7d der **Umfang der Chronik** (im Testbetrieb wird alles
 festgehalten), mit Phase 4.7c die **Stadtwache** (eine Anstellung, kein Amt: Der Bürgermeister setzt
@@ -113,15 +114,6 @@ Der Prüfstein ist derselbe wie bei Waren und Fertigkeiten: **Wo wirkt der Bau?*
 Brunnen gegen Seuchen setzt Punkt 5 voraus; eine Mauer gegen Räuber und ein Löschteich
 gegen Brände hätten seit 4.8 dagegen sofort eine Wirkung — die Unglücke sind da, nur
 fehlt bisher jeder Bau, der gegen sie hilft. Die Wache ist der einzige.
-
-### 13. Erschließung neuen Baulands
-
-Vorgeschlagen ist eine Amtshandlung, die aus der Stadtkasse bezahlt wird. Offen: Wie
-viele Grundstücke entstehen dabei, wer darf dort bauen (Versteigerung, Vergabe durch das
-Amt, freier Verkauf), und braucht es dafür eine angrenzende Umlandfläche, die dadurch
-verschwindet?
-
-## Vor dem ersten öffentlichen Betrieb
 
 ### 14. Startbedingungen
 

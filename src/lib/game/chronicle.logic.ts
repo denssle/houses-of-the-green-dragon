@@ -29,7 +29,9 @@ export const EVENT_KINDS = [
 	'JOB_ENDED',
 	'SCHOOL_ATTENDED',
 	'RAID',
-	'FIRE'
+	'FIRE',
+	'LAND_DEVELOPED',
+	'AUCTION_WON'
 ] as const;
 
 export type EventKind = (typeof EVENT_KINDS)[number];
