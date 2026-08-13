@@ -27,6 +27,20 @@ export async function getDynastyForUser(userId: string): Promise<Dynasty | undef
 	return gefunden ? convertToDynasty(gefunden.dataValues) : undefined;
 }
 
+/**
+ * Alle Häuser eines Benutzers, das jüngste zuerst.
+ *
+ * Die erloschenen verschwinden nicht: Sie sind die Geschichte des Spielers, und ab 4.3
+ * hängen an ihnen die Fehden und Bündnisse, die andere Häuser mit ihnen hatten.
+ */
+export async function getDynastiesForUser(userId: string): Promise<Dynasty[]> {
+	const gefunden = await DynastyModel.findAll({
+		where: { UserId: userId },
+		order: [['foundedAtTick', 'DESC']]
+	});
+	return gefunden.map((haus) => convertToDynasty(haus.dataValues));
+}
+
 export async function getDynasty(dynastyId: string): Promise<Dynasty | undefined> {
 	const gefunden = await DynastyModel.findByPk(dynastyId);
 	return gefunden ? convertToDynasty(gefunden.dataValues) : undefined;

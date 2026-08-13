@@ -1,4 +1,5 @@
 import * as worldService from '$lib/server/service/worldService';
+import * as lifecycleService from '$lib/server/service/lifecycleService';
 
 /**
  * Der Herzschlag der Welt.
@@ -48,6 +49,22 @@ async function schlagen(): Promise<void> {
 			console.info(
 				`Weltzeit um ${geschehen.ticks} Ticks vorgestellt, davon ${geschehen.missed} verpasst ` +
 					'(Serverausfall) — für die übersprungene Zeit wächst nichts nach.'
+			);
+		}
+
+		// Genau **ein** Wurf je Herzschlag, auch wenn die Uhr gerade über eine Ausfallzeit
+		// gesprungen ist: Die übersprungenen Ticks haben für alles Handelnde nicht
+		// stattgefunden, und dazu gehört das Sterben. Sonst raffte ein Wochenendausfall
+		// beim Neustart eine halbe Generation dahin — für Spieler, die nicht zusehen
+		// konnten.
+		for (const fall of await lifecycleService.reapTheDead(geschehen.currentTick)) {
+			console.info(
+				`${fall.name} ist mit ${fall.age} Jahren gestorben` +
+					(fall.extinctDynastyId
+						? ' — ohne Erben. Das Haus ist erloschen.'
+						: fall.heirId
+							? `. Erbe: ${fall.heirId}.`
+							: '.')
 			);
 		}
 	} catch (error) {

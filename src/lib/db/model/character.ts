@@ -36,6 +36,9 @@ export const Character: ModelStatic<Model<CharacterAttributes, CharacterCreation
 			motherId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
 			fatherId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
 			spouseId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
+			// Der benannte Erbe. Leer heisst nicht erblos, sondern unbenannt — dann greift
+			// die gesetzliche Reihenfolge (siehe inheritance.logic.ts).
+			heirId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
 			HomeBuildingId: { type: DataTypes.STRING, allowNull: true, defaultValue: null }
 		},
 		{ timestamps: true }

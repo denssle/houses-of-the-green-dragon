@@ -77,4 +77,9 @@ describe('Nachwachsende Aktionspunkte', () => {
 	it('nimmt nichts weg, wenn der letzte Stand in der Zukunft liegt', () => {
 		expect(regrownActionPoints(7, 120, 100)).toBe(7);
 	});
+
+	it('meldet einen unlesbaren Ankerpunkt, statt NaN weiterzureichen', () => {
+		// Ohne diese Prüfung rechnete sich NaN bis in ein UPDATE auf die Weltuhr durch.
+		expect(() => planWorldAdvance(new Date('unfug'), new Date())).toThrow(/Ankerpunkt/);
+	});
 });

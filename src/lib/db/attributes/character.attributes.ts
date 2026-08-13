@@ -33,6 +33,7 @@ export interface CharacterAttributes {
 	motherId: string | null;
 	fatherId: string | null;
 	spouseId: string | null;
+	heirId: string | null;
 	HomeBuildingId: string | null;
 }
 
@@ -46,6 +47,7 @@ export type CharacterCreationAttributes = Optional<
 	| 'motherId'
 	| 'fatherId'
 	| 'spouseId'
+	| 'heirId'
 	| 'HomeBuildingId'
 >;
 

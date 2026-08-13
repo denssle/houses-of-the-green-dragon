@@ -1,16 +1,26 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
-	let { data }: PageProps = $props();
+	let { data, form }: PageProps = $props();
 </script>
 
 <h2>{data.character.firstName}</h2>
 <p><i>{data.character.title}</i></p>
 
+{#if form?.message}
+	<p><b>{form.message}</b></p>
+{/if}
+
 <dl>
 	<dt>Alter</dt>
-	<dd>{data.age} Jahre</dd>
+	<dd>
+		{data.age} Jahre
+		{#if data.mortal}
+			<i>— die Jahre zählen</i>
+		{/if}
+	</dd>
 
 	<dt>Aufenthalt</dt>
 	<dd>{data.region?.name ?? 'unbekannt'}</dd>
@@ -56,6 +66,46 @@
 				</li>
 			{/each}
 		</ul>
+	{/if}
+</section>
+
+<section>
+	<h3>Erbfolge</h3>
+	{#if data.children.length === 0}
+		<p>
+			<i>Du hast keine Kinder.</i>
+			Stirbst du so, erlischt dein Haus und dein Besitz fällt an die Stadt.
+		</p>
+	{:else}
+		<p>
+			<i>
+				Wer erbt, entscheidest du. Die übrigen Kinder bekommen ihren gesetzlichen Anteil am Bargeld;
+				Grundstücke und Gebäude gehen ungeteilt an den Erben.
+			</i>
+		</p>
+		<ul>
+			{#each data.children as kind (kind.id)}
+				<li>
+					{kind.firstName}, {kind.age} Jahre
+					{#if kind.isHeir}
+						<b>— dein Erbe</b>
+						<form method="POST" action="?/heir" use:enhance>
+							<button type="submit" class="link">Benennung zurücknehmen</button>
+						</form>
+					{:else}
+						<form method="POST" action="?/heir" use:enhance>
+							<input type="hidden" name="heirId" value={kind.id} />
+							<button type="submit">Zum Erben bestimmen</button>
+						</form>
+					{/if}
+				</li>
+			{/each}
+		</ul>
+		<p>
+			<small>
+				Ohne Benennung erbt das älteste volljährige Kind — aber nur, wenn es dich überlebt.
+			</small>
+		</p>
 	{/if}
 </section>
 

@@ -36,6 +36,19 @@ export interface WorldAdvance {
  */
 export function planWorldAdvance(lastTickAt: Date, now: Date): WorldAdvance | null {
 	const vergangen: number = now.getTime() - lastTickAt.getTime();
+
+	// Ein ungültiger Ankerpunkt ergibt NaN, und NaN rechnet sich stillschweigend durch bis
+	// in ein `UPDATE worlds SET currentTick = NULL`. Die Datenbank fängt das zwar ab, aber
+	// mit einer Meldung, die das Symptom nennt und nicht die Ursache. Passiert ist das
+	// beim Nachstellen von Hand: Wer `lastTickAt` in einem Format schreibt, das Sequelize
+	// nicht als Datum liest, bekommt hier ein `Invalid Date` herein.
+	if (!Number.isFinite(vergangen)) {
+		throw new Error(
+			`Ungültiger Ankerpunkt der Weltzeit: ${String(lastTickAt)}. ` +
+				'Steht in `worlds.lastTickAt` ein Datum, das der Treiber lesen kann?'
+		);
+	}
+
 	if (vergangen < MS_PER_TICK) return null;
 
 	const ticks: number = Math.floor(vergangen / MS_PER_TICK);

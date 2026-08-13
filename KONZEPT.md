@@ -40,6 +40,25 @@ den Geschwistern aufgeteilt wird, ist eine Stellschraube, die der Rat einer Stad
 kann. Ein Haus, das über Generationen Vermögen bündeln will, hat damit ein Interesse an
 der Gesetzgebung.
 
+Geteilt wird dabei nur das **Bargeld**; Grundstücke und Gebäude gehen ungeteilt an den
+Erben. Ein Viertel eines Hauses ist nichts, was man bewohnen, vermieten oder renovieren
+kann, und Grundbesitz zersplitterte über Generationen zu Bruchteilen, die niemand mehr
+zusammenbekäme. Der Preis: Wer viel Boden und wenig Münzen hinterlässt, vererbt seinen
+übrigen Kindern wenig — was der Politik aus Abschnitt 7 einen Streitgegenstand gibt.
+
+**Benannt wird zu Lebzeiten, nicht im Sterben.** Der Erbe steht fest, bevor er gebraucht
+wird; ohne Benennung erbt das älteste volljährige Kind. Anders ginge es nicht: Die Welt
+läuft weiter, auch wenn der Spieler gerade nicht da ist, und ein Haus, das bis zum
+nächsten Login stillsteht, wäre ein Loch in dieser Welt. Gibt es nur minderjährige
+Kinder, erbt das älteste von ihnen — ein Haus, das an seinen Kindern vorbei erlischt,
+bestrafte den Spieler für einen Zeitpunkt, den er nicht wählt.
+
+**Gestorben wird am Alter, ohne Höchstalter.** Das Risiko beginnt in den Vierzigern und
+verdoppelt sich etwa alle acht Jahre; die Hälfte kommt über die siebzig, einzelne werden
+neunzig. Kein Alter, ab dem der Tod sicher ist — das machte aus dem Lebensende einen
+Schalter statt eines Schicksals, und der Greis, der alle überlebt, ist eine Geschichte.
+Krankheit, Hunger und Kälte werden dieses Risiko später erhöhen, nicht ersetzen.
+
 **Wer ohne Erben stirbt, dessen Besitz fällt an die öffentliche Hand.** Nicht ins Nichts
 und nicht an einen zufälligen Nachbarn: Häuser, Grundstücke und Vermögen gehen an die
 Stadt, die sie neu vergeben oder verkaufen kann. Das schließt einen Kreis, den knappes

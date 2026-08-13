@@ -552,7 +552,7 @@ Erledigt und am laufenden Server nachgestellt: Weltuhr um drei Stunden zurückda
 Server gestartet, Uhr springt um drei Ticks (zwei davon verpasst), der Ankerpunkt wandert
 exakt drei Stunden, und der Charakter mit zehn Ticks rechtmäßigem Rückstand behält sie.
 
-**4.2 Lebenszyklus.** Alterung aus `birthTick`, Sterbewahrscheinlichkeit, Tod des
+**4.2 Lebenszyklus.** ✓ Alterung aus `birthTick`, Sterbewahrscheinlichkeit, Tod des
 Spielercharakters, **Erbenwahl durch den Spieler** unter den eigenen Kindern, gesetzlicher
 Anteil für die übrigen, Besitzübergang. Kinderlos heißt: Dynastie auf `isExtinct`, Besitz
 an die Stadt, neue Dynastie anlegbar.
@@ -560,6 +560,46 @@ an die Stadt, neue Dynastie anlegbar.
 Dass der Erbteil der Geschwister aus einem Gesetz kommt, heißt für die Umsetzung: Der
 Satz ist ein Parameter, kein Literal — auch solange es die Politik aus 4.7 noch nicht
 gibt. Sonst muss die Erbschaftslogik später umgebaut werden.
+
+_Entschieden:_ Das Sterberisiko folgt einer **Gompertz-Kurve** — vor 40 nichts, danach
+Verdopplung alle 8 Jahre. Mittleres Sterbealter um 70, aber ohne harte Obergrenze: Ein
+Alter, ab dem der Tod sicher ist, machte aus dem Lebensende einen Schalter. Zwei Tests
+halten das Balancing fest, statt nur die Formel zu prüfen — die Hälfte muss über die 70
+kommen, und einzelne müssen 90 werden.
+
+_Entschieden:_ Der Erbe wird **vorab benannt**, mit Rückfall auf das älteste volljährige
+Kind. Die Alternative — das Haus wartet auf den nächsten Login — verträgt sich nicht mit
+4.1: Die Welt läuft weiter, und ein eingefrorener Betrieb wäre ein Loch darin.
+
+_Entschieden:_ Geteilt wird nur das **Bargeld** (Vorgabe 25 % unter den Geschwistern),
+Grundstücke und Gebäude gehen ungeteilt an den Erben. Ein Viertel eines Hauses ist
+nichts, was man bewohnen oder renovieren kann, und über Generationen zersplitterte
+Grundbesitz sonst zu Bruchteilen.
+
+Drei Dinge, die sich beim Bauen zeigten:
+
+- **Das Sterben gehört an den Takt, nicht an den Seitenaufruf.** Anders als das
+  Aktionsbudget lässt es sich nicht faul beim Lesen nachrechnen: Ein Todesfall betrifft
+  Kinder, Besitz und Stadtkasse. Würde er erst beim Hinsehen ausgelöst, stürben nur die
+  Charaktere aktiver Spieler. Teuer ist der Durchlauf trotzdem nicht — vor 40 ist das
+  Risiko null, die Abfrage holt nur die Alten.
+- **Ein Wurf je Herzschlag, nicht je übersprungenem Tick.** Sonst raffte ein
+  Wochenendausfall beim Neustart eine halbe Generation dahin, für Spieler, die nicht
+  zusehen konnten. Ergibt sich aus 4.1 von selbst, muss aber so gemeint sein.
+- **Minderjährige erben notfalls doch.** Die Regel sagt „ältestes volljähriges Kind",
+  lässt aber offen, was bei lauter Minderjährigen gilt. Ein Haus, das an seinen Kindern
+  vorbei erlischt, bestrafte den Spieler für den Zeitpunkt seines Todes — den er nicht
+  steuert. Also erbt dann das älteste Kind.
+
+Nebenbei ein Fund im Bestand: `planWorldAdvance()` reichte ein ungültiges Datum als `NaN`
+weiter, bis in ein `UPDATE worlds SET currentTick = NULL`. Die Datenbank fing es ab, aber
+mit einer Meldung über das Symptom. Jetzt wirft die Rechnung selbst, und zwar mit Namen.
+
+_Fertig, wenn:_ Ein Charakter stirbt am Alter, das Haus geht an den Erben über oder
+erlischt, und der Spieler kann danach neu anfangen. — Erledigt und am laufenden Server
+durchgespielt: eine NPC-Greisin starb, ihre 137 Münzen landeten in der Stadtkasse
+(80 → 217); ein Spielercharakter ohne Erben nahm sein Haus mit ins Grab, und die
+Dynastieseite bot danach die Neugründung an.
 
 **4.3 Beziehungen.** `relationship.logic.ts` als reine Funktionen: die drei Schichten zu
 einer Zuneigung verrechnen, Verfall Richtung Grundwert über die verstrichenen Ticks,

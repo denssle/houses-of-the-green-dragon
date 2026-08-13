@@ -38,7 +38,12 @@ export async function currentTick(): Promise<number> {
  *
  * Gibt zurück, was geschehen ist — oder `null`, wenn noch kein voller Tick vergangen war.
  */
-export async function advanceWorld(now: Date = new Date()): Promise<WorldAdvance | null> {
+/** Was `advanceWorld()` getan hat, samt dem Stand, auf dem die Uhr nun steht. */
+export interface WorldAdvanced extends WorldAdvance {
+	currentTick: number;
+}
+
+export async function advanceWorld(now: Date = new Date()): Promise<WorldAdvanced | null> {
 	return sequelize.transaction(async (t: Transaction) => {
 		const welt = await World.findByPk(WORLD_ID, { transaction: t, lock: t.LOCK.UPDATE });
 		if (!welt) {
@@ -67,6 +72,6 @@ export async function advanceWorld(now: Date = new Date()): Promise<WorldAdvance
 			});
 		}
 
-		return plan;
+		return { ...plan, currentTick: neuerTick };
 	});
 }
