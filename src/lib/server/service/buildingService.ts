@@ -1,3 +1,4 @@
+import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { randomUUID } from 'node:crypto';
 import { type Transaction } from 'sequelize';
 import type { Building } from '$lib/model/building';
@@ -6,7 +7,7 @@ import { sequelize } from '$lib/db/sequelize';
 import { Building as BuildingModel } from '$lib/db/model/building';
 import { Plot as PlotModel } from '$lib/db/model/plot';
 import { convertToBuilding } from '$lib/db/attributes/building.attributes';
-import { build as buildLogic, type ActionFailureReason } from '$lib/game/buildingAction.logic';
+import { build as buildLogic } from '$lib/game/buildingAction.logic';
 import * as characterService from '$lib/server/service/characterService';
 import * as worldService from '$lib/server/service/worldService';
 

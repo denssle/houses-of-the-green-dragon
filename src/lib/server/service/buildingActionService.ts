@@ -1,7 +1,8 @@
+import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { type Transaction } from 'sequelize';
 import type { BuildingAction } from '$lib/model/buildingAction';
 import { sequelize } from '$lib/db/sequelize';
-import { work, type ActionFailureReason } from '$lib/game/buildingAction.logic';
+import { work } from '$lib/game/buildingAction.logic';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as worldService from '$lib/server/service/worldService';

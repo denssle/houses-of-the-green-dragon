@@ -1,4 +1,5 @@
 import type { BuildingTemplate } from '$lib/model/buildingTemplate';
+import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { canAfford } from '$lib/game/economy';
 
 /**
@@ -9,18 +10,8 @@ import { canAfford } from '$lib/game/economy';
  * wert, weil sich an genau diesen Zahlen das Balancing abspielt: Sie lassen sich prüfen,
  * ohne eine Welt aufzubauen.
  *
- * Fehlschläge tragen einen Grund als Code, keinen fertigen Satz. Die Formulierung gehört
- * in die Oberfläche — hier wäre sie doppelt gepflegt und nicht übersetzbar.
+ * Fehlschläge tragen einen Grund als Code aus `actionFailure.ts`, keinen fertigen Satz.
  */
-
-export type ActionFailureReason =
-	| 'NOT_ENOUGH_ACTION_POINTS'
-	| 'NOT_ENOUGH_MONEY'
-	| 'WRONG_REGION'
-	| 'NOT_A_WORKPLACE'
-	| 'PLOT_NOT_OWNED'
-	| 'PLOT_ALREADY_BUILT'
-	| 'LIMIT_REACHED';
 
 /** Wie viel Zustand ein Charakter für eine Schicht einsetzt. */
 export const WORK_ACTION_POINT_COST = 1;

@@ -601,7 +601,7 @@ durchgespielt: eine NPC-Greisin starb, ihre 137 Münzen landeten in der Stadtkas
 (80 → 217); ein Spielercharakter ohne Erben nahm sein Haus mit ins Grab, und die
 Dynastieseite bot danach die Neugründung an.
 
-**4.3 Beziehungen.** `relationship.logic.ts` als reine Funktionen: die drei Schichten zu
+**4.3 Beziehungen.** ✓ `relationship.logic.ts` als reine Funktionen: die drei Schichten zu
 einer Zuneigung verrechnen, Verfall Richtung Grundwert über die verstrichenen Ticks,
 Änderung durch freundliche und feindliche Interaktion, Deckelung nach oben und unten.
 Vorgezogen vor Familie und Politik, weil beide darauf aufsetzen — Heirat braucht eine
@@ -618,6 +618,48 @@ Der Verfall ist der Kern der Specs: Er muss über beliebig große Tick-Abstände
 Ergebnis liefern wie über viele kleine, sonst hängt die Zuneigung davon ab, wie oft
 jemand die Seite aufruft. Zweiter Testschwerpunkt ist, dass die persönliche Schicht die
 Hausfehde überstimmen kann — sonst ist Romeo und Julia mechanisch ausgeschlossen.
+
+_Gewählt:_ **Exponentieller Verfall** über eine Halbwertszeit, fünf Jahre für Menschen,
+fünfzehn für Häuser. Nicht aus Geschmack: Diese Kurve ist die einzige, die sich
+zusammensetzen lässt — zweimal fünf Jahre ergeben genau dasselbe wie einmal zehn. Bei
+linearem Verfall hinge das Ergebnis daran, wie oft zwischendurch nachgerechnet wurde.
+Ein Test lässt beides gegeneinander laufen, Tick für Tick über zwölf Jahre.
+
+_Gewählt:_ Skala von -100 bis +100, Hausschicht mit **halbem Gewicht**. Damit reicht die
+persönliche Schicht weiter als die Fehde, und der Kampf gegen den Strom ist gewinnbar,
+aber teuer. Die Deckelung steht ganz außen: Ein Verwandtschaftsbonus soll den Hass nicht
+heimlich anheben.
+
+_Gewählt:_ Der natürliche Abdruck auf die Häuser ist ein **Zehntel**, auf ganze Punkte
+gerundet. Unter fünf Punkten bewegt sich damit gar nichts — ein Gruß auf der Straße ist
+keine Außenpolitik.
+
+Drei Dinge, die sich beim Bauen zeigten:
+
+- **Der Verfall zieht Richtung Grundwert, nicht Richtung null.** Gespeichert wird die
+  Abweichung; sie klingt gegen null ab, und damit die Zuneigung gegen Verwandtschaft plus
+  Hausstand. Ein Bruder, den man Jahre nicht gesehen hat, ist wieder einfach ein Bruder —
+  nicht ein Fremder.
+- **Die Häuser ziehen in beide Richtungen mit.** Beim Schreiben des Tests fiel auf, dass
+  Romeos Zuneigung die Fehde nicht nur überstimmt, sondern sie um neun Punkte mildert.
+  Das war nicht geplant, ist aber genau richtig: Wo sich genug Leute über die Grenze
+  hinweg anfreunden, hört eine Fehde von selbst auf. Steht jetzt als eigener Test da.
+- **`Math.round(-0.4)` ist `-0`.** Rechnerisch dasselbe wie null, aber `Object.is` und
+  `JSON.stringify` sehen einen Unterschied — eine Höflichkeit hätte je nach Vorzeichen
+  anders ausgesehen.
+
+Nebenbei umgezogen: `ActionFailureReason` stand bei den Gebäudehandlungen und gilt jetzt
+für alle. Eigene Datei, weil „nicht genug Kraft" und „zu weit weg" für eine Schicht in
+der Schmiede so gelten wie für einen Besuch beim Nachbarn.
+
+Damit 4.3 überhaupt anfassbar ist, kam eine Seite `/people` dazu und **eine** freundliche
+Handlung: Zeit mit jemandem verbringen, ein Aktionspunkt, sechs Punkte Zuneigung. Klein
+gehalten mit Absicht — wer eine Freundschaft will, muss wiederkommen. Feindliche
+Handlungen fehlen noch, sie hängen an Kämpfen und Verletzungen (Punkt 6).
+
+_Fertig, wenn:_ Zuneigung entsteht, verfällt und schlägt auf die Häuser durch, ohne dass
+das Nachsehen sie verändert. — Erledigt und am gebauten Server durchgespielt: fünf
+Besuche machten aus „gleichgültig" eine „Freundschaft" und kosteten fünf Aktionspunkte.
 
 **4.4 Familie und Bevölkerung.** Werben, Heirat, Zeugung, Geburt; Geschwister als NPCs
 mit indirekten Befehlen (anstellen, verheiraten, ins Amt schicken) und einfachen
