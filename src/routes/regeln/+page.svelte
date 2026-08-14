@@ -49,7 +49,8 @@
 <p>
 	Du benennst deinen Nickname, dein Haus, deine Kinder und deine Gebäude. Beleidigende, hetzende
 	oder verwechslungsträchtige Namen werden geändert, ohne dass es dafür eine Ankündigung braucht.
-	Der Nickname sollte kein Klarname sein — er steht für andere sichtbar.
+	Der Nickname sollte kein Klarname sein — er steht für andere sichtbar, und die Stadtchronik können
+	auch Gäste lesen.
 </p>
 
 <h3>Fehler im Spiel</h3>

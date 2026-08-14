@@ -46,7 +46,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                      | Punkt 43 / Punkt 23          | Entwurf      |
 | 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                  | —                            | erledigt     |
 | 26  | Datensicherung per Cron, einmal wiederhergestellt                                    | erster öffentlicher Betrieb  | Aufgabe      |
-| 27  | Impressum, Datenschutz, Nutzungsbedingungen — **Entwürfe mit 5.9**, Angaben fehlen   | vor dem ersten Fremden       | Aufgabe      |
+| 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen    | —                            | erledigt     |
 | 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                              | —                            | erledigt     |
 
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =

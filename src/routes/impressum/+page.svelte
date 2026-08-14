@@ -1,48 +1,78 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { onMount } from 'svelte';
+
+	// Die E-Mail-Adresse steht bewusst nicht als zusammenhängende Zeichenkette im Markup,
+	// damit sie nicht direkt aus dem ausgelieferten HTML abgegriffen werden kann. Sie wird
+	// erst im Browser zusammengesetzt; ohne JavaScript bleibt die umschriebene Form stehen,
+	// die für Menschen und Screenreader lesbar ist.
+	//
+	// Bewusst `onMount` statt `$derived`: Letzteres liefe beim SSR mit und schriebe die
+	// fertige Adresse doch wieder ins ausgelieferte HTML. (Derselbe Kniff wie bei Festival.)
+	const mailUser: string = 'dominik.hellweg';
+	const mailHost: string = 'protonmail.com';
+
+	let mailAddress: string | undefined = $state(undefined);
+
+	onMount(() => {
+		mailAddress = `${mailUser}@${mailHost}`;
+	});
 </script>
-
-<!--
-	ENTWURF — vor dem ersten fremden Nutzer auszufüllen und zu prüfen.
-
-	Die Angaben in [eckigen Klammern] muss der Betreiber einsetzen; sie stehen nicht im
-	Code, weil sie niemand außer ihm kennt. Eine Anbieterkennzeichnung mit Platzhaltern ist
-	schlechter als keine Seite, denn sie sieht aus, als wäre sie fertig.
-
-	Das hier ist kein Rechtsrat: Ob die Angaben vollständig sind, hängt an Rechtsform und
-	Umständen des Betriebs und gehört von jemandem geprüft, der das beurteilen darf.
--->
 
 <h2>Impressum</h2>
 
-<p>Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG).</p>
+<section>
+	<h3>Angaben gemäß § 5 DDG</h3>
+	<address>
+		Dominik Hellweg<br />
+		Preinstraße 116<br />
+		44265 Dortmund<br />
+		E-Mail:
+		{#if mailAddress}
+			<a href="mailto:{mailAddress}" class="link">{mailAddress}</a>
+		{:else}
+			<span>{mailUser} (at) {mailHost}</span>
+		{/if}
+	</address>
+	<p>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV: Dominik Hellweg (Anschrift wie oben).</p>
+</section>
 
-<h3>Anbieter</h3>
-<p>
-	[Vor- und Nachname]<br />
-	[Straße und Hausnummer]<br />
-	[Postleitzahl und Ort]<br />
-	[Land]
-</p>
+<section>
+	<h3>Was diese Seite ist</h3>
+	<p>
+		Ein privat betriebenes Browserspiel ohne Gewinnerzielungsabsicht. Es gibt nichts zu kaufen,
+		keine Werbung und keine Weitergabe von Daten zu Werbezwecken. Was gespeichert wird, steht in der
+		<a href="{base}/datenschutz" class="link">Datenschutzerklärung</a>; was im Spiel gilt, in den
+		<a href="{base}/regeln" class="link">Spielregeln</a>.
+	</p>
+</section>
 
-<h3>Kontakt</h3>
-<p>
-	E-Mail: [Adresse]<br />
-	[Weitere Erreichbarkeit, falls gewünscht]
-</p>
+<section>
+	<h3>Haftung für Inhalte</h3>
+	<p>
+		Die Inhalte dieser Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit,
+		Vollständigkeit und Aktualität kann ich jedoch keine Gewähr übernehmen. Als Diensteanbieter bin
+		ich gemäß § 7 Abs. 1 DDG für eigene Inhalte nach den allgemeinen Gesetzen verantwortlich. Nach
+		§§ 8 bis 10 DDG bin ich jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde
+		Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige
+		Tätigkeit hinweisen. Bei Bekanntwerden entsprechender Rechtsverletzungen entferne ich diese
+		Inhalte umgehend.
+	</p>
+</section>
 
-<h3>Verantwortlich für den Inhalt</h3>
-<p>[Name und Anschrift wie oben, falls abweichend: hier eintragen]</p>
+<section>
+	<h3>Nutzerinhalte</h3>
+	<p>
+		Die Namen von Figuren, Häusern und Gebäuden stammen von den angemeldeten Spielenden. Für diese
+		fremden Inhalte bin ich als Betreiber erst ab Kenntnis einer konkreten Rechtsverletzung
+		verantwortlich. Hinweise nehme ich über die oben genannte E-Mail-Adresse entgegen.
+	</p>
+</section>
 
-<h3>Streitbeilegung</h3>
-<p>
-	Zur Teilnahme an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle sind wir
-	nicht verpflichtet und nicht bereit.
-</p>
-
-<h3>Was diese Seite ist</h3>
-<p>
-	Ein privat betriebenes Browserspiel ohne Gewinnerzielungsabsicht. Es gibt keine Bezahlinhalte,
-	keine Werbung und keine Weitergabe von Daten an Dritte — was gespeichert wird, steht in der
-	<a href="{base}/datenschutz" class="link">Datenschutzerklärung</a>.
-</p>
+<section>
+	<h3>Streitbeilegung</h3>
+	<p>
+		Zur Teilnahme an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle bin ich
+		nicht verpflichtet und nicht bereit.
+	</p>
+</section>

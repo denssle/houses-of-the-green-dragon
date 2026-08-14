@@ -2114,11 +2114,21 @@ einem „Anmeldeprotokoll", das es zu löschen gälte — es gibt keines.
 Damit ist der Text nichts Abgeschriebenes, sondern eine Beschreibung des Codes. Wer ihn
 ändert, ohne den Code zu ändern, macht ihn zur Behauptung.
 
-**Impressum und Spielregeln sind Entwürfe.** Die Anbieterangaben stehen in eckigen Klammern
-und gehören ausgefüllt; ob der Text vollständig ist, gehört von jemandem geprüft, der das
-beurteilen darf — das ist keine Zurückhaltung, sondern die Grenze meiner Zuständigkeit. Die
-Spielregeln enthalten dagegen, was das Konzept voraussetzt: **ein Konto je Person.** Ein
+**Die Angaben stammen aus dem Nachbarprojekt** (`festival`) — derselbe Verantwortliche,
+derselbe Hoster, dasselbe Vorgehen. Übertragen und nicht abgeschrieben: Dort gibt es
+Profilbilder, Kommentare und Freundschaften, hier eine Chronik, die auch Gästen offensteht,
+und eine Löschung, die anonymisiert statt zu löschen. Beides steht ausdrücklich drin.
+
+Zwei Dinge kamen von dort, die hier gefehlt hätten: die **Server-Protokolle beim Hoster**
+(beim Aufruf fallen IP-Adressen an, die der Hoster verantwortet) und der Kniff, die
+**E-Mail-Adresse erst im Browser zusammenzusetzen** — mit `onMount` statt `$derived`, weil
+Letzteres beim SSR mitliefe und die fertige Adresse doch wieder ins HTML schriebe.
+
+Die **Spielregeln** enthalten, was das Konzept voraussetzt: **ein Konto je Person.** Ein
 Verbot von Mehrfachkonten setzt voraus, dass es irgendwo geschrieben steht.
+
+Ob die Texte vollständig sind, gehört trotzdem von jemandem geprüft, der das beurteilen
+darf — das ist keine Zurückhaltung, sondern die Grenze meiner Zuständigkeit.
 
 Alle drei Rechtstexte stehen **ohne Anmeldung** offen. Wer wissen will, was mit seinen
 Daten geschieht, soll das entscheiden können, bevor er welche hergibt.
