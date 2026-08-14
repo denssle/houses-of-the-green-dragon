@@ -1643,6 +1643,46 @@ wohnt. — Erledigt. Am laufenden Modell: Tick 1 kaufen alle acht ein Grundstüc
 steht die erste Zimmerei, Tick 6 sägt sie Bretter, Tick 7 verkauft sie, Tick 9 kaufen drei
 NPCs Material — **Tick 10 steht das erste eigene Wohnhaus**, Tick 13 das zweite.
 
+**4.15 Der Bürgermeister führt sein Amt.** ✓ Ein NPC im Amt ist keine Kulisse mehr.
+
+Seit 4.7c richtete er öffentliche Bauten her — mehr nicht. Kein Gesetz, kein Bauland,
+keine Wache: Unter ihm wuchs die Stadt nur, soweit sie ohnehin wuchs. Ein Amt, das nichts
+tut, ist kein Amt, und für einen Spieler wäre es kein Ziel gewesen, es ihm abzunehmen.
+
+**Eine Stadt hat Bedürfnisse wie ein Mensch**, und sie lassen sich genauso ordnen wie die
+eines Einwohners (4.13): erst was schützt, dann was trägt, dann was wächst.
+
+1. **Die Wache bezahlen.** Ein Wachhaus ohne Sold ist ein leeres Haus, und Raubzüge kosten
+   die Stadt mehr als der Sold. Kostet nichts außer dem Aushang — deshalb ganz vorn.
+2. **Erhalten, was steht.** Billiger als neu bauen, und der Verfall frisst still.
+3. **Bauen, was fehlt** — Wachhaus, Schule, Unterkunft. Nur Bauten mit Wirkung: Ein
+   zweites Rathaus ändert nichts.
+4. **Land ausweisen**, wenn keines mehr frei ist.
+5. **An der Steuer drehen** — zuletzt, weil sie andere trifft. Wer sie anhebt, nimmt
+   seinen Wählern etwas weg und wird daran gemessen.
+
+**Die Rücklage der Stadt** ist die Bremse: Gebaut wird nur, was die Kasse über zwei
+Erschließungen hinaus hergibt. Löhne und Instandhaltung laufen weiter, auch wenn gerade
+nichts eingeht — eine Stadt, die alles verbaut, kann ihre Wache nächste Woche nicht
+bezahlen. Gerechnet wird sie in Erschließungskosten, damit sie mit den Preisen mitwandert
+statt eine Konstante zu sein, die beim ersten Balancing danebenliegt.
+
+Die Steuer steigt, wenn die Kasse die Rücklage nicht hergibt, und **sinkt wieder**, wenn
+die Stadt hortet: Wer hortet, nimmt seinen Bürgern Geld ab, das sie besser selbst ausgäben.
+Die Grenzen aus 4.7b gelten dabei auch für einen NPC — die Verfassung steht im Code, nicht
+zur Abstimmung.
+
+**Höchstens eine Handlung je Tick.** Ein Bürgermeister, der in derselben Stunde die
+Steuern erhöht, ein Wachhaus baut und Land erschließt, wäre kein Amtsinhaber, sondern ein
+Automat. Und ein **Spieler** im Amt bekommt diese Hilfe nicht: Er soll selbst entscheiden.
+
+Nebenbei ist `TAGELOHN` aus dem NPC-Dienst nach `economy.ts` gewandert. Die Zahl ist die
+Messlatte für jedes Lohnangebot — auch der Bürgermeister zahlt sie seiner Wache —, und
+eine Balancing-Größe gehört zu den anderen.
+
+_Fertig, wenn:_ Eine Stadt unter NPC-Führung verändert sich sichtbar. — Erledigt;
+`mayorService.spec.ts` prüft jede Stufe gegen die Datenbank.
+
 **4.9b Fernhandel und weitere Städte.** Waren zwischen Orten bewegen (`shipment` mit
 Ankunfts-Tick statt Fortbewegung), Gründung einer zweiten Stadt. Fernziele für etablierte
 Dynastien — und die Voraussetzung dafür, dass ein Räuber jemanden unterwegs überfallen

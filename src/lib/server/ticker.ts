@@ -6,6 +6,7 @@ import * as buildingService from '$lib/server/service/buildingService';
 import * as electionService from '$lib/server/service/electionService';
 import * as hazardService from '$lib/server/service/hazardService';
 import * as lawService from '$lib/server/service/lawService';
+import * as mayorService from '$lib/server/service/mayorService';
 import * as npcService from '$lib/server/service/npcService';
 import { findStartRegionId } from '$lib/db/seed';
 
@@ -109,6 +110,18 @@ async function schlagen(): Promise<void> {
 		if (auktionen.closed > 0) {
 			console.info(
 				`${auktionen.closed} Versteigerungen beendet, ${auktionen.awarded} mit Zuschlag.`
+			);
+		}
+
+		// Und er fuehrt sein Amt: Wache bezahlen, bauen, Land ausweisen, Steuern setzen.
+		// Hoechstens eine Handlung je Tick — ein Buergermeister, der in derselben Stunde
+		// alles taete, waere kein Amtsinhaber, sondern ein Automat.
+		const regiert = await mayorService.governAsNpcMayor(stadtId, geschehen.currentTick);
+		if (regiert) {
+			console.info(
+				`Amtshandlung: ${regiert.action}` +
+					(regiert.detail ? ` (${regiert.detail})` : '') +
+					(regiert.value !== undefined ? ` — ${regiert.value}` : '')
 			);
 		}
 

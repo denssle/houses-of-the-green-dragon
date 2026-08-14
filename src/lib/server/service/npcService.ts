@@ -15,7 +15,7 @@ import {
 	renovationMaterial,
 	residentsAt
 } from '$lib/game/building.logic';
-import { PLOT_PRICE } from '$lib/game/economy';
+import { PLOT_PRICE, TAGELOHN } from '$lib/game/economy';
 import { LEASE_FEE } from '$lib/server/service/productionService';
 import { AGE_OF_MAJORITY, ageInYears } from '$lib/game/time';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
@@ -44,13 +44,6 @@ import { isWorthTaking } from '$lib/game/employment.logic';
  * gehört er gestaffelt oder auf einen eigenen Prozess. Der Punkt, an dem es weh tut,
  * liegt bei einigen tausend Einwohnern, und bis dahin ist die Einfachheit mehr wert.
  */
-
-/**
- * Was die staedtische Schmiede zahlt — die Messlatte, ab der sich eine feste Stelle
- * lohnt. Steht hier, weil es eine Eigenschaft der Kruecke ist und nicht der Anstellung:
- * Faellt die Schmiede weg, faellt auch diese Zahl.
- */
-const TAGELOHN = 3;
 
 /** Was ein Durchlauf bewirkt hat — fürs Log und die Tests. */
 export interface NpcTick {

@@ -17,6 +17,16 @@
  */
 export const PLOT_PRICE = 40;
 
+/**
+ * Was die städtische Schmiede zahlt — die Messlatte, ab der sich eine feste Stelle lohnt.
+ *
+ * Sie ist eine Eigenschaft der Krücke aus 3.3 und nicht der Anstellung: Fällt die Schmiede
+ * weg, fällt auch diese Zahl. Bis dahin ist sie der Lohn, den jeder sicher bekommt — und
+ * damit die Zahl, an der sich jedes Angebot messen lassen muss. Auch der Bürgermeister
+ * zahlt sie seiner Wache; wer weniger böte, fände niemanden.
+ */
+export const TAGELOHN = 3;
+
 /** Reicht das Geld? Eine eigene Funktion, damit die Richtung des Vergleichs an einer
  * Stelle steht — im Prototyp war genau dieser Vergleich verdreht und verbot den Kauf,
  * sobald man genug hatte. */

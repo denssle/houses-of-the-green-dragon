@@ -277,9 +277,8 @@ Offen bleibt:
   ein NPC nimmt sie nie. Dasselbe beim Wohnhaus: Aus der Kate wird nie ein Haus, obwohl
   genau das mehr Platz für Kinder schüfe.
 - **Kinder zur Schule schicken** (das ist Punkt 24 und gehört hierher).
-- **Sich um Ämter kümmern, die sie haben.** Ein NPC-Bürgermeister richtet öffentliche
-  Bauten her (4.7c), erlässt aber keine Gesetze und weist kein Bauland aus — die Stadt
-  wächst unter ihm nur, soweit sie ohnehin wächst.
+- ~~Sich um Ämter kümmern~~ **(4.15 erledigt):** Ein NPC-Bürgermeister bezahlt seine
+  Wache, erhält die Bauten, errichtet was fehlt, weist Land aus und setzt den Zehnt.
 - **Verkaufen, was sie nicht brauchen.** Sie hängen nur Erzeugnisse des eigenen Betriebs
   aus. Ein Bauer mit dreißig Getreide in der Kammer bietet nichts an.
 
