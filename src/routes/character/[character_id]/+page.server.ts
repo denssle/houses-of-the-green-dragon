@@ -1,5 +1,5 @@
 import * as chronicleService from '$lib/server/service/chronicleService';
-import { chronicleMessage } from '$lib/chronicleMessage';
+import { chronicleParts } from '$lib/chronicleMessage';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as characterService from '$lib/server/service/characterService';
@@ -14,43 +14,69 @@ import { deathProbabilityPerYear } from '$lib/game/mortality.logic';
 import { personalityLabel } from '$lib/game/personality.logic';
 import { ageInYears, MAX_ACTION_POINTS, yearOf } from '$lib/game/time';
 
-export const load: PageServerLoad = async ({ locals }) => {
-	const character = locals.currentCharacter;
-	if (!character) {
-		error(404, 'Not Found');
+/**
+ * Die Seite einer Person — der eigenen oder einer fremden.
+ *
+ * **Bis hierher zeigte sie immer den eigenen Charakter**, ganz gleich, welche Kennung in
+ * der Adresse stand. Alle Verweise aus Chronik und Rathaus führten damit ins Leere: Man
+ * klickte auf „Alheid" und sah sich selbst. Jetzt entscheidet der Parameter, wer gezeigt
+ * wird.
+ *
+ * **Nicht alles geht jeden an.** Was auf der Gasse sichtbar wäre, steht auch hier: Alter,
+ * Aufenthalt, Familie, Wohnhaus, Besitz, Können, was die Chronik über jemanden festhält.
+ * Was in seiner Truhe liegt, nicht: Geld, Aktionspunkte, Sättigung. Das ist keine
+ * Geheimniskrämerei, sondern dieselbe Grenze, die auch das Spiel zieht — wer wissen will,
+ * wie es einem anderen geht, muss ihn besuchen.
+ */
+export const load: PageServerLoad = async ({ locals, params }) => {
+	const eigener = locals.currentCharacter;
+	const gezeigt =
+		eigener && eigener.id === params.character_id
+			? eigener
+			: await characterService.getCharacter(params.character_id);
+
+	if (!gezeigt) {
+		error(404, 'Diese Person kennt hier niemand');
 	}
 
+	// Der Vergleich läuft über die Kennung und nicht über die Objektgleichheit: Der eigene
+	// Charakter kommt aus `locals`, ein fremder aus der Datenbank.
+	const selbst: boolean = eigener?.id === gezeigt.id;
+
 	const jetzt: number = await worldService.currentTick();
-	const alter: number = ageInYears(character.birthTick, jetzt);
-	const eigeneGebäude = await buildingService.getBuildingsOfCharacter(character.id);
-	const zuhause = character.homeBuildingId
-		? await buildingService.getBuilding(character.homeBuildingId)
+	const alter: number = ageInYears(gezeigt.birthTick, jetzt);
+	const zuhause = gezeigt.homeBuildingId
+		? await buildingService.getBuilding(gezeigt.homeBuildingId)
 		: undefined;
 
 	return {
-		character,
+		character: gezeigt,
+		self: selbst,
 		age: alter,
-		nature: personalityLabel(character.personality, character.gender),
+		// Wer tot ist, soll nicht lebendig wirken: Ein Verweis aus der Chronik führt oft zu
+		// jemandem, den es längst nicht mehr gibt.
+		diedInYear: gezeigt.deathTick === null ? null : yearOf(gezeigt.deathTick),
+		nature: personalityLabel(gezeigt.personality, gezeigt.gender),
 		// Nicht die Zahl, sondern ob überhaupt eines besteht: Ein Prozentwert lüde dazu
 		// ein, den Tod auszurechnen statt sich auf ihn vorzubereiten.
 		mortal: deathProbabilityPerYear(alter) > 0,
 		maxActionPoints: MAX_ACTION_POINTS,
-		region: await regionService.getRegion(character.regionId),
+		region: await regionService.getRegion(gezeigt.regionId),
 		home: zuhause,
-		plots: await plotService.getPlotsOfCharacter(character.id),
-		buildings: eigeneGebäude,
-		children: await lifecycleService.getChildren(character.id, jetzt),
-		skills: await skillService.getSkills(character.id),
-		hunger: await needService.getHunger(character.id, jetzt),
-		spouse: character.spouseId
-			? await characterService.getCharacter(character.spouseId)
-			: undefined,
+		plots: await plotService.getPlotsOfCharacter(gezeigt.id),
+		buildings: await buildingService.getBuildingsOfCharacter(gezeigt.id),
+		children: await lifecycleService.getChildren(gezeigt.id, jetzt),
+		skills: await skillService.getSkills(gezeigt.id),
+		// Sättigung ist eine Auskunft über den Zustand einer Truhe, nicht über einen
+		// Menschen auf der Gasse.
+		hunger: selbst ? await needService.getHunger(gezeigt.id, jetzt) : undefined,
+		spouse: gezeigt.spouseId ? await characterService.getCharacter(gezeigt.spouseId) : undefined,
 		// Der Lebenslauf ist kein eigenes System, sondern die Chronik nach dieser Person
 		// gefiltert: geboren, verheiratet, im Amt, gestorben.
-		life: (await chronicleService.getChronicle({ characterId: character.id, limit: 12 })).map(
+		life: (await chronicleService.getChronicle({ characterId: gezeigt.id, limit: 12 })).map(
 			(eintrag) => ({
 				id: eintrag.id,
-				text: chronicleMessage(eintrag),
+				parts: chronicleParts(eintrag),
 				year: yearOf(eintrag.tick)
 			})
 		)

@@ -1,4 +1,4 @@
-import type { EventKind } from '$lib/game/chronicle.logic';
+﻿import type { EventKind } from '$lib/game/chronicle.logic';
 import { LAW_RULES, type LawKind } from '$lib/game/law.logic';
 import { OFFICE_NAMES, type Office } from '$lib/game/election.logic';
 import { SKILL_NAMES, type SkillType } from '$lib/game/skill.logic';
@@ -15,19 +15,85 @@ import { getItemTemplate } from '$lib/model/itemTemplate';
 
 export interface ChronicleLine {
 	kind: EventKind;
-	subject?: { name: string };
-	object?: { name: string };
-	building?: { name: string };
+	subject?: { id?: string; name: string };
+	object?: { id?: string; name: string };
+	building?: { id?: string; name: string };
 	dynasty?: { name: string };
 	value: number | null;
 	detail: string | null;
 }
 
+/**
+ * Die Stellen im Satz, an denen jemand oder etwas genannt wird.
+ *
+ * Der Satz wird einmal gebaut — mit Platzhaltern statt Namen. Wer ihn als Text braucht,
+ * bekommt die Namen eingesetzt; wer ihn anzeigen will, bekommt ihn in Stücken und kann
+ * die Genannten verlinken. Zwei Fassungen desselben Satzes nebeneinander zu pflegen wäre
+ * die Alternative gewesen, und sie liefen auseinander, sobald jemand eine Formulierung
+ * ändert.
+ *
+ * Steuerzeichen als Platzhalter, weil sie in keinem Namen vorkommen können.
+ */
+const PLATZ = { subject: '\u0001', object: '\u0002', building: '\u0003' } as const;
+
+/** Ein Stück eines Chroniksatzes: entweder Text oder jemand, den man aufsuchen kann. */
+export type ChroniclePart =
+	| { text: string }
+	| { name: string; target: 'character' | 'building'; id?: string };
+
 /** Was in der Chronik steht — als ganzer Satz. */
 export function chronicleMessage(entry: ChronicleLine): string {
-	const wer: string = entry.subject?.name ?? 'Jemand';
-	const wen: string = entry.object?.name ?? 'jemanden';
-	const haus: string = entry.building?.name ?? 'ein Gebäude';
+	return satz(entry)
+		.split(/([\u0001\u0002\u0003])/)
+		.map((stueck) => {
+			if (stueck === PLATZ.subject) return entry.subject?.name ?? 'Jemand';
+			if (stueck === PLATZ.object) return entry.object?.name ?? 'jemanden';
+			if (stueck === PLATZ.building) return entry.building?.name ?? 'ein Gebäude';
+			return stueck;
+		})
+		.join('');
+}
+
+/**
+ * Derselbe Satz, aber in Stücken — damit die Anzeige die Genannten verlinken kann.
+ *
+ * Leere Stücke fallen weg: Steht ein Platzhalter am Satzanfang, liefert `split` davor
+ * eine leere Zeichenkette, und die als eigenes Stück auszugeben wäre nur Ballast.
+ */
+export function chronicleParts(entry: ChronicleLine): ChroniclePart[] {
+	return satz(entry)
+		.split(/([\u0001\u0002\u0003])/)
+		.filter((stueck) => stueck !== '')
+		.map((stueck): ChroniclePart => {
+			if (stueck === PLATZ.subject) {
+				return {
+					name: entry.subject?.name ?? 'Jemand',
+					target: 'character',
+					id: entry.subject?.id
+				};
+			}
+			if (stueck === PLATZ.object) {
+				return {
+					name: entry.object?.name ?? 'jemanden',
+					target: 'character',
+					id: entry.object?.id
+				};
+			}
+			if (stueck === PLATZ.building) {
+				return {
+					name: entry.building?.name ?? 'ein Gebäude',
+					target: 'building',
+					id: entry.building?.id
+				};
+			}
+			return { text: stueck };
+		});
+}
+
+function satz(entry: ChronicleLine): string {
+	const wer: string = PLATZ.subject;
+	const wen: string = PLATZ.object;
+	const haus: string = PLATZ.building;
 
 	switch (entry.kind) {
 		case 'BIRTH':

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
@@ -70,27 +71,6 @@
 		</p>
 	</section>
 {/if}
-<dl>
-	{#if data.plot}
-		<dt>Lage</dt>
-		<dd>{data.plot.address}</dd>
-	{/if}
-
-	<dt>Zustand</dt>
-	<dd>{data.building.condition} von 100 — {zustandswort(data.building.condition)}</dd>
-
-	<dt>Ausbaustufe</dt>
-	<dd>
-		{data.levelName ?? data.building.level}
-		<small>(Stufe {data.building.level} von {data.maxLevel})</small>
-	</dd>
-
-	{#if data.building.forSalePrice !== null}
-		<dt>Zu verkaufen</dt>
-		<dd>{data.building.forSalePrice} Münzen, samt Grundstück</dd>
-	{/if}
-</dl>
-
 {#each data.option?.actions ?? [] as action (action)}
 	<form method="POST" action="?/act" use:enhance>
 		<input type="hidden" name="action" value={action} />
@@ -107,7 +87,9 @@
 			{#each data.offers as angebot (angebot.id)}
 				<li>
 					{angebot.quantity} × {angebot.itemName} für {angebot.pricePerUnit} Münzen
-					<small>— {angebot.sellerName}</small>
+					<small>
+						— <a href="{base}/character/{angebot.sellerId}" class="link">{angebot.sellerName}</a>
+					</small>
 					{#if !angebot.mine}
 						<form method="POST" action="?/buyOffer" use:enhance>
 							<input type="hidden" name="offerId" value={angebot.id} />
@@ -212,7 +194,10 @@
 		{:else}
 			<ul>
 				{#each data.staff as person (person.id)}
-					<li>{person.name} — {person.wage} Münzen je Aktionspunkt</li>
+					<li>
+						<a href="{base}/character/{person.id}" class="link">{person.name}</a>
+						— {person.wage} Münzen je Aktionspunkt
+					</li>
 				{/each}
 			</ul>
 		{/if}
@@ -274,16 +259,20 @@
 				{#if data.school.fee === 0}<i>— die Stadt zahlt</i>{/if} und einen Teil der Kraft deines Kindes.
 			</p>
 			{#each data.school.teachers as lehrer (lehrer.characterId + lehrer.skill)}
+				<!--
+					Der Lehrer steht außerhalb des `label`: Ein Verweis darin wäre nur schwer
+					anzuklicken, weil ein Klick aufs Label zum Auswahlfeld springt.
+				-->
 				<form method="POST" action="?/school" use:enhance>
 					<input type="hidden" name="skill" value={lehrer.skill} />
-					<label>
-						{lehrer.skillName} bei {lehrer.name} (bis Stufe {lehrer.upTo}) —
-						<select name="childId" aria-label="Kind für {lehrer.skillName}">
-							{#each data.school.children as kind (kind.id)}
-								<option value={kind.id}>{kind.firstName}, {kind.age} Jahre</option>
-							{/each}
-						</select>
-					</label>
+					{lehrer.skillName} bei
+					<a href="{base}/character/{lehrer.characterId}" class="link">{lehrer.name}</a>
+					(bis Stufe {lehrer.upTo}) —
+					<select name="childId" aria-label="Kind für {lehrer.skillName}">
+						{#each data.school.children as kind (kind.id)}
+							<option value={kind.id}>{kind.firstName}, {kind.age} Jahre</option>
+						{/each}
+					</select>
 					<button type="submit">Hinschicken</button>
 				</form>
 			{/each}

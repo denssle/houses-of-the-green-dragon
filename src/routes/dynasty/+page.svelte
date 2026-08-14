@@ -44,10 +44,19 @@
 					(m) => m.id === person.motherId || m.id === person.fatherId
 				)}
 				<li>
-					{#if person.isPlayed}<b>{person.firstName}</b>{:else}{person.firstName}{/if}
+					<a href="{base}/character/{person.id}" class="link">
+						{#if person.isPlayed}<b>{person.firstName}</b>{:else}{person.firstName}{/if}
+					</a>
 					— {person.age} Jahre{person.alive ? '' : ', gestorben'}
 					{#if eltern.length > 0}
-						<small>Kind von {eltern.map((e) => e.firstName).join(' und ')}</small>
+						<!-- Auch die Eltern sind Personen, die man nachschlagen können soll. -->
+						<small>
+							Kind von
+							{#each eltern as elternteil, i (elternteil.id)}
+								{#if i > 0}und{/if}
+								<a href="{base}/character/{elternteil.id}" class="link">{elternteil.firstName}</a>
+							{/each}
+						</small>
 					{:else}
 						<small>Beginn der Linie</small>
 					{/if}

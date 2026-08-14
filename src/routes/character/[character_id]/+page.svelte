@@ -1,13 +1,19 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
+	import ChronicleText from '$lib/ChronicleText.svelte';
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
 </script>
 
 <h2>{data.character.firstName}</h2>
-<p><i>{data.character.title}</i></p>
+<p>
+	<i>{data.character.title}</i>
+	{#if data.diedInYear !== null}
+		<b>— gestorben im Jahr {data.diedInYear}</b>
+	{/if}
+</p>
 
 {#if form?.message}
 	<p><b>{form.message}</b></p>
@@ -17,7 +23,7 @@
 	<dt>Alter</dt>
 	<dd>
 		{data.age} Jahre
-		{#if data.mortal}
+		{#if data.mortal && data.diedInYear === null}
 			<i>— die Jahre zählen</i>
 		{/if}
 	</dd>
@@ -25,16 +31,22 @@
 	<dt>Aufenthalt</dt>
 	<dd>{data.region?.name ?? 'unbekannt'}</dd>
 
-	<dt>Geld</dt>
-	<dd>{data.character.money} Münzen</dd>
+	<!--
+		Geld, Aktionspunkte und Sättigung stehen nur auf der eigenen Seite: Was jemand in
+		der Truhe hat, sieht man ihm nicht an.
+	-->
+	{#if data.self}
+		<dt>Geld</dt>
+		<dd>{data.character.money} Münzen</dd>
 
-	<dt>Aktionspunkte</dt>
-	<dd>{data.character.actionPoints} von {data.maxActionPoints}</dd>
+		<dt>Aktionspunkte</dt>
+		<dd>{data.character.actionPoints} von {data.maxActionPoints}</dd>
 
-	<dt>Zustand</dt>
-	<dd>
-		{#if data.hunger}{data.hunger.label} <small>({data.hunger.satiety} von 100)</small>{/if}
-	</dd>
+		<dt>Zustand</dt>
+		<dd>
+			{#if data.hunger}{data.hunger.label} <small>({data.hunger.satiety} von 100)</small>{/if}
+		</dd>
+	{/if}
 
 	<dt>Wesensart</dt>
 	<dd>
@@ -48,7 +60,8 @@
 	<dt>Familienstand</dt>
 	<dd>
 		{#if data.spouse}
-			verheiratet mit {data.spouse.firstName}
+			verheiratet mit
+			<a href="{base}/character/{data.spouse.id}" class="link">{data.spouse.firstName}</a>
 			{#if data.character.pregnantSinceTick !== null}
 				<b>— ein Kind ist unterwegs</b>
 			{/if}
@@ -86,7 +99,9 @@
 <section>
 	<h3>Besitz</h3>
 	{#if data.plots.length === 0 && data.buildings.length === 0}
-		<p><i>Noch gehört dir nichts.</i></p>
+		<p>
+			<i>{data.self ? 'Noch gehört dir nichts.' : 'Besitz hat diese Person keinen.'}</i>
+		</p>
 	{/if}
 
 	{#if data.plots.length > 0}
@@ -112,42 +127,61 @@
 </section>
 
 <section>
-	<h3>Erbfolge</h3>
+	<h3>{data.self ? 'Erbfolge' : 'Kinder'}</h3>
 	{#if data.children.length === 0}
 		<p>
-			<i>Du hast keine Kinder.</i>
-			Stirbst du so, erlischt dein Haus und dein Besitz fällt an die Stadt.
+			{#if data.self}
+				<i>Du hast keine Kinder.</i>
+				Stirbst du so, erlischt dein Haus und dein Besitz fällt an die Stadt.
+			{:else}
+				<i>Kinder hat diese Person keine.</i>
+			{/if}
 		</p>
 	{:else}
-		<p>
-			<i>
-				Wer erbt, entscheidest du. Die übrigen Kinder bekommen ihren gesetzlichen Anteil am Bargeld;
-				Grundstücke und Gebäude gehen ungeteilt an den Erben.
-			</i>
-		</p>
-		<ul>
+		{#if data.self}
+			<p>
+				<i>
+					Wer erbt, entscheidest du. Die übrigen Kinder bekommen ihren gesetzlichen Anteil am
+					Bargeld; Grundstücke und Gebäude gehen ungeteilt an den Erben.
+				</i>
+			</p>
+		{/if}
+		<ul class="entries">
 			{#each data.children as kind (kind.id)}
 				<li>
-					{kind.firstName}, {kind.age} Jahre — <i>{kind.nature}</i>
-					{#if kind.isHeir}
-						<b>— dein Erbe</b>
-						<form method="POST" action="?/heir" use:enhance>
-							<button type="submit" class="link">Benennung zurücknehmen</button>
-						</form>
-					{:else}
-						<form method="POST" action="?/heir" use:enhance>
-							<input type="hidden" name="heirId" value={kind.id} />
-							<button type="submit">Zum Erben bestimmen</button>
-						</form>
+					<p>
+						<a href="{base}/character/{kind.id}" class="link">{kind.firstName}</a>, {kind.age}
+						Jahre — <i>{kind.nature}</i>
+						{#if kind.isHeir && data.self}<b>— dein Erbe</b>{/if}
+					</p>
+					<!--
+						Die Erbenwahl steht nur auf der eigenen Seite: Über fremde Häuser
+						bestimmt niemand.
+					-->
+					{#if data.self}
+						<div class="actions">
+							{#if kind.isHeir}
+								<form method="POST" action="?/heir" use:enhance>
+									<button type="submit" class="link">Benennung zurücknehmen</button>
+								</form>
+							{:else}
+								<form method="POST" action="?/heir" use:enhance>
+									<input type="hidden" name="heirId" value={kind.id} />
+									<button type="submit">Zum Erben bestimmen</button>
+								</form>
+							{/if}
+						</div>
 					{/if}
 				</li>
 			{/each}
 		</ul>
-		<p>
-			<small>
-				Ohne Benennung erbt das älteste volljährige Kind — aber nur, wenn es dich überlebt.
-			</small>
-		</p>
+		{#if data.self}
+			<p>
+				<small>
+					Ohne Benennung erbt das älteste volljährige Kind — aber nur, wenn es dich überlebt.
+				</small>
+			</p>
+		{/if}
 	{/if}
 </section>
 
@@ -162,7 +196,10 @@
 		<h3>Lebenslauf</h3>
 		<ul>
 			{#each data.life as eintrag (eintrag.id)}
-				<li><small>Jahr {eintrag.year}:</small> {eintrag.text}</li>
+				<li>
+					<small>Jahr {eintrag.year}:</small>
+					<ChronicleText parts={eintrag.parts} />
+				</li>
 			{/each}
 		</ul>
 	</section>

@@ -1724,6 +1724,40 @@ nicht zur Wahl; sobald die Rücklage steht, schon. Das steht jetzt als eigener T
 
 _Fertig, wenn:_ Der Wahlzettel füllt sich im Laufe des Wahlkampfs. — Erledigt.
 
+**4.17 Jeder Name führt zu der Person, die er meint.** ✓ Ein Vorspann zu Phase 5, und er
+deckte einen Fehler auf, der seit 3.4 im Code stand.
+
+**Die Charakterseite zeigte immer den eigenen Charakter.** `/character/<kennung>` las den
+Parameter gar nicht, sondern nahm, was in `locals` stand. Die Verweise aus Chronik und
+Rathaus gab es längst — sie führten alle auf einen selbst. Wer auf „Alheid" klickte, sah
+sich.
+
+Jetzt entscheidet der Parameter, und damit stellt sich eine Frage, die es vorher nicht
+gab: **Was geht einen Fremden an?** Die Trennung folgt dem, was auf der Gasse sichtbar
+wäre. Alter, Aufenthalt, Familie, Wohnhaus, Besitz, Können und die Chronik stehen jedem
+offen — Geld, Aktionspunkte und Sättigung nur einem selbst. Und wer tot ist, wird als tot
+ausgewiesen: Ein Verweis aus der Chronik führt oft zu jemandem, den es nicht mehr gibt.
+
+**Die Chronik nennt jetzt jeden Genannten einzeln.** Vorher war der ganze Satz ein Link
+auf das Subjekt — bei „Alheid und Bertram haben geheiratet" führten damit beide Namen zu
+Alheid. Die Sätze entstehen deshalb mit Platzhaltern statt Namen: `chronicleMessage` setzt
+sie ein, `chronicleParts` liefert sie in Stücken, und beide kommen aus derselben Vorlage.
+Zwei Fassungen nebeneinander liefen auseinander, sobald jemand eine Formulierung ändert.
+
+Verlinkt sind damit: die Leute in der Stadt, der Stammbaum samt Eltern, Ehepartner und
+Kinder, Verkäufer auf dem Markt und im Laden, Angestellte, Lehrer, und jeder Name in jeder
+Chronikzeile. **Gäste bekommen keine** — ihnen stehen die Charakterseiten nicht offen, und
+ein Link, der auf die Anmeldung führt, ist ein Versprechen, das die Seite bricht.
+
+Beim Durchklicken fiel nebenbei auf, dass die **Gebäudeseite ihren Kopf zweimal zeigte** —
+Lage, Zustand und Ausbaustufe standen in zwei gleichen `dl`-Blöcken untereinander. Der
+zweite ist gefallen.
+
+_Fertig, wenn:_ Man kann sich von einem Namen aus durch die Stadt klicken. — Erledigt und
+am laufenden Server durchgeklickt: von der Leuteliste zu Alheid (62, verheiratet mit
+Bertram, Schmieden auf Stufe 6 — aber ohne Geld und Aktionspunkte), von dort über ihren
+Lebenslauf zu Tilman, aus der Chronik ins Wohnhaus.
+
 **4.9b Fernhandel und weitere Städte.** Waren zwischen Orten bewegen (`shipment` mit
 Ankunfts-Tick statt Fortbewegung), Gründung einer zweiten Stadt. Fernziele für etablierte
 Dynastien — und die Voraussetzung dafür, dass ein Räuber jemanden unterwegs überfallen

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import ChronicleText from '$lib/ChronicleText.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -33,11 +34,7 @@
 		{#each data.entries as eintrag (eintrag.id)}
 			<li>
 				<small>{eintrag.season} {eintrag.year}:</small>
-				{#if eintrag.subjectId}
-					<a href="{base}/character/{eintrag.subjectId}" class="link">{eintrag.text}</a>
-				{:else}
-					{eintrag.text}
-				{/if}
+				<ChronicleText parts={eintrag.parts} />
 			</li>
 		{/each}
 	</ul>

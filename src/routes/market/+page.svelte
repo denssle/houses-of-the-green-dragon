@@ -25,7 +25,8 @@
 			<li>
 				{angebot.quantity} × {angebot.itemName} für {angebot.pricePerUnit} Münzen das Stück
 				<small>
-					— bei {angebot.sellerName},
+					— bei
+					<a href="{base}/character/{angebot.sellerId}" class="link">{angebot.sellerName}</a>,
 					<a href="{base}/building/{angebot.buildingId}" class="link">{angebot.buildingName}</a>
 				</small>
 				{#if angebot.mine}

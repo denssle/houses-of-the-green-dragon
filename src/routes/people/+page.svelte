@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
@@ -54,7 +55,7 @@
 		{#each data.people as person (person.id)}
 			<li>
 				<p>
-					<b>{person.firstName}</b>
+					<a href="{base}/character/{person.id}" class="link"><b>{person.firstName}</b></a>
 					<small
 						>({person.title}{VERWANDT[person.kinship]
 							? `, ${VERWANDT[person.kinship]}`

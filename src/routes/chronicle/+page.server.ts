@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import * as chronicleService from '$lib/server/service/chronicleService';
 import * as regionService from '$lib/server/service/regionService';
-import { chronicleMessage } from '$lib/chronicleMessage';
+import { chronicleParts } from '$lib/chronicleMessage';
 import { findStartRegionId } from '$lib/db/seed';
 import { seasonOf, SEASON_NAMES, yearOf } from '$lib/game/time';
 
@@ -59,12 +59,18 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			id: eintrag.id,
 			// Der Satz entsteht hier und nicht in der Ablage: Dort steht eine Zeile aus
 			// Kennungen, damit ein umbenannter Charakter nicht für immer anders heißt.
-			text: chronicleMessage(eintrag),
-			year: yearOf(eintrag.tick),
-			season: SEASON_NAMES[seasonOf(eintrag.tick)],
-			// Für Gäste ohne Verweis: Die Charakterseiten stehen ihnen nicht offen, und ein
+			//
+			// In Stücken statt am Stück, damit jeder Genannte für sich verlinkt werden kann:
+			// „X und Y haben geheiratet" nennt zwei Personen, und ein Verweis auf den ganzen
+			// Satz führte beide auf dieselbe.
+			//
+			// Für Gäste ohne Kennungen: Die Charakterseiten stehen ihnen nicht offen, und ein
 			// Link, der auf die Anmeldung führt, ist ein Versprechen, das die Seite bricht.
-			subjectId: character ? eintrag.subject?.id : undefined
+			parts: chronicleParts(eintrag).map((teil) =>
+				character || !('id' in teil) ? teil : { name: teil.name, target: teil.target }
+			),
+			year: yearOf(eintrag.tick),
+			season: SEASON_NAMES[seasonOf(eintrag.tick)]
 		}))
 	};
 };
