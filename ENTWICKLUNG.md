@@ -2084,7 +2084,8 @@ Interpreter namens „bash\r", und die Meldung dazu nennt eine Datei, die sichtb
 existiert — ein Fehler, der jeden einmal eine Stunde kostet.
 
 _Fertig, wenn:_ Eine Sicherung wurde eingespielt und die Welt stand vollständig darin. —
-Skripte stehen; der Lauf auf dem Host fehlt noch.
+Erledigt: Beide Skripte sind auf dem Host gelaufen, die Rückspielprobe hat bestätigt, und
+der Cron zieht die Sicherung täglich um 4:17 Uhr.
 
 **5.9 Was ein Betreiber schuldet.** ✓ (Punkte 27, 28) Vier Seiten und eine Funktion.
 

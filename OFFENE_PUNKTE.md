@@ -1056,7 +1056,7 @@ Grundstück kaufen, bauen, arbeiten — fände genau die Fehler, die beim Durchs
 Hand auffielen: ein Formular ohne Aktion, ein Link ins Leere, eine Freigabe, die für
 Datenrequests nicht gilt.
 
-### 26. Datensicherung, die geprüft ist
+### 26. Datensicherung, die geprüft ist — erledigt (5.8)
 
 Vor jedem Deploy wird die Produktionsdatenbank gesichert (seit 2.4), und die letzten
 vierzehn Sicherungen bleiben liegen. Es fehlt beides, was daraus eine Sicherung macht:
@@ -1065,6 +1065,11 @@ ein **regelmäßiger Dump per Cron** — ein Deploy ist kein Sicherungsplan — 
 
 Die Produktionsdatenbank ist das wertvollste Artefakt des Projekts: Sie enthält
 Generationen von Spielzeit, die sich nicht nachbauen lassen.
+
+Beides steht: `scripts/backup.sh` läuft täglich um 4:17 Uhr per Cron, und
+`scripts/restore-check.sh` spielt die jüngste Sicherung in eine getrennte Prüfdatenbank
+ein und zählt nach, ob die Welt darin vollständig ist. Beide sind auf dem Host gelaufen,
+die Rückspielprobe hat bestätigt.
 
 ### 27. Impressum, Datenschutz und Nutzungsbedingungen
 
