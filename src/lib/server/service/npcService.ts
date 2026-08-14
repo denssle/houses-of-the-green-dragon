@@ -1,4 +1,5 @@
 import { garmentIntact } from '$lib/game/attire.logic';
+import { CAMPAIGN_TICKS, npcChoice } from '$lib/game/election.logic';
 import { Op } from 'sequelize';
 import { Employment } from '$lib/db/model/employment';
 import { positionsAt } from '$lib/game/employment.logic';
@@ -27,6 +28,7 @@ import * as productionService from '$lib/server/service/productionService';
 import * as needService from '$lib/server/service/needService';
 import * as relationshipService from '$lib/server/service/relationshipService';
 import * as tradeService from '$lib/server/service/tradeService';
+import * as electionService from '$lib/server/service/electionService';
 import * as employmentService from '$lib/server/service/employmentService';
 import { isWorthTaking } from '$lib/game/employment.logic';
 
@@ -230,6 +232,22 @@ async function ausfuehren(npcId: string, tick: number): Promise<NpcAction> {
 			if (lage.workshopId) await employmentService.offerJob(npcId, lage.workshopId, TAGELOHN);
 			return 'OFFER_JOB';
 
+		case 'VOTE': {
+			// Gewählt wird nach Zuneigung — es gibt kein eigenes Wahlkampfsystem, und das
+			// ist der Punkt: Wer über Jahre Beziehungen gepflegt hat, hat Stimmen.
+			const zettel = lage.ballot;
+			if (zettel) {
+				const zuneigungen = [];
+				for (const kandidat of zettel.candidates) {
+					const stand = await relationshipService.getAffection(npcId, kandidat.id, tick);
+					zuneigungen.push({ candidateId: kandidat.id, affection: stand.affection });
+				}
+				const gewaehlt: string | undefined = npcChoice(npcId, zuneigungen);
+				if (gewaehlt) await electionService.vote(npcId, lage.regionId, gewaehlt);
+			}
+			return 'VOTE';
+		}
+
 		case 'IDLE':
 			return 'IDLE';
 	}
@@ -258,6 +276,7 @@ async function lageAufnehmen(
 			leaseId?: string;
 			leasableId?: string;
 			sellable?: { itemId: string; quantity: number; inChamber: number };
+			ballot?: Awaited<ReturnType<typeof electionService.getBallot>>;
 			repairId?: string;
 			missingMaterialOffer?: { id: string; quantity: number; pricePerUnit: number };
 			missingMaterialCount: number;
@@ -329,6 +348,11 @@ async function lageAufnehmen(
 		: undefined;
 	const stelleFrei = werkstatt ? await freieStelleImEigenen(werkstatt) : false;
 
+	// Läuft eine Wahl, bei der er noch nicht abgestimmt hat? (4.16)
+	const wahlzettel = await electionService.getBallot(werte.RegionId, npcId);
+	const wahlLaeuft: boolean =
+		wahlzettel !== undefined && !wahlzettel.iVoted && wahlzettel.candidates.length > 0;
+
 	const arbeitsplatz = await freierArbeitsplatz(werte.RegionId);
 	const stelle = await employmentService.getJobOf(npcId);
 	// Wer schon eine Stelle hat, sieht sich nicht um — ein NPC, der jede Stunde den
@@ -398,8 +422,15 @@ async function lageAufnehmen(
 			repairCost:
 				Math.ceil(CONDITION_MAX - (baufaellig?.condition ?? CONDITION_MAX)) *
 				RENOVATION_COST_PER_POINT,
-			canOfferJob: stelleFrei
+			canOfferJob: stelleFrei,
+			// Teilhabe (4.16). Der Fortschritt ist ein Anteil, damit `votingDelay` ihn
+			// unabhängig von der Wahlkampfdauer vergleichen kann.
+			canVote: wahlLaeuft && ageInYears(werte.birthTick, tick) >= AGE_OF_MAJORITY,
+			campaignProgress: wahlzettel
+				? Math.min(1, Math.max(0, 1 - (wahlzettel.closesTick - tick) / CAMPAIGN_TICKS))
+				: 0
 		},
+		ballot: wahlzettel,
 		repairId: baufaellig?.id,
 		missingMaterialOffer: material,
 		missingMaterialCount: fehltMaterial?.quantity ?? 0,

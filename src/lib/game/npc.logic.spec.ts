@@ -58,6 +58,9 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		repairNeeded: false,
 		repairCost: 40,
 		canOfferJob: false,
+		// Es läuft keine Wahl — die neue Stufe aus 4.16 schlägt nicht zu.
+		canVote: false,
+		campaignProgress: 0,
 		...werte
 	};
 }

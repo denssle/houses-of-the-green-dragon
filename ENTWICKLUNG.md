@@ -1683,6 +1683,42 @@ eine Balancing-Größe gehört zu den anderen.
 _Fertig, wenn:_ Eine Stadt unter NPC-Führung verändert sich sichtbar. — Erledigt;
 `mayorService.spec.ts` prüft jede Stufe gegen die Datenbank.
 
+**4.16 Wählen ist eine Handlung.** ✓ Nicht mehr ein Sammelvorgang beim Auszählen.
+
+Bis hierher stimmten alle NPCs **gleichzeitig ab, kurz vor der Auszählung**. Der Grund
+war gut gemeint: Wer am ersten Tag wählt, hatte weniger Zeit, sich eine Meinung zu bilden
+— und weil NPCs nach Zuneigung wählen, soll der Wahlkampf wirken.
+
+Zwei Folgen fielen erst im Betrieb auf, und beide sind ernst:
+
+**Der Zwischenstand stand zwei Realtage lang auf null.** Wer ins Rathaus schaute, sah eine
+Wahl, in der nichts geschah — nicht zu unterscheiden von einer kaputten.
+
+**Wer während des Wahlkampfs starb, hatte nie gewählt.** Bei fünfzig Ticks und einer
+Bevölkerung, in der ständig jemand stirbt, ist das kein Randfall: Gerade die Alten, deren
+Zuneigung am meisten Geschichte hätte, fielen systematisch heraus.
+
+Jetzt ist Wählen eine Handlung wie jede andere — ein Eintrag in der Bedürfnishierarchie,
+Stufe **Zugehörigkeit**, denn Wählen ist Teilhabe. Damit verteilt sich die Stimmabgabe
+über den Wahlkampf, der Zettel lebt, und wer stirbt, hat meist schon gewählt.
+
+**Wann einer geht, sagt sein Wesen.** `votingDelay` mischt Fleiß und Ehrgeiz: Fleiß sagt,
+wie früh einer erledigt, was ansteht (dieselbe Rolle wie beim Essen), Ehrgeiz, ob ihn
+Ämter überhaupt kümmern. Wer beides hat, steht am ersten Tag da; wer träge und
+gleichgültig ist, wartet bis kurz vor Schluss — und stirbt er vorher, hat er eben nicht
+gewählt. Trägheit soll etwas kosten.
+
+**Wählen kostet keine Aktionspunkte**, wie Essen. Wer erst dafür arbeiten müsste,
+verzichtete ausgerechnet dann darauf, wenn es ihm schlecht geht; die Ärmsten gingen nie
+zur Wahl, und das wäre eine Aussage über diese Welt, die wir nicht treffen wollen.
+
+**Die Hierarchie zeigt sich dabei von selbst**, und das ist der schönste Teil: Beim
+Umbauen der Tests wählte zunächst niemand — weil die Test-NPCs kein Geld hatten und
+deshalb arbeiten gingen. Sicherheit kommt vor Teilhabe. Wer nichts zu essen hat, geht
+nicht zur Wahl; sobald die Rücklage steht, schon. Das steht jetzt als eigener Test da.
+
+_Fertig, wenn:_ Der Wahlzettel füllt sich im Laufe des Wahlkampfs. — Erledigt.
+
 **4.9b Fernhandel und weitere Städte.** Waren zwischen Orten bewegen (`shipment` mit
 Ankunfts-Tick statt Fortbewegung), Gründung einer zweiten Stadt. Fernziele für etablierte
 Dynastien — und die Voraussetzung dafür, dass ein Räuber jemanden unterwegs überfallen

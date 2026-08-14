@@ -9,6 +9,7 @@ import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as electionService from '$lib/server/service/electionService';
+import * as npcService from '$lib/server/service/npcService';
 import * as relationshipService from '$lib/server/service/relationshipService';
 import { AMBITION_TO_STAND, CAMPAIGN_TICKS, TERM_TICKS } from '$lib/game/election.logic';
 import { AGE_OF_MAJORITY, yearsToTicks } from '$lib/game/time';
@@ -193,20 +194,63 @@ describe('Wahlen gegen die Datenbank', () => {
 			expect(await Vote.count()).toBe(1);
 		});
 
-		it('lässt NPCs beim Auszählen nach Zuneigung stimmen', async () => {
+		it('lässt NPCs im Wahlkampf nach Zuneigung stimmen', async () => {
+			// **Nicht mehr beim Auszählen.** Seit 4.16 ist Wählen eine Handlung wie jede
+			// andere: Jeder geht, wenn sein Wesen ihn treibt. Hier wird deshalb der Takt
+			// laufen gelassen und nicht die Auszählung abgewartet.
 			await wahlAusrufen();
-			const anna = await person('Anna');
-			const bertram = await person('Bertram');
-			const waehler = await person('Wähler');
+			// Mit Geld über der Rücklage: Wer nichts hat, arbeitet — Sicherheit kommt vor
+			// Teilhabe. Das ist der eigene Test darunter.
+			const anna = await person('Anna', { diligence: 100, ambition: 100, money: 100 });
+			const bertram = await person('Bertram', { diligence: 100, ambition: 100, money: 100 });
+			const waehler = await person('Wähler', { diligence: 100, ambition: 100, money: 100 });
 			await electionService.stand(anna, stadtId);
 			await electionService.stand(bertram, stadtId);
 			await relationshipService.changeAffection(waehler, bertram, 60, JETZT);
 
+			// **Zweimal:** Im ersten Tick ziehen sie unter ein Dach — Sicherheit kommt vor
+			// Teilhabe, und das ist die Hierarchie, nicht ein Versehen.
+			await npcService.actForNpcs(JETZT);
+			await npcService.actForNpcs(JETZT);
 			const ergebnis = await electionService.advanceElections(stadtId, JETZT + CAMPAIGN_TICKS);
 
 			// Anna und Bertram wählen sich selbst, der Wähler nimmt Bertram.
 			expect(ergebnis.closed?.winner).toBe(bertram);
 			expect(ergebnis.closed?.votes).toBe(3);
+		});
+
+		it('lässt den Mittellosen erst arbeiten', async () => {
+			// **Sicherheit vor Teilhabe.** Wer nichts zu essen hat, geht nicht zur Wahl —
+			// und das ist keine Panne, sondern die Bedürfnishierarchie aus 4.13. Sobald die
+			// Rücklage steht, wählt er.
+			await wahlAusrufen();
+			const anna = await person('Anna', { diligence: 100, ambition: 100, money: 100 });
+			await electionService.stand(anna, stadtId);
+			const arm = await person('Arm', { diligence: 100, ambition: 100, money: 0 });
+
+			await npcService.actForNpcs(JETZT);
+			await npcService.actForNpcs(JETZT);
+
+			const stimmen = await Vote.findAll();
+			expect(stimmen.map((s) => s.dataValues.VoterCharacterId)).not.toContain(arm);
+		});
+
+		it('lässt den Trägen erst spät wählen', async () => {
+			// Wer träge und gleichgültig ist, wartet bis kurz vor Schluss — und wenn er
+			// vorher stirbt, hat er eben nicht gewählt. Trägheit soll etwas kosten.
+			await wahlAusrufen();
+			const anna = await person('Anna', { diligence: 100, ambition: 100, money: 100 });
+			await electionService.stand(anna, stadtId);
+			await person('Traege', { diligence: -100, ambition: -100, money: 100 });
+
+			await npcService.actForNpcs(JETZT);
+			await npcService.actForNpcs(JETZT);
+			expect(await Vote.count()).toBe(1);
+
+			// Kurz vor der Auszählung geht auch er.
+			await World.update({ currentTick: JETZT + CAMPAIGN_TICKS - 1 }, { where: { id: WORLD_ID } });
+			await npcService.actForNpcs(JETZT + CAMPAIGN_TICKS - 1);
+			expect(await Vote.count()).toBe(2);
 		});
 	});
 

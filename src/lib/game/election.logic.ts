@@ -134,6 +134,26 @@ export function npcChoice(
 }
 
 /**
+ * Wie lange einer braucht, bis er wählen geht.
+ *
+ * **Als Anteil der Wahlkampfzeit, nicht in Ticks** — die Zahl soll auch dann stimmen, wenn
+ * jemand die Wahlkampfdauer ändert.
+ *
+ * Wer fleißig und ehrgeizig ist, geht am ersten Tag; wer träge und gleichgültig ist,
+ * wartet bis kurz vor Schluss — und wenn er vorher stirbt, hat er eben nicht gewählt. Das
+ * ist bewusst so: Eine Stimme, die niemand abgibt, fehlt, und Trägheit soll etwas kosten.
+ *
+ * Die Mischung aus beiden Achsen hat einen Grund: **Fleiß** sagt, wie früh einer erledigt,
+ * was ansteht (dieselbe Rolle wie beim Essen), **Ehrgeiz**, ob ihn Ämter überhaupt
+ * kümmern. Wer beides hat, steht am Wahltag als Erster da.
+ */
+export function votingDelay(personality: { diligence: number; ambition: number }): number {
+	const antrieb: number = (personality.diligence + personality.ambition) / 2;
+	// −100 → 0.9 (kurz vor Schluss), +100 → 0 (sofort).
+	return Math.max(0, Math.min(0.9, ((100 - antrieb) / 200) * 0.9));
+}
+
+/**
  * Ab welchem Ehrgeiz sich ein NPC zur Wahl stellt.
  *
  * Über dem Durchschnitt, aber nicht am Rand: Ein Wahlzettel, auf dem jeder steht, macht

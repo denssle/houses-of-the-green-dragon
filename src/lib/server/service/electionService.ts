@@ -11,14 +11,12 @@ import {
 	canVote,
 	currentHolder,
 	isEligible,
-	npcChoice,
 	type Office,
 	ranking,
 	type Tally,
 	TERM_TICKS,
 	wouldStand
 } from '$lib/game/election.logic';
-import * as relationshipService from '$lib/server/service/relationshipService';
 import * as worldService from '$lib/server/service/worldService';
 
 /**
@@ -170,10 +168,14 @@ export async function advanceElections(
 /**
  * Auszählen.
  *
- * Vorher stimmen alle NPCs ab, die es noch nicht getan haben — nach Zuneigung zu den
- * Kandidaten. Das geschieht **erst hier** und nicht laufend: Eine Stimme ist eine
- * Entscheidung ohne Kosten, und ein NPC, der sie am ersten Tag abgibt, hätte nur weniger
- * Zeit gehabt, sich eine Meinung zu bilden.
+ * **Hier wird nur gezählt.** Bis 4.16 stimmten an dieser Stelle alle NPCs auf einmal ab,
+ * die es noch nicht getan hatten — mit zwei Folgen, die erst im Betrieb auffielen: Der
+ * Zwischenstand stand die ganze Wahlkampfzeit auf null, und wer während des Wahlkampfs
+ * starb, hatte nie gewählt. Gerade die Alten, deren Zuneigung am meisten Geschichte
+ * hätte, fielen so systematisch heraus.
+ *
+ * Jetzt ist Wählen eine Handlung wie jede andere (`npc.logic.ts`): Jeder geht, wenn sein
+ * Wesen ihn treibt — der Fleißige am ersten Tag, der Träge kurz vor Schluss.
  */
 async function auszaehlen(
 	electionId: string,
@@ -181,7 +183,6 @@ async function auszaehlen(
 	tick: number
 ): Promise<NonNullable<ElectionTick['closed']>> {
 	await notfallsJemandenAufstellen(electionId, regionId, tick);
-	await npcsAbstimmenLassen(electionId, regionId, tick);
 
 	const rang: string[] = await rangfolge(electionId);
 	const stimmen: number = await Vote.count({ where: { ElectionId: electionId } });
@@ -226,50 +227,6 @@ async function notfallsJemandenAufstellen(
 		CharacterId: gedraengt.dataValues.id,
 		standingSinceTick: tick
 	});
-}
-
-/** Alle wahlberechtigten NPCs, die noch nicht gewählt haben, stimmen ab. */
-async function npcsAbstimmenLassen(
-	electionId: string,
-	regionId: string,
-	tick: number
-): Promise<void> {
-	const kandidaten = await Candidacy.findAll({ where: { ElectionId: electionId } });
-	if (kandidaten.length === 0) return;
-
-	const kandidatenIds: string[] = kandidaten.map((k) => k.dataValues.CharacterId);
-	const waehler = await Character.findAll({
-		where: { RegionId: regionId, deathTick: null, role: 'NPC' }
-	});
-
-	for (const waehlerIn of waehler) {
-		if (!isEligible(waehlerIn.dataValues.birthTick, tick)) continue;
-
-		const schon = await Vote.findOne({
-			where: { ElectionId: electionId, VoterCharacterId: waehlerIn.dataValues.id }
-		});
-		if (schon) continue;
-
-		// Kein eigenes Wahlkampfsystem: Es zählt, wie der Wähler zum Kandidaten steht.
-		const zuneigungen = [];
-		for (const kandidatId of kandidatenIds) {
-			const stand = await relationshipService.getAffection(
-				waehlerIn.dataValues.id,
-				kandidatId,
-				tick
-			);
-			zuneigungen.push({ candidateId: kandidatId, affection: stand.affection });
-		}
-
-		const gewaehlt: string | undefined = npcChoice(waehlerIn.dataValues.id, zuneigungen);
-		if (!gewaehlt) continue;
-
-		await Vote.create({
-			ElectionId: electionId,
-			VoterCharacterId: waehlerIn.dataValues.id,
-			CandidateCharacterId: gewaehlt
-		});
-	}
 }
 
 // --- Handlungen ----------------------------------------------------------------------

@@ -1,3 +1,4 @@
+import { votingDelay } from '$lib/game/election.logic';
 import type { Personality } from '$lib/game/personality.logic';
 import { SATIETY_COMFORTABLE, SATIETY_WEAKENED } from '$lib/game/need.logic';
 
@@ -45,6 +46,8 @@ export const NPC_ACTIONS = [
 	'BUILD_HOME',
 	'RENOVATE',
 	'OFFER_JOB',
+	// Seit 4.16: Wählen ist eine Handlung wie jede andere.
+	'VOTE',
 	'IDLE'
 ] as const;
 export type NpcAction = (typeof NPC_ACTIONS)[number];
@@ -119,6 +122,12 @@ export interface NpcState {
 	repairCost: number;
 	/** Hat sein Betrieb eine freie Stelle, für die noch kein Lohn aushängt? */
 	canOfferJob: boolean;
+
+	// --- Teilhabe (4.16) --------------------------------------------------------------
+	/** Läuft eine Wahl, bei der er noch nicht abgestimmt hat? */
+	canVote: boolean;
+	/** Wie weit der Wahlkampf fortgeschritten ist — 0 am Anfang, 1 am Ende. */
+	campaignProgress: number;
 }
 
 /**
@@ -253,6 +262,18 @@ function sicherheit(state: NpcState): NpcAction | undefined {
  * sonst stürbe seine Linie an seinem Wesen.
  */
 function zugehoerigkeit(state: NpcState): NpcAction | undefined {
+	// **Wählen kostet keine Aktionspunkte** — wie Essen. Wer erst dafür arbeiten müsste,
+	// verzichtete ausgerechnet dann darauf, wenn es ihm schlecht geht; die Ärmsten gingen
+	// nie zur Wahl, und das wäre eine Aussage über diese Welt, die wir nicht treffen
+	// wollen.
+	//
+	// **Wann** einer geht, sagt sein Wesen (siehe `votingDelay`): Der Fleißige und
+	// Ehrgeizige am ersten Tag, der Träge kurz vor Schluss — und wer vorher stirbt, hat
+	// eben nicht gewählt.
+	if (state.canVote && state.campaignProgress >= votingDelay(state.personality)) {
+		return 'VOTE';
+	}
+
 	if (
 		!state.isMarried &&
 		state.isAdult &&
