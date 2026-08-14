@@ -151,6 +151,46 @@ export function desiredReserve(personality: Personality, foodPrice: number): num
 }
 
 /**
+ * Worauf einer gerade spart — oder nichts, wenn er nichts vorhat.
+ *
+ * **Das ist die Antwort auf Punkt 55.** Bis hierher arbeitete ein NPC nur, solange sein
+ * Geld unter der Rücklage lag; war sie voll, hörte er auf. Für ein Grundstück braucht er
+ * aber Rücklage *plus* Kaufpreis — und über die Rücklage kam er nie. Gemessen an der
+ * Seed-Welt: Nach zwei Spieljahren standen die Einwohner in 508 von 800 Runden untätig
+ * herum, mit 21 bis 45 Münzen in der Tasche, und kein Grundstück hatte den Besitzer
+ * gewechselt. Die Stadt stand nicht still, weil ihr Geld fehlte, sondern weil niemand
+ * einen Grund hatte, mehr zu verdienen als für das Brot von morgen.
+ *
+ * **Gespart wird auf den nächsten Schritt, nicht auf das ganze Vorhaben.** Erst das
+ * Grundstück, dann das Haus darauf. Kleine Ziele halten den Fortschritt sichtbar, und
+ * niemand hängt an einer Summe, die er in seinem Leben nicht erreicht.
+ *
+ * Die Reihenfolge entspricht der Bedürfnishierarchie: Das Dach für die Familie geht dem
+ * Unternehmen vor. Wer nichts vorhat — der Genügsame ohne Ehrgeiz, der Verheiratete mit
+ * eigenem Haus —, spart auch nicht; er arbeitet bis zur Rücklage und lebt sein Leben.
+ */
+export function savingsTarget(state: NpcState): number | null {
+	if (!state.isAdult) return null;
+
+	// Ein Dach für die Familie — dieselbe Bedingung wie in `eigenesDach`.
+	if (state.isMarried && !state.ownsHome && state.homePrice !== null) {
+		if (state.materialMissing) return state.materialPrice;
+		if (!state.hasFreePlot) return state.plotPrice;
+		return state.homePrice;
+	}
+
+	// Etwas Eigenes — nur, wen sein Wesen dazu drängt. Sonst spart die halbe Stadt auf eine
+	// Werkstatt, und es gäbe niemanden mehr, der darin arbeitet.
+	if (!state.ownsWorkshop && isEnterprising(state.personality)) {
+		if (!state.hasFreePlot) return state.plotPrice;
+		if (state.workshopMaterialMissing) return state.materialPrice;
+		return state.workshopPrice;
+	}
+
+	return null;
+}
+
+/**
  * Ab welcher Sättigung einer sich ums Essen kümmert.
  *
  * Der Fleißige sorgt früher vor, der Träge wartet, bis es zwickt. Die Spanne liegt
@@ -261,6 +301,15 @@ function ueberleben(state: NpcState): NpcAction | undefined {
 }
 
 /**
+ * Bis wohin sich Arbeiten lohnt: die Rücklage, und darüber das, was der nächste Schritt
+ * kostet. Ohne Vorhaben bleibt es bei der Rücklage — die Zahl von vor Punkt 55.
+ */
+function sparziel(state: NpcState): number {
+	const ruecklage: number = desiredReserve(state.personality, state.foodPrice);
+	return ruecklage + (savingsTarget(state) ?? 0);
+}
+
+/**
  * Stufe 2 — **Sicherheit**: ein Dach, ein Auskommen, eine Rücklage.
  *
  * Was hier steht, schützt vor der Stufe darunter: Die Anstellung sichert das Essen von
@@ -281,12 +330,9 @@ function sicherheit(state: NpcState): NpcAction | undefined {
 		return 'DRINK_TONIC';
 	}
 
-	// Verdienen, bis die Rücklage steht. Wie hoch sie ist, sagt die Gier.
-	if (
-		state.workAvailable &&
-		state.actionPoints > 0 &&
-		state.money < desiredReserve(state.personality, state.foodPrice)
-	) {
+	// Verdienen, bis die Rücklage steht. Wie hoch sie ist, sagt die Gier — und wer etwas
+	// vorhat, arbeitet darüber hinaus, bis der nächste Schritt bezahlt ist (Punkt 55).
+	if (state.workAvailable && state.actionPoints > 0 && state.money < sparziel(state)) {
 		return 'WORK';
 	}
 

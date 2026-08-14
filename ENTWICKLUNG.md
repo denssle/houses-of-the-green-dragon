@@ -2185,6 +2185,55 @@ sollte. Jetzt heißt es **„Vergessen"** und tut dasselbe.
 _Fertig, wenn:_ Kein Mensch in der Stadt steht ohne Nachnamen da, und keine Anzeige
 verrät, wer Spielerfigur ist und wer nicht. — Erledigt.
 
+**5.11 Warum die Stadt stillstand.** ✓ (Punkte 55, 56) Ein Durchklick durch die laufende
+Anwendung förderte den Befund zutage: Grünau steht im Jahr 96, und es ist nichts geschehen.
+Kein privates Gebäude, keine Pacht, kein Preisschild, null Kinder, null Tote.
+
+**Die erste Diagnose war naheliegend und zur Hälfte falsch.** Die NPCs werden ohne Geld
+angelegt, die Spalte hat den Standardwert 0 — also fehlte Startkapital. Das stimmte, war
+aber nicht der Grund.
+
+**Gemessen statt geraten.** Der neue Test `worldComesAlive.spec.ts` baut die Welt so auf,
+wie `seedWorld()` sie erzeugt, setzt nichts nach und lässt Zeit vergehen. Ergebnis nach
+zwei Spieljahren: 508 von 800 Runden Müßiggang, voller Aktionsvorrat bei jedem, zwanzig bis
+fünfzig Münzen in der Tasche. Sie _konnten_ handeln und _wollten_ nicht.
+
+Der Grund stand in `npc.logic.ts`: Gearbeitet wurde, **solange das Geld unter der Rücklage
+lag**. War sie voll, hörte man auf. Ein Grundstück verlangt aber Rücklage _plus_ Kaufpreis
+— und über die Rücklage kam niemand. Es fehlte nicht das Geld, sondern **ein Grund, mehr zu
+verdienen als für das Brot von morgen.**
+
+**`savingsTarget` ist die Antwort:** Wer etwas vorhat, arbeitet über die Rücklage hinaus.
+Gespart wird auf den **nächsten Schritt** und nicht auf das ganze Vorhaben — erst das
+Grundstück, dann das Haus darauf. Kleine Ziele halten den Fortschritt sichtbar, und niemand
+hängt an einer Summe, die er in seinem Leben nicht erreicht. Die Reihenfolge folgt der
+Bedürfnishierarchie: Das Dach der Familie geht dem eigenen Unternehmen vor.
+
+Erst danach das **Startkapital** — und der zweite Messlauf zeigte prompt, wie man es falsch
+macht. Mit bis zu 240 Münzen stand die Stadt vollständig still: vierhundert Ticks, kein
+einziger Arbeitseinsatz. Wer mehr besitzt, als seine Rücklage verlangt, arbeitet nicht;
+die acht lebten von ihrem Vermögen. Jetzt sind es zwanzig bis neunzig — genug für ein
+Grundstück und etwas Anlauf, zu wenig zum Ausruhen.
+
+**Und die dritte Zutat:** Drei der acht Gründer bringen Unternehmergeist mit, festgelegt
+statt gewürfelt. Zwei Läufe an derselben Welt hatten einmal zwei Unternehmungslustige und
+drei gekaufte Grundstücke ergeben, einmal keinen einzigen und vierhundert Ticks Stillstand.
+Eine Wirtschaft, die daran hängt, ob `randomPersonality` unter acht Menschen zufällig einen
+über der Schwelle hervorbringt, ist keine. Das ist keine Bevorzugung, sondern Weltaufbau —
+dieselbe Sorte Entscheidung wie die acht Namen.
+
+**Was bleibt, wird ehrlich benannt:** Grundstücke werden gekauft, eine Werkstatt entsteht in
+vierhundert Ticks noch nicht. Und ein Nebenbefund, der bewusst stehen bleibt (Punkt 61): Ein
+Lediger wirbt in jeder Runde, in der er Punkte hat, und kommt nie zur Entfaltungsstufe.
+Solange jeder irgendwann heiratet, ist das folgenlos — sobald Partner knapp sind, nicht
+mehr.
+
+Die **Produktionswelt bleibt unangetastet.** Kein Migrationsgeschenk an acht Menschen, die
+sich ihr Geld erarbeitet haben; der Sparwille wirkt auch dort, nur langsamer.
+
+_Fertig, wenn:_ Eine Welt, die niemand anfasst, bringt aus eigener Kraft Eigentum hervor. —
+Erledigt, gemessen und im Test festgehalten.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

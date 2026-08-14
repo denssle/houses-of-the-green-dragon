@@ -3,7 +3,8 @@ import {
 	decideNpcAction,
 	desiredReserve,
 	eatingThreshold,
-	type NpcState
+	type NpcState,
+	savingsTarget
 } from '$lib/game/npc.logic';
 import { PERSONALITY_AXES, type Personality } from '$lib/game/personality.logic';
 import { SATIETY_MAX, SATIETY_WEAKENED } from '$lib/game/need.logic';
@@ -187,6 +188,67 @@ describe('Was ein NPC tut', () => {
 			});
 
 			expect(decideNpcAction(zurueckhaltend)).toBe('COURT');
+		});
+	});
+
+	/**
+	 * Der Sparwille (Punkt 55).
+	 *
+	 * Gemessen an der Seed-Welt: Nach zwei Spieljahren standen die acht Einwohner in 508
+	 * von 800 Runden untätig herum — mit vollem Aktionsvorrat und zwanzig bis fünfzig
+	 * Münzen in der Tasche. Sie hatten ihre Rücklage erreicht und keinen Grund mehr, zu
+	 * arbeiten. Für ein Grundstück braucht es aber Rücklage **plus** Kaufpreis.
+	 */
+	describe('worauf einer spart', () => {
+		/** Ein Unternehmungslustiger ohne Besitz — genau die Lage aus der Messung. */
+		function gruender(werte: Partial<NpcState> = {}): NpcState {
+			return zufrieden({
+				personality: anlagen({ ambition: 40, diligence: 40 }),
+				isMarried: false,
+				ownsHome: false,
+				money: 50,
+				plotPrice: 40,
+				workshopPrice: 180,
+				...werte
+			});
+		}
+
+		it('arbeitet über die Rücklage hinaus, wenn er etwas vorhat', () => {
+			// Rücklage bei Gier 0 und Brot zu 4: neun Mahlzeiten, also 36 Münzen. Mit 50 in
+			// der Tasche war er vorher fertig — jetzt fehlen ihm noch die 40 fürs Grundstück.
+			expect(decideNpcAction(gruender())).toBe('WORK');
+		});
+
+		it('kauft, sobald das Ziel erreicht ist', () => {
+			// **Verheiratet, denn ein Lediger wirbt.** Zugehörigkeit steht in der Hierarchie
+			// vor der Entfaltung, und wer noch keinen Partner hat, kommt Tick für Tick nicht
+			// weiter als bis dorthin. Das ist so gewollt — es heißt aber auch, dass ein
+			// Lediger nie etwas aufbaut, solange er wirbt (siehe offene Punkte).
+			const bereit = gruender({ money: 36 + 40, isMarried: true, ownsHome: true });
+
+			expect(decideNpcAction(bereit)).toBe('BUY_PLOT');
+		});
+
+		it('spart auf den nächsten Schritt, nicht auf das ganze Vorhaben', () => {
+			// Mit Grundstück steht die Werkstatt an — vorher nicht.
+			expect(savingsTarget(gruender())).toBe(40);
+			expect(savingsTarget(gruender({ hasFreePlot: true }))).toBe(180);
+		});
+
+		it('lässt den Genügsamen in Ruhe', () => {
+			// Wer nichts vorhat, arbeitet wie bisher nur bis zur Rücklage. Sonst spart die
+			// halbe Stadt auf eine Werkstatt, und niemand bliebe, der darin arbeitet.
+			const ohne = gruender({ personality: anlagen({ ambition: -50, diligence: -50 }) });
+
+			expect(savingsTarget(ohne)).toBeNull();
+			expect(decideNpcAction(ohne)).toBe('COURT');
+		});
+
+		it('stellt das Dach der Familie vor das eigene Unternehmen', () => {
+			const verheiratet = gruender({ isMarried: true, hasFreePlot: true });
+
+			// Nicht 180 für die Werkstatt, sondern 100 fürs Wohnhaus.
+			expect(savingsTarget(verheiratet)).toBe(100);
 		});
 	});
 });

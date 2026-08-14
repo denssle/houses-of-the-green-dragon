@@ -74,15 +74,55 @@ const STADTGEBAEUDE = [
  * Die Namen nach dem, was man tut — so entstanden Familiennamen in einer Stadt dieser Zeit.
  */
 const BEVOELKERUNG = [
-	{ firstName: 'Alheid', lastName: 'Steinmetz', gender: 'FEMALE', age: 52 },
-	{ firstName: 'Bertram', lastName: 'Schmied', gender: 'MALE', age: 47 },
-	{ firstName: 'Cunne', lastName: 'Müller', gender: 'FEMALE', age: 34 },
-	{ firstName: 'Dietrich', lastName: 'Weber', gender: 'MALE', age: 29 },
-	{ firstName: 'Elsbeth', lastName: 'Becker', gender: 'FEMALE', age: 26 },
-	{ firstName: 'Frowin', lastName: 'Fischer', gender: 'MALE', age: 41 },
-	{ firstName: 'Gertrud', lastName: 'Schuster', gender: 'FEMALE', age: 19 },
-	{ firstName: 'Hinrik', lastName: 'Wagner', gender: 'MALE', age: 23 }
+	{ firstName: 'Alheid', lastName: 'Steinmetz', gender: 'FEMALE', age: 52, unternehmend: true },
+	{ firstName: 'Bertram', lastName: 'Schmied', gender: 'MALE', age: 47, unternehmend: false },
+	{ firstName: 'Cunne', lastName: 'Müller', gender: 'FEMALE', age: 34, unternehmend: true },
+	{ firstName: 'Dietrich', lastName: 'Weber', gender: 'MALE', age: 29, unternehmend: false },
+	{ firstName: 'Elsbeth', lastName: 'Becker', gender: 'FEMALE', age: 26, unternehmend: false },
+	{ firstName: 'Frowin', lastName: 'Fischer', gender: 'MALE', age: 41, unternehmend: true },
+	{ firstName: 'Gertrud', lastName: 'Schuster', gender: 'FEMALE', age: 19, unternehmend: false },
+	{ firstName: 'Hinrik', lastName: 'Wagner', gender: 'MALE', age: 23, unternehmend: false }
 ] as const;
+
+/**
+ * **Drei der acht bringen Unternehmergeist mit** — festgelegt, nicht gewürfelt.
+ *
+ * Ob eine Stadt je einen Betrieb bekommt, hing bis Punkt 55 daran, ob `randomPersonality`
+ * unter acht Menschen zufällig einen hervorbrachte, dessen Ehrgeiz und Fleiß über der
+ * Schwelle liegen. Zwei Messläufe an derselben Welt: einmal zwei Unternehmungslustige und
+ * drei gekaufte Grundstücke, einmal keiner und vierhundert Ticks Stillstand. Eine
+ * Wirtschaft, die am Würfel hängt, ist keine.
+ *
+ * Das ist keine Bevorzugung der NPCs, sondern Weltaufbau — dieselbe Sorte Entscheidung
+ * wie die acht Namen und ihre Berufe. Die übrigen Achsen bleiben gewürfelt: Wie gesellig,
+ * mutig oder gierig einer ist, darf der Zufall sagen, denn davon hängt nicht ab, ob die
+ * Stadt lebt.
+ */
+const GRUENDER_EHRGEIZ = 45;
+const GRUENDER_FLEISS = 45;
+
+/**
+ * Was die Gründer mitbringen (Punkt 55).
+ *
+ * Bis hierher: nichts. Die Spalte hat den Standardwert null, und niemand hatte je etwas
+ * anderes gesetzt — die Stadt begann mit acht mittellosen Menschen und einer
+ * Tagelöhnerei, die drei Münzen bringt. Das genügt zum Leben und für nichts sonst.
+ *
+ * **Eine Spanne und keine feste Zahl.** Gleiche Taschen wären der langweiligere Anfang:
+ * Handel entsteht aus Unterschieden, und wer mehr hat, kauft zuerst — die Reihenfolge, in
+ * der die Stadt wächst, soll aus der Welt kommen und nicht aus einer Liste.
+ *
+ * **Knapp gehalten, und das aus Erfahrung.** Ein erster Versuch mit bis zu 240 Münzen
+ * legte die Stadt still: Wer mehr besitzt, als seine Rücklage verlangt, hört auf zu
+ * arbeiten — vierhundert Ticks lang kein einziger Arbeitseinsatz, die acht lebten von
+ * ihrem Vermögen. Die Spanne reicht deshalb für ein Grundstück und etwas Anlauf; alles
+ * Weitere muss erarbeitet werden.
+ *
+ * Dass es überhaupt nötig ist, ist die kleinere Hälfte der Antwort auf Punkt 55 — die
+ * größere steht in `npc.logic.ts` beim Sparwillen. Geld allein zündet nur einmal.
+ */
+const STARTKAPITAL_MIN = 20;
+const STARTKAPITAL_MAX = 90;
 
 export async function seedWorld(): Promise<boolean> {
 	if (await World.findByPk(WORLD_ID)) {
@@ -173,9 +213,15 @@ export async function seedWorld(): Promise<boolean> {
 			lastNeedTick: jetzt,
 			RegionId: stadtId,
 			DynastyId: hausId,
+			// Was einer mitbringt — gewürfelt, damit die Stadt ungleich anfängt.
+			money:
+				STARTKAPITAL_MIN + Math.floor(Math.random() * (STARTKAPITAL_MAX - STARTKAPITAL_MIN + 1)),
 			// Die Anlagen gewürfelt — sie sind die erste Generation und haben niemanden,
-			// von dem sie etwas erben könnten.
-			...randomPersonality(Math.random)
+			// von dem sie etwas erben könnten. Ehrgeiz und Fleiß der drei Gründer stehen
+			// allerdings fest: Ob die Stadt je einen Betrieb bekommt, darf nicht am Würfel
+			// hängen.
+			...randomPersonality(Math.random),
+			...(person.unternehmend ? { ambition: GRUENDER_EHRGEIZ, diligence: GRUENDER_FLEISS } : {})
 		});
 	}
 

@@ -46,8 +46,10 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                      | Punkt 43 / Punkt 23          | Entwurf      |
 | 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                  | —                            | erledigt     |
 | 26  | Datensicherung per Cron, einmal wiederhergestellt — **erledigt mit 5.8**             | —                            | erledigt     |
-| 55  | **Die NPCs haben kein Startkapital** — die Stadt kommt nicht in Gang                 | sofort                       | Aufgabe      |
-| 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt                               | zusammen mit 55              | Aufgabe      |
+| 55  | Die Stadt kommt nicht in Gang — **erledigt mit 5.11**, ein Rest bleibt               | —                            | erledigt     |
+| 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt — **erledigt mit 5.11**       | —                            | erledigt     |
+| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                | laufend                      | Entwurf      |
+| 62  | Geburts- und Errichtungsdatum sichtbar machen                                        | laufend                      | Aufgabe      |
 | 57  | Der Takt der Welt steht nirgends — wann kommen Aktionspunkte wieder?                 | erster fremder Spieler       | Aufgabe      |
 | 58  | Wege, die nur beschrieben und nicht verlinkt sind                                    | laufend                      | Aufgabe      |
 | 59  | Aktionen, die scheitern müssen, sehen aus wie Aktionen, die gehen                    | laufend                      | Aufgabe      |
@@ -871,7 +873,37 @@ falsche. Zu klären ist nur die Benennung — „Schmieden (1 AP)" für das Hand
 „Eine Schicht arbeiten" für den Lohn wären schon zwei verschiedene Sätze. Der Test greift
 inzwischen den exakten Namen ab und würde eine Umbenennung merken.
 
-### 55. Die NPCs haben kein Startkapital
+### 61. Wer ledig ist, baut nie etwas
+
+Bei der Arbeit an 55 aufgefallen und bewusst stehen gelassen: In der Bedürfnishierarchie
+steht **Zugehörigkeit vor Entfaltung**. Ein Lediger, für den es jemanden zu umwerben gibt,
+wirbt deshalb in jeder Runde, in der er Aktionspunkte hat — und kommt nie zu der Stufe, auf
+der Grundstücke gekauft und Werkstätten gebaut werden.
+
+Solange jeder irgendwann heiratet, ist das folgenlos. Sobald Partner knapp sind — mehr
+Männer als Frauen, eine Stadt mit wenigen Erwachsenen —, wirbt ein Teil der Bevölkerung
+lebenslang und tut sonst nichts.
+
+Die Rangfolge selbst ist richtig und soll bleiben. Was fehlt, ist eine Grenze: **Werben,
+solange es Aussicht hat.** Denkbar ist, nach einigen erfolglosen Versuchen bei derselben
+Person weiterzuziehen oder das Werben zu beenden, wenn die Zuneigung schon hoch genug wäre
+und es nur an der Gegenseite hängt. Zu klären, wenn die Zuneigung mehr Zustände kennt als
+heute.
+
+### 62. Geburts- und Errichtungsdatum
+
+Ein Charakter hat einen `birthTick`, ein Gebäude einen Zeitpunkt seiner Errichtung — beides
+steht in der Datenbank und nirgends auf der Seite. Sichtbar ist nur das Alter in Jahren.
+
+**Ein Datum ist mehr als eine Zahl:** „geboren im Frühling 96" verankert einen Menschen in
+der Geschichte der Stadt, „errichtet im Herbst 71" macht aus einem Haus ein altes Haus.
+Beides ist bereits vorhanden und muss nur angezeigt werden — bei Gebäuden ist zu prüfen,
+ob der Zeitpunkt überhaupt gespeichert wird oder erst mitgeschrieben werden muss.
+
+Verwandt mit dem Lebenslauf aus 5.3: Dort steht bereits, was einem Menschen widerfahren
+ist. Die Geburt gehört an den Anfang dieser Reihe.
+
+### 55. Die Stadt kommt nicht in Gang — erledigt (5.11)
 
 **Der schwerste Befund des Durchgangs vom 14. August 2026.** Die Welt auf dem Server steht
 im Jahr 96, und in Grünau ist nichts geschehen: kein einziges privates Gebäude, keine der
@@ -884,21 +916,36 @@ das billigste Haus 100. Was ein NPC verdienen kann, ist die Tagelöhnerei — dr
 Aktionspunkt, und davon muss er essen. Die Schwelle zum ersten Besitz ist so hoch, dass
 niemand sie in absehbarer Zeit übersteigt.
 
-**Die Stadt hat also nicht zu wenig NPC-Verhalten, sondern zu wenig Anfangsvermögen.** Das
-ist kein Fehler in einer Regel, sondern eine fehlende Zahl — und deshalb billig zu
-beheben. Zu entscheiden ist:
+**So weit die erste Diagnose — und sie war zur Hälfte falsch.** Das Messen hat den
+eigentlichen Grund gezeigt, und er lag nicht am Geld: Ein NPC arbeitete nur, solange sein
+Vermögen unter der Rücklage lag. War sie voll, hörte er auf. Für ein Grundstück braucht er
+Rücklage **plus** Kaufpreis — über die Rücklage kam er nie. Nach zwei Spieljahren standen
+die acht in 508 von 800 Runden untätig herum, mit vollem Aktionsvorrat und zwanzig bis
+fünfzig Münzen in der Tasche. **Niemand sparte auf ein Ziel.**
 
-- **Wie viel.** Genug für ein Grundstück und einen ersten Betrieb wäre das eine Extrem
-  (jeder Gründer als kleiner Unternehmer), genug für ein paar Brote das andere. Sinnvoll
-  ist vermutlich eine Spanne statt einer festen Zahl: Ungleichheit von Anfang an ist der
-  Motor, aus dem sich Handel ergibt.
-- **Ob nur die Gründer** es bekommen oder auch, wer später zuwandert (Punkt 41).
-- **Was mit den bestehenden Welten geschieht.** Die Produktionswelt läuft seit Jahren mit
-  mittellosen Einwohnern; eine Migration, die ihnen Geld gibt, ist ein Eingriff in eine
-  laufende Wirtschaft — vertretbar, solange niemand Fremdes mitspielt, aber nicht
-  stillschweigend.
+Behoben in drei Schritten, alle in 5.11:
 
-### 56. Der Wirtschaftstest prüft eine Welt, die es nicht gibt
+1. **Der Sparwille** (`savingsTarget` in `npc.logic.ts`): Wer etwas vorhat, arbeitet über
+   die Rücklage hinaus — bis der **nächste Schritt** bezahlt ist, nicht das ganze
+   Vorhaben. Erst das Grundstück, dann das Haus darauf. Das wirkt für jede Generation,
+   während Geld nur einmal zündet.
+2. **Startkapital** (`seed.ts`), gewürfelt zwischen 20 und 90 Münzen. Bewusst knapp: Ein
+   erster Versuch mit bis zu 240 legte die Stadt vollständig still, weil niemand mehr
+   arbeiten musste — vierhundert Ticks ohne einen einzigen Arbeitseinsatz.
+3. **Drei der acht Gründer bringen Unternehmergeist mit**, festgelegt statt gewürfelt. Ob
+   eine Stadt je einen Betrieb bekommt, hing vorher daran, ob `randomPersonality` unter
+   acht Menschen zufällig einen über der Schwelle hervorbrachte. Zwei Läufe an derselben
+   Welt: einmal zwei Unternehmungslustige und drei Grundstücke, einmal keiner und
+   vierhundert Ticks Stillstand.
+
+**Was bleibt:** Grundstücke werden gekauft, eine Werkstatt entsteht in vierhundert Ticks
+noch nicht — dafür reicht das Ersparte knapp nicht. Ob es an der Zeit liegt, am Lohn der
+Tagelöhnerei oder daran, dass die Ledigen ihre Runden mit Werben verbringen (Punkt 61),
+muss der nächste Messlauf zeigen. Und die **Produktionswelt** ist unangetastet: Dort leben
+acht Menschen mit dem, was sie sich erarbeitet haben. Der Sparwille wirkt auch für sie —
+langsamer, aber er wirkt.
+
+### 56. Der Wirtschaftstest prüft eine Welt, die es nicht gibt — erledigt (5.11)
 
 Unmittelbar an Punkt 55: `selfSustainingEconomy.spec.ts` heißt „Die Wirtschaft trägt sich
 selbst" und setzt vor dem Lauf `money: 400, ambition: 60, diligence: 60` für alle NPCs.
@@ -910,9 +957,15 @@ Unternehmungslustiger auch unternimmt, nicht ob der Würfel einen hervorbringt")
 Begründung stimmt für die Anlagen und trägt beim Geld nicht: Ehrgeiz wird gewürfelt,
 Vermögen wird vergeben.
 
-**Was fehlt, ist ein Test auf die Welt, die der Weltaufbau wirklich erzeugt:** Bevölkerung
+**Was fehlte, war ein Test auf die Welt, die der Weltaufbau wirklich erzeugt:** Bevölkerung
 aus `seedWorld()`, nichts nachgesetzt, ein paar hundert Ticks — und dann die Frage, ob
-irgendetwas entstanden ist. Ein solcher Test wäre heute rot, und das ist genau sein Wert.
+irgendetwas entstanden ist.
+
+Er steht jetzt als `worldComesAlive.spec.ts` und war bei seiner Entstehung rot; genau das
+war sein Wert. Er hat die Diagnose zu Punkt 55 vom Kopf auf die Füße gestellt und
+anschließend jeden Schritt der Behebung gemessen. Der ältere Test bleibt daneben stehen —
+seine Frage ist berechtigt, sie ist nur eine andere: ob ein Unternehmungslustiger
+unternimmt, nicht ob die Welt einen hervorbringt.
 
 ### 57. Der Takt der Welt steht nirgends
 
