@@ -2231,6 +2231,13 @@ mehr.
 Die **Produktionswelt bleibt unangetastet.** Kein Migrationsgeschenk an acht Menschen, die
 sich ihr Geld erarbeitet haben; der Sparwille wirkt auch dort, nur langsamer.
 
+**Damit wirkt auf dem Server nur eine der drei Änderungen** — und das gehört festgehalten,
+bevor jemand aus der laufenden Welt falsche Schlüsse zieht: `seedWorld()` läuft nur, wenn
+noch keine Welt steht. Startkapital und der festgelegte Unternehmergeist der Gründer
+greifen deshalb ausschließlich in frisch aufgesetzten Welten. Bleibt Grünau stehen,
+widerlegt das die Messungen nicht — es beantwortet die andere Frage: ob der Sparwille
+allein genügt.
+
 _Fertig, wenn:_ Eine Welt, die niemand anfasst, bringt aus eigener Kraft Eigentum hervor. —
 Erledigt, gemessen und im Test festgehalten.
 
