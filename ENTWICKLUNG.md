@@ -1,4 +1,4 @@
-# Entwicklung
+﻿# Entwicklung
 
 **Warum das Spiel so gebaut ist, wie es gebaut ist.**
 
@@ -14,11 +14,16 @@ ersten Zimmerei, die Grundstücke, die versteigert **und** zum Festpreis angebot
 wurden — das steht nirgends sonst.
 
 Gelesen wird sie deshalb rückwärts: Wer wissen will, warum etwas so ist, sucht den
-Schritt, in dem es entstand. **Was noch zu tun ist, steht nicht hier, sondern in**
-`OFFENE_PUNKTE.md`; was das Spiel werden soll, in `KONZEPT.md`.
+Schritt, in dem es entstand.
 
-Ein ✓ markiert einen abgeschlossenen Schritt. Die wenigen ohne Haken sind Vorhaben,
-die beschrieben, aber nicht gebaut wurden.
+**Ab Phase 5 liest sie sich wieder vorwärts.** Nachdem das Konzept in mehreren Runden
+gewachsen ist, steht dort die Reihenfolge, in der das Übrige gebaut werden soll — dieselbe
+Rolle, die Phase 4 einmal hatte, bevor sie Häkchen bekam. Die Arbeitsteilung bleibt: **Was
+zu entscheiden ist**, steht in `OFFENE_PUNKTE.md`, **was das Spiel werden soll** in
+`KONZEPT.md`, und **in welcher Reihenfolge es entsteht**, hier.
+
+Ein ✓ markiert einen abgeschlossenen Schritt. Die ohne Haken sind Vorhaben, die
+beschrieben, aber nicht gebaut wurden.
 
 Stand des ursprünglichen Plans: Bestandsaufnahme vom 12.08.2026, Commit `ee6d703`.
 
@@ -1724,6 +1729,348 @@ Ankunfts-Tick statt Fortbewegung), Gründung einer zweiten Stadt. Fernziele für
 Dynastien — und die Voraussetzung dafür, dass ein Räuber jemanden unterwegs überfallen
 kann (Punkt 23). Die zweite Stadt ist der größere Brocken: Alles, was heute stillschweigend
 „die Startstadt" annimmt, muss dann zwei Orte vertragen.
+
+Dieser Schritt ist nicht liegengeblieben, sondern gewachsen: Er ist inzwischen **Phase 8**
+und heißt dort anders, weil Karte, Reisen und Bürgerrecht dazugehören.
+
+## Der Weg von hier
+
+Das Konzept ist in mehreren Runden gewachsen und beschreibt inzwischen mehr, als in einem
+Zug zu bauen wäre. Was folgt, ist die Reihenfolge — mit dem Maßstab, nach dem sie
+zustande kam.
+
+**Drei Regeln haben sie bestimmt.**
+
+**Erstens: Löcher vor Neubau.** Mehrere Dinge, die es gibt, sind unvollständig — beim Tod
+eines Hausherrn steht die Witwe im Nichts, ein Kind erbt eine Werkstatt, die niemand
+führen kann, ein Gebäude lässt sich nicht verkaufen. Solche Stellen kosten wenig und
+werden mit jedem neuen System teurer.
+
+**Zweitens: Was viele tragen, kommt früh.** Der **Ruf** ist die Bremse, die ein halbes
+Dutzend offener Punkte voraussetzt, ohne dass es ihn gibt — Räuber, Konvertit, Schuldner,
+Zunftbewerber. Solche Querschnitte nachträglich einzuziehen hieße, jede Regel noch einmal
+aufzumachen; dieselbe Überlegung, die schon 4.5a vor 4.6 gezogen hat.
+
+**Drittens: Keine Härte ohne Ausweg.** Wo ein Schritt etwas verbietet, gehört der Weg
+daran vorbei in denselben Schritt. Die Meisterpflicht ohne die Lehre im eigenen Betrieb
+wäre eine Falle für jeden Erben; der Schuldturm ohne die Auslösung eine Sackgasse. Solche
+Paare werden nicht getrennt.
+
+**Und eine Regel gilt quer durch alles:** Ein Schritt ist erst fertig, wenn **NPCs ihn
+auch tun**. Das ist der Maßstab aus dem Konzept — funktioniert es ohne Spieler? Eine
+Zunft, in der nur Spieler Mitglied sind, ist keine; ein Geldverleiher, der nur montags
+verleiht, weil dann jemand online ist, auch nicht. Punkt 30 wird deshalb nicht als eigener
+Schritt abgearbeitet, sondern in jedem.
+
+## Phase 5 — Bis Fremde spielen können
+
+**Das Ziel ist `1.0.0`, und es ist näher, als der Berg an offenen Punkten vermuten lässt.**
+Das Spiel ist spielbar: Man wird geboren, arbeitet, lernt, baut, heiratet, wählt, stirbt
+und vererbt, und die Stadt läuft ohne Zuschauer weiter. Was fehlt, ist nicht Inhalt,
+sondern die Gewissheit, dass ein Fremder nicht binnen einer Stunde in etwas läuft, das
+kaputt oder unfair ist.
+
+Diese Phase baut deshalb **nichts Neues an Systemen**. Sie schließt Löcher und macht das
+Vorhandene betriebsfest. Alles Übrige kommt danach — an einem laufenden Spiel mit echten
+Spielern, was allemal besser ist, als es vorher am Reißbrett auszudenken.
+
+**5.1 Der Erbfall wird vollständig.** (Punkt 48) Die Witwe bekommt Wohnrecht und einen
+Anteil, der minderjährige Erbe jemanden, der für ihn handelt. Das sind die beiden
+Stellen, an denen der Tod eines Hausherrn heute jemanden ins Nichts fallen lässt — und
+der Tod ist die häufigste Sache der Welt.
+
+_Fertig, wenn:_ Ein Erbfall mit überlebendem Partner und kleinen Kindern hinterlässt
+niemanden ohne Dach und keinen Betrieb, der stillschweigend verfällt.
+
+**5.2 Namen.** (Punkte 42, 36) Kinder benennen, solange sie klein sind; Gebäude und
+Betriebe benennen. Beides ist wenig Arbeit und viel Bindung — ein Haus, dessen Kinder man
+selbst benannt hat, ist ein anderes als eine Liste erzeugter Vornamen.
+
+_Fertig, wenn:_ In der Chronik stehen Namen, die jemand gewählt hat.
+
+**5.3 Der Lebenslauf wird vollständig.** (Punkt 52) Die Chronik kann bereits, was gebraucht
+wird: `getChronicle({ characterId })` liefert genau die Ereignisse, an denen jemand
+beteiligt war, und die Charakterseite zeigt sie. Es fehlt nicht die Sicht, sondern der
+Stoff — mehrere Höhepunkte eines Lebens werden schlicht nicht aufgeschrieben.
+
+Nachgetragen werden vor allem **Einzug und Umzug** (heute setzt `npcService` bei `MOVE_IN`
+und `familyService` beim Zusammenziehen einfach `HomeBuildingId`, ohne dass es jemand
+erfährt) und der **Grundstückserwerb** außerhalb der Versteigerung — `plotService.buyPlot`
+und `buyFromOwner` schreiben nichts, obwohl `AUCTION_WON` beim Zuschlag längst festgehalten
+wird. Beides sind Zeilen an vorhandenen Stellen, keine neue Mechanik.
+
+Die Auswahl ist dabei die eigentliche Arbeit: Ein Lebenslauf, der jede Schicht und jeden
+Brotkauf aufführt, ist keiner. Aufgenommen wird, was jemand nach sechzig Jahren noch
+erzählen würde — wo er wohnte, wo er arbeitete, was er erwarb, wen er verlor.
+
+_Fertig, wenn:_ Der Lebenslauf eines Verstorbenen liest sich wie ein Leben und nicht wie
+ein Auszug aus dem Kassenbuch.
+
+**5.4 Gebäude verkaufen.** (Punkt 37) Für Grundstücke gebaut, für Gebäude nicht. Solange
+das fehlt, hat ein Haus nur zwei Wege aus dem Besitz: Erbschaft oder Verfall — und ein
+Neuling findet nichts zu kaufen, obwohl anderswo etwas leersteht. Gebäude und Grundstück
+wechseln zusammen den Besitzer.
+
+_Fertig, wenn:_ Ein Betrieb, den niemand mehr braucht, findet jemanden, der ihn braucht.
+
+**5.5 Der abwesende Spieler.** (Punkt 40) Wer lange nicht hereinschaut, dessen Charakter
+isst, arbeitet und hält sein Haus instand. Erhalten ja, entscheiden nein. Ohne das
+bestraft die Welt Abwesenheit härter als jeden Fehler — und genau das erlebt ein neuer
+Spieler beim ersten Wochenende, an dem er anderes vorhat.
+
+_Fertig, wenn:_ Zwei Wochen Abwesenheit kosten Fortschritt, aber nicht das Haus.
+
+**5.6 Womit ein Neuling anfängt.** (Punkt 14) Die letzte inhaltliche Entscheidung vor dem
+öffentlichen Betrieb, und die empfindlichste: Was bekommt jemand mit, der in eine Stadt
+kommt, in der das Bauland vergeben ist? Dazu gehört die Frage, ob die städtische Schmiede
+bleibt.
+
+_Fertig, wenn:_ Ein frisch angelegter Charakter hat einen begehbaren Weg nach oben, ohne
+dass ihm jemand hilft.
+
+**5.7 Ein Rundlauf, der klickt.** (Punkt 25) Ein Playwright-Test, der registriert, einen
+Charakter anlegt, arbeitet, kauft, baut und wählt. Die Unit-Tests decken die Regeln ab;
+sie hätten keinen der Fehler gefunden, die beim Durchspielen von Hand auffielen — ein
+Formular ohne Aktion, ein Link ins Leere, eine Bauoption, die es nicht geben durfte.
+
+_Fertig, wenn:_ Ein kaputter Weg durch die Anwendung bricht den Build.
+
+**5.8 Eine Sicherung, die geprüft ist.** (Punkt 26) Dump per Cron, und einmal
+wiederhergestellt. Die Produktionsdatenbank enthält Generationen von Spielzeit, die sich
+nicht nachbauen lassen; ein Deploy ist kein Sicherungsplan, und eine Sicherung, die
+niemand zurückgespielt hat, ist eine Vermutung.
+
+_Fertig, wenn:_ Eine Sicherung wurde auf einem leeren System eingespielt und die Welt lief
+weiter.
+
+**5.9 Was ein Betreiber schuldet.** (Punkte 27, 28) Impressum, Datenschutz,
+Nutzungsbedingungen — und die Kontolöschung als Anonymisierung, weil eine Dynastie sich
+nicht löschen lässt, ohne die Geschichte anderer zu zerreißen.
+
+_Fertig, wenn:_ Jemand kann verlangen, dass seine Daten verschwinden, ohne dass die Welt
+Lücken bekommt.
+
+**Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
+`0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
+mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird
+`1.1.x`. Das gehört entschieden, bevor der Tag da ist.
+
+## Phase 6 — Ruf und Handwerk
+
+Der erste Block nach dem Start, und der, der am meisten trägt: Er bringt die Größe, die
+ein halbes Dutzend späterer Regeln braucht, und macht aus dem Handwerk einen Stand statt
+einer Zahl.
+
+**6.1 Ansehen und Ruf.** (Punkt 47) Eine Zahl am Charakter, die aus Taten entsteht,
+abklingt und zum Teil auf den Erben übergeht; als Schicht in der Zuneigung sofort
+wirksam. Sie kommt **zuerst**, weil alles Folgende sie als Bremse voraussetzt.
+
+_Fertig, wenn:_ Wer sich anständig verhält, merkt es an der Stadt — und wer nicht, auch.
+
+**6.2 Die Lehre im eigenen Betrieb.** (Punkt 45) Kinder arbeiten in der Werkstatt mit,
+bringen wenig ein und lernen dabei. Steht **vor** der Meisterpflicht, nicht daneben: sonst
+wäre die Pflicht eine Falle für jeden Erben.
+
+_Fertig, wenn:_ Ein Kind, das mit zehn in die Werkstatt geht, kann sie mit sechzehn
+führen.
+
+**6.3 Wer ein Handwerk führen darf.** (Punkt 34) Eine Werkstatt braucht jemanden, der das
+Handwerk beherrscht — den Eigentümer oder einen Angestellten. Damit bekommen Fertigkeiten
+wirtschaftliches Gewicht, und der plötzliche Tod eines Meisters hat die Folge, die
+Permadeath tragen soll.
+
+_Fertig, wenn:_ Eine Schmiede ohne Schmied steht still, und man sieht, warum.
+
+**6.4 Zünfte.** (Punkt 46) Die Körperschaft, die die Meisterwürde verleiht, die Lehre
+ordnet, Preise setzt und den Zutritt begrenzt. Der größte Schritt der Phase — und der
+erste Ort im Spiel, an dem sich mehrere Spieler zusammentun können. Die Preisregeln
+wandern dabei vom Bürgermeister zur Zunft.
+
+_Fertig, wenn:_ Zwei Häuser streiten sich um eine Zunftmeisterwahl, und der Rat kann
+nichts dagegen tun.
+
+**6.5 Über den Lohn wird verhandelt.** (Punkt 33) Bisher hängt ein Betrieb einen Satz aus
+und wer will, tritt ein. Künftig geht, wem zu wenig geboten wird — und wer über Jahre
+gehalten hat, zahlt weniger, weil Zuneigung etwas wert ist.
+
+_Fertig, wenn:_ Eine Stadt mit drei Schmieden und zwei Gesellen hat steigende Löhne.
+
+**6.6 Familie: Ehe für alle, Adoption, Mitgift.** (Punkte 38, 51) Die Ehe wird für jedes
+Paar geöffnet; die Adoption ist der zweite Weg zum Erben und gehört in denselben Schritt,
+weil die Öffnung ohne sie eine Falle wäre. Dazu die Mitgift, die aus der Heirat zwischen
+zwei Häusern eine Verhandlung macht, und das Testament.
+
+_Fertig, wenn:_ Ein Haus ohne leibliche Kinder hat einen Weg weiter, und eine Heirat
+kostet etwas.
+
+## Phase 7 — Recht, Schuld und Gewalt
+
+Der Block, in dem die Stadt lernt zu vollstrecken. Er hängt eng zusammen: Ohne Richter
+kein Urteil, ohne Turm keine Vollstreckung, ohne Vollstreckung kein Kredit — und ohne
+Kampf kein Räuber, den man einsperren könnte.
+
+**7.1 Die Ämter und der Richter.** (Punkt 32) Der dritte Zweig, den die Stadt noch nicht
+hat. Dazu der Zuschnitt der übrigen Ämter und die Entscheidung, was gewählt und was
+ernannt wird. Der Richter wird gewählt, weil ein Richter, den der Bürgermeister absetzen
+kann, kein Gegengewicht ist.
+
+_Fertig, wenn:_ Ein Bürgermeister muss mit einem Richter auskommen, den er nicht wollte.
+
+**7.2 Der Schuldturm.** (Punkt 44) Haft als Zustand: Wer sitzt, handelt nicht. Und die
+Auslösung, ohne die es eine Sackgasse wäre. Er nimmt auch überführte Räuber auf, die es
+noch nicht gibt — deshalb steht er hier und nicht später.
+
+_Fertig, wenn:_ Jemand sitzt, jemand anderes holt ihn heraus, und beides steht in der
+Chronik.
+
+**7.3 Verträge zwischen Charakteren.** Der unscheinbarste und nützlichste Schritt der
+Phase. Es gibt bisher genau einen Vertrag — die Anstellung. Es kommen drei dazu:
+Bauauftrag (Punkt 35), Kredit (Punkt 43) und Lehrvertrag. Statt dreimal „A bietet, B nimmt
+an" zu bauen, entsteht die Form einmal.
+
+_Fertig, wenn:_ Ein Angebot, das jemand annehmen oder ablehnen kann, ist eine Sache und
+nicht drei.
+
+**7.4 Geldverleih.** (Punkt 43) Die Leihstube, der Zins, das Pfand — und der Turm als
+letzte Stufe. Er bringt die Fallhöhe, die ein Spiel über Generationen braucht, und löst
+die Klemme zwischen Vermögen und Liquidität, an der ein Neuling, ein Erbe und eine
+ausgefallene Ernte gleichermaßen hängen.
+
+_Fertig, wenn:_ Jemand hat sich verschuldet, gebaut, und es hat sich gelohnt — oder eben
+nicht.
+
+**7.5 Der Bauherr.** (Punkt 35) Wer nicht selbst Holz einkaufen will, beauftragt jemanden.
+Die Baukette bleibt unangetastet; der Unternehmer verdient an der Spanne. Nutzt die
+Vertragsform aus 7.3.
+
+_Fertig, wenn:_ Man kann ein Haus bestellen, statt es zu bauen.
+
+**7.6 Kämpfe und Verletzungen.** (Punkt 6) Die Fertigkeit steht, der Ausgang nicht: Wer
+darf wen angreifen, was schützt, was kostet es, und kann ein Kampf tödlich enden. Das
+Letzte hängt an der Erbfolge und ist die eigentliche Entscheidung.
+
+_Fertig, wenn:_ Ein Überfall geht aus, ohne dass jemand die Regeln kennen muss, um ihn zu
+überleben.
+
+**7.7 Räuber als Beruf.** (Punkt 23) Bande, Überfall, Beute — und das Gegengewicht aus
+Wache, Ruf und Turm, das seit 4.7c auf diese Aufgabe wartet. Erst hier ist alles
+beisammen, was ein Räuber braucht: etwas zu holen, jemanden, der ihn fängt, und einen Ort,
+an den er kommt.
+
+_Fertig, wenn:_ Ein NPC ergreift den Beruf, und die Stadt reagiert darauf.
+
+## Phase 8 — Die Welt wird größer
+
+Aus 4.9b geworden und deutlich gewachsen. Der teuerste Block, weil alles, was heute
+stillschweigend „die Startstadt" annimmt, danach zwei Orte vertragen muss.
+
+**8.1 Die Karte als Sechseckraster.** (Punkt 31) Kacheln mit Lage und Art, Entfernung
+gerechnet statt gespeichert, `regionLink` fällt. Der Zielkonflikt zwischen Bebauung und
+Ertrag ist der Kern: Wer baut, nimmt der Kachel, was sie hergibt.
+
+_Fertig, wenn:_ Eine Stadt verdichtet sich von selbst, ohne dass es eine Vorschrift gibt.
+
+**8.2 Die zweite Stadt.** Gründung auf einer Kachel ohne Nachbarstadt; alles, was
+regionsblind ist, wird regionsfähig. Der eigentliche Umbau.
+
+_Fertig, wenn:_ Zwei Städte laufen nebeneinander, jede mit eigener Kasse, Wahl und
+Chronik.
+
+**8.3 Reisen.** (Punkt 41) Ziel und Ankunfts-Tick am Charakter; unterwegs handelt er
+nicht. Dazu die Durchsicht jeder bestehenden Handlung: Handgriff oder Anweisung.
+
+_Fertig, wenn:_ Wer in Falkenstein etwas will, ist erst einmal acht Ticks unterwegs.
+
+**8.4 Fernhandel.** `shipment` mit Ankunfts-Tick, Preisunterschiede zwischen Städten. Erst
+jetzt gibt es etwas zu überfallen, das nicht in derselben Stadt steht.
+
+_Fertig, wenn:_ Eine Karawane bindet Kapital und kommt an — oder nicht.
+
+**8.5 Bürgerrecht und Stand.** (Punkt 49) Besitz und Wahlrecht nur für Bürger, erworben
+durch Bleiben; ein Hauptwohnsitz, mehrere Bürgerrechte. Der Titel vor dem Namen macht den
+Stand sichtbar. Steht hier, weil er ohne zweite Stadt die halbe Wirkung hätte.
+
+_Fertig, wenn:_ Ein Zuwanderer arbeitet ein Jahr, bevor er mitreden darf.
+
+**8.6 Zoll, Bannrechte, Bauordnung und die Grenzen für Auswärtige.** (Punkt 50) Vier neue
+Gesetzesarten, die alle erst jetzt etwas bewirken können.
+
+_Fertig, wenn:_ Zwei Städte führen unterschiedliche Politik, und man merkt es am Preis.
+
+## Phase 9 — Glaube und Geselligkeit
+
+Der Block, der die Stadt bevölkert statt sie zu erweitern. Er kommt spät, weil er nichts
+blockiert — und er wäre trotzdem der erste, den man vorziehen sollte, wenn das Spiel
+lebendiger wirken soll.
+
+**9.1 Religion und Taufe.** (Punkt 39) Zwei Konfessionen, gleichwertig, Zugehörigkeit
+durch Taufe, Wirkung auf die Zuneigung. Damit bekommt die Wahl eine zweite Achse neben
+der persönlichen Zuneigung.
+
+**9.2 Die Kirche als Betrieb.** Sie gehört jemandem und lebt von Taufe, Hochzeit,
+Begräbnis. Der erste Dienstleistungsbetrieb — er verkauft keine Ware, sondern eine
+Handlung, die es ohnehin gibt.
+
+**9.3 Brauer und Taverne.** Bier gibt dem Acker seinen zweiten Abnehmer, die Taverne gibt
+dem Werben einen Ort. Zusammen mit 9.2 die Bauart für alles, was Leistung statt Ware
+verkauft.
+
+**9.4 Feste im Jahreslauf.** Aus dem Tick gerechnet, nicht gespeichert. Sie geben dem Jahr
+einen Rhythmus und der Zuneigung eine Gelegenheit, viele auf einmal zu treffen.
+
+**9.5 Die Stadtreligion.** Die Gesetzesart, die Andersgläubige besteuert — und die
+Auswanderung als ihr Gegengewicht. Braucht 8.2 und 8.5, sonst hat sie keine Folgen.
+
+_Fertig, wenn:_ Eine Stadt hat eine Mehrheit, eine Minderheit und einen Streit darüber.
+
+## Phase 10 — Leib und Leben
+
+Zuletzt, was am Körper hängt. Es blockiert nichts, aber ein halbes Dutzend Waren wartet
+darauf, eine Wirkung zu bekommen.
+
+**10.1 Krankheiten.** (Punkt 5) Ursache, Verlauf, Heilung; Wirkung auf Aktionspunkte und
+Sterberisiko. Der Brunnen bekommt seinen Zweck, der Seuchenzug aus 4.8 seine Folgen.
+
+**10.2 Bader und Hospital.** Der Ort, an dem Heilkunst wirkt, und der zweite Beruf, der
+Leistung verkauft.
+
+**10.3 Heiltrank und Winterkleidung.** Die beiden Waren, die seit 4.11 fertig entworfen
+sind und auf ein System warteten.
+
+**10.4 Verschleiß von Gegenständen.** (Punkt 20) Ohne ihn kauft niemand ein zweites Mal,
+und der Schneider hat nach einer Generation nichts mehr zu tun. Die Bauart steht seit dem
+Gewand; offen ist nur, ob Ausrüstung einzeln geführt wird.
+
+_Fertig, wenn:_ Ein Handwerk bleibt ein Beruf und wird nicht ein einmaliger Auftrag.
+
+## Was quer dazu läuft
+
+Vier Punkte gehören in keine Phase, weil sie in alle gehören:
+
+- **Weltinhalte** (Punkt 15): Berufe, Waren, Rezepte wachsen mit jedem Block. Pferd und
+  Fuhrwerk kommen mit Phase 8, Bader mit 10, Brauer mit 9.
+- **Balancing** (Punkt 16): am laufenden Spiel, nicht am Reißbrett — ab Phase 5 gibt es
+  eines.
+- **Was NPCs tun** (Punkte 30, 24, 7): kein eigener Schritt mehr, sondern Bedingung jedes
+  Schritts. Die drei Persönlichkeitsachsen ohne Handlung bekommen ihre mit den Systemen,
+  zu denen sie gehören — Mut mit dem Kampf, Ehrgeiz mit den Ämtern, Verträglichkeit mit
+  der Fehde.
+- **Weitere öffentliche Gebäude** (Punkt 12): Der Katalog wächst mit dem, was es zu
+  schützen gibt. Löschteich mit der Bauordnung, Brunnen mit den Krankheiten, Schuldturm
+  mit Phase 7.
+
+## Was fehlt, wenn man es ehrlich sagt
+
+Der Plan hat zwei Stellen, an denen er brechen kann.
+
+**Phase 8 ist zu groß.** Die zweite Stadt berührt jede Abfrage, die heute eine Region
+annimmt. Wenn etwas schiefgeht, dann dort — und es lohnt, vorher einmal zu zählen, wie
+viele Stellen das wirklich sind, statt es zu schätzen.
+
+**Phase 5 könnte kürzer sein.** Wer früher öffnen will, kann 5.6 (Startbedingungen)
+vorziehen und den Rest der Phase mit ein paar Spielern zusammen machen. Das ist die
+riskantere, aber lehrreichere Reihenfolge: Was ein Neuling wirklich braucht, weiß man
+erst, wenn einer da ist.
 
 ## Warum in dieser Reihenfolge gebaut wurde
 

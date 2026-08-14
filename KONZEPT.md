@@ -708,6 +708,15 @@ versucht, es zu kaufen. Beides ist erwünscht. Ein Bannrecht ist befristet wie e
 damit die erste Generation sich nicht auf ewig festsetzt, und seine Vergabe steht in der
 Chronik.
 
+**Das Bürgerrecht für Auswärtige ist die einzige Gesetzesart, die keine Zahl ist.** Sie
+kennt nur offen oder zu: Darf, wer anderswo wohnt, hier Bürger werden und damit besitzen?
+(Abschnitt 16). Eine Stadt, die zumacht, schützt ihre Handwerker vor fremdem Kapital und
+verliert es zugleich an die Nachbarstadt, die offen ist.
+
+Sie wirkt nur nach vorn: Wer das Bürgerrecht schon hat, behält es. Ein Gesetz, das
+Erworbenes wieder nimmt, wäre eine Enteignung auf Beschluss — und das soll auch eine
+Mehrheit nicht können.
+
 **Die Bauordnung ist Vorsorge statt Einnahme.** Sie schreibt vor, womit gebaut wird —
 Stein statt Holz, Abstände zwischen Häusern. Sie kostet jeden Bauherrn Geld und senkt
 dafür, was ein Brand anrichtet. Damit hat die Stadt zum ersten Mal ein Gesetz, das nicht
@@ -1158,6 +1167,43 @@ nicht, oder nur wenig: „Es zählen Köpfe, nicht Münzen" ist eine der wenigen
 Festlegungen dieses Konzepts, und ein käufliches Wahlrecht nähme sie zurück. Wer lange
 genug in einer Stadt lebt und einen Leumund hat, wird Bürger. Kinder von Bürgern werden es
 mit der Volljährigkeit.
+
+**Jeder hat genau einen Hauptwohnsitz.** Man kann sich aufhalten, wo man will, und
+irgendwann Besitz an mehreren Orten haben — aber eine Stadt ist die, zu der man **gehört**.
+Sie ist keine Frage des Aufenthalts, sondern eine Erklärung, die man abgibt und ändern
+kann.
+
+An ihr hängt alles, was nur einmal gelten darf: Man **wählt** dort und nur dort, man wird
+dort besteuert, dort steht man in den Listen, und dort ist man Bürger im vollen Sinn.
+Ohne diesen einen Anker wäre bei zwei Städten sofort unklar, wo jemand abstimmt und wer
+seine Grundsteuer bekommt — und wer beides in mehreren Städten hätte, wäre zweimal so viel
+wert wie ein Sesshafter. Genau das soll er nicht sein: **Es zählen Köpfe.**
+
+Den Wohnsitz zu verlegen ist deshalb ein Vorgang mit Gewicht, kein Klick. Was er kostet und
+wie lange er dauert, ist noch nicht entschieden (offener Punkt 49); dass er nicht zwischen
+zwei Wahlen zu machen ist, schon.
+
+**Das Bürgerrecht erwirbt man in jeder Stadt einzeln — und man darf mehrere haben.** Wer
+sich lange genug in einer zweiten Stadt aufhält, wird auch dort Bürger und darf dort
+besitzen. Gewählt wird deswegen trotzdem nur an einem Ort: am Hauptwohnsitz. Besitz ist
+teilbar, Zugehörigkeit nicht.
+
+Damit wird die Niederlassung in einer zweiten Stadt zu dem, was sie sein sollte — ein
+großes, langsames Vorhaben für ein Haus, das schon steht. Ein Handelshaus mit einem Kontor
+in Falkenstein ist ein Fernziel, das man über Generationen erreicht, und der Fernhandel
+bekommt einen Ort, an dem er sesshaft wird, statt ewig auf fremdem Boden zu gastieren.
+
+**Und eine Stadt darf es verbieten.** Sie kann per Gesetz beschließen, dass Auswärtige bei
+ihr kein Bürgerrecht erwerben — wer anderswo seinen Hauptwohnsitz hat, kann hier dann
+nichts besitzen.
+
+Das ist dieselbe Abwägung wie beim Zoll, eine Ebene höher: Die Stadt schützt ihre
+Handwerker vor fremdem Kapital und schneidet sich zugleich davon ab. Wer zumacht, hält die
+Preise für seine eigenen Leute — und sieht zu, wie das Geld in die Nachbarstadt geht, die
+offen ist. Wer aufmacht, bekommt Investoren und irgendwann die Frage, wem die Stadt
+eigentlich gehört. Historisch war der Ausbürger den Städten ein Dorn im Auge, und sie sind
+gegen ihn vorgegangen; im Spiel soll das eine Entscheidung derer sein, die dort wohnen,
+und keine Regel des Codes.
 
 **Der Stand steht vor dem Namen.** Jeder Charakter trägt einen **Titel**, der sagt, wo er
 steht: _Knecht_, wer ohne Bürgerrecht in fremdem Dienst steht; _Bürger_, wer es erworben

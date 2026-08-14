@@ -4,6 +4,10 @@ Alles, was noch entschieden oder entworfen werden muss, mit dem Zeitpunkt, zu de
 spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 `ENTWICKLUNG.md`.
 
+**In welchem Schritt ein Punkt drankommt**, steht dort unter „Der Weg von hier" (Phasen 5
+bis 10). Die Spalte „Fällig vor" sagt etwas anderes und bleibt deshalb: nicht wann er
+gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen ist.
+
 | #   | Punkt                                                                                | Fällig vor                   | Art          |
 | --- | ------------------------------------------------------------------------------------ | ---------------------------- | ------------ |
 | 5   | Krankheiten: Ursachen, Verlauf, Heilung                                              | Heiltrank (4.6c)             | Entwurf      |
@@ -25,9 +29,10 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                         | Punkt 34                     | Entwurf      |
 | 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                 | Punkte 23, 39, 43            | Entwurf      |
 | 48  | Was beim Tod aus den Zurückbleibenden wird: Witwe, minderjähriger Erbe               | laufend                      | Entwurf      |
-| 49  | Bürgerrecht und Stand: Erwerb, Verlust, was daran hängt                              | Zuwanderung (Punkt 41)       | Entwurf      |
-| 50  | Zoll, Bannrechte und Bauordnung als neue Gesetzesarten                               | Fernhandel                   | Entwurf      |
+| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                   | Zuwanderung (Punkt 41)       | Entwurf      |
+| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten    | Fernhandel                   | Entwurf      |
 | 51  | Mitgift, Testament und Stiftung                                                      | laufend                      | Entwurf      |
+| 52  | Der Lebenslauf: welche Ereignisse ein Leben ausmachen                                | laufend                      | Aufgabe      |
 | 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                               | laufend                      | Entwurf      |
 | 36  | Gebäude und Betriebe benennen                                                        | laufend                      | Aufgabe      |
 | 37  | Gebäude verkaufen (Grundstücke gehen bereits) — entschieden, aber ungebaut           | laufend                      | Aufgabe      |
@@ -513,10 +518,10 @@ Zu entscheiden bleibt:
   Bevölkerung — Zuwanderung wäre der Weg, wie eine junge Stadt überhaupt wächst, und
   Abwanderung die Strafe für eine schlecht regierte. Das ist ein eigenes Stück Simulation
   und gehört zur Bedürfnishierarchie (Punkt 7).
-- **Wo wohnt man, wenn man unterwegs ist?** Der Wohnsitz bleibt, wo das Haus steht — daran
-  hängt das Wahlrecht. Aber ein Charakter, der dauerhaft in eine andere Stadt zieht,
-  braucht einen Weg, seinen Wohnsitz zu verlegen, und die alte Stadt verliert damit einen
-  Wähler.
+- **Wo wohnt man, wenn man unterwegs ist?** Der **Hauptwohnsitz** bleibt, wo er ist —
+  Aufenthalt und Zugehörigkeit sind zweierlei (`KONZEPT.md`, Abschnitt 16). Wie man ihn
+  verlegt und was das für Bürgerrecht und Besitz bedeutet, gehört zu Punkt 49 und wird
+  dort entschieden.
 - **Und die Ehe über Entfernung?** Zwei Verheiratete an verschiedenen Orten sind
   spielerisch möglich und mechanisch heikel: Wohnen, Kinder und Zuneigung setzen bisher
   voraus, dass beide am selben Fleck sind.
@@ -741,23 +746,49 @@ das Kind bleibt Eigentümer und kauft ein, was es nicht selbst kann. Offen ist:
 Gebäude besitzen sowie wählen und gewählt werden; alle anderen können arbeiten und leben.
 Erworben wird es durch Bleiben, nicht durch Zahlen — ein käufliches Wahlrecht widerspräche
 „es zählen Köpfe, nicht Münzen". Der Titel vor dem Namen (Knecht, Bürger, Meister,
-Bürgermeister) zeigt den Stand an und wird berechnet, nicht verliehen.
+Bürgermeister) zeigt den Stand an und wird berechnet, nicht verliehen. Und **jeder hat
+genau einen Hauptwohnsitz**: die eine Stadt, in der er wählt und besteuert wird.
 
-Zu entscheiden:
+**Das Bürgerrecht gilt je Stadt, und man darf mehrere haben.** Wer sich lange genug in
+einer zweiten Stadt aufhält, wird auch dort Bürger und darf dort besitzen; gewählt wird
+trotzdem nur am Hauptwohnsitz. Besitz ist teilbar, Zugehörigkeit nicht. Damit ist die
+Niederlassung in einer zweiten Stadt ein Fernziel für ein Haus, das schon steht — und der
+Fernhandel bekommt einen Ort, an dem er sesshaft wird.
 
-- **Wie lange dauert es?** Das ist die eine Zahl, an der alles hängt. Zu kurz, und der
-  Filter wirkt nicht; zu lang, und ein Zuwanderer ist ein halbes Leben Bürger zweiter
+Dazu die Gegenkraft: **Eine Stadt darf per Gesetz beschließen, dass Auswärtige bei ihr kein
+Bürgerrecht erwerben.** Sie kennt nur offen oder zu und wirkt nur nach vorn — Erworbenes
+bleibt, sonst wäre es eine Enteignung auf Beschluss. Die Abwägung gehört denen, die dort
+wohnen: Wer zumacht, schützt seine Handwerker vor fremdem Kapital und sieht zu, wie es in
+die Nachbarstadt geht.
+
+Weil damit ein Besitzverbot an einem Beschluss hängt, sind zwei Dinge zu klären:
+
+- **Was, wenn eine Stadt zumacht, während jemand mitten im Erwerb steht?** Wer die Frist
+  fast voll hat, verlöre sie. Naheliegend ist ein Stichtag: Wer bei Erlass schon dort
+  wohnt, führt den Erwerb zu Ende.
+- **Was genau ist verboten?** Nur das Bürgerwerden — nicht der Zuzug. Wenn zumachen auch
+  hieße, dass niemand mehr zuwandert (Punkt 41), wäre die Wirkung ungleich größer als
+  beabsichtigt, und eine Stadt könnte sich versehentlich die Arbeitskräfte abschneiden.
+
+**Weiter zu entscheiden:**
+
+- **Was kostet der Wohnsitzwechsel?** Er darf kein Klick sein, sonst zieht man zur Wahl um.
+  Eine Frist ist das naheliegende Mittel — wer wechselt, wählt erst beim übernächsten Mal.
+- **Wie lange dauert der Erwerb?** Das ist die eine Zahl, an der alles hängt. Zu kurz, und
+  der Filter wirkt nicht; zu lang, und ein Zuwanderer ist ein halbes Leben Bürger zweiter
   Klasse. Ein Spieljahr oder zwei klingt richtig — lang genug, um Wahlen nicht zu kippen,
   kurz genug, um einen Neuanfang nicht zu bestrafen.
 - **Was ist mit dem Anfang?** Die Startbevölkerung und jeder neue Spieler brauchen einen
   Stand. Ein Neuling ohne Bürgerrecht kann nichts besitzen — das verschärft Punkt 14
   erheblich und muss zusammen mit ihm entschieden werden. Vermutlich beginnt man als
   Bürger der Stadt, in der man anfängt.
-- **Kann man es verlieren?** Naheliegend beim Fortzug, und vielleicht bei schwerer
-  Verfehlung — was dem Richteramt (Punkt 32) eine zweite Strafe neben dem Turm gäbe.
-- **Was wird aus vorhandenem Besitz?** Wer sein Bürgerrecht verliert oder fortzieht, kann
-  seine Häuser nicht behalten. Ein Zwangsverkauf mit Frist ist die freundlichste Lösung;
-  ohne Frist wäre es eine Enteignung.
+- **Verfällt ein Bürgerrecht, das niemand nutzt?** Beim Wegzug bleibt es — das ist gerade
+  der Sinn der Entscheidung. Aber eine Stadt führte sonst Bürger, die seit drei
+  Generationen fort sind. Dagegen spricht, dass ein Kontor in einer fernen Stadt genau dann
+  etwas wert ist, wenn man nicht ständig hinreisen muss.
+- **Kann man es verlieren?** Bei schwerer Verfehlung — was dem Richteramt (Punkt 32) eine
+  zweite Strafe neben dem Turm gäbe. Dann greift, was oben zum Besitz steht: Zwangsverkauf
+  mit Frist, denn ohne Frist wäre es eine Enteignung.
 - **Gilt es auch für NPCs?** Muss es, sonst hat die halbe Stadt Sonderrechte. Und
   NPC-Zuwanderer brauchen denselben Weg hinein.
 
@@ -779,6 +810,10 @@ zeigt.
 - **Die Bauordnung** kostet beim Bauen und senkt den Schaden bei Bränden. Sie ist das
   erste Gesetz, das nicht umverteilt, sondern abwendet — und braucht deshalb die
   Unglücke aus 4.8 als Gegenstück, sonst ist sie nur teuer.
+- **Das Bürgerrecht für Auswärtige** ist die einzige dieser Arten, die keine Zahl setzt,
+  sondern einen Schalter umlegt: offen oder zu (Punkt 49). Sie ist deshalb auch die
+  einzige, bei der eine Mehrheit einer Minderheit etwas wegnehmen könnte — was durch die
+  Regel verhindert wird, dass sie nur nach vorn wirkt.
 
 ### 51. Mitgift, Testament und Stiftung
 
@@ -797,6 +832,35 @@ Drei Wege, auf denen Vermögen den Besitzer wechselt, ohne dass jemand kauft ode
   eigene Kosten, das Ansehen über den Tod hinaus bringt (Punkt 47). Zu klären: ob der
   Stifter mitbestimmt, was gebaut wird, oder ob er nur zahlt — und ob sein Name daran
   hängen bleibt. Er sollte, sonst ist es eine Spende.
+
+### 52. Der Lebenslauf
+
+Hier ist wenig zu bauen und einiges auszuwählen. Die Technik steht seit 4.7d vollständig:
+`getChronicle({ characterId })` liefert alle Ereignisse, an denen jemand beteiligt war, und
+die Charakterseite zeigt sie als „Lebenslauf". Der Lebenslauf ist ausdrücklich kein eigenes
+System, sondern eine Sicht auf dieselben Zeilen — daran ändert sich nichts.
+
+**Was fehlt, ist der Stoff.** Mehrere Höhepunkte eines Lebens werden nicht aufgeschrieben:
+
+- **Einzug und Umzug.** `npcService` setzt bei `MOVE_IN` die `HomeBuildingId`, ebenso
+  `familyService` beim Zusammenziehen nach der Hochzeit — beide ohne Chronikeintrag. Wo
+  jemand gewohnt hat, ist aber eine der wenigen Angaben, die ein ganzes Leben umspannen.
+- **Grundstückserwerb außerhalb der Versteigerung.** `AUCTION_WON` steht seit 4.9a, aber
+  `plotService.buyPlot` (von der Stadt) und `buyFromOwner` (von privat) schreiben nichts.
+- **Später:** Bürgerrecht erworben, in eine Zunft aufgenommen, Meister geworden, getauft,
+  Konfession gewechselt, im Turm gesessen, ausgelöst worden. Jeder dieser Schritte bringt
+  seine eigene Art mit; sie werden dort nachgetragen, wo sie entstehen.
+
+**Zu entscheiden ist die Grenze.** Ein Lebenslauf, der jede Schicht und jeden Brotkauf
+aufführt, ist keiner — bei fünfzig Ticks im Spieljahr wären das Tausende Zeilen. Der
+Maßstab: Aufgenommen wird, was jemand nach sechzig Jahren noch erzählen würde. Alles, was
+sich wiederholt, gehört nicht dazu; alles, was einen Zustand ändert, der lange hält, schon.
+
+Damit hängt zusammen, ob die Stadtchronik dieselbe Auswahl braucht. Vermutlich nicht: Was
+für ein Leben zu klein ist, kann für eine Stadt trotzdem uninteressant sein — aber der
+Umzug eines Einzelnen interessiert die Stadt weniger als ihn selbst. Wenn die Sichten
+verschiedene Schwellen brauchen, ist das der erste Fall, in dem eine Ereignisart nicht in
+jeder Sicht auftaucht.
 
 ### 15. Weltinhalte: Berufe, Waren und Rezepte
 
