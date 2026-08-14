@@ -131,7 +131,19 @@ export async function getCharacterForUser(userId: string): Promise<Character | u
 	});
 	if (!gefunden) return undefined;
 
-	await nachwachsenLassen(gefunden, await worldService.currentTick());
+	const jetzt: number = await worldService.currentTick();
+	await nachwachsenLassen(gefunden, jetzt);
+
+	// **Hier und nur hier** wird festgehalten, dass ein Mensch hereingeschaut hat. Dieser
+	// Weg führt über die Sitzung; die Selbstverwaltung (5.5) kommt nie hier vorbei und
+	// kann sich deshalb nicht selbst für anwesend erklären.
+	//
+	// Geschrieben wird höchstens einmal je Tick: Ein Blick auf fünf Seiten in derselben
+	// Stunde ist derselbe Blick, und fünf Schreibzugriffe wären vier zu viel.
+	if (gefunden.dataValues.lastSeenTick !== jetzt) {
+		await gefunden.update({ lastSeenTick: jetzt });
+	}
+
 	return convertToCharacter(gefunden.dataValues);
 }
 

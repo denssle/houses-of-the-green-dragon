@@ -12,6 +12,8 @@ export interface Character {
 	id: string;
 	firstName: string;
 	title: string;
+	/** Wann zuletzt ein Mensch hereingeschaut hat — nur er selbst setzt es (5.5). */
+	lastSeenTick: number | null;
 	role: CharacterRole;
 	gender: Gender;
 	actionPoints: number;

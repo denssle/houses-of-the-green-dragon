@@ -187,6 +187,61 @@ export function decideNpcAction(state: NpcState): NpcAction {
 }
 
 /**
+ * Was ein Charakter tun darf, den gerade niemand spielt.
+ *
+ * **Erhalten ja, entscheiden nein.** Wer lange nicht hereinschaut, soll nicht verhungern
+ * und sein Haus nicht verfallen sehen — aber er soll auch nicht heiraten, bauen oder
+ * Grundstücke erwerben. Das legte fest, was der Spieler bei seiner Rückkehr vorfindet, und
+ * genau davon soll ihm nichts abgenommen werden.
+ *
+ * Essen, arbeiten, unter ein Dach ziehen, Material kaufen und renovieren bleiben. Das
+ * Dach gehört dazu, weil ein Obdachloser sich nicht erholt und keine Kinder bekommt —
+ * ihn draußen stehen zu lassen wäre keine Zurückhaltung, sondern Vernachlässigung.
+ */
+/**
+ * Ab wann ein Charakter als verwaist gilt.
+ *
+ * Dieselbe Spanne wie der Deckel der Aktionspunkte, und aus demselben Grund: Nach
+ * achtundvierzig Ticks steht das Budget an, und jede weitere Stunde verfällt ungenutzt.
+ * Genau das ist Abwesenheit — nicht, dass jemand offline wäre, sondern dass Zeit brachliegt.
+ *
+ * Wer nie gesehen wurde, gilt als abwesend. Das trifft NPCs (richtig) und Spieler nach
+ * einem Serverstart, bis sie das erste Mal hereinschauen (ebenfalls richtig: In der
+ * Zwischenzeit soll ihr Charakter essen).
+ */
+export const ABSENCE_AFTER_TICKS = 48;
+
+export function isUnattended(
+	lastSeenTick: number | null,
+	currentTick: number,
+	after: number = ABSENCE_AFTER_TICKS
+): boolean {
+	if (lastSeenTick === null) return true;
+	return currentTick - lastSeenTick >= after;
+}
+
+export const CARETAKER_ACTIONS: readonly NpcAction[] = [
+	'EAT',
+	'BUY_FOOD',
+	'WORK',
+	'MOVE_IN',
+	'BUY_MATERIAL',
+	'RENOVATE'
+] as const;
+
+export function decideCaretakerAction(state: NpcState): NpcAction {
+	const gewuenscht: NpcAction = decideNpcAction(state);
+	if (CARETAKER_ACTIONS.includes(gewuenscht)) return gewuenscht;
+
+	// Was die Hierarchie sonst vorschlägt, ist eine Entscheidung — und die steht dem
+	// Verwalter nicht zu. Statt untätig zu bleiben, wird gearbeitet: Wer abwesend ist, soll
+	// wenigstens nicht ärmer werden, und Zeit, die am Deckel der Aktionspunkte verfällt,
+	// ist ohnehin verloren.
+	if (state.workAvailable && state.actionPoints > 0) return 'WORK';
+	return 'IDLE';
+}
+
+/**
  * Stufe 1 — **Überleben**: essen, und wenn nichts da ist, welches besorgen.
  *
  * Essen kostet keinen Aktionspunkt: Wer erst dafür arbeiten müsste, verhungerte

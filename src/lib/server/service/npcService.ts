@@ -7,7 +7,14 @@ import { levelOf } from '$lib/model/buildingTemplate';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
-import { decideNpcAction, type NpcAction, type NpcState, REPAIR_BELOW } from '$lib/game/npc.logic';
+import {
+	decideCaretakerAction,
+	decideNpcAction,
+	isUnattended,
+	type NpcAction,
+	type NpcState,
+	REPAIR_BELOW
+} from '$lib/game/npc.logic';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import {
 	CONDITION_MAX,
@@ -68,15 +75,41 @@ export async function actForNpcs(tick: number): Promise<NpcTick> {
 		if (handlung !== 'IDLE') gehandelt++;
 	}
 
+	// **Und die Charaktere, die gerade niemand spielt** (5.5). Sie laufen durch dieselbe
+	// Schleife, nur mit engeren Befugnissen — ein zweiter Durchlauf mit eigener Taktung
+	// wäre dieselbe Arbeit an zwei Stellen.
+	const verwaist = await Character.findAll({
+		where: { deathTick: null, role: 'PLAYER' }
+	});
+
+	for (const charakter of verwaist) {
+		if (!isUnattended(charakter.dataValues.lastSeenTick, tick)) continue;
+
+		const handlung: NpcAction = await ausfuehren(charakter.dataValues.id, tick, true);
+		gezaehlt[handlung] = (gezaehlt[handlung] ?? 0) + 1;
+		if (handlung !== 'IDLE') gehandelt++;
+	}
+
 	return { acted: gehandelt, byAction: gezaehlt };
 }
 
-/** Einen NPC entscheiden und handeln lassen. */
-async function ausfuehren(npcId: string, tick: number): Promise<NpcAction> {
+/**
+ * Einen Charakter entscheiden und handeln lassen.
+ *
+ * `verwaltet` schaltet auf die engeren Befugnisse um: Ein Spielercharakter, den gerade
+ * niemand führt, wird erhalten und nicht gelenkt.
+ */
+async function ausfuehren(
+	npcId: string,
+	tick: number,
+	verwaltet: boolean = false
+): Promise<NpcAction> {
 	const lage = await lageAufnehmen(npcId, tick);
 	if (!lage) return 'IDLE';
 
-	const handlung: NpcAction = decideNpcAction(lage.state);
+	const handlung: NpcAction = verwaltet
+		? decideCaretakerAction(lage.state)
+		: decideNpcAction(lage.state);
 
 	switch (handlung) {
 		case 'EAT':

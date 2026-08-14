@@ -1913,12 +1913,35 @@ Nebenbei beantwortet sich damit eine Frage aus 5.1: Das Wohnrecht überdauert ei
 Hausverkauf, denn `buyBuilding` überträgt den Eigentumstitel und rührt die Bewohner nicht
 an.
 
-**5.5 Der abwesende Spieler.** (Punkt 40) Wer lange nicht hereinschaut, dessen Charakter
-isst, arbeitet und hält sein Haus instand. Erhalten ja, entscheiden nein. Ohne das
-bestraft die Welt Abwesenheit härter als jeden Fehler — und genau das erlebt ein neuer
-Spieler beim ersten Wochenende, an dem er anderes vorhat.
+**5.5 Der abwesende Spieler.** ✓ (Punkt 40) Wer lange nicht hereinschaut, dessen Charakter
+isst, arbeitet und hält sein Haus instand. Erhalten ja, entscheiden nein.
 
-_Fertig, wenn:_ Zwei Wochen Abwesenheit kosten Fortschritt, aber nicht das Haus.
+**Woran Abwesenheit hängt, war die eigentliche Frage.** Keines der vorhandenen Felder
+taugte: `lastTickProcessed` wird bei jedem Zugriff fortgeschrieben — auch von der
+Selbstverwaltung selbst, die sich damit durch ihr eigenes Handeln für anwesend erklärt
+hätte. Also `lastSeenTick`, gesetzt allein in `getCharacterForUser`. Das ist der Weg über
+die Sitzung, den nur ein Mensch nimmt; die Verwaltung kommt dort nie vorbei. Geschrieben
+wird höchstens einmal je Tick — fünf Seitenaufrufe in derselben Stunde sind derselbe Blick.
+
+**Die Schwelle ist der Deckel der Aktionspunkte**, achtundvierzig Ticks, und die Begründung
+ist dieselbe: Ab da steht das Budget an und jede weitere Stunde verfällt ungenutzt.
+Abwesenheit heißt hier nicht „offline", sondern „Zeit liegt brach". Wer nie gesehen wurde,
+gilt als abwesend — das trifft NPCs und Spieler nach einem Serverstart, und beides ist
+richtig.
+
+**Gehandelt wird durch dieselbe Schleife wie bei den NPCs**, nur mit engeren Befugnissen:
+essen, einkaufen, arbeiten, unter ein Dach ziehen, Material kaufen, renovieren. Ein
+zweiter Durchlauf mit eigener Taktung wäre dieselbe Arbeit an zwei Stellen gewesen.
+
+Das Dach gehört ausdrücklich dazu, obwohl es eine Festlegung ist: Ein Obdachloser erholt
+sich nicht und bekommt keine Kinder — ihn draußen stehen zu lassen wäre keine
+Zurückhaltung, sondern Vernachlässigung. Werben, heiraten, bauen, Grundstücke kaufen,
+eine Stelle antreten und wählen bleiben dagegen dem Spieler. Schlägt die Hierarchie
+etwas davon vor, wird stattdessen gearbeitet — wer abwesend ist, soll wenigstens nicht
+ärmer werden.
+
+_Fertig, wenn:_ Zwei Wochen Abwesenheit kosten Fortschritt, aber nicht das Haus. —
+Erledigt.
 
 **5.6 Womit ein Neuling anfängt.** (Punkt 14) Die letzte inhaltliche Entscheidung vor dem
 öffentlichen Betrieb, und die empfindlichste: Was bekommt jemand mit, der in eine Stadt

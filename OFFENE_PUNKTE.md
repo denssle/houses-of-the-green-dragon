@@ -38,7 +38,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum        | —                            | erledigt     |
 | 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                    | Ehe für alle                 | Entwurf      |
 | 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit             | später                       | Entwurf      |
-| 40  | Der abwesende Spieler: ab wann, wie weit, und was beim Erbfall                       | erster öffentlicher Betrieb  | Entwurf      |
+| 40  | Der abwesende Spieler — **erledigt mit 5.5**, zwei Restfragen                        | —                            | erledigt     |
 | 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist              | zweite Stadt                 | Entwurf      |
 | 42  | Kindern einen Namen geben — **erledigt mit 5.2**                                     | —                            | erledigt     |
 | 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                          | erste verliehene Münze       | Entwurf      |
@@ -466,31 +466,31 @@ Zu entscheiden bleibt:
 Der Prüfstein bleibt derselbe wie bei Waren und Bauten: **Wo wirkt es?** Eine Kirche ohne
 Wirkung ist ein teures Haus mit einem Turm.
 
-### 40. Der abwesende Spieler
+### 40. Der abwesende Spieler — erledigt (5.5)
 
-**Die Richtung steht** (`KONZEPT.md`, „Das Ziel"): Bleibt ein Spieler lange weg, übernimmt
-die Bedürfnishierarchie der NPCs seinen Charakter — er isst, arbeitet und hält sein Haus
-instand, baut aber nichts auf.
+**Ab wann:** achtundvierzig Ticks ohne einen Blick — dieselbe Spanne wie der Deckel der
+Aktionspunkte, und aus demselben Grund. Gemessen an `lastSeenTick`, das allein der Weg über
+die Sitzung setzt; die Verwaltung kommt dort nie vorbei und kann sich nicht selbst für
+anwesend erklären.
 
-Zu entscheiden ist:
+**Wie weit:** essen, einkaufen, arbeiten, unter ein Dach ziehen, Material kaufen,
+renovieren. Nicht: werben, heiraten, bauen, Grundstücke kaufen, eine Stelle antreten,
+wählen. Schlägt die Bedürfnishierarchie eines davon vor, wird stattdessen gearbeitet.
 
-- **Ab wann?** Zu früh, und das Spiel spielt sich selbst, während man überlegt; zu spät,
-  und der Charakter ist verhungert, bevor die Hilfe greift. Ein Maß, das sich anbietet:
-  wenn die Aktionspunkte am Deckel anstehen und nichts geschieht — dann liegt Zeit brach,
-  und genau das ist Abwesenheit.
-- **Wie weit geht die Übernahme?** Essen und renovieren sind unstrittig. Heiraten,
-  Kinder bekommen, ein Grundstück ersteigern sind es nicht — sie legen fest, was der
-  Spieler bei seiner Rückkehr vorfindet. Die Grenze verläuft vermutlich dort: erhalten ja,
-  entscheiden nein.
-- **Was beim Erbfall?** Der Charakter altert und stirbt auch in Abwesenheit. Wer erbt,
-  steht durch die Benennung fest (oder das älteste volljährige Kind) — die Frage ist, ob
-  der Erbe dann ebenfalls selbstverwaltet weiterläuft. Naheliegend ja, sonst reißt die
-  Kette genau dort, wo sie gebraucht wird.
-- **Sagt es jemand?** Ein Spieler, der zurückkommt, sollte sehen, was in seiner
-  Abwesenheit geschah. Die Chronik hat dafür bereits die Form (4.7d).
-- **Und wo hört es auf?** Ein Konto, das nie wiederkommt, hält ein Haus für immer am
-  Leben. Irgendwann muss die Selbstverwaltung enden — das berührt die Kontolöschung
-  (Punkt 28) und die Frage, ob eine Dynastie ohne Spieler zum NPC-Haus wird.
+**Was beim Erbfall:** Der Erbe läuft von selbst mit, ohne dass etwas nachgetragen werden
+müsste — auch er hat kein `lastSeenTick`, bis jemand hereinschaut, und gilt damit als
+verwaist. Genau richtig: In der Zwischenzeit soll er essen.
+
+**Zwei Fragen bleiben offen:**
+
+- **Sagt es jemand?** Ein Spieler, der zurückkommt, sollte sehen, was in seiner Abwesenheit
+  geschah. Die Chronik hat die Form dafür (4.7d), aber die Handlungen der Verwaltung stehen
+  nicht darin — sie schreiben nur, was ohnehin jede Handlung schreibt. Ob ein
+  Rückkehrer eine eigene Zusammenfassung braucht, entscheidet sich am besten an einem
+  echten Rückkehrer.
+- **Wo hört es auf?** Ein Konto, das nie wiederkommt, hält ein Haus für immer am Leben.
+  Irgendwann muss die Selbstverwaltung enden — das berührt die Kontolöschung (Punkt 28)
+  und die Frage, ob eine Dynastie ohne Spieler zum NPC-Haus wird.
 
 ### 41. Reisen
 

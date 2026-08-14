@@ -1,4 +1,4 @@
-import { DataTypes, type Model, type ModelStatic } from 'sequelize';
+﻿import { DataTypes, type Model, type ModelStatic } from 'sequelize';
 import type {
 	CharacterAttributes,
 	CharacterCreationAttributes
@@ -60,6 +60,7 @@ export const Character: ModelStatic<Model<CharacterAttributes, CharacterCreation
 			// beim Gebaeude: gerechnet beim Lesen, geschrieben nur beim Essen.
 			satiety: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 100 },
 			wornSinceTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
+			lastSeenTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
 			lastNeedTick: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 }
 		},
 		{ timestamps: true }

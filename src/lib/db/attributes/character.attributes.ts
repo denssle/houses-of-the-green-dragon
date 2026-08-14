@@ -1,4 +1,4 @@
-import type { Optional } from 'sequelize';
+﻿import type { Optional } from 'sequelize';
 import type { CharacterRole, Gender } from '$lib/db/attributes/enums';
 import type { Character } from '$lib/model/character';
 
@@ -53,6 +53,8 @@ export interface CharacterAttributes {
 	 * herunterzählen müsste.
 	 */
 	wornSinceTick: number | null;
+	/** Wann zuletzt ein Mensch hereingeschaut hat — nur er selbst setzt es. */
+	lastSeenTick: number | null;
 	HomeBuildingId: string | null;
 }
 
@@ -79,6 +81,7 @@ export type CharacterCreationAttributes = Optional<
 	| 'satiety'
 	| 'lastNeedTick'
 	| 'wornSinceTick'
+	| 'lastSeenTick'
 	| 'HomeBuildingId'
 >;
 
@@ -92,6 +95,7 @@ export function convertToCharacter(attributes: CharacterAttributes): Character {
 		actionPoints: attributes.actionPoints,
 		money: attributes.money,
 		wornSinceTick: attributes.wornSinceTick,
+		lastSeenTick: attributes.lastSeenTick,
 		birthTick: attributes.birthTick,
 		deathTick: attributes.deathTick,
 		regionId: attributes.RegionId,
