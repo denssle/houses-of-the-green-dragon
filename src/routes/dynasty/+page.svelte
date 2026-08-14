@@ -68,6 +68,6 @@
 	</section>
 {/if}
 
-{#if data.dynasty}
+{#if data.dynasty && !data.hasCharacter}
 	<p><a href="{base}/character/new" class="link">Neuen Charakter anlegen</a></p>
 {/if}

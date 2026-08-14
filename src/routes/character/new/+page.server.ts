@@ -9,6 +9,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.currentUser) {
 		redirect(303, `${base}/login`);
 	}
+	// Wer schon einen Charakter führt, hat hier nichts zu suchen: Das Formular würde
+	// beim Absenden ohnehin abgewiesen. Also zurück zu dem, der lebt.
+	const bestehend = await characterService.getCharacterForUser(locals.currentUser.id);
+	if (bestehend) {
+		redirect(303, `${base}/character/${bestehend.id}`);
+	}
+
 	return {
 		dynasty: await dynastyService.getDynastyForUser(locals.currentUser.id)
 	};

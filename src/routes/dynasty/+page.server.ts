@@ -1,6 +1,7 @@
 import { base } from '$app/paths';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import * as characterService from '$lib/server/service/characterService';
 import * as dynastyService from '$lib/server/service/dynastyService';
 import * as familyService from '$lib/server/service/familyService';
 import * as userService from '$lib/server/service/userService';
@@ -21,6 +22,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const lebend = await dynastyService.getDynastyForUser(locals.currentUser.id);
 	return {
 		dynasty: lebend,
+		// Ein Spieler führt genau einen Charakter. Ob schon einer da ist, entscheidet
+		// darüber, ob der Weg zu einem neuen überhaupt angeboten wird.
+		hasCharacter: Boolean(await characterService.getCharacterForUser(locals.currentUser.id)),
 		founder: lebend ? await userService.getUser(lebend.foundedBy) : undefined,
 		tree: lebend
 			? await familyService.getFamilyTree(lebend.id, await worldService.currentTick())

@@ -1,14 +1,112 @@
 @import 'tailwindcss';
 
+/*
+	Tailwinds Preflight nimmt Überschriften und Listen ihre Auszeichnung — ohne Ersatz
+	steht eine Gruppenüberschrift so groß da wie der Satz darunter, und was die Seite
+	ordnen soll, ordnet nichts. Also die Grundtypografie einmal von Hand.
+*/
+h2 {
+	@apply mb-2 text-2xl font-semibold;
+}
+
+h3 {
+	@apply mt-8 mb-2 text-lg font-semibold;
+}
+
+h4 {
+	@apply mt-4 mb-1 font-semibold;
+}
+
+p {
+	@apply my-2;
+}
+
+ul {
+	@apply my-2 list-disc pl-5;
+}
+
+dt {
+	@apply mt-2 font-semibold;
+}
+
 input {
 	@apply rounded border border-gray-300 m-2 invalid:border-pink-500 valid:border-green-500;
 }
 
 .link {
-	@apply text-blue-600 visited:text-purple-600;
+	@apply text-blue-600 underline visited:text-purple-600;
 }
 
-a,
-button {
-	@apply rounded border p-2 border-gray-300 my-4;
+/*
+	Ein Link ist Text, kein Kasten.
+
+	Vorher trug jedes `a` einen Rahmen. Eine Liste von zwölf Gebäuden wurde damit zu
+	zwölf Kästen, die untereinander versetzt stehen wie eine Treppe — Rahmen um etwas,
+	das man liest, statt um etwas, das man drückt.
+
+	Den Kasten bekommt nur, was eine Handlung auslöst: Formularknöpfe und die Wege in
+	einer Handlungsleiste.
+*/
+button,
+.actions a {
+	@apply my-1 rounded border border-gray-300 px-3 py-1;
+}
+
+/*
+	Eine Leiste zusammengehörender Wege — waagerecht, mit Umbruch: Auf einem schmalen
+	Fenster wird aus der Reihe ein Block und kein Überlauf.
+*/
+.actions {
+	@apply my-2 flex flex-wrap items-center gap-2;
+}
+
+.actions a {
+	@apply no-underline;
+}
+
+/*
+	Ein Knopf, der wie ein Link aussehen soll: Abmelden, Kündigen, eine Benennung
+	zurücknehmen. Formular ist er, weil er etwas ändert — aber im Satz steht er als
+	Link, und mit Rahmen sprang er aus jeder Zeile heraus.
+*/
+button.link {
+	@apply my-0 rounded-none border-0 p-0;
+}
+
+/*
+	Eine Liste, deren Einträge mehr sind als eine Zeile — eine Person mit ihren
+	Handlungen etwa. Kein Aufzählungspunkt, dafür eine feine Linie: Sie sagt, wo der
+	eine Eintrag aufhört und der nächste beginnt, ohne jeden in einen Kasten zu sperren.
+*/
+.entries {
+	@apply list-none pl-0;
+}
+
+.entries > li {
+	@apply border-b border-gray-100 py-3;
+}
+
+.entries > li:last-child {
+	@apply border-b-0;
+}
+
+/*
+	In einer Handlungsleiste sorgt der Abstand der Leiste für die Lücken; ein eigener
+	Rand des Formulars käme obendrauf und ließe die Reihe ungleichmäßig wirken.
+*/
+.actions form {
+	@apply m-0 flex flex-wrap items-center gap-2;
+}
+
+.actions label {
+	@apply flex items-center;
+}
+
+/*
+	Ein Formular in einem Listenpunkt gehört zu dessen Zeile — „Pachten" zu der Fläche,
+	„Kaufen" zu der Ware. Als Blockelement riss es den Knopf in eine eigene Zeile, und
+	bei zehn Flächen sah die Liste doppelt so lang aus, wie sie ist.
+*/
+li form {
+	@apply ml-2 inline-block align-middle;
 }
