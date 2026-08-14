@@ -32,9 +32,14 @@ export interface ChronicleLine {
  * die Alternative gewesen, und sie liefen auseinander, sobald jemand eine Formulierung
  * ändert.
  *
- * Steuerzeichen als Platzhalter, weil sie in keinem Namen vorkommen können.
+ * Als Platzhalter dienen Zeichen aus dem **privaten Bereich** von Unicode (`U+E000` ff.).
+ * Sie haben keine festgelegte Bedeutung und kommen deshalb in keinem Namen vor. Hier
+ * standen zuerst Steuerzeichen — die tun dasselbe, aber ESLint verbietet sie in regulären
+ * Ausdrücken zu Recht (`no-control-regex`): Dort ist ein unsichtbares Zeichen fast immer
+ * ein Versehen. Für den privaten Bereich gilt der Einwand nicht, er ist für genau solche
+ * Zwecke gedacht.
  */
-const PLATZ = { subject: '\u0001', object: '\u0002', building: '\u0003' } as const;
+const PLATZ = { subject: '\uE000', object: '\uE001', building: '\uE002' } as const;
 
 /** Ein Stück eines Chroniksatzes: entweder Text oder jemand, den man aufsuchen kann. */
 export type ChroniclePart =
@@ -44,7 +49,7 @@ export type ChroniclePart =
 /** Was in der Chronik steht — als ganzer Satz. */
 export function chronicleMessage(entry: ChronicleLine): string {
 	return satz(entry)
-		.split(/([\u0001\u0002\u0003])/)
+		.split(/([\uE000\uE001\uE002])/)
 		.map((stueck) => {
 			if (stueck === PLATZ.subject) return entry.subject?.name ?? 'Jemand';
 			if (stueck === PLATZ.object) return entry.object?.name ?? 'jemanden';
@@ -62,7 +67,7 @@ export function chronicleMessage(entry: ChronicleLine): string {
  */
 export function chronicleParts(entry: ChronicleLine): ChroniclePart[] {
 	return satz(entry)
-		.split(/([\u0001\u0002\u0003])/)
+		.split(/([\uE000\uE001\uE002])/)
 		.filter((stueck) => stueck !== '')
 		.map((stueck): ChroniclePart => {
 			if (stueck === PLATZ.subject) {

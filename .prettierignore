@@ -2,3 +2,12 @@
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
+
+# Werkzeugeinstellungen, die nicht ins Repository gehören.
+#
+# `.claude/settings.local.json` schreibt Claude Code selbst und ist per .gitignore
+# ausgenommen — auf dem CI-Runner gibt es sie also gar nicht. Lokal brach `npm run lint`
+# an ihr ab, **bevor** eslint an die Reihe kam, und damit lief die zweite Hälfte des
+# Befehls hier nie. Genau so ist ein eslint-Fehler in die Pipeline gelangt, der lokal
+# unentdeckt blieb.
+.claude/
