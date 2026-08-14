@@ -106,13 +106,25 @@ describe('Baumaterial', () => {
 			await material(bauherrin, 50);
 			const grund = await eigenerGrund(bauherrin);
 			const vorlage = buildingService.getBuildingOption(WOHNHAUS)!;
-			const bedarf = materialFor(vorlage.levels[0].price);
+			const bedarf = materialFor(vorlage.levels[0].price, vorlage.type);
 
 			expect((await buildingService.build(vorlage, bauherrin, grund)).ok).toBe(true);
 
 			for (const posten of bedarf) {
 				expect(await vorrat(bauherrin, posten.itemId)).toBe(50 - posten.quantity);
 			}
+		});
+
+		it('verlangt für ein Wohnhaus nur Holz', async () => {
+			// Eine Kate ist Fachwerk, keine Festung. Ohne diese Ausnahme hinge das Wachstum
+			// der Bevölkerung an einer Erzgrube, einer Schmiede und dem Zufall, dass jemand
+			// beides betreibt — im Selbsterhaltungstest baute deshalb kein NPC ein Haus.
+			expect(materialFor(100, 'RESIDENCE').map((posten) => posten.itemId)).toEqual(['PLANK']);
+			expect(materialFor(100, 'CRAFT').map((posten) => posten.itemId)).toEqual([
+				'PLANK',
+				'BLOCK',
+				'IRON'
+			]);
 		});
 
 		it('verlangt vom größeren Haus mehr', async () => {

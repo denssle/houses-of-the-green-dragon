@@ -18,7 +18,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			// hat die Hälfte des Spiels erraten müssen.
 			material: vorlage.recipes?.some((rezept) => producesBuildingMaterial(rezept.outputItemId))
 				? []
-				: materialFor(vorlage.levels[0].price).map((posten) => ({
+				: materialFor(vorlage.levels[0].price, vorlage.type).map((posten) => ({
 						...posten,
 						name: getItemTemplate(posten.itemId)?.name ?? posten.itemId
 					}))

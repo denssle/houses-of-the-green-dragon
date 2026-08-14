@@ -47,7 +47,17 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		canCraft: false,
 		plotPrice: null,
 		workshopPrice: null,
+		workshopMaterialMissing: false,
 		leaseFee: 20,
+		// Der Zufriedene wohnt im Eigenen, hat Platz und alles instand.
+		homeHasRoom: true,
+		ownsHome: true,
+		homePrice: 100,
+		materialMissing: false,
+		materialPrice: 20,
+		repairNeeded: false,
+		repairCost: 40,
+		canOfferJob: false,
 		...werte
 	};
 }

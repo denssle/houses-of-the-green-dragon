@@ -380,7 +380,7 @@ export async function build(
 		// `producesBuildingMaterial`).
 		const bedarf = option.recipes?.some((rezept) => producesBuildingMaterial(rezept.outputItemId))
 			? []
-			: materialFor(levelOf(option, 1).price);
+			: materialFor(levelOf(option, 1).price, option.type);
 		const fehlt = await materialAbziehen(characterId, bedarf, t);
 		if (fehlt) {
 			return { ok: false, reason: 'NOT_IN_STOCK', missing: fehlt } as const;
@@ -407,10 +407,15 @@ export async function build(
 			t
 		);
 
-		// Wer sein erstes Wohnhaus baut, zieht ein. Ohne diese Zeile stünde er mit einem
-		// eigenen Haus in der Stadt und trotzdem als obdachlos auf seiner Seite — ein
-		// Umzug als eigene Handlung lohnt erst, wenn es mehrere Häuser zur Wahl gibt.
-		const ziehtEin: boolean = option.type === 'RESIDENCE' && !bauherr.dataValues.HomeBuildingId;
+		// **Wer sein Wohnhaus baut, zieht ein — mit Frau oder Mann.**
+		//
+		// Bis 4.14 galt das nur für Obdachlose: Wer in der städtischen Unterkunft wohnte,
+		// blieb dort und ließ sein neues Haus leer stehen. Für NPCs war das fatal, denn sie
+		// wohnen alle erst einmal in der Unterkunft — die Häuser entstanden, und die
+		// Bevölkerung wuchs trotzdem nicht, weil Kinder am Wohnraum der **Mutter** hängen
+		// (4.4). Deshalb zieht der Ehepartner mit: Man baut kein Haus, um allein darin zu
+		// wohnen.
+		const ziehtEin: boolean = option.type === 'RESIDENCE';
 		await bauherr.update(
 			{
 				money: ergebnis.money,
@@ -418,6 +423,12 @@ export async function build(
 			},
 			{ transaction: t }
 		);
+		if (ziehtEin && bauherr.dataValues.spouseId) {
+			await CharacterModel.update(
+				{ HomeBuildingId: angelegt.dataValues.id },
+				{ where: { id: bauherr.dataValues.spouseId }, transaction: t }
+			);
+		}
 
 		return { ok: true, building: convertToBuilding(angelegt.dataValues) } as const;
 	});

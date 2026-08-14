@@ -40,6 +40,11 @@ export const NPC_ACTIONS = [
 	'HARVEST',
 	'CRAFT',
 	'SELL',
+	// Seit 4.14: ein eigenes Dach, Instandhaltung und Leute (Punkt 30).
+	'BUY_MATERIAL',
+	'BUILD_HOME',
+	'RENOVATE',
+	'OFFER_JOB',
 	'IDLE'
 ] as const;
 export type NpcAction = (typeof NPC_ACTIONS)[number];
@@ -95,7 +100,25 @@ export interface NpcState {
 	plotPrice: number | null;
 	/** Was die billigste Werkstatt kostet, die hier fehlt. */
 	workshopPrice: number | null;
+	/** Fehlt für sie das Baumaterial? */
+	workshopMaterialMissing: boolean;
 	leaseFee: number;
+
+	// --- Ein eigenes Dach und was daran hängt (4.14) ----------------------------------
+	/** Ist im jetzigen Zuhause noch Platz für ein Kind? */
+	homeHasRoom: boolean;
+	/** Gehört ihm das Haus, in dem er wohnt? */
+	ownsHome: boolean;
+	/** Was ein eigenes Wohnhaus kostet — nichts heißt: keines zu bauen. */
+	homePrice: number | null;
+	/** Fehlt Baumaterial, und ist es zu kaufen? */
+	materialMissing: boolean;
+	materialPrice: number | null;
+	/** Steht ein eigenes Gebäude schlecht genug für eine Renovierung? */
+	repairNeeded: boolean;
+	repairCost: number;
+	/** Hat sein Betrieb eine freie Stelle, für die noch kein Lohn aushängt? */
+	canOfferJob: boolean;
 }
 
 /**
@@ -204,6 +227,22 @@ function sicherheit(state: NpcState): NpcAction | undefined {
 	}
 
 	if (!state.hasHome && state.homeAvailable) return 'MOVE_IN';
+
+	// Ein eigenes Dach für die Familie — und die Instandhaltung dessen, was steht.
+	const dach = eigenesDach(state);
+	if (dach) return dach;
+
+	// Was verfällt, verliert Wohnraum und Ertrag. Wer nicht renoviert, steht in zwanzig
+	// Spieljahren vor einer Ruine.
+	if (state.repairNeeded && state.actionPoints > 0) {
+		const uebrig: number = state.money - desiredReserve(state.personality, state.foodPrice);
+		if (state.materialMissing) {
+			if (state.materialPrice !== null && uebrig >= state.materialPrice) return 'BUY_MATERIAL';
+		} else if (uebrig >= state.repairCost) {
+			return 'RENOVATE';
+		}
+	}
+
 	return undefined;
 }
 
@@ -289,6 +328,10 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 	// Schritt wäre die ganze Stufe eine Beschäftigungstherapie.
 	if (state.ownStockToSell > 0) return 'SELL';
 
+	// Leute suchen. Kostet nichts und macht aus der Einmannsache einen Betrieb — die
+	// Angestellten stellen her, während der Eigentümer anderes tut.
+	if (state.canOfferJob) return 'OFFER_JOB';
+
 	// Herstellen, solange Zutaten da sind.
 	if (state.canCraft) return 'CRAFT';
 
@@ -304,8 +347,20 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 
 	// **Bauen ist die teuerste Entscheidung und steht deshalb hinten.** Wer nichts
 	// unternimmt, verliert nichts; wer zu früh baut, hat kein Geld mehr für Brot.
-	if (!state.ownsWorkshop && state.hasFreePlot && state.workshopPrice !== null) {
-		if (uebrig >= state.workshopPrice && isEnterprising(state.personality)) return 'BUILD';
+	//
+	// Geprüft wird auch das Material: Ein NPC, der es nicht hat, versuchte es sonst in
+	// **jedem** Tick aufs Neue und käme nie dazu, etwas anderes zu tun. Genau das war im
+	// Selbsterhaltungstest zu sehen — sieben von acht standen Tick für Tick vor demselben
+	// leeren Bauplatz.
+	if (
+		!state.ownsWorkshop &&
+		state.hasFreePlot &&
+		state.workshopPrice !== null &&
+		!state.workshopMaterialMissing &&
+		uebrig >= state.workshopPrice &&
+		isEnterprising(state.personality)
+	) {
+		return 'BUILD';
 	}
 
 	// Ein Grundstück, um darauf zu bauen. Erst danach lohnt der Blick auf die Werkstatt.
@@ -334,4 +389,48 @@ export const ENTERPRISE_THRESHOLD = 20;
 
 export function isEnterprising(personality: Personality): boolean {
 	return (personality.ambition + personality.diligence) / 2 >= ENTERPRISE_THRESHOLD;
+}
+
+/**
+ * Ab welchem Zustand ein NPC sein eigenes Haus herrichtet.
+ *
+ * Dieselbe Schwelle wie beim Bürgermeister und den öffentlichen Bauten (4.7c): bei der
+ * Hälfte. Früher wäre Verschwendung, später verliert das Haus schon Wohnraum — und wer
+ * nicht renoviert, dessen Werk fällt nach zwanzig Spieljahren zur Ruine.
+ */
+export const REPAIR_BELOW = 50;
+
+/**
+ * Ein eigenes Dach — die Stufe, an der die Bevölkerung hängt.
+ *
+ * **Ohne Platz keine Kinder** (4.4), und die städtische Unterkunft ist ein Auffangnetz,
+ * kein Zuhause: Sie fasst zwanzig, und wenn sie voll ist, wächst niemand mehr nach. Wer
+ * eine Familie gründet, baut deshalb sein eigenes Haus, **auch wenn in der Unterkunft
+ * noch ein Bett frei wäre** — die freie Pritsche ist kein Grund, keine Kinder zu bekommen.
+ *
+ * Deshalb steht der Hausbau in der **Sicherheitsstufe** und nicht bei der Entfaltung: Er
+ * ist kein Unternehmen, sondern Vorsorge.
+ *
+ * Die drei Schritte in ihrer natürlichen Folge — erst das Material, dann der Boden, dann
+ * das Haus. Jeder einzelne ist eine Handlung, und jede kann daran scheitern, dass das
+ * Geld nicht reicht; dann wartet er eben und arbeitet weiter.
+ */
+function eigenesDach(state: NpcState): NpcAction | undefined {
+	// Nur wer eine Familie hat, braucht ein Haus. Ein Alleinstehender ist in der
+	// Unterkunft versorgt — und wer schon eines besitzt, baut kein zweites.
+	if (!state.isMarried || state.ownsHome) return undefined;
+	if (state.homePrice === null) return undefined;
+
+	const uebrig: number = state.money - desiredReserve(state.personality, state.foodPrice);
+	if (uebrig < state.homePrice) return undefined;
+
+	if (state.materialMissing) {
+		return state.materialPrice !== null && uebrig >= state.materialPrice
+			? 'BUY_MATERIAL'
+			: undefined;
+	}
+	if (!state.hasFreePlot) {
+		return state.plotPrice !== null && uebrig >= state.plotPrice ? 'BUY_PLOT' : undefined;
+	}
+	return 'BUILD_HOME';
 }

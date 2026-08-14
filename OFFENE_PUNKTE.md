@@ -268,18 +268,20 @@ die natürlichste.
 stellen her und verkaufen — gesteuert über die Bedürfnishierarchie, mit der Entfaltung als
 oberster Stufe.
 
-Offen bleibt, in der Reihenfolge ihres Gewichts:
+**Erledigt (4.14):** Wohnhäuser bauen (samt Grundstück und Material), renovieren, Lohn
+aushängen.
 
-- **Wohnhäuser bauen.** Sie errichten nur Werkstätten. Dabei ist Wohnraum der Engpass der
-  Bevölkerung (ohne Platz keine Kinder, 4.4), und die städtische Unterkunft ist eine
-  Krücke, kein Plan. Ein NPC mit Familie und Geld sollte sich ein Haus bauen.
-- **Leute einstellen.** Sie hängen keinen Lohn aus, also arbeitet in einem NPC-Betrieb
-  niemand außer dem Eigentümer. Damit bleibt jeder Betrieb eine Einmannsache.
+Offen bleibt:
+
 - **Ausbauen.** Die zweite Stufe eines Betriebs bringt mehr Ertrag und eine Stelle mehr —
-  ein NPC nimmt sie nie.
+  ein NPC nimmt sie nie. Dasselbe beim Wohnhaus: Aus der Kate wird nie ein Haus, obwohl
+  genau das mehr Platz für Kinder schüfe.
 - **Kinder zur Schule schicken** (das ist Punkt 24 und gehört hierher).
-- **Renovieren.** Ihre Häuser verfallen, und niemand richtet sie her; nach zwanzig
-  Spieljahren fällt die erste NPC-Werkstatt zur Ruine.
+- **Sich um Ämter kümmern, die sie haben.** Ein NPC-Bürgermeister richtet öffentliche
+  Bauten her (4.7c), erlässt aber keine Gesetze und weist kein Bauland aus — die Stadt
+  wächst unter ihm nur, soweit sie ohnehin wächst.
+- **Verkaufen, was sie nicht brauchen.** Sie hängen nur Erzeugnisse des eigenen Betriebs
+  aus. Ein Bauer mit dreißig Getreide in der Kammer bietet nichts an.
 
 ### 16. Balancing
 

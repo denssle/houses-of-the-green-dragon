@@ -1,12 +1,20 @@
 import { garmentIntact } from '$lib/game/attire.logic';
 import { Op } from 'sequelize';
+import { Employment } from '$lib/db/model/employment';
+import { positionsAt } from '$lib/game/employment.logic';
 import { levelOf } from '$lib/model/buildingTemplate';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
-import { decideNpcAction, type NpcAction, type NpcState } from '$lib/game/npc.logic';
+import { decideNpcAction, type NpcAction, type NpcState, REPAIR_BELOW } from '$lib/game/npc.logic';
 import { getItemTemplate } from '$lib/model/itemTemplate';
-import { residentsAt } from '$lib/game/building.logic';
+import {
+	CONDITION_MAX,
+	materialFor,
+	RENOVATION_COST_PER_POINT,
+	renovationMaterial,
+	residentsAt
+} from '$lib/game/building.logic';
 import { PLOT_PRICE } from '$lib/game/economy';
 import { LEASE_FEE } from '$lib/server/service/productionService';
 import { AGE_OF_MAJORITY, ageInYears } from '$lib/game/time';
@@ -201,6 +209,34 @@ async function ausfuehren(npcId: string, tick: number): Promise<NpcAction> {
 			return 'BUY_PLOT';
 		}
 
+		case 'BUY_MATERIAL': {
+			// So viel, wie fehlt — begrenzt durch das Angebot und den Beutel. Wer Stück für
+			// Stück kaufte, stünde vier Ticks lang auf einem leeren Bauplatz.
+			const angebot = lage.missingMaterialOffer;
+			if (angebot) {
+				const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
+				const wieviel: number = Math.min(lage.missingMaterialCount, angebot.quantity, bezahlbar);
+				if (wieviel > 0) await tradeService.buyFromOffer(npcId, angebot.id, wieviel);
+			}
+			return 'BUY_MATERIAL';
+		}
+
+		case 'BUILD_HOME': {
+			const vorlage = buildingService.getBuildingOption(WOHNHAUS_OPTION_ID);
+			if (vorlage && lage.freePlotId) await buildingService.build(vorlage, npcId, lage.freePlotId);
+			return 'BUILD_HOME';
+		}
+
+		case 'RENOVATE':
+			if (lage.repairId) await buildingService.renovateBuilding(npcId, lage.repairId);
+			return 'RENOVATE';
+
+		case 'OFFER_JOB':
+			// Zum Lohn der Tagelöhnerei: Wer weniger böte, fände niemanden — mehr zu bieten
+			// wäre großzügig auf Kosten des eigenen Ertrags.
+			if (lage.workshopId) await employmentService.offerJob(npcId, lage.workshopId, TAGELOHN);
+			return 'OFFER_JOB';
+
 		case 'IDLE':
 			return 'IDLE';
 	}
@@ -229,6 +265,9 @@ async function lageAufnehmen(
 			leaseId?: string;
 			leasableId?: string;
 			sellable?: { itemId: string; quantity: number; inChamber: number };
+			repairId?: string;
+			missingMaterialOffer?: { id: string; quantity: number; pricePerUnit: number };
+			missingMaterialCount: number;
 	  }
 	| undefined
 > {
@@ -264,6 +303,38 @@ async function lageAufnehmen(
 	const freieFlaeche = flaechen.find((flaeche) => !flaeche.leased && flaeche.resourceType);
 	const zuVerkaufen = werkstatt ? await unverkauftes(npcId, werkstatt) : undefined;
 	const werkstattLuecke = werkstatt ? undefined : await fehlendeWerkstatt(werte.RegionId);
+
+	// Ein eigenes Dach und was daran hängt (4.14).
+	const wohnhaus = eigene.find(
+		(haus) => buildingService.getBuildingOption(haus.optionId)?.type === 'RESIDENCE'
+	);
+	const platz: number | null = await familyService.freierWohnraum(werte.HomeBuildingId);
+	const hausVorlage = buildingService.getBuildingOption(WOHNHAUS_OPTION_ID);
+	const baufaellig = eigene.filter((haus) => haus.condition < REPAIR_BELOW)[0];
+	const materialBedarf = baufaellig
+		? renovationMaterial(Math.ceil(CONDITION_MAX - baufaellig.condition))
+		: hausVorlage
+			? materialFor(levelOf(hausVorlage, 1).price, hausVorlage.type)
+			: [];
+
+	// Was die nächste Werkstatt an Material verlangt — sonst versucht er es in jedem Tick
+	// aufs Neue.
+	const werkstattVorlage =
+		werkstattLuecke !== undefined
+			? buildingService.getBuildingOption(werkstattLuecke.optionId)
+			: undefined;
+	const werkstattMaterial = werkstattVorlage?.recipes?.some((rezept) =>
+		['PLANK', 'BLOCK', 'IRON'].includes(rezept.outputItemId)
+	)
+		? []
+		: werkstattVorlage
+			? materialFor(levelOf(werkstattVorlage, 1).price, werkstattVorlage.type)
+			: [];
+	const fehltMaterial = await fehlendesMaterial(npcId, materialBedarf);
+	const material = fehltMaterial
+		? await tradeService.cheapestOffer(werte.RegionId, fehltMaterial.itemId, npcId)
+		: undefined;
+	const stelleFrei = werkstatt ? await freieStelleImEigenen(werkstatt) : false;
 
 	const arbeitsplatz = await freierArbeitsplatz(werte.RegionId);
 	const stelle = await employmentService.getJobOf(npcId);
@@ -322,8 +393,23 @@ async function lageAufnehmen(
 			canCraft: werkstatt ? await kannHerstellen(npcId, werkstatt) : false,
 			plotPrice: PLOT_PRICE,
 			workshopPrice: werkstattLuecke?.price ?? null,
-			leaseFee: LEASE_FEE
+			workshopMaterialMissing: (await fehlendesMaterial(npcId, werkstattMaterial)) !== undefined,
+			leaseFee: LEASE_FEE,
+			// Ein eigenes Dach (4.14).
+			homeHasRoom: (platz ?? 0) > 0,
+			ownsHome: wohnhaus !== undefined,
+			homePrice: hausVorlage ? levelOf(hausVorlage, 1).price : null,
+			materialMissing: fehltMaterial !== undefined,
+			materialPrice: material?.pricePerUnit ?? null,
+			repairNeeded: baufaellig !== undefined,
+			repairCost:
+				Math.ceil(CONDITION_MAX - (baufaellig?.condition ?? CONDITION_MAX)) *
+				RENOVATION_COST_PER_POINT,
+			canOfferJob: stelleFrei
 		},
+		repairId: baufaellig?.id,
+		missingMaterialOffer: material,
+		missingMaterialCount: fehltMaterial?.quantity ?? 0,
 		workshopId: werkstatt?.id,
 		workshopOptionId: werkstattLuecke?.optionId,
 		freePlotId: grundstuecke.find((flaeche) => !flaeche.hasBuilding)?.id,
@@ -498,4 +584,57 @@ async function kannHerstellen(
 	return rezepte.some((rezept) =>
 		rezept.input.every((zutat) => (vorrat.get(zutat.itemId) ?? 0) >= zutat.quantity)
 	);
+}
+
+/**
+ * Die Vorlage, aus der ein NPC sein Zuhause baut.
+ *
+ * Die kleinste Stufe des Wohnhauses — eine Kate mit vier Plätzen. Wer mehr Kinder will,
+ * baut später aus; das kann heute noch niemand, und es steht als Punkt 30 auf der Liste.
+ */
+const WOHNHAUS_OPTION_ID = 1;
+
+/**
+ * Was an Baumaterial fehlt — die erste Ware, an der es hakt, **mit der Fehlmenge**.
+ *
+ * Die Menge muss mit: Ein NPC, der Stück für Stück kauft, braucht vier Ticks für vier
+ * Bretter und steht so lange auf einem leeren Bauplatz. Wer bauen will, kauft, was fehlt.
+ */
+async function fehlendesMaterial(
+	characterId: string,
+	bedarf: { itemId: string; quantity: number }[]
+): Promise<{ itemId: string; quantity: number } | undefined> {
+	if (bedarf.length === 0) return undefined;
+
+	const vorrat = new Map<string, number>();
+	for (const posten of await needService.getStock(characterId)) {
+		vorrat.set(posten.itemId, posten.quantity);
+	}
+
+	for (const posten of bedarf) {
+		const da: number = vorrat.get(posten.itemId) ?? 0;
+		if (da < posten.quantity) return { itemId: posten.itemId, quantity: posten.quantity - da };
+	}
+	return undefined;
+}
+
+/**
+ * Hat der eigene Betrieb eine Stelle frei, für die noch kein Lohn aushängt?
+ *
+ * Beides muss stimmen: Ein Aushang ohne freie Stelle lockt niemanden, eine freie Stelle
+ * ohne Aushang findet keinen.
+ */
+async function freieStelleImEigenen(werkstatt: {
+	id: string;
+	optionId: number;
+	level: number;
+	offeredWage: number | null;
+}): Promise<boolean> {
+	if (werkstatt.offeredWage !== null) return false;
+
+	const vorlage = buildingService.getBuildingOption(werkstatt.optionId);
+	if (!vorlage) return false;
+
+	const belegt: number = await Employment.count({ where: { BuildingId: werkstatt.id } });
+	return positionsAt(vorlage, werkstatt.level) - belegt > 0;
 }

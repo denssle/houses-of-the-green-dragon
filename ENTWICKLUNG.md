@@ -1604,6 +1604,45 @@ nicht aus und schicken ihre Kinder nicht zur Schule (Punkt 24). Und sie bauen nu
 Werkstätten — kein Wohnhaus für die eigene Familie, obwohl gerade das der Engpass der
 Bevölkerung ist.
 
+**4.14 Eigene Häuser, Instandhaltung und Leute.** ✓ Die Bevölkerung baut sich ihr Dach
+selbst — der Engpass, an dem alles hing.
+
+**Ohne Platz keine Kinder** (4.4), und die städtische Unterkunft fasst zwanzig. Bis
+hierher baute kein NPC je ein Wohnhaus; die Bevölkerung hing an einer Krücke aus dem
+Weltaufbau, und war die voll, wuchs niemand mehr nach — egal wie viele heirateten.
+
+Der Hausbau steht in der **Sicherheitsstufe**, nicht bei der Entfaltung: Er ist kein
+Unternehmen, sondern Vorsorge. Wer heiratet, baut — **auch wenn in der Unterkunft noch
+ein Bett frei wäre**. Die freie Pritsche ist kein Grund, keine Kinder zu bekommen.
+
+Dazu zwei weitere Handlungen: **renovieren**, was verfällt (dieselbe Schwelle wie beim
+Bürgermeister — bei halber Güte), und **Lohn aushängen**, damit aus der Einmannsache ein
+Betrieb wird.
+
+**Drei Fehler, die erst der Selbsterhaltungstest zeigte:**
+
+Die NPCs versuchten in **jedem** Tick zu bauen und scheiterten am Material — sieben von
+acht standen Tick für Tick vor demselben leeren Bauplatz und kamen nie dazu, etwas anderes
+zu tun. Die Entfaltungsstufe prüft jetzt auch das Material, bevor sie zum Bau rät.
+
+Sie kauften Baumaterial **stückweise** und brauchten vier Ticks für vier Bretter. Jetzt
+kaufen sie, was fehlt — begrenzt durch Angebot und Beutel.
+
+Und das größte: Ein Wohnhaus verlangte Bretter, Quader **und Eisen**. Damit hing das
+Wachstum der Bevölkerung an einer Erzgrube, einer Schmiede und dem Zufall, dass jemand
+beides betreibt. Eine Kate ist aber Fachwerk, keine Festung: Sie braucht nur Holz. Erst
+was Ertrag abwirft, verlangt Fundament und Beschläge.
+
+**Und einer, der auch Spieler betraf:** Wer ein Wohnhaus baute, zog nur ein, wenn er
+vorher obdachlos war. Wer in der Unterkunft wohnte — und das tun alle NPCs zu Beginn —,
+ließ sein neues Haus leer stehen. Jetzt zieht der Bauherr ein, und sein Ehepartner mit:
+Man baut kein Haus, um allein darin zu wohnen, und Kinder hängen am Wohnraum der Mutter.
+
+_Fertig, wenn:_ Eine Stadt ohne Spieler bringt eigene Wohnhäuser hervor, in denen jemand
+wohnt. — Erledigt. Am laufenden Modell: Tick 1 kaufen alle acht ein Grundstück, Tick 2
+steht die erste Zimmerei, Tick 6 sägt sie Bretter, Tick 7 verkauft sie, Tick 9 kaufen drei
+NPCs Material — **Tick 10 steht das erste eigene Wohnhaus**, Tick 13 das zweite.
+
 **4.9b Fernhandel und weitere Städte.** Waren zwischen Orten bewegen (`shipment` mit
 Ankunfts-Tick statt Fortbewegung), Gründung einer zweiten Stadt. Fernziele für etablierte
 Dynastien — und die Voraussetzung dafür, dass ein Räuber jemanden unterwegs überfallen

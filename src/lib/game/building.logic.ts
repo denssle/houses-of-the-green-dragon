@@ -247,12 +247,23 @@ export function producesBuildingMaterial(outputItemId: string | undefined): bool
 	return outputItemId !== undefined && BUILDING_MATERIALS.includes(outputItemId);
 }
 
-export function materialFor(price: number): MaterialNeed[] {
+export function materialFor(price: number, type?: string): MaterialNeed[] {
 	if (price <= 0) return [];
 	const hundert: number = price / 100;
 
+	const bretter = { itemId: 'PLANK', quantity: Math.max(1, Math.round(hundert * PLANKS_PER_100)) };
+
+	// **Ein Wohnhaus ist Fachwerk, keine Festung.** Die Kate braucht Holz und Lehm —
+	// Quader fürs Fundament und Eisen für Beschläge verlangt erst, was Ertrag abwirft.
+	//
+	// Das ist nicht nur stimmig, es macht die Kette überhaupt erst gangbar: Steht die
+	// erste Zimmerei, kann gebaut werden. Verlangte schon die erste Kate Eisen, hinge das
+	// Wachstum der Bevölkerung an einer Erzgrube, einer Schmiede und dem Zufall, dass
+	// jemand beides betreibt — im Selbsterhaltungstest baute deshalb niemand ein Haus.
+	if (type === 'RESIDENCE') return [bretter];
+
 	return [
-		{ itemId: 'PLANK', quantity: Math.max(1, Math.round(hundert * PLANKS_PER_100)) },
+		bretter,
 		{ itemId: 'BLOCK', quantity: Math.max(1, Math.round(hundert * BLOCKS_PER_100)) },
 		{ itemId: 'IRON', quantity: Math.max(1, Math.round(hundert * IRON_PER_100)) }
 	];
