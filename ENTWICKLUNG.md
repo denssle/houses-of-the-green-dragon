@@ -1991,12 +1991,40 @@ viel — die eine kannte das eigene Haus nicht, die andere schon.
 
 _Fertig, wenn:_ Wem ein Haus gehört, der wohnt auch darin. — Erledigt.
 
-**5.7 Ein Rundlauf, der klickt.** (Punkt 25) Ein Playwright-Test, der registriert, einen
-Charakter anlegt, arbeitet, kauft, baut und wählt. Die Unit-Tests decken die Regeln ab;
-sie hätten keinen der Fehler gefunden, die beim Durchspielen von Hand auffielen — ein
-Formular ohne Aktion, ein Link ins Leere, eine Bauoption, die es nicht geben durfte.
+**5.7 Ein Rundlauf, der klickt.** ✓ (Punkt 25) Acht Schritte als **eine Geschichte**:
+registrieren, Charakter anlegen, die Stadt sehen, einem Namen folgen, eine Schicht
+arbeiten, vierzig Schichten später ein Grundstück kaufen, die Chronik lesen, abmelden.
+Seriell, weil sie aufeinander aufbauen — wer keinen Charakter hat, kauft kein Grundstück,
+und die Folgefehler verdeckten nur den einen, auf den es ankommt.
 
-_Fertig, wenn:_ Ein kaputter Weg durch die Anwendung bricht den Build.
+Er läuft gegen das **gebaute** Artefakt (`npm run build && node build`), nicht gegen den
+Entwicklungsserver: Der Unterschied zwischen beiden hat dieses Projekt schon Deploy-Fehler
+gekostet (2.4). `PLAYWRIGHT=true` schaltet dabei auf SQLite im Arbeitsspeicher — jeder Lauf
+beginnt in einer frischen Welt und lässt `.data/` in Ruhe.
+
+**Der Weltaufbau brauchte dafür eine Ausnahme.** Im Testmodus lief er bisher nicht, weil
+jede Vitest-Spec ihre Welt selbst aufbaut. Ein Browser kann das nicht: Er braucht eine
+Stadt, in der sich spielen lässt.
+
+**Und schon beim Schreiben fand er vier Dinge**, die ich falsch angenommen hatte — genau
+das, wofür er da ist:
+
+- Das Feld heißt „Name der Dynastie", nicht „Name des Hauses", und die Registrierung will
+  das Passwort zweimal.
+- Nach dem Registrieren landet man auf der Übersicht, nicht beim Charakterformular.
+- Tagelöhnerei gibt es nicht auf der Arbeitsseite, sondern in der städtischen Schmiede.
+- Auf der Gebäudeseite stehen **zwei Knöpfe namens „Arbeiten"**: „Arbeiten (1 AP)" fürs
+  Herstellen aus eigenem Vorrat und „Arbeiten" für die Schicht. Wer Erz hat, trifft
+  vielleicht den richtigen; wer keines hat, klickt und bekommt „Davon hast du nichts mehr".
+  Das ist ein Fund für sich und gehört bei nächster Gelegenheit auseinandergezogen.
+
+Dazu zwei Eigenheiten von Playwright, die man kennen muss: Ein absoluter Pfad in `goto`
+**ersetzt** den Pfad der `baseURL`, statt ihn zu ergänzen — der Unterpfad steht deshalb im
+Test. Und jeder Test bekommt sonst einen frischen Browser-Kontext, womit der Anmeldecookie
+verlorenginge; die Geschichte teilt sich deshalb eine Seite.
+
+_Fertig, wenn:_ Ein kaputter Weg durch die Anwendung bricht den Build. — Erledigt, als
+eigener Job neben Unit-Tests und Rauchtest.
 
 **5.8 Eine Sicherung, die geprüft ist.** (Punkt 26) Dump per Cron, und einmal
 wiederhergestellt. Die Produktionsdatenbank enthält Generationen von Spielzeit, die sich

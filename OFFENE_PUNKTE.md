@@ -33,6 +33,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten    | Fernhandel                   | Entwurf      |
 | 51  | Mitgift, Testament und Stiftung                                                      | laufend                      | Entwurf      |
 | 52  | Der Lebenslauf — **erledigt mit 5.3**                                                | —                            | erledigt     |
+| 53  | Zwei Knöpfe namens „Arbeiten" auf derselben Gebäudeseite                             | laufend                      | Aufgabe      |
 | 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                               | laufend                      | Entwurf      |
 | 36  | Gebäude und Betriebe benennen — **erledigt mit 5.2**                                 | —                            | erledigt     |
 | 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum        | —                            | erledigt     |
@@ -43,7 +44,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 42  | Kindern einen Namen geben — **erledigt mit 5.2**                                     | —                            | erledigt     |
 | 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                          | erste verliehene Münze       | Entwurf      |
 | 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                      | Punkt 43 / Punkt 23          | Entwurf      |
-| 25  | End-to-End-Test (Playwright)                                                         | erster öffentlicher Betrieb  | Aufgabe      |
+| 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                  | —                            | erledigt     |
 | 26  | Datensicherung per Cron, einmal wiederhergestellt                                    | erster öffentlicher Betrieb  | Aufgabe      |
 | 27  | Impressum, Datenschutz, Nutzungsbedingungen                                          | erster öffentlicher Betrieb  | Aufgabe      |
 | 28  | Kontolöschung als Anonymisierung                                                     | erster öffentlicher Betrieb  | Entwurf      |
@@ -850,6 +851,20 @@ Umzug eines Einzelnen interessiert die Stadt weniger als ihn selbst. Wenn die Si
 verschiedene Schwellen brauchen, ist das der erste Fall, in dem eine Ereignisart nicht in
 jeder Sicht auftaucht.
 
+### 53. Zwei Knöpfe namens „Arbeiten"
+
+Ein Fund des Rundlaufs (5.7): Auf der Gebäudeseite eines Betriebs stehen zwei Knöpfe, die
+fast gleich heißen und Verschiedenes tun.
+
+- **„Arbeiten (1 AP)"** steht bei den Rezepten und stellt aus **eigenem** Vorrat her. Ohne
+  Zutaten scheitert es mit „Davon hast du nichts mehr".
+- **„Arbeiten"** ist die Schicht: Man verdingt sich und bekommt Lohn.
+
+Für einen Neuling in der städtischen Schmiede ist der erste Knopf der sichtbarere und der
+falsche. Zu klären ist nur die Benennung — „Schmieden (1 AP)" für das Handwerk und
+„Eine Schicht arbeiten" für den Lohn wären schon zwei verschiedene Sätze. Der Test greift
+inzwischen den exakten Namen ab und würde eine Umbenennung merken.
+
 ### 15. Weltinhalte: Berufe, Waren und Rezepte
 
 Ortsnamen und Karte der Startregion, Warenkatalog mit Produktionsketten,
@@ -1020,7 +1035,7 @@ Der Umbau selbst ist abgeschlossen (siehe `ENTWICKLUNG.md`). Was von seiner letz
 übrig blieb, ist keine Architektur mehr, sondern das, was ein Spiel braucht, bevor Fremde
 es benutzen dürfen.
 
-### 25. End-to-End-Test
+### 25. End-to-End-Test — erledigt (5.7)
 
 Die Unit- und Dienst-Specs decken die Regeln ab, aber kein einziger Test klickt sich
 durch die Anwendung. Ein Playwright-Rundlauf — registrieren, Charakter anlegen, ein

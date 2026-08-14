@@ -29,3 +29,9 @@ vite.config.ts.timestamp-*
 # Artefakte des Rauchtests
 smoke-server.log
 smoke-health.json
+
+# Artefakte des Rundlaufs (5.7)
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

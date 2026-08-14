@@ -26,6 +26,35 @@ jobs:
       - name: Unit-Tests
         run: npx vitest run
 
+  # Der Rundlauf klickt sich durch die Anwendung (5.7). Er läuft gegen das **gebaute**
+  # Artefakt und SQLite im Arbeitsspeicher, braucht also keine Datenbank als Service —
+  # und er gehört in diesen Workflow, weil deploy.yml an dessen Gesamtergebnis hängt.
+  e2e:
+    name: Rundlauf durch die Anwendung
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22.20.0
+      - name: Abhängigkeiten installieren
+        run: npm ci
+      - name: Browser bereitstellen
+        run: npx playwright install chromium --with-deps
+      - name: Rundlauf
+        run: npx playwright test
+
+      - name: Spur bei Fehlschlag sichern
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+
   # Die Vitest-Suite läuft über VITEST=true gegen SQLite im Arbeitsspeicher und fasst
   # damit weder `node build` noch den MariaDB-Zweig von startDB() an. Dieser Job startet
   # das gebaute Artefakt gegen eine echte MariaDB — genau so, wie der Supervisor es auf

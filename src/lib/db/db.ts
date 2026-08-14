@@ -155,7 +155,12 @@ export async function startDB(): Promise<void> {
 
 		// Erst danach, und wiederholbar: Ohne Stadt gäbe es keinen Ort, an dem ein
 		// Charakter stehen könnte. Im Testlauf baut jeder Test seine Welt selbst auf.
-		if (mode !== 'TEST') {
+		//
+		// Der Rundlauf aus 5.7 ist die Ausnahme: Er läuft zwar im Testmodus (SQLite im
+		// Arbeitsspeicher), startet aber den **echten** Server und braucht deshalb eine
+		// Welt, in der sich spielen lässt. Ein Vitest-Lauf baut sie je Test selbst auf,
+		// ein Browser kann das nicht.
+		if (mode !== 'TEST' || process.env.PLAYWRIGHT === 'true') {
 			await seedWorld();
 		}
 
