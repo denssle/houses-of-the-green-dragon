@@ -50,12 +50,6 @@
 			bekommen Kinder, wählen ihren Bürgermeister und sterben. Hier steht, was ihnen zugestoßen ist.
 		</small>
 	</p>
-	<!--
-		Genau ein Aufruf, und er sagt, was geschieht: Die Registrierung legt Konto und Haus
-		in einem Schritt an. „Anmelden" steht schon oben im Menü — zweimal derselbe Weg auf
-		einer Seite lässt den Leser rätseln, worin der Unterschied besteht.
-	-->
-	<p><a href="{base}/register" class="link">Mitspielen und ein eigenes Haus gründen</a></p>
 {:else}
 	<p>
 		<small>
