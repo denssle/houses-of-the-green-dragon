@@ -12,8 +12,8 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                             | 4.8                          | Entwurf      |
 | 14  | Startbedingungen für neue Spieler                                                    | erster öffentlicher Betrieb  | Entscheidung |
 | 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche (die Zufalls-Raubzüge stehen seit 4.8) | 4.8 / Punkt 6                | Entwurf      |
+| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
-| 29  | NPCs als Unternehmer: kaufen, bauen, gründen, verkaufen                              | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
 | 15  | Weltinhalte: Berufe, Waren und Rezepte                                               | laufend                      | Entwurf      |
 | 16  | Balancing im engeren Sinn                                                            | laufend                      | laufend      |
@@ -262,24 +262,24 @@ Offen ist auch, ob NPCs den Beruf ergreifen. Die Persönlichkeitsachsen liegen b
 Mut und Verträglichkeit warten seit 4.4a auf eine Handlung, und Rauben wäre für beide
 die natürlichste.
 
-### 29. NPCs als Unternehmer
+### 30. Was NPCs noch nicht tun
 
-Seit 4.12 kaufen NPCs auch, was über das Nötigste hinausgeht — damit steht die
-Nachfrageseite. Die Angebotsseite ist weiterhin **geliehen**: Alle Betriebe gehören
-Spielern, NPCs arbeiten nur darin. Fällt der letzte Spieler weg, stellt niemand mehr
-etwas her, und die Wirtschaft fällt auf Kornspeicher und städtische Schmiede zurück.
+**Erledigt (4.13):** Sie kaufen Grundstücke, bauen Werkstätten, pachten Flächen, ernten,
+stellen her und verkaufen — gesteuert über die Bedürfnishierarchie, mit der Entfaltung als
+oberster Stufe.
 
-Was dafür fehlt, ist der Reihe nach: ein Grundstück **kaufen** (bieten können sie schon),
-ein Gebäude **errichten** (Material besorgen inbegriffen), darin **produzieren** und die
-Erzeugnisse **aushängen**. Jede dieser Handlungen gibt es bereits — sie steht nur nicht in
-`decideNpcAction`.
+Offen bleibt, in der Reihenfolge ihres Gewichts:
 
-Die eigentliche Entwurfsarbeit ist nicht das Ausführen, sondern die **Entscheidung**: Wann
-lohnt sich ein Betrieb? Ein NPC, der bei jeder Gelegenheit baut, verwandelt die Stadt in
-eine Fabriklandschaft; einer, der nie baut, ändert nichts. Naheliegend ist derselbe
-Maßstab wie beim Kaufen — Rücklage plus Persönlichkeit (Ehrgeiz und Gier treiben, Trägheit
-bremst) —, dazu ein Blick darauf, was in der Stadt fehlt: Wer sieht, dass niemand Bretter
-anbietet, baut die Zimmerei.
+- **Wohnhäuser bauen.** Sie errichten nur Werkstätten. Dabei ist Wohnraum der Engpass der
+  Bevölkerung (ohne Platz keine Kinder, 4.4), und die städtische Unterkunft ist eine
+  Krücke, kein Plan. Ein NPC mit Familie und Geld sollte sich ein Haus bauen.
+- **Leute einstellen.** Sie hängen keinen Lohn aus, also arbeitet in einem NPC-Betrieb
+  niemand außer dem Eigentümer. Damit bleibt jeder Betrieb eine Einmannsache.
+- **Ausbauen.** Die zweite Stufe eines Betriebs bringt mehr Ertrag und eine Stelle mehr —
+  ein NPC nimmt sie nie.
+- **Kinder zur Schule schicken** (das ist Punkt 24 und gehört hierher).
+- **Renovieren.** Ihre Häuser verfallen, und niemand richtet sie her; nach zwanzig
+  Spieljahren fällt die erste NPC-Werkstatt zur Ruine.
 
 ### 16. Balancing
 

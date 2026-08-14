@@ -1550,6 +1550,60 @@ Betriebe, hängen keine Angebote aus und schicken ihre Kinder nicht zur Schule. 
 alle Betriebe Spielern gehören, ist die Angebotsseite geliehen. Der nächste Schritt in
 diese Richtung wäre der **NPC als Unternehmer** — und der ist größer als dieser hier.
 
+**4.13 NPCs als Unternehmer — und die Bedürfnishierarchie als Struktur.** ✓ Die Welt
+bringt ihre Wirtschaft selbst hervor.
+
+**Die Rangfolge ist jetzt die Bauform der Entscheidung.** `decideNpcAction` war eine Liste
+nummerierter Regeln; sie ist eine Kette aus fünf benannten Stufen geworden —
+`ueberleben() ?? sicherheit() ?? zugehoerigkeit() ?? ansehen() ?? entfaltung()`. Das
+leistet mehr als Ordnung: Es beantwortet die Frage, die jede neue NPC-Handlung sonst
+einzeln aufwerfen würde — **wann tut er das?** Antwort: wenn alles Darunterliegende
+gedeckt ist. Wer hungert, denkt nicht an ein Gewand; wer kein Dach hat, gründet keinen
+Betrieb.
+
+Innerhalb einer Stufe entscheidet weiterhin die Persönlichkeit, **ob** und **wie früh** —
+nicht, was zuerst kommt. Ein Träger stirbt nicht am Hunger, weil er faul ist; er kümmert
+sich nur später darum.
+
+**Die fünfte Stufe macht aus Einwohnern Unternehmer** (Punkt 29): Grundstück kaufen,
+Werkstatt bauen, Fläche pachten, ernten, herstellen, verkaufen. Bis hierher gehörte jeder
+Betrieb der Welt einem Spieler — fiel der letzte weg, stellte niemand mehr etwas her.
+
+Zwei Entscheidungen tragen die Stufe:
+
+**Gebaut wird, was fehlt.** Der Katalog wird durchgegangen, die günstigste in der Stadt
+noch nicht vorhandene Werkstatt gewinnt. Damit ergibt sich die Vielfalt der Berufe von
+selbst, ohne dass jemand eine Quote pflegen müsste — und wer wenig hat, fängt klein an.
+Ein NPC, der die vierte Bäckerei danebenstellt, ruiniert sich und den Markt.
+
+**Innerhalb der Stufe geht es vom Vorhandenen zum Neuen:** erst verwerten (verkaufen,
+herstellen, ernten), dann erweitern (pachten, bauen, kaufen). Sonst häufte einer
+Grundstücke an, während in seiner Werkstatt die Ware verdirbt.
+
+**Zwei Fehler wurden dabei sichtbar:**
+
+`craft` legt das Erzeugnis in die **Kammer**, `placeOffer` nimmt es im eigenen Laden aber
+aus dem **Betriebslager**. Ein NPC hätte endlos hergestellt, ohne je etwas anzubieten —
+im Selbsterhaltungstest stand am Ende ein Betrieb ohne ein einziges Preisschild. Jetzt
+wandert die Ware beim Aushängen zuerst ins Lager, über dieselbe Tür, die ein Spieler mit
+„Einlagern" benutzt.
+
+Und der neue Test teilte sich die Datenbank mit dem alten: Der zweite Block erbte eine
+Welt, die schon fünf Jahre gelaufen war — mit alten, verheirateten, mittellosen
+Einwohnern. Er schlug fehl, und zwar aus einem Grund, der nichts mit seiner Frage zu tun
+hatte. Jetzt hat er eine eigene Datei und läuft in fünfzehn statt vierhundert Sekunden.
+
+_Fertig, wenn:_ Eine Stadt ohne Spieler bringt einen Betrieb hervor und arbeitet darin. —
+Erledigt; `selfSustainingEconomy.spec.ts` prüft genau das. Am laufenden Modell ist die
+Kette gut zu sehen: Tick 0 ziehen alle acht unter ein Dach, Tick 1 bis 7 wird geworben
+(bis die Aktionspunkte leer sind), Tick 8 kauft der Erste ein Grundstück, Tick 9 baut er
+die Zimmerei, Tick 10 pachtet er den Wald, Tick 11 erntet er.
+
+**Was bleibt:** NPCs stellen keine Leute ein, hängen keinen Lohn aus, bauen ihre Betriebe
+nicht aus und schicken ihre Kinder nicht zur Schule (Punkt 24). Und sie bauen nur
+Werkstätten — kein Wohnhaus für die eigene Familie, obwohl gerade das der Engpass der
+Bevölkerung ist.
+
 **4.9b Fernhandel und weitere Städte.** Waren zwischen Orten bewegen (`shipment` mit
 Ankunfts-Tick statt Fortbewegung), Gründung einer zweiten Stadt. Fernziele für etablierte
 Dynastien — und die Voraussetzung dafür, dass ein Räuber jemanden unterwegs überfallen

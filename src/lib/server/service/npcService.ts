@@ -1,16 +1,21 @@
 import { garmentIntact } from '$lib/game/attire.logic';
 import { Op } from 'sequelize';
+import { levelOf } from '$lib/model/buildingTemplate';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
 import { decideNpcAction, type NpcAction, type NpcState } from '$lib/game/npc.logic';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import { residentsAt } from '$lib/game/building.logic';
+import { PLOT_PRICE } from '$lib/game/economy';
+import { LEASE_FEE } from '$lib/server/service/productionService';
 import { AGE_OF_MAJORITY, ageInYears } from '$lib/game/time';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as familyService from '$lib/server/service/familyService';
+import * as plotService from '$lib/server/service/plotService';
+import * as productionService from '$lib/server/service/productionService';
 import * as needService from '$lib/server/service/needService';
 import * as relationshipService from '$lib/server/service/relationshipService';
 import * as tradeService from '$lib/server/service/tradeService';
@@ -147,6 +152,55 @@ async function ausfuehren(npcId: string, tick: number): Promise<NpcAction> {
 			return 'BUY_TONIC';
 		}
 
+		case 'SELL': {
+			// **Zum Grundpreis, nicht darunter und nicht darüber.** Ein NPC, der Preise
+			// aushandelt, wäre ein eigenes System; der Katalogpreis ist der Anker, den es
+			// ohnehin gibt, und er lässt Spielern Raum, ihn zu unterbieten.
+			const ware = lage.sellable;
+			if (ware && lage.workshopId) {
+				// Erst ins Lager, dann ans Schild: Im eigenen Laden verkauft man aus dem
+				// Betrieb, nicht aus der Tasche.
+				if (ware.inChamber > 0) {
+					// Dieselbe Tür wie beim Spieler, der auf 'Einlagern' klickt.
+					await tradeService.moveToStock(npcId, lage.workshopId, ware.itemId, ware.inChamber);
+				}
+				const preis: number = getItemTemplate(ware.itemId)?.basePrice ?? 1;
+				await tradeService.placeOffer(npcId, lage.workshopId, ware.itemId, ware.quantity, preis);
+			}
+			return 'SELL';
+		}
+
+		case 'CRAFT':
+			if (lage.workshopId) await productionService.craft(npcId, lage.workshopId);
+			return 'CRAFT';
+
+		case 'HARVEST':
+			if (lage.leaseId) await productionService.harvest(npcId, lage.leaseId);
+			return 'HARVEST';
+
+		case 'LEASE':
+			if (lage.leasableId) await productionService.leasePlot(npcId, lage.leasableId);
+			return 'LEASE';
+
+		case 'BUILD': {
+			const vorlage =
+				lage.workshopOptionId !== undefined
+					? buildingService.getBuildingOption(lage.workshopOptionId)
+					: undefined;
+			if (vorlage && lage.freePlotId) {
+				await buildingService.build(vorlage, npcId, lage.freePlotId);
+			}
+			return 'BUILD';
+		}
+
+		case 'BUY_PLOT': {
+			// Das erste freie Stück in der Stadt. Eine Wahl nach Lage gäbe es erst, wenn
+			// Lage etwas bedeutete — heute sind alle Grundstücke gleich.
+			const frei = await plotService.getFreeBuildingLand(lage.regionId);
+			if (frei[0]) await plotService.buyPlot(frei[0].id, npcId);
+			return 'BUY_PLOT';
+		}
+
 		case 'IDLE':
 			return 'IDLE';
 	}
@@ -165,9 +219,16 @@ async function lageAufnehmen(
 			jobId?: string;
 			leisten: number;
 			money: number;
+			regionId: string;
 			cheapestBread?: { id: string; quantity: number; pricePerUnit: number };
 			cheapestGarment?: { id: string; quantity: number; pricePerUnit: number };
 			cheapestTonic?: { id: string; quantity: number; pricePerUnit: number };
+			workshopId?: string;
+			workshopOptionId?: number;
+			freePlotId?: string;
+			leaseId?: string;
+			leasableId?: string;
+			sellable?: { itemId: string; quantity: number; inChamber: number };
 	  }
 	| undefined
 > {
@@ -192,6 +253,18 @@ async function lageAufnehmen(
 	const gewand = await tradeService.cheapestOffer(werte.RegionId, 'GARMENT', npcId);
 	const trank = await tradeService.cheapestOffer(werte.RegionId, 'TONIC', npcId);
 
+	// Was er selbst besitzt und betreibt (4.13).
+	const eigene = await buildingService.getBuildingsOfCharacter(npcId);
+	const werkstatt = eigene.find(
+		(haus) => buildingService.getBuildingOption(haus.optionId)?.type === 'CRAFT'
+	);
+	const grundstuecke = await plotService.getPlotsOfCharacter(npcId);
+	const flaechen = await productionService.getAreas(npcId);
+	const eigenePacht = flaechen.find((flaeche) => flaeche.leasedByMe);
+	const freieFlaeche = flaechen.find((flaeche) => !flaeche.leased && flaeche.resourceType);
+	const zuVerkaufen = werkstatt ? await unverkauftes(npcId, werkstatt) : undefined;
+	const werkstattLuecke = werkstatt ? undefined : await fehlendeWerkstatt(werte.RegionId);
+
 	const arbeitsplatz = await freierArbeitsplatz(werte.RegionId);
 	const stelle = await employmentService.getJobOf(npcId);
 	// Wer schon eine Stelle hat, sieht sich nicht um — ein NPC, der jede Stunde den
@@ -204,6 +277,7 @@ async function lageAufnehmen(
 	return {
 		leisten: Math.floor(werte.money / brot.basePrice),
 		money: werte.money,
+		regionId: werte.RegionId,
 		cheapestBread: await tradeService.cheapestOffer(werte.RegionId, 'BREAD', npcId),
 		workplaceId: arbeitsplatz,
 		homeId: unterkunft,
@@ -238,8 +312,24 @@ async function lageAufnehmen(
 			garmentInStock: menge(vorrat, 'GARMENT'),
 			tonicInStock: menge(vorrat, 'TONIC'),
 			garmentPrice: gewand?.pricePerUnit ?? null,
-			tonicPrice: trank?.pricePerUnit ?? null
+			tonicPrice: trank?.pricePerUnit ?? null,
+			// Die fünfte Stufe (4.13).
+			ownsWorkshop: werkstatt !== undefined,
+			hasFreePlot: grundstuecke.some((flaeche) => !flaeche.hasBuilding),
+			hasLease: eigenePacht !== undefined,
+			leaseAvailable: freieFlaeche !== undefined,
+			ownStockToSell: zuVerkaufen?.quantity ?? 0,
+			canCraft: werkstatt ? await kannHerstellen(npcId, werkstatt) : false,
+			plotPrice: PLOT_PRICE,
+			workshopPrice: werkstattLuecke?.price ?? null,
+			leaseFee: LEASE_FEE
 		},
+		workshopId: werkstatt?.id,
+		workshopOptionId: werkstattLuecke?.optionId,
+		freePlotId: grundstuecke.find((flaeche) => !flaeche.hasBuilding)?.id,
+		leaseId: eigenePacht?.plotId,
+		leasableId: freieFlaeche?.plotId,
+		sellable: zuVerkaufen,
 		cheapestGarment: gewand,
 		cheapestTonic: trank
 	};
@@ -319,4 +409,93 @@ async function naechsterPartner(
 /** Wie viel von einer Ware im Vorrat liegt. */
 function menge(vorrat: { itemId: string; quantity: number }[], itemId: string): number {
 	return vorrat.find((posten) => posten.itemId === itemId)?.quantity ?? 0;
+}
+
+// --- Die fünfte Stufe: etwas Eigenes (4.13) -------------------------------------------
+
+/**
+ * Welche Werkstatt in dieser Stadt fehlt — und was sie kostet.
+ *
+ * **Gebaut wird, was es noch nicht gibt.** Ein NPC, der die vierte Bäckerei danebenstellt,
+ * ruiniert sich und den Markt; einer, der die erste Zimmerei baut, versorgt eine Stadt,
+ * die auf Bretter wartet. Damit ergibt sich die Vielfalt der Berufe von selbst, ohne dass
+ * jemand eine Quote pflegen müsste.
+ *
+ * Der Reihe nach durchgegangen wird der Katalog, wie er im Code steht — die günstigste
+ * fehlende gewinnt, denn wer wenig hat, fängt klein an.
+ */
+export async function fehlendeWerkstatt(
+	regionId: string
+): Promise<{ optionId: number; price: number } | undefined> {
+	const vorhanden = await buildingService.getBuildingsInRegion(regionId);
+
+	const kandidaten = buildingService
+		.getBuildingOptions()
+		.filter((vorlage) => vorlage.type === 'CRAFT')
+		.filter((vorlage) => !vorhanden.some((haus) => haus.optionId === vorlage.optionId))
+		.map((vorlage) => ({ optionId: vorlage.optionId, price: levelOf(vorlage, 1).price }))
+		.sort((a, b) => a.price - b.price);
+
+	return kandidaten[0];
+}
+
+/**
+ * Was er verkaufen könnte — aus dem Betriebslager **und aus der eigenen Kammer**.
+ *
+ * Die Kammer muss mitzählen, weil `craft` das Erzeugnis dorthin legt: Wer selbst an der
+ * Werkbank steht, trägt es nach Hause. Zum Verkauf im eigenen Laden muss es aber im Lager
+ * liegen — deshalb wandert es beim Aushängen zuerst dorthin. Ohne diesen Umweg stellte
+ * ein NPC her und her, und nichts käme je an ein Preisschild; genau das zeigte der
+ * Selbsterhaltungstest.
+ */
+async function unverkauftes(
+	characterId: string,
+	werkstatt: { id: string; optionId: number }
+): Promise<{ itemId: string; quantity: number; inChamber: number } | undefined> {
+	const erzeugnisse: string[] = (
+		buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? []
+	).map((rezept) => rezept.outputItemId);
+	if (erzeugnisse.length === 0) return undefined;
+
+	const angebote = await tradeService.getOffersAt(werkstatt.id, characterId);
+	const lager = await tradeService.getBuildingStock(werkstatt.id);
+	const kammer = await needService.getStock(characterId);
+
+	for (const itemId of erzeugnisse) {
+		if (angebote.some((angebot) => angebot.itemId === itemId)) continue;
+
+		const imLager: number = lager.find((posten) => posten.itemId === itemId)?.quantity ?? 0;
+		const inDerKammer: number = kammer.find((posten) => posten.itemId === itemId)?.quantity ?? 0;
+		if (imLager + inDerKammer > 0) {
+			return { itemId, quantity: imLager + inDerKammer, inChamber: inDerKammer };
+		}
+	}
+	return undefined;
+}
+
+/**
+ * Reichen die Zutaten für einen Durchgang?
+ *
+ * Gezählt wird beides — Betriebslager und eigene Kammer —, weil `craft` seit 4.10 auch
+ * beides verbraucht. Ein NPC, der sein Holz eingelagert hat und dann nicht sägen dürfte,
+ * stünde vor demselben Rätsel wie ein Spieler vor der Umstellung.
+ */
+async function kannHerstellen(
+	characterId: string,
+	werkstatt: { id: string; optionId: number }
+): Promise<boolean> {
+	const rezepte = buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? [];
+	if (rezepte.length === 0) return false;
+
+	const vorrat = new Map<string, number>();
+	for (const posten of await tradeService.getBuildingStock(werkstatt.id)) {
+		vorrat.set(posten.itemId, posten.quantity);
+	}
+	for (const posten of await needService.getStock(characterId)) {
+		vorrat.set(posten.itemId, (vorrat.get(posten.itemId) ?? 0) + posten.quantity);
+	}
+
+	return rezepte.some((rezept) =>
+		rezept.input.every((zutat) => (vorrat.get(zutat.itemId) ?? 0) >= zutat.quantity)
+	);
 }

@@ -36,9 +36,20 @@ werben und heiraten, wählen und kandidieren, bei Versteigerungen bieten, als
 Bürgermeister öffentliche Bauten herrichten — und seit 4.12 kaufen sie auch, was über
 das Nötigste hinausgeht.
 
-Offen ist der größte Brocken: **NPCs, die selbst etwas unternehmen** — Grundstücke
-kaufen, Betriebe gründen, produzieren, Waren aushängen. Solange alle Betriebe Spielern
-gehören, ist die Angebotsseite geliehen.
+**Wonach ein NPC entscheidet: einer Bedürfnishierarchie.** Erst das Überleben (essen),
+dann Sicherheit (ein Dach, eine Anstellung, eine Rücklage), dann Zugehörigkeit (werben,
+heiraten), dann Ansehen (wie man dasteht — Kleidung), und ganz oben die Entfaltung: ein
+Grundstück kaufen, eine Werkstatt bauen, etwas herstellen und verkaufen.
+
+Diese Ordnung ist nicht Beiwerk, sondern der Kern der Simulation. Sie beantwortet für
+jede neue Handlung die Frage, wann ein NPC sie tut — und sie sorgt nebenbei fürs
+Gleichgewicht: Ein Betrieb entsteht nur dort, wo jemand alles Darunterliegende gedeckt
+hat und obendrein die Neigung dazu mitbringt. Innerhalb einer Stufe entscheidet die
+Persönlichkeit, ob und wie früh — nicht, was zuerst kommt.
+
+Was noch fehlt: NPCs stellen niemanden ein, bauen ihre Betriebe nicht aus und errichten
+keine Wohnhäuser für ihre Familien — obwohl gerade Wohnraum der Engpass der Bevölkerung
+ist.
 
 ## Die Säulen
 

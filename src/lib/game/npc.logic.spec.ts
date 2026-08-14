@@ -38,6 +38,16 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		tonicInStock: 1,
 		garmentPrice: 14,
 		tonicPrice: 10,
+		// Der Zufriedene unternimmt nichts: kein Grundstück, kein Anlass, keine Neigung.
+		ownsWorkshop: false,
+		hasFreePlot: false,
+		hasLease: false,
+		leaseAvailable: false,
+		ownStockToSell: 0,
+		canCraft: false,
+		plotPrice: null,
+		workshopPrice: null,
+		leaseFee: 20,
 		...werte
 	};
 }
