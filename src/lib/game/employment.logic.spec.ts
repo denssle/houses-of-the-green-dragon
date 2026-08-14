@@ -11,13 +11,15 @@ const BAECKEREI: BuildingTemplate = {
 	limitedTo: 0,
 	actions: [],
 	skill: 'BAKING',
-	recipe: {
-		input: [{ itemId: 'FLOUR', quantity: 2 }],
-		outputItemId: 'BREAD',
-		baseOutput: 3,
-		actionPointCost: 1,
-		skill: 'BAKING'
-	},
+	recipes: [
+		{
+			input: [{ itemId: 'FLOUR', quantity: 2 }],
+			outputItemId: 'BREAD',
+			baseOutput: 3,
+			actionPointCost: 1,
+			skill: 'BAKING'
+		}
+	],
 	levels: [
 		{ price: 220, name: 'Backhaus' },
 		{ price: 400, name: 'Bäckerei' }
@@ -28,7 +30,7 @@ const WOHNHAUS: BuildingTemplate = {
 	...BAECKEREI,
 	optionId: 1,
 	type: 'RESIDENCE',
-	recipe: undefined,
+	recipes: undefined,
 	levels: [{ price: 100, name: 'Kate', residents: 4 }]
 };
 

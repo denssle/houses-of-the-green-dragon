@@ -27,7 +27,7 @@ export type RegionType = (typeof REGION_TYPES)[number];
 export const PLOT_TYPES = ['BUILDING_LAND', 'RESOURCE'] as const;
 export type PlotType = (typeof PLOT_TYPES)[number];
 
-export const RESOURCE_TYPES = ['WOOD', 'STONE', 'GRAIN', 'ORE'] as const;
+export const RESOURCE_TYPES = ['WOOD', 'STONE', 'GRAIN', 'ORE', 'WOOL', 'HERBS'] as const;
 export type ResourceType = (typeof RESOURCE_TYPES)[number];
 
 /**

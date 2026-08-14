@@ -23,14 +23,14 @@ describe('Weltaufbau', () => {
 		expect(welt?.dataValues.currentTick).toBe(WORLD_STARTS_AT_TICK);
 	});
 
-	it('legt eine Stadt mit Kasse und vier Umlandflächen an', async () => {
+	it('legt eine Stadt mit Kasse und sechs Umlandflächen an', async () => {
 		const stadt = await Region.findOne({ where: { type: 'CITY' } });
 		const umland = await Region.count({ where: { type: ['FOREST', 'QUARRY', 'FIELD', 'MINE'] } });
 
 		expect(stadt?.dataValues.name).toBe('Grünau');
 		expect(stadt?.dataValues.treasury).toBe(0);
-		// Wald, Steinbruch, Acker — und seit 4.10 die Erzgrube.
-		expect(umland).toBe(4);
+		// Wald, Steinbruch, Acker, Erzgrube (4.10), Schafweide und Kräuterwiese (4.11).
+		expect(umland).toBe(6);
 	});
 
 	it('verbindet jeden Ort des Umlands in beide Richtungen mit der Stadt', async () => {
@@ -39,8 +39,8 @@ describe('Weltaufbau', () => {
 		const hin = await RegionLink.count({ where: { fromRegionId: stadtId } });
 		const zurueck = await RegionLink.count({ where: { toRegionId: stadtId } });
 
-		expect(hin).toBe(4);
-		expect(zurueck).toBe(4);
+		expect(hin).toBe(6);
+		expect(zurueck).toBe(6);
 	});
 
 	it('legt freies Bauland in der Stadt und Abbauflächen im Umland an', async () => {
@@ -58,10 +58,13 @@ describe('Weltaufbau', () => {
 			'GRAIN',
 			'GRAIN',
 			'GRAIN',
+			'HERBS',
 			'ORE',
 			'STONE',
 			'WOOD',
-			'WOOD'
+			'WOOD',
+			'WOOL',
+			'WOOL'
 		]);
 	});
 

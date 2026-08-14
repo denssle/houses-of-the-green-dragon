@@ -59,6 +59,7 @@ export const Character: ModelStatic<Model<CharacterAttributes, CharacterCreation
 			// Saettigung und Stichtag gehoeren zusammen wie condition und lastConditionTick
 			// beim Gebaeude: gerechnet beim Lesen, geschrieben nur beim Essen.
 			satiety: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 100 },
+			wornSinceTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
 			lastNeedTick: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 }
 		},
 		{ timestamps: true }

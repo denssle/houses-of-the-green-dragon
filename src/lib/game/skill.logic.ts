@@ -34,14 +34,19 @@ export const SKILL_TYPES = [
 	// Mit der Baukette (4.10): Wer Holz schlägt, ist kein Bauer, und wer Stein bricht,
 	// kein Schmied. Beide Fertigkeiten wirken wie die anderen — auf Ertrag und Kosten.
 	'FORESTRY',
-	'MINING'
+	'MINING',
+	// Mit Schneider und Alchemist (4.11).
+	'TAILORING',
+	'ALCHEMY'
 ] as const;
 export type SkillType = (typeof SKILL_TYPES)[number];
 
 export const SKILL_NAMES: Record<SkillType, string> = {
+	ALCHEMY: 'Alchemie',
 	FORESTRY: 'Holzarbeit',
 	MINING: 'Bergbau',
 	SMITHING: 'Schmieden',
+	TAILORING: 'Schneiderei',
 	CONSTRUCTION: 'Bauen',
 	FARMING: 'Ackerbau',
 	BAKING: 'Backen'

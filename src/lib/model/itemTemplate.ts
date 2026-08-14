@@ -89,6 +89,42 @@ const WAREN: ItemTemplate[] = [
 		name: 'Eisen',
 		description: 'Nägel, Bänder, Beschläge — was ein Haus zusammenhält.',
 		basePrice: 9
+	},
+
+	// --- Schneider und Alchemist (4.11) ----------------------------------------------
+	//
+	// Beide wirken auf die **Zuneigung**, die seit 4.3 steht — das Gewand dauerhaft,
+	// solange es hält, das Duftwasser einmalig beim Werben. Der Stärkungstrank wirkt auf
+	// Aktionspunkte.
+	{
+		itemId: 'WOOL',
+		name: 'Wolle',
+		description: 'Gesponnen, ungefärbt — der Anfang jedes Gewands.',
+		basePrice: 2
+	},
+	{
+		itemId: 'GARMENT',
+		name: 'Gewand',
+		description: 'Gut geschnitten. Wer es trägt, wird anders angesehen.',
+		basePrice: 14
+	},
+	{
+		itemId: 'HERBS',
+		name: 'Kräuter',
+		description: 'Gesammelt am Waldrand, getrocknet.',
+		basePrice: 2
+	},
+	{
+		itemId: 'PERFUME',
+		name: 'Duftwasser',
+		description: 'Ein Fläschchen für den einen Abend, auf den es ankommt.',
+		basePrice: 12
+	},
+	{
+		itemId: 'TONIC',
+		name: 'Stärkungstrank',
+		description: 'Bitter, aber danach geht die Arbeit wieder von der Hand.',
+		basePrice: 10
 	}
 ];
 

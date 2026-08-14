@@ -118,6 +118,12 @@ verarbeiten. Damit hat jede Ware eine nachvollziehbare Herkunft, und Engpässe w
 sich die Kette entlang aus — wer den Wald hält, bestimmt den Preis für Bauholz und damit
 mittelbar, was Renovieren kostet.
 
+**Was man trägt, wird gesehen.** Ein Gewand verbessert jeden Umgang mit anderen, ein
+Duftwasser den einen Abend, auf den es ankommt. Damit hängt an der Zuneigung — dem
+Querschnitt des ganzen Spiels — auch ein Handwerk: Der Schneider lebt davon, dass Kleidung
+sich abträgt, der Alchemist davon, dass ein Fläschchen einmal wirkt und dann leer ist.
+Zwei Berufe, die nicht von Häusern leben, sondern von Menschen.
+
 **Ein Haus besteht nicht aus Münzen.** Wer bauen oder renovieren will, braucht Bretter,
 Quader und Eisen — und damit hat jede Stufe der Kette einen Abnehmer: Der Holzfäller
 verkauft an die Zimmerei, die Zimmerei an den Bauherrn. Das ist der Grund, warum Holz

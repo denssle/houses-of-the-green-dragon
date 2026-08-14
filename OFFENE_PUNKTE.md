@@ -161,10 +161,12 @@ Stein und Erz, Zimmerei, Steinmetzhütte und Schmiede machen daraus Bretter, Qua
 Eisen, und verbaut wird es in jedem Haus. Zwei neue Fertigkeiten (Holzarbeit, Bergbau)
 und der Nachweis, dass die Regel trägt: Die Ware wirkt, weil Bauen sie verbraucht.
 
-Offen bleiben die Berufe, deren Wirkung an fehlenden Systemen hängt — Schneider und
-Alchemist warten auf Krankheit (Punkt 5), Waffenschmied und Giftmischer auf den Kampf
-(Punkt 6). Was auf nichts wartet, lässt sich sofort bauen: Kleidung fürs Auftreten und
-Duftwasser fürs Werben wirken auf Zuneigung, und die steht seit 4.3.
+**Mit Phase 4.11 gebaut:** **Schneider** und **Alchemist** — Gewand, Duftwasser und
+Stärkungstrank. Beide wirken auf Größen, die stehen: Zuneigung (4.3) und Aktionspunkte.
+
+Offen bleiben die Erzeugnisse, deren Wirkung an fehlenden Systemen hängt: Heiltrank und
+Winterkleidung warten auf Krankheit (Punkt 5), Waffen, Rüstung und Gift auf den Kampf
+(Punkt 6).
 
 Der Prüfstein bleibt derselbe wie bei Fertigkeiten und Persönlichkeitsachsen: **Wo wirkt
 die Ware?** Deshalb ist dieser Punkt nicht so unabhängig, wie er aussieht — er hängt an
@@ -202,6 +204,10 @@ Zulauf sehen — das ist der Reiz an der Stellschraube) und davon, ob überhaupt
 da ist, der etwas beibringen kann.
 
 ### 20. Verschleiß von Gegenständen
+
+**Für die Kleidung entschieden (4.11):** Ein Gewand hält drei Spieljahre, dann ist es hin
+— gespeichert wird nur der Zeitpunkt des Anziehens, alles andere ist eine Rechnung. Das
+ist die Bauart, die auch für den Rest taugt, und der Beleg, dass sie trägt.
 
 **Nicht nur Häuser verfallen, sondern auch alles, was man besitzt.** Ohne das kauft
 niemand ein zweites Mal: Ein Mantel, ein Hammer und ein Schwert werden einmal gekauft und

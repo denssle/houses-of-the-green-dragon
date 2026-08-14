@@ -45,6 +45,14 @@ export interface CharacterAttributes {
 	agreeableness: number;
 	satiety: number;
 	lastNeedTick: number;
+	/**
+	 * Seit wann das Gewand getragen wird — oder null, wenn keines.
+	 *
+	 * Ob es noch heil ist, ergibt sich daraus (siehe `attire.logic.ts`): dieselbe träge
+	 * Rechnung wie beim Gebäudezustand und beim Hunger, statt eines Wertes, den jemand
+	 * herunterzählen müsste.
+	 */
+	wornSinceTick: number | null;
 	HomeBuildingId: string | null;
 }
 
@@ -70,6 +78,7 @@ export type CharacterCreationAttributes = Optional<
 	| 'agreeableness'
 	| 'satiety'
 	| 'lastNeedTick'
+	| 'wornSinceTick'
 	| 'HomeBuildingId'
 >;
 
@@ -82,6 +91,7 @@ export function convertToCharacter(attributes: CharacterAttributes): Character {
 		gender: attributes.gender,
 		actionPoints: attributes.actionPoints,
 		money: attributes.money,
+		wornSinceTick: attributes.wornSinceTick,
 		birthTick: attributes.birthTick,
 		deathTick: attributes.deathTick,
 		regionId: attributes.RegionId,

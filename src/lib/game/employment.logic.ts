@@ -23,7 +23,7 @@ import { type BuildingTemplate, levelOf, maxLevel } from '$lib/model/buildingTem
 export function positionsAt(template: BuildingTemplate, level: number): number {
 	// Ein Betrieb ohne Rezept und ohne Lohn ist kein Arbeitsplatz — ein Wohnhaus stellt
 	// niemanden ein.
-	if (!template.recipe && !levelOf(template, level).wagePerActionPoint) return 0;
+	if (!template.recipes?.length && !levelOf(template, level).wagePerActionPoint) return 0;
 	// Je Ausbaustufe eine Stelle mehr. Wer mehr Hände will, muss ausbauen — dieselbe
 	// Leiter wie beim Wohnraum, und derselbe Grund: Wachstum soll etwas kosten.
 	return Math.min(level, maxLevel(template));

@@ -169,7 +169,9 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 		return { ok: false, reason: 'NO_JOB_OFFERED' };
 	}
 
-	const rezept = vorlage.recipe;
+	// Angestellte machen das **erste** Erzeugnis des Betriebs: Wer wählt, ist der
+	// Eigentümer; wer arbeitet, tut das, wofür der Laden bekannt ist.
+	const rezept = vorlage.recipes?.[0];
 	const kosten: number = rezept?.actionPointCost ?? 1;
 
 	return sequelize.transaction(async (t: Transaction) => {

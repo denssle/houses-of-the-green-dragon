@@ -1,3 +1,4 @@
+import { affectionBonus, garmentIntact } from '$lib/game/attire.logic';
 import { randomUUID } from 'node:crypto';
 import { Op, type Transaction } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
@@ -24,6 +25,7 @@ import { AGE_OF_MAJORITY, ageInYears, yearsToTicks } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as chronicleService from '$lib/server/service/chronicleService';
+import * as needService from '$lib/server/service/needService';
 import * as relationshipService from '$lib/server/service/relationshipService';
 import * as worldService from '$lib/server/service/worldService';
 import { NEUGEBORENE } from '$lib/db/names';
@@ -63,7 +65,19 @@ export type ProposalResult =
  * Technisch derselbe Ablauf: sperren, nachwachsen lassen, Punkte abziehen, Zuneigung
  * beim **anderen** erhöhen. Man macht sich beliebt, nicht sich selbst etwas vor.
  */
-export async function courtSomeone(characterId: string, otherId: string): Promise<FamilyResult> {
+/**
+ * Werben.
+ *
+ * `withPerfume` verbraucht ein Fläschchen aus der eigenen Kammer und schlägt kräftig auf
+ * die Zuneigung — der Aufwand für einen Anlass, nicht für den Alltag. Wer eine Ehe will,
+ * für die die Zuneigung noch nicht reicht, kann sie damit erkaufen: teurer als Geduld,
+ * aber schneller.
+ */
+export async function courtSomeone(
+	characterId: string,
+	otherId: string,
+	withPerfume = false
+): Promise<FamilyResult> {
 	if (characterId === otherId) return { ok: false, reason: 'SAME_PERSON' };
 
 	const umworben = await Character.findByPk(otherId);
@@ -86,8 +100,17 @@ export async function courtSomeone(characterId: string, otherId: string): Promis
 		);
 		if (!geplant.ok) return geplant;
 
+		// Das Duftwasser wird **vor** dem Zuschlag verbraucht: Wer keines mehr hat, wirbt
+		// trotzdem — nur eben ohne. Andersherum bekäme er die Wirkung ohne die Ware.
+		const duft: boolean =
+			withPerfume && (await needService.changeStock(characterId, 'PERFUME', -1, t));
+
 		await werbender.update({ actionPoints: geplant.actionPoints }, { transaction: t });
-		return { ok: true, delta: geplant.delta } as const;
+		const zuschlag: number = affectionBonus({
+			garmentIntact: garmentIntact(werbender.dataValues.wornSinceTick, tick),
+			perfumeUsed: duft
+		});
+		return { ok: true, delta: geplant.delta + zuschlag } as const;
 	});
 
 	if (!ergebnis.ok) return ergebnis;

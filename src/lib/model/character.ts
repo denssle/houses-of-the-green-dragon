@@ -24,6 +24,13 @@ export interface Character {
 	spouseId: string | null;
 	/** Seit wann schwanger — null heisst: nicht. Steht hier, weil die Anzeige es zeigt. */
 	pregnantSinceTick: number | null;
+	/**
+	 * Seit wann das Gewand getragen wird — null heißt: keines.
+	 *
+	 * Ob es noch heil ist, rechnet `attire.logic.ts` daraus aus; ein zweites Feld dafür
+	 * ginge mit der Zeit auseinander.
+	 */
+	wornSinceTick: number | null;
 	/** Die Anlagen. Festgelegt bei der Geburt, unveraenderlich. */
 	personality: Personality;
 }

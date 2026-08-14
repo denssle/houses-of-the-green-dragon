@@ -46,16 +46,17 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		upgradeCost: option ? upgradePrice(option, building.level) : undefined,
 		// Was eine Renovierung jetzt kostete — sichtbar, damit man abwägen kann, ob man
 		// sie noch aufschiebt.
-		recipe: option?.recipe
-			? {
-					input: option.recipe.input.map((zutat) => ({
-						name: getItemTemplate(zutat.itemId)?.name ?? zutat.itemId,
-						quantity: zutat.quantity
-					})),
-					output: getItemTemplate(option.recipe.outputItemId)?.name ?? option.recipe.outputItemId,
-					cost: option.recipe.actionPointCost
-				}
-			: undefined,
+		// Ein Betrieb kann mehreres herstellen (die Alchemistenküche etwa), deshalb eine
+		// Liste — und je Eintrag ein eigener Knopf.
+		recipes: (option?.recipes ?? []).map((rezept) => ({
+			itemId: rezept.outputItemId,
+			input: rezept.input.map((zutat) => ({
+				name: getItemTemplate(zutat.itemId)?.name ?? zutat.itemId,
+				quantity: zutat.quantity
+			})),
+			output: getItemTemplate(rezept.outputItemId)?.name ?? rezept.outputItemId,
+			cost: rezept.actionPointCost
+		})),
 		// Jedes Handelshaus ist zugleich Verkaufsstelle — Lager und Preisschilder gehoeren
 		// deshalb auf die Gebaeudeseite und nicht in eine eigene Ecke.
 		stock: await tradeService.getBuildingStock(params.building_id),
@@ -176,11 +177,16 @@ export const actions = {
 		};
 	},
 
-	craft: async ({ params, locals }) => {
+	craft: async ({ request, params, locals }) => {
 		if (!locals.currentCharacter) {
 			return fail(401, { message: 'Kein Charakter, der arbeiten könnte' });
 		}
-		const ergebnis = await productionService.craft(locals.currentCharacter.id, params.building_id);
+		const itemId = (await request.formData()).get('itemId')?.toString();
+		const ergebnis = await productionService.craft(
+			locals.currentCharacter.id,
+			params.building_id,
+			itemId
+		);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return {
 			message: `${ergebnis.produced} ${getItemTemplate(ergebnis.itemId)?.name ?? ''} hergestellt.`

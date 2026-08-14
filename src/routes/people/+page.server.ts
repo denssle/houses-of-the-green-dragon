@@ -8,6 +8,8 @@ import * as worldService from '$lib/server/service/worldService';
 import { actionMessage } from '$lib/actionMessage';
 import { COURT_ACTION_POINT_COST } from '$lib/game/family.logic';
 import { SOCIALIZE_ACTION_POINT_COST } from '$lib/game/relationship.logic';
+import { garmentYearsLeft } from '$lib/game/attire.logic';
+import * as needService from '$lib/server/service/needService';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const character = locals.currentCharacter;
@@ -15,29 +17,41 @@ export const load: PageServerLoad = async ({ locals }) => {
 		error(404, 'Not Found');
 	}
 
+	const jetzt: number = await worldService.currentTick();
+
 	return {
 		region: await regionService.getRegion(character.regionId),
 		visitCost: SOCIALIZE_ACTION_POINT_COST,
 		courtCost: COURT_ACTION_POINT_COST,
+		// Was das Äußere hergibt: ein heiles Gewand wirkt immer, Duftwasser nur beim Werben.
+		attire: {
+			garmentYearsLeft: garmentYearsLeft(character.wornSinceTick ?? null, jetzt),
+			perfume:
+				(await needService.getStock(character.id)).find((posten) => posten.itemId === 'PERFUME')
+					?.quantity ?? 0
+		},
 		married: character.spouseId !== null,
 		people: await mitLehrangeboten(
-			await relationshipService.getNeighbours(
-				character.id,
-				character.regionId,
-				await worldService.currentTick()
-			),
+			await relationshipService.getNeighbours(character.id, character.regionId, jetzt),
 			character.id
 		)
 	};
 };
 
-/** Alle Handlungen dieser Seite brauchen dasselbe: einen Charakter und ein Gegenüber. */
-async function gegenueber(
+/**
+ * Alle Handlungen dieser Seite brauchen dasselbe: einen Charakter und ein Gegenüber.
+ *
+ * Nimmt die **bereits gelesenen** Formulardaten entgegen und liest sie nicht selbst: Ein
+ * Request-Body lässt sich nur einmal lesen. Solange jede Handlung genau ein Feld
+ * brauchte, fiel das nicht auf — beim Werben mit Duftwasser kam ein zweites dazu, und der
+ * zweite `formData()`-Aufruf lieferte nichts mehr.
+ */
+function gegenueber(
 	locals: App.Locals,
-	request: Request
-): Promise<{ ich: string; anderer: string } | undefined> {
+	daten: FormData
+): { ich: string; anderer: string } | undefined {
 	if (!locals.currentCharacter) return undefined;
-	const anderer = (await request.formData()).get('personId')?.toString();
+	const anderer = daten.get('personId')?.toString();
 	if (!anderer) return undefined;
 	return { ich: locals.currentCharacter.id, anderer };
 }
@@ -64,11 +78,11 @@ export const actions = {
 		if (!locals.currentCharacter) {
 			return fail(401, { message: 'Kein Charakter, der lernen könnte' });
 		}
-		// Der Body lässt sich nur einmal lesen — deshalb hier nicht über `gegenueber`,
-		// das ihn für sich verbraucht.
-		const data = await request.formData();
-		const meisterId = data.get('personId')?.toString();
-		const art = data.get('skill')?.toString();
+		// Zwei Felder: Wen und was. Seit `gegenueber` die Daten entgegennimmt statt sie
+		// selbst zu lesen, braucht das keinen Sonderweg mehr.
+		const daten = await request.formData();
+		const meisterId = daten.get('personId')?.toString();
+		const art = daten.get('skill')?.toString();
 		if (!meisterId || !art) return fail(400, { message: 'Bei wem denn, und was?' });
 
 		const ergebnis = await skillService.learnFrom(
@@ -81,7 +95,8 @@ export const actions = {
 	},
 
 	visit: async ({ request, locals }) => {
-		const beide = await gegenueber(locals, request);
+		const daten = await request.formData();
+		const beide = gegenueber(locals, daten);
 		if (!beide) return fail(400, { message: 'Wen denn?' });
 
 		const ergebnis = await relationshipService.spendTimeWith(beide.ich, beide.anderer);
@@ -90,16 +105,19 @@ export const actions = {
 	},
 
 	court: async ({ request, locals }) => {
-		const beide = await gegenueber(locals, request);
+		const daten = await request.formData();
+		const beide = gegenueber(locals, daten);
 		if (!beide) return fail(400, { message: 'Um wen denn?' });
 
-		const ergebnis = await familyService.courtSomeone(beide.ich, beide.anderer);
+		const mitDuft: boolean = daten.get('perfume') === 'on';
+		const ergebnis = await familyService.courtSomeone(beide.ich, beide.anderer, mitDuft);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return { message: 'Du hast um sie oder ihn geworben.' };
 	},
 
 	propose: async ({ request, locals }) => {
-		const beide = await gegenueber(locals, request);
+		const daten = await request.formData();
+		const beide = gegenueber(locals, daten);
 		if (!beide) return fail(400, { message: 'Wem denn?' });
 
 		const ergebnis = await familyService.propose(beide.ich, beide.anderer);
@@ -112,7 +130,8 @@ export const actions = {
 	},
 
 	accept: async ({ request, locals }) => {
-		const beide = await gegenueber(locals, request);
+		const daten = await request.formData();
+		const beide = gegenueber(locals, daten);
 		if (!beide) return fail(400, { message: 'Wessen Antrag?' });
 
 		const ergebnis = await familyService.acceptProposal(beide.ich, beide.anderer);

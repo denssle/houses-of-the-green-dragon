@@ -47,7 +47,15 @@ export interface BuildingTemplate {
 	 */
 	skill?: SkillType;
 	/** Was sich hier herstellen laesst — leer bei Wohnhaus und Rathaus. */
-	recipe?: Recipe;
+	/**
+	 * Was hier hergestellt werden kann.
+	 *
+	 * **Mehrere**, seit es den Alchemisten gibt: Seine Küche macht Duftwasser und
+	 * Stärkungstrank aus denselben Kräutern. Ein Feld für genau ein Rezept hätte dafür
+	 * zwei Gebäude verlangt, die sich nur im Erzeugnis unterscheiden — eine Trennung, die
+	 * niemand erklären könnte. Wo nur eines steht, ist die Liste eben einelementig.
+	 */
+	recipes?: Recipe[];
 }
 
 /**

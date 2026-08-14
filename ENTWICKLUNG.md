@@ -1473,6 +1473,48 @@ am gebauten Server durchgespielt: Wald gepachtet, dreimal Holz geschlagen, Zimme
 errichtet (ohne Material), Holz eingelagert, viermal gesägt — und aus den Brettern, zwei
 Quadern und einem Eisen ein Wohnhaus gebaut.
 
+**4.11 Schneider und Alchemist.** ✓ Zwei Berufe, die auf Menschen wirken statt auf Häuser.
+
+**Beide wirken auf die Zuneigung** — sie steht seit 4.3, und damit ist der Prüfstein
+erfüllt, an dem Waren sonst scheitern. Kleidung gegen Kälte müsste dagegen auf Krankheit
+wirken, und die gibt es noch nicht (Punkt 5); deshalb wärmt das Gewand hier nicht, es
+kleidet.
+
+**Der Unterschied liegt darin, wie sie sich verbrauchen.** Ein Gewand wird _getragen_: Es
+wirkt bei jedem Umgang und hält drei Spieljahre, dann ist es hin. Ein Duftwasser wird
+_aufgebraucht_: einmal, beim Werben. Daraus ergeben sich zwei verschiedene Berufe — der
+Schneider lebt von Dauerkundschaft, der Alchemist vom Anlass.
+
+Damit ist **Punkt 20 für diese Ware beantwortet**, ohne auf ein großes Verschleißsystem zu
+warten: Ohne Haltbarkeit kauft jeder genau ein Gewand, und das Handwerk hätte nach einer
+Generation nichts mehr zu tun. Gespeichert wird dafür nur der Zeitpunkt des Anziehens —
+ob das Stück noch heil ist, ist eine Rechnung, wie beim Gebäudezustand und beim Hunger.
+
+Der **Stärkungstrank** wirkt auf Aktionspunkte, die Hauptressource. Er füllt nur auf, was
+fehlt: Über die Obergrenze hinaus wirkt er nicht, sonst hortete man Punkte für einen Tag,
+an dem alles auf einmal geschieht — und die Drosselung über das Aktionsbudget wäre
+ausgehebelt. Acht Punkte sind ein Sechstel des Tagesbudgets: spürbar, wenn es klemmt, und
+zu wenig, um damit ein zweites Leben zu führen.
+
+**Ein Betrieb kann jetzt mehreres herstellen.** Die Alchemistenküche macht Duftwasser und
+Trank aus denselben Kräutern; ein Feld für genau ein Rezept hätte dafür zwei Gebäude
+verlangt, die sich nur im Erzeugnis unterscheiden — eine Trennung, die niemand erklären
+könnte. Aus `recipe` wurde `recipes`, und der Angestellte stellt weiterhin das erste
+Erzeugnis her: Wer wählt, ist der Eigentümer; wer arbeitet, tut das, wofür der Laden
+bekannt ist.
+
+**Beim Durchspielen fiel ein Fehler auf, der älter ist als dieser Schritt:** Die
+Werbe-Aktion las `request.formData()` ein zweites Mal, nachdem eine Hilfsfunktion den Body
+bereits verbraucht hatte — das Duftwasser wäre nie angekommen. Umschifft war das schon
+einmal worden (die Lehr-Aktion trug einen Kommentar darüber); jetzt liest die Route die
+Daten einmal und reicht sie weiter, und der Sonderweg konnte verschwinden.
+
+_Fertig, wenn:_ Es gibt einen Beruf, der von Menschen lebt statt von Häusern. — Erledigt
+und am gebauten Server durchgespielt: Schneiderei und Alchemistenküche errichtet (beide
+brauchten erst Quader vom Steinmetz), Gewand genäht, Duftwasser und Trank aus derselben
+Küche, angezogen, geworben — 30 Zuneigung statt 15, genau die Summe aus Werben, Duftwasser
+und Gewand.
+
 **4.9b Fernhandel und weitere Städte.** Waren zwischen Orten bewegen (`shipment` mit
 Ankunfts-Tick statt Fortbewegung), Gründung einer zweiten Stadt. Fernziele für etablierte
 Dynastien — und die Voraussetzung dafür, dass ein Räuber jemanden unterwegs überfallen

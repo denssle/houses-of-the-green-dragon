@@ -37,6 +37,14 @@
 
 <section>
 	<h3>Dein Vorrat</h3>
+	{#if data.garmentYearsLeft > 0}
+		<p>
+			<i>
+				Du trägst ein Gewand; es hält noch {data.garmentYearsLeft}
+				{data.garmentYearsLeft === 1 ? 'Jahr' : 'Jahre'}.
+			</i>
+		</p>
+	{/if}
 	{#if data.stock.length === 0}
 		<p><i>Deine Kammer ist leer.</i></p>
 	{:else}
@@ -48,6 +56,16 @@
 						<form method="POST" action="?/eat" use:enhance>
 							<input type="hidden" name="itemId" value={posten.itemId} />
 							<button type="submit">Essen</button>
+						</form>
+					{/if}
+					{#if posten.itemId === 'GARMENT'}
+						<form method="POST" action="?/wear" use:enhance>
+							<button type="submit">Anziehen</button>
+						</form>
+					{/if}
+					{#if posten.itemId === 'TONIC'}
+						<form method="POST" action="?/drink" use:enhance>
+							<button type="submit">Trinken</button>
 						</form>
 					{/if}
 				</li>

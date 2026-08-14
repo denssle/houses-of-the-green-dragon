@@ -1,3 +1,4 @@
+import { affectionBonus, garmentIntact } from '$lib/game/attire.logic';
 import { Op, type Transaction } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
@@ -215,7 +216,13 @@ export async function spendTimeWith(
 		if (!geplant.ok) return geplant;
 
 		await besucher.update({ actionPoints: geplant.actionPoints }, { transaction: t });
-		return { ok: true, delta: geplant.delta } as const;
+		// Wer etwas auf sein Äußeres hält, kommt besser an. Das Gewand wirkt bei jedem
+		// Umgang — ein Duftwasser wäre hier verschwendet und zählt deshalb nur beim Werben.
+		const zuschlag: number = affectionBonus({
+			garmentIntact: garmentIntact(besucher.dataValues.wornSinceTick, tick),
+			perfumeUsed: false
+		});
+		return { ok: true, delta: geplant.delta + zuschlag } as const;
 	});
 
 	if (!ergebnis.ok) return ergebnis;

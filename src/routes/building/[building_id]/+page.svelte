@@ -48,26 +48,48 @@
 	{/if}
 </dl>
 
-{#if data.recipe}
+{#if data.recipes.length > 0}
 	<section>
 		<h3>Herstellen</h3>
+		{#each data.recipes as rezept (rezept.itemId)}
+			<div>
+				<i>
+					{rezept.input.map((z) => `${z.quantity} × ${z.name}`).join(', ')} → {rezept.output}
+				</i>
+				<form method="POST" action="?/craft" use:enhance>
+					<input type="hidden" name="itemId" value={rezept.itemId} />
+					<button type="submit">Arbeiten ({rezept.cost} AP)</button>
+				</form>
+			</div>
+		{/each}
 		<p>
-			<i>
-				{data.recipe.input.map((z) => `${z.quantity} × ${z.name}`).join(', ')} → {data.recipe
-					.output}
-			</i>
-		</p>
-		<form method="POST" action="?/craft" use:enhance>
-			<button type="submit">Arbeiten ({data.recipe.cost} AP)</button>
-		</form>
-		<p>
-			<small
-				>Aus eigenem Vorrat, auf eigene Rechnung. Wer für dich arbeitet, produziert dagegen ins
-				Betriebslager.</small
-			>
+			<small>
+				Aus eigenem Vorrat und aus dem Betriebslager, auf eigene Rechnung. Wer für dich arbeitet,
+				produziert dagegen ins Lager.
+			</small>
 		</p>
 	</section>
 {/if}
+<dl>
+	{#if data.plot}
+		<dt>Lage</dt>
+		<dd>{data.plot.address}</dd>
+	{/if}
+
+	<dt>Zustand</dt>
+	<dd>{data.building.condition} von 100 — {zustandswort(data.building.condition)}</dd>
+
+	<dt>Ausbaustufe</dt>
+	<dd>
+		{data.levelName ?? data.building.level}
+		<small>(Stufe {data.building.level} von {data.maxLevel})</small>
+	</dd>
+
+	{#if data.building.forSalePrice !== null}
+		<dt>Zu verkaufen</dt>
+		<dd>{data.building.forSalePrice} Münzen, samt Grundstück</dd>
+	{/if}
+</dl>
 
 {#each data.option?.actions ?? [] as action (action)}
 	<form method="POST" action="?/act" use:enhance>

@@ -15,6 +15,15 @@
 	};
 </script>
 
+{#if data.attire.garmentYearsLeft > 0}
+	<p>
+		<small>
+			Du trägst ein Gewand — es hält noch {data.attire.garmentYearsLeft}
+			{data.attire.garmentYearsLeft === 1 ? 'Jahr' : 'Jahre'} und macht dich überall etwas angenehmer.
+		</small>
+	</p>
+{/if}
+
 <h2>Leute in {data.region?.name ?? 'der Stadt'}</h2>
 
 {#if form?.message}
@@ -57,6 +66,12 @@
 				-->
 				{#if !data.married && !person.married && person.kinship === 'NONE'}
 					<form method="POST" action="?/court" use:enhance>
+						{#if data.attire.perfume > 0}
+							<label>
+								<input type="checkbox" name="perfume" />
+								Duftwasser ({data.attire.perfume})
+							</label>
+						{/if}
 						<input type="hidden" name="personId" value={person.id} />
 						<button type="submit">Werben ({data.courtCost} AP)</button>
 					</form>

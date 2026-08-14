@@ -126,13 +126,15 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			limitedTo: 0,
 			actions: [],
 			skill: 'CONSTRUCTION',
-			recipe: {
-				input: [{ itemId: 'WOOD', quantity: 2 }],
-				outputItemId: 'PLANK',
-				baseOutput: 3,
-				actionPointCost: 1,
-				skill: 'CONSTRUCTION'
-			},
+			recipes: [
+				{
+					input: [{ itemId: 'WOOD', quantity: 2 }],
+					outputItemId: 'PLANK',
+					baseOutput: 3,
+					actionPointCost: 1,
+					skill: 'CONSTRUCTION'
+				}
+			],
 			levels: [
 				{ price: 180, name: 'Sägeschuppen' },
 				{ price: 340, name: 'Zimmerei' }
@@ -147,16 +149,73 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			limitedTo: 0,
 			actions: [],
 			skill: 'MINING',
-			recipe: {
-				input: [{ itemId: 'STONE', quantity: 2 }],
-				outputItemId: 'BLOCK',
-				baseOutput: 2,
-				actionPointCost: 1,
-				skill: 'MINING'
-			},
+			recipes: [
+				{
+					input: [{ itemId: 'STONE', quantity: 2 }],
+					outputItemId: 'BLOCK',
+					baseOutput: 2,
+					actionPointCost: 1,
+					skill: 'MINING'
+				}
+			],
 			levels: [
 				{ price: 200, name: 'Steinmetzhütte' },
 				{ price: 380, name: 'Steinmetzei' }
+			]
+		},
+		{
+			optionId: 11,
+			initialName: 'Schneiderei',
+			type: 'CRAFT',
+			description: 'Näht aus Wolle Gewänder, die man ansieht.',
+			limited: false,
+			limitedTo: 0,
+			actions: [],
+			skill: 'TAILORING',
+			recipes: [
+				{
+					input: [{ itemId: 'WOOL', quantity: 3 }],
+					outputItemId: 'GARMENT',
+					baseOutput: 1,
+					actionPointCost: 1,
+					skill: 'TAILORING'
+				}
+			],
+			levels: [
+				{ price: 190, name: 'Nähstube' },
+				{ price: 360, name: 'Schneiderei' }
+			]
+		},
+		{
+			optionId: 12,
+			initialName: 'Alchemistenküche',
+			type: 'CRAFT',
+			description: 'Zieht aus Kräutern Duftwasser und Stärkungstrank.',
+			limited: false,
+			limitedTo: 0,
+			actions: [],
+			skill: 'ALCHEMY',
+			// Zwei Erzeugnisse aus demselben Rohstoff — der Grund, warum eine Vorlage
+			// mehrere Rezepte tragen kann.
+			recipes: [
+				{
+					input: [{ itemId: 'HERBS', quantity: 3 }],
+					outputItemId: 'PERFUME',
+					baseOutput: 1,
+					actionPointCost: 1,
+					skill: 'ALCHEMY'
+				},
+				{
+					input: [{ itemId: 'HERBS', quantity: 2 }],
+					outputItemId: 'TONIC',
+					baseOutput: 1,
+					actionPointCost: 1,
+					skill: 'ALCHEMY'
+				}
+			],
+			levels: [
+				{ price: 210, name: 'Kräuterküche' },
+				{ price: 400, name: 'Alchemistenküche' }
 			]
 		},
 		{
@@ -178,13 +237,15 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			limitedTo: 0,
 			actions: [],
 			skill: 'BAKING',
-			recipe: {
-				input: [{ itemId: 'GRAIN', quantity: 3 }],
-				outputItemId: 'FLOUR',
-				baseOutput: 2,
-				actionPointCost: 1,
-				skill: 'BAKING'
-			},
+			recipes: [
+				{
+					input: [{ itemId: 'GRAIN', quantity: 3 }],
+					outputItemId: 'FLOUR',
+					baseOutput: 2,
+					actionPointCost: 1,
+					skill: 'BAKING'
+				}
+			],
 			levels: [
 				{ price: 200, name: 'Handmühle' },
 				{ price: 350, name: 'Wassermühle' }
@@ -199,13 +260,15 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			limitedTo: 0,
 			actions: [],
 			skill: 'BAKING',
-			recipe: {
-				input: [{ itemId: 'FLOUR', quantity: 2 }],
-				outputItemId: 'BREAD',
-				baseOutput: 3,
-				actionPointCost: 1,
-				skill: 'BAKING'
-			},
+			recipes: [
+				{
+					input: [{ itemId: 'FLOUR', quantity: 2 }],
+					outputItemId: 'BREAD',
+					baseOutput: 3,
+					actionPointCost: 1,
+					skill: 'BAKING'
+				}
+			],
 			levels: [
 				{ price: 220, name: 'Backhaus' },
 				{ price: 400, name: 'Bäckerei' }
@@ -222,13 +285,15 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			skill: 'SMITHING',
 			// Seit 4.10 hat sie ein Rezept. Bis dahin war sie ein Arbeitsplatz ohne Werk:
 			// Man konnte dort Lohn verdienen, aber es entstand nichts.
-			recipe: {
-				input: [{ itemId: 'ORE', quantity: 3 }],
-				outputItemId: 'IRON',
-				baseOutput: 1,
-				actionPointCost: 1,
-				skill: 'SMITHING'
-			},
+			recipes: [
+				{
+					input: [{ itemId: 'ORE', quantity: 3 }],
+					outputItemId: 'IRON',
+					baseOutput: 1,
+					actionPointCost: 1,
+					skill: 'SMITHING'
+				}
+			],
 			levels: [
 				{ price: 250, name: 'Schmiede', wagePerActionPoint: 3 },
 				{ price: 400, name: 'Werkstatt', wagePerActionPoint: 5 },
@@ -313,7 +378,7 @@ export async function build(
 		// fehlenden Brett scheitern.
 		// Wer die Kette selbst in Gang setzt, braucht sie noch nicht (siehe
 		// `producesBuildingMaterial`).
-		const bedarf = producesBuildingMaterial(option.recipe?.outputItemId)
+		const bedarf = option.recipes?.some((rezept) => producesBuildingMaterial(rezept.outputItemId))
 			? []
 			: materialFor(levelOf(option, 1).price);
 		const fehlt = await materialAbziehen(characterId, bedarf, t);

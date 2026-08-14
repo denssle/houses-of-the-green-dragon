@@ -11,6 +11,8 @@ import type {
 import { currentSatiety, eat, satietyLabel, wouldBeWasted } from '$lib/game/need.logic';
 import { getItemTemplate, type ItemTemplate } from '$lib/model/itemTemplate';
 import { canAfford } from '$lib/game/economy';
+import { tonicRestores } from '$lib/game/attire.logic';
+import { MAX_ACTION_POINTS } from '$lib/game/time';
 import * as characterService from '$lib/server/service/characterService';
 import * as worldService from '$lib/server/service/worldService';
 
@@ -203,3 +205,57 @@ export function granaryOffers(): ItemTemplate[] {
 
 /** Der Ausschnitt eines Charakters, den die Sättigung braucht. */
 export type Fed = Model<CharacterAttributes, CharacterCreationAttributes>;
+
+// --- Kleidung und Tränke (4.11) ------------------------------------------------------
+
+/**
+ * Ein Gewand anziehen.
+ *
+ * Das alte wird dabei nicht ausgezogen, sondern **ersetzt** — wer ein neues anlegt, hat
+ * das alte abgelegt, und ein Kleiderschrank wäre ein System für sich. Der Zeitpunkt ist
+ * alles, was gespeichert wird: Ob es noch heil ist, rechnet `attire.logic.ts` daraus aus.
+ */
+export async function wearGarment(characterId: string): Promise<NeedResult> {
+	const tick: number = await worldService.currentTick();
+
+	return sequelize.transaction(async (t: Transaction) => {
+		const person = await Character.findByPk(characterId, { transaction: t, lock: t.LOCK.UPDATE });
+		if (!person) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+
+		if (!(await changeStock(characterId, 'GARMENT', -1, t))) {
+			return { ok: false, reason: 'NOT_IN_STOCK' } as const;
+		}
+		await person.update({ wornSinceTick: tick }, { transaction: t });
+		return { ok: true } as const;
+	});
+}
+
+/**
+ * Einen Stärkungstrank trinken.
+ *
+ * Er füllt nur auf, was fehlt: Über die Obergrenze hinaus wirkt er nicht, sonst hortete
+ * man Punkte für einen Tag, an dem alles auf einmal geschieht — und die Drosselung über
+ * das Aktionsbudget wäre ausgehebelt.
+ */
+export async function drinkTonic(
+	characterId: string
+): Promise<{ ok: true; restored: number } | { ok: false; reason: ActionFailureReason }> {
+	const tick: number = await worldService.currentTick();
+
+	return sequelize.transaction(async (t: Transaction) => {
+		const person = await characterService.loadForAction(characterId, tick, t);
+		if (!person) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+
+		const zurueck: number = tonicRestores(person.dataValues.actionPoints, MAX_ACTION_POINTS);
+		if (zurueck <= 0) return { ok: false, reason: 'NOTHING_TO_DO' } as const;
+
+		if (!(await changeStock(characterId, 'TONIC', -1, t))) {
+			return { ok: false, reason: 'NOT_IN_STOCK' } as const;
+		}
+		await person.update(
+			{ actionPoints: person.dataValues.actionPoints + zurueck },
+			{ transaction: t }
+		);
+		return { ok: true, restored: zurueck } as const;
+	});
+}

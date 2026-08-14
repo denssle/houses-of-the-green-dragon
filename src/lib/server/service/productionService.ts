@@ -76,6 +76,23 @@ const ABBAU: Record<string, Recipe> = {
 		baseOutput: 2,
 		actionPointCost: 1,
 		skill: 'MINING'
+	},
+	// Wolle und Kräuter (4.11). Die Schafe geben das ganze Jahr, die Kräuter nicht: Was
+	// im Januar am Waldrand wächst, taugt für kein Duftwasser.
+	WOOL: {
+		input: [],
+		outputItemId: 'WOOL',
+		baseOutput: 3,
+		actionPointCost: 1,
+		skill: 'FARMING'
+	},
+	HERBS: {
+		input: [],
+		outputItemId: 'HERBS',
+		baseOutput: 4,
+		actionPointCost: 1,
+		skill: 'ALCHEMY',
+		seasons: ['SPRING', 'SUMMER', 'AUTUMN']
 	}
 };
 
@@ -242,12 +259,24 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
  * nicht ungefragt. Städtische Betriebe stehen allen offen — dieselbe Rolle wie die
  * städtische Schmiede für den Neuling.
  */
-export async function craft(characterId: string, buildingId: string): Promise<ProductionResult> {
+/**
+ * Etwas herstellen.
+ *
+ * `itemId` wählt das Rezept, wo ein Betrieb mehrere hat — die Alchemistenküche macht
+ * Duftwasser und Stärkungstrank aus denselben Kräutern. Ohne Angabe das erste.
+ */
+export async function craft(
+	characterId: string,
+	buildingId: string,
+	itemId?: string
+): Promise<ProductionResult> {
 	const tick: number = await worldService.currentTick();
 
 	const gebaeude = await buildingService.getBuilding(buildingId);
 	const vorlage = gebaeude ? buildingService.getBuildingOption(gebaeude.optionId) : undefined;
-	const rezept: Recipe | undefined = vorlage?.recipe;
+	const rezept: Recipe | undefined = itemId
+		? vorlage?.recipes?.find((eintrag) => eintrag.outputItemId === itemId)
+		: vorlage?.recipes?.[0];
 	if (!gebaeude || !rezept) return { ok: false, reason: 'NOTHING_TO_DO' };
 
 	const fremd: boolean =

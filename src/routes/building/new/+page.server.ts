@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			...vorlage,
 			// Seit 4.10 kostet ein Bau auch Material. Wer es erst beim Fehlschlag erfährt,
 			// hat die Hälfte des Spiels erraten müssen.
-			material: producesBuildingMaterial(vorlage.recipe?.outputItemId)
+			material: vorlage.recipes?.some((rezept) => producesBuildingMaterial(rezept.outputItemId))
 				? []
 				: materialFor(vorlage.levels[0].price).map((posten) => ({
 						...posten,
