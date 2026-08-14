@@ -285,6 +285,61 @@ describe('Sterben und Erben', () => {
 		});
 	});
 
+	describe('einem Kind seinen Namen geben', () => {
+		it('nimmt einen neuen Namen an', async () => {
+			const vater = await person('Vater', 40);
+			const kind = await person('Namenlos', 5, { motherId: vater });
+
+			const ergebnis = await lifecycleService.renameChild(vater, kind, '  Adelbert ', JETZT);
+
+			expect(ergebnis).toEqual({ ok: true, name: 'Adelbert' });
+			expect((await stand(kind)).firstName).toBe('Adelbert');
+		});
+
+		it('lässt fremde Kinder in Ruhe', async () => {
+			const fremder = await person('Fremder', 40);
+			const vater = await person('Vater', 40);
+			const kind = await person('Kind', 5, { motherId: vater });
+
+			const ergebnis = await lifecycleService.renameChild(fremder, kind, 'Meins', JETZT);
+
+			expect(ergebnis).toEqual({ ok: false, reason: 'NOT_YOURS' });
+			expect((await stand(kind)).firstName).toBe('Kind');
+		});
+
+		it('hört mit der Volljährigkeit auf', async () => {
+			const vater = await person('Vater', 50);
+			const kind = await person('Erwachsen', 16, { motherId: vater });
+
+			const ergebnis = await lifecycleService.renameChild(vater, kind, 'Anders', JETZT);
+
+			expect(ergebnis).toEqual({ ok: false, reason: 'TOO_OLD' });
+			expect((await stand(kind)).firstName).toBe('Erwachsen');
+		});
+
+		it('lässt zwei Geschwister nicht gleich heißen', async () => {
+			const vater = await person('Vater', 40);
+			await person('Alheid', 8, { motherId: vater });
+			const zweites = await person('Zweites', 5, { motherId: vater });
+
+			const ergebnis = await lifecycleService.renameChild(vater, zweites, 'alheid', JETZT);
+
+			expect(ergebnis).toEqual({ ok: false, reason: 'TAKEN' });
+		});
+
+		it('lässt ein Kind seinen eigenen Namen behalten', async () => {
+			// Das Kind selbst zählt nicht zu den belegten Namen — sonst ließe sich eine
+			// bloße Änderung der Schreibweise nie bestätigen.
+			const vater = await person('Vater', 40);
+			const kind = await person('Alheid', 5, { motherId: vater });
+
+			expect(await lifecycleService.renameChild(vater, kind, 'Alheid', JETZT)).toEqual({
+				ok: true,
+				name: 'Alheid'
+			});
+		});
+	});
+
 	describe('die Benennung', () => {
 		it('nimmt ein eigenes lebendes Kind an', async () => {
 			const vater = await person('Vater', 60);

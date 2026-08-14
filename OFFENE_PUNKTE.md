@@ -1,4 +1,4 @@
-# Offene Punkte
+﻿# Offene Punkte
 
 Alles, was noch entschieden oder entworfen werden muss, mit dem Zeitpunkt, zu dem es
 spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
@@ -34,13 +34,13 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 51  | Mitgift, Testament und Stiftung                                                      | laufend                      | Entwurf      |
 | 52  | Der Lebenslauf: welche Ereignisse ein Leben ausmachen                                | laufend                      | Aufgabe      |
 | 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                               | laufend                      | Entwurf      |
-| 36  | Gebäude und Betriebe benennen                                                        | laufend                      | Aufgabe      |
-| 37  | Gebäude verkaufen (Grundstücke gehen bereits) — entschieden, aber ungebaut           | laufend                      | Aufgabe      |
+| 36  | Gebäude und Betriebe benennen — **erledigt mit 5.2**                                 | —                            | erledigt     |
+| 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum        | —                            | erledigt     |
 | 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                    | Ehe für alle                 | Entwurf      |
 | 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit             | später                       | Entwurf      |
 | 40  | Der abwesende Spieler: ab wann, wie weit, und was beim Erbfall                       | erster öffentlicher Betrieb  | Entwurf      |
 | 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist              | zweite Stadt                 | Entwurf      |
-| 42  | Kindern einen Namen geben                                                            | laufend                      | Aufgabe      |
+| 42  | Kindern einen Namen geben — **erledigt mit 5.2**                                     | —                            | erledigt     |
 | 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                          | erste verliehene Münze       | Entwurf      |
 | 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                      | Punkt 43 / Punkt 23          | Entwurf      |
 | 25  | End-to-End-Test (Playwright)                                                         | erster öffentlicher Betrieb  | Aufgabe      |
@@ -360,7 +360,7 @@ Charakteren — und davon gibt es bisher nur einen, die Anstellung.
 Offen ist auch, ob NPCs den Beruf ergreifen. Ohne das ist er nur für Spieler da, und ein
 Spieler, der drei Tage nicht hereinschaut, ist ein Bauherr, auf den niemand warten will.
 
-### 36. Gebäude und Betriebe benennen
+### 36. Gebäude und Betriebe benennen — erledigt (5.2)
 
 Eine kleine Sache mit sichtbarer Wirkung: „Bäckerei" ist eine Gattung, „Zum goldenen Weck"
 ein Betrieb. Der Name gehört dem Eigentümer und lässt sich ändern.
@@ -369,18 +369,15 @@ Zu klären ist nur, was die Freiheit einschränkt — Länge, und ob zwei Gebäu
 Stadt gleich heißen dürfen. Beim ersten fremden Nutzer kommt die Frage nach anstößigen
 Namen dazu; sie gehört zu den Nutzungsbedingungen (Punkt 27).
 
-### 37. Gebäude verkaufen
+### 37. Gebäude verkaufen — hinfällig
 
-Hier ist nichts zu entscheiden — es fehlt die Umsetzung. Das Konzept sieht den
-Immobilienhandel seit jeher vor, und die Bauart steht fest: ein nullbarer Preis am
-Datensatz, kein eigenes Auktionswesen. Für `plot` ist genau das gebaut (`setPlotPrice`,
-`buyFromOwner`); für `building` fehlt es.
+**Dieser Punkt beruhte auf einem Irrtum.** Er entstand aus einer Suche nach `salePrice`;
+das Feld heißt `forSalePrice`. Der Handel steht seit 4.5 vollständig: `setBuildingPrice`
+und `buyBuilding`, samt Action, Oberfläche und der Regel, dass das Grundstück mitwandert.
 
-Solange es fehlt, hat ein Haus nur zwei Wege aus dem Besitz: Erbschaft oder Verfall. Wer
-eine Werkstatt nicht mehr braucht, kann sie niemandem geben, der sie braucht — und ein
-Neuling (Punkt 14) findet nichts zu kaufen, obwohl anderswo etwas leersteht. Der Betrieb
-mit dem Grundstück darunter sollte in einem Zug den Besitzer wechseln können; getrennt
-verkauft entstünde ein Haus auf fremdem Boden, und dafür gibt es keine Regel.
+Er bleibt als Warnung stehen: Ein Punkt, der aus der Suche nach einem geratenen Bezeichner
+entstanden ist, ist keine Bestandsaufnahme. Wo hier „entschieden, aber ungebaut" steht,
+gehört vor dem Anfangen nachgesehen.
 
 ### 38. Adoption
 
@@ -529,7 +526,7 @@ Zu entscheiden bleibt:
 Fällig wird das mit der **zweiten Stadt** — vorher gibt es nichts, wohin man reisen
 könnte. Der Punkt hängt damit an 31.
 
-### 42. Kindern einen Namen geben
+### 42. Kindern einen Namen geben — erledigt (5.2)
 
 **Die Richtung steht** (`KONZEPT.md`, Abschnitt 1): Die Welt vergibt bei der Geburt einen
 Namen, weil sie nicht auf den Spieler wartet; solange das Kind minderjährig ist, darf der
@@ -725,9 +722,9 @@ heute schon fast alles, auch arbeiten. Wo Kinderarbeit aufhört, wird mit **6.2*
 
 **Zwei Fragen bleiben offen**, weil sie an Dingen hängen, die es noch nicht gibt:
 
-- **Was, wenn der Erbe das Haus verkauft** (Punkt 37)? Das Wohnrecht muss den Verkauf
-  überdauern, sonst ist es keins — heute gibt es keinen Gebäudeverkauf, an dem es sich
-  zeigen könnte.
+- ~~Was, wenn der Erbe das Haus verkauft?~~ **Beantwortet:** Den Verkauf gibt es (Punkt
+  37), und er überträgt nur den Eigentumstitel — die Bewohner rührt er nicht an. Das
+  Wohnrecht überdauert ihn also von selbst.
 - **Endet es mit einer neuen Ehe?** Naheliegend ja: Wer neu heiratet, zieht zum Partner.
   Das entscheidet sich, wenn das Zusammenziehen auch beim zweiten Mal greift.
 

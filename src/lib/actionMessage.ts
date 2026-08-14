@@ -1,4 +1,5 @@
 import type { ActionFailureReason } from '$lib/game/actionFailure';
+import { MAX_NAME_LENGTH, MIN_NAME_LENGTH, type NameProblem } from '$lib/game/naming.logic';
 
 /**
  * Die Sätze zu den Fehlschlägen aus der Spiellogik.
@@ -47,4 +48,23 @@ const SAETZE: Record<ActionFailureReason, string> = {
 
 export function actionMessage(reason: ActionFailureReason): string {
 	return SAETZE[reason];
+}
+
+/**
+ * Warum ein Name nicht angenommen wurde.
+ *
+ * Eigene Liste statt eines Eintrags in `SAETZE`: Namen sind keine Handlung, die scheitert,
+ * sondern eine Eingabe, die nicht taugt — und die Gründe dafür gelten für Kinder wie für
+ * Gebäude gleichermaßen.
+ */
+const NAMENSSAETZE: Record<NameProblem, string> = {
+	TOO_SHORT: `Ein Name braucht mindestens ${MIN_NAME_LENGTH} Zeichen.`,
+	TOO_LONG: `Mehr als ${MAX_NAME_LENGTH} Zeichen sind kein Name mehr.`,
+	TAKEN: 'So heißt schon ein Geschwisterkind.',
+	TOO_OLD: 'Dafür ist es zu spät — der Name steht seit der Volljährigkeit fest.',
+	NOT_YOURS: 'Darüber hast du nicht zu bestimmen.'
+};
+
+export function nameMessage(reason: NameProblem): string {
+	return NAMENSSAETZE[reason];
 }

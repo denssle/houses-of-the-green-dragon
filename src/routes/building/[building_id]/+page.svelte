@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
+	import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '$lib/game/naming.logic';
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
@@ -48,6 +49,25 @@
 		<dd>{data.building.forSalePrice} Münzen, samt Grundstück</dd>
 	{/if}
 </dl>
+
+<!--
+	Der Name gehört dem Eigentümer. Über städtische Bauten verfügt auch der Bürgermeister
+	nicht — ihr Name ist der der Stadt.
+-->
+{#if data.mine}
+	<form method="POST" action="?/rename" use:enhance class="actions">
+		<input
+			type="text"
+			name="name"
+			value={data.building.name}
+			required
+			minlength={MIN_NAME_LENGTH}
+			maxlength={MAX_NAME_LENGTH}
+			aria-label="Name des Hauses"
+		/>
+		<button type="submit">Umbenennen</button>
+	</form>
+{/if}
 
 {#if data.recipes.length > 0}
 	<section>

@@ -1,5 +1,6 @@
 import * as chronicleService from '$lib/server/service/chronicleService';
 import { chronicleParts } from '$lib/chronicleMessage';
+import { nameMessage } from '$lib/actionMessage';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as characterService from '$lib/server/service/characterService';
@@ -103,5 +104,32 @@ export const actions = {
 			return fail(400, { message: 'Nur ein eigenes lebendes Kind kann erben' });
 		}
 		return { message: heirId ? 'Der Erbe ist benannt.' : 'Die Benennung ist zurückgenommen.' };
+	},
+
+	/**
+	 * Einem Kind seinen Namen geben.
+	 *
+	 * Die Welt hat bei der Geburt einen vergeben, weil sie nicht wartet; bis zur
+	 * Volljährigkeit darf der Spieler ihn ändern.
+	 */
+	rename: async ({ request, locals }) => {
+		if (!locals.currentCharacter) {
+			return fail(401, { message: 'Kein Charakter, der etwas zu benennen hätte' });
+		}
+
+		const data = await request.formData();
+		const childId = data.get('childId')?.toString();
+		const wunsch = data.get('firstName')?.toString() ?? '';
+		if (!childId) return fail(400, { message: 'Welches Kind denn?' });
+
+		const ergebnis = await lifecycleService.renameChild(
+			locals.currentCharacter.id,
+			childId,
+			wunsch,
+			await worldService.currentTick()
+		);
+		if (!ergebnis.ok) return fail(400, { message: nameMessage(ergebnis.reason) });
+
+		return { message: `Das Kind heißt jetzt ${ergebnis.name}.` };
 	}
 } satisfies Actions;

@@ -491,4 +491,50 @@ describe('Gebäude über die Zeit', () => {
 			});
 		});
 	});
+
+	describe('benennen', () => {
+		it('nimmt einen Namen vom Eigentümer an', async () => {
+			const wirt = await person('Wirt');
+			const id = await haus(wirt);
+
+			const ergebnis = await buildingService.renameBuilding(wirt, id, '  Zum goldenen  Weck ');
+
+			expect(ergebnis).toEqual({ ok: true, name: 'Zum goldenen Weck' });
+			expect((await BuildingModel.findByPk(id))!.dataValues.name).toBe('Zum goldenen Weck');
+		});
+
+		it('lässt fremde Häuser in Ruhe', async () => {
+			const eigentümer = await person('Eigentümer');
+			const fremder = await person('Fremder');
+			const id = await haus(eigentümer);
+
+			expect(await buildingService.renameBuilding(fremder, id, 'Meins')).toEqual({
+				ok: false,
+				reason: 'NOT_YOURS'
+			});
+		});
+
+		it('lässt städtische Bauten unbenannt', async () => {
+			// Über das Rathaus verfügt auch der Bürgermeister nicht: Sein Name ist der der
+			// Stadt, nicht seiner.
+			const bürger = await person('Bürger');
+			const id = await haus(null);
+
+			expect(await buildingService.renameBuilding(bürger, id, 'Mein Rathaus')).toEqual({
+				ok: false,
+				reason: 'NOT_YOURS'
+			});
+		});
+
+		it('weist einen zu kurzen Namen ab', async () => {
+			const wirt = await person('Wirt');
+			const id = await haus(wirt);
+
+			expect(await buildingService.renameBuilding(wirt, id, ' x ')).toEqual({
+				ok: false,
+				reason: 'TOO_SHORT'
+			});
+			expect((await BuildingModel.findByPk(id))!.dataValues.name).toBe('Wohnhaus');
+		});
+	});
 });

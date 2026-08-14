@@ -1849,11 +1849,27 @@ zweimal an derselben Altersgrenze zu drehen wäre einmal zu viel.
 _Fertig, wenn:_ Ein Erbfall mit überlebendem Partner und kleinen Kindern hinterlässt
 niemanden ohne Dach und keinen Betrieb, der stillschweigend verfällt. — Erledigt.
 
-**5.2 Namen.** (Punkte 42, 36) Kinder benennen, solange sie klein sind; Gebäude und
-Betriebe benennen. Beides ist wenig Arbeit und viel Bindung — ein Haus, dessen Kinder man
-selbst benannt hat, ist ein anderes als eine Liste erzeugter Vornamen.
+**5.2 Namen.** ✓ (Punkte 42, 36) Kinder benennen, solange sie klein sind; Gebäude
+benennen, solange sie einem gehören. Wenig Arbeit und viel Bindung — ein Haus, dessen
+Kinder man selbst benannt hat, ist ein anderes als eine Liste erzeugter Vornamen.
 
-_Fertig, wenn:_ In der Chronik stehen Namen, die jemand gewählt hat.
+Die Regeln stehen in `naming.logic.ts`, weil sie für beide Fälle dieselben sind: Länge,
+Leerraum zusammenziehen, und keine zwei **lebenden** Geschwister mit demselben Namen —
+verglichen ohne Rücksicht auf Groß- und Kleinschreibung, denn zwei Kinder, die man in einer
+Liste nicht auseinanderhält, sind eine Falle. Tote zählen nicht mit: Ein Kind nach der
+verstorbenen Großmutter zu benennen ist genau das, was Häuser tun.
+
+**Zwei Grenzen, die aus dem Konzept folgen.** Mit der Volljährigkeit steht der Name fest —
+ein Erwachsener, den man umbenennen kann, ist für alle anderen niemand, auf den man sich
+beziehen könnte, und die Chronik hielte Ereignisse fest, deren Handelnder später anders
+heißt. Und über **städtische** Bauten verfügt niemand, auch der Bürgermeister nicht: Der
+Name des Rathauses ist der der Stadt.
+
+Doppelte Gebäudenamen sind dagegen erlaubt. Zwei Bäckereien dürfen beide „Zum goldenen
+Weck" heißen; wer das tut, verwirrt vor allem sich selbst. Eine Sperre müsste stadtweit
+prüfen und brächte nichts, was die Kennung nicht schon leistet.
+
+_Fertig, wenn:_ In der Chronik stehen Namen, die jemand gewählt hat. — Erledigt.
 
 **5.3 Der Lebenslauf wird vollständig.** (Punkt 52) Die Chronik kann bereits, was gebraucht
 wird: `getChronicle({ characterId })` liefert genau die Ereignisse, an denen jemand
@@ -1873,12 +1889,22 @@ erzählen würde — wo er wohnte, wo er arbeitete, was er erwarb, wen er verlor
 _Fertig, wenn:_ Der Lebenslauf eines Verstorbenen liest sich wie ein Leben und nicht wie
 ein Auszug aus dem Kassenbuch.
 
-**5.4 Gebäude verkaufen.** (Punkt 37) Für Grundstücke gebaut, für Gebäude nicht. Solange
-das fehlt, hat ein Haus nur zwei Wege aus dem Besitz: Erbschaft oder Verfall — und ein
-Neuling findet nichts zu kaufen, obwohl anderswo etwas leersteht. Gebäude und Grundstück
-wechseln zusammen den Besitzer.
+**5.4 Gebäude verkaufen.** ✓ **Entfällt — war längst gebaut.**
 
-_Fertig, wenn:_ Ein Betrieb, den niemand mehr braucht, findet jemanden, der ihn braucht.
+Dieser Schritt stand im Plan, weil die Bestandsaufnahme ihn als Lücke ausgewiesen hatte.
+Das war ein Irrtum meinerseits: Gesucht worden war nach `salePrice`, und das Feld heißt
+`forSalePrice`. Tatsächlich stehen `setBuildingPrice` und `buyBuilding` samt Action und
+Oberfläche seit 4.5, mitsamt der Regel, dass das Grundstück mitwandert — ein Haus auf
+fremdem Boden wäre eine Pacht, und dafür gibt es keine.
+
+Die Lehre daraus ist kein Verlust, sondern eine Warnung an die übrige Liste: Ein Punkt, der
+aus einer Suche nach einem geratenen Bezeichner entstanden ist, ist keine Bestandsaufnahme.
+Bei den anderen „entschieden, aber ungebaut"-Einträgen gehört deshalb nachgesehen, bevor
+jemand anfängt.
+
+Nebenbei beantwortet sich damit eine Frage aus 5.1: Das Wohnrecht überdauert einen
+Hausverkauf, denn `buyBuilding` überträgt den Eigentumstitel und rührt die Bewohner nicht
+an.
 
 **5.5 Der abwesende Spieler.** (Punkt 40) Wer lange nicht hereinschaut, dessen Charakter
 isst, arbeitet und hält sein Haus instand. Erhalten ja, entscheiden nein. Ohne das

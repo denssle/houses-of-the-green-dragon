@@ -35,6 +35,7 @@ import * as needService from '$lib/server/service/needService';
 import * as electionService from '$lib/server/service/electionService';
 import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
+import { checkName, type NameCheck } from '$lib/game/naming.logic';
 import { seasonOf } from '$lib/game/time';
 
 /**
@@ -580,6 +581,40 @@ export type MaintenanceResult =
  * Eigentümer darf — ein fremdes Haus zu renovieren wäre ein Geschenk, und Geschenke
  * gehören zu 4.6.
  */
+/**
+ * Ein Gebäude benennen.
+ *
+ * „Bäckerei" ist eine Gattung, „Zum goldenen Weck" ein Betrieb. Das kostet nichts an
+ * Mechanik und gibt einer Stadt ihr Gesicht — und der Chronik Namen, die jemand gewählt
+ * hat, statt einer Gattungsbezeichnung, die zwölfmal vorkommt.
+ *
+ * **Doppelte Namen sind erlaubt.** Zwei Bäckereien dürfen beide „Zum goldenen Weck"
+ * heißen; wer das tut, verwirrt vor allem sich selbst. Eine Sperre dagegen müsste
+ * stadtweit prüfen und brächte nichts, was die Kennung nicht schon leistet.
+ */
+export async function renameBuilding(
+	characterId: string,
+	buildingId: string,
+	wunsch: string
+): Promise<NameCheck> {
+	const gebäude = await BuildingModel.findByPk(buildingId);
+	// Nur der Eigentümer, und nur bei privaten Bauten: Über das Rathaus verfügt niemand,
+	// auch der Bürgermeister nicht — sein Name ist der der Stadt.
+	if (
+		!gebäude ||
+		gebäude.dataValues.ownerType !== 'CHARACTER' ||
+		gebäude.dataValues.OwnerCharacterId !== characterId
+	) {
+		return { ok: false, reason: 'NOT_YOURS' };
+	}
+
+	const geprueft = checkName(wunsch);
+	if (!geprueft.ok) return geprueft;
+
+	await gebäude.update({ name: geprueft.name });
+	return geprueft;
+}
+
 export async function renovateBuilding(
 	characterId: string,
 	buildingId: string

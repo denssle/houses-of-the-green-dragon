@@ -4,7 +4,7 @@ import * as buildingService from '$lib/server/service/buildingService';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
 import * as plotService from '$lib/server/service/plotService';
 import type { BuildingAction } from '$lib/model/buildingAction';
-import { actionMessage } from '$lib/actionMessage';
+import { actionMessage, nameMessage } from '$lib/actionMessage';
 import * as productionService from '$lib/server/service/productionService';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import * as tradeService from '$lib/server/service/tradeService';
@@ -292,5 +292,22 @@ export const actions = {
 		const kosten: string =
 			ergebnis.fee > 0 ? `${ergebnis.fee} Münzen Schulgeld.` : 'auf Kosten der Stadt.';
 		return { message: `Ein Schultag bei ${ergebnis.teacher} — ${kosten}` };
+	},
+
+	/** Dem eigenen Haus einen Namen geben — „Bäckerei" ist eine Gattung, kein Betrieb. */
+	rename: async ({ request, params, locals }) => {
+		if (!locals.currentCharacter) {
+			return fail(401, { message: 'Kein Charakter, der etwas zu benennen hätte' });
+		}
+
+		const wunsch = (await request.formData()).get('name')?.toString() ?? '';
+		const ergebnis = await buildingService.renameBuilding(
+			locals.currentCharacter.id,
+			params.building_id,
+			wunsch
+		);
+		if (!ergebnis.ok) return fail(400, { message: nameMessage(ergebnis.reason) });
+
+		return { message: `Das Haus heißt jetzt ${ergebnis.name}.` };
 	}
 } satisfies Actions;

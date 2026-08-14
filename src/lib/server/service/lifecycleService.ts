@@ -14,6 +14,7 @@ import {
 	starvationRiskPerYear,
 	TICKS_BEFORE_STARVATION_POSSIBLE
 } from '$lib/game/need.logic';
+import { checkName, type NameCheck, stillNameable } from '$lib/game/naming.logic';
 import { personalityLabel } from '$lib/game/personality.logic';
 import { ageInYears, yearsToTicks } from '$lib/game/time';
 
@@ -220,12 +221,59 @@ export async function designateHeir(characterId: string, heirId: string | null):
 	return true;
 }
 
+/**
+ * Ein Kind benennen.
+ *
+ * Die Welt vergibt bei der Geburt einen Namen, weil sie nicht auf den Spieler wartet —
+ * ein namenloses Kind wäre ein Loch in der Chronik. Bis zur Volljährigkeit darf er ihn
+ * ändern; danach steht der Name fest, denn die Chronik hält Ereignisse fest, deren
+ * Handelnder nicht später anders heißen soll.
+ *
+ * Geprüft wird gegen die eigenen lebenden Kinder — dieselbe Quelle wie bei der Erbenwahl,
+ * damit ein fremdes Kind hier nicht hineinrutscht.
+ */
+export async function renameChild(
+	parentId: string,
+	childId: string,
+	wunsch: string,
+	tick: number
+): Promise<NameCheck> {
+	const kinder = await lebendeKinder(parentId);
+	if (!kinder.some((kind) => kind.id === childId)) return { ok: false, reason: 'NOT_YOURS' };
+
+	const kind = await Character.findByPk(childId);
+	if (!kind) return { ok: false, reason: 'NOT_YOURS' };
+	if (!stillNameable(kind.dataValues.birthTick, tick)) return { ok: false, reason: 'TOO_OLD' };
+
+	// Die Geschwister, gegen die geprüft wird — das Kind selbst nicht, sonst ließe sich
+	// sein eigener Name nie bestätigen.
+	const geschwister = await Character.findAll({
+		where: {
+			deathTick: null,
+			id: { [Op.ne]: childId },
+			[Op.or]: [{ motherId: parentId }, { fatherId: parentId }]
+		},
+		attributes: ['firstName']
+	});
+
+	const geprueft = checkName(
+		wunsch,
+		geschwister.map((person) => person.dataValues.firstName)
+	);
+	if (!geprueft.ok) return geprueft;
+
+	await Character.update({ firstName: geprueft.name }, { where: { id: childId } });
+	return geprueft;
+}
+
 /** Ein Kind, wie es auf der Charakterseite steht. */
 export interface ChildOnList {
 	id: string;
 	firstName: string;
 	age: number;
 	isHeir: boolean;
+	/** Ob es noch umbenannt werden darf — mit der Volljährigkeit steht der Name fest. */
+	nameable: boolean;
 	/**
 	 * Das Etikett der Anlagen — „die Gierige", „der Fleißige".
 	 *
@@ -253,6 +301,7 @@ export async function getChildren(characterId: string, tick: number): Promise<Ch
 		firstName: kind.dataValues.firstName,
 		age: ageInYears(kind.dataValues.birthTick, tick),
 		isHeir: kind.dataValues.id === eltern.dataValues.heirId,
+		nameable: stillNameable(kind.dataValues.birthTick, tick),
 		nature: personalityLabel(
 			{
 				courage: kind.dataValues.courage,

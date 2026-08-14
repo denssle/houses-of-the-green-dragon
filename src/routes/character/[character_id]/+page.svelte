@@ -2,6 +2,7 @@
 	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import ChronicleText from '$lib/ChronicleText.svelte';
+	import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '$lib/game/naming.logic';
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
@@ -168,6 +169,27 @@
 								<form method="POST" action="?/heir" use:enhance>
 									<input type="hidden" name="heirId" value={kind.id} />
 									<button type="submit">Zum Erben bestimmen</button>
+								</form>
+							{/if}
+
+							<!--
+								Der Name steht zur Änderung, solange das Kind klein ist. Danach
+								nicht mehr: Ein Erwachsener, der umbenannt werden kann, ist für
+								alle anderen niemand, auf den man sich beziehen könnte.
+							-->
+							{#if kind.nameable}
+								<form method="POST" action="?/rename" use:enhance>
+									<input type="hidden" name="childId" value={kind.id} />
+									<input
+										type="text"
+										name="firstName"
+										value={kind.firstName}
+										required
+										minlength={MIN_NAME_LENGTH}
+										maxlength={MAX_NAME_LENGTH}
+										aria-label="Name von {kind.firstName}"
+									/>
+									<button type="submit">Umbenennen</button>
 								</form>
 							{/if}
 						</div>
