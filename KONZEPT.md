@@ -1,7 +1,7 @@
 # Konzept
 
 Was das Spiel werden soll — festgehalten, damit die Architekturentscheidungen in
-`UMBAU.md` einen Zweck haben, auf den sie zulaufen.
+`ENTWICKLUNG.md` einen Zweck haben, auf den sie zulaufen.
 
 ## Kernidee
 

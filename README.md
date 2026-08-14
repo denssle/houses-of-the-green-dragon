@@ -22,14 +22,16 @@ ist, gehört nichts davon auf einen öffentlichen Server.**
 
 - **[KONZEPT.md](KONZEPT.md)** — was das Spiel werden soll: die sechs Säulen und alle
   getroffenen Entscheidungen
-- **[UMBAU.md](UMBAU.md)** — der Weg dorthin in fünf Phasen, ausgehend vom heutigen Stand
+- **[ENTWICKLUNG.md](ENTWICKLUNG.md)** — warum es so gebaut ist, wie es gebaut ist:
+  jeder Schritt mit seiner Begründung und dem, was beim Durchspielen schiefging
+- **[CLAUDE.md](CLAUDE.md)** — Arbeitsregeln fürs Projekt (Versionsnummer, Deploy)
 - **[OFFENE_PUNKTE.md](OFFENE_PUNKTE.md)** — was noch zu entscheiden oder zu entwerfen
   ist, jeweils mit Fälligkeit
 
 ## Technik
 
-SvelteKit 2 mit Svelte 5, TypeScript und Tailwind 4. Serverseitig kommen mit dem Umbau
-Sequelize und MariaDB dazu (SQLite in Entwicklung und Tests), Migrationen über umzug,
+SvelteKit 2 mit Svelte 5, TypeScript und Tailwind 4. Serverseitig Sequelize
+und MariaDB (SQLite in Entwicklung und Tests), Migrationen über umzug,
 Tests mit Vitest und Playwright — dieselbe Architektur wie im Nachbarprojekt `festival`.
 
 ## Entwicklung

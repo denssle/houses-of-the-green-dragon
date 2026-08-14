@@ -2,7 +2,7 @@
 
 Alles, was noch entschieden oder entworfen werden muss, mit dem Zeitpunkt, zu dem es
 spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
-`UMBAU.md`.
+`ENTWICKLUNG.md`.
 
 | #   | Punkt                                                                                | Fällig vor                   | Art          |
 | --- | ------------------------------------------------------------------------------------ | ---------------------------- | ------------ |
@@ -16,6 +16,10 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
 | 15  | Weltinhalte: Berufe, Waren und Rezepte                                               | laufend                      | Entwurf      |
 | 16  | Balancing im engeren Sinn                                                            | laufend                      | laufend      |
+| 25  | End-to-End-Test (Playwright)                                                         | erster öffentlicher Betrieb  | Aufgabe      |
+| 26  | Datensicherung per Cron, einmal wiederhergestellt                                    | erster öffentlicher Betrieb  | Aufgabe      |
+| 27  | Impressum, Datenschutz, Nutzungsbedingungen                                          | erster öffentlicher Betrieb  | Aufgabe      |
+| 28  | Kontolöschung als Anonymisierung                                                     | erster öffentlicher Betrieb  | Entwurf      |
 
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
@@ -39,7 +43,7 @@ Bedürfnisse** (gestaffelt: erst Leistung, dann Leben), und mit Phase 4.1 das
 **Tick-Nachholen** —
 verpasste Ticks werden übersprungen, die Weltuhr springt trotzdem vor, und niemand
 bekommt etwas für die Ausfallzeit. Alles steht in `KONZEPT.md` beziehungsweise
-`UMBAU.md`.
+`ENTWICKLUNG.md`.
 
 ## Vor Phase 4
 
@@ -257,3 +261,46 @@ Wie stark wirkt was, wie schnell verfällt Zuneigung, was kostet welche Handlung
 wirft ein Betrieb ab. Bewusst am laufenden Spiel justiert, nicht vorab am Reißbrett.
 Voraussetzung dafür ist, dass die Werte an einer Stelle stehen (Templates und Konstanten
 im Code) und nicht über die Logik verstreut sind.
+
+## Vor dem ersten öffentlichen Betrieb — was noch fehlt
+
+Der Umbau selbst ist abgeschlossen (siehe `ENTWICKLUNG.md`). Was von seiner letzten Phase
+übrig blieb, ist keine Architektur mehr, sondern das, was ein Spiel braucht, bevor Fremde
+es benutzen dürfen.
+
+### 25. End-to-End-Test
+
+Die Unit- und Dienst-Specs decken die Regeln ab, aber kein einziger Test klickt sich
+durch die Anwendung. Ein Playwright-Rundlauf — registrieren, Charakter anlegen, ein
+Grundstück kaufen, bauen, arbeiten — fände genau die Fehler, die beim Durchspielen von
+Hand auffielen: ein Formular ohne Aktion, ein Link ins Leere, eine Freigabe, die für
+Datenrequests nicht gilt.
+
+### 26. Datensicherung, die geprüft ist
+
+Vor jedem Deploy wird die Produktionsdatenbank gesichert (seit 2.4), und die letzten
+vierzehn Sicherungen bleiben liegen. Es fehlt beides, was daraus eine Sicherung macht:
+ein **regelmäßiger Dump per Cron** — ein Deploy ist kein Sicherungsplan — und der
+**Wiederherstellungsversuch**, ohne den niemand weiß, ob die Dateien etwas taugen.
+
+Die Produktionsdatenbank ist das wertvollste Artefakt des Projekts: Sie enthält
+Generationen von Spielzeit, die sich nicht nachbauen lassen.
+
+### 27. Impressum, Datenschutz und Nutzungsbedingungen
+
+Beide Seiten stehen in `noAuthURLs` und sind **eine Zeile lang**. Vor dem ersten fremden
+Nutzer müssen sie Inhalt haben: Wer betreibt das, was wird gespeichert, was passiert mit
+E-Mail-Adressen und Anmeldeprotokollen. Dazu Spielregeln, in denen steht, was verboten
+ist — ein Verbot von Mehrfachaccounts setzt voraus, dass es irgendwo geschrieben steht.
+
+### 28. Kontolöschung als Anonymisierung
+
+Verlangt jemand die Löschung seiner Daten, kann die Welt seine Dynastie nicht einfach
+vergessen: An ihr hängen Gebäude, Verträge, Ämter, Chronikeinträge und die Vorfahren
+anderer Spieler. Der gangbare Weg ist **anonymisieren statt löschen** —
+personenbezogene Daten entfernen (Nickname, E-Mail, Anmeldeprotokoll), die Spielfigur als
+namenloses Haus in der Geschichte stehen lassen, den Besitz an die Stadt geben.
+
+Das berührt die Chronik aus 4.7d unmittelbar: Sie hält Namen fest, und zwar dauerhaft.
+Weil dort Kennungen und keine Namen gespeichert sind, genügt es, den Charakternamen zu
+ändern — die Chronik zeigt dann „jemand", ohne dass ein Eintrag verschwindet.

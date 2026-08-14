@@ -1,12 +1,26 @@
-# Umbauplan
+# Entwicklung
 
-Stand: Bestandsaufnahme vom 12.08.2026, ausgehend vom Commit `ee6d703`.
+**Warum das Spiel so gebaut ist, wie es gebaut ist.**
 
-Ziel ist, den Prototyp auf die Architektur des Nachbarprojekts `festival` zu heben:
-Sequelize statt JSON-Dateien, echte Sessions, reine Logikmodule mit Tests, Deployment
-über GitHub Actions. Die inhaltliche Richtung des Spiels beschreibt `KONZEPT.md` —
-dieser Plan setzt sie voraus, wo das Datenmodell davon berührt ist. Was noch nicht
-entschieden ist, sammelt `OFFENE_PUNKTE.md`.
+Diese Datei begann als Umbauplan: Der Prototyp sollte auf eine tragfähige Architektur
+gehoben werden — Sequelize statt JSON-Dateien, echte Sessions, reine Logikmodule mit
+Tests, Deployment über GitHub Actions. Dieser Umbau ist abgeschlossen; die Phasen 1
+bis 3 sind Geschichte, und Phase 4 hat aus dem Gerüst eine Welt gemacht.
+
+Geblieben ist der Teil, der sich nicht aus dem Code ablesen lässt: **warum** eine Sache
+so entschieden wurde und was beim Durchspielen schiefging. Der Gompertz-Verlauf beim
+Sterben, das Spieljahr aus fünfzig statt achtundvierzig Ticks, das Henne-Ei bei der
+ersten Zimmerei, die Grundstücke, die versteigert **und** zum Festpreis angeboten
+wurden — das steht nirgends sonst.
+
+Gelesen wird sie deshalb rückwärts: Wer wissen will, warum etwas so ist, sucht den
+Schritt, in dem es entstand. **Was noch zu tun ist, steht nicht hier, sondern in**
+`OFFENE_PUNKTE.md`; was das Spiel werden soll, in `KONZEPT.md`.
+
+Ein ✓ markiert einen abgeschlossenen Schritt. Die wenigen ohne Haken sind Vorhaben,
+die beschrieben, aber nicht gebaut wurden.
+
+Stand des ursprünglichen Plans: Bestandsaufnahme vom 12.08.2026, Commit `ee6d703`.
 
 ## Grundannahmen
 
@@ -1465,53 +1479,7 @@ Dynastien — und die Voraussetzung dafür, dass ein Räuber jemanden unterwegs 
 kann (Punkt 23). Die zweite Stadt ist der größere Brocken: Alles, was heute stillschweigend
 „die Startstadt" annimmt, muss dann zwei Orte vertragen.
 
-## Phase 5 — Aufräumen und Ausliefern
-
-### 5.1 Codehygiene
-
-- Sechs Dateien importieren Typen aus `../../../../.svelte-kit/types/src/routes/...`
-  statt aus `./$types`, teils mit falschem Route-Bezug. Umstellen.
-- Die drei `@ts-ignore` auflösen, `LayoutLoad` → `LayoutServerLoad`.
-- `emailAlreadyUsed()` ist ein `return false`-Stub.
-- `npm run check` muss sauber durchlaufen.
-
-### 5.2 CI und End-to-End-Tests
-
-Die Unit-Specs entstehen laufend mit den Logikmodulen in Phase 3 und 4 — hier kommt
-zusammen, was übrig bleibt: Playwright für den Rundlauf Registrieren → Charakter →
-Bauen → Arbeiten und `tests.yml` als CI-Workflow, damit beides bei jedem Push läuft.
-
-### 5.3 Deployment und Datensicherung
-
-Das Grundgerüst steht seit 2.4; hier wird es fertig gemacht. `deploy.yml` mit
-`burnett01/rsync-deployments`, Secrets sind pro Repository — für dieses hier neu setzen,
-am besten per `gh secret set NAME < keydatei` (beim Einfügen über die Zwischenablage
-gehen regelmäßig Zeilenumbrüche verloren). `--chmod=D755,F644` gehört in die
-rsync-Switches.
-
-**Datensicherung ist hier kein Beiwerk.** Die Produktionsdatenbank ist das wertvollste
-Artefakt des Projekts: Sie enthält Generationen von Spielzeit, die sich nicht
-wiederherstellen lassen. Ein fehlgeschlagener Migrationsschritt kann sie zerstören.
-Deshalb ein Dump **vor jedem Deploy** als Teil des Workflows, dazu ein regelmäßiger
-Dump per Cron mit Aufbewahrung über mehrere Tage — und mindestens einmal ausprobiert,
-ob sich daraus tatsächlich wiederherstellen lässt.
-
-### 5.4 Beiwerk
-
-Impressum und Datenschutz mit Inhalt füllen (beide stehen in `noAuthURLs`, sind aber
-leer) — die Datenschutzerklärung muss dabei abdecken, was zur Erkennung von
-Mehrfachaccounts protokolliert wird, dazu Spielregeln und Nutzungsbedingungen, in denen
-das Verbot überhaupt steht; `README.md` um eine Setup-Anleitung ergänzen, `CLAUDE.md`
-fürs Projekt anlegen.
-
-**Kontolöschung braucht eine eigene Regel.** Verlangt jemand die Löschung seiner Daten,
-kann die Welt seine Dynastie nicht einfach vergessen: An ihr hängen Gebäude, Verträge,
-Ämter und die Vorfahren anderer Spieler. Der gangbare Weg ist Anonymisieren statt Löschen
-— personenbezogene Daten (Nickname, E-Mail, Anmeldeprotokoll) entfernen, die Spielfigur
-als namenloses Haus in der Geschichte stehen lassen, Besitz an die Stadt geben. Festivals
-`account-deletion` ist der Ausgangspunkt, die Regel selbst ist hier eine andere.
-
-## Reihenfolge
+## Warum in dieser Reihenfolge gebaut wurde
 
 Nicht beliebig: Phase 1 vor 2 (die Session-Tabelle braucht die DB), 1 und 2 vor 3
 (sonst entsteht Spiellogik auf Datei-Persistenz, die gleich wieder umgeschrieben wird).
