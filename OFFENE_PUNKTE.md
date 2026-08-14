@@ -32,7 +32,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                   | Zuwanderung (Punkt 41)       | Entwurf      |
 | 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten    | Fernhandel                   | Entwurf      |
 | 51  | Mitgift, Testament und Stiftung                                                      | laufend                      | Entwurf      |
-| 52  | Der Lebenslauf: welche Ereignisse ein Leben ausmachen                                | laufend                      | Aufgabe      |
+| 52  | Der Lebenslauf — **erledigt mit 5.3**                                                | —                            | erledigt     |
 | 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                               | laufend                      | Entwurf      |
 | 36  | Gebäude und Betriebe benennen — **erledigt mit 5.2**                                 | —                            | erledigt     |
 | 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum        | —                            | erledigt     |
@@ -821,23 +821,21 @@ Drei Wege, auf denen Vermögen den Besitzer wechselt, ohne dass jemand kauft ode
   Stifter mitbestimmt, was gebaut wird, oder ob er nur zahlt — und ob sein Name daran
   hängen bleibt. Er sollte, sonst ist es eine Spende.
 
-### 52. Der Lebenslauf
+### 52. Der Lebenslauf — erledigt (5.3)
 
 Hier ist wenig zu bauen und einiges auszuwählen. Die Technik steht seit 4.7d vollständig:
 `getChronicle({ characterId })` liefert alle Ereignisse, an denen jemand beteiligt war, und
 die Charakterseite zeigt sie als „Lebenslauf". Der Lebenslauf ist ausdrücklich kein eigenes
 System, sondern eine Sicht auf dieselben Zeilen — daran ändert sich nichts.
 
-**Was fehlt, ist der Stoff.** Mehrere Höhepunkte eines Lebens werden nicht aufgeschrieben:
+**Nachgetragen mit 5.3:** `MOVED_IN` für Einzug und Umzug (Hochzeit, NPC unter ein Dach,
+mitziehender Ehepartner) und `PLOT_BOUGHT` für den Grundstückserwerb außerhalb der
+Versteigerung. Wo der Bauherr selbst einzieht, steht nichts Zusätzliches — `BUILDING_BUILT`
+sagt es schon.
 
-- **Einzug und Umzug.** `npcService` setzt bei `MOVE_IN` die `HomeBuildingId`, ebenso
-  `familyService` beim Zusammenziehen nach der Hochzeit — beide ohne Chronikeintrag. Wo
-  jemand gewohnt hat, ist aber eine der wenigen Angaben, die ein ganzes Leben umspannen.
-- **Grundstückserwerb außerhalb der Versteigerung.** `AUCTION_WON` steht seit 4.9a, aber
-  `plotService.buyPlot` (von der Stadt) und `buyFromOwner` (von privat) schreiben nichts.
-- **Später:** Bürgerrecht erworben, in eine Zunft aufgenommen, Meister geworden, getauft,
-  Konfession gewechselt, im Turm gesessen, ausgelöst worden. Jeder dieser Schritte bringt
-  seine eigene Art mit; sie werden dort nachgetragen, wo sie entstehen.
+**Später kommt dazu:** Bürgerrecht erworben, in eine Zunft aufgenommen, Meister geworden,
+getauft, Konfession gewechselt, im Turm gesessen, ausgelöst worden. Jeder dieser Schritte
+bringt seine eigene Art mit; sie werden dort nachgetragen, wo sie entstehen.
 
 **Zu entscheiden ist die Grenze.** Ein Lebenslauf, der jede Schicht und jeden Brotkauf
 aufführt, ist keiner — bei fünfzig Ticks im Spieljahr wären das Tausende Zeilen. Der

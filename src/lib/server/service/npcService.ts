@@ -22,6 +22,7 @@ import { AGE_OF_MAJORITY, ageInYears } from '$lib/game/time';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
+import * as chronicleService from '$lib/server/service/chronicleService';
 import * as familyService from '$lib/server/service/familyService';
 import * as plotService from '$lib/server/service/plotService';
 import * as productionService from '$lib/server/service/productionService';
@@ -121,6 +122,10 @@ async function ausfuehren(npcId: string, tick: number): Promise<NpcAction> {
 		case 'MOVE_IN':
 			if (lage.homeId) {
 				await Character.update({ HomeBuildingId: lage.homeId }, { where: { id: npcId } });
+				// Wo jemand ein Dach fand, gehört in seinen Lebenslauf — für den
+				// Obdachlosen, der endlich unterkommt, ist es der wichtigere Tag als
+				// mancher, der schon drinsteht.
+				await chronicleService.recordMoveIn(npcId, lage.homeId, tick);
 			}
 			return 'MOVE_IN';
 

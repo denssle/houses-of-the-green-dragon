@@ -437,6 +437,15 @@ export async function build(
 				{ HomeBuildingId: angelegt.dataValues.id },
 				{ where: { id: bauherr.dataValues.spouseId }, transaction: t }
 			);
+			// Für den Bauherrn sagt `BUILDING_BUILT` schon alles — wer ein Haus baut, wohnt
+			// darin. Für den Ehepartner hielte das niemand fest, und für ihn ist es der
+			// Umzug seines Lebens.
+			await chronicleService.recordMoveIn(
+				bauherr.dataValues.spouseId,
+				angelegt.dataValues.id,
+				tick,
+				t
+			);
 		}
 
 		return { ok: true, building: convertToBuilding(angelegt.dataValues) } as const;

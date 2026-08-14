@@ -12,6 +12,7 @@ import { buyPlot as buyPlotLogic } from '$lib/game/buildingAction.logic';
 import { purchase } from '$lib/game/building.logic';
 import { PLOT_PRICE } from '$lib/game/economy';
 import * as characterService from '$lib/server/service/characterService';
+import * as chronicleService from '$lib/server/service/chronicleService';
 import * as worldService from '$lib/server/service/worldService';
 
 /** Was von einem Grundstück auf einer Liste steht. */
@@ -125,6 +126,21 @@ export async function buyPlot(plotId: string, characterId: string): Promise<BuyR
 			transaction: t
 		});
 
+		// Ein Grundstück ist der Anfang von allem, was ein Haus je baut — das gehört in den
+		// Lebenslauf. Beim Zuschlag einer Versteigerung stand es längst (`AUCTION_WON`), beim
+		// Kauf zum Festpreis bis 5.3 nicht.
+		await chronicleService.record(
+			'PLOT_BOUGHT',
+			grundstück.dataValues.RegionId,
+			tick,
+			{
+				subjectId: characterId,
+				value: ergebnis.spent,
+				detail: grundstück.dataValues.address
+			},
+			t
+		);
+
 		return { ok: true, plot: convertToPlot(grundstück.dataValues) } as const;
 	});
 }
@@ -194,6 +210,22 @@ export async function buyFromOwner(characterId: string, plotId: string): Promise
 			{ OwnerCharacterId: characterId, ownerType: 'CHARACTER', forSalePrice: null },
 			{ transaction: t }
 		);
+
+		// Derselbe Eintrag wie beim Kauf von der Stadt: Für den Käufer ist es dasselbe
+		// Ereignis, gleich wem der Boden vorher gehörte.
+		await chronicleService.record(
+			'PLOT_BOUGHT',
+			grundstück.dataValues.RegionId,
+			tick,
+			{
+				subjectId: characterId,
+				objectId: verkäuferId,
+				value: ergebnis.price,
+				detail: grundstück.dataValues.address
+			},
+			t
+		);
+
 		return { ok: true } as const;
 	});
 }

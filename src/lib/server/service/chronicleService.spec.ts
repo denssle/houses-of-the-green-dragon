@@ -87,6 +87,41 @@ describe('Die Chronik', () => {
 			expect(chronicleMessage(chronik[0])).toBe('Sie und Er haben geheiratet.');
 		});
 
+		it('ein Einzug — beim Zusammenziehen nach der Hochzeit', async () => {
+			// Wo jemand gewohnt hat, ist eine der wenigen Angaben, die ein ganzes Leben
+			// umspannen. Bis 5.3 setzte das Zusammenziehen die Kennung und sonst nichts.
+			const plotId = randomUUID();
+			await Plot.create({
+				id: plotId,
+				address: 'Herdgasse 1',
+				type: 'BUILDING_LAND',
+				RegionId: stadtId,
+				ownerType: 'CHARACTER'
+			});
+			const hausId = randomUUID();
+			await Building.create({
+				id: hausId,
+				name: 'Kate am Wall',
+				optionId: 1,
+				condition: 100,
+				lastConditionTick: JETZT,
+				PlotId: plotId,
+				ownerType: 'CHARACTER'
+			});
+
+			const sie = await person('Sie', { role: 'PLAYER', HomeBuildingId: hausId });
+			const er = await person('Er', { gender: 'MALE' });
+			await relationshipService.changeAffection(sie, er, MARRIAGE_MIN_AFFECTION, JETZT);
+			await relationshipService.changeAffection(er, sie, MARRIAGE_MIN_AFFECTION, JETZT);
+
+			await familyService.propose(sie, er);
+
+			const seins = await chronicleService.getChronicle({ characterId: er });
+			const einzug = seins.find((eintrag) => eintrag.kind === 'MOVED_IN');
+			expect(einzug).toBeDefined();
+			expect(chronicleMessage(einzug!)).toBe('Er wohnt jetzt in Kate am Wall.');
+		});
+
 		it('ein Todesfall, mit Alter', async () => {
 			const alte = await person('Alte', { birthTick: JETZT - yearsToTicks(71) });
 

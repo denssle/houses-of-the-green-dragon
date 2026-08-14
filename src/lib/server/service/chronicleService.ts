@@ -47,6 +47,38 @@ export async function record(
 	}
 }
 
+/**
+ * Wo jemand von nun an wohnt.
+ *
+ * Eine eigene Funktion, weil drei Stellen sie brauchen — die Heirat, der NPC, der ein Dach
+ * findet, und der Ehepartner, der in ein neu gebautes Haus mitzieht. Sie steht hier und
+ * nicht bei der Familie, weil `buildingService` sie ebenfalls ruft und die Familie
+ * ihrerseits schon von den Gebäuden abhängt: Ein Ringschluss zwischen zwei Diensten wäre
+ * ein hoher Preis für eine Zeile.
+ *
+ * Die Region kommt von der Person und nicht vom Gebäude: Wer einzieht, ist der, um dessen
+ * Leben es geht.
+ */
+export async function recordMoveIn(
+	characterId: string,
+	buildingId: string | null,
+	tick: number,
+	t?: Transaction
+): Promise<void> {
+	if (!buildingId) return;
+
+	const person = await Character.findByPk(characterId, { transaction: t });
+	if (!person) return;
+
+	await record(
+		'MOVED_IN',
+		person.dataValues.RegionId,
+		tick,
+		{ subjectId: characterId, buildingId },
+		t
+	);
+}
+
 /** Ein Eintrag, wie ihn die Anzeige braucht: mit Namen statt Kennungen. */
 export interface ChronicleEntry {
 	id: string;

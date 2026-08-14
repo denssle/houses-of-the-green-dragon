@@ -148,6 +148,14 @@ function satz(entry: ChronicleLine): string {
 			return `${wer} hat ${entry.value ?? 0} neue Grundstücke ausweisen lassen.`;
 		case 'AUCTION_WON':
 			return `${wer} hat ein Grundstück ersteigert — für ${entry.value ?? 0} Münzen.`;
+		case 'MOVED_IN':
+			return `${wer} wohnt jetzt in ${haus}.`;
+		case 'PLOT_BOUGHT':
+			// `detail` trägt die Lage: Ein Grundstück hat keinen Namen, nur eine Adresse, und
+			// die steht in der Plot-Zeile und nicht am Gebäude.
+			return entry.value
+				? `${wer} hat ${entry.detail ?? 'ein Grundstück'} gekauft — für ${entry.value} Münzen.`
+				: `${wer} hat ${entry.detail ?? 'ein Grundstück'} gekauft.`;
 		case 'SCHOOL_ATTENDED':
 			// Über den Lehrer und nicht über das Haus: „in Schule" bräuchte einen Artikel,
 			// und der hinge am Namen, den der Bürgermeister vergeben hat.

@@ -10,6 +10,7 @@ import { Region as RegionModel } from '$lib/db/model/region';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
+import * as chronicleService from '$lib/server/service/chronicleService';
 import * as plotService from '$lib/server/service/plotService';
 import { PLOT_PRICE } from '$lib/game/economy';
 import * as familyService from '$lib/server/service/familyService';
@@ -158,6 +159,22 @@ describe('Bauen und Arbeiten', () => {
 			expect(stadt!.dataValues.treasury).toBe(PLOT_PRICE);
 			const gekauft = await plotService.getPlot(frei[0].id);
 			expect(gekauft).toMatchObject({ ownerType: 'CHARACTER', ownerCharacterId: adelbert });
+		});
+
+		it('schreibt den Kauf in die Chronik', async () => {
+			// Beim Zuschlag einer Versteigerung stand er längst; beim Kauf zum Festpreis
+			// bis 5.3 nicht — dabei ist ein Grundstück der Anfang von allem, was ein Haus
+			// je baut.
+			const adelbert = await charakterMitGeld(100);
+			const frei = await plotService.getFreeBuildingLand(stadtId);
+
+			await plotService.buyPlot(frei[0].id, adelbert);
+
+			const seins = await chronicleService.getChronicle({ characterId: adelbert });
+			const kauf = seins.find((eintrag) => eintrag.kind === 'PLOT_BOUGHT');
+			expect(kauf).toBeDefined();
+			expect(kauf!.value).toBe(PLOT_PRICE);
+			expect(kauf!.detail).toBe(frei[0].address);
 		});
 
 		it('lässt bei zu wenig Geld alles, wie es war', async () => {

@@ -216,7 +216,7 @@ async function trauen(oneId: string, otherId: string, tick: number): Promise<voi
 			{ spouseId: oneId, proposedToId: null },
 			{ where: { id: otherId }, transaction: t }
 		);
-		await zusammenziehen(oneId, otherId, t);
+		await zusammenziehen(oneId, otherId, tick, t);
 	});
 	const paar = await Character.findByPk(oneId, { attributes: ['id', 'RegionId'] });
 	await chronicleService.record('MARRIAGE', paar?.dataValues.RegionId ?? null, tick, {
@@ -407,7 +407,12 @@ async function empfangen_lassen(tick: number, roll: () => number): Promise<numbe
  * nirgends jemand dazu, bleibt alles, wie es ist — dann wohnen sie eben getrennt, bis
  * einer baut. Das ist besser als eine Ehe, die am Wohnraum scheitert.
  */
-async function zusammenziehen(oneId: string, otherId: string, t: Transaction): Promise<void> {
+async function zusammenziehen(
+	oneId: string,
+	otherId: string,
+	tick: number,
+	t: Transaction
+): Promise<void> {
 	const einer = await Character.findByPk(oneId, { transaction: t });
 	const anderer = await Character.findByPk(otherId, { transaction: t });
 	if (!einer || !anderer) return;
@@ -422,8 +427,10 @@ async function zusammenziehen(oneId: string, otherId: string, t: Transaction): P
 
 	if (platzBeiEinem > 0 && platzBeiEinem >= platzBeimAnderen) {
 		await anderer.update({ HomeBuildingId: heimEiner }, { transaction: t });
+		await chronicleService.recordMoveIn(otherId, heimEiner, tick, t);
 	} else if (platzBeimAnderen > 0) {
 		await einer.update({ HomeBuildingId: heimAnderer }, { transaction: t });
+		await chronicleService.recordMoveIn(oneId, heimAnderer, tick, t);
 	}
 }
 

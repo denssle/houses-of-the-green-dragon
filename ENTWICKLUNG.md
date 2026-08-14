@@ -1871,23 +1871,30 @@ prüfen und brächte nichts, was die Kennung nicht schon leistet.
 
 _Fertig, wenn:_ In der Chronik stehen Namen, die jemand gewählt hat. — Erledigt.
 
-**5.3 Der Lebenslauf wird vollständig.** (Punkt 52) Die Chronik kann bereits, was gebraucht
-wird: `getChronicle({ characterId })` liefert genau die Ereignisse, an denen jemand
-beteiligt war, und die Charakterseite zeigt sie. Es fehlt nicht die Sicht, sondern der
-Stoff — mehrere Höhepunkte eines Lebens werden schlicht nicht aufgeschrieben.
+**5.3 Der Lebenslauf wird vollständig.** ✓ (Punkt 52) Die Chronik konnte längst, was
+gebraucht wird — `getChronicle({ characterId })` liefert die Ereignisse, an denen jemand
+beteiligt war, und die Charakterseite zeigt sie. Es fehlte nicht die Sicht, sondern der
+Stoff.
 
-Nachgetragen werden vor allem **Einzug und Umzug** (heute setzt `npcService` bei `MOVE_IN`
-und `familyService` beim Zusammenziehen einfach `HomeBuildingId`, ohne dass es jemand
-erfährt) und der **Grundstückserwerb** außerhalb der Versteigerung — `plotService.buyPlot`
-und `buyFromOwner` schreiben nichts, obwohl `AUCTION_WON` beim Zuschlag längst festgehalten
-wird. Beides sind Zeilen an vorhandenen Stellen, keine neue Mechanik.
+Zwei Arten kommen dazu. **`MOVED_IN`**: Wo jemand wohnt, war nirgends festgehalten — das
+Zusammenziehen nach der Hochzeit, der NPC, der endlich ein Dach findet, und der Ehepartner,
+der in ein neu gebautes Haus mitzieht, setzten alle nur die Kennung. Dabei ist der
+Wohnort eine der wenigen Angaben, die ein ganzes Leben umspannen. **`PLOT_BOUGHT`**: Beim
+Zuschlag einer Versteigerung stand der Erwerb längst, beim Kauf zum Festpreis nicht —
+dabei ist ein Grundstück der Anfang von allem, was ein Haus je baut.
 
-Die Auswahl ist dabei die eigentliche Arbeit: Ein Lebenslauf, der jede Schicht und jeden
-Brotkauf aufführt, ist keiner. Aufgenommen wird, was jemand nach sechzig Jahren noch
-erzählen würde — wo er wohnte, wo er arbeitete, was er erwarb, wen er verlor.
+**Wo der Bauherr selbst einzieht, wird nichts nachgetragen.** `BUILDING_BUILT` sagt schon
+alles: Wer ein Haus baut, wohnt darin. Für den Ehepartner gilt das nicht, und für ihn ist
+es der Umzug seines Lebens — also steht er dort. Das ist die Auswahlregel in einem Fall:
+Aufgenommen wird, was jemand nach sechzig Jahren noch erzählen würde, und nichts, was ein
+anderer Eintrag ohnehin erzählt.
+
+`recordMoveIn` liegt beim Chronikdienst und nicht bei der Familie, obwohl es dort entstand:
+`buildingService` ruft es ebenfalls, und die Familie hängt ihrerseits schon an den
+Gebäuden. Ein Ringschluss zwischen zwei Diensten wäre ein hoher Preis für eine Zeile.
 
 _Fertig, wenn:_ Der Lebenslauf eines Verstorbenen liest sich wie ein Leben und nicht wie
-ein Auszug aus dem Kassenbuch.
+ein Auszug aus dem Kassenbuch. — Erledigt.
 
 **5.4 Gebäude verkaufen.** ✓ **Entfällt — war längst gebaut.**
 
