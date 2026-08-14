@@ -1808,13 +1808,46 @@ Diese Phase baut deshalb **nichts Neues an Systemen**. Sie schließt Löcher und
 Vorhandene betriebsfest. Alles Übrige kommt danach — an einem laufenden Spiel mit echten
 Spielern, was allemal besser ist, als es vorher am Reißbrett auszudenken.
 
-**5.1 Der Erbfall wird vollständig.** (Punkt 48) Die Witwe bekommt Wohnrecht und einen
-Anteil, der minderjährige Erbe jemanden, der für ihn handelt. Das sind die beiden
-Stellen, an denen der Tod eines Hausherrn heute jemanden ins Nichts fallen lässt — und
-der Tod ist die häufigste Sache der Welt.
+**5.1 Der Erbfall wird vollständig.** ✓ (Punkt 48) Beim Nachzeichnen fanden sich mehr
+Löcher als die zwei geplanten, und eines davon war ein Fehler.
+
+**Die Ehe endete bisher gar nicht.** `die()` räumte `spouseId` nicht auf — die Witwe blieb
+mit einem Toten verheiratet. Das hatte zwei Folgen, und beide waren falsch: Sie konnte
+nicht wieder heiraten, weil `canMarry` eine bestehende Ehe sieht, und sie konnte weiterhin
+**empfangen**, weil die Empfängnis nur prüft, ob ein Partner eingetragen ist. Die
+Wiederheirat, die das Konzept vorsieht, war damit unerreichbar.
+
+**Beim Heiraten zog niemand zusammen.** `trauen()` setzte nur die beiden Verweise; Wohnen
+blieb, wie es war. Zwei Verheiratete konnten in verschiedenen Häusern leben oder beide auf
+der Straße — und weil die Empfängnis am freien Platz im Haus **der Mutter** hängt,
+entschied allein ihr Dach über Kinder. Ein Mann mit einem Großhaus half seiner obdachlosen
+Frau nicht. Damit war auch das geplante Wohnrecht der Witwe eine Regel ohne Gegenstand: Sie
+wohnte ja nie bei ihm.
+
+Jetzt zieht einer zum anderen — dorthin, wo Platz ist, bei gleichem Platz ins größere Haus,
+weil dort später die Kinder unterkommen. Passt nirgends jemand dazu, bleibt alles beim
+Alten; eine Ehe soll nicht am Wohnraum scheitern. **Der Besitz bleibt getrennt**, und damit
+ist das Wohnrecht der Witwe genau das, was es sein soll: Sie bleibt wohnen, wo sie wohnte,
+auch wenn das Haus nun dem Kind gehört. Dafür war nichts zu bauen — `HomeBuildingId` zeigt
+weiter aufs Haus, und niemand kann jemanden hinauswerfen.
+
+**Der Anteil am Bargeld geht vorweg**, vor der Teilung unter den Kindern. Sonst hinge das
+Auskommen der Witwe daran, wie viele Geschwister sich den Rest teilen, und eine
+kinderreiche Ehe ließe sie ärmer zurück als eine kinderlose. Ein Viertel: genug zum
+Weiterleben, wenig genug, dass eine Ehe kurz vor dem Tod kein Weg wird, ein Haus
+auszunehmen. Erlischt das Haus, behält sie ihren Anteil trotzdem — ein Haus endet, ein
+Mensch nicht.
+
+**Der minderjährige Erbe brauchte nichts.** Die Sorge war, ein Sechsjähriger könne nicht
+handeln und der geerbte Betrieb stehe still. Tatsächlich ist es umgekehrt: Gesperrt sind
+heute nur Heirat, Wahl und eine feste Anstellung — arbeiten, herstellen, bauen, kaufen und
+einstellen kann ein Kind längst. Die Grenze „anweisen ja, Hand anlegen nein" ist damit
+keine Erlaubnis, die zu geben, sondern eine Sperre, die zu ziehen wäre. Sie gehört zu
+**6.2**, wo die Lehre im eigenen Betrieb Kinder ausdrücklich in die Werkstatt schickt —
+zweimal an derselben Altersgrenze zu drehen wäre einmal zu viel.
 
 _Fertig, wenn:_ Ein Erbfall mit überlebendem Partner und kleinen Kindern hinterlässt
-niemanden ohne Dach und keinen Betrieb, der stillschweigend verfällt.
+niemanden ohne Dach und keinen Betrieb, der stillschweigend verfällt. — Erledigt.
 
 **5.2 Namen.** (Punkte 42, 36) Kinder benennen, solange sie klein sind; Gebäude und
 Betriebe benennen. Beides ist wenig Arbeit und viel Bindung — ein Haus, dessen Kinder man

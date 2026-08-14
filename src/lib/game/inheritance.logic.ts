@@ -19,6 +19,16 @@ import { AGE_OF_MAJORITY, ageInYears } from '$lib/game/time';
 /** Welcher Anteil des Bargelds unter den übrigen Kindern aufgeteilt wird. */
 export const SIBLING_SHARE = 0.25;
 
+/**
+ * Was dem überlebenden Ehepartner zusteht, bevor unter den Kindern geteilt wird.
+ *
+ * Er erbt das Haus nicht — Grund und Mauern gehen ungeteilt an den Erben, damit der Besitz
+ * über Generationen nicht zerfällt. Aber er darf davon nicht mittellos zurückbleiben. Ein
+ * Viertel vorweg ist genug, um weiterzuleben, und wenig genug, dass eine Ehe kurz vor dem
+ * Tod kein Weg wird, ein Haus auszunehmen.
+ */
+export const SPOUSE_SHARE = 0.25;
+
 /** Was die Erbfolge von einem Kind wissen muss. */
 export interface Child {
 	id: string;
@@ -63,6 +73,8 @@ export interface EstateSplit {
 	perSibling: number;
 	/** Was an die Stadt fällt — nur, wenn es keinen Erben gibt. */
 	toCity: number;
+	/** Was der überlebende Ehepartner vorweg bekommt. */
+	spouse: number;
 }
 
 /**
@@ -81,20 +93,32 @@ export function splitEstate(
 	money: number,
 	hasHeir: boolean,
 	siblingCount: number,
-	share: number = SIBLING_SHARE
+	share: number = SIBLING_SHARE,
+	hasSpouse: boolean = false,
+	spouseShare: number = SPOUSE_SHARE
 ): EstateSplit {
+	// Der Ehepartner wird **vorweg** bedient, aus dem ganzen Nachlass. Erst danach beginnt
+	// die Teilung unter den Kindern — sonst hinge sein Auskommen daran, wie viele
+	// Geschwister es gibt, und eine kinderreiche Ehe ließe die Witwe ärmer zurück als eine
+	// kinderlose.
+	const anEhepartner: number = hasSpouse ? Math.floor(money * spouseShare) : 0;
+	const rest: number = money - anEhepartner;
+
 	if (!hasHeir) {
-		return { heir: 0, perSibling: 0, toCity: money };
+		// Ohne Erben fällt der Rest an die Stadt — der Anteil des Partners bleibt seiner.
+		// Ein Haus endet hier, ein Mensch nicht.
+		return { heir: 0, perSibling: 0, toCity: rest, spouse: anEhepartner };
 	}
 	if (siblingCount <= 0) {
-		return { heir: money, perSibling: 0, toCity: 0 };
+		return { heir: rest, perSibling: 0, toCity: 0, spouse: anEhepartner };
 	}
 
-	const topf: number = Math.floor(money * share);
+	const topf: number = Math.floor(rest * share);
 	const jeGeschwister: number = Math.floor(topf / siblingCount);
 	return {
-		heir: money - jeGeschwister * siblingCount,
+		heir: rest - jeGeschwister * siblingCount,
 		perSibling: jeGeschwister,
-		toCity: 0
+		toCity: 0,
+		spouse: anEhepartner
 	};
 }

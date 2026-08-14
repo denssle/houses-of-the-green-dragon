@@ -232,6 +232,59 @@ describe('Sterben und Erben', () => {
 		});
 	});
 
+	describe('der überlebende Ehepartner', () => {
+		it('bekommt seinen Anteil und ist wieder frei', async () => {
+			// Die Ehe endete bis 5.1 gar nicht: `spouseId` blieb auf einen Toten stehen.
+			// Damit konnte die Witwe nicht wieder heiraten — und trotzdem noch empfangen.
+			const witwe = await person('Witwe', 50);
+			const mann = await person('Mann', 70, { money: 400, spouseId: witwe });
+			await Character.update({ spouseId: mann }, { where: { id: witwe } });
+
+			await lifecycleService.die(mann, JETZT);
+
+			const danach = await stand(witwe);
+			expect(danach.money).toBe(100);
+			expect(danach.spouseId).toBeNull();
+		});
+
+		it('behält seinen Anteil, auch wenn das Haus erlischt', async () => {
+			const witwe = await person('Witwe', 50);
+			const mann = await person('Mann', 80, { money: 400, spouseId: witwe });
+			await Character.update({ spouseId: mann }, { where: { id: witwe } });
+
+			await lifecycleService.die(mann, JETZT);
+
+			expect((await stand(witwe)).money).toBe(100);
+			// Der Rest fällt an die Stadt: Ein Haus endet, ein Mensch nicht.
+			expect(await stadtkasse()).toBe(300);
+		});
+
+		it('geht leer aus, wenn er den Erblasser nicht überlebt hat', async () => {
+			// Sterben beide im selben Durchlauf, ist der Zweite kein Hinterbliebener.
+			const zuerst = await person('Zuerst', 80);
+			const mann = await person('Mann', 80, { money: 400, spouseId: zuerst });
+			await Character.update({ spouseId: mann }, { where: { id: zuerst } });
+			await lifecycleService.die(zuerst, JETZT);
+
+			await lifecycleService.die(mann, JETZT);
+
+			expect((await stand(zuerst)).money).toBe(0);
+			expect(await stadtkasse()).toBe(400);
+		});
+
+		it('nimmt dem Erben nur den Vorwegabzug', async () => {
+			const witwe = await person('Witwe', 50);
+			const vater = await person('Vater', 70, { money: 400, spouseId: witwe });
+			await Character.update({ spouseId: vater }, { where: { id: witwe } });
+			const kind = await person('Kind', 20, { motherId: vater });
+
+			await lifecycleService.die(vater, JETZT);
+
+			expect((await stand(witwe)).money).toBe(100);
+			expect((await stand(kind)).money).toBe(300);
+		});
+	});
+
 	describe('die Benennung', () => {
 		it('nimmt ein eigenes lebendes Kind an', async () => {
 			const vater = await person('Vater', 60);

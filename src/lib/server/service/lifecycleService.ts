@@ -104,10 +104,34 @@ export async function die(characterId: string, tick: number): Promise<Death | nu
 		const erbeId: string | null = chooseHeir(tot.dataValues.heirId, kinder, tick);
 		const geschwister: string[] = kinder.map((kind) => kind.id).filter((id) => id !== erbeId);
 
-		const geteilt = splitEstate(tot.dataValues.money, erbeId !== null, geschwister.length);
+		// Der überlebende Ehepartner — nur, wenn er den Tod tatsächlich überlebt hat.
+		// Sterben beide im selben Durchlauf, ist der Zweite kein Hinterbliebener mehr.
+		const witwe = tot.dataValues.spouseId
+			? await Character.findByPk(tot.dataValues.spouseId, { transaction: t, lock: t.LOCK.UPDATE })
+			: null;
+		const hinterbliebener = witwe && witwe.dataValues.deathTick === null ? witwe : null;
+
+		const geteilt = splitEstate(
+			tot.dataValues.money,
+			erbeId !== null,
+			geschwister.length,
+			undefined,
+			hinterbliebener !== null
+		);
 
 		// Erst der Tote: Sein Vermögen ist ab hier verteilt, nicht mehr seines.
 		await tot.update({ deathTick: tick, money: 0 }, { transaction: t });
+
+		if (hinterbliebener) {
+			// **Die Ehe endet mit dem Tod.** Bis hierher blieb `spouseId` auf einen Toten
+			// stehen — mit zwei Folgen, die beide falsch waren: Die Witwe konnte nicht wieder
+			// heiraten (`canMarry` sieht eine bestehende Ehe), und sie konnte weiterhin
+			// empfangen, weil die Empfängnis nur prüft, **ob** ein Partner eingetragen ist.
+			await hinterbliebener.update(
+				{ spouseId: null, money: hinterbliebener.dataValues.money + geteilt.spouse },
+				{ transaction: t }
+			);
+		}
 
 		if (erbeId) {
 			await Character.increment('money', {

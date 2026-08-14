@@ -174,26 +174,51 @@ Solange die Ehe besteht, gibt es allerdings nur die eine. Nicht aus Sitte, sonde
 alles, was an der Ehe hängt — Zuneigung, Wohnung, Erbfolge, Zugehörigkeit der Kinder —,
 sich auf genau einen Partner beziehen muss, um eindeutig zu bleiben.
 
+**Ein Dach für zwei, aber getrennte Truhen.** Wer heiratet, führt einen Haushalt: Einer
+zieht zum anderen, und von da an wohnen beide dort. Der Besitz bleibt getrennt — das Haus
+gehört weiter dem, dem es gehörte, und geht später an dessen Erben. Es gibt keinen
+gemeinsamen Geldbeutel.
+
+Damit ist der Gewinn einer Ehe kein Vermögensübertrag, sondern etwas Handfesteres: ein Dach
+statt zweier, zwei Einkommen in einem Haushalt, Kinder als Arbeitskraft und Erben — und die
+Mitgift als der eine direkte Transfer, über den verhandelt wird. Eine Ehe, die Vermögen
+verschmelzen ließe, wäre für zwei Spielerhäuser auch das falsche Bild: Sie sollen sich
+verbinden, nicht ineinander aufgehen.
+
 **Die Witwe erbt nicht — sie wird versorgt.** Der Besitz geht an die Kinder, das war und
 bleibt die Regel; aber der überlebende Ehepartner darf davon nicht auf der Straße stehen.
-Er behält ein **Wohnrecht im Haus** und einen Anteil am Bargeld, und beides endet nicht,
-wenn das Kind erbt, sondern erst mit seinem Tod oder einer neuen Ehe.
+Er bekommt einen **Anteil am Bargeld vorweg** — vor der Teilung unter den Kindern, damit
+sein Auskommen nicht davon abhängt, wie viele Geschwister sich den Rest teilen — und er
+**bleibt wohnen**, auch wenn das Haus nun dem Kind gehört. Das Wohnrecht endet mit seinem
+Tod oder einer neuen Ehe, nicht mit dem Erbfall.
 
 Ohne das wäre die Wiederheirat, die es jetzt gibt, ein Hohn: Wer seinen Partner verliert,
 verlöre mit ihm sein Dach — und zwar an das eigene Kind. Der Erbe bekommt damit ein Haus
 mit einer Bewohnerin darin, die er nicht hinauswerfen kann. Das ist keine Belastung des
 Erbes, sondern seine ehrlichere Beschreibung: Ein Haus ist selten leer.
 
+**Und die Ehe endet mit dem Tod.** Das klingt selbstverständlich und war es nicht: Wer
+verwitwet, ist ab dem Erbfall wieder ungebunden — sonst könnte er weder neu heiraten noch
+aufhören, Kinder eines Toten zu erwarten.
+
 **Ein Kind, das erbt, braucht jemanden, der für es handelt.** Erbt ein Minderjähriger —
 und das kommt vor, weil ohne Benennung das älteste Kind erbt, auch wenn es sechs ist —,
 dann gehört ihm alles, aber er kann fast nichts damit anfangen: Ein Betrieb, den er nicht
 führen darf, verfällt weiter und wird trotzdem besteuert.
 
-Der Weg dahin ist offen (Punkt 49), aber die Richtung steht: Das Kind bleibt Eigentümer,
-und was es selbst nicht kann, **kauft es ein**. Es stellt jemanden an, der die Werkstatt
-führt, und bezahlt ihn aus dem Erbe. Das kostet mehr, als der Vater bezahlt hätte — genau
-das ist der Preis eines frühen Todes, und es braucht dafür keine Vormundschaft mit eigenen
-Regeln, sondern nur die Anstellung, die es ohnehin gibt.
+**Ein Minderjähriger darf anweisen, aber nicht Hand anlegen.** Das ist die Grenze, und sie
+ist dieselbe, die auch für Abwesende und für Reisende gilt: Wer nicht selbst am Amboss
+stehen kann, kann trotzdem verfügen. Das Kind bleibt Eigentümer, stellt einen Meister an,
+setzt Preise, verkauft, benennt seinerseits einen Erben — und bezahlt aus dem Erbe, was es
+nicht selbst tun kann. Das kostet mehr, als der Vater bezahlt hätte; genau das ist der
+Preis eines frühen Todes. Eine Vormundschaft mit eigenen Regeln braucht es dafür nicht.
+
+Beim Nachsehen zeigte sich, dass die Frage andersherum steht als gedacht: Ein Kind kann
+heute schon fast alles, **auch arbeiten**. Gesperrt sind nur Heirat, Wahl und eine feste
+Anstellung. Wo genau Kinderarbeit aufhört, entscheidet sich deshalb dort, wo sie erwünscht
+ist — bei der Lehre im eigenen Betrieb (Abschnitt 10), die ein Kind ausdrücklich in die
+Werkstatt schickt. Beides gehört in denselben Schritt, sonst wird zweimal an derselben
+Altersgrenze gedreht.
 
 **Vermacht wird über den Erben hinaus.** Neben der Benennung des Erben soll ein
 **Testament** stehen: einzelne Beträge an einzelne Personen, an die Zunft, an eine Kirche.

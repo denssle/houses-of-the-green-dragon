@@ -28,7 +28,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                        | zusammen mit Punkt 34        | Entwurf      |
 | 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                         | Punkt 34                     | Entwurf      |
 | 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                 | Punkte 23, 39, 43            | Entwurf      |
-| 48  | Was beim Tod aus den Zurückbleibenden wird: Witwe, minderjähriger Erbe               | laufend                      | Entwurf      |
+| 48  | Was beim Tod aus den Zurückbleibenden wird — **erledigt mit 5.1**                    | —                            | erledigt     |
 | 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                   | Zuwanderung (Punkt 41)       | Entwurf      |
 | 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten    | Fernhandel                   | Entwurf      |
 | 51  | Mitgift, Testament und Stiftung                                                      | laufend                      | Entwurf      |
@@ -712,33 +712,24 @@ Zu entscheiden:
   kosten. Zu klären ist, ob die Stadt sie braucht (dann muss jemand sie tun) und ob man aus
   ihnen wieder herauskommt.
 
-### 48. Was beim Tod aus den Zurückbleibenden wird
+### 48. Was beim Tod aus den Zurückbleibenden wird — erledigt (5.1)
 
-Zwei Löcher, die sich beim Nachzeichnen eines Erbfalls zeigten. Beide betreffen nicht den
-Erben, sondern die, für die niemand zuständig ist.
+Der Ehepartner bekommt ein Viertel des Bargelds **vorweg**, vor der Teilung unter den
+Kindern, und behält es auch, wenn das Haus erlischt. Er bleibt wohnen, wo er wohnte — dafür
+war nichts zu bauen, seit die Ehe ihn dorthin zieht. Und die Ehe endet mit dem Tod, was
+sie vorher nicht tat.
 
-**Die Witwe.** Entschieden ist, dass sie nicht erbt, aber versorgt wird — Wohnrecht im
-Haus und ein Anteil am Bargeld (`KONZEPT.md`, Abschnitt 1). Offen ist:
+Beim minderjährigen Erben stellte sich die Frage andersherum als gedacht: Ein Kind kann
+heute schon fast alles, auch arbeiten. Wo Kinderarbeit aufhört, wird mit **6.2** entschieden
+(Lehre im eigenen Betrieb), nicht hier.
 
-- Wie groß der Anteil ist, und ob er vom Erbe der Kinder abgeht oder vorweg.
-- Was geschieht, wenn der Erbe das Haus verkauft (Punkt 37) — das Wohnrecht muss den
-  Verkauf überdauern, sonst ist es keins.
-- Ob es mit einer neuen Ehe endet. Naheliegend ja: Wer neu heiratet, zieht zum Partner.
-- Ob dasselbe für den Witwer gilt. Ja — im Konzept ist kein Geschlecht bevorzugt.
+**Zwei Fragen bleiben offen**, weil sie an Dingen hängen, die es noch nicht gibt:
 
-**Der minderjährige Erbe.** Die Richtung steht: kein eigenes Vormundschaftssystem, sondern
-das Kind bleibt Eigentümer und kauft ein, was es nicht selbst kann. Offen ist:
-
-- **Wer handelt in der Zwischenzeit?** Ein Sechsjähriger stellt niemanden ein. Entweder
-  darf die Mutter für ihn handeln (dann ist es doch eine Vormundschaft, nur eine schlanke),
-  oder der Betrieb steht still, bis das Kind alt genug ist — was ein Haus über zehn Jahre
-  ruiniert.
-- **Wovon lebt es?** Grundsteuer und Verfall laufen weiter. Ohne jemanden, der zahlt,
-  endet der Erbfall in der Ruine, und die Erbregel, die Kinder schützen sollte, tut das
-  Gegenteil.
-- **Was hindert den Missbrauch?** Wer für ein Kind handelt, verwaltet fremdes Vermögen —
-  dieselbe Frage wie beim Amt und die Kasse (Abschnitt 5), nur ohne Wahl, die es richten
-  könnte.
+- **Was, wenn der Erbe das Haus verkauft** (Punkt 37)? Das Wohnrecht muss den Verkauf
+  überdauern, sonst ist es keins — heute gibt es keinen Gebäudeverkauf, an dem es sich
+  zeigen könnte.
+- **Endet es mit einer neuen Ehe?** Naheliegend ja: Wer neu heiratet, zieht zum Partner.
+  Das entscheidet sich, wenn das Zusammenziehen auch beim zweiten Mal greift.
 
 ### 49. Bürgerrecht und Stand
 

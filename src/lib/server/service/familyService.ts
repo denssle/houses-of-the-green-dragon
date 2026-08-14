@@ -216,6 +216,7 @@ async function trauen(oneId: string, otherId: string, tick: number): Promise<voi
 			{ spouseId: oneId, proposedToId: null },
 			{ where: { id: otherId }, transaction: t }
 		);
+		await zusammenziehen(oneId, otherId, t);
 	});
 	const paar = await Character.findByPk(oneId, { attributes: ['id', 'RegionId'] });
 	await chronicleService.record('MARRIAGE', paar?.dataValues.RegionId ?? null, tick, {
@@ -389,6 +390,43 @@ async function empfangen_lassen(tick: number, roll: () => number): Promise<numbe
  * Gezählt werden die Lebenden: Ein Haus, dessen Bewohner gestorben sind, hat wieder
  * Platz.
  */
+/**
+ * Wer heiratet, führt einen Haushalt.
+ *
+ * **Bis hierher geschah beim Trauen mit dem Wohnen gar nichts.** Zwei Verheiratete konnten
+ * in verschiedenen Häusern leben oder beide auf der Straße — und weil die Empfängnis am
+ * freien Platz im Haus der Mutter hängt, entschied allein ihr Dach über Kinder. Ein Mann
+ * mit einem Großhaus half seiner obdachlosen Frau nicht.
+ *
+ * Jetzt zieht einer zum anderen. Der Besitz bleibt getrennt: Das Haus gehört weiter dem,
+ * dem es gehörte, und geht später an dessen Erben. Was die Ehe bringt, ist der gemeinsame
+ * Haushalt — ein Dach für zwei statt zweier Mieten.
+ *
+ * **Wer zieht, entscheidet der Platz.** Es geht dorthin, wo noch jemand hineinpasst; haben
+ * beide Platz, ins größere Haus, weil dort später auch die Kinder unterkommen. Passt
+ * nirgends jemand dazu, bleibt alles, wie es ist — dann wohnen sie eben getrennt, bis
+ * einer baut. Das ist besser als eine Ehe, die am Wohnraum scheitert.
+ */
+async function zusammenziehen(oneId: string, otherId: string, t: Transaction): Promise<void> {
+	const einer = await Character.findByPk(oneId, { transaction: t });
+	const anderer = await Character.findByPk(otherId, { transaction: t });
+	if (!einer || !anderer) return;
+
+	const heimEiner: string | null = einer.dataValues.HomeBuildingId;
+	const heimAnderer: string | null = anderer.dataValues.HomeBuildingId;
+	if (heimEiner === heimAnderer) return;
+
+	// Wer einzieht, braucht einen freien Platz — der andere zählt schon als Bewohner mit.
+	const platzBeiEinem: number = (await freierWohnraum(heimEiner)) ?? 0;
+	const platzBeimAnderen: number = (await freierWohnraum(heimAnderer)) ?? 0;
+
+	if (platzBeiEinem > 0 && platzBeiEinem >= platzBeimAnderen) {
+		await anderer.update({ HomeBuildingId: heimEiner }, { transaction: t });
+	} else if (platzBeimAnderen > 0) {
+		await einer.update({ HomeBuildingId: heimAnderer }, { transaction: t });
+	}
+}
+
 export async function freierWohnraum(homeBuildingId: string | null): Promise<number | null> {
 	if (!homeBuildingId) return null;
 

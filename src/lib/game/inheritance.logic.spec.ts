@@ -58,12 +58,22 @@ describe('Erbfolge', () => {
 
 	describe('was jeder bekommt', () => {
 		it('gibt dem Einzelkind alles', () => {
-			expect(splitEstate(100, true, 0)).toEqual({ heir: 100, perSibling: 0, toCity: 0 });
+			expect(splitEstate(100, true, 0)).toEqual({
+				heir: 100,
+				perSibling: 0,
+				toCity: 0,
+				spouse: 0
+			});
 		});
 
 		it('teilt den gesetzlichen Anteil unter den Geschwistern', () => {
 			// 25 % von 400 sind 100, aufgeteilt auf zwei.
-			expect(splitEstate(400, true, 2)).toEqual({ heir: 300, perSibling: 50, toCity: 0 });
+			expect(splitEstate(400, true, 2)).toEqual({
+				heir: 300,
+				perSibling: 50,
+				toCity: 0,
+				spouse: 0
+			});
 		});
 
 		it('lässt den Rest der Teilung beim Erben', () => {
@@ -86,13 +96,71 @@ describe('Erbfolge', () => {
 		});
 
 		it('gibt der Stadt alles, wenn es keinen Erben gibt', () => {
-			expect(splitEstate(400, false, 0)).toEqual({ heir: 0, perSibling: 0, toCity: 400 });
+			expect(splitEstate(400, false, 0)).toEqual({
+				heir: 0,
+				perSibling: 0,
+				toCity: 400,
+				spouse: 0
+			});
 		});
 
 		it('folgt einem geänderten Gesetz', () => {
 			// Ab 4.7 kann der Rat den Satz verschieben — die Rechnung muss das mitmachen.
-			expect(splitEstate(400, true, 2, 0.5)).toEqual({ heir: 200, perSibling: 100, toCity: 0 });
-			expect(splitEstate(400, true, 2, 0)).toEqual({ heir: 400, perSibling: 0, toCity: 0 });
+			expect(splitEstate(400, true, 2, 0.5)).toEqual({
+				heir: 200,
+				perSibling: 100,
+				toCity: 0,
+				spouse: 0
+			});
+			expect(splitEstate(400, true, 2, 0)).toEqual({
+				heir: 400,
+				perSibling: 0,
+				toCity: 0,
+				spouse: 0
+			});
+		});
+	});
+
+	describe('der überlebende Ehepartner', () => {
+		it('bekommt seinen Anteil vorweg, bevor die Kinder teilen', () => {
+			// 25 % von 400 sind 100 für die Witwe; von den übrigen 300 gehen 25 % an die
+			// beiden Geschwister, also je 37.
+			const geteilt = splitEstate(400, true, 2, undefined, true);
+
+			expect(geteilt.spouse).toBe(100);
+			expect(geteilt.perSibling).toBe(37);
+			expect(geteilt.heir).toBe(226);
+			expect(geteilt.spouse + geteilt.heir + geteilt.perSibling * 2).toBe(400);
+		});
+
+		it('steht nicht schlechter da, nur weil es viele Kinder gibt', () => {
+			// Der Grund für „vorweg": Sonst hinge das Auskommen der Witwe daran, wie viele
+			// Geschwister sich den Rest teilen.
+			const ohneKinder = splitEstate(400, true, 0, undefined, true);
+			const mitVielen = splitEstate(400, true, 6, undefined, true);
+
+			expect(ohneKinder.spouse).toBe(mitVielen.spouse);
+		});
+
+		it('behält seinen Anteil, auch wenn das Haus erlischt', () => {
+			// Ein Haus endet hier, ein Mensch nicht: Der Rest fällt an die Stadt, sein
+			// Anteil nicht.
+			const geteilt = splitEstate(400, false, 0, undefined, true);
+
+			expect(geteilt.spouse).toBe(100);
+			expect(geteilt.toCity).toBe(300);
+		});
+
+		it('verliert keine Münze, egal wie krumm die Zahlen sind', () => {
+			for (const geld of [0, 1, 7, 33, 99, 1234, 100_001]) {
+				for (const geschwister of [0, 1, 3, 7]) {
+					const geteilt = splitEstate(geld, true, geschwister, undefined, true);
+
+					expect(
+						geteilt.spouse + geteilt.heir + geteilt.perSibling * geschwister + geteilt.toCity
+					).toBe(geld);
+				}
+			}
 		});
 	});
 });
