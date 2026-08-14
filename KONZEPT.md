@@ -143,6 +143,16 @@ dazugehört: Aus einer Ehe zweier Männer oder zweier Frauen gehen keine leiblic
 hervor. Ohne einen zweiten Weg zum Erben wäre die Erlaubnis eine Falle — man dürfte
 heiraten, wen man will, und verlöre dafür sein Haus.
 
+**Eine Heirat verschiebt Vermögen.** Wer heiratet, bringt eine **Mitgift** ein — eine
+Summe, die das Haus der Braut oder des Bräutigams mitgibt und die dem neuen Paar gehört.
+Damit ist die Ehe zwischen zwei Spielerhäusern das, was sie historisch war: eine
+Verhandlung. Man wirbt nicht nur um eine Person, sondern einigt sich mit einem Haus.
+
+Das gibt der Partnerwahl eine zweite Ebene neben Zuneigung und Persönlichkeit — ein
+verarmtes Haus mit gutem Namen und ein reiches ohne Ansehen haben einander etwas zu bieten.
+Und es gibt kinderreichen Häusern eine Last, die sie bisher nicht haben: Wer sechs Kinder
+verheiratet, zahlt sechsmal.
+
 **Adoption ist der zweite Weg zum Erben.** Ein Haus kann ein Kind aufnehmen, das nicht von
 ihm abstammt: Waisen, deren Eltern gestorben sind, oder Kinder aus einem Haus mit mehr
 Nachwuchs, als es braucht. Das angenommene Kind gehört fortan zum Haus, erbt wie ein
@@ -163,6 +173,37 @@ neu. Die Kinder aus der ersten Ehe bleiben, was sie sind: Erben ihres Hauses.
 Solange die Ehe besteht, gibt es allerdings nur die eine. Nicht aus Sitte, sondern weil
 alles, was an der Ehe hängt — Zuneigung, Wohnung, Erbfolge, Zugehörigkeit der Kinder —,
 sich auf genau einen Partner beziehen muss, um eindeutig zu bleiben.
+
+**Die Witwe erbt nicht — sie wird versorgt.** Der Besitz geht an die Kinder, das war und
+bleibt die Regel; aber der überlebende Ehepartner darf davon nicht auf der Straße stehen.
+Er behält ein **Wohnrecht im Haus** und einen Anteil am Bargeld, und beides endet nicht,
+wenn das Kind erbt, sondern erst mit seinem Tod oder einer neuen Ehe.
+
+Ohne das wäre die Wiederheirat, die es jetzt gibt, ein Hohn: Wer seinen Partner verliert,
+verlöre mit ihm sein Dach — und zwar an das eigene Kind. Der Erbe bekommt damit ein Haus
+mit einer Bewohnerin darin, die er nicht hinauswerfen kann. Das ist keine Belastung des
+Erbes, sondern seine ehrlichere Beschreibung: Ein Haus ist selten leer.
+
+**Ein Kind, das erbt, braucht jemanden, der für es handelt.** Erbt ein Minderjähriger —
+und das kommt vor, weil ohne Benennung das älteste Kind erbt, auch wenn es sechs ist —,
+dann gehört ihm alles, aber er kann fast nichts damit anfangen: Ein Betrieb, den er nicht
+führen darf, verfällt weiter und wird trotzdem besteuert.
+
+Der Weg dahin ist offen (Punkt 49), aber die Richtung steht: Das Kind bleibt Eigentümer,
+und was es selbst nicht kann, **kauft es ein**. Es stellt jemanden an, der die Werkstatt
+führt, und bezahlt ihn aus dem Erbe. Das kostet mehr, als der Vater bezahlt hätte — genau
+das ist der Preis eines frühen Todes, und es braucht dafür keine Vormundschaft mit eigenen
+Regeln, sondern nur die Anstellung, die es ohnehin gibt.
+
+**Vermacht wird über den Erben hinaus.** Neben der Benennung des Erben soll ein
+**Testament** stehen: einzelne Beträge an einzelne Personen, an die Zunft, an eine Kirche.
+Das ist die Gelegenheit, Dinge zu regeln, die keine Erbregel trifft — den treuen Gesellen
+zu bedenken, das Kind zu übergehen, mit dem man sich zerstritten hat.
+
+Und daran hängt die **Stiftung**: Wer ein öffentliches Werk stiftet — ein Spital, einen
+Brunnen —, kauft damit kein Gebäude, sondern Ansehen, das seinen Tod überdauert (Abschnitt
+15). Für ein altes, reiches Haus ist das die einzige Ausgabe, die sich noch lohnt, und für
+die Stadt eine Einnahme, die keine Steuer ist.
 
 **Wer ohne Erben stirbt, dessen Besitz fällt an die öffentliche Hand.** Nicht ins Nichts
 und nicht an einen zufälligen Nachbarn: Häuser, Grundstücke und Vermögen gehen an die
@@ -472,7 +513,8 @@ verarmten Einwohner.
 
 **Der Platz in der Stadt ist begrenzt.** Es gibt eine feste Zahl von **Grundstücken**,
 und sie sind selbst Besitz — getrennt vom Gebäude, das darauf steht. Wer bauen will,
-muss erst ein Grundstück haben, und die sind irgendwann alle vergeben. Erst dadurch
+muss erst ein Grundstück haben, und die sind irgendwann alle vergeben. Und er muss
+**Bürger** sein: Grund und Boden gehören denen, die zur Stadt gehören (Abschnitt 16). Erst dadurch
 bekommt der Immobilienhandel Gewicht: Man kauft nicht, weil Bauen teuer wäre, sondern
 weil kein Platz mehr frei ist. Lage wird zum Wert.
 
@@ -530,8 +572,15 @@ irgendwann ein Grundstück frei.
 ### 5. Politik
 
 Spieler können sich für Ämter zur Wahl stellen, andere stimmen ab. Ämter bringen echte
-Macht: Ein Bürgermeister kann Gesetze erlassen, die für alle gelten — Steuern,
-Preisregeln, Bauvorschriften.
+Macht: Ein Bürgermeister kann Gesetze erlassen, die für alle gelten — Steuern, Zölle,
+Bauvorschriften.
+
+**Preise gehören nicht dazu.** Sie standen ursprünglich auf dieser Liste und sind
+inzwischen woanders zu Hause: bei den Zünften (Abschnitt 17). Wer ein Handwerk ausübt,
+regelt seine Preise mit seinesgleichen — und eine Stadt, in der der Bürgermeister die
+Brotpreise setzt und die Bäckerzunft ebenfalls, hätte zwei Herren an derselben Zahl.
+Zwischen Rat und Zunft zu streiten ist das interessantere Spiel, als beides in eine Hand
+zu legen.
 
 Politik ist damit die Ebene, auf der die Wirtschaft von Spielern selbst reguliert wird,
 statt von Balancing-Konstanten im Code.
@@ -641,6 +690,31 @@ der Zeit hängt: einmal im Spieljahr, je Grundstück. Sie macht Horten teuer. We
 zahlen kann, zahlt, was er hat; der Rest wird erlassen, denn eine Schuld ohne
 Vollstreckung wäre nur eine Zahl, die wächst.
 
+**Der Zoll trifft, was hereinkommt.** Auf Waren, die von auswärts in die Stadt gebracht
+werden, liegt eine Abgabe. Historisch war das die wichtigste Stadteinnahme, und im Spiel
+ist sie der Hebel, der dem Fernhandel überhaupt eine politische Seite gibt: Eine Stadt
+kann sich öffnen oder abschotten. Ein hoher Zoll schützt die eigenen Handwerker vor
+billiger Ware von auswärts und macht alles teurer, was sie selbst nicht herstellen können —
+die klassische Abwägung, und sie trifft verschiedene Häuser verschieden. Wer eine Zunft
+hinter sich hat, will ihn hoch; wer Fernhandel treibt, niedrig.
+
+**Bannrechte sind das schärfste Instrument der Kasse.** Eine Stadt kann ein Gewerbe zum
+Vorrecht erklären und es vergeben: Nur diese eine Mühle darf mahlen, nur dieser eine
+Brauer brauen. Wer es bekommt, hat ein Monopol und zahlt dafür an die Stadt; wer es nicht
+bekommt, hat umsonst gebaut.
+
+Das ist der Punkt, an dem ein Amt am meisten wert ist — und an dem am ehesten jemand
+versucht, es zu kaufen. Beides ist erwünscht. Ein Bannrecht ist befristet wie eine Pacht,
+damit die erste Generation sich nicht auf ewig festsetzt, und seine Vergabe steht in der
+Chronik.
+
+**Die Bauordnung ist Vorsorge statt Einnahme.** Sie schreibt vor, womit gebaut wird —
+Stein statt Holz, Abstände zwischen Häusern. Sie kostet jeden Bauherrn Geld und senkt
+dafür, was ein Brand anrichtet. Damit hat die Stadt zum ersten Mal ein Gesetz, das nicht
+umverteilt, sondern **abwendet**: Es zahlt sich erst aus, wenn etwas passiert, das ohne es
+schlimmer gewesen wäre. Der Bürgermeister, der sie erlässt, wird dafür gescholten; sein
+Nachfolger erntet, dass die Stadt nicht abbrennt.
+
 **Die Stadtreligion ist die schärfste Gesetzesart.** Eine Stadt kann eine Konfession zur
 ihren erklären; wer ihr nicht angehört, zahlt eine zusätzliche Abgabe. Auch das ist keine
 neue Regel, sondern eine Zahl auf einer vorhandenen Stellschraube — nur wirkt sie nicht auf
@@ -703,15 +777,16 @@ sich verfeindete Adelsgeschlechter abbilden: Wer in eine Familie hineingeboren w
 erbt zwar nicht die persönlichen Beziehungen seiner Eltern — aber er erbt deren Feinde
 und Freunde als Vorzeichen.
 
-Die Zuneigung zwischen zwei Charakteren setzt sich damit aus vier Schichten zusammen:
+Die Zuneigung zwischen zwei Charakteren setzt sich damit aus fünf Schichten zusammen:
 
 1. **Verwandtschaft** — der Bonus aus dem Stammbaum
 2. **Religion** — der Zuschlag für dieselbe Konfession (Abschnitt 13)
-3. **Haus zu Haus** — die Fehde oder Freundschaft der Dynastien
-4. **Person zu Person** — was die beiden konkret miteinander erlebt haben
+3. **Ruf** — was alle von ihm halten, auch wer ihn nie getroffen hat (Abschnitt 15)
+4. **Haus zu Haus** — die Fehde oder Freundschaft der Dynastien
+5. **Person zu Person** — was die beiden konkret miteinander erlebt haben
 
-Die ersten drei sind der **Grundwert** und werden gerechnet, nicht gespeichert: Sie stehen
-schon fest, bevor sich zwei je begegnet sind. Nur die vierte hat eine Zeile, und nur wenn
+Die ersten vier sind der **Grundwert** und werden gerechnet, nicht gespeichert: Sie stehen
+schon fest, bevor sich zwei je begegnet sind. Nur die fünfte hat eine Zeile, und nur wenn
 es etwas zu erzählen gibt.
 
 Die persönliche Schicht sticht dabei die anderen: Man kann sich mit einem Mitglied des
@@ -745,6 +820,11 @@ Das macht aus dem Generationenwechsel eine Vorbereitung statt einer Formel. Wer 
 stirbt, hinterlässt eine Werkstatt, die niemand bedienen kann — genau die Dramatik, die
 Permadeath tragen soll. Und es gibt der Lehre einen Platz im Spiel: Sie ist Zeit, die man
 in die nächste Generation steckt, statt in die eigene Werkstatt.
+
+Der übliche Ort dafür ist das **eigene Haus**: Das Kind arbeitet in der Werkstatt mit und
+lernt dabei (Abschnitt 10). Ohne diesen Weg wäre die Voraussetzung, ein Handwerk zu
+beherrschen, um es zu betreiben, eine Falle für jeden Erben — mit ihm ist sie eine
+Aufgabe, die man rechtzeitig angehen muss.
 
 **Kämpfen ist eine Fertigkeit wie jede andere.** Sie entscheidet den Überfall auf einen
 Händler, die Verteidigung dagegen, den Streit mit der Konkurrenz und den Dienst in der
@@ -875,6 +955,35 @@ Bildung eine politische Seite: Wie viele Schulen sich eine Stadt leistet, ob das
 Schulgeld hoch oder niedrig ist, wer es sich leisten kann — das entscheidet ein
 gewähltes Amt und nicht der Code.
 
+**Die Lehre im eigenen Betrieb.** Neben der Schule steht der zweite Weg, und er ist der
+ältere: Das Kind arbeitet in der Werkstatt der Eltern mit. Es taugt anfangs wenig, bringt
+also weniger ein als ein erwachsener Geselle — dafür lernt es dabei, und zwar ohne dass
+jemand Lehrgeld an einen Fremden zahlt.
+
+Auch das erfindet nichts Neues, sondern verbindet zwei vorhandene Dinge: Eine Schicht im
+Betrieb ist Arbeit, eine Lehrstunde ist Unterricht, und die Lehre im eigenen Haus ist
+beides in einem Zug. Der Meister ist ohnehin da, die Werkstatt steht, und die Zeit des
+Kindes wäre sonst ungenutzt.
+
+**Der Grund, warum es das geben muss**, liegt eine Ebene tiefer. Weil ein Handwerksbetrieb
+nur führen darf, wer das Handwerk beherrscht (Abschnitt 3), kann ein Erbe die Werkstatt
+seines Vaters nicht übernehmen, wenn er nichts gelernt hat — er erbt Mauern und eine
+Maschine, die er nicht anwerfen kann. Das ist realistisch und wäre trotzdem eine Falle:
+eine Härte ohne Weg daran vorbei. Mit der Lehre im eigenen Betrieb hat der Spieler diesen
+Weg, und er kostet, was er kosten soll — die Jahre, in denen das Kind noch nichts
+erwirtschaftet.
+
+Damit stehen sich zwei Erziehungen gegenüber, und das ist die eigentliche Entscheidung:
+**Schule oder Werkstatt.** Die Schule ist breit, kostet Geld und gibt, was gerade ein
+Lehrer beherrscht; die Werkstatt ist eng, kostet Ertrag und gibt genau das eine Handwerk,
+von dem das Haus lebt. Beide kosten dieselben Aktionspunkte des Kindes, und ein Tag ist
+nur einmal da. Wer sein Haus fortsetzen will, bildet den Nachfolger aus; wer ihm etwas
+anderes ermöglichen will, schickt ihn zur Schule.
+
+Und wer beides versäumt, hat immer noch den dritten Weg: **jemanden einstellen, der es
+kann.** Das ist teuer und macht abhängig — aber es rettet den Betrieb, und ein Haus, das
+seinen eigenen Meister nicht mehr stellt, hat genau das verdient.
+
 ### 11. Unglücke — was einem zustoßen kann
 
 **Die Welt nimmt auch.** Raubzüge und Brände treffen die Stadt, ohne dass jemand etwas
@@ -996,6 +1105,111 @@ Die religiösen Feste erben dabei den Streit aus Abschnitt 13: Ein Fest, das die
 ausrichtet, ist das Fest einer Konfession, und wer es ausrichtet, hat gewonnen. Die
 weltlichen — Markttag, Erntedank — gehören allen und sind der Ausgleich dazu.
 
+### 15. Ansehen und Ruf — der vierte Querschnitt
+
+**Zuneigung ist privat, Ansehen ist öffentlich.** Bisher kennt das Spiel nur, was zwei
+Charaktere voneinander halten. Was aber **alle** von einem halten, gibt es nicht — obwohl
+das Konzept es an mehreren Stellen voraussetzt: Titel, Besitz und Ansehen sollen vererbt
+werden, die Bedürfnishierarchie hat eine Stufe „Ansehen", der Ehrgeiz zielt auf „Bauten
+fürs Ansehen". Alles das zeigt auf eine Größe, die fehlt.
+
+**Der Ruf entsteht aus Taten, nicht aus Meinungen.** Was jemand tut, bringt ihm Punkte ein
+oder kostet ihn welche, und die Summe daraus ist sein Ruf. Ein Amt ehrenhaft geführt, eine
+Stiftung errichtet, ein Handwerk zur Meisterschaft gebracht, viele Kinder großgezogen — das
+hebt ihn. Als Schuldner ausgefallen, im Turm gesessen, beim Rauben erkannt, eine Zunftregel
+gebrochen, die Konfession aus Berechnung gewechselt — das senkt ihn.
+
+Damit bekommen ein halbes Dutzend Regeln endlich ihre Bremse. Mehrere offene Punkte
+schlagen bisher vor, dass etwas „den Ruf kostet", ohne dass es einen gäbe: der Räuber, der
+erkannt wird; der Konvertit; der Wucherer. Ein Ruf macht diese Folgen erst möglich — und
+zwar ohne für jeden Fall eine eigene Strafe zu erfinden.
+
+**Was der Ruf bewirkt**, folgt aus dem, was es schon gibt: Er geht als weitere Schicht in
+den Grundwert der Zuneigung ein (jeder mag den Angesehenen ein wenig lieber), er entscheidet
+mit, wem ein Geldverleiher borgt, ob eine Zunft jemanden aufnimmt und ob ein NPC für ihn
+stimmt. Kein eigenes System, sondern ein Zeiger, den bestehende Regeln ablesen.
+
+**Der Ruf ist die Ausnahme von der Vererbungsregel.** Fertigkeiten sterben mit dem
+Charakter, Beziehungen auch — der Ruf nicht ganz: Ein Teil davon geht als **Ansehen des
+Hauses** auf den Erben über. Genau das ist es, was eine Dynastie über Generationen
+aufbaut und was ein einzelner Skandal beschädigen kann. Ohne diese Übertragung wäre jeder
+Erbe ein Niemand, und die Idee des Hauses verlöre ihren Sinn.
+
+**Und es gibt Arbeit, die Ansehen kostet.** Manche Gewerbe waren nötig und verachtet —
+Henker, Abdecker, Totengräber. Sie zahlten gut, gerade weil sie niemand machen wollte. Das
+ist keine Farbe, sondern eine Abwägung: Geld gegen Stand, und wer sie eingeht, kommt schwer
+wieder heraus.
+
+### 16. Bürgerrecht und Stand
+
+**Nicht jeder Einwohner ist ein Bürger.** Wer in einer Stadt lebt, wohnt dort — mehr nicht.
+Das **Bürgerrecht** ist ein eigener Status, und er entscheidet über zweierlei: Nur ein
+Bürger darf **Grundstücke und Gebäude besitzen**, und nur ein Bürger darf **wählen und
+gewählt werden**. Wer es nicht hat, kann arbeiten, kaufen, heiraten und leben — aber nur
+als Angestellter, nie als Eigentümer.
+
+Das ist der Filter, der bisher fehlte. Mit dem Zuzug aus anderen Städten (Abschnitt 2) wäre
+eine Stadt sonst binnen kurzem von Fremden bevölkert, die am Tag ihrer Ankunft mitwählen;
+wer eine Wahl gewinnen will, siedelte Leute an. Das Bürgerrecht macht daraus einen Vorgang
+mit Dauer.
+
+**Erworben wird es durch Bleiben, nicht durch Zahlen.** Historisch kostete es Geld — hier
+nicht, oder nur wenig: „Es zählen Köpfe, nicht Münzen" ist eine der wenigen ausdrücklichen
+Festlegungen dieses Konzepts, und ein käufliches Wahlrecht nähme sie zurück. Wer lange
+genug in einer Stadt lebt und einen Leumund hat, wird Bürger. Kinder von Bürgern werden es
+mit der Volljährigkeit.
+
+**Der Stand steht vor dem Namen.** Jeder Charakter trägt einen **Titel**, der sagt, wo er
+steht: _Knecht_, wer ohne Bürgerrecht in fremdem Dienst steht; _Bürger_, wer es erworben
+hat; _Meister_, wer sein Handwerk beherrscht und einen Betrieb führt; _Ratsherr_ oder
+_Bürgermeister_, wer ein Amt hält. Der Titel ist keine eigene Mechanik, sondern die
+Anzeige mehrerer: Er ergibt sich aus Bürgerrecht, Zunftrang und Amt und wird nirgends
+gesondert verliehen.
+
+Er ist trotzdem mehr als Zierrat. In einer Liste von zwanzig Namen sagt er auf einen Blick,
+mit wem man es zu tun hat — und er macht den Aufstieg sichtbar, den ein Haus über
+Generationen nimmt. Vom Knecht zum Bürgermeister ist eine Geschichte, die man an einem Wort
+ablesen kann.
+
+### 17. Zünfte
+
+**Zwischen dem Haus und der Stadt fehlt eine Ebene.** Es gibt den einzelnen Charakter und
+sein Haus, und es gibt das Gemeinwesen mit seinen Ämtern — dazwischen nichts. Damit hat ein
+Spiel für viele Spieler keine Form, in der sich mehrere zusammentun können, außer der Ehe.
+Die **Zunft** ist diese Form.
+
+Eine Zunft vereint alle, die dasselbe Handwerk ausüben: Schmiede, Bäcker, Zimmerleute. Sie
+hat Mitglieder, eine Kasse, einen gewählten **Zunftmeister** und Regeln, die für ihre
+Mitglieder gelten.
+
+**Was sie tut, nimmt anderen Stellen etwas ab, statt Neues zu erfinden:**
+
+- **Sie verleiht die Meisterwürde.** Wer einen Handwerksbetrieb führen will, braucht sie
+  (Abschnitt 3) — bisher ohne Instanz, die sie feststellt. Die Zunft prüft und nimmt auf,
+  und damit hat die Meisterpflicht ein Gesicht statt einer Zahlenschwelle.
+- **Sie ordnet die Lehre.** Lehrling, Geselle, Meister sind Stufen, die sie vergibt. Der
+  Weg über das eigene Kind (Abschnitt 10) bleibt — nur endet er künftig vor einer Prüfung.
+- **Sie setzt Preise.** Was der Bürgermeister nicht mehr darf, darf sie: Mindestpreise für
+  das eigene Gewerbe. Das schützt die Mitglieder vor gegenseitigem Unterbieten und macht
+  aus der Zunft sofort einen politischen Akteur, denn die Stadt hätte gern billiges Brot.
+- **Sie begrenzt den Zutritt.** Wie viele Schmieden eine Stadt verträgt, entscheidet die
+  Zunft, nicht der Markt. Das ist unfreundlich und historisch, und es gibt dem Spiel etwas,
+  das ihm fehlt: einen Grund, sich mit anderen Spielern gut zu stellen, bevor man baut.
+- **Sie versorgt die Ihren.** Aus der Zunftkasse wird bezahlt, wer in Not gerät — die
+  Witwe eines Meisters, der Abgebrannte. Damit hat das Spiel eine Fürsorge, die weder
+  Familie noch Stadtkasse ist.
+
+**Der Konflikt mit dem Rat ist der Gewinn.** Zunft und Bürgermeister wollen verschiedene
+Dinge: Die Zunft will hohe Preise, wenige Betriebe und einen hohen Zoll; die Stadt will
+billige Waren, viele Steuerzahler und offenen Handel. Beide haben Mittel, und beide werden
+von denselben Leuten gewählt. Damit entsteht Politik, die nicht nur aus einer Wahl alle
+fünf Jahre besteht.
+
+**Eine Korrektur sei angemerkt**: An anderer Stelle stand einmal, die Zunft entstehe von
+selbst aus der Lehre und brauche kein eigenes System. Das galt, solange es nur um
+Wissensweitergabe ging. Sobald Meisterwürde, Preise und Zutritt dazukommen, braucht es
+jemanden, der sie vergibt — und das ist eine Körperschaft mit Mitgliedern und Kasse.
+
 ## Was das für das Datenmodell heißt
 
 Das Schema in Phase 1 des Umbauplans bildet die Grundzüge bereits ab, damit sie nicht
@@ -1072,6 +1286,21 @@ nachträglich in jede Tabelle eingezogen werden müssen:
   Verwandten der Verwandtschaftsbonus; er wird aus dem Stammbaum **berechnet, nicht
   gespeichert**, und gilt automatisch, sobald keine Zeile existiert. Die Richtung ist
   bewusst asymmetrisch: A kann B schätzen, ohne dass es erwidert wird.
+- Der **Ruf** ist eine Zahl am Charakter, das **Ansehen des Hauses** eine an der Dynastie.
+  Beide werden fortgeschrieben, nicht gerechnet — sie summieren Taten, und Taten lassen
+  sich nicht aus der Zeit ableiten. Damit sind sie die Ausnahme von der Regel, die für
+  Alter, Verfall und Zuneigung gilt, und die Ausnahme ist begründet: Wer wissen will, wie
+  angesehen jemand ist, müsste sonst sein Leben nacherzählen. Ein Ruf klingt mit der Zeit
+  ab — das ist wieder eine Rechnung und braucht nur den Tick der letzten Änderung.
+- Das **Bürgerrecht** hängt an der Verbindung von Charakter und Stadt, nicht am Charakter
+  allein: Wer fortzieht, ist anderswo kein Bürger. Der **Titel** ist dagegen gar kein
+  Datum, sondern eine Anzeige — er wird aus Bürgerrecht, Zunftrang und Amt gebildet, wenn
+  jemand ihn liest. Das vorhandene Feld `title` am Charakter trägt heute nur den Standardwert
+  „Neuling" und wird nirgends gepflegt; es fällt damit weg oder wird zum berechneten Wert.
+- Die **Zunft** ist eine Körperschaft wie die Stadt: eigene Zeile, eigene Kasse,
+  Mitgliedschaften als Verbindung zu Charakteren, mit Rang (Lehrling, Geselle, Meister).
+  Ihre Ämter laufen über dieselbe Wahlmechanik wie die städtischen — ein Zunftmeister ist
+  der bestplatzierte Kandidat der letzten Zunftwahl, der noch lebt.
 - Die **Religion** ist ein nullbares Feld am Charakter, kein Verbund: Wer ungetauft ist,
   hat keine. Sie geht als Schicht in den berechneten Grundwert der Zuneigung ein und muss
   deshalb bei jedem Vergleich zur Hand sein — dieselbe Überlegung wie bei der

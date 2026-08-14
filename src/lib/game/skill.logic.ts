@@ -176,8 +176,12 @@ export type TeachingOutcome =
  *
  * Beide zahlen mit Zeit, der Schüler zusätzlich mit Geld — und das Geld geht an den
  * Meister. Damit hat Meisterschaft ein Einkommen jenseits der Werkbank, und aus
- * Fertigkeiten wird ein Markt: Die Zunft entsteht von selbst, ohne dass es sie als
- * eigenes System geben müsste.
+ * Fertigkeiten wird ein Markt.
+ *
+ * Hier stand einmal, die Zunft entstehe daraus von selbst und brauche kein eigenes
+ * System. Das galt, solange es nur um Wissensweitergabe ging. Inzwischen soll sie die
+ * Meisterwürde verleihen, Preise setzen und den Zutritt begrenzen (`KONZEPT.md`,
+ * Abschnitt 17) — und das kann kein Markt, das braucht jemanden, der vergibt.
  *
  * Gelehrt wird nicht nur den eigenen Kindern. Ein Neuling ohne Familie hätte sonst
  * keinen Zugang zu Können — und die Startbedingungen (Punkt 14) sind ohnehin die

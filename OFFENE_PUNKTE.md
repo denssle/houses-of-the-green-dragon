@@ -21,6 +21,13 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 32  | Die Ämter: Zuschnitt, was gewählt und was ernannt wird, der Richter                  | Ämter über den Bürgermeister | Entscheidung |
 | 33  | Lohn: Aushang, Verhandlung, wer wen einstellt                                        | laufend                      | Entwurf      |
 | 34  | Wer einen Handwerksbetrieb führen darf                                               | Berufe (Punkt 15)            | Entwurf      |
+| 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                        | zusammen mit Punkt 34        | Entwurf      |
+| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                         | Punkt 34                     | Entwurf      |
+| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                 | Punkte 23, 39, 43            | Entwurf      |
+| 48  | Was beim Tod aus den Zurückbleibenden wird: Witwe, minderjähriger Erbe               | laufend                      | Entwurf      |
+| 49  | Bürgerrecht und Stand: Erwerb, Verlust, was daran hängt                              | Zuwanderung (Punkt 41)       | Entwurf      |
+| 50  | Zoll, Bannrechte und Bauordnung als neue Gesetzesarten                               | Fernhandel                   | Entwurf      |
+| 51  | Mitgift, Testament und Stiftung                                                      | laufend                      | Entwurf      |
 | 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                               | laufend                      | Entwurf      |
 | 36  | Gebäude und Betriebe benennen                                                        | laufend                      | Aufgabe      |
 | 37  | Gebäude verkaufen (Grundstücke gehen bereits) — entschieden, aber ungebaut           | laufend                      | Aufgabe      |
@@ -322,6 +329,11 @@ Zu entscheiden ist die **Schwelle und was bei ihrem Verlust geschieht**:
 - **Was passiert beim Tod des Meisters?** Der Betrieb steht still, bis der Erbe jemanden
   findet — das ist die gewollte Dramatik. Aber steht er still oder verfällt er? Und
   bekommt der Erbe eine Frist, oder trifft es ihn am Tag der Beerdigung?
+- **Der Weg daran vorbei muss zuerst stehen.** Die Regel ohne die **Lehre im eigenen
+  Betrieb** (`KONZEPT.md`, Abschnitt 10) wäre eine Falle: Ein Erbe könnte die Werkstatt
+  seines Vaters nie übernehmen, wenn niemand ihn ausgebildet hat, und die Härte träfe
+  genau die Häuser, die etwas aufgebaut haben. Beides gehört deshalb in denselben Schritt
+  — die Voraussetzung und der Weg, sie zu erfüllen.
 - **Gilt das auch für NPCs?** Sie bauen seit 4.13 selbst Werkstätten. Die Regel muss auf
   ihrer Seite dieselbe sein, sonst entsteht eine Schattenwirtschaft aus NPC-Betrieben ohne
   Meister.
@@ -604,6 +616,188 @@ Willen geschieht**, das ihn nicht umbringt. Das ist ein neuer Zustand und verlan
   sich verschuldet hat, ist ein Fall, der nicht eintreten darf — die Selbstverwaltung
   nimmt keine Kredite auf.
 
+### 45. Die Lehre im eigenen Betrieb
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitt 10): Das Kind arbeitet in der Werkstatt der
+Eltern mit, bringt dabei weniger ein als ein Geselle und lernt im Gegenzug das Handwerk.
+Es ist der Weg, der die Meisterpflicht aus Punkt 34 erträglich macht, und gehört deshalb in
+denselben Schritt wie sie.
+
+Zu entscheiden ist das Verhältnis von Ertrag und Lernen:
+
+- **Wie viel bringt ein Lehrling ein?** Nichts wäre einfach und falsch — dann ist er reine
+  Kosten, und niemand nähme ihn. Voller Ertrag wäre auch falsch, denn dann kostete die
+  Ausbildung nichts und die Entscheidung wäre keine. Naheliegend: Der Ertrag hängt am
+  Können wie bei jedem anderen auch, nur ist das Können eben klein — dann braucht es gar
+  keine eigene Regel, sondern nur die Erlaubnis, dass Kinder mitarbeiten dürfen.
+- **Wie schnell lernt er dabei?** Langsamer als in einer Lehrstunde, für die beide ihre
+  Zeit hergeben, aber stetig. Sonst schlägt der bequeme Weg den guten, und die Lehrstunde
+  aus 4.5a wird sinnlos.
+- **Ab welchem Alter?** Zu früh, und Kinder sind Arbeitskräfte ab dem Laufenlernen; zu
+  spät, und bis zur Volljährigkeit bleibt keine Zeit. Es muss ein Alter geben, ab dem es
+  geht, und es sollte deutlich unter der Volljährigkeit liegen — sonst ist der Erbe am Tag
+  seiner Mündigkeit immer noch nicht Meister.
+- **Steht es gegen die Schule?** Ja, und das ist gewollt: Beide kosten dieselben
+  Aktionspunkte des Kindes. Die Schule ist breit und kostet Geld, die Werkstatt ist eng und
+  kostet Ertrag. Zu klären ist nur, ob ein Kind beides an verschiedenen Tagen tun darf
+  (vermutlich ja — die Aktionspunkte sind die Schranke, mehr braucht es nicht).
+- **Tun NPCs das auch?** Sie müssen, sonst stirbt das Handwerk in NPC-Häusern mit jeder
+  Generation aus und die Stadt verliert ihre Betriebe. Die Regel dafür ist dieselbe wie bei
+  der Schule (Punkt 24): Ein NPC-Elternteil entscheidet nach seinen Achsen — Fleiß und
+  Ehrgeiz dafür, Gier dagegen, weil der Lehrling im Betrieb weniger einbringt.
+- **Nur die eigenen Kinder?** Ein fremdes Kind als Lehrling wäre eine Anstellung mit
+  niedrigem Lohn und hohem Lerngewinn — und damit ein Geschäft zwischen zwei Häusern, das
+  dem Spiel guttäte. Es setzt allerdings voraus, dass die Eltern zustimmen, und berührt
+  damit dieselbe Frage wie die Adoption (Punkt 38).
+
+### 46. Zünfte
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitt 17): Eine Körperschaft je Handwerk, mit
+Mitgliedern, Kasse und gewähltem Zunftmeister. Sie verleiht die Meisterwürde, ordnet die
+Lehre in Lehrling/Geselle/Meister, setzt Mindestpreise für ihr Gewerbe, begrenzt den
+Zutritt und versorgt Mitglieder in Not. Die Preisregeln wandern dafür vom Bürgermeister zu
+ihr.
+
+Das ist der größte der neuen Punkte und hängt an Punkt 34 — ohne Meisterpflicht hat eine
+Zunft nichts zu verleihen. Zu entscheiden:
+
+- **Wer gründet die erste?** Eine Zunft mit einem Mitglied ist keine. Entweder existieren
+  sie von Anfang an je Handwerk (dann sind sie Weltinventar wie die städtische Schmiede),
+  oder sie entstehen ab einer Mindestzahl von Meistern — was schöner ist und die junge
+  Stadt zunftfrei lässt.
+- **Wie kommt man hinein?** Prüfung durch die Zunft heißt: Ein Meister muss zustimmen. Bei
+  einem NPC-Zunftmeister braucht das eine Regel (Können plus Zuneigung plus Ruf), bei einem
+  Spieler die Möglichkeit, willkürlich abzulehnen — und genau die macht die Zunft
+  interessant und gefährlich.
+- **Was, wenn sie niemanden mehr aufnimmt?** Eine Zunft, die den Zutritt zumacht, ist
+  historisch der Normalfall und spielerisch eine Sperre für Neulinge (Punkt 14). Es braucht
+  ein Gegengewicht: ein Höchstmaß im Code, ein Recht des Rats einzugreifen, oder die
+  Möglichkeit, in einer anderen Stadt anzufangen.
+- **Wie verhält sich der Mindestpreis zum Festpreisprinzip?** Jeder Betrieb setzt seinen
+  Preis selbst; die Zunft zieht eine Untergrenze ein. Das ist verträglich, solange die
+  Grenze nur nach unten wirkt.
+- **Was kostet die Mitgliedschaft?** Ein Beitrag füllt die Zunftkasse, aus der die Fürsorge
+  bezahlt wird. Damit ist die Zunft ein kleines Gemeinwesen mit denselben Fragen wie die
+  Stadt — und vermutlich mit derselben Mechanik zu bauen.
+- **Sitzen Zünfte im Rat?** Historisch ja, und es wäre der stärkste Zug: Zunftmeister als
+  geborene Ratsherren. Das berührt Punkt 32 unmittelbar und sollte zusammen entschieden
+  werden.
+
+### 47. Ansehen und Ruf
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitt 15): Der Ruf ist eine Zahl am Charakter,
+die aus Taten entsteht; ein Teil davon geht als Ansehen des Hauses auf den Erben über. Er
+wirkt als Schicht in der Zuneigung und als Bedingung, wo bisher „Ruf" nur behauptet wurde —
+beim Geldverleiher, in der Zunft, bei der Wahl.
+
+Zu entscheiden:
+
+- **Welche Tat wie viel?** Das ist eine lange Liste und der eigentliche Aufwand. Wichtiger
+  als die Zahlen ist die Symmetrie: Was Ansehen kostet, muss auch zu gewinnen sein, sonst
+  ist der Ruf eine Einbahnstraße nach unten.
+- **Klingt er ab?** Ja — sonst ist ein Fehltritt mit zwanzig ein Urteil für sechzig Jahre.
+  Dieselbe Rechnung wie beim Verfall der Zuneigung, aus dem Tick der letzten Änderung.
+- **Wie viel erbt der Nachfolger?** Zu viel, und ein Neuling hat gegen alte Häuser keine
+  Chance; zu wenig, und die Dynastie ist keine. Ein Bruchteil, gedeckelt, ist vermutlich
+  richtig.
+- **Sieht man ihn?** Ein Ruf, den niemand ablesen kann, wirkt nur verdeckt. Vermutlich als
+  Wort statt als Zahl — dieselbe Entscheidung wie bei der Wesensart, und aus demselben
+  Grund: Zahlen laden zum Ausrechnen ein.
+- **Die unehrlichen Gewerbe.** Henker, Abdecker, Totengräber: gut bezahlt, weil sie Ansehen
+  kosten. Zu klären ist, ob die Stadt sie braucht (dann muss jemand sie tun) und ob man aus
+  ihnen wieder herauskommt.
+
+### 48. Was beim Tod aus den Zurückbleibenden wird
+
+Zwei Löcher, die sich beim Nachzeichnen eines Erbfalls zeigten. Beide betreffen nicht den
+Erben, sondern die, für die niemand zuständig ist.
+
+**Die Witwe.** Entschieden ist, dass sie nicht erbt, aber versorgt wird — Wohnrecht im
+Haus und ein Anteil am Bargeld (`KONZEPT.md`, Abschnitt 1). Offen ist:
+
+- Wie groß der Anteil ist, und ob er vom Erbe der Kinder abgeht oder vorweg.
+- Was geschieht, wenn der Erbe das Haus verkauft (Punkt 37) — das Wohnrecht muss den
+  Verkauf überdauern, sonst ist es keins.
+- Ob es mit einer neuen Ehe endet. Naheliegend ja: Wer neu heiratet, zieht zum Partner.
+- Ob dasselbe für den Witwer gilt. Ja — im Konzept ist kein Geschlecht bevorzugt.
+
+**Der minderjährige Erbe.** Die Richtung steht: kein eigenes Vormundschaftssystem, sondern
+das Kind bleibt Eigentümer und kauft ein, was es nicht selbst kann. Offen ist:
+
+- **Wer handelt in der Zwischenzeit?** Ein Sechsjähriger stellt niemanden ein. Entweder
+  darf die Mutter für ihn handeln (dann ist es doch eine Vormundschaft, nur eine schlanke),
+  oder der Betrieb steht still, bis das Kind alt genug ist — was ein Haus über zehn Jahre
+  ruiniert.
+- **Wovon lebt es?** Grundsteuer und Verfall laufen weiter. Ohne jemanden, der zahlt,
+  endet der Erbfall in der Ruine, und die Erbregel, die Kinder schützen sollte, tut das
+  Gegenteil.
+- **Was hindert den Missbrauch?** Wer für ein Kind handelt, verwaltet fremdes Vermögen —
+  dieselbe Frage wie beim Amt und die Kasse (Abschnitt 5), nur ohne Wahl, die es richten
+  könnte.
+
+### 49. Bürgerrecht und Stand
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitt 16): Nur Bürger dürfen Grundstücke und
+Gebäude besitzen sowie wählen und gewählt werden; alle anderen können arbeiten und leben.
+Erworben wird es durch Bleiben, nicht durch Zahlen — ein käufliches Wahlrecht widerspräche
+„es zählen Köpfe, nicht Münzen". Der Titel vor dem Namen (Knecht, Bürger, Meister,
+Bürgermeister) zeigt den Stand an und wird berechnet, nicht verliehen.
+
+Zu entscheiden:
+
+- **Wie lange dauert es?** Das ist die eine Zahl, an der alles hängt. Zu kurz, und der
+  Filter wirkt nicht; zu lang, und ein Zuwanderer ist ein halbes Leben Bürger zweiter
+  Klasse. Ein Spieljahr oder zwei klingt richtig — lang genug, um Wahlen nicht zu kippen,
+  kurz genug, um einen Neuanfang nicht zu bestrafen.
+- **Was ist mit dem Anfang?** Die Startbevölkerung und jeder neue Spieler brauchen einen
+  Stand. Ein Neuling ohne Bürgerrecht kann nichts besitzen — das verschärft Punkt 14
+  erheblich und muss zusammen mit ihm entschieden werden. Vermutlich beginnt man als
+  Bürger der Stadt, in der man anfängt.
+- **Kann man es verlieren?** Naheliegend beim Fortzug, und vielleicht bei schwerer
+  Verfehlung — was dem Richteramt (Punkt 32) eine zweite Strafe neben dem Turm gäbe.
+- **Was wird aus vorhandenem Besitz?** Wer sein Bürgerrecht verliert oder fortzieht, kann
+  seine Häuser nicht behalten. Ein Zwangsverkauf mit Frist ist die freundlichste Lösung;
+  ohne Frist wäre es eine Enteignung.
+- **Gilt es auch für NPCs?** Muss es, sonst hat die halbe Stadt Sonderrechte. Und
+  NPC-Zuwanderer brauchen denselben Weg hinein.
+
+### 50. Zoll, Bannrechte und Bauordnung
+
+Drei neue Gesetzes- und Amtshebel (`KONZEPT.md`, Abschnitt 5). Sie gehören zusammen, weil
+sie dieselbe Bauart haben: eine Zahl oder eine Vergabe, die auf eine vorhandene Mechanik
+zeigt.
+
+- **Der Zoll** trifft Waren, die von auswärts hereinkommen. Er setzt Fernhandel voraus und
+  wird erst dann fällig. Zu klären: ob er auch für Reisende gilt (dann brauchen die Tore
+  eine Rolle) und ob eine Stadt einzelne Waren verschieden belegen darf — das Zweite ist
+  reizvoller und ungleich mehr Verwaltung.
+- **Bannrechte** vergeben ein Gewerbe als Monopol, befristet wie eine Pacht, gegen Zahlung
+  an die Stadt. Zu klären: was mit den Betrieben geschieht, die es schon gibt, wenn ein
+  Bann erlassen wird — Enteignung geht nicht, Bestandsschutz macht den Bann zahnlos. Und
+  wie sich das zur Zutrittsbegrenzung der Zunft verhält (Punkt 46): Zwei Instanzen, die
+  begrenzen, ist eine zu viel.
+- **Die Bauordnung** kostet beim Bauen und senkt den Schaden bei Bränden. Sie ist das
+  erste Gesetz, das nicht umverteilt, sondern abwendet — und braucht deshalb die
+  Unglücke aus 4.8 als Gegenstück, sonst ist sie nur teuer.
+
+### 51. Mitgift, Testament und Stiftung
+
+Drei Wege, auf denen Vermögen den Besitzer wechselt, ohne dass jemand kauft oder stirbt.
+
+- **Die Mitgift** (`KONZEPT.md`, Abschnitt 1) macht die Heirat zwischen zwei Häusern zur
+  Verhandlung. Zu klären: wer sie zahlt (historisch die Familie der Braut — hier besser
+  beide oder frei verhandelt, weil das Konzept kein Geschlecht bevorzugt), ob sie beim Tod
+  zurückfällt, und was geschieht, wenn niemand zahlen kann. Bei NPC-Ehen braucht es eine
+  Regel, sonst heiratet niemand mehr.
+- **Das Testament** erlaubt einzelne Vermächtnisse neben der Erbregel. Zu klären: ob es
+  Pflichtteile gibt (das Konzept kennt bereits einen gesetzlichen Anteil der übrigen
+  Kinder — ein Testament, das ihn aushebelt, macht ihn wertlos), und ob es Schulden vor
+  Vermächtnissen bedient (ja, siehe Punkt 43).
+- **Die Stiftung** ist die Ausgabe für ein altes, reiches Haus: ein öffentliches Werk auf
+  eigene Kosten, das Ansehen über den Tod hinaus bringt (Punkt 47). Zu klären: ob der
+  Stifter mitbestimmt, was gebaut wird, oder ob er nur zahlt — und ob sein Name daran
+  hängen bleibt. Er sollte, sonst ist es eine Spende.
+
 ### 15. Weltinhalte: Berufe, Waren und Rezepte
 
 Ortsnamen und Karte der Startregion, Warenkatalog mit Produktionsketten,
@@ -630,6 +824,19 @@ gibt dem Acker seinen zweiten Abnehmer neben der Mühle. Die Taverne ist dann ke
 sondern ein Dienstleistungsbetrieb: Man geht hin, um Leute zu treffen, und das wirkt auf
 die Zuneigung. Zu klären ist, was ein Abend dort genau bewirkt und ob er billiger ist als
 derselbe Besuch unter vier Augen — sonst geht niemand hin.
+
+**Was beim Abgleich mit der mittelalterlichen Stadt noch fehlte** und hierher gehört, weil
+es Waren und Berufe sind:
+
+- **Pferd und Fuhrwerk.** Reisen und Warentransport gibt es, aber kein Mittel dazu. Ein
+  Zugtier wäre die erste Ware, die nicht ein Bedürfnis deckt, sondern **Zeit spart** — und
+  damit für jeden verschieden viel wert. Es setzt Reisen voraus (Punkt 41).
+- **Bader und Badstube.** Der Ort, an dem die Heilkunst wirkt, und der zweite Anlass, Geld
+  für Wohlbefinden auszugeben. Hängt an Krankheit (Punkt 5) — vorher gibt es nichts zu
+  heilen.
+- **Maß, Gewicht und Münze.** Wer betrügt, verkauft zu wenig für zu viel. Das wäre eine
+  Handlung mit Risiko, die den Ruf kostet (Punkt 47), und eine Amtsaufgabe für den
+  Kämmerer: eichen und prüfen. Reizvoll, aber erst sinnvoll, wenn Ruf und Ämter stehen.
 
 Offen bleiben die Erzeugnisse, deren Wirkung an fehlenden Systemen hängt: Heiltrank und
 Winterkleidung warten auf Krankheit (Punkt 5), Waffen, Rüstung und Gift auf den Kampf
