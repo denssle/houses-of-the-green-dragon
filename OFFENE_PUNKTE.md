@@ -152,6 +152,16 @@ Berufe, jeder Beruf hat sein Gebäude und seine Rezepte. Skizziert sind der **Sc
 Gift) und der **Schneider** (Kleidung gegen Kälte, Kleidung für den Umgang mit anderen).
 Weitere kommen dazu.
 
+**Mit Phase 4.10 gebaut:** die **Baukette** — Holzfäller und Steinmetz gewinnen Holz,
+Stein und Erz, Zimmerei, Steinmetzhütte und Schmiede machen daraus Bretter, Quader und
+Eisen, und verbaut wird es in jedem Haus. Zwei neue Fertigkeiten (Holzarbeit, Bergbau)
+und der Nachweis, dass die Regel trägt: Die Ware wirkt, weil Bauen sie verbraucht.
+
+Offen bleiben die Berufe, deren Wirkung an fehlenden Systemen hängt — Schneider und
+Alchemist warten auf Krankheit (Punkt 5), Waffenschmied und Giftmischer auf den Kampf
+(Punkt 6). Was auf nichts wartet, lässt sich sofort bauen: Kleidung fürs Auftreten und
+Duftwasser fürs Werben wirken auf Zuneigung, und die steht seit 4.3.
+
 Der Prüfstein bleibt derselbe wie bei Fertigkeiten und Persönlichkeitsachsen: **Wo wirkt
 die Ware?** Deshalb ist dieser Punkt nicht so unabhängig, wie er aussieht — er hängt an
 Systemen, die es noch nicht gibt:

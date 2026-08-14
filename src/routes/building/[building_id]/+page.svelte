@@ -161,7 +161,11 @@
 		<h3>Instandhaltung</h3>
 		{#if data.building.condition < 100}
 			<form method="POST" action="?/renovate" use:enhance>
-				<button type="submit">Renovieren ({data.renovationCost} Münzen)</button>
+				<button type="submit">
+					Renovieren ({data.renovationCost} Münzen{#each data.renovationMaterial as posten (posten.itemId)}
+						und {posten.quantity}
+						{posten.name}{/each})
+				</button>
 			</form>
 			<p>
 				<small>Wer früh renoviert, zahlt wenig — gezahlt wird nach dem, was fehlt.</small>

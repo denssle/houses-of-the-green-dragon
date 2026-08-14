@@ -118,6 +118,11 @@ verarbeiten. Damit hat jede Ware eine nachvollziehbare Herkunft, und Engpässe w
 sich die Kette entlang aus — wer den Wald hält, bestimmt den Preis für Bauholz und damit
 mittelbar, was Renovieren kostet.
 
+**Ein Haus besteht nicht aus Münzen.** Wer bauen oder renovieren will, braucht Bretter,
+Quader und Eisen — und damit hat jede Stufe der Kette einen Abnehmer: Der Holzfäller
+verkauft an die Zimmerei, die Zimmerei an den Bauherrn. Das ist der Grund, warum Holz
+einen Preis hat: weil jemand ein Haus will, nicht weil eine Tabelle es festlegt.
+
 **Pacht.** Abbauflächen sind knapp wie Bauland, aber sie gehören **der Stadt** und werden
 verpachtet, nicht verkauft. Ein Pachtverhältnis läuft auf Zeit und kostet laufend; wer
 nicht zahlt, verliert es. Das erzeugt drei Dinge, die dem Spiel guttun: eine

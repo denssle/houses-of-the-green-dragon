@@ -10,11 +10,17 @@ import { Plot as PlotModel } from '$lib/db/model/plot';
 import { convertToBuilding } from '$lib/db/attributes/building.attributes';
 import { build as buildLogic } from '$lib/game/buildingAction.logic';
 import {
+	CONDITION_MAX,
 	currentCondition,
 	isRuin,
+	type MaterialNeed,
+	materialFor,
+	missingMaterial,
+	producesBuildingMaterial,
 	purchase,
 	renovate,
 	RENOVATION_ACTION_POINT_COST,
+	renovationMaterial,
 	upgrade,
 	UPGRADE_ACTION_POINT_COST
 } from '$lib/game/building.logic';
@@ -25,6 +31,7 @@ import type {
 } from '$lib/db/attributes/building.attributes';
 import { Region as RegionModel } from '$lib/db/model/region';
 import * as characterService from '$lib/server/service/characterService';
+import * as needService from '$lib/server/service/needService';
 import * as electionService from '$lib/server/service/electionService';
 import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
@@ -111,6 +118,48 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			levels: [{ price: 350, name: 'Schule', wagePerActionPoint: 4 }]
 		},
 		{
+			optionId: 9,
+			initialName: 'Zimmerei',
+			type: 'CRAFT',
+			description: 'Sägt aus Stämmen die Bretter für Dach und Diele.',
+			limited: false,
+			limitedTo: 0,
+			actions: [],
+			skill: 'CONSTRUCTION',
+			recipe: {
+				input: [{ itemId: 'WOOD', quantity: 2 }],
+				outputItemId: 'PLANK',
+				baseOutput: 3,
+				actionPointCost: 1,
+				skill: 'CONSTRUCTION'
+			},
+			levels: [
+				{ price: 180, name: 'Sägeschuppen' },
+				{ price: 340, name: 'Zimmerei' }
+			]
+		},
+		{
+			optionId: 10,
+			initialName: 'Steinmetzhütte',
+			type: 'CRAFT',
+			description: 'Behaut Bruchstein zu Quadern für Mauern und Fundamente.',
+			limited: false,
+			limitedTo: 0,
+			actions: [],
+			skill: 'MINING',
+			recipe: {
+				input: [{ itemId: 'STONE', quantity: 2 }],
+				outputItemId: 'BLOCK',
+				baseOutput: 2,
+				actionPointCost: 1,
+				skill: 'MINING'
+			},
+			levels: [
+				{ price: 200, name: 'Steinmetzhütte' },
+				{ price: 380, name: 'Steinmetzei' }
+			]
+		},
+		{
 			optionId: 6,
 			initialName: 'Marktplatz',
 			type: 'PUBLIC',
@@ -166,11 +215,20 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			optionId: 2,
 			initialName: 'Schmiede',
 			type: 'CRAFT',
-			description: 'Ein bescheidener Handwerksbetrieb',
+			description: 'Schmiedet aus Erz das Eisen, das ein Haus zusammenhält.',
 			limited: false,
 			limitedTo: 0,
 			actions: ['WORK'],
 			skill: 'SMITHING',
+			// Seit 4.10 hat sie ein Rezept. Bis dahin war sie ein Arbeitsplatz ohne Werk:
+			// Man konnte dort Lohn verdienen, aber es entstand nichts.
+			recipe: {
+				input: [{ itemId: 'ORE', quantity: 3 }],
+				outputItemId: 'IRON',
+				baseOutput: 1,
+				actionPointCost: 1,
+				skill: 'SMITHING'
+			},
 			levels: [
 				{ price: 250, name: 'Schmiede', wagePerActionPoint: 3 },
 				{ price: 400, name: 'Werkstatt', wagePerActionPoint: 5 },
@@ -208,7 +266,9 @@ export async function limitReached(
 
 export type BuildResult =
 	| { ok: true; building: Building }
-	| { ok: false; reason: ActionFailureReason };
+	// `missing` sagt, **was** fehlt: „Das hast du nicht" ist keine Auskunft, wenn drei
+	// Waren gebraucht werden.
+	| { ok: false; reason: ActionFailureReason; missing?: MaterialNeed[] };
 
 /**
  * Errichtet ein Gebäude auf einem eigenen, freien Grundstück.
@@ -246,6 +306,20 @@ export async function build(
 			grenzeErreicht
 		);
 		if (!ergebnis.ok) return ergebnis;
+
+		// **Ein Haus besteht nicht aus Münzen.** Seit 4.10 kostet der Bau auch Bretter,
+		// Quader und Eisen — wer keine hat, kauft sie beim Zimmerer. Geprüft wird nach dem
+		// Geld und vor dem Anlegen: Der Bauherr soll nicht bezahlt haben und dann am
+		// fehlenden Brett scheitern.
+		// Wer die Kette selbst in Gang setzt, braucht sie noch nicht (siehe
+		// `producesBuildingMaterial`).
+		const bedarf = producesBuildingMaterial(option.recipe?.outputItemId)
+			? []
+			: materialFor(levelOf(option, 1).price);
+		const fehlt = await materialAbziehen(characterId, bedarf, t);
+		if (fehlt) {
+			return { ok: false, reason: 'NOT_IN_STOCK', missing: fehlt } as const;
+		}
 
 		const angelegt = await BuildingModel.create(
 			{
@@ -413,7 +487,7 @@ async function lebende(
 
 export type MaintenanceResult =
 	| { ok: true; spent: number }
-	| { ok: false; reason: ActionFailureReason };
+	| { ok: false; reason: ActionFailureReason; missing?: MaterialNeed[] };
 
 /**
  * Renovieren: Zustand auf Anfang, bezahlt nach dem, was fehlt.
@@ -440,16 +514,25 @@ export async function renovateBuilding(
 		const eigentümer = await characterService.loadForAction(characterId, tick, t);
 		if (!eigentümer) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
+		const zustand: number = zustandVon(gebäude, tick);
 		const ergebnis = renovate(
 			{
 				actionPoints: eigentümer.dataValues.actionPoints,
 				money: eigentümer.dataValues.money,
 				buildingSkill: await skillService.getLevel(characterId, 'CONSTRUCTION', t)
 			},
-			zustandVon(gebäude, tick),
+			zustand,
 			seasonOf(tick)
 		);
 		if (!ergebnis.ok) return ergebnis;
+
+		// Auch das Herrichten braucht Holz — weniger als ein Neubau, aber nicht nichts.
+		const fehlt = await materialAbziehen(
+			characterId,
+			renovationMaterial(Math.ceil(CONDITION_MAX - zustand)),
+			t
+		);
+		if (fehlt) return { ok: false, reason: 'NOT_IN_STOCK', missing: fehlt } as const;
 
 		await eigentümer.update(
 			{ actionPoints: ergebnis.actionPoints, money: ergebnis.money },
@@ -818,4 +901,45 @@ export async function maintainAsNpcMayor(
 	const ergebnis = await renovatePublicBuilding(inhaber.characterId, schlechtestes.id);
 	if (!ergebnis.ok) return undefined;
 	return { building: schlechtestes.name, spent: ergebnis.spent };
+}
+
+// --- Baumaterial ---------------------------------------------------------------------
+
+/**
+ * Material aus der Kammer nehmen — oder sagen, was fehlt.
+ *
+ * **Aus dem persönlichen Vorrat, nicht aus einem Betriebslager.** Wer baut, schleppt
+ * sein Holz selbst herbei; das Lager gehört dem Betrieb, und der Bauherr ist hier
+ * Kunde, nicht Eigentümer. Wer nichts hat, kauft beim Zimmerer — genau dafür gibt es ihn.
+ *
+ * Gibt `undefined` zurück, wenn es gereicht hat, sonst die Fehlmenge.
+ */
+async function materialAbziehen(
+	characterId: string,
+	bedarf: MaterialNeed[],
+	t: Transaction
+): Promise<MaterialNeed[] | undefined> {
+	if (bedarf.length === 0) return undefined;
+
+	const vorrat = new Map<string, number>();
+	for (const posten of await needService.getStock(characterId)) {
+		vorrat.set(posten.itemId, posten.quantity);
+	}
+
+	const fehlt: MaterialNeed[] = missingMaterial(bedarf, vorrat);
+	if (fehlt.length > 0) return fehlt;
+
+	for (const posten of bedarf) {
+		await needService.changeStock(characterId, posten.itemId, -posten.quantity, t);
+	}
+	return undefined;
+}
+
+/** Was ein Bau oder eine Renovierung an Material kostet — für die Anzeige. */
+export function materialForBuilding(price: number): MaterialNeed[] {
+	return materialFor(price);
+}
+
+export function materialForRenovation(missingCondition: number): MaterialNeed[] {
+	return renovationMaterial(missingCondition);
 }

@@ -208,3 +208,80 @@ export function purchase(
 	}
 	return { ok: true, buyerMoney: buyer.money - offer.forSalePrice, price: offer.forSalePrice };
 }
+
+// --- Baumaterial (4.10) --------------------------------------------------------------
+
+/** Was an Material gebraucht wird — Ware und Menge. */
+export interface MaterialNeed {
+	itemId: string;
+	quantity: number;
+}
+
+/**
+ * Wie viel Material ein Bau verschlingt.
+ *
+ * **Am Preis bemessen, nicht je Vorlage aufgezählt.** Ein Großhaus für 400 Münzen braucht
+ * viermal so viel wie eine Kate für 100 — das ergibt sich, statt in zehn Tabellenzeilen
+ * gepflegt zu werden, und jede neue Gebäudeart bringt ihren Materialbedarf von selbst mit.
+ *
+ * Die Mischung ist dieselbe für alles: viel Holz, halb so viel Stein, wenig Eisen. Ein
+ * Haus ist ein Haus; dass eine Mühle mehr Eisen bräuchte als eine Kate, wäre eine
+ * Feinheit, die niemand nachrechnet.
+ */
+export const PLANKS_PER_100 = 4;
+export const BLOCKS_PER_100 = 2;
+export const IRON_PER_100 = 1;
+
+/**
+ * Die Waren, aus denen gebaut wird.
+ *
+ * Wer einen Betrieb errichtet, der genau diese herstellt, braucht selbst keine: Die erste
+ * Zimmerei zimmert man sich aus dem, was im Wald liegt. Ohne diese Ausnahme stünde die
+ * ganze Kette vor einem Henne-Ei-Problem — für die Zimmerei bräuchte es Bretter, und
+ * Bretter gäbe es nur aus der Zimmerei. Sie löst sich von selbst auf, sobald die erste
+ * steht.
+ */
+export const BUILDING_MATERIALS: string[] = ['PLANK', 'BLOCK', 'IRON'];
+
+export function producesBuildingMaterial(outputItemId: string | undefined): boolean {
+	return outputItemId !== undefined && BUILDING_MATERIALS.includes(outputItemId);
+}
+
+export function materialFor(price: number): MaterialNeed[] {
+	if (price <= 0) return [];
+	const hundert: number = price / 100;
+
+	return [
+		{ itemId: 'PLANK', quantity: Math.max(1, Math.round(hundert * PLANKS_PER_100)) },
+		{ itemId: 'BLOCK', quantity: Math.max(1, Math.round(hundert * BLOCKS_PER_100)) },
+		{ itemId: 'IRON', quantity: Math.max(1, Math.round(hundert * IRON_PER_100)) }
+	];
+}
+
+/**
+ * Was eine Renovierung an Material braucht.
+ *
+ * Deutlich weniger als ein Neubau, und abhängig davon, wie viel fehlt: Wer sein Haus
+ * pflegt, kommt mit ein paar Brettern aus; wer es verfallen lässt, zahlt beim Herrichten
+ * doppelt — einmal in Münzen, einmal in Material.
+ */
+export const RENOVATION_MATERIAL_DIVISOR = 25;
+
+export function renovationMaterial(missingCondition: number): MaterialNeed[] {
+	if (missingCondition <= 0) return [];
+	const bretter: number = Math.max(1, Math.round(missingCondition / RENOVATION_MATERIAL_DIVISOR));
+	return [{ itemId: 'PLANK', quantity: bretter }];
+}
+
+/** Fehlt etwas? Gibt zurück, was zu wenig da ist — leer heißt: es reicht. */
+export function missingMaterial(
+	needed: MaterialNeed[],
+	stock: Map<string, number>
+): MaterialNeed[] {
+	return needed
+		.map((posten) => ({
+			itemId: posten.itemId,
+			quantity: posten.quantity - (stock.get(posten.itemId) ?? 0)
+		}))
+		.filter((posten) => posten.quantity > 0);
+}

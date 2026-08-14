@@ -19,11 +19,27 @@
 		<a href="{base}/plot" class="link">Erst eines kaufen</a> — gebaut wird nicht ins Leere.
 	</p>
 {:else}
+	{#if data.stock.length > 0}
+		<p>
+			<small>
+				In deiner Kammer: {#each data.stock as posten, i (posten.itemId)}{#if i > 0},
+					{/if}{posten.quantity}
+					{posten.name}{/each}
+			</small>
+		</p>
+	{/if}
+
 	{#each data.buildingsOptions as building (building.optionId)}
 		<section>
 			<b>{building.initialName}</b>
 			<i>{building.description}</i>
-			<p>{buildPrice(building)} Münzen</p>
+			<p>
+				{buildPrice(building)} Münzen{#if building.material.length > 0}
+					und
+					{#each building.material as posten, i (posten.itemId)}{#if i > 0},
+						{/if}{posten.quantity}
+						{posten.name}{/each}{/if}
+			</p>
 			<form method="POST" use:enhance>
 				<input type="hidden" name="optionId" value={building.optionId} />
 				<label>

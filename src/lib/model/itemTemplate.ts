@@ -47,6 +47,48 @@ const WAREN: ItemTemplate[] = [
 		// Realtage. Ein Vorrat für eine Woche ist eine überschaubare Menge.
 		nourishment: 40,
 		basePrice: 4
+	},
+
+	// --- Die Baukette (4.10) ---------------------------------------------------------
+	//
+	// Alle sechs haben dieselbe Wirkung: Sie werden beim **Bauen und Renovieren**
+	// verbraucht. Damit hat Holz einen Preis, weil jemand ein Haus will — und nicht, weil
+	// eine Tabelle ihn festlegt.
+	{
+		itemId: 'WOOD',
+		name: 'Holz',
+		description: 'Stämme aus dem Eichwald, roh.',
+		basePrice: 2
+	},
+	{
+		itemId: 'STONE',
+		name: 'Bruchstein',
+		description: 'Rohe Blöcke aus dem Steinbruch.',
+		basePrice: 3
+	},
+	{
+		itemId: 'ORE',
+		name: 'Eisenerz',
+		description: 'Was die Grube hergibt — noch nicht viel wert.',
+		basePrice: 3
+	},
+	{
+		itemId: 'PLANK',
+		name: 'Bretter',
+		description: 'Gesägt und gehobelt, bereit für den Dachstuhl.',
+		basePrice: 6
+	},
+	{
+		itemId: 'BLOCK',
+		name: 'Quader',
+		description: 'Behauener Stein für Mauern und Fundamente.',
+		basePrice: 8
+	},
+	{
+		itemId: 'IRON',
+		name: 'Eisen',
+		description: 'Nägel, Bänder, Beschläge — was ein Haus zusammenhält.',
+		basePrice: 9
 	}
 ];
 

@@ -30,7 +30,10 @@ const STADT = 'Grünau';
 const UMLAND = [
 	{ name: 'Eichwald', type: 'FOREST', resource: 'WOOD', distance: 2, flaechen: 2 },
 	{ name: 'Steinbruch am Hang', type: 'QUARRY', resource: 'STONE', distance: 3, flaechen: 1 },
-	{ name: 'Mühlenfeld', type: 'FIELD', resource: 'GRAIN', distance: 2, flaechen: 3 }
+	{ name: 'Mühlenfeld', type: 'FIELD', resource: 'GRAIN', distance: 2, flaechen: 3 },
+	// Mit der Baukette (4.10): Ohne Grube kein Erz, ohne Erz kein Eisen — und ohne Eisen
+	// hält kein Haus zusammen.
+	{ name: 'Erzgrube', type: 'MINE', resource: 'ORE', distance: 4, flaechen: 1 }
 ] as const;
 
 /** Die Gassen der Startstadt. Je Eintrag entstehen vier Grundstücke. */

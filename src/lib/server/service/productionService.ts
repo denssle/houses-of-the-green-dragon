@@ -11,6 +11,7 @@ import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as needService from '$lib/server/service/needService';
 import * as lawService from '$lib/server/service/lawService';
+import * as tradeService from '$lib/server/service/tradeService';
 import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
 
@@ -48,11 +49,34 @@ const ABBAU: Record<string, Recipe> = {
 		// Getreide gibt es zur Ernte, nicht im Januar. Die erste Wirkung der Jahreszeiten,
 		// die etwas erzeugt statt nur etwas zu verteuern.
 		seasons: ['SUMMER', 'AUTUMN']
+	},
+	// Holz, Stein und Erz — seit 4.10 haben sie eine Verwendung: Sie werden über die
+	// Werkstätten zu Baumaterial, und das wird beim Bauen und Renovieren verbraucht.
+	//
+	// **Ohne Jahreszeiten-Einschränkung, anders als beim Getreide.** Ein Baum lässt sich
+	// im Februar fällen und ein Stein im Juli brechen; nur der Acker richtet sich nach
+	// dem Jahr. Der Winteraufschlag aufs Bauen (4.5b) reicht als jahreszeitliche Wirkung.
+	WOOD: {
+		input: [],
+		outputItemId: 'WOOD',
+		baseOutput: 4,
+		actionPointCost: 1,
+		skill: 'FORESTRY'
+	},
+	STONE: {
+		input: [],
+		outputItemId: 'STONE',
+		baseOutput: 3,
+		actionPointCost: 1,
+		skill: 'MINING'
+	},
+	ORE: {
+		input: [],
+		outputItemId: 'ORE',
+		baseOutput: 2,
+		actionPointCost: 1,
+		skill: 'MINING'
 	}
-	// Holz, Stein und Erz fehlen mit Absicht: Sie hätten heute keine Verwendung, und eine
-	// Ware ohne Wirkung ist Dekoration — dieselbe Regel wie bei Fertigkeiten und
-	// Persönlichkeitsachsen. Sie kommen mit dem Baumaterial für die Renovierung und mit
-	// dem Schmiedehandwerk.
 };
 
 export function harvestRecipe(resourceType: string | null): Recipe | undefined {
@@ -234,9 +258,21 @@ export async function craft(characterId: string, buildingId: string): Promise<Pr
 		const handwerker = await characterService.loadForAction(characterId, tick, t);
 		if (!handwerker) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
-		const vorrat: Record<string, number> = {};
+		// **Kammer und Betriebslager zusammen.** Wer sein Holz einlagert und dann nicht
+		// sägen kann, weil die Werkstatt „nichts mehr" hat, hält das für einen Fehler — und
+		// hat recht: Es liegt ja da. Verbraucht wird zuerst das Lager, dann die Kammer;
+		// eingelagertes Material ist erklärtermaßen für den Betrieb bestimmt.
+		const lager: Record<string, number> = {};
+		for (const posten of await tradeService.getBuildingStock(buildingId)) {
+			lager[posten.itemId] = posten.quantity;
+		}
+		const kammer: Record<string, number> = {};
 		for (const posten of await needService.getStock(characterId)) {
-			vorrat[posten.itemId] = posten.quantity;
+			kammer[posten.itemId] = posten.quantity;
+		}
+		const vorrat: Record<string, number> = { ...kammer };
+		for (const [itemId, menge] of Object.entries(lager)) {
+			vorrat[itemId] = (vorrat[itemId] ?? 0) + menge;
 		}
 
 		const ergebnis = produce(
@@ -252,7 +288,14 @@ export async function craft(characterId: string, buildingId: string): Promise<Pr
 		if (!ergebnis.ok) return ergebnis;
 
 		for (const zutat of rezept.input) {
-			await needService.changeStock(characterId, zutat.itemId, -zutat.quantity, t);
+			const ausDemLager: number = Math.min(lager[zutat.itemId] ?? 0, zutat.quantity);
+			if (ausDemLager > 0) {
+				await tradeService.changeBuildingStock(buildingId, zutat.itemId, -ausDemLager, t);
+			}
+			const ausDerKammer: number = zutat.quantity - ausDemLager;
+			if (ausDerKammer > 0) {
+				await needService.changeStock(characterId, zutat.itemId, -ausDerKammer, t);
+			}
 		}
 		await needService.changeStock(characterId, rezept.outputItemId, ergebnis.produced, t);
 		await handwerker.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });

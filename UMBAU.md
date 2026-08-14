@@ -1412,6 +1412,53 @@ Versteigerung wäre eine Zierde gewesen. Jetzt sind sie aus der Liste **und** au
 Kaufweg genommen: Die Liste ist die Anzeige, aber wer die Kennung kennt, käme sonst über
 das Formular doch heran.
 
+**4.10 Die Baukette.** ✓ Drei neue Betriebe, zwei neue Fertigkeiten — und ein Haus, das
+nicht mehr aus Münzen allein besteht.
+
+**Die leeren Abbauflächen bekommen einen Sinn.** Eichwald und Steinbruch standen seit
+4.6c ohne Rezept da, weil Holz und Stein nichts bewirkt hätten — und eine Ware ohne
+Wirkung ist Dekoration. Jetzt haben sie eine: **Bauen und Renovieren verbrauchen
+Material.** Das ist der Angelpunkt des ganzen Schritts; ohne ihn wären Bretter eine Zahl
+im Lager.
+
+Die Kette ist vollständig und kurz: Holz, Stein und Erz aus dem Umland (Fertigkeiten
+**Holzarbeit** und **Bergbau**, beide neu), verarbeitet in **Zimmerei**, **Steinmetzhütte**
+und **Schmiede** zu Brettern, Quadern und Eisen, verbaut in jedem Haus. Die Schmiede
+bekommt damit endlich ein Rezept — bis hierher war sie ein Arbeitsplatz ohne Werk: Man
+konnte dort Lohn verdienen, aber es entstand nichts.
+
+**Der Materialbedarf bemisst sich am Preis**, statt je Vorlage aufgezählt zu werden: Ein
+Großhaus für 400 Münzen braucht viermal so viel wie eine Kate für 100. Damit bringt jede
+künftige Gebäudeart ihren Bedarf von selbst mit, und niemand muss zehn Tabellenzeilen
+pflegen.
+
+**Zwei Fallen, die beim Durchspielen sichtbar wurden:**
+
+Die erste ist ein Henne-Ei-Problem: Für die Zimmerei bräuchte es Bretter, und Bretter gibt
+es nur aus der Zimmerei. Die Auflösung ist eine einzige Ausnahme — **wer einen Betrieb
+errichtet, der Baumaterial herstellt, braucht selbst keins.** Die erste Zimmerei zimmert
+man sich aus dem, was im Wald liegt. Sie löst sich von selbst auf, sobald die erste steht.
+
+Die zweite betrifft das Handwerk allgemein: `craft` nahm die Zutaten **nur aus der eigenen
+Kammer**. Wer sein Holz in die Werkstatt einlagerte und dann sägen wollte, bekam „Davon
+hast du nichts mehr" zu hören — obwohl es sichtbar dort lag. Jetzt zählt beides zusammen,
+und verbraucht wird zuerst das Lager: Eingelagertes Material ist erklärtermaßen für den
+Betrieb bestimmt.
+
+Die **öffentliche Hand baut ohne Material.** Die Stadt hat kein Lager, sie vergibt
+Aufträge und bezahlt sie; ein Stadtvorrat wäre ein eigenes System, und für die Wirkung der
+Kette braucht es ihn nicht — der Bedarf der Spieler reicht als Nachfrage.
+
+Dazu eine Migration für Bestandswelten: Die **Erzgrube** gab es im Seed noch nicht. Ohne
+sie kein Erz, ohne Erz kein Eisen — und ohne Eisen könnte in einer laufenden Welt niemand
+mehr bauen. (Dieselbe Regel wie beim Deploy zuvor: Wer den Seed erweitert, schreibt eine
+Migration dazu.)
+
+_Fertig, wenn:_ Ein Haus braucht mehr als Geld, und jemand verdient daran. — Erledigt und
+am gebauten Server durchgespielt: Wald gepachtet, dreimal Holz geschlagen, Zimmerei
+errichtet (ohne Material), Holz eingelagert, viermal gesägt — und aus den Brettern, zwei
+Quadern und einem Eisen ein Wohnhaus gebaut.
+
 **4.9b Fernhandel und weitere Städte.** Waren zwischen Orten bewegen (`shipment` mit
 Ankunfts-Tick statt Fortbewegung), Gründung einer zweiten Stadt. Fernziele für etablierte
 Dynastien — und die Voraussetzung dafür, dass ein Räuber jemanden unterwegs überfallen

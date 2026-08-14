@@ -16,7 +16,11 @@ import * as lifecycleService from '$lib/server/service/lifecycleService';
 import * as schoolService from '$lib/server/service/schoolService';
 import type { SkillType } from '$lib/game/skill.logic';
 import { AGE_OF_MAJORITY } from '$lib/game/time';
-import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
+import {
+	CONDITION_MAX,
+	RENOVATION_COST_PER_POINT,
+	renovationMaterial
+} from '$lib/game/building.logic';
 import { levelOf, maxLevel, upgradePrice } from '$lib/model/buildingTemplate';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -78,7 +82,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 						).filter((kind) => kind.age < AGE_OF_MAJORITY)
 					}
 				: undefined,
-		renovationCost: Math.ceil(CONDITION_MAX - building.condition) * RENOVATION_COST_PER_POINT
+		renovationCost: Math.ceil(CONDITION_MAX - building.condition) * RENOVATION_COST_PER_POINT,
+		// Was das Herrichten an Holz kostet — sichtbar, bevor man es versucht.
+		renovationMaterial: renovationMaterial(Math.ceil(CONDITION_MAX - building.condition)).map(
+			(posten) => ({ ...posten, name: getItemTemplate(posten.itemId)?.name ?? posten.itemId })
+		)
 	};
 };
 
@@ -118,8 +126,21 @@ export const actions = {
 			locals.currentCharacter.id,
 			params.building_id
 		);
-		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
-		return { message: `Renoviert. ${ergebnis.spent} Münzen für Material und Handwerk.` };
+		if (!ergebnis.ok) {
+			const fehlt = 'missing' in ergebnis ? ergebnis.missing : undefined;
+			const nachsatz: string = fehlt
+				? ' Es fehlen: ' +
+					fehlt
+						.map(
+							(posten) =>
+								posten.quantity + ' ' + (getItemTemplate(posten.itemId)?.name ?? posten.itemId)
+						)
+						.join(', ') +
+					'.'
+				: '';
+			return fail(400, { message: actionMessage(ergebnis.reason) + nachsatz });
+		}
+		return { message: `Renoviert. ${ergebnis.spent} Münzen und das Holz dazu.` };
 	},
 
 	upgrade: async ({ params, locals }) => {

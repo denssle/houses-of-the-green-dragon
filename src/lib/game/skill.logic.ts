@@ -26,10 +26,21 @@ import type { ActionFailureReason } from '$lib/game/actionFailure';
  * Redekunst (4.7) und Kämpfen (offener Punkt 6) kommen mit den Handlungen, zu denen sie
  * gehören — eine Fertigkeit ohne Wirkung wäre eine Zahl, die niemand liest.
  */
-export const SKILL_TYPES = ['SMITHING', 'CONSTRUCTION', 'FARMING', 'BAKING'] as const;
+export const SKILL_TYPES = [
+	'SMITHING',
+	'CONSTRUCTION',
+	'FARMING',
+	'BAKING',
+	// Mit der Baukette (4.10): Wer Holz schlägt, ist kein Bauer, und wer Stein bricht,
+	// kein Schmied. Beide Fertigkeiten wirken wie die anderen — auf Ertrag und Kosten.
+	'FORESTRY',
+	'MINING'
+] as const;
 export type SkillType = (typeof SKILL_TYPES)[number];
 
 export const SKILL_NAMES: Record<SkillType, string> = {
+	FORESTRY: 'Holzarbeit',
+	MINING: 'Bergbau',
 	SMITHING: 'Schmieden',
 	CONSTRUCTION: 'Bauen',
 	FARMING: 'Ackerbau',

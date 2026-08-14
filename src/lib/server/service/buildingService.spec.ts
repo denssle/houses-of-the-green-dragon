@@ -1,3 +1,4 @@
+import { Inventory } from '$lib/db/model/inventory';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { sequelize } from '$lib/db/sequelize';
@@ -41,7 +42,21 @@ async function person(name: string, extras: Record<string, unknown> = {}): Promi
 		RegionId: stadtId,
 		...extras
 	});
+	await materialGeben(id);
 	return id;
+}
+
+/**
+ * Seit 4.10 kostet Bauen auch Material.
+ *
+ * Die Testfiguren bekommen reichlich davon in die Kammer: Geprüft wird hier, was der Bau
+ * mit Geld und Grundstück macht — dass ohne Bretter nichts geht, steht in
+ * `material.spec.ts`.
+ */
+async function materialGeben(characterId: string): Promise<void> {
+	for (const ware of ['PLANK', 'BLOCK', 'IRON']) {
+		await Inventory.create({ CharacterId: characterId, itemId: ware, quantity: 200 });
+	}
 }
 
 /** Ein Gebäude auf eigenem Grund, mit dem angegebenen Stand. */
@@ -95,6 +110,7 @@ async function charakterMitGeld(money: number): Promise<string> {
 		money,
 		RegionId: stadtId
 	});
+	await materialGeben(id);
 	return id;
 }
 
