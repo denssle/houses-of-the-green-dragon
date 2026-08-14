@@ -9,13 +9,17 @@ import type { Dynasty } from '$lib/model/dynasty';
 export interface DynastyAttributes {
 	id: string;
 	name: string;
-	UserId: string;
+	/** `null` bei Häusern, die niemand spielt — NPC-Familien und gelöschte Konten (5.10). */
+	UserId: string | null;
 	isExtinct: boolean;
 	foundedAtTick: number;
 	extinctAtTick: number | null;
 }
 
-export type DynastyCreationAttributes = Optional<DynastyAttributes, 'isExtinct' | 'extinctAtTick'>;
+export type DynastyCreationAttributes = Optional<
+	DynastyAttributes,
+	'isExtinct' | 'extinctAtTick' | 'UserId'
+>;
 
 export function convertToDynasty(attributes: DynastyAttributes): Dynasty {
 	return {

@@ -796,8 +796,11 @@ Diese eine Mechanik trägt zwei andere:
 - **Heiraten zwei Spielerhäuser, entscheidet der Zufall über jedes Kind.** Welchem der
   beiden Häuser ein Kind zugeschlagen wird, ist ein Münzwurf — kein Geschlecht „heiratet
   hinein“ und gibt sein Haus auf. Beide Spieler haben dieselbe Aussicht auf einen Erben,
-  und keiner muss fürchten, mit der Ehe seine Dynastie zu beenden. Bei einer Ehe mit einem
-  NPC ohne Haus fallen alle Kinder an das Haus des Spielers.
+  und keiner muss fürchten, mit der Ehe seine Dynastie zu beenden.
+- **Ist nur ein Elternteil gespielt, fallen alle Kinder an dessen Haus.** Auch NPCs haben
+  ein Haus, aber niemanden, der es führt. Ohne diese Regel halbierte eine Ehe mit einem
+  NPC die Erbenaussicht — für etwas, das der Spieler nicht in der Hand hat. Die Häuser
+  sind gleichwertig; die Aufmerksamkeit dahinter ist es nicht.
 - **NPCs wählen nach Zuneigung.** Es gibt kein separates Wahlkampfsystem: Wer über
   Generationen Beziehungen gepflegt, anständig entlohnt und die Familie vergrößert hat,
   hat Stimmen. Wer die Stadt gegen sich aufgebracht hat, verliert sie.
@@ -1631,7 +1634,15 @@ Startbedingungen für neue Spieler.
 
 Hier bewusst nicht wiederholt, damit die Listen nicht auseinanderlaufen.
 
-Eine Annahme sei festgehalten, weil sie sonst später als Lücke auffällt: Jeder Charakter
-gehört zu einer Dynastie — auch NPC-Kinder gehören zum Haus ihrer Eltern. Nur
-Fremd-NPCs, die die Welt zum Start bevölkern, stehen ohne Haus da; bei ihnen entfällt
-die mittlere Schicht der Zuneigung.
+**Jeder Charakter gehört zu einem Haus — ohne Ausnahme.** Auch die Fremden, die die Welt
+zum Start bevölkern, bekommen eines; jeder für sich, denn zwei Fremde mit demselben
+Nachnamen wären eine Verwandtschaft, die es nicht gibt. Damit greift die mittlere Schicht
+der Zuneigung überall, NPC-Familien können aussterben, und ein Spieler kann sich mit einer
+NPC-Familie verfeinden.
+
+**Der Hausname ist der Nachname.** Es gibt keine zweite Stelle, an der ein Familienname
+stünde: Wer zu welchem Haus gehört, ist dieselbe Auskunft wie „wie heißt er mit
+Nachnamen". Angezeigt wird der volle Name überall dort, wo Menschen verschiedener Häuser
+nebeneinanderstehen — Chronik, Leuteliste, Rathaus, Markt, Belegschaft. Wo der
+Zusammenhang das Haus schon geklärt hat, genügt der Vorname: bei den eigenen Kindern, im
+eigenen Stammbaum.

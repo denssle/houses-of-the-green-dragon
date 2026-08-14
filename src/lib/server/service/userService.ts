@@ -220,7 +220,10 @@ export async function anonymizeAccount(userId: string): Promise<boolean> {
 
 	const haeuser = await Dynasty.findAll({ where: { UserId: userId } });
 	for (const haus of haeuser) {
-		await haus.update({ name: 'Ein vergessenes Haus' });
+		// **Der Hausname ist der Nachname** (5.10), also muss er sich wie einer lesen. „Ein
+		// vergessenes Haus" ergäbe „Namenlos Ein vergessenes Haus" — ein Satz, wo ein Name
+		// stehen sollte. „Vergessen" tut dasselbe und liest sich wie ein Familienname.
+		await haus.update({ name: 'Vergessen' });
 		await Character.update({ firstName: 'Namenlos' }, { where: { DynastyId: haus.dataValues.id } });
 		// Aus dem gespielten Charakter wird ein Einwohner wie jeder andere.
 		await Character.update(

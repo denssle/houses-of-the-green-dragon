@@ -13,6 +13,7 @@ import { Region } from '$lib/db/model/region';
 import { Plot } from '$lib/db/model/plot';
 import * as characterService from '$lib/server/service/characterService';
 import * as electionService from '$lib/server/service/electionService';
+import * as nameService from '$lib/server/service/nameService';
 import * as skillService from '$lib/server/service/skillService';
 import * as tradeService from '$lib/server/service/tradeService';
 import * as worldService from '$lib/server/service/worldService';
@@ -262,8 +263,13 @@ export async function getOpenJobs(regionId: string, seekerId?: string): Promise<
 			wage: eintrag.offeredWage,
 			free: frei,
 			// Bei einem staedtischen Betrieb ist die Stadt der Arbeitgeber, kein Mensch.
-			employerName:
-				chef?.dataValues.firstName ?? (eintrag.ownerCharacterId ? 'jemand' : 'der Stadt')
+			// Sonst steht dort ein Name mit Haus (5.10): Bei wem man in Dienst tritt, ist
+			// eine Frage der Familie.
+			employerName: chef
+				? ((await nameService.displayName(chef.dataValues.id)) ?? 'jemand')
+				: eintrag.ownerCharacterId
+					? 'jemand'
+					: 'der Stadt'
 		});
 	}
 	return stellen.sort((a, b) => b.wage - a.wage);
@@ -290,13 +296,19 @@ export async function getStaff(
 ): Promise<{ id: string; name: string; wage: number }[]> {
 	const stellen = await Employment.findAll({ where: { BuildingId: buildingId } });
 
+	// Eine Belegschaft ist eine Reihe Fremder nebeneinander — da gehört der Nachname dazu
+	// (5.10).
+	const namen = await nameService.displayNames(
+		stellen.map((s) => s.dataValues.EmployeeCharacterId)
+	);
+
 	const leute: { id: string; name: string; wage: number }[] = [];
 	for (const stelle of stellen) {
 		const person = await Character.findByPk(stelle.dataValues.EmployeeCharacterId);
 		if (!person) continue;
 		leute.push({
 			id: person.dataValues.id,
-			name: person.dataValues.firstName,
+			name: namen.get(person.dataValues.id) ?? person.dataValues.firstName,
 			wage: stelle.dataValues.wagePerActionPoint
 		});
 	}

@@ -217,6 +217,32 @@ describe('Sterben und Erben', () => {
 			expect(haus.extinctAtTick).toBe(JETZT);
 		});
 
+		it('lässt auch ein Haus ohne Spieler erlöschen', async () => {
+			// Seit 5.10 gehört jeder zu einem Haus, auch die NPC-Familien. Dieselbe Regel
+			// für alle: Wer ohne Erben stirbt, dessen Linie endet — ein Nachname, den
+			// niemand mehr trägt, gehört zu einer Familie, die es nicht mehr gibt.
+			const hausId = randomUUID();
+			await Dynasty.create({ id: hausId, name: 'Töpfer', UserId: null, foundedAtTick: 0 });
+			const letzte = await person('Letzte', 80, { DynastyId: hausId });
+
+			const fall = await lifecycleService.die(letzte, JETZT);
+
+			expect(fall?.extinctDynastyId).toBe(hausId);
+			expect((await Dynasty.findByPk(hausId))!.dataValues.isExtinct).toBe(true);
+		});
+
+		it('lässt ein NPC-Haus am Leben, solange jemand darin lebt', async () => {
+			const hausId = randomUUID();
+			await Dynasty.create({ id: hausId, name: 'Seiler', UserId: null, foundedAtTick: 0 });
+			await person('Tochter', 25, { DynastyId: hausId });
+			const mutter = await person('Mutter', 80, { DynastyId: hausId });
+
+			const fall = await lifecycleService.die(mutter, JETZT);
+
+			expect(fall?.extinctDynastyId).toBeNull();
+			expect((await Dynasty.findByPk(hausId))!.dataValues.isExtinct).toBe(false);
+		});
+
 		it('lässt ein Haus am Leben, wenn ein NPC des Hauses stirbt', async () => {
 			// Nur der Tod des **gespielten** Charakters entscheidet über das Haus. Stürbe
 			// jedes kinderlose Geschwisterkind die Dynastie mit, wäre sie nicht zu halten.

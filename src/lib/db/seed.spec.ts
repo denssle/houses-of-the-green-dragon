@@ -82,11 +82,16 @@ describe('Weltaufbau', () => {
 		expect(städtisch.every((b) => b.dataValues.PlotId !== null)).toBe(true);
 	});
 
-	it('bevölkert die Stadt mit erwachsenen Fremden ohne Haus', async () => {
+	it('bevölkert die Stadt mit erwachsenen Einwohnern, jeder mit eigenem Haus', async () => {
 		const leute = await Character.findAll({ where: { role: 'NPC' } });
 
 		expect(leute).toHaveLength(8);
-		expect(leute.every((c) => c.dataValues.DynastyId === null)).toBe(true);
+		// **Seit 5.10 gehört jeder zu einem Haus** — der Hausname ist der Nachname, und
+		// die Ausnahme für Fremd-NPCs ist gefallen. Eigene Häuser und keine geteilten:
+		// Zwei Fremde mit demselben Nachnamen wären eine Verwandtschaft, die es nicht gibt.
+		const haeuser = leute.map((c) => c.dataValues.DynastyId);
+		expect(haeuser.every((id) => id !== null)).toBe(true);
+		expect(new Set(haeuser).size).toBe(8);
 		// Die Geburtstage müssen zum Weltalter passen: lauter Erwachsene, niemand älter
 		// als die Welt selbst.
 		for (const person of leute) {

@@ -109,6 +109,8 @@ describe('Ein Konto löschen', () => {
 
 		const haus = (await Dynasty.findOne({ where: { UserId: userId } }))!.dataValues;
 		expect(haus.name).not.toContain('abschied');
+		// Er muss sich als Nachname lesen lassen, denn genau das ist er (5.10).
+		expect(haus.name).toBe('Vergessen');
 	});
 
 	it('lässt die Chronik stehen, aber ohne den Namen', async () => {
@@ -121,7 +123,9 @@ describe('Ein Konto löschen', () => {
 
 		const chronik = await chronicleService.getChronicle({ characterId });
 		expect(chronik).toHaveLength(1);
-		expect(chronik[0].subject?.name).toBe('Namenlos');
+		// Seit 5.10 trägt jeder den Namen seines Hauses — auch der Namenlose. „Vergessen"
+		// ist dabei kein Rest, sondern die Auskunft: Hier stand einmal jemand.
+		expect(chronik[0].subject?.name).toBe('Namenlos Vergessen');
 	});
 
 	it('meldet einen unbekannten Benutzer, statt etwas zu tun', async () => {

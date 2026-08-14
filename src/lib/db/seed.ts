@@ -3,6 +3,7 @@ import { randomPersonality } from '$lib/game/personality.logic';
 import { SATIETY_MAX } from '$lib/game/need.logic';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
+import { Dynasty } from '$lib/db/model/dynasty';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
 import { RegionLink } from '$lib/db/model/regionLink';
@@ -58,16 +59,29 @@ const STADTGEBAEUDE = [
 	{ optionId: 6, name: 'Marktplatz', adresse: 'Am Markt 4' }
 ] as const;
 
-/** Fremde NPCs, die die Stadt von Anfang an bevölkern — Kundschaft, Arbeitskraft, Wähler. */
+/**
+ * Die NPCs, die die Stadt von Anfang an bevölkern — Kundschaft, Arbeitskraft, Wähler.
+ *
+ * **Jeder gründet sein eigenes Haus** (5.10). Der Nachname ist der Hausname, und damit
+ * gehört ausnahmslos jeder Charakter zu einem Haus — was das Konzept ohnehin behauptete,
+ * mit den Fremd-NPCs als Ausnahme. Die Ausnahme ist gefallen.
+ *
+ * Eigene Häuser und keine geteilten: Bei einer Heirat behält jeder das seine (kein
+ * Geschlecht heiratet hinein), und Familien entstehen dort, wo Kinder zur Welt kommen.
+ * Zwei Fremde, die zufällig denselben Nachnamen trügen, wären dagegen eine Verwandtschaft,
+ * die es nicht gibt.
+ *
+ * Die Namen nach dem, was man tut — so entstanden Familiennamen in einer Stadt dieser Zeit.
+ */
 const BEVOELKERUNG = [
-	{ firstName: 'Alheid', gender: 'FEMALE', age: 52 },
-	{ firstName: 'Bertram', gender: 'MALE', age: 47 },
-	{ firstName: 'Cunne', gender: 'FEMALE', age: 34 },
-	{ firstName: 'Dietrich', gender: 'MALE', age: 29 },
-	{ firstName: 'Elsbeth', gender: 'FEMALE', age: 26 },
-	{ firstName: 'Frowin', gender: 'MALE', age: 41 },
-	{ firstName: 'Gertrud', gender: 'FEMALE', age: 19 },
-	{ firstName: 'Hinrik', gender: 'MALE', age: 23 }
+	{ firstName: 'Alheid', lastName: 'Steinmetz', gender: 'FEMALE', age: 52 },
+	{ firstName: 'Bertram', lastName: 'Schmied', gender: 'MALE', age: 47 },
+	{ firstName: 'Cunne', lastName: 'Müller', gender: 'FEMALE', age: 34 },
+	{ firstName: 'Dietrich', lastName: 'Weber', gender: 'MALE', age: 29 },
+	{ firstName: 'Elsbeth', lastName: 'Becker', gender: 'FEMALE', age: 26 },
+	{ firstName: 'Frowin', lastName: 'Fischer', gender: 'MALE', age: 41 },
+	{ firstName: 'Gertrud', lastName: 'Schuster', gender: 'FEMALE', age: 19 },
+	{ firstName: 'Hinrik', lastName: 'Wagner', gender: 'MALE', age: 23 }
 ] as const;
 
 export async function seedWorld(): Promise<boolean> {
@@ -138,6 +152,16 @@ export async function seedWorld(): Promise<boolean> {
 	}
 
 	for (const person of BEVOELKERUNG) {
+		// Ein Haus ohne Benutzer: eine Familie, die niemand spielt. Es gilt dieselbe
+		// Mechanik wie für Spielerhäuser — Erbfolge, Erlöschen, Fehden.
+		const hausId = randomUUID();
+		await Dynasty.create({
+			id: hausId,
+			name: person.lastName,
+			UserId: null,
+			foundedAtTick: jetzt
+		});
+
 		await Character.create({
 			id: randomUUID(),
 			firstName: person.firstName,
@@ -148,7 +172,7 @@ export async function seedWorld(): Promise<boolean> {
 			satiety: SATIETY_MAX,
 			lastNeedTick: jetzt,
 			RegionId: stadtId,
-			// Ohne Dynastie: Fremd-NPCs gehören zu keinem Haus.
+			DynastyId: hausId,
 			// Die Anlagen gewürfelt — sie sind die erste Generation und haben niemanden,
 			// von dem sie etwas erben könnten.
 			...randomPersonality(Math.random)

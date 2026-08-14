@@ -865,6 +865,19 @@ falsche. Zu klären ist nur die Benennung — „Schmieden (1 AP)" für das Hand
 „Eine Schicht arbeiten" für den Lohn wären schon zwei verschiedene Sätze. Der Test greift
 inzwischen den exakten Namen ab und würde eine Umbenennung merken.
 
+### 54. Ein Test, der würfelt
+
+`selfSustainingEconomy.spec.ts` → „lässt darin auch arbeiten" schlug bei 5.10 einmal fehl
+und lief danach zwanzigmal durch. Er lässt zwanzig Ticks NPC-Entscheidungen laufen und
+prüft dann, ob irgendwo etwas hergestellt oder ausgehängt wurde — und diese
+Entscheidungen hängen an `Math.random`. Startkapital und Anlagen sind bereits gesetzt, die
+Handlungswahl selbst nicht.
+
+**Ein Test, der gelegentlich rot ist, ist auf Dauer schlimmer als keiner:** Man gewöhnt
+sich an, ihn noch einmal laufen zu lassen — und übersieht das eine Mal, bei dem er recht
+hatte. Der Weg dahin ist derselbe wie bei den Anlagen: den Zufall hineinreichen statt ihn
+im Dienst zu ziehen, damit der Test ihn festhalten kann.
+
 ### 15. Weltinhalte: Berufe, Waren und Rezepte
 
 Ortsnamen und Karte der Startregion, Warenkatalog mit Produktionsketten,

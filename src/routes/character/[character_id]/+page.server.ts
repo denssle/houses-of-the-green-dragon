@@ -4,14 +4,17 @@ import { nameMessage } from '$lib/actionMessage';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as characterService from '$lib/server/service/characterService';
+import * as dynastyService from '$lib/server/service/dynastyService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
+import * as nameService from '$lib/server/service/nameService';
 import * as needService from '$lib/server/service/needService';
 import * as skillService from '$lib/server/service/skillService';
 import * as plotService from '$lib/server/service/plotService';
 import * as regionService from '$lib/server/service/regionService';
 import * as worldService from '$lib/server/service/worldService';
 import { deathProbabilityPerYear } from '$lib/game/mortality.logic';
+import { fullName } from '$lib/game/naming.logic';
 import { personalityLabel } from '$lib/game/personality.logic';
 import { ageInYears, MAX_ACTION_POINTS, yearOf } from '$lib/game/time';
 
@@ -50,8 +53,15 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		? await buildingService.getBuilding(gezeigt.homeBuildingId)
 		: undefined;
 
+	// Das Haus gibt den Nachnamen (5.10) — und steht als eigene Angabe daneben, weil es
+	// mehr ist als ein Namensbestandteil: Wer zu welchem Haus gehört, entscheidet über
+	// Erbfolge, Fehden und Zuneigung.
+	const haus = gezeigt.dynastyId ? await dynastyService.getDynasty(gezeigt.dynastyId) : undefined;
+
 	return {
 		character: gezeigt,
+		house: haus ? { id: haus.id, name: haus.name } : undefined,
+		displayName: fullName(gezeigt.firstName, haus?.name),
 		self: selbst,
 		age: alter,
 		// Wer tot ist, soll nicht lebendig wirken: Ein Verweis aus der Chronik führt oft zu
@@ -71,6 +81,9 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		// Sättigung ist eine Auskunft über den Zustand einer Truhe, nicht über einen
 		// Menschen auf der Gasse.
 		hunger: selbst ? await needService.getHunger(gezeigt.id, jetzt) : undefined,
+		// Der Ehepartner mit vollem Namen (5.10): Eine Ehe verbindet in aller Regel zwei
+		// Häuser, und genau das soll dastehen.
+		spouseName: await nameService.displayName(gezeigt.spouseId),
 		spouse: gezeigt.spouseId ? await characterService.getCharacter(gezeigt.spouseId) : undefined,
 		// Der Lebenslauf ist kein eigenes System, sondern die Chronik nach dieser Person
 		// gefiltert: geboren, verheiratet, im Amt, gestorben.

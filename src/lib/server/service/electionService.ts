@@ -17,6 +17,7 @@ import {
 	TERM_TICKS,
 	wouldStand
 } from '$lib/game/election.logic';
+import * as nameService from '$lib/server/service/nameService';
 import * as worldService from '$lib/server/service/worldService';
 
 /**
@@ -100,7 +101,7 @@ export async function getHolder(
 
 	const lebende = await Character.findAll({
 		where: { id: { [Op.in]: rang }, deathTick: null },
-		attributes: ['id', 'firstName']
+		attributes: ['id', 'firstName', 'DynastyId']
 	});
 	const lebendeIds = new Set<string>(lebende.map((c) => c.dataValues.id));
 
@@ -109,7 +110,9 @@ export async function getHolder(
 
 	return {
 		characterId: inhaberId,
-		name: lebende.find((c) => c.dataValues.id === inhaberId)!.dataValues.firstName,
+		// Mit Hausnamen (5.10): Ein Amt trägt jemand aus einer bestimmten Familie, und im
+		// Rathaus stehen Fremde nebeneinander.
+		name: (await nameService.displayName(inhaberId))!,
 		termEndsTick: wahl.dataValues.termEndsTick,
 		movedUpBy: rang.indexOf(inhaberId)
 	};
@@ -339,13 +342,17 @@ export async function getBallot(regionId: string, viewerId?: string): Promise<Ba
 	});
 	const stimmen = await Vote.findAll({ where: { ElectionId: wahl.dataValues.id } });
 
+	// Wer zur Wahl steht, steht mit seinem Haus zur Wahl (5.10) — bei einer Stadtwahl ist
+	// die Familie die halbe Auskunft.
+	const namen = await nameService.displayNames(kandidaturen.map((k) => k.dataValues.CharacterId));
+
 	const kandidaten = [];
 	for (const kandidatur of kandidaturen) {
 		const person = await Character.findByPk(kandidatur.dataValues.CharacterId);
 		if (!person) continue;
 		kandidaten.push({
 			id: person.dataValues.id,
-			name: person.dataValues.firstName,
+			name: namen.get(person.dataValues.id) ?? person.dataValues.firstName,
 			// Zwischenstände sind sichtbar: Ein Wahlkampf, in dem niemand weiß, wo er
 			// steht, ist keiner.
 			votes: stimmen.filter(

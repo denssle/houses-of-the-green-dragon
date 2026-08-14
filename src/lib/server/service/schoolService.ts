@@ -17,6 +17,7 @@ import { AGE_OF_MAJORITY, ageInYears } from '$lib/game/time';
 import * as characterService from '$lib/server/service/characterService';
 import * as chronicleService from '$lib/server/service/chronicleService';
 import * as lawService from '$lib/server/service/lawService';
+import * as nameService from '$lib/server/service/nameService';
 import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
 
@@ -63,6 +64,11 @@ export interface Teacher {
 export async function getTeachers(buildingId: string): Promise<Teacher[]> {
 	const angestellte = await Employment.findAll({ where: { BuildingId: buildingId } });
 
+	// Bei wem man sein Kind in die Lehre gibt, ist eine Frage der Familie (5.10).
+	const namen = await nameService.displayNames(
+		angestellte.map((s) => s.dataValues.EmployeeCharacterId)
+	);
+
 	const lehrer: Teacher[] = [];
 	for (const stelle of angestellte) {
 		const person = await Character.findByPk(stelle.dataValues.EmployeeCharacterId);
@@ -73,7 +79,7 @@ export async function getTeachers(buildingId: string): Promise<Teacher[]> {
 			if (teachableUpTo(fertigkeit.level) <= 0) continue;
 			lehrer.push({
 				characterId: person.dataValues.id,
-				name: person.dataValues.firstName,
+				name: namen.get(person.dataValues.id) ?? person.dataValues.firstName,
 				skill: fertigkeit.type,
 				skillName: SKILL_NAMES[fertigkeit.type],
 				level: fertigkeit.level,

@@ -16,6 +16,23 @@ import { AGE_OF_MAJORITY, ageInYears } from '$lib/game/time';
 export const MIN_NAME_LENGTH = 2;
 export const MAX_NAME_LENGTH = 30;
 
+/**
+ * Vor- und Nachname zusammen — der Nachname ist der Name des Hauses (5.10).
+ *
+ * **Nicht überall.** Wo Menschen aus verschiedenen Häusern nebeneinanderstehen, sagt der
+ * Nachname, wer zu wem gehört: in der Chronik, in der Leuteliste, im Rathaus, auf dem
+ * Markt. Wo der Zusammenhang das Haus ohnehin klärt — die eigenen Kinder, der eigene
+ * Stammbaum —, ist er Wiederholung und bleibt weg. Deshalb entscheidet die Anzeige und
+ * nicht der Dienst, ob er dazugehört.
+ *
+ * Ein Haus ohne Namen kommt vor: bei gelöschten Konten (5.9). Dann steht der Vorname
+ * allein, und das ist die richtige Auskunft — mehr ist über die Person nicht zu sagen.
+ */
+export function fullName(firstName: string, lastName: string | null | undefined): string {
+	const haus: string = (lastName ?? '').trim();
+	return haus ? `${firstName} ${haus}` : firstName;
+}
+
 export type NameCheck = { ok: true; name: string } | { ok: false; reason: NameProblem };
 
 export type NameProblem = 'TOO_SHORT' | 'TOO_LONG' | 'TAKEN' | 'TOO_OLD' | 'NOT_YOURS';

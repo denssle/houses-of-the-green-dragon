@@ -12,6 +12,7 @@ import { getItemTemplate } from '$lib/model/itemTemplate';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as lawService from '$lib/server/service/lawService';
+import * as nameService from '$lib/server/service/nameService';
 import * as needService from '$lib/server/service/needService';
 import * as worldService from '$lib/server/service/worldService';
 
@@ -353,6 +354,12 @@ async function zuListe(
 	angebote: Awaited<ReturnType<typeof ShopOffer.findAll>>,
 	viewerId?: string
 ): Promise<OfferOnList[]> {
+	// Am Markt steht jeder mit seinem Haus (5.10): Wer bei wem kauft, ist eine Frage
+	// zwischen Familien.
+	const namen = await nameService.displayNames(
+		angebote.map((a) => a.dataValues.SellerCharacterId).filter((id): id is string => Boolean(id))
+	);
+
 	const liste: OfferOnList[] = [];
 	for (const angebot of angebote) {
 		const vorlage = getItemTemplate(angebot.dataValues.itemId);
@@ -367,7 +374,7 @@ async function zuListe(
 			quantity: angebot.dataValues.quantity,
 			pricePerUnit: angebot.dataValues.pricePerUnit,
 			sellerId: angebot.dataValues.SellerCharacterId,
-			sellerName: verkaeufer?.dataValues.firstName ?? 'jemand',
+			sellerName: verkaeufer ? (namen.get(verkaeufer.dataValues.id) ?? 'jemand') : 'jemand',
 			buildingId: gebaeude.dataValues.id,
 			buildingName: gebaeude.dataValues.name,
 			mine: angebot.dataValues.SellerCharacterId === viewerId

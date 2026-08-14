@@ -1,8 +1,10 @@
-import { affectionBonus, garmentIntact } from '$lib/game/attire.logic';
+﻿import { affectionBonus, garmentIntact } from '$lib/game/attire.logic';
 import { Op, type Transaction } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
 import { Character } from '$lib/db/model/character';
+import { Dynasty } from '$lib/db/model/dynasty';
+import { fullName } from '$lib/game/naming.logic';
 import { DynastyRelationship } from '$lib/db/model/dynastyRelationship';
 import { Relationship } from '$lib/db/model/relationship';
 import {
@@ -163,12 +165,31 @@ export async function getNeighbours(
 		order: [['firstName', 'ASC']]
 	});
 
+	// Die Hausnamen in einem Rutsch: Auf dieser Seite stehen alle Einwohner der Stadt
+	// nebeneinander, und erst der Nachname sagt, wer zu wem gehört (5.10).
+	const hausNamen = new Map<string, string>();
+	const hausIds: string[] = [
+		...new Set(
+			leute.map((person) => person.dataValues.DynastyId).filter((id): id is string => Boolean(id))
+		)
+	];
+	if (hausIds.length > 0) {
+		const haeuser = await Dynasty.findAll({
+			where: { id: { [Op.in]: hausIds } },
+			attributes: ['id', 'name']
+		});
+		for (const haus of haeuser) hausNamen.set(haus.dataValues.id, haus.dataValues.name);
+	}
+
 	const liste: PersonOnList[] = [];
 	for (const person of leute) {
 		const stand = await getAffection(person.dataValues.id, characterId, tick);
 		liste.push({
 			id: person.dataValues.id,
-			firstName: person.dataValues.firstName,
+			firstName: fullName(
+				person.dataValues.firstName,
+				person.dataValues.DynastyId ? hausNamen.get(person.dataValues.DynastyId) : undefined
+			),
 			title: person.dataValues.title,
 			affectionToYou: affectionLabel(stand.affection),
 			kinship: stand.kinship,

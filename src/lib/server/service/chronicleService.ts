@@ -5,6 +5,7 @@ import { Dynasty } from '$lib/db/model/dynasty';
 import { Building } from '$lib/db/model/building';
 import { Event } from '$lib/db/model/event';
 import type { EventFacts, EventKind } from '$lib/game/chronicle.logic';
+import * as nameService from '$lib/server/service/nameService';
 
 /**
  * Die Chronik: was geschehen ist.
@@ -156,16 +157,9 @@ export async function getChronicle(query: ChronicleQuery = {}): Promise<Chronicl
 		if (zeile.dataValues.dynastyId) hausIds.add(zeile.dataValues.dynastyId);
 	}
 
-	const personen = new Map<string, string>();
-	if (personIds.size > 0) {
-		const gefunden = await Character.findAll({
-			where: { id: { [Op.in]: [...personIds] } },
-			attributes: ['id', 'firstName']
-		});
-		for (const person of gefunden) {
-			personen.set(person.dataValues.id, person.dataValues.firstName);
-		}
-	}
+	// **Mit dem Hausnamen** (5.10): In der Chronik stehen Menschen aus verschiedenen
+	// Häusern nebeneinander, und erst der Nachname sagt, wer zu wem gehört.
+	const personen = await nameService.displayNames(personIds);
 
 	const gebaeude = new Map<string, string>();
 	if (gebaeudeIds.size > 0) {

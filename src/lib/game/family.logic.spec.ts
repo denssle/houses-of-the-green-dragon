@@ -179,26 +179,45 @@ describe('Familie', () => {
 	});
 
 	describe('welchem Haus ein Kind zufällt', () => {
+		const gespielt = (id: string | null) => ({ dynastyId: id, played: true });
+		const npc = (id: string | null) => ({ dynastyId: id, played: false });
+
 		it('folgt dem einzigen Haus, wenn nur einer eines hat', () => {
-			expect(assignDynasty('haus-a', null, 0)).toBe('haus-a');
-			expect(assignDynasty(null, 'haus-b', 0.99)).toBe('haus-b');
+			expect(assignDynasty(gespielt('haus-a'), npc(null), 0)).toBe('haus-a');
+			expect(assignDynasty(npc(null), gespielt('haus-b'), 0.99)).toBe('haus-b');
 		});
 
 		it('bleibt beim gemeinsamen Haus', () => {
-			expect(assignDynasty('haus-a', 'haus-a', 0.99)).toBe('haus-a');
+			expect(assignDynasty(gespielt('haus-a'), npc('haus-a'), 0.99)).toBe('haus-a');
 		});
 
 		/**
 		 * Kein Geschlecht „heiratet hinein" und gibt sein Haus auf: Beide Spieler haben
 		 * dieselbe Aussicht auf einen Erben.
 		 */
-		it('wirft bei zwei Häusern eine Münze — je Kind', () => {
-			expect(assignDynasty('haus-a', 'haus-b', 0.2)).toBe('haus-a');
-			expect(assignDynasty('haus-a', 'haus-b', 0.8)).toBe('haus-b');
+		it('wirft zwischen zwei Spielerhäusern eine Münze — je Kind', () => {
+			expect(assignDynasty(gespielt('haus-a'), gespielt('haus-b'), 0.2)).toBe('haus-a');
+			expect(assignDynasty(gespielt('haus-a'), gespielt('haus-b'), 0.8)).toBe('haus-b');
 		});
 
+		/**
+		 * Seit 5.10 hat auch jeder NPC ein Haus. Ohne diese Regel halbierte eine Ehe mit
+		 * einem NPC die Erbenaussicht — für etwas, das der Spieler nicht in der Hand hat.
+		 */
+		it('gibt das Kind an das gespielte Haus, wenn der Partner ein NPC ist', () => {
+			expect(assignDynasty(gespielt('haus-a'), npc('haus-b'), 0.99)).toBe('haus-a');
+			expect(assignDynasty(npc('haus-b'), gespielt('haus-a'), 0.01)).toBe('haus-a');
+		});
+
+		it('würfelt unter NPCs weiter — dort ist keiner bevorzugt', () => {
+			expect(assignDynasty(npc('haus-a'), npc('haus-b'), 0.2)).toBe('haus-a');
+			expect(assignDynasty(npc('haus-a'), npc('haus-b'), 0.8)).toBe('haus-b');
+		});
+
+		// Kommt seit 5.10 nicht mehr vor; die Absicherung bleibt, damit ein fehlender
+		// Hauseintrag kein Kind ohne Namen erzeugt.
 		it('lässt Kinder ohne Haus als Fremde aufwachsen', () => {
-			expect(assignDynasty(null, null, 0.5)).toBeNull();
+			expect(assignDynasty(npc(null), npc(null), 0.5)).toBeNull();
 		});
 	});
 });

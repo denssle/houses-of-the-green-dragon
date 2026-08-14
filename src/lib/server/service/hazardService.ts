@@ -17,6 +17,7 @@ import { currentCondition } from '$lib/game/building.logic';
 import { TICKS_PER_YEAR } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as chronicleService from '$lib/server/service/chronicleService';
+import * as nameService from '$lib/server/service/nameService';
 
 /**
  * Unglücke: Raub und Brand.
@@ -163,7 +164,10 @@ async function raid(
 			value: beute,
 			detail: 'MONEY'
 		});
-		return { kind: 'RAID', what: opfer.dataValues.firstName, value: beute };
+		// Mit Hausnamen (5.10) — wie in der Chronik, in die dasselbe Ereignis wandert.
+		const name: string =
+			(await nameService.displayName(getroffen.id)) ?? opfer.dataValues.firstName;
+		return { kind: 'RAID', what: name, value: beute };
 	}
 
 	const beute: number = loot(getroffen.menge);

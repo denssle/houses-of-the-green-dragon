@@ -19,6 +19,7 @@ import {
 } from '$lib/game/auction.logic';
 import * as chronicleService from '$lib/server/service/chronicleService';
 import * as electionService from '$lib/server/service/electionService';
+import * as nameService from '$lib/server/service/nameService';
 import * as worldService from '$lib/server/service/worldService';
 
 /**
@@ -311,7 +312,11 @@ export async function getOpenAuctions(
 			address: flaeche.dataValues.address,
 			closesTick: auktion.dataValues.closesTick,
 			highest: bestes?.amount ?? null,
-			highestBidderName: bieter?.dataValues.firstName ?? null,
+			// Mit Hausnamen (5.10): Gegen wen man bietet, ist bei einer Versteigerung unter
+			// Familien die eigentliche Auskunft.
+			highestBidderName: bieter
+				? ((await nameService.displayName(bieter.dataValues.id)) ?? null)
+				: null,
 			mine: bestes?.bidderId === viewerId,
 			nextBid: nextBid(bestes?.amount ?? null)
 		});

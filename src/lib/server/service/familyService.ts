@@ -296,8 +296,14 @@ async function zurWeltBringen(
 				money: 0,
 				RegionId: mutter.dataValues.RegionId,
 				DynastyId: assignDynasty(
-					mutter.dataValues.DynastyId,
-					vater?.dataValues.DynastyId ?? null,
+					{
+						dynastyId: mutter.dataValues.DynastyId,
+						played: mutter.dataValues.role === 'PLAYER'
+					},
+					{
+						dynastyId: vater?.dataValues.DynastyId ?? null,
+						played: vater?.dataValues.role === 'PLAYER'
+					},
 					roll()
 				),
 				motherId: mutter.dataValues.id,

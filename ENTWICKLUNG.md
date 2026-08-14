@@ -2136,6 +2136,54 @@ Daten geschieht, soll das entscheiden können, bevor er welche hergibt.
 _Fertig, wenn:_ Jemand kann verlangen, dass seine Daten verschwinden, ohne dass die Welt
 Lücken bekommt. — Erledigt; die Anbieterangaben fehlen noch.
 
+**5.10 Jeder hat einen Nachnamen.** ✓ Bisher trugen nur Spielerfiguren einen — die
+Einwohner der Stadt hießen Alheid, Bertram, Cunne, als wäre die Stadt ein Dorf mit acht
+Leuten.
+
+**Der Hausname _ist_ der Nachname.** Das war die eine Entscheidung, aus der alles Übrige
+folgte. Ein zweites Feld `lastName` neben der Dynastie wäre schneller gebaut gewesen und
+hätte dieselbe Auskunft an zwei Stellen gespeichert — die erste Frage wäre gewesen, welche
+gilt, wenn sie sich widersprechen. Stattdessen bekommt jeder Fremd-NPC ein eigenes Haus,
+und der Name kommt von dort.
+
+**Jeder für sich, keine geteilten Häuser.** Zwei Fremde mit demselben Nachnamen wären eine
+Verwandtschaft, die es nicht gibt — und Verwandtschaft heißt in diesem Spiel Erbfolge.
+
+**Die Häuser sind vollwertig.** Dieselben Regeln für alle: Die Zuneigungsschicht „Haus zu
+Haus" greift auch unter NPCs, ein Spieler kann sich mit einer NPC-Familie verfeinden, und
+**ein NPC-Haus kann aussterben**. Letzteres verlangte einen Eingriff in `hausFortfuehren`,
+das bis dahin auf „war gespielt" prüfte: Wer ohne Erben stirbt, dessen Linie endet, egal
+wer ihn geführt hat. Gezählt werden dabei die **lebenden** Angehörigen — ein Haus endet
+erst mit dem letzten, nicht mit dem ersten Toten.
+
+**Ein Fund, der ohne diesen Schritt nie aufgefallen wäre:** `assignDynasty` würfelt das
+Haus jedes Kindes aus, sobald _beide_ Eltern eines haben. Solange NPCs keines hatten,
+fielen alle Kinder ans Spielerhaus — mit 5.10 wäre das stillschweigend gekippt, und eine
+Ehe mit einem NPC hätte im Schnitt die Hälfte des Nachwuchses an eine Familie verloren,
+die der Spieler nicht führt. Die Regel heißt jetzt: **Ist nur ein Elternteil gespielt,
+fällt das Kind an dessen Haus.** Der Münzwurf bleibt, wo er hingehört — zwischen zwei
+Spielern und zwischen zwei NPCs. Die Häuser sind gleichwertig; die Aufmerksamkeit dahinter
+ist es nicht.
+
+**`nameService` statt einer Schleife an neun Stellen.** Die Aufgabe war überall dieselbe:
+aus Kennungen Namen machen, in zwei Abfragen statt in zweimal so vielen wie Personen. Das
+Modul kennt nur Charaktere und Häuser und darf deshalb von jedem Dienst benutzt werden,
+ohne einen Zyklus zu erzeugen.
+
+**Wo der volle Name steht und wo nicht** ist eine Regel und keine Geschmacksfrage: voll,
+wo Menschen verschiedener Häuser nebeneinanderstehen — Chronik, Leuteliste, Rathaus,
+Markt, Belegschaft, Lehrer, Gesetzestafel, Versteigerung. Vorname allein, wo der
+Zusammenhang das Haus schon geklärt hat: eigene Kinder, eigener Stammbaum. Sie steht bei
+`fullName` in `naming.logic.ts`, damit die nächste Anzeigestelle sie nicht neu erfinden
+muss.
+
+Nebenbei fiel auf, dass die Anonymisierung aus 5.9 ihr Haus „Ein vergessenes Haus" nannte
+— was als Nachname „Namenlos Ein vergessenes Haus" ergab, einen Satz, wo ein Name stehen
+sollte. Jetzt heißt es **„Vergessen"** und tut dasselbe.
+
+_Fertig, wenn:_ Kein Mensch in der Stadt steht ohne Nachnamen da, und keine Anzeige
+verrät, wer Spielerfigur ist und wer nicht. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

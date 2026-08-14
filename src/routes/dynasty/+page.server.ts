@@ -25,7 +25,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		// Ein Spieler führt genau einen Charakter. Ob schon einer da ist, entscheidet
 		// darüber, ob der Weg zu einem neuen überhaupt angeboten wird.
 		hasCharacter: Boolean(await characterService.getCharacterForUser(locals.currentUser.id)),
-		founder: lebend ? await userService.getUser(lebend.foundedBy) : undefined,
+		// Ein Haus ohne Gründer gibt es seit 5.10: NPC-Familien und gelöschte Konten.
+		// Auf dieser Seite steht allerdings immer das eigene, also ist der Fall theoretisch.
+		founder: lebend?.foundedBy ? await userService.getUser(lebend.foundedBy) : undefined,
 		tree: lebend
 			? await familyService.getFamilyTree(lebend.id, await worldService.currentTick())
 			: [],

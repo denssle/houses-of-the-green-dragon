@@ -395,13 +395,29 @@ async function hausFortfuehren(
 	tick: number,
 	t: Transaction
 ): Promise<string | null> {
-	// Fremd-NPCs gehören zu keinem Haus: Sie sterben, ihr Besitz wandert, sonst nichts.
-	if (!dynastyId || !warGespielt) return null;
+	if (!dynastyId) return null;
 
+	// Der Erbe rückt nach — aber gespielt wird er nur, wenn auch der Verstorbene gespielt
+	// wurde. In einem NPC-Haus (5.10) erbt ein NPC von einem NPC.
 	if (erbeId) {
-		await Character.update({ role: 'PLAYER' }, { where: { id: erbeId }, transaction: t });
+		if (warGespielt) {
+			await Character.update({ role: 'PLAYER' }, { where: { id: erbeId }, transaction: t });
+		}
 		return null;
 	}
+
+	// **Auch ein Haus ohne Spieler erlischt** (5.10). Dieselbe Regel für alle: Wer ohne
+	// Erben stirbt, dessen Linie endet. Vorher galt sie nur für gespielte Häuser, weil
+	// NPCs zu keinem gehörten — jetzt gehören sie zu einem, und ein Nachname, den niemand
+	// mehr trägt, gehört zu einer Familie, die es nicht mehr gibt.
+	//
+	// Geprüft wird gegen die **lebenden** Angehörigen: Ein Haus endet erst mit dem
+	// letzten. Der Verstorbene ist zu diesem Zeitpunkt bereits als tot eingetragen.
+	const nochLebende: number = await Character.count({
+		where: { DynastyId: dynastyId, deathTick: null },
+		transaction: t
+	});
+	if (nochLebende > 0) return null;
 
 	await Dynasty.update(
 		{ isExtinct: true, extinctAtTick: tick },

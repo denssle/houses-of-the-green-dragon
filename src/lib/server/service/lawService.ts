@@ -17,6 +17,7 @@ import {
 } from '$lib/game/law.logic';
 import { TICKS_PER_YEAR } from '$lib/game/time';
 import * as electionService from '$lib/server/service/electionService';
+import * as nameService from '$lib/server/service/nameService';
 
 /**
  * Gesetze und ihre Erhebung.
@@ -112,18 +113,20 @@ export async function chronicle(regionId: string, limit = 10): Promise<Chronicle
 		limit
 	});
 
+	// Wer ein Gesetz erlassen hat, wird mit Haus genannt (5.10): Die Stadtgeschichte merkt
+	// sich Familien, nicht Vornamen.
+	const namen = await nameService.displayNames(
+		zeilen.map((z) => z.dataValues.EnactedByCharacterId).filter((id): id is string => Boolean(id))
+	);
+
 	const eintraege: ChronicleEntry[] = [];
 	for (const zeile of zeilen) {
-		const urheber = zeile.dataValues.EnactedByCharacterId
-			? await Character.findByPk(zeile.dataValues.EnactedByCharacterId, {
-					attributes: ['id', 'firstName']
-				})
-			: null;
+		const urheberId: string | null = zeile.dataValues.EnactedByCharacterId ?? null;
 		eintraege.push({
 			kind: zeile.dataValues.kind,
 			value: zeile.dataValues.value,
 			enactedTick: zeile.dataValues.enactedTick,
-			enactedBy: urheber?.dataValues.firstName ?? null
+			enactedBy: urheberId ? (namen.get(urheberId) ?? null) : null
 		});
 	}
 	return eintraege;

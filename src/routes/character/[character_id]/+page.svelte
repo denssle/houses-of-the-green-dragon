@@ -8,9 +8,12 @@
 	let { data, form }: PageProps = $props();
 </script>
 
-<h2>{data.character.firstName}</h2>
+<h2>{data.displayName}</h2>
 <p>
 	<i>{data.character.title}</i>
+	{#if data.house}
+		— aus dem Haus {data.house.name}
+	{/if}
 	{#if data.diedInYear !== null}
 		<b>— gestorben im Jahr {data.diedInYear}</b>
 	{/if}
@@ -62,7 +65,9 @@
 	<dd>
 		{#if data.spouse}
 			verheiratet mit
-			<a href="{base}/character/{data.spouse.id}" class="link">{data.spouse.firstName}</a>
+			<a href="{base}/character/{data.spouse.id}" class="link"
+				>{data.spouseName ?? data.spouse.firstName}</a
+			>
 			{#if data.character.pregnantSinceTick !== null}
 				<b>— ein Kind ist unterwegs</b>
 			{/if}

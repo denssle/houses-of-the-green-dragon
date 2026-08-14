@@ -171,23 +171,40 @@ export function isDue(pregnantSinceTick: number, currentTick: number): boolean {
 	return currentTick - pregnantSinceTick >= PREGNANCY_TICKS;
 }
 
+/** Was für die Hauswahl von einem Elternteil zählt. */
+export interface ParentHouse {
+	dynastyId: string | null;
+	/** Wird dieser Elternteil von einem Menschen geführt? */
+	played: boolean;
+}
+
 /**
  * Welchem Haus ein Kind zufällt.
  *
- * Heiraten zwei Spielerhäuser, entscheidet der Zufall je Kind — kein Geschlecht
+ * **Heiraten zwei Spielerhäuser, entscheidet der Zufall je Kind** — kein Geschlecht
  * „heiratet hinein" und gibt sein Haus auf. Beide Spieler haben dieselbe Aussicht auf
  * einen Erben, und keiner muss fürchten, mit der Ehe seine Dynastie zu beenden.
  *
- * Hat nur ein Elternteil ein Haus, fallen alle Kinder daran; hat keiner eines, wächst
- * das Kind als Fremd-NPC auf.
+ * **Ist nur ein Elternteil gespielt, fallen alle Kinder an dessen Haus.** Seit 5.10 hat
+ * auch jeder NPC ein Haus — ohne diese Regel halbierte eine Ehe mit einem NPC die
+ * Erbenaussicht, und zwar für etwas, das der Spieler nicht beeinflussen kann: Den Partner
+ * führt er nicht, und ein Kind im NPC-Haus ist für ihn verloren. Die Häuser sind
+ * gleichwertig; die *Aufmerksamkeit* dahinter ist es nicht.
+ *
+ * Erben zwei NPCs voneinander, entscheidet wieder der Zufall — unter ihnen ist keiner
+ * bevorzugt.
  */
 export function assignDynasty(
-	motherDynastyId: string | null,
-	fatherDynastyId: string | null,
+	mother: ParentHouse,
+	father: ParentHouse,
 	roll: number
 ): string | null {
-	if (motherDynastyId === null) return fatherDynastyId;
-	if (fatherDynastyId === null) return motherDynastyId;
-	if (motherDynastyId === fatherDynastyId) return motherDynastyId;
-	return roll < 0.5 ? motherDynastyId : fatherDynastyId;
+	if (mother.dynastyId === null) return father.dynastyId;
+	if (father.dynastyId === null) return mother.dynastyId;
+	if (mother.dynastyId === father.dynastyId) return mother.dynastyId;
+
+	if (mother.played !== father.played) {
+		return mother.played ? mother.dynastyId : father.dynastyId;
+	}
+	return roll < 0.5 ? mother.dynastyId : father.dynastyId;
 }
