@@ -36,11 +36,25 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		locals.currentCharacter !== undefined &&
 		building.ownerCharacterId === locals.currentCharacter.id;
 
+	// Wohnraum mit freiem Platz, der einem selbst oder der Stadt gehört — dann darf man
+	// einziehen (5.6). Die Zahl steht daneben: „Noch zwei Plätze" ist die Auskunft, die
+	// über Bleiben oder Weitersuchen entscheidet.
+	const freiePlaetze: number | null = await buildingService.freierWohnraum(building.id);
+	const darfEinziehen: boolean =
+		locals.currentCharacter !== undefined &&
+		locals.currentCharacter.homeBuildingId !== building.id &&
+		(gehoertMir || building.ownerType === 'CITY') &&
+		freiePlaetze !== null &&
+		freiePlaetze > 0;
+
 	return {
 		building,
 		option,
 		plot: building.plotId ? await plotService.getPlot(building.plotId) : undefined,
 		mine: gehoertMir,
+		freeRoom: freiePlaetze,
+		canMoveIn: darfEinziehen,
+		livesHere: locals.currentCharacter?.homeBuildingId === building.id,
 		levelName: option ? levelOf(option, building.level).name : undefined,
 		maxLevel: option ? maxLevel(option) : 1,
 		upgradeCost: option ? upgradePrice(option, building.level) : undefined,
@@ -292,6 +306,24 @@ export const actions = {
 		const kosten: string =
 			ergebnis.fee > 0 ? `${ergebnis.fee} Münzen Schulgeld.` : 'auf Kosten der Stadt.';
 		return { message: `Ein Schultag bei ${ergebnis.teacher} — ${kosten}` };
+	},
+
+	/**
+	 * Hier einziehen.
+	 *
+	 * Der Weg, den es bis 5.6 nur für NPCs gab: in die städtische Unterkunft oder ins
+	 * eigene Haus. Wer obdachlos ist, erholt sich nicht und bekommt keine Kinder — für
+	 * einen Neuling war das eine Sackgasse, für einen Abgebrannten ebenso.
+	 */
+	moveIn: async ({ params, locals }) => {
+		if (!locals.currentCharacter) {
+			return fail(401, { message: 'Kein Charakter, der einziehen könnte' });
+		}
+
+		const ergebnis = await buildingService.moveInto(locals.currentCharacter.id, params.building_id);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+
+		return { message: 'Du wohnst jetzt hier.' };
 	},
 
 	/** Dem eigenen Haus einen Namen geben — „Bäckerei" ist eine Gattung, kein Betrieb. */

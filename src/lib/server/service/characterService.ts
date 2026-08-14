@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+﻿import { randomUUID } from 'node:crypto';
 import type { Model, Transaction } from 'sequelize';
 import type { Character } from '$lib/model/character';
 import type { Gender } from '$lib/db/attributes/enums';
@@ -10,6 +10,7 @@ import type {
 } from '$lib/db/attributes/character.attributes';
 import { convertToCharacter } from '$lib/db/attributes/character.attributes';
 import { findStartRegionId } from '$lib/db/seed';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as worldService from '$lib/server/service/worldService';
 import { regrownActionPoints } from '$lib/game/tick.logic';
 import { actionPointFactor, currentSatiety, SATIETY_MAX } from '$lib/game/need.logic';
@@ -47,7 +48,16 @@ export async function create(
 		// also gewürfelt. Ab der zweiten Generation vererbt `familyService` die Anlagen.
 		...randomPersonality(Math.random)
 	});
-	return convertToCharacter(angelegt.dataValues);
+
+	// **Ein Dach von Anfang an, wenn die Stadt eines übrig hat** (5.6). Genau dafür steht
+	// die städtische Unterkunft: Wer sie nicht bekommt, ist obdachlos — und Obdachlosigkeit
+	// heißt keine Erholung und keine Kinder, also das Ende der Dynastie, bevor sie beginnt.
+	//
+	// Das ist keine Starthilfe, die etwas schenkt, sondern die Umsetzung dessen, wofür das
+	// Haus gebaut wurde. Ist es voll, beginnt man eben im Freien und muss sich sputen.
+	await buildingService.moveIntoFreeShelter(angelegt.dataValues.id);
+
+	return convertToCharacter((await CharacterModel.findByPk(angelegt.dataValues.id))!.dataValues);
 }
 
 /**

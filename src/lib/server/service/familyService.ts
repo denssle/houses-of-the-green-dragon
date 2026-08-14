@@ -1,9 +1,8 @@
-import { affectionBonus, garmentIntact } from '$lib/game/attire.logic';
+﻿import { affectionBonus, garmentIntact } from '$lib/game/attire.logic';
 import { randomUUID } from 'node:crypto';
 import { Op, type Transaction } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
-import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import type {
 	CharacterAttributes,
@@ -18,7 +17,6 @@ import {
 	court,
 	isDue
 } from '$lib/game/family.logic';
-import { residentsAt } from '$lib/game/building.logic';
 import { SATIETY_MAX } from '$lib/game/need.logic';
 import { inheritPersonality, type Personality } from '$lib/game/personality.logic';
 import { AGE_OF_MAJORITY, ageInYears, yearsToTicks } from '$lib/game/time';
@@ -361,7 +359,9 @@ async function empfangen_lassen(tick: number, roll: () => number): Promise<numbe
 
 	let empfangen = 0;
 	for (const frau of frauen) {
-		const platz: number | null = await freierWohnraum(frau.dataValues.HomeBuildingId);
+		const platz: number | null = await buildingService.freierWohnraum(
+			frau.dataValues.HomeBuildingId
+		);
 
 		const empfaengt: boolean = conceives(
 			{
@@ -422,8 +422,8 @@ async function zusammenziehen(
 	if (heimEiner === heimAnderer) return;
 
 	// Wer einzieht, braucht einen freien Platz — der andere zählt schon als Bewohner mit.
-	const platzBeiEinem: number = (await freierWohnraum(heimEiner)) ?? 0;
-	const platzBeimAnderen: number = (await freierWohnraum(heimAnderer)) ?? 0;
+	const platzBeiEinem: number = (await buildingService.freierWohnraum(heimEiner)) ?? 0;
+	const platzBeimAnderen: number = (await buildingService.freierWohnraum(heimAnderer)) ?? 0;
 
 	if (platzBeiEinem > 0 && platzBeiEinem >= platzBeimAnderen) {
 		await anderer.update({ HomeBuildingId: heimEiner }, { transaction: t });
@@ -432,23 +432,6 @@ async function zusammenziehen(
 		await einer.update({ HomeBuildingId: heimAnderer }, { transaction: t });
 		await chronicleService.recordMoveIn(oneId, heimAnderer, tick, t);
 	}
-}
-
-export async function freierWohnraum(homeBuildingId: string | null): Promise<number | null> {
-	if (!homeBuildingId) return null;
-
-	const gebaeude = await Building.findByPk(homeBuildingId);
-	if (!gebaeude) return null;
-
-	const vorlage = buildingService.getBuildingOption(gebaeude.dataValues.optionId);
-	if (!vorlage) return null;
-	const plaetze: number = residentsAt(vorlage, gebaeude.dataValues.level);
-	if (plaetze === 0) return null;
-
-	const bewohner: number = await Character.count({
-		where: { HomeBuildingId: homeBuildingId, deathTick: null }
-	});
-	return Math.max(0, plaetze - bewohner);
 }
 
 // --- Anzeigen ------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+﻿import { beforeAll, describe, expect, it } from 'vitest';
 import { Op } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 import '$lib/db/db';
@@ -7,6 +7,7 @@ import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as electionService from '$lib/server/service/electionService';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as familyService from '$lib/server/service/familyService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
 import * as npcService from '$lib/server/service/npcService';
@@ -141,7 +142,7 @@ describe('Die Welt trägt sich selbst', () => {
 			const alter: number = ageInYears(frau.dataValues.birthTick, jetzt);
 			if (alter < AGE_OF_MAJORITY || alter > FERTILE_TO_AGE) continue;
 
-			const platz = await familyService.freierWohnraum(frau.dataValues.HomeBuildingId);
+			const platz = await buildingService.freierWohnraum(frau.dataValues.HomeBuildingId);
 			if (platz !== null && platz > 0) bereit.push(frau.dataValues.firstName);
 		}
 

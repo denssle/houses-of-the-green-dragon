@@ -1943,13 +1943,37 @@ etwas davon vor, wird stattdessen gearbeitet — wer abwesend ist, soll wenigste
 _Fertig, wenn:_ Zwei Wochen Abwesenheit kosten Fortschritt, aber nicht das Haus. —
 Erledigt.
 
-**5.6 Womit ein Neuling anfängt.** (Punkt 14) Die letzte inhaltliche Entscheidung vor dem
-öffentlichen Betrieb, und die empfindlichste: Was bekommt jemand mit, der in eine Stadt
-kommt, in der das Bauland vergeben ist? Dazu gehört die Frage, ob die städtische Schmiede
-bleibt.
+**5.6 Womit ein Neuling anfängt.** ✓ (Punkt 14) Die empfindlichste Entscheidung vor dem
+öffentlichen Betrieb — und beim Nachsehen stellte sich heraus, dass es weniger um
+Starthilfe ging als um eine fehlende Tür.
+
+**Ein Spieler konnte nirgends einziehen.** NPCs zogen seit 4.14 in die städtische
+Unterkunft; für einen Spielercharakter gab es keinen Weg dorthin. Wer nicht selbst baute
+oder heiratete, blieb obdachlos — und das heißt keine Erholung und keine Kinder. Ein
+Neuling stand damit vor der Wahl, hundertvierzig Münzen für Grundstück und Kate
+zusammenzuarbeiten oder gar nicht erst anzufangen, und wessen Haus zur Ruine verfiel, dem
+half die Unterkunft nicht, für die er als Bürger mitbezahlt hat.
+
+Jetzt gibt es `moveInto` mit denselben Schranken wie bei den NPCs: Wohnraum muss es sein,
+ein Platz frei, und es muss der Allgemeinheit oder einem selbst gehören. Dazu ein Knopf auf
+der Gebäudeseite und die Zahl daneben — „noch zwei Plätze frei" ist die Auskunft, die über
+Bleiben oder Weitersuchen entscheidet.
+
+**Und ein frischer Charakter zieht von selbst ein**, wenn die Stadt Platz hat. Das ist
+keine Starthilfe, die etwas schenkt, sondern die Umsetzung dessen, wofür das Haus gebaut
+wurde. Ist es voll, beginnt man im Freien und muss sich sputen — dann ist es an der Stadt,
+eine zweite Unterkunft zu bauen.
+
+**Sonst bleibt alles, wie es war:** zehn Münzen, achtundvierzig Aktionspunkte, die
+städtische Schmiede. Mehr Kapital wäre ein Geschenk, und der Grundweg ist begehbar —
+eine Schicht bringt drei Münzen, ein Brot kostet vier, und wer arbeitet, kommt voran.
+
+`freierWohnraum` ist dabei vom Familien- zum Gebäudedienst gewandert. Sie stand dort, weil
+die Empfängnis sie zuerst brauchte; sie ist aber eine Frage an das Gebäude, und seit der
+Einzug hier liegt, wäre der alte Ort ein Ringschluss.
 
 _Fertig, wenn:_ Ein frisch angelegter Charakter hat einen begehbaren Weg nach oben, ohne
-dass ihm jemand hilft.
+dass ihm jemand hilft. — Erledigt.
 
 **5.7 Ein Rundlauf, der klickt.** (Punkt 25) Ein Playwright-Test, der registriert, einen
 Charakter anlegt, arbeitet, kauft, baut und wählt. Die Unit-Tests decken die Regeln ab;

@@ -19,6 +19,7 @@ import {
 	producesBuildingMaterial,
 	purchase,
 	renovate,
+	residentsAt,
 	RENOVATION_ACTION_POINT_COST,
 	renovationMaterial,
 	upgrade,
@@ -590,6 +591,114 @@ export type MaintenanceResult =
  * Eigentümer darf — ein fremdes Haus zu renovieren wäre ein Geschenk, und Geschenke
  * gehören zu 4.6.
  */
+/**
+ * Wie viele noch in dieses Haus passen — `null`, wenn es kein Wohnraum ist.
+ *
+ * Stand bis 5.6 beim Familiendienst, weil die Empfängnis sie zuerst brauchte. Sie ist aber
+ * eine Frage an das Gebäude und keine an die Familie, und seit der Einzug hier liegt, wäre
+ * der alte Ort ein Ringschluss: Die Familie hängt ohnehin schon an den Gebäuden.
+ */
+export async function freierWohnraum(homeBuildingId: string | null): Promise<number | null> {
+	if (!homeBuildingId) return null;
+
+	const gebaeude = await BuildingModel.findByPk(homeBuildingId);
+	if (!gebaeude) return null;
+
+	const vorlage = getBuildingOption(gebaeude.dataValues.optionId);
+	if (!vorlage) return null;
+	const plaetze: number = residentsAt(vorlage, gebaeude.dataValues.level);
+	if (plaetze === 0) return null;
+
+	const bewohner: number = await CharacterModel.count({
+		where: { HomeBuildingId: homeBuildingId, deathTick: null }
+	});
+	return Math.max(0, plaetze - bewohner);
+}
+
+/**
+ * Unter ein Dach ziehen.
+ *
+ * **Bis 5.6 konnte das nur, wer selbst baute oder heiratete.** NPCs zogen längst in die
+ * städtische Unterkunft — für einen Spieler gab es keinen Weg dorthin. Ein Neuling stand
+ * damit vor der Wahl, hundertvierzig Münzen für Grundstück und Kate zusammenzuarbeiten
+ * oder dauerhaft im Freien zu bleiben; und wessen Haus zur Ruine verfiel, dem half die
+ * Unterkunft nicht, für die er als Bürger mitbezahlt hat.
+ *
+ * Dieselben Schranken wie bei den NPCs: Wohnraum muss es sein, ein Platz muss frei sein,
+ * und es muss der Allgemeinheit oder einem selbst gehören. In ein fremdes Privathaus zieht
+ * niemand ungefragt — Miete und Untermiete sind ein eigenes Thema.
+ */
+export async function moveInto(characterId: string, buildingId: string): Promise<BuildResult> {
+	const tick: number = await worldService.currentTick();
+
+	const bewohner = await CharacterModel.findByPk(characterId);
+	if (!bewohner) return { ok: false, reason: 'NO_SUCH_PERSON' };
+	if (bewohner.dataValues.HomeBuildingId === buildingId) {
+		return { ok: false, reason: 'NOTHING_TO_DO' };
+	}
+
+	const gebäude = await BuildingModel.findByPk(buildingId);
+	if (!gebäude) return { ok: false, reason: 'PLOT_NOT_OWNED' };
+
+	const vorlage = getBuildingOption(gebäude.dataValues.optionId);
+	if (!vorlage || residentsAt(vorlage, gebäude.dataValues.level) === 0) {
+		return { ok: false, reason: 'NOT_A_WORKPLACE' };
+	}
+
+	const städtisch: boolean = gebäude.dataValues.ownerType === 'CITY';
+	const eigenes: boolean = gebäude.dataValues.OwnerCharacterId === characterId;
+	if (!städtisch && !eigenes) return { ok: false, reason: 'PLOT_NOT_OWNED' };
+
+	// Nur in der eigenen Stadt: Solange es eine gibt, ist das eine Formalie — mit der
+	// zweiten (Phase 8) wäre es der Unterschied zwischen Wohnen und Reisen.
+	const grundstück = gebäude.dataValues.PlotId
+		? await PlotModel.findByPk(gebäude.dataValues.PlotId)
+		: null;
+	if (grundstück && grundstück.dataValues.RegionId !== bewohner.dataValues.RegionId) {
+		return { ok: false, reason: 'PLOT_NOT_OWNED' };
+	}
+
+	const platz: number | null = await freierWohnraum(buildingId);
+	if (platz === null || platz <= 0) return { ok: false, reason: 'NO_ROOM' };
+
+	await bewohner.update({ HomeBuildingId: buildingId });
+	await chronicleService.recordMoveIn(characterId, buildingId, tick);
+
+	return { ok: true, building: convertToBuilding(gebäude.dataValues) };
+}
+
+/**
+ * Das erste Dach: der freie Platz, den die Stadt stellt.
+ *
+ * Dieselbe Suche, die ein NPC anstellt, wenn er obdachlos ist — nur wird sie hier einmal
+ * beim Anlegen eines Charakters gerufen. Findet sich nichts, geschieht nichts: Eine volle
+ * Unterkunft ist kein Fehler, sondern eine Stadt, die wachsen muss.
+ */
+export async function moveIntoFreeShelter(characterId: string): Promise<void> {
+	const bewohner = await CharacterModel.findByPk(characterId);
+	if (!bewohner || bewohner.dataValues.HomeBuildingId) return;
+
+	const städtische = await BuildingModel.findAll({
+		where: { ownerType: 'CITY' },
+		include: [
+			{
+				model: PlotModel,
+				as: 'plot',
+				where: { RegionId: bewohner.dataValues.RegionId },
+				required: true
+			}
+		]
+	});
+
+	for (const gebäude of städtische) {
+		const platz: number | null = await freierWohnraum(gebäude.dataValues.id);
+		if (platz !== null && platz > 0) {
+			await moveInto(characterId, gebäude.dataValues.id);
+			return;
+		}
+	}
+}
+
 /**
  * Ein Gebäude benennen.
  *

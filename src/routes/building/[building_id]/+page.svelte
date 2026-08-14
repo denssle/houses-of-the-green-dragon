@@ -48,7 +48,26 @@
 		<dt>Zu verkaufen</dt>
 		<dd>{data.building.forSalePrice} Münzen, samt Grundstück</dd>
 	{/if}
+
+	{#if data.freeRoom !== null}
+		<dt>Wohnraum</dt>
+		<dd>
+			{#if data.livesHere}<b>Hier wohnst du.</b>{/if}
+			{data.freeRoom === 0 ? 'kein Platz mehr frei' : `noch ${data.freeRoom} Platz frei`}
+		</dd>
+	{/if}
 </dl>
+
+<!--
+	Einziehen kann, wem das Haus gehört oder für wen die Stadt es gebaut hat. Bis 5.6 gab
+	es diesen Weg nur für NPCs — ein Spieler ohne eigenes Haus blieb obdachlos, und das
+	heißt: keine Erholung, keine Kinder.
+-->
+{#if data.canMoveIn}
+	<form method="POST" action="?/moveIn" use:enhance class="actions">
+		<button type="submit">Hier einziehen</button>
+	</form>
+{/if}
 
 <!--
 	Der Name gehört dem Eigentümer. Über städtische Bauten verfügt auch der Bürgermeister

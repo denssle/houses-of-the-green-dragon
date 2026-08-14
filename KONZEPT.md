@@ -505,6 +505,12 @@ genau das: Ausgaben, die niemand machen muss und die trotzdem jeder macht.
 **Öffentliche Gebäude** gehören keinem Charakter, sondern der Stadt: Brunnen, Schule,
 Friedhof, Stadtmauer, Unterkunft für Obdachlose, **Schuldturm**.
 
+**In die Unterkunft zieht, wer sonst nirgends unterkommt** — und zwar von selbst, sobald
+ein Haus erlischt oder ein neues beginnt. Das ist keine Wohltat, sondern der Zweck des
+Baus: Ein Obdachloser erholt sich nicht und bekommt keine Kinder, und ein Neuling, der im
+Freien anfängt, hat keine Dynastie, sondern eine Frist. Ist die Unterkunft voll, beginnt
+man draußen — dann ist es an der Stadt, eine zweite zu bauen.
+
 **Nur ein Amt kann sie errichten.** Wer kein Amt hält, kann kein Rathaus bauen, auch nicht
 aus eigener Tasche — das ist keine Preisfrage, sondern eine Zuständigkeitsfrage. Sonst
 entstünde die widersinnige Lage, dass ein reiches Haus das einzige Rathaus der Stadt besitzt

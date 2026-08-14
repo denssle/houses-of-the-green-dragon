@@ -1,4 +1,4 @@
-import { Inventory } from '$lib/db/model/inventory';
+﻿import { Inventory } from '$lib/db/model/inventory';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { sequelize } from '$lib/db/sequelize';
@@ -13,7 +13,6 @@ import * as buildingActionService from '$lib/server/service/buildingActionServic
 import * as chronicleService from '$lib/server/service/chronicleService';
 import * as plotService from '$lib/server/service/plotService';
 import { PLOT_PRICE } from '$lib/game/economy';
-import * as familyService from '$lib/server/service/familyService';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { CONDITION_MAX, YEARS_TO_RUIN } from '$lib/game/building.logic';
@@ -460,12 +459,12 @@ describe('Gebäude über die Zeit', () => {
 			const besitzer = await person('Besitzer');
 			const id = await haus(besitzer);
 
-			expect(await familyService.freierWohnraum(id)).toBe(4);
+			expect(await buildingService.freierWohnraum(id)).toBe(4);
 
 			expect(await buildingService.upgradeBuilding(besitzer, id)).toMatchObject({ ok: true });
 
 			// Genau hier hängt die Bevölkerungsgrenze aus 4.4: Wer wachsen will, baut aus.
-			expect(await familyService.freierWohnraum(id)).toBe(6);
+			expect(await buildingService.freierWohnraum(id)).toBe(6);
 		});
 
 		it('macht das alte Gemäuer nicht neu', async () => {
@@ -506,6 +505,75 @@ describe('Gebäude über die Zeit', () => {
 				ok: false,
 				reason: 'NOT_FOR_SALE'
 			});
+		});
+	});
+
+	describe('einziehen', () => {
+		it('nimmt einen Obdachlosen in die städtische Unterkunft auf', async () => {
+			// Bis 5.6 konnte das nur, wer selbst baute oder heiratete — NPCs zogen längst
+			// ein, für Spieler gab es keinen Weg.
+			const heimatlos = await person('Heimatlos');
+			const unterkunft = await haus(null);
+
+			const ergebnis = await buildingService.moveInto(heimatlos, unterkunft);
+
+			expect(ergebnis.ok).toBe(true);
+			expect((await CharacterModel.findByPk(heimatlos))!.dataValues.HomeBuildingId).toBe(
+				unterkunft
+			);
+		});
+
+		it('lässt niemanden in ein fremdes Privathaus', async () => {
+			// Miete und Untermiete sind ein eigenes Thema; ungefragt zieht niemand ein.
+			const eigentümer = await person('Eigentümer');
+			const fremder = await person('Fremder');
+			const privat = await haus(eigentümer);
+
+			expect(await buildingService.moveInto(fremder, privat)).toEqual({
+				ok: false,
+				reason: 'PLOT_NOT_OWNED'
+			});
+		});
+
+		it('weist ab, wenn kein Platz mehr frei ist', async () => {
+			const unterkunft = await haus(null);
+			// Die Kate fasst vier — vier Bewohner machen sie voll.
+			for (const name of ['Eins', 'Zwei', 'Drei', 'Vier']) {
+				const bewohner = await person(name);
+				await buildingService.moveInto(bewohner, unterkunft);
+			}
+			const zuspaet = await person('Zuspät');
+
+			expect(await buildingService.moveInto(zuspaet, unterkunft)).toEqual({
+				ok: false,
+				reason: 'NO_ROOM'
+			});
+		});
+
+		it('schreibt den Einzug in die Chronik', async () => {
+			const heimatlos = await person('Heimatlos');
+			const unterkunft = await haus(null);
+
+			await buildingService.moveInto(heimatlos, unterkunft);
+
+			const seins = await chronicleService.getChronicle({ characterId: heimatlos });
+			expect(seins.some((eintrag) => eintrag.kind === 'MOVED_IN')).toBe(true);
+		});
+
+		it('zieht einen frischen Charakter von selbst unter das Dach der Stadt', async () => {
+			// Ohne das beginnt ein Neuling obdachlos: keine Erholung, keine Kinder — das
+			// Ende der Dynastie, bevor sie anfängt.
+			//
+			// Welches der städtischen Häuser es wird, ist offen: Die Welt bringt mehrere
+			// mit. Geprüft wird, dass es überhaupt eines ist und dass es der Stadt gehört.
+			await haus(null);
+			const neuling = await person('Neuling', { HomeBuildingId: null });
+
+			await buildingService.moveIntoFreeShelter(neuling);
+
+			const dach = (await CharacterModel.findByPk(neuling))!.dataValues.HomeBuildingId;
+			expect(dach).not.toBeNull();
+			expect((await BuildingModel.findByPk(dach!))!.dataValues.ownerType).toBe('CITY');
 		});
 	});
 

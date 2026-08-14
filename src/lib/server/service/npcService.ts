@@ -1,4 +1,4 @@
-import { garmentIntact } from '$lib/game/attire.logic';
+﻿import { garmentIntact } from '$lib/game/attire.logic';
 import { CAMPAIGN_TICKS, npcChoice } from '$lib/game/election.logic';
 import { Op } from 'sequelize';
 import { Employment } from '$lib/db/model/employment';
@@ -358,7 +358,7 @@ async function lageAufnehmen(
 	const wohnhaus = eigene.find(
 		(haus) => buildingService.getBuildingOption(haus.optionId)?.type === 'RESIDENCE'
 	);
-	const platz: number | null = await familyService.freierWohnraum(werte.HomeBuildingId);
+	const platz: number | null = await buildingService.freierWohnraum(werte.HomeBuildingId);
 	const hausVorlage = buildingService.getBuildingOption(WOHNHAUS_OPTION_ID);
 	const baufaellig = eigene.filter((haus) => haus.condition < REPAIR_BELOW)[0];
 	const materialBedarf = baufaellig
@@ -511,7 +511,7 @@ async function freierWohnplatz(regionId: string): Promise<string | undefined> {
 		// ungefragt ein. Miete und Untermiete kommen mit 4.6d.
 		if (eintrag.dataValues.ownerType !== 'CITY') continue;
 
-		const platz: number | null = await familyService.freierWohnraum(eintrag.dataValues.id);
+		const platz: number | null = await buildingService.freierWohnraum(eintrag.dataValues.id);
 		if (platz !== null && platz > 0) return eintrag.dataValues.id;
 	}
 	return undefined;

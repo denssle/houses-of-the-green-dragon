@@ -14,7 +14,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 6   | Kämpfe und Verletzungen                                                              | Waffen und Gift (4.6c)       | Entwurf      |
 | 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                    | 4.7 / Punkt 6                | Entwurf      |
 | 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                             | 4.8                          | Entwurf      |
-| 14  | Startbedingungen für neue Spieler                                                    | erster öffentlicher Betrieb  | Entscheidung |
+| 14  | Startbedingungen für neue Spieler — **entschieden mit 5.6**                          | —                            | erledigt     |
 | 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche (die Zufalls-Raubzüge stehen seit 4.8) | 4.8 / Punkt 6                | Entwurf      |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
@@ -150,26 +150,28 @@ Brunnen gegen Seuchen setzt Punkt 5 voraus; eine Mauer gegen Räuber und ein Lö
 gegen Brände hätten seit 4.8 dagegen sofort eine Wirkung — die Unglücke sind da, nur
 fehlt bisher jeder Bau, der gegen sie hilft. Die Wache ist der einzige.
 
-### 14. Startbedingungen
+### 14. Startbedingungen — entschieden (5.6)
 
-Wer neu anfängt — oder nach dem Erlöschen seines Hauses neu beginnt — trifft auf eine
-Stadt, in der das Bauland vergeben ist. Der Grundweg steht fest: als Angestellter
-anfangen und Geld verdienen. Offen ist, ob es Starthilfe gibt (etwas Kapital, ein Platz
-in der Unterkunft, ein garantierter Arbeitsplatz) und ob eine neue Stadt Neulingen
-vorbehalten sein kann.
+Ein Neuling bekommt **ein Dach, zehn Münzen und eine offene Werkstatt**: einen Platz in der
+städtischen Unterkunft, sofern einer frei ist, das Startkapital wie bisher und die
+städtische Schmiede, in der jeder arbeiten kann.
 
-Ohne Antwort hat das Spiel ein Zeitfenster, nach dem es für Neue unspielbar wird.
+Die eigentliche Lücke war dabei nicht die Starthilfe, sondern eine fehlende Tür: **Ein
+Spieler konnte überhaupt nicht einziehen.** NPCs zogen seit 4.14 in die Unterkunft, für
+Spieler gab es keinen Weg dorthin — wer nicht baute oder heiratete, blieb obdachlos, und
+das heißt keine Erholung und keine Kinder.
 
-**Stand nach Phase 4.6:** Der Grundweg ist begehbar geworden — es gibt Arbeit gegen Lohn,
-Waren mit Herkunft, Läden und Anstellung. Die städtische Schmiede ist damit die letzte
-Stelle, an der Geld ohne Deckung entsteht, und kann fallen, sobald genug private Betriebe
-stehen. Was ein Neuling **mitbekommt**, ist damit aber immer noch nicht entschieden.
+Mehr Kapital wäre ein Geschenk gewesen. Der Grundweg trägt: Eine Schicht bringt drei
+Münzen, ein Brot kostet vier, und die vierundvierzig Schichten bis zum eigenen Haus sind
+eine Aufgabe, keine Sperre.
 
-**Vorläufig entschieden (Phase 3.3):** Die Startstadt hat eine **städtische Schmiede**, in
-der jeder arbeiten kann. Damit ist der Grundweg wenigstens begehbar — 44 Schichten
-reichen für ein Grundstück und ein Wohnhaus. Das ersetzt die Antwort nicht: Sobald es
-Anstellungsverhältnisse (4.6) und eine echte Bevölkerungsdynamik gibt, muss geklärt sein,
-ob dieser Betrieb bleibt, wem er gehört und was ein Neuling sonst noch mitbekommt.
+**Zwei Fragen bleiben, aber sie drängen nicht mehr:**
+
+- **Bleibt die städtische Schmiede?** Sie ist die letzte Stelle, an der Geld ohne Deckung
+  entsteht. Sie kann fallen, sobald genug private Betriebe Arbeit bieten — das ist eine
+  Frage an die laufende Welt und nicht ans Reißbrett.
+- **Kann eine neue Stadt Neulingen vorbehalten sein?** Erst mit der zweiten Stadt (Phase 8)
+  überhaupt zu beantworten.
 
 ## Vor der Politik
 
