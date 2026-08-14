@@ -64,9 +64,9 @@
 <p>
 	Dies ist ein privat betriebenes Spiel ohne Gewinnerzielungsabsicht. Es gibt nichts zu kaufen, und
 	es gibt keine Zusage, dass die Welt für immer läuft. Was zugesagt wird: Die Datenbank wird täglich
-	gesichert, Ausfälle werden nachgeholt statt eingerechnet (verpasste Zeit wird übersprungen, und
-	niemand verliert dabei seine Aktionspunkte), und wenn die Welt je enden sollte, wird es
-	angekündigt und nicht abgeschaltet.
+	gesichert, ein Serverausfall geht nicht zu deinen Lasten — die verpasste Zeit wird übersprungen
+	statt nachgeholt, und niemand verliert dabei seine Aktionspunkte —, und wenn die Welt je enden
+	sollte, wird es angekündigt und nicht abgeschaltet.
 </p>
 
 <h3>Konto und Daten</h3>

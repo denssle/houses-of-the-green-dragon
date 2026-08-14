@@ -83,3 +83,27 @@ export function buildPrice(template: BuildingTemplate): number {
 export function upgradePrice(template: BuildingTemplate, currentLevel: number): number | undefined {
 	return template.levels[currentLevel]?.price;
 }
+
+/** Ein Posten, wie ihn Kostenliste und Kammer führen. */
+export interface Posten {
+	quantity: number;
+	name: string;
+}
+
+/**
+ * Eine Aufzählung von Posten: „8 Bretter, 4 Quader, 2 Eisen".
+ *
+ * **Als Funktion und nicht im Template**, weil Svelte an den Grenzen von `{#each}` und
+ * `{#if}` die Leerzeichen verschluckt — auf dem Server stand deshalb „190 Münzenund 8
+ * Bretter,4 Quader". Ein Satz, den man aus Textbausteinen zusammenklebt, gehört dorthin,
+ * wo man die Fugen sieht.
+ */
+export function itemLine(items: Posten[]): string {
+	return items.map((posten) => `${posten.quantity} ${posten.name}`).join(', ');
+}
+
+/** Was ein Bau kostet, als ganzer Satz: „190 Münzen und 8 Bretter, 4 Quader". */
+export function costLine(price: number, material: Posten[]): string {
+	const stoff: string = itemLine(material);
+	return stoff ? `${price} Münzen und ${stoff}` : `${price} Münzen`;
+}

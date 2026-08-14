@@ -13,7 +13,9 @@
 {/if}
 
 {#if data.dynasty}
-	<p>Dynastie {data.dynasty.name} by {data.founder?.nickname}</p>
+	<p>
+		Haus <b>{data.dynasty.name}</b>{#if data.founder}, gegründet von {data.founder.nickname}{/if}
+	</p>
 {:else}
 	<p>
 		<i>Du hast kein Haus mehr.</i>

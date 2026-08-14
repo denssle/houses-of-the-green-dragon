@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import { buildPrice } from '$lib/model/buildingTemplate';
+	import { buildPrice, costLine, itemLine } from '$lib/model/buildingTemplate';
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
 </script>
 
-<h2>Bauen wir was Neues!</h2>
+<h2>Bauen</h2>
 
 {#if form?.message}
 	<p><b>{form.message}</b></p>
@@ -21,11 +21,7 @@
 {:else}
 	{#if data.stock.length > 0}
 		<p>
-			<small>
-				In deiner Kammer: {#each data.stock as posten, i (posten.itemId)}{#if i > 0},
-					{/if}{posten.quantity}
-					{posten.name}{/each}
-			</small>
+			<small>In deiner Kammer: {itemLine(data.stock)}</small>
 		</p>
 	{/if}
 
@@ -33,13 +29,7 @@
 		<section>
 			<b>{building.initialName}</b>
 			<i>{building.description}</i>
-			<p>
-				{buildPrice(building)} Münzen{#if building.material.length > 0}
-					und
-					{#each building.material as posten, i (posten.itemId)}{#if i > 0},
-						{/if}{posten.quantity}
-						{posten.name}{/each}{/if}
-			</p>
+			<p>{costLine(buildPrice(building), building.material)}</p>
 			<form method="POST" use:enhance>
 				<input type="hidden" name="optionId" value={building.optionId} />
 				<label>
@@ -50,7 +40,7 @@
 						{/each}
 					</select>
 				</label>
-				<button type="submit">Das soll es werden!</button>
+				<button type="submit">Errichten</button>
 			</form>
 		</section>
 	{/each}

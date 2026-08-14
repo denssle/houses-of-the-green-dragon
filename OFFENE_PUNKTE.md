@@ -45,7 +45,13 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                          | erste verliehene Münze       | Entwurf      |
 | 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                      | Punkt 43 / Punkt 23          | Entwurf      |
 | 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                  | —                            | erledigt     |
-| 26  | Datensicherung per Cron, einmal wiederhergestellt                                    | erster öffentlicher Betrieb  | Aufgabe      |
+| 26  | Datensicherung per Cron, einmal wiederhergestellt — **erledigt mit 5.8**             | —                            | erledigt     |
+| 55  | **Die NPCs haben kein Startkapital** — die Stadt kommt nicht in Gang                 | sofort                       | Aufgabe      |
+| 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt                               | zusammen mit 55              | Aufgabe      |
+| 57  | Der Takt der Welt steht nirgends — wann kommen Aktionspunkte wieder?                 | erster fremder Spieler       | Aufgabe      |
+| 58  | Wege, die nur beschrieben und nicht verlinkt sind                                    | laufend                      | Aufgabe      |
+| 59  | Aktionen, die scheitern müssen, sehen aus wie Aktionen, die gehen                    | laufend                      | Aufgabe      |
+| 60  | Listen ohne Ordnung, Wahlen ohne Termin                                              | laufend                      | Aufgabe      |
 | 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen    | —                            | erledigt     |
 | 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                              | —                            | erledigt     |
 
@@ -864,6 +870,94 @@ Für einen Neuling in der städtischen Schmiede ist der erste Knopf der sichtbar
 falsche. Zu klären ist nur die Benennung — „Schmieden (1 AP)" für das Handwerk und
 „Eine Schicht arbeiten" für den Lohn wären schon zwei verschiedene Sätze. Der Test greift
 inzwischen den exakten Namen ab und würde eine Umbenennung merken.
+
+### 55. Die NPCs haben kein Startkapital
+
+**Der schwerste Befund des Durchgangs vom 14. August 2026.** Die Welt auf dem Server steht
+im Jahr 96, und in Grünau ist nichts geschehen: kein einziges privates Gebäude, keine der
+zehn Umlandflächen verpachtet, kein Preisschild am Markt, niemand in der Schmiede
+angestellt, null Kinder, null Tote.
+
+Der Grund steht in `seed.ts`: Die acht Gründer werden **ohne `money`** angelegt, und die
+Spalte hat den Standardwert 0. Ein Grundstück kostet 40 Münzen, die billigste Pacht 20,
+das billigste Haus 100. Was ein NPC verdienen kann, ist die Tagelöhnerei — drei Münzen je
+Aktionspunkt, und davon muss er essen. Die Schwelle zum ersten Besitz ist so hoch, dass
+niemand sie in absehbarer Zeit übersteigt.
+
+**Die Stadt hat also nicht zu wenig NPC-Verhalten, sondern zu wenig Anfangsvermögen.** Das
+ist kein Fehler in einer Regel, sondern eine fehlende Zahl — und deshalb billig zu
+beheben. Zu entscheiden ist:
+
+- **Wie viel.** Genug für ein Grundstück und einen ersten Betrieb wäre das eine Extrem
+  (jeder Gründer als kleiner Unternehmer), genug für ein paar Brote das andere. Sinnvoll
+  ist vermutlich eine Spanne statt einer festen Zahl: Ungleichheit von Anfang an ist der
+  Motor, aus dem sich Handel ergibt.
+- **Ob nur die Gründer** es bekommen oder auch, wer später zuwandert (Punkt 41).
+- **Was mit den bestehenden Welten geschieht.** Die Produktionswelt läuft seit Jahren mit
+  mittellosen Einwohnern; eine Migration, die ihnen Geld gibt, ist ein Eingriff in eine
+  laufende Wirtschaft — vertretbar, solange niemand Fremdes mitspielt, aber nicht
+  stillschweigend.
+
+### 56. Der Wirtschaftstest prüft eine Welt, die es nicht gibt
+
+Unmittelbar an Punkt 55: `selfSustainingEconomy.spec.ts` heißt „Die Wirtschaft trägt sich
+selbst" und setzt vor dem Lauf `money: 400, ambition: 60, diligence: 60` für alle NPCs.
+Er war die ganze Zeit grün — und hat nie gezeigt, was sein Name behauptet. Er belegt, dass
+die Wirtschaft sich trüge, **wenn** jeder Startkapital und Unternehmergeist hätte.
+
+Der Kommentar im Test begründet das Setzen sogar ausdrücklich („geprüft wird, ob ein
+Unternehmungslustiger auch unternimmt, nicht ob der Würfel einen hervorbringt") — die
+Begründung stimmt für die Anlagen und trägt beim Geld nicht: Ehrgeiz wird gewürfelt,
+Vermögen wird vergeben.
+
+**Was fehlt, ist ein Test auf die Welt, die der Weltaufbau wirklich erzeugt:** Bevölkerung
+aus `seedWorld()`, nichts nachgesetzt, ein paar hundert Ticks — und dann die Frage, ob
+irgendetwas entstanden ist. Ein solcher Test wäre heute rot, und das ist genau sein Wert.
+
+### 57. Der Takt der Welt steht nirgends
+
+Eine Stunde Wirklichkeit ist eine Stunde in Grünau, fünfzig davon ein Spieljahr. Diese
+Zahl entscheidet, ob man in zehn Minuten wiederkommt oder morgen — und sie steht an keiner
+Stelle, an der ein Spieler sie sucht. Die Meldung bei leerem Vorrat lautet „Dafür fehlt die
+Kraft — warte, bis wieder Aktionspunkte da sind" und sagt nicht, wie lange.
+
+Nötig ist beides: die Regel einmal erklärt (die Seite „Über die Seite" tut das jetzt) und
+die konkrete Auskunft dort, wo sie fehlt — **wann der nächste Punkt kommt**, sichtbar bei
+den Aktionspunkten und in der Fehlermeldung.
+
+### 58. Wege, die nur beschrieben und nicht verlinkt sind
+
+Die Arbeit-Seite sagt: „Niemand sucht gerade Leute. Bleibt die Tagelöhnerei in der
+städtischen Schmiede." Ein Link dorthin fehlt. Der Spieler bekommt die Auskunft und muss
+den Weg trotzdem selbst finden — auf einer Seite, die nichts anderes anzubieten hat.
+
+Dasselbe Muster gehört überall gesucht, wo ein Satz einen Ausweg nennt: Wer den Ort kennt,
+soll ihn anklicken können. Verwandt mit Punkt 53 (zwei Knöpfe „Arbeiten"), der bei diesem
+Durchgang bestätigt wurde — der untere sagt bis heute nicht, was er einbringt (drei Münzen
+für einen Aktionspunkt).
+
+### 59. Aktionen, die scheitern müssen, sehen aus wie Aktionen, die gehen
+
+Auf der Bauseite steht jedes Gebäude mit aktivem Knopf, auch wenn das Geld um das
+Fünffache fehlt. Erst der Klick sagt es. Die Fehlermeldungen selbst sind gut („Das Geld
+reicht nicht", „Dafür fehlt die Kraft") — sie kommen nur zu spät.
+
+Zu klären ist die Linie: Ein Knopf, der nie gehen kann, gehört gesperrt; einer, der heute
+nicht geht und morgen schon, gehört sichtbar gelassen, aber mit dem Grund daneben. Sonst
+lernt der Spieler, dass Knöpfe Glückssache sind.
+
+### 60. Listen ohne Ordnung, Wahlen ohne Termin
+
+Kleinigkeiten aus demselben Durchgang, die zusammen den Eindruck machen:
+
+- **Das Umland ist unsortiert** — Mühlenfeld 1, Kräuterwiese, Schafweide 2, Eichwald 1,
+  Eichwald 2, Erzgrube, Mühlenfeld 3 … Eine Liste, aus der man wählt, gehört geordnet.
+- **Das Rathaus sagt „Niemand führt die Stadt. Es muss gewählt werden."** — direkt über
+  einer Wahl, die längst läuft. Und **wann ausgezählt wird, steht nicht dabei**, obwohl
+  der Termin feststeht (ein Spieljahr nach der Ausrufung, also zwei Realtage).
+- **Die Chronik erklärt sich unterhalb der Liste.** Der Satz „Diese Welt läuft weiter, ob
+  jemand zusieht oder nicht" ist die Einladung an jeden Gast — und steht da, wo man ihn
+  erst liest, wenn man die Liste schon nicht verstanden hat.
 
 ### 54. Ein Test, der würfelt
 
