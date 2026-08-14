@@ -87,6 +87,11 @@ jobs:
             # Nur `dependencies`: adapter-node hält sie extern, sie müssen also im
             # node_modules des Hosts liegen.
             npm ci --omit=dev
+            # rsync setzt mit --chmod=D755,F644 **jede** Datei auf 644 — das Ausführbar-Bit
+            # aus dem Repository überlebt den Upload nicht. Ohne diese Zeile scheitert der
+            # Aufruf der Sicherungsskripte mit "Permission denied", obwohl die Datei
+            # sichtbar da ist und im Repository 755 trägt.
+            chmod +x scripts/*.sh
             # Der Supervisor-Dienst "houses" führt `npm run start-server` im
             # Verzeichnis ~/houses-app aus (~/etc/services.d/houses.ini).
             supervisorctl restart houses

@@ -3,6 +3,9 @@ import type { LayoutServerLoad } from './$types';
 export const load: LayoutServerLoad = ({ locals }) => {
 	if (!locals.currentUser) {
 		return {
+			// Die Fußzeile zeigt „Konto" nur, wenn es eines gibt — ein Link, der auf die
+			// Anmeldung führt, ist ein Versprechen, das die Seite bricht.
+			loggedIn: false,
 			sections: [
 				// Die Chronik steht auch Gästen offen — sie ist das Schaufenster der Welt.
 				{ slug: 'chronicle', title: 'Chronik' },
@@ -14,6 +17,7 @@ export const load: LayoutServerLoad = ({ locals }) => {
 
 	const character = locals.currentCharacter;
 	return {
+		loggedIn: true,
 		sections: [
 			{ slug: '', title: 'Übersicht' },
 			character

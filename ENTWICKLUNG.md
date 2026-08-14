@@ -2061,16 +2061,23 @@ Spielzeit und gehört nicht in einen Aufruf, den man versehentlich absetzt.
 ls -l ~/houses-app/scripts/
 
 # 2. Eine Sicherung von Hand ziehen und prüfen:
-~/houses-app/scripts/backup.sh
-~/houses-app/scripts/restore-check.sh
+bash ~/houses-app/scripts/backup.sh
+bash ~/houses-app/scripts/restore-check.sh
 
 # 3. Erst wenn das durchläuft: den Cron einrichten.
 crontab -e
-#   17 4 * * * $HOME/houses-app/scripts/backup.sh >> $HOME/logs/backup.log 2>&1
+#   17 4 * * * bash $HOME/houses-app/scripts/backup.sh >> $HOME/logs/backup.log 2>&1
 ```
 
 Die krumme Minute mit Absicht: Zur vollen Stunde laufen auf einem geteilten Host die
 Aufgaben aller Nutzer gleichzeitig.
+
+**Aufgerufen wird über `bash`**, und dafür gibt es einen Grund, der beim ersten Versuch
+sofort zuschlug: rsync setzt mit `--chmod=D755,F644` **jede** Datei auf 644 — das
+Ausführbar-Bit aus dem Repository überlebt den Upload nicht, und der direkte Aufruf
+scheitert mit „Permission denied" bei einer Datei, die sichtbar da ist. Der Deploy hängt
+inzwischen ein `chmod +x scripts/*.sh` an, womit auch der direkte Aufruf geht; `bash` davor
+schadet trotzdem nie und ist dieselbe Konvention, mit der die CI den Rauchtest ruft.
 
 `.gitattributes` nagelt `*.sh` dabei auf LF fest. Mit CRLF wird aus der Shebang-Zeile ein
 Interpreter namens „bash\r", und die Meldung dazu nennt eine Datei, die sichtbar
@@ -2079,12 +2086,45 @@ existiert — ein Fehler, der jeden einmal eine Stunde kostet.
 _Fertig, wenn:_ Eine Sicherung wurde eingespielt und die Welt stand vollständig darin. —
 Skripte stehen; der Lauf auf dem Host fehlt noch.
 
-**5.9 Was ein Betreiber schuldet.** (Punkte 27, 28) Impressum, Datenschutz,
-Nutzungsbedingungen — und die Kontolöschung als Anonymisierung, weil eine Dynastie sich
-nicht löschen lässt, ohne die Geschichte anderer zu zerreißen.
+**5.9 Was ein Betreiber schuldet.** ✓ (Punkte 27, 28) Vier Seiten und eine Funktion.
+
+**Die Kontolöschung ist der Teil, der Code braucht.** Sie löscht nicht, sie anonymisiert:
+Nickname, E-Mail und Passwort fallen weg, alle Sitzungen enden, die Figuren heißen
+„Namenlos" und das Haus „Ein vergessenes Haus". Die Chronik behält ihre Einträge, zeigt
+aber keinen Namen mehr — sie speichert Kennungen, und der Satz entsteht beim Lesen. Genau
+darauf hatte das Konzept gesetzt, und es trägt.
+
+**Aus dem gespielten Charakter wird ein NPC.** Das ist die Entscheidung, die im Konzept
+noch offen war (Punkt 40: „ob eine Dynastie ohne Spieler zum NPC-Haus wird"). Die Figur
+bleibt in der Welt, wohnt, arbeitet und stirbt irgendwann wie jede andere. Sie sterben zu
+lassen wäre die einfachere Antwort gewesen und die schlechtere: Ihre Nachbarn hätten von
+einem Tag auf den anderen einen Toten und ein herrenloses Haus, weil anderswo jemand ein
+Formular abgeschickt hat.
+
+Bestätigt wird durch **Abtippen des eigenen Nicknames**. Ein Knopf allein ist zu wenig für
+etwas, das sich nicht zurücknehmen lässt, und eine Sicherheitsabfrage, die man wegklickt,
+ist keine.
+
+**Die Datenschutzerklärung konnte präzise werden**, weil die Bestandsaufnahme kurz ausfiel:
+Nickname, optionale E-Mail, bcrypt-Hash, Sitzungstoken mit Ablauf — mehr steht nicht in der
+Datenbank. IP-Adressen hält allein der Rate-Limiter, im Arbeitsspeicher, fünfzehn Minuten
+lang. Kein Anmeldeprotokoll, keine Analysewerkzeuge, keine Dritten. Das Konzept sprach von
+einem „Anmeldeprotokoll", das es zu löschen gälte — es gibt keines.
+
+Damit ist der Text nichts Abgeschriebenes, sondern eine Beschreibung des Codes. Wer ihn
+ändert, ohne den Code zu ändern, macht ihn zur Behauptung.
+
+**Impressum und Spielregeln sind Entwürfe.** Die Anbieterangaben stehen in eckigen Klammern
+und gehören ausgefüllt; ob der Text vollständig ist, gehört von jemandem geprüft, der das
+beurteilen darf — das ist keine Zurückhaltung, sondern die Grenze meiner Zuständigkeit. Die
+Spielregeln enthalten dagegen, was das Konzept voraussetzt: **ein Konto je Person.** Ein
+Verbot von Mehrfachkonten setzt voraus, dass es irgendwo geschrieben steht.
+
+Alle drei Rechtstexte stehen **ohne Anmeldung** offen. Wer wissen will, was mit seinen
+Daten geschieht, soll das entscheiden können, bevor er welche hergibt.
 
 _Fertig, wenn:_ Jemand kann verlangen, dass seine Daten verschwinden, ohne dass die Welt
-Lücken bekommt.
+Lücken bekommt. — Erledigt; die Anbieterangaben fehlen noch.
 
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht

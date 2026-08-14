@@ -22,7 +22,18 @@ startTicker();
  * wurde, wo es gebrannt hat —, bevor er sich für ein Konto entscheidet. Eine Stadtchronik,
  * die man nur als Bürger lesen darf, wäre auch inhaltlich verkehrt herum.
  */
-const noAuthURLs: string[] = ['/login', '/register', '/about', '/impressum', '/chronicle'];
+const noAuthURLs: string[] = [
+	'/login',
+	'/register',
+	'/about',
+	'/impressum',
+	'/chronicle',
+	// Rechtstexte müssen **vor** der Anmeldung lesbar sein: Wer wissen will, was mit
+	// seinen Daten geschieht, soll das entscheiden können, bevor er welche hergibt. Eine
+	// Datenschutzerklärung hinter einer Anmeldung wäre ein Widerspruch in sich.
+	'/datenschutz',
+	'/regeln'
+];
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	// Die App läuft unter einem Base-Pfad (siehe svelte.config.js), und der Uberspace

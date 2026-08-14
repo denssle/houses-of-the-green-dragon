@@ -4,6 +4,8 @@ import { compare, hash } from 'bcrypt-ts';
 import type { User } from '$lib/model/user';
 import { User as UserModel } from '$lib/db/model/user';
 import { SessionToken } from '$lib/db/model/sessionToken';
+import { Character } from '$lib/db/model/character';
+import { Dynasty } from '$lib/db/model/dynasty';
 import { convertToUser } from '$lib/db/attributes/user.attributes';
 import { mode } from '$lib/db/sequelize';
 import * as characterService from '$lib/server/service/characterService';
@@ -174,4 +176,58 @@ export async function create(
 export async function getUser(userId: string): Promise<User | undefined> {
 	const gefunden = await UserModel.findByPk(userId);
 	return gefunden ? convertToUser(gefunden.dataValues) : undefined;
+}
+
+/**
+ * Ein Konto löschen — als Anonymisierung (Punkt 28).
+ *
+ * **Die Welt kann eine Dynastie nicht einfach vergessen.** An ihr hängen Gebäude, Verträge,
+ * Ämter, Chronikeinträge und die Vorfahren anderer Spieler. Ein `DELETE` risse Löcher in
+ * fremde Stammbäume und machte Ereignisse ungeschehen, an denen andere beteiligt waren.
+ *
+ * Also verschwindet, was **personenbezogen** ist, und was zur Welt gehört, bleibt:
+ *
+ * - Nickname und E-Mail fallen weg, das Passwort wird unbrauchbar. Eine Anmeldung ist
+ *   danach unmöglich — auch mit dem alten Passwort, denn der Hash gehört zu keinem
+ *   Passwort mehr.
+ * - Alle Sitzungen enden sofort.
+ * - Die Namen der Figuren werden zu „Namenlos", der des Hauses zu „Ein vergessenes Haus".
+ *   Die Chronik zeigt damit rückwirkend keinen Namen mehr — sie speichert Kennungen, und
+ *   der Satz entsteht beim Lesen.
+ * - **Der gespielte Charakter wird zum NPC.** Er bleibt in der Welt, wohnt, arbeitet und
+ *   stirbt irgendwann wie jeder andere. Das ist die ehrlichere Lösung, als ihn sterben zu
+ *   lassen: Seine Nachbarn hätten sonst von einem Tag auf den anderen einen Toten und ein
+ *   herrenloses Haus, weil jemand anderes ein Formular abgeschickt hat.
+ *
+ * Was bleibt, ist damit ein Einwohner ohne Namen und ohne Menschen dahinter — und genau so
+ * steht es im Konzept.
+ */
+export async function anonymizeAccount(userId: string): Promise<boolean> {
+	const benutzer = await UserModel.findByPk(userId);
+	if (!benutzer) return false;
+
+	await SessionToken.destroy({ where: { UserId: userId } });
+
+	// Der Nickname muss eindeutig bleiben — die Spalte verlangt es, und ein zweiter
+	// „gelöscht" ließe die nächste Löschung scheitern.
+	await benutzer.update({
+		nickname: `geloescht-${userId.slice(0, 8)}`,
+		email: null,
+		// Kein gültiger bcrypt-Hash: `compare` gibt dagegen immer false zurück, ohne dass
+		// es dafür eine Sonderprüfung im Anmeldeweg bräuchte.
+		password: 'geloescht'
+	});
+
+	const haeuser = await Dynasty.findAll({ where: { UserId: userId } });
+	for (const haus of haeuser) {
+		await haus.update({ name: 'Ein vergessenes Haus' });
+		await Character.update({ firstName: 'Namenlos' }, { where: { DynastyId: haus.dataValues.id } });
+		// Aus dem gespielten Charakter wird ein Einwohner wie jeder andere.
+		await Character.update(
+			{ role: 'NPC' },
+			{ where: { DynastyId: haus.dataValues.id, role: 'PLAYER' } }
+		);
+	}
+
+	return true;
 }

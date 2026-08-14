@@ -158,4 +158,18 @@ test.describe.serial('Ein Leben von vorn', () => {
 		// Versprechen, das die Seite bricht.
 		await expect(page.locator('li a.link')).toHaveCount(0);
 	});
+
+	test('zeigt die Rechtstexte auch ohne Anmeldung', async () => {
+		// Wer wissen will, was mit seinen Daten geschieht, soll das entscheiden können,
+		// **bevor** er welche hergibt. Eine Datenschutzerklärung hinter einer Anmeldung
+		// wäre ein Widerspruch in sich.
+		for (const [pfad, ueberschrift] of [
+			['/impressum', 'Impressum'],
+			['/datenschutz', 'Datenschutzerklärung'],
+			['/regeln', 'Spielregeln']
+		]) {
+			await page.goto(BASIS + pfad);
+			await expect(page.getByRole('heading', { name: ueberschrift })).toBeVisible();
+		}
+	});
 });

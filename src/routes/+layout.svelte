@@ -41,9 +41,14 @@
 	</main>
 
 	<footer class="border-t border-gray-200 pt-3">
-		<nav class="flex place-content-around">
+		<nav class="flex flex-wrap place-content-around gap-2">
 			<a href="{base}/about" class="link">Über die Seite</a>
+			<a href="{base}/regeln" class="link">Spielregeln</a>
+			<a href="{base}/datenschutz" class="link">Datenschutz</a>
 			<a href="{base}/impressum" class="link">Impressum</a>
+			{#if data.loggedIn}
+				<a href="{base}/konto" class="link">Konto</a>
+			{/if}
 		</nav>
 	</footer>
 </div>

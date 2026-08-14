@@ -46,8 +46,8 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                      | Punkt 43 / Punkt 23          | Entwurf      |
 | 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                  | —                            | erledigt     |
 | 26  | Datensicherung per Cron, einmal wiederhergestellt                                    | erster öffentlicher Betrieb  | Aufgabe      |
-| 27  | Impressum, Datenschutz, Nutzungsbedingungen                                          | erster öffentlicher Betrieb  | Aufgabe      |
-| 28  | Kontolöschung als Anonymisierung                                                     | erster öffentlicher Betrieb  | Entwurf      |
+| 27  | Impressum, Datenschutz, Nutzungsbedingungen — **Entwürfe mit 5.9**, Angaben fehlen   | vor dem ersten Fremden       | Aufgabe      |
+| 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                              | —                            | erledigt     |
 
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
@@ -1060,7 +1060,7 @@ Nutzer müssen sie Inhalt haben: Wer betreibt das, was wird gespeichert, was pas
 E-Mail-Adressen und Anmeldeprotokollen. Dazu Spielregeln, in denen steht, was verboten
 ist — ein Verbot von Mehrfachaccounts setzt voraus, dass es irgendwo geschrieben steht.
 
-### 28. Kontolöschung als Anonymisierung
+### 28. Kontolöschung als Anonymisierung — erledigt (5.9)
 
 Verlangt jemand die Löschung seiner Daten, kann die Welt seine Dynastie nicht einfach
 vergessen: An ihr hängen Gebäude, Verträge, Ämter, Chronikeinträge und die Vorfahren
