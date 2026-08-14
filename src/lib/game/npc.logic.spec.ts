@@ -31,6 +31,13 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		betterJobAvailable: false,
 		matchAvailable: true,
 		foodPrice: 4,
+		// Der Zufriedene hat alles: Er trägt ein Gewand und hat einen Trank in der Kammer,
+		// damit die neuen Stufen aus 4.12 nicht ungewollt zuschlagen.
+		wearsGarment: true,
+		garmentInStock: 0,
+		tonicInStock: 1,
+		garmentPrice: 14,
+		tonicPrice: 10,
 		...werte
 	};
 }
@@ -92,9 +99,33 @@ describe('Was ein NPC tut', () => {
 		});
 
 		it('tut nichts ohne Kraft', () => {
-			const erschoepft = zufrieden({ isMarried: false, money: 0, actionPoints: 0 });
+			const erschoepft = zufrieden({
+				isMarried: false,
+				money: 0,
+				actionPoints: 0,
+				tonicInStock: 0
+			});
 
 			expect(decideNpcAction(erschoepft)).toBe('IDLE');
+		});
+
+		it('trinkt, wenn die Kraft fehlt und Arbeit wartet', () => {
+			const erschoepft = zufrieden({ actionPoints: 0, tonicInStock: 1, workAvailable: true });
+
+			expect(decideNpcAction(erschoepft)).toBe('DRINK_TONIC');
+		});
+
+		it('trinkt nicht im Müßiggang', () => {
+			// Der Trank füllt nur auf, was fehlt — ohne Arbeit wäre er verschenkt, und die
+			// Punkte wachsen ohnehin von selbst nach.
+			const müßig = zufrieden({
+				actionPoints: 0,
+				tonicInStock: 1,
+				workAvailable: false,
+				hasJob: false
+			});
+
+			expect(decideNpcAction(müßig)).toBe('IDLE');
 		});
 	});
 

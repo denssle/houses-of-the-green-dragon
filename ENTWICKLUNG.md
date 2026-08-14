@@ -1515,6 +1515,41 @@ brauchten erst Quader vom Steinmetz), Gewand genäht, Duftwasser und Trank aus d
 Küche, angezogen, geworben — 30 Zuneigung statt 15, genau die Summe aus Werben, Duftwasser
 und Gewand.
 
+**4.12 NPCs als Kundschaft.** ✓ Die erste Stufe auf dem Weg zu einer Welt, die niemanden
+braucht.
+
+**Bis hierher kauften NPCs ausschließlich Nahrung.** Alles, was seit 4.10 und 4.11
+dazugekommen war, hatte damit keinen Markt: Ein Schneider nähte für sich selbst, der
+Alchemist hatte außer dem Spieler keinen Kunden, und die Baukette funktionierte nur, weil
+der Spieler selbst baute. Die Angebotsseite war besetzt — NPCs stellen als Angestellte
+alles her —, die Nachfrageseite nicht.
+
+Der Grund war historisch: `decideNpcAction` entstand mit 4.6b, als es nur Brot zu kaufen
+gab. Die Rangfolge nach Dringlichkeit war richtig und ist geblieben; sie hat jetzt vier
+Stufen mehr am Ende — **erst überleben, dann ein Dach, dann eine Familie, dann ein gutes
+Gewand**.
+
+**Gekauft wird nur über der Rücklage.** Ein NPC, der sein letztes Geld für ein Gewand
+ausgibt, verhungert darin. Die Rücklage gibt es seit 4.6b und sie hängt an der Gier: Der
+Genügsame kauft früher, der Raffende später. Damit wirkt die Persönlichkeit auf den Konsum,
+ohne dass eine einzige neue Achse nötig wäre. Dazu die Geselligkeit: Wer nie unter Leute
+geht, kauft kein Gewand — dem Eigenbrötler ist gleich, wie er aussieht.
+
+Der **Trank** folgt einer anderen Regel: Ihn nimmt nur mit, wer arbeitet, und getrunken
+wird er erst, wenn kaum noch Kraft übrig ist. Beides folgt aus seiner Wirkung — er füllt
+nur auf, was fehlt, und im Müßiggang wäre er ein teures Getränk. Beim Schreiben der Spec
+fiel auf, dass die erste Fassung ihn auch dem Müßiggänger eingeflößt hätte.
+
+_Fertig, wenn:_ Ein Handwerker findet Kundschaft, ohne dass ein Spieler kauft. — Erledigt;
+`attire.spec.ts` prüft es gegen die Datenbank: Ein versorgter NPC kauft das Gewand und
+zieht es an, ein knapper lässt es liegen.
+
+**Was noch fehlt, bis die Welt wirklich niemanden braucht:** NPCs kaufen keine
+Grundstücke (nur ersteigern), bauen keine Häuser, pachten keine Flächen, gründen keine
+Betriebe, hängen keine Angebote aus und schicken ihre Kinder nicht zur Schule. Solange
+alle Betriebe Spielern gehören, ist die Angebotsseite geliehen. Der nächste Schritt in
+diese Richtung wäre der **NPC als Unternehmer** — und der ist größer als dieser hier.
+
 **4.9b Fernhandel und weitere Städte.** Waren zwischen Orten bewegen (`shipment` mit
 Ankunfts-Tick statt Fortbewegung), Gründung einer zweiten Stadt. Fernziele für etablierte
 Dynastien — und die Voraussetzung dafür, dass ein Räuber jemanden unterwegs überfallen

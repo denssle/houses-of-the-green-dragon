@@ -16,6 +16,30 @@ als Arbeitskräfte, Kundschaft und — sobald es Politik gibt — als Wähler.
 Angesiedelt im Mittelalter. Der Spieler muss sich um das Elementare kümmern: ein Dach
 über dem Kopf, Arbeit oder ein eigener Betrieb, Nahrung, Kleidung.
 
+## Das Ziel: eine Welt, die niemanden braucht
+
+**Am Ende sollen NPCs alles tun, was Spieler tun.** Nicht als Kulisse, die auf Eingaben
+wartet, sondern als Bewohner: Sie arbeiten, kaufen, bauen, heiraten, wählen, streiten und
+sterben — und wenn wochenlang niemand hereinschaut, ist die Stadt danach eine andere.
+Ein Spieler tritt in eine laufende Welt ein und verändert sie; er hält sie nicht am
+Leben.
+
+Das ist der Maßstab, an dem jeder Schritt zu messen ist: **Funktioniert das auch ohne
+Spieler?** Eine Ware, die nur ein Spieler kauft, ist kein Markt. Ein Betrieb, der nur
+einem Spieler gehören kann, ist kein Handwerk. Ein Amt, für das sich nur Spieler
+bewerben, ist keine Politik.
+
+Der Weg dorthin ist eine Reihe von Schritten, und jeder einzelne ist daran zu erkennen,
+dass er eine Handlung von der Spielerseite auf die NPC-Seite holt. Erledigt sind bisher:
+essen und Nahrung kaufen, eine Stelle antreten und arbeiten, unter ein Dach ziehen,
+werben und heiraten, wählen und kandidieren, bei Versteigerungen bieten, als
+Bürgermeister öffentliche Bauten herrichten — und seit 4.12 kaufen sie auch, was über
+das Nötigste hinausgeht.
+
+Offen ist der größte Brocken: **NPCs, die selbst etwas unternehmen** — Grundstücke
+kaufen, Betriebe gründen, produzieren, Waren aushängen. Solange alle Betriebe Spielern
+gehören, ist die Angebotsseite geliehen.
+
 ## Die Säulen
 
 ### 1. Lebenszyklus und Erbfolge

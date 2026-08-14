@@ -1,3 +1,4 @@
+import { garmentIntact } from '$lib/game/attire.logic';
 import { Op } from 'sequelize';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
@@ -124,6 +125,28 @@ async function ausfuehren(npcId: string, tick: number): Promise<NpcAction> {
 			}
 			return 'COURT';
 
+		case 'WEAR_GARMENT':
+			await needService.wearGarment(npcId);
+			return 'WEAR_GARMENT';
+
+		case 'DRINK_TONIC':
+			await needService.drinkTonic(npcId);
+			return 'DRINK_TONIC';
+
+		case 'BUY_GARMENT': {
+			// Genau eines: Ein zweites Gewand im Schrank nützt niemandem, solange nur eines
+			// getragen werden kann.
+			const angebot = lage.cheapestGarment;
+			if (angebot) await tradeService.buyFromOffer(npcId, angebot.id, 1);
+			return 'BUY_GARMENT';
+		}
+
+		case 'BUY_TONIC': {
+			const angebot = lage.cheapestTonic;
+			if (angebot) await tradeService.buyFromOffer(npcId, angebot.id, 1);
+			return 'BUY_TONIC';
+		}
+
 		case 'IDLE':
 			return 'IDLE';
 	}
@@ -143,6 +166,8 @@ async function lageAufnehmen(
 			leisten: number;
 			money: number;
 			cheapestBread?: { id: string; quantity: number; pricePerUnit: number };
+			cheapestGarment?: { id: string; quantity: number; pricePerUnit: number };
+			cheapestTonic?: { id: string; quantity: number; pricePerUnit: number };
 	  }
 	| undefined
 > {
@@ -161,6 +186,11 @@ async function lageAufnehmen(
 	const essbar: number = vorrat
 		.filter((posten) => posten.nourishment)
 		.reduce((summe, posten) => summe + posten.quantity, 0);
+
+	// Was der Markt hergibt: Ohne Angebot kein Kauf — und ohne Kauf keine Nachfrage für
+	// die Betriebe aus 4.10 und 4.11.
+	const gewand = await tradeService.cheapestOffer(werte.RegionId, 'GARMENT', npcId);
+	const trank = await tradeService.cheapestOffer(werte.RegionId, 'TONIC', npcId);
 
 	const arbeitsplatz = await freierArbeitsplatz(werte.RegionId);
 	const stelle = await employmentService.getJobOf(npcId);
@@ -200,8 +230,18 @@ async function lageAufnehmen(
 			hasJob: stelle !== undefined,
 			betterJobAvailable: besser !== undefined,
 			matchAvailable: partner !== undefined,
-			foodPrice: brot.basePrice
-		}
+			foodPrice: brot.basePrice,
+			// Was über das Nötigste hinausgeht (4.12). Ohne diese fünf Angaben kauft ein
+			// NPC ausschließlich Nahrung, und jeder Beruf außer dem Bäcker bliebe ohne
+			// Kundschaft.
+			wearsGarment: garmentIntact(werte.wornSinceTick, tick),
+			garmentInStock: menge(vorrat, 'GARMENT'),
+			tonicInStock: menge(vorrat, 'TONIC'),
+			garmentPrice: gewand?.pricePerUnit ?? null,
+			tonicPrice: trank?.pricePerUnit ?? null
+		},
+		cheapestGarment: gewand,
+		cheapestTonic: trank
 	};
 }
 
@@ -274,4 +314,9 @@ async function naechsterPartner(
 		}
 	}
 	return bester;
+}
+
+/** Wie viel von einer Ware im Vorrat liegt. */
+function menge(vorrat: { itemId: string; quantity: number }[], itemId: string): number {
+	return vorrat.find((posten) => posten.itemId === itemId)?.quantity ?? 0;
 }

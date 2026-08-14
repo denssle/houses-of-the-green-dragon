@@ -13,6 +13,7 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 14  | Startbedingungen für neue Spieler                                                    | erster öffentlicher Betrieb  | Entscheidung |
 | 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche (die Zufalls-Raubzüge stehen seit 4.8) | 4.8 / Punkt 6                | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
+| 29  | NPCs als Unternehmer: kaufen, bauen, gründen, verkaufen                              | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
 | 15  | Weltinhalte: Berufe, Waren und Rezepte                                               | laufend                      | Entwurf      |
 | 16  | Balancing im engeren Sinn                                                            | laufend                      | laufend      |
@@ -260,6 +261,25 @@ braucht ein Risiko, sonst ist er die dominante Strategie:
 Offen ist auch, ob NPCs den Beruf ergreifen. Die Persönlichkeitsachsen liegen bereit —
 Mut und Verträglichkeit warten seit 4.4a auf eine Handlung, und Rauben wäre für beide
 die natürlichste.
+
+### 29. NPCs als Unternehmer
+
+Seit 4.12 kaufen NPCs auch, was über das Nötigste hinausgeht — damit steht die
+Nachfrageseite. Die Angebotsseite ist weiterhin **geliehen**: Alle Betriebe gehören
+Spielern, NPCs arbeiten nur darin. Fällt der letzte Spieler weg, stellt niemand mehr
+etwas her, und die Wirtschaft fällt auf Kornspeicher und städtische Schmiede zurück.
+
+Was dafür fehlt, ist der Reihe nach: ein Grundstück **kaufen** (bieten können sie schon),
+ein Gebäude **errichten** (Material besorgen inbegriffen), darin **produzieren** und die
+Erzeugnisse **aushängen**. Jede dieser Handlungen gibt es bereits — sie steht nur nicht in
+`decideNpcAction`.
+
+Die eigentliche Entwurfsarbeit ist nicht das Ausführen, sondern die **Entscheidung**: Wann
+lohnt sich ein Betrieb? Ein NPC, der bei jeder Gelegenheit baut, verwandelt die Stadt in
+eine Fabriklandschaft; einer, der nie baut, ändert nichts. Naheliegend ist derselbe
+Maßstab wie beim Kaufen — Rücklage plus Persönlichkeit (Ehrgeiz und Gier treiben, Trägheit
+bremst) —, dazu ein Blick darauf, was in der Stadt fehlt: Wer sieht, dass niemand Bretter
+anbietet, baut die Zimmerei.
 
 ### 16. Balancing
 

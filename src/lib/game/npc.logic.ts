@@ -27,6 +27,12 @@ export const NPC_ACTIONS = [
 	'WORK',
 	'MOVE_IN',
 	'COURT',
+	// Seit 4.12: Was über das Überleben hinausgeht. Ohne diese vier kaufen NPCs
+	// ausschließlich Nahrung — und jeder Beruf außer dem Bäcker hätte keine Kundschaft.
+	'BUY_GARMENT',
+	'WEAR_GARMENT',
+	'BUY_TONIC',
+	'DRINK_TONIC',
 	'IDLE'
 ] as const;
 export type NpcAction = (typeof NPC_ACTIONS)[number];
@@ -54,7 +60,25 @@ export interface NpcState {
 	matchAvailable: boolean;
 	/** Was ein Stück Nahrung kostet. */
 	foodPrice: number;
+
+	// --- Was über das Nötigste hinausgeht (4.12) --------------------------------------
+	/** Trägt er ein heiles Gewand? */
+	wearsGarment: boolean;
+	/** Liegt eines in der Kammer, ungetragen? */
+	garmentInStock: number;
+	tonicInStock: number;
+	/** Was ein Gewand am Markt kostet — nichts heißt: keines zu haben. */
+	garmentPrice: number | null;
+	tonicPrice: number | null;
 }
+
+/**
+ * Ab wie vielen fehlenden Aktionspunkten sich ein Trank lohnt.
+ *
+ * Erst wenn kaum noch etwas übrig ist: Ein Trank auf halbem Stand verschenkt die Hälfte
+ * seiner Wirkung, weil er nur auffüllt, was fehlt.
+ */
+export const TONIC_WORTH_IT_BELOW = 3;
 
 /**
  * Wie viel Geld einer zurücklegen will, bevor er aufhört zu arbeiten.
@@ -123,6 +147,49 @@ export function decideNpcAction(state: NpcState): NpcAction {
 		state.personality.sociability > -80
 	) {
 		return 'COURT';
+	}
+
+	// 7. Wieder zu Kräften kommen — aber nur, wenn es auch etwas zu tun gibt. Ein Trank
+	//    im Müßiggang ist ein teures Getränk: Die Punkte wachsen von selbst nach, und
+	//    verschenkt wäre er, weil er nur auffüllt, was fehlt.
+	if (
+		state.actionPoints < TONIC_WORTH_IT_BELOW &&
+		state.tonicInStock > 0 &&
+		(state.hasJob || state.workAvailable)
+	) {
+		return 'DRINK_TONIC';
+	}
+
+	// 8. Sich kleiden. Kostet nichts und wirkt bei jedem Umgang — deshalb vor dem Kaufen.
+	if (!state.wearsGarment && state.garmentInStock > 0) return 'WEAR_GARMENT';
+
+	// 9. Kaufen, was das Auskommen verbessert — aber **nur über der Rücklage**. Ein NPC,
+	//    der sein letztes Geld für ein Gewand ausgibt, verhungert darin. Die Rücklage
+	//    hängt an der Gier: Der Genügsame kauft früher, der Raffende später.
+	const ruecklage: number = desiredReserve(state.personality, state.foodPrice);
+	const uebrig: number = state.money - ruecklage;
+
+	//    Kleidung nur, wer überhaupt unter Leute geht. Dem Eigenbrötler ist gleich, wie er
+	//    aussieht — und das ist die zweite Achse, die hier etwas zu sagen bekommt.
+	if (
+		!state.wearsGarment &&
+		state.garmentInStock === 0 &&
+		state.garmentPrice !== null &&
+		uebrig >= state.garmentPrice &&
+		state.personality.sociability > -50
+	) {
+		return 'BUY_GARMENT';
+	}
+
+	//    Einen Trank auf Vorrat nimmt nur mit, wer arbeitet: Für den Müßiggänger ist er
+	//    ein teures Getränk ohne Zweck.
+	if (
+		state.tonicInStock === 0 &&
+		state.tonicPrice !== null &&
+		uebrig >= state.tonicPrice &&
+		(state.hasJob || state.workAvailable)
+	) {
+		return 'BUY_TONIC';
 	}
 
 	return 'IDLE';

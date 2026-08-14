@@ -4,12 +4,16 @@ import { sequelize } from '$lib/db/sequelize';
 import '$lib/db/db';
 import { Character } from '$lib/db/model/character';
 import { Inventory } from '$lib/db/model/inventory';
+import { ShopOffer } from '$lib/db/model/shop';
 import { Relationship } from '$lib/db/model/relationship';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as familyService from '$lib/server/service/familyService';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as needService from '$lib/server/service/needService';
+import * as npcService from '$lib/server/service/npcService';
+import * as tradeService from '$lib/server/service/tradeService';
 import * as relationshipService from '$lib/server/service/relationshipService';
 import { GARMENT_BONUS, GARMENT_LIFETIME_TICKS, PERFUME_BONUS } from '$lib/game/attire.logic';
 import { COURT_AFFECTION_GAIN } from '$lib/game/family.logic';
@@ -176,5 +180,91 @@ describe('Auftreten', () => {
 			expect(await needService.drinkTonic(ich)).toEqual({ ok: false, reason: 'NOTHING_TO_DO' });
 			expect((await needService.getStock(ich))[0].quantity).toBe(1);
 		});
+	});
+});
+
+/**
+ * Phase 4.12: Kaufen NPCs auch, was nicht Nahrung ist?
+ *
+ * Das ist die Frage, an der die ganze Wirtschaft hängt. Bis hierher kauften sie
+ * ausschließlich Brot — jeder Beruf außer dem Bäcker hatte damit keine Kundschaft, und
+ * die Betriebe aus 4.10 und 4.11 produzierten für einen Markt, den es nicht gab.
+ */
+describe('NPCs als Kundschaft', () => {
+	beforeEach(async () => {
+		await World.update({ currentTick: JETZT }, { where: { id: WORLD_ID } });
+		await ShopOffer.destroy({ where: {} });
+		await Inventory.destroy({ where: {} });
+		await Relationship.destroy({ where: {} });
+		await Character.destroy({ where: {} });
+	});
+
+	/**
+	 * Ein NPC, für den das Nötigste erledigt ist: satt, behaust, verheiratet.
+	 *
+	 * Ohne das käme er nie zum Einkaufen — und das ist richtig so: Erst ein Dach, dann
+	 * eine Familie, dann ein gutes Gewand. Die Rangfolge ist der Kern der Entscheidung.
+	 */
+	async function versorgt(name: string, geld: number): Promise<string> {
+		const unterkunft = (await buildingService.getBuildingsInRegion(stadtId)).find(
+			(haus) => haus.optionId === 3
+		);
+		const gatte = await person(name + 's Gatte');
+		const id = await person(name, {
+			money: geld,
+			satiety: 100,
+			spouseId: gatte,
+			HomeBuildingId: unterkunft!.id
+		});
+		await Character.update({ spouseId: id }, { where: { id: gatte } });
+		await geben(id, 'BREAD', 10);
+		return id;
+	}
+
+	/** Ein Angebot am Marktplatz, wie es ein Spieler aushängen würde. */
+	async function angebot(verkaeuferId: string, itemId: string, preis: number): Promise<void> {
+		const markt = (await buildingService.getBuildingsInRegion(stadtId)).find(
+			(haus) => haus.optionId === tradeService.MARKET_OPTION_ID
+		);
+		await ShopOffer.create({
+			id: randomUUID(),
+			BuildingId: markt!.id,
+			SellerCharacterId: verkaeuferId,
+			itemId,
+			quantity: 5,
+			pricePerUnit: preis
+		});
+	}
+
+	it('kauft ein Gewand, wenn Geld über der Rücklage bleibt', async () => {
+		const schneider = await person('Schneider', { role: 'PLAYER' });
+		const kunde = await versorgt('Kunde', 500);
+		await angebot(schneider, 'GARMENT', 14);
+
+		await npcService.actForNpcs(JETZT);
+
+		const gekauft = await needService.getStock(kunde);
+		expect(gekauft.some((posten) => posten.itemId === 'GARMENT')).toBe(true);
+	});
+
+	it('kauft nichts, wenn das Geld für Essen gebraucht wird', async () => {
+		// Ein NPC, der sein letztes Geld für ein Gewand ausgibt, verhungert darin.
+		const schneider = await person('Schneider', { role: 'PLAYER' });
+		const arm = await versorgt('Arme', 15);
+		await angebot(schneider, 'GARMENT', 14);
+
+		await npcService.actForNpcs(JETZT);
+
+		// Nur das Brot, kein Gewand.
+		expect(await needService.getStock(arm)).toHaveLength(1);
+	});
+
+	it('zieht das gekaufte Gewand an', async () => {
+		const kunde = await versorgt('Kunde', 500);
+		await geben(kunde, 'GARMENT', 1);
+
+		await npcService.actForNpcs(JETZT);
+
+		expect((await stand(kunde)).wornSinceTick).toBe(JETZT);
 	});
 });
