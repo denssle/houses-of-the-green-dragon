@@ -258,16 +258,20 @@ describe('Bauen und Arbeiten', () => {
 			expect(await BuildingModel.count()).toBe(1);
 		});
 
-		it('lässt das Rathaus nur einmal je Stadt zu', async () => {
+		// Öffentliche Bauten gehören der Stadt und entstehen aus ihrer Kasse. Ohne diese
+		// Schranke kaufte sich ein reiches Haus das einzige Rathaus der Stadt — und die
+		// Allgemeinheit müsste es fragen, wo sie wählt. Dass es je Stadt nur eines geben
+		// darf, prüft `publicWorks.spec.ts` auf dem Weg, den es dafür gibt.
+		it('lässt niemanden ein öffentliches Gebäude auf eigene Rechnung bauen', async () => {
 			const adelbert = await charakterMitGeld(100);
-			const erstes = await eigenesGrundstueck(adelbert);
+			const grundstück = await eigenesGrundstueck(adelbert);
 			const rathaus = buildingService.getBuildingOption(RATHAUS)!;
-			await buildingService.build(rathaus, adelbert, erstes);
-			const zweites = await eigenesGrundstueck(adelbert);
 
-			const ergebnis = await buildingService.build(rathaus, adelbert, zweites);
+			const ergebnis = await buildingService.build(rathaus, adelbert, grundstück);
 
-			expect(ergebnis).toEqual({ ok: false, reason: 'LIMIT_REACHED' });
+			expect(ergebnis).toEqual({ ok: false, reason: 'NOT_IN_OFFICE' });
+			expect(await BuildingModel.count()).toBe(0);
+			expect(await geld(adelbert)).toBe(100);
 		});
 	});
 

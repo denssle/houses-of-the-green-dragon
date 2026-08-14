@@ -12,17 +12,23 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const character = locals.currentCharacter;
 	const eigene = character ? await plotService.getPlotsOfCharacter(character.id) : [];
 	return {
-		buildingsOptions: buildingService.getBuildingOptions().map((vorlage) => ({
-			...vorlage,
-			// Seit 4.10 kostet ein Bau auch Material. Wer es erst beim Fehlschlag erfährt,
-			// hat die Hälfte des Spiels erraten müssen.
-			material: vorlage.recipes?.some((rezept) => producesBuildingMaterial(rezept.outputItemId))
-				? []
-				: materialFor(vorlage.levels[0].price, vorlage.type).map((posten) => ({
-						...posten,
-						name: getItemTemplate(posten.itemId)?.name ?? posten.itemId
-					}))
-		})),
+		// Nur, was einem selbst gehören kann. Öffentliche Bauten errichtet der
+		// Amtsinhaber aus der Stadtkasse (Rathaus); sie hier anzubieten hieße, einen Weg
+		// zu zeigen, den der Server ohnehin verweigert.
+		buildingsOptions: buildingService
+			.getBuildingOptions()
+			.filter((vorlage) => vorlage.type !== 'PUBLIC')
+			.map((vorlage) => ({
+				...vorlage,
+				// Seit 4.10 kostet ein Bau auch Material. Wer es erst beim Fehlschlag erfährt,
+				// hat die Hälfte des Spiels erraten müssen.
+				material: vorlage.recipes?.some((rezept) => producesBuildingMaterial(rezept.outputItemId))
+					? []
+					: materialFor(vorlage.levels[0].price, vorlage.type).map((posten) => ({
+							...posten,
+							name: getItemTemplate(posten.itemId)?.name ?? posten.itemId
+						}))
+			})),
 		// Was in der eigenen Kammer liegt — daneben liest sich der Bedarf von selbst.
 		stock: character ? await needService.getStock(character.id) : [],
 		// Nur unbebaute eigene Grundstücke — auf ein besetztes passt kein zweites Haus.

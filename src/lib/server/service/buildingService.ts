@@ -348,6 +348,14 @@ export async function build(
 	characterId: string,
 	plotId: string
 ): Promise<BuildResult> {
+	// Öffentliche Bauten gehören der Stadt und entstehen aus ihrer Kasse — der Weg dafür
+	// ist `buildPublicBuilding()` und setzt das Amt voraus. Ohne diese Schranke baute sich
+	// ein Spieler ein privates Rathaus, und weil es je Stadt nur eines geben darf, bekäme
+	// die Stadt nie ihr eigenes: Die Wahl hinge am Wohlwollen eines Hauses.
+	if (option.type === 'PUBLIC') {
+		return { ok: false, reason: 'NOT_IN_OFFICE' };
+	}
+
 	const tick = await worldService.currentTick();
 
 	return sequelize.transaction(async (t: Transaction) => {
