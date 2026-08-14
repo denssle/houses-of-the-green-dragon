@@ -1,9 +1,11 @@
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+﻿import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { sequelize } from '$lib/db/sequelize';
 import '$lib/db/db';
 import { Character } from '$lib/db/model/character';
+import { Building } from '$lib/db/model/building';
 import { Dynasty } from '$lib/db/model/dynasty';
+import { Plot } from '$lib/db/model/plot';
 import { User } from '$lib/db/model/user';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
@@ -90,6 +92,43 @@ describe('Der verwaiste Charakter im Takt', () => {
 		const danach = await stand(anwesend);
 		expect(danach.satiety).toBe(5);
 		expect(danach.money).toBe(500);
+	});
+
+	it('schickt einen obdachlosen Erben ins eigene Haus statt in die Unterkunft', async () => {
+		// `besitzUebertragen` gibt den Eigentumstitel weiter und rührt die Bewohner nicht
+		// an — wer ein Wohnhaus erbt, wohnt deshalb noch lange nicht darin. Bis 5.6a
+		// übersah die Wohnungssuche das eigene Haus und schickte ihn in die städtische
+		// Unterkunft, während sein Erbe leer stand.
+		const erbe = await spieler('Erbe', {
+			satiety: 100,
+			HomeBuildingId: null,
+			lastSeenTick: JETZT - ABSENCE_AFTER_TICKS
+		});
+
+		const plotId = randomUUID();
+		await Plot.create({
+			id: plotId,
+			address: 'Erbgasse 7',
+			type: 'BUILDING_LAND',
+			RegionId: stadtId,
+			ownerType: 'CHARACTER',
+			OwnerCharacterId: erbe
+		});
+		const geerbt = randomUUID();
+		await Building.create({
+			id: geerbt,
+			name: 'Väterliche Kate',
+			optionId: 1,
+			condition: 100,
+			lastConditionTick: JETZT,
+			PlotId: plotId,
+			ownerType: 'CHARACTER',
+			OwnerCharacterId: erbe
+		});
+
+		await npcService.actForNpcs(JETZT);
+
+		expect((await stand(erbe)).HomeBuildingId).toBe(geerbt);
 	});
 
 	it('nimmt ihm keine Entscheidungen ab', async () => {

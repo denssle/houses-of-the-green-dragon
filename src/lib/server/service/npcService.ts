@@ -29,7 +29,6 @@ import { AGE_OF_MAJORITY, ageInYears } from '$lib/game/time';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
-import * as chronicleService from '$lib/server/service/chronicleService';
 import * as familyService from '$lib/server/service/familyService';
 import * as plotService from '$lib/server/service/plotService';
 import * as productionService from '$lib/server/service/productionService';
@@ -153,13 +152,10 @@ async function ausfuehren(
 			return 'WORK';
 
 		case 'MOVE_IN':
-			if (lage.homeId) {
-				await Character.update({ HomeBuildingId: lage.homeId }, { where: { id: npcId } });
-				// Wo jemand ein Dach fand, gehört in seinen Lebenslauf — für den
-				// Obdachlosen, der endlich unterkommt, ist es der wichtigere Tag als
-				// mancher, der schon drinsteht.
-				await chronicleService.recordMoveIn(npcId, lage.homeId, tick);
-			}
+			// Derselbe Weg, den seit 5.6 auch ein Spieler nimmt — samt Prüfung und
+			// Chronikeintrag. Zwei Fassungen desselben Einzugs waren eine zu viel: Die
+			// eine kannte das eigene Haus nicht, die andere schon.
+			if (lage.homeId) await buildingService.moveInto(npcId, lage.homeId);
 			return 'MOVE_IN';
 
 		case 'COURT':
@@ -397,7 +393,9 @@ async function lageAufnehmen(
 	// Arbeitgeber wechselt, wäre kein Handwerker, sondern ein Flattermann.
 	const offen = stelle ? [] : await employmentService.getOpenJobs(werte.RegionId, npcId);
 	const besser = offen.filter((angebot) => isWorthTaking(angebot.wage, TAGELOHN))[0];
-	const unterkunft = werte.HomeBuildingId ? undefined : await freierWohnplatz(werte.RegionId);
+	const unterkunft = werte.HomeBuildingId
+		? undefined
+		: await freierWohnplatz(werte.RegionId, npcId);
 	const partner = werte.spouseId ? undefined : await naechsterPartner(npc.dataValues, tick);
 
 	return {
@@ -498,19 +496,37 @@ async function freierArbeitsplatz(regionId: string): Promise<string | undefined>
 	return undefined;
 }
 
-/** Ein Wohngebäude mit freiem Platz — die eigene Kate oder die städtische Unterkunft. */
-async function freierWohnplatz(regionId: string): Promise<string | undefined> {
+/**
+ * Ein Wohngebäude mit freiem Platz — das eigene zuerst, sonst das der Stadt.
+ *
+ * **Das eigene stand bis 5.6a nicht auf der Liste**, und das war ein Fehler mit einem
+ * naheliegenden Anlass: Wer ein Wohnhaus **erbt**, bekommt den Eigentumstitel, aber keinen
+ * Wohnsitz — `besitzUebertragen` rührt die Bewohner nicht an. Ein obdachloser Erbe zog
+ * daraufhin in die städtische Unterkunft, während sein eigenes Haus leer stand.
+ *
+ * Fremde Privathäuser bleiben ausgenommen: Dort zieht niemand ungefragt ein.
+ */
+async function freierWohnplatz(regionId: string, characterId: string): Promise<string | undefined> {
 	const gebäude = await Building.findAll({
 		include: [{ model: Plot, as: 'plot', where: { RegionId: regionId }, required: true }]
 	});
 
-	for (const eintrag of gebäude) {
+	const bewohnbar = gebäude.filter((eintrag) => {
 		const vorlage = buildingService.getBuildingOption(eintrag.dataValues.optionId);
-		if (!vorlage || residentsAt(vorlage, eintrag.dataValues.level) === 0) continue;
-		// Nur was der Allgemeinheit gehört: In ein fremdes Privathaus zieht niemand
-		// ungefragt ein. Miete und Untermiete kommen mit 4.6d.
-		if (eintrag.dataValues.ownerType !== 'CITY') continue;
+		if (!vorlage || residentsAt(vorlage, eintrag.dataValues.level) === 0) return false;
+		return (
+			eintrag.dataValues.ownerType === 'CITY' || eintrag.dataValues.OwnerCharacterId === characterId
+		);
+	});
 
+	// Das eigene Dach vor dem der Allgemeinheit: Ein Platz in der Unterkunft, den ein
+	// Hausbesitzer belegt, fehlt dem, der keines hat.
+	const sortiert = [
+		...bewohnbar.filter((eintrag) => eintrag.dataValues.OwnerCharacterId === characterId),
+		...bewohnbar.filter((eintrag) => eintrag.dataValues.OwnerCharacterId !== characterId)
+	];
+
+	for (const eintrag of sortiert) {
 		const platz: number | null = await buildingService.freierWohnraum(eintrag.dataValues.id);
 		if (platz !== null && platz > 0) return eintrag.dataValues.id;
 	}

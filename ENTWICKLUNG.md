@@ -1975,6 +1975,22 @@ Einzug hier liegt, wäre der alte Ort ein Ringschluss.
 _Fertig, wenn:_ Ein frisch angelegter Charakter hat einen begehbaren Weg nach oben, ohne
 dass ihm jemand hilft. — Erledigt.
 
+**5.6a Und die NPCs?** ✓ Die Anschlussfrage deckte einen zweiten Fehler auf, denselben in
+Grün.
+
+NPCs zogen längst von selbst unter ein Dach — aber ihre Wohnungssuche kannte **nur
+städtische Häuser**. Das eigene stand nicht auf der Liste, und der Anlass dafür liegt
+näher, als man denkt: Wer ein Wohnhaus **erbt**, bekommt den Eigentumstitel, aber keinen
+Wohnsitz — `besitzUebertragen` rührt die Bewohner nicht an. Ein obdachloser Erbe zog
+daraufhin in die städtische Unterkunft, während sein eigenes Haus leer stand und den Platz
+belegte, den ein Besitzloser gebraucht hätte.
+
+Jetzt sucht er zuerst im Eigenen und erst dann bei der Stadt. Und der Einzug selbst läuft
+über denselben `moveInto` wie beim Spieler: Zwei Fassungen desselben Vorgangs waren eine zu
+viel — die eine kannte das eigene Haus nicht, die andere schon.
+
+_Fertig, wenn:_ Wem ein Haus gehört, der wohnt auch darin. — Erledigt.
+
 **5.7 Ein Rundlauf, der klickt.** (Punkt 25) Ein Playwright-Test, der registriert, einen
 Charakter anlegt, arbeitet, kauft, baut und wählt. Die Unit-Tests decken die Regeln ab;
 sie hätten keinen der Fehler gefunden, die beim Durchspielen von Hand auffielen — ein
