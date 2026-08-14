@@ -51,6 +51,28 @@ Was noch fehlt: NPCs stellen niemanden ein, bauen ihre Betriebe nicht aus und er
 keine Wohnhäuser für ihre Familien — obwohl gerade Wohnraum der Engpass der Bevölkerung
 ist.
 
+**Wer lange nicht hereinschaut, dessen Charakter lebt weiter — von selbst.** Bleibt ein
+Spieler über eine gewisse Zeit weg, übernimmt dieselbe Bedürfnishierarchie, die die NPCs
+steuert: Der Charakter kauft Brot, geht arbeiten, hält sein Haus instand. Nicht besonders
+klug und nicht besonders ehrgeizig, aber am Leben.
+
+Das folgt zwingend aus allem anderen. Eine Welt, in der die Zeit weiterläuft, kennt keinen
+Pausenknopf: Wer zwei Wochen wegbleibt, verhungerte sonst, während sein Haus verfällt —
+und käme zu einer Ruine und einem toten Charakter zurück. Das bestrafte Abwesenheit
+härter als jeden Fehler, den man im Spiel machen kann, und widerspräche der Zusage, dass
+Aktionspunkte sich ansammeln, damit niemand im Minutentakt klicken muss.
+
+Es hat aber auch eine Seite, die nicht bequem ist: Ein verwaister Betrieb produziert
+weiter, ein verwaistes Haus wird instand gehalten, und ein Abwesender bleibt Konkurrenz um
+Bauland und Arbeit. Das ist gewollt — die Welt soll niemanden aussortieren, weil er ein
+paar Tage anderes zu tun hatte. Der Selbsterhalt reicht dabei bewusst nur bis zur
+Selbsterhaltung: Er hält, was da ist, und baut nichts auf. Wer vorankommen will, kommt
+wieder.
+
+Ab wann jemand als abwesend gilt, wie weit die Übernahme geht und was beim Erbfall in
+Abwesenheit geschieht — der Charakter stirbt ja weiterhin —, ist noch nicht entschieden
+(offener Punkt 40).
+
 ## Die Säulen
 
 ### 1. Lebenszyklus und Erbfolge
@@ -94,6 +116,54 @@ neunzig. Kein Alter, ab dem der Tod sicher ist — das machte aus dem Lebensende
 Schalter statt eines Schicksals, und der Greis, der alle überlebt, ist eine Geschichte.
 Krankheit, Hunger und Kälte werden dieses Risiko später erhöhen, nicht ersetzen.
 
+**Ein Kind bekommt einen Namen von seinen Eltern.** Wer geboren wird, heißt zunächst, was
+die Welt ihm gibt — die Geburt geschieht auch dann, wenn der Spieler gerade nicht da ist,
+und ein namenloses Kind wäre ein Loch in der Chronik. Aber der Name ist nicht endgültig:
+Solange das Kind klein ist, darf der Spieler ihn ändern.
+
+Dieselbe Bauart wie bei der Benennung des Erben, und aus demselben Grund. Die Welt wartet
+auf niemanden, also entscheidet sie vorläufig; wer da ist, entscheidet richtig. Was daran
+hängt, ist nicht Mechanik, sondern Bindung: Ein Haus, dessen Kinder man selbst benannt hat,
+ist ein anderes als eine Liste erzeugter Vornamen. Und die Chronik, die über Generationen
+mitschreibt, erzählt dann von Namen, die jemand gewählt hat.
+
+Mit der Volljährigkeit steht der Name fest. Ein Erwachsener, der umbenannt werden kann, ist
+für alle anderen niemand, auf den man sich beziehen könnte — und die Chronik hielte
+Ereignisse fest, deren Handelnder später jemand anderes heißt.
+
+**Wer heiraten darf, entscheidet nicht das Geschlecht.** Zwei Erwachsene, die einander
+zugetan sind, können heiraten — gleich welchen Geschlechts. Das ist, wie die
+Gleichberechtigung beim Erben, historisch unsauber und spielerisch richtig: Ein Spiel, das
+seinen Spielern vorschreibt, wen ihre Figur lieben darf, gewinnt dadurch nichts als eine
+Ausrede. Die Welt hat Not, Verfall und Sterblichkeit genug; sie braucht diese Härte nicht
+dazu.
+
+Für die Dynastie hat das eine Folge, und die ist der Grund, warum das Nächste
+dazugehört: Aus einer Ehe zweier Männer oder zweier Frauen gehen keine leiblichen Kinder
+hervor. Ohne einen zweiten Weg zum Erben wäre die Erlaubnis eine Falle — man dürfte
+heiraten, wen man will, und verlöre dafür sein Haus.
+
+**Adoption ist der zweite Weg zum Erben.** Ein Haus kann ein Kind aufnehmen, das nicht von
+ihm abstammt: Waisen, deren Eltern gestorben sind, oder Kinder aus einem Haus mit mehr
+Nachwuchs, als es braucht. Das angenommene Kind gehört fortan zum Haus, erbt wie ein
+leibliches und kann zum Erben benannt werden.
+
+Damit bekommen drei Dinge eine Antwort, die das Spiel bisher schuldig blieb. Ein Haus ohne
+leibliche Kinder — durch Unfruchtbarkeit, durch den frühen Tod des Partners oder durch die
+Wahl des Partners — hat einen Weg weiter. Ein Kind, dessen Eltern beide starben, hat einen
+Ort. Und ein kinderreiches Haus hat etwas, das ein anderes dringend braucht, was zwischen
+zwei Spielern eine Verhandlung ist und keine Zahl. Was Adoption kostet und wer zustimmen
+muss, ist noch nicht entschieden (offener Punkt 38).
+
+**Wer verwitwet, darf wieder heiraten.** Der Tod des Partners beendet die Ehe, nicht das
+Leben — und in einer Welt, in der die Hälfte die siebzig nicht erreicht, ist Verwitwung
+der Normalfall und nicht die Ausnahme. Wer allein zurückbleibt, wirbt neu und heiratet
+neu. Die Kinder aus der ersten Ehe bleiben, was sie sind: Erben ihres Hauses.
+
+Solange die Ehe besteht, gibt es allerdings nur die eine. Nicht aus Sitte, sondern weil
+alles, was an der Ehe hängt — Zuneigung, Wohnung, Erbfolge, Zugehörigkeit der Kinder —,
+sich auf genau einen Partner beziehen muss, um eindeutig zu bleiben.
+
 **Wer ohne Erben stirbt, dessen Besitz fällt an die öffentliche Hand.** Nicht ins Nichts
 und nicht an einen zufälligen Nachbarn: Häuser, Grundstücke und Vermögen gehen an die
 Stadt, die sie neu vergeben oder verkaufen kann. Das schließt einen Kreis, den knappes
@@ -121,16 +191,112 @@ Die Karte trägt außerdem, was die Wirtschaft braucht: **Rohstoffflächen** lie
 Umland, nicht in der Stadt. Wald, Steinbruch, Acker, Erzgrube — dort entsteht, was in
 den Handwerkshäusern verarbeitet wird.
 
-**Die Karte ist eine Liste von Orten mit Entfernungen dazwischen**, kein Kachelraster.
-Grünau liegt zwei Ticks vom Eichwald und acht von Falkenstein — das genügt für Reisezeit,
-Transportkosten und Fernhandel, ohne dass jemand Kartografie betreiben müsste. Neue Orte
-anzulegen ist damit eine Zeile, was für eine Welt, die wachsen soll, der entscheidende
-Punkt ist.
+**Die Karte ist ein Raster aus Sechsecken.** Jede Kachel hat eine Lage und eine Art;
+Entfernung ist der Abstand darauf und muss nicht für jedes Paar von Orten einzeln
+festgelegt werden. Das Sechseck statt des Quadrats, weil alle sechs Nachbarn gleich weit
+weg liegen — beim Quadrat wäre die Diagonale eine Sonderregel, und Sonderregeln in der
+Geometrie schlagen auf jede Rechnung durch, die darauf aufsetzt.
+
+**Die Art der Kachel bestimmt, was sie hergibt.** Gebirge, Wald, Grasland, Sumpf,
+Gewässer — Erz und Stein kommen aus dem Gebirge, Holz aus dem Wald, Getreide vom
+Grasland. Damit ist die Landschaft kein Hintergrundbild, sondern die Ursache dafür, dass
+eine Ware hier billig und dort teuer ist: Eine Stadt zwischen Wald und Gebirge baut
+anders als eine am Wasser, und der Handel zwischen beiden hat einen Grund, der nicht in
+einer Tabelle steht, sondern auf der Karte.
+
+Welche Ware genau an welcher Kachelart hängt, ist Teil des Warenkatalogs und noch nicht
+entschieden (offener Punkt 15) — beim Sumpf ist nicht einmal klar, ob er etwas hergibt
+oder vor allem im Weg liegt. Beides wäre brauchbar: Eine Landschaft, in der jede Kachel
+etwas abwirft, ist keine Landschaft, sondern ein Vorratsschrank.
+
+**Wer baut, nimmt der Kachel, was sie hergibt.** Das ist der eigentliche Sinn des Rasters:
+Es gibt keine Obergrenze, ab der eine Kachel voll wäre — aber je mehr auf ihr steht, desto
+weniger wirft sie ab. Ein Wald mit drei Häusern darin ist ein schlechterer Wald.
+
+Daraus entsteht eine Abwägung, die jeden Bau betrifft und die niemand für einen entscheidet:
+**Verdichten oder ausweichen.** Wer sein Haus dorthin stellt, wo schon Häuser stehen,
+kostet die Stadt fast nichts — die Kachel gibt ohnehin kaum noch etwas her. Wer sich ins
+Grüne setzt, hat es schöner und nimmt allen den Ertrag. Damit ist die Stadt kein Kreis, der
+gleichmäßig wächst, sondern ein dichter Kern mit einem Umland, das man freihält, weil es
+sich lohnt.
+
+Das Bemerkenswerte daran: Es braucht keine Bauvorschrift, damit sich das einstellt. Der
+Boden selbst bestraft die Zersiedelung. Eine Bauvorschrift wäre trotzdem denkbar — dann
+aber als politische Verschärfung eines Anreizes, der ohnehin wirkt, und nicht als Ersatz
+für ihn.
+
+**Eine Stadt ist deshalb kein Ort mehr, sondern eine Fläche.** Wächst sie, erstreckt sie
+sich über mehrere Kacheln, und was innerhalb ihrer Grenzen liegt, kann weit
+auseinanderliegen. Damit wird **Transport auch innerhalb einer Stadt** zur Sache: Der
+Steinmetz am Gebirgsrand und die Baustelle im Kern sind nicht mehr am selben Fleck. Was
+bisher nur zwischen Städten galt — Ware braucht Zeit und kostet Weg —, gilt dann eine
+Nummer kleiner auch zu Hause. Dasselbe `shipment`, dieselbe Rechnung, nur kürzere
+Strecken.
+
+**Erweitern und Gründen unterscheidet die Nachbarschaft.** Beides heißt, eine Kachel in
+Besitz zu nehmen; welches von beidem es ist, sagt die Karte und nicht der Handelnde. Grenzt
+die Kachel an eine bestehende Stadt, ist es eine **Erweiterung** — sie fällt an diese Stadt,
+in ihre Kasse, unter ihre Gesetze und ihren Bürgermeister. Grenzt sie an keine, ist es eine
+**Gründung**: ein neues Gemeinwesen mit eigener Kasse, eigener Wahl und eigenen Ämtern.
+
+Das ist eine unscheinbare Regel mit politischer Wucht. Wer sich der Herrschaft einer Stadt
+entziehen will, muss weit genug weggehen — und wer eine neue Stadt zu nah gründet, hat
+lediglich das Gebiet des Nachbarn vergrößert. Umgekehrt kann eine Stadt einer entstehenden
+zuvorkommen, indem sie in ihre Richtung wächst.
+
+**Was geschieht, wenn zwei Städte zusammenwachsen?** Bei genug Wachstum berühren sich ihre
+Gebiete irgendwann. Naheliegend ist eine **Verschmelzung** — eine Stadt, zwei Kassen, ein
+Bürgermeister —, und ebenso naheliegend ist, dass niemand das freiwillig will, dessen Amt
+dabei verschwindet. Damit hätte die Karte etwas hervorgebracht, das das Spiel bisher nicht
+hat: einen Konflikt zwischen Gemeinwesen, ganz ohne Krieg. Wie er ausgeht — Abstimmung
+beider Bürgerschaften, das größere Haus schluckt das kleinere, oder eine Grenze, die
+einfach bestehen bleibt —, ist noch nicht entschieden (offener Punkt 31).
+
+**Was das Raster kostet, sei gesagt.** Ein neuer Ort war vorher eine Zeile mit ein paar
+Entfernungen; jetzt braucht die Welt eine Landschaft, die jemand entwirft oder ein
+Verfahren erzeugt. Das ist der Preis. Bezahlt wird er dafür, dass Ausdehnung, Rohstoffe
+und Nachbarschaft aus derselben Quelle stammen statt aus drei getrennten Tabellen.
 
 Entfernung ist dabei kein Beiwerk, sondern der Preis: Was weiter weg liegt, kostet Zeit
 und Transport. Genau daraus entsteht **Handel zwischen den Städten** — Waren, die hier
 im Überfluss vorhanden und dort knapp sind, lohnen den Weg. Wer eine Karawane schickt,
 bindet Kapital für mehrere Ticks und wettet darauf, dass der Preis am Ziel hält.
+
+**Man ist irgendwo, und wer woanders etwas will, muss hin.** Bisher hält sich ein Charakter
+in einer Stadt auf, ohne dass es etwas bedeutet — es gibt nur die eine. Sobald es zwei
+gibt, ist der Aufenthaltsort die Bedingung für fast alles: Man kauft auf dem Markt, auf dem
+man steht, arbeitet in einem Betrieb, den man betreten kann, und verbringt Zeit mit Leuten,
+die vor einem stehen. Ein Spiel, in dem man von überall alles tun kann, hat keine Karte,
+sondern eine Liste.
+
+**Die Stadt ist die Einheit des Aufenthalts, nicht die Kachel.** Innerhalb ihrer Grenzen
+bewegt man sich frei, auch wenn sie sich über mehrere Kacheln erstreckt — sonst würde aus
+dem Gang zum Bäcker eine Reise, und aus dem Spiel Buchführung über Fußwege. Waren machen
+den Unterschied trotzdem (siehe oben): Ein Mensch geht durch seine Stadt, ein Fuder Steine
+nicht.
+
+**Gereist wird in Zeit, nicht in Aktionspunkten.** Wer aufbricht, ist unterwegs — bis zum
+Ankunfts-Tick handelt er nicht, danach steht er am Ziel. Das ist dieselbe Bauart wie beim
+Warentransport und aus demselben Grund richtig: Der Preis einer Entfernung ist die Zeit,
+die sie kostet, und nicht eine Zahl, die man mit ausgeruhten Punkten wegkauft. Ein
+Kaufmann, der acht Ticks unterwegs ist, verpasst acht Ticks in seiner Werkstatt — das ist
+die Abwägung, und sie steht von selbst da.
+
+Die Aktionspunkte wachsen unterwegs weiter, laufen aber gegen ihren Deckel. Wer viel
+reist, verliert also nicht, was er nicht ausgibt — aber wer ständig unterwegs ist, spielt
+oberhalb des Deckels und verschenkt Zeit. Auch das braucht keine eigene Regel.
+
+**Was am Aufenthalt hängt und was nicht**, ist die eigentliche Entwurfsfrage, und ein Teil
+davon lässt sich schon sagen. Handgriffe brauchen Anwesenheit: arbeiten, renovieren,
+bauen, ernten, jemanden besuchen, werben. Anweisungen nicht: einen Verkaufspreis setzen,
+einen Lohn aushängen, seinen Erben benennen — dafür genügt, dass man Eigentümer ist.
+Gewählt wird dort, wo man **wohnt**, nicht wo man gerade steht; sonst entstünde
+Wahltourismus, und die Bürgerschaft wäre, wer zufällig am Wahltag in der Stadt war.
+
+**Wer reist, ist angreifbar.** Ein Charakter unterwegs ist dasselbe Ziel wie eine Ladung
+unterwegs — damit bekommt der Räuber (offener Punkt 23) etwas zu überfallen, das nicht erst
+erfunden werden muss, und die Stadtwache einen Grund, Wege zu sichern. Ob es so weit kommt,
+hängt am Kampf (Punkt 6); die Karte hält den Platz dafür frei.
 
 ### 3. Wirtschaft
 
@@ -145,6 +311,26 @@ Nachfrage statt eines reinen Zahlenkreislaufs.
 Angestellte NPCs (eigene Kinder oder fremde) arbeiten im Betrieb, kosten Lohn und
 erzeugen Wert — das schließt den Kreis zur Familienmechanik: viele Kinder sind
 Arbeitskraft.
+
+**Eine Anstellung ist ein Verhältnis, keine Schicht.** Wer jemanden fest einstellt, bindet
+ihn — und bindet sich: Der Lohn läuft, ob der Betrieb trägt oder nicht. Das ist der
+Unterschied zur Tagelöhnerei, und er ist für beide Seiten ein Geschäft mit Risiko. Der
+Angestellte gibt seine Freiheit auf, anderswo mehr zu verdienen; der Betrieb übernimmt
+eine Fixkostenseite, die er auch im schlechten Jahr trägt.
+
+**Über den Lohn wird verhandelt, nicht verfügt.** Ein Betrieb hängt einen Satz aus, und
+wer ihn zu niedrig findet, geht woandershin — oder fordert mehr. Damit wird der Lohn zu
+dem, was er sein soll: ein Preis, der sich zwischen Angebot und Nachfrage einpendelt. In
+einer Stadt mit drei Schmieden und zwei Schmiedegesellen zahlt man, was verlangt wird. Wer
+einen Angestellten über Jahre hält, hat außerdem Zuneigung aufgebaut — und die ist bei der
+nächsten Wahl eine Stimme. Ein zu knapper Lohn kostet also zweimal.
+
+**Ein Handwerk betreibt, wer es kann.** Eine Schmiede zu führen setzt voraus, dass jemand
+schmieden kann — der Eigentümer selbst oder ein Angestellter mit der Qualifikation. Das
+gibt den Fertigkeiten (Abschnitt 7) ihr wirtschaftliches Gewicht: Ein Betrieb ist dann
+nicht mehr ein Gebäude, das man kauft, sondern eines, das man besetzen muss. Und es
+schärft, was die Lehre wert ist — wer keinen Meister ausgebildet hat, hinterlässt seinem
+Erben eine Werkstatt, die stillsteht, bis er jemanden findet und bezahlt.
 
 **Rohstoffe entstehen nicht aus dem Nichts.** Am Anfang jeder Produktionskette steht
 eine **Abbaufläche** im Umland: Holz aus dem Wald, Stein aus dem Bruch, Getreide vom
@@ -175,6 +361,48 @@ Anders als bei gekauftem Land kann sich die erste Generation nicht dauerhaft all
 sichern — Pacht läuft aus, und über die Verlängerung entscheidet jemand, den man
 überzeugen (oder wählen lassen) muss.
 
+**Der Geldverleiher.** Wer bauen will, hat selten genug — und wer genug hat, lässt es
+liegen. Ein Betrieb, der **Geld gegen Zins** verleiht, bringt beides zusammen und macht
+aus totem Kapital ein Geschäft.
+
+Er wird errichtet wie jeder andere: Ein Spieler oder ein NPC baut eine **Leihstube**, und
+wer Geld braucht, fragt dort an. Der Verleiher sagt zu oder ab — das ist der Punkt, an dem
+sich das Geschäft von einem Automaten unterscheidet. Wem man borgt, entscheidet man
+selbst, und die Grundlage dafür liegt bereit: die Zuneigung. Wer sich anständig verhalten
+hat, bekommt Geld; wer schon einmal ausgefallen ist, bekommt keins mehr. Damit ist ein
+guter Ruf zum ersten Mal etwas wert, das sich in Münzen ausdrücken lässt.
+
+Er löst dabei ein Problem, das die Welt an mehreren Stellen hat: Ein Neuling steht vor
+einem Grundstück, das er sich erst in vierzig Schichten leisten kann (Abschnitt zu den
+Startbedingungen, offener Punkt 14); ein Erbe übernimmt eine Werkstatt und kein Bargeld;
+eine Ernte fällt aus, und die Grundsteuer ist trotzdem fällig. In allen drei Fällen fehlt
+nicht Vermögen, sondern **Liquidität**, und genau dafür gibt es Kredit.
+
+Er ist zugleich der schärfste Weg, sich zu ruinieren, und das ist beabsichtigt. Wer sich
+verschuldet und die Rechnung nicht aufgeht, verliert mehr als der Vorsichtige je gewinnt.
+Ein Spiel über Generationen, in dem man nur langsam wachsen kann, hat keine Fallhöhe; mit
+Schulden hat es sie.
+
+**Wer nicht zahlt, verliert erst sein Pfand und dann seine Freiheit.** Zuerst haftet, was
+haftbar ist: Grundstück und Gebäude gehen an den Gläubiger. Ist auch das nicht da, kommt
+der **Schuldturm** — dieselbe Haft, in die ein überführter Räuber geht, nur aus einem
+anderen Grund. Ein Inhaftierter handelt nicht; seine Zeit läuft weiter, sein Leben steht
+still.
+
+Das ist hart, und es soll hart sein: Ohne diese letzte Stufe wäre ein Kredit an einen
+Besitzlosen folgenlos zu behalten, und ein Verleiher liehe nur denen, die es nicht
+brauchen. Die Härte hat allerdings ein Gegengewicht, und es ist das beste, das dieses
+Spiel zu bieten hat: **Jemand kann einen auslösen.** Ein Verwandter, ein Freund, ein
+Arbeitgeber, dem an einem guten Mann liegt — wer die Schuld begleicht, holt den Schuldner
+heraus. Damit wird aus einer Bankrottregel eine Szene, in der sich zeigt, was ein Haus
+über Generationen an Beziehungen aufgebaut hat.
+
+Was das Gefängnis sonst noch regelt — wie lange man sitzt, ob man dort abarbeiten kann, wer
+das Urteil spricht — steht bei den Bauten und Ämtern (offener Punkt 44). Was mit einer
+Schuld beim Tod des Schuldners geschieht, ist ebenfalls offen (Punkt 43), und daran hängt
+mehr, als es aussieht: Erbt der Erbe die Schulden, ist die Erbfolge plötzlich etwas, das
+man ausschlagen möchte.
+
 **Fernhandel.** Waren zwischen Städten zu bewegen kostet Zeit (mehrere Ticks) und Geld.
 Wer richtig einschätzt, wo etwas knapp ist, verdient daran; wer sich verschätzt, sitzt
 auf Ware, die am Zielort niemand braucht. Weil das Spiel ohnehin in Ticks rechnet, ist
@@ -191,13 +419,44 @@ lässt sich **kaufen und verkaufen**.
 das Bedürfnis nach einem Dach über dem Kopf und bestimmt, wie gut man sich erholt; die
 Handwerkshütte produziert Waren und bietet Arbeitsplätze für Angestellte.
 
+**Nicht jeder Betrieb stellt etwas her.** Der dritte Typ verkauft eine **Leistung**: Die
+Kirche tauft, traut und bestattet, die Taverne schenkt aus und gibt einen Ort zum
+Zusammensitzen, der Geldverleiher gibt Geld gegen Zins. Nichts davon landet in einem
+Vorrat, und trotzdem ist es dasselbe Gebäude — Eigentümer, Zustand, Ausbaustufe,
+Angestellte, Verfall.
+
+Der Unterschied liegt allein darin, **woher die Einnahme kommt**: Wo ein Handwerksbetrieb
+ein Erzeugnis auslegt, das jemand kauft, verlangt ein Dienstleister eine Gebühr für eine
+Handlung, die ohnehin im Spiel vorkommt. Geheiratet wird auch heute; künftig kostet es und
+zahlt jemanden. Das ist der billigste denkbare Weg, aus vorhandenen Handlungen Wirtschaft
+zu machen — es braucht keine neue Mechanik, nur einen Empfänger für das Geld.
+
+Und es löst ein Problem, das die Bedürfnishierarchie hat: Ihre oberen Stufen — Ansehen,
+Zugehörigkeit, Entfaltung — haben bisher wenig, wofür man Geld ausgeben könnte. Ein
+Wirtshausabend, eine Hochzeit mit Feier und ein Begräbnis, das sich sehen lässt, sind
+genau das: Ausgaben, die niemand machen muss und die trotzdem jeder macht.
+
 **Öffentliche Gebäude** gehören keinem Charakter, sondern der Stadt: Brunnen, Schule,
-Friedhof, Stadtmauer, Unterkunft für Obdachlose. Sie werden aus der **Stadtkasse**
+Friedhof, Stadtmauer, Unterkunft für Obdachlose, **Schuldturm**.
+
+**Nur ein Amt kann sie errichten.** Wer kein Amt hält, kann kein Rathaus bauen, auch nicht
+aus eigener Tasche — das ist keine Preisfrage, sondern eine Zuständigkeitsfrage. Sonst
+entstünde die widersinnige Lage, dass ein reiches Haus das einzige Rathaus der Stadt besitzt
+und die Allgemeinheit ihres um Erlaubnis bitten müsste, wo sie wählt. Öffentlich heißt: aus
+der Stadtkasse bezahlt, von einem Gewählten beschlossen, im Eigentum der Stadt. Sie werden aus der **Stadtkasse**
 bezahlt, also aus Steuern und Pachteinnahmen, und wer sie baut, entscheidet die Politik.
 Damit bekommen Ämter einen sichtbaren Zweck: Ein Bürgermeister hinterlässt Bauwerke.
 
 Ihr Nutzen liegt bei der Allgemeinheit, nicht beim Erbauer — der Brunnen versorgt alle,
 die Schule bildet die Kinder der Stadt, die Mauer schützt jeden hinter ihr.
+
+**Der Schuldturm ist die Ausnahme davon**, und deshalb der interessanteste unter ihnen: Er
+nützt niemandem unmittelbar, sondern macht ein Versprechen glaubhaft. Wer dort sitzt, ist
+entweder ein überführter Räuber oder jemand, der seine Schulden nicht bezahlen konnte und
+nichts hatte, was sich pfänden ließ. Eine Stadt ohne Turm kann Recht sprechen, aber nicht
+vollstrecken — und in ihr ist ein Kredit an einen Besitzlosen eine Schenkung. Der Turm ist
+damit nicht Strafe, sondern die Bedingung dafür, dass Verträge zwischen Fremden überhaupt
+etwas gelten.
 
 **Wovor die Mauer schützt: Zufallsereignisse.** Die Welt schlägt gelegentlich zu —
 Räuber überfallen das Umland, eine Seuche geht um, ein Brand greift auf die Nachbarhäuser
@@ -241,6 +500,27 @@ zu einem Festpreis wie alle anderen Waren, oder durch Erbschaft beim Tod des
 Eigentümers. Damit ist Grundbesitz das, was eine Dynastie über Generationen tatsächlich
 aufbaut: Wer erbt, erbt vor allem Mauern.
 
+Das gilt für Wohnhäuser wie für Werkstätten, und bei der Werkstatt hat es eine zweite
+Seite: Wer einen Betrieb kauft, kauft Mauern, nicht Können. Ob er ihn führen darf, hängt
+daran, ob er das Handwerk beherrscht oder jemanden anstellt, der es tut (Abschnitt 3).
+Eine Schmiede zu erben oder zu ersteigern ist damit noch kein Geschäft, sondern erst die
+Gelegenheit dazu.
+
+**Bauen lassen statt selbst bauen.** Ein Haus besteht aus Brettern, Quadern und Eisen —
+aber nicht jeder will Holz einkaufen, bevor er wohnen kann. Wer zahlt, kann deshalb einen
+**Bauherrn beauftragen**: Er nennt einen Preis in Münzen, besorgt das Material und stellt
+das Haus hin.
+
+Die Kette bleibt dabei unangetastet — das Material wird gekauft, nur eben von jemand
+anderem. Genau darin liegt der Reiz: Der Bauunternehmer verdient an der Spanne zwischen
+dem, was er für Holz und Stein zahlt, und dem, was der Bauherr ihm gibt. Wer die
+Baustoffpreise kennt, verdient; wer sich verschätzt, baut auf eigene Kosten. Aus dem
+Baugewerbe wird damit ein Beruf statt einer Einkaufsliste.
+
+**Gebäude tragen Namen, die man ändern kann.** „Bäckerei" ist eine Gattung, „Zum goldenen
+Weck" ein Betrieb. Das kostet nichts an Mechanik und gibt einer Stadt ihr Gesicht — und
+der Chronik Namen, die jemand gewählt hat, statt einer Nummer.
+
 **Auch NPCs besitzen, bauen und verkaufen.** Sie unterliegen denselben Regeln wie
 Spielercharaktere — sie wohnen in eigenen Häusern, müssen sie instand halten und lassen
 sie verfallen, wenn das Geld nicht reicht. Damit ist der Immobilienmarkt auch dann
@@ -256,6 +536,35 @@ Preisregeln, Bauvorschriften.
 Politik ist damit die Ebene, auf der die Wirtschaft von Spielern selbst reguliert wird,
 statt von Balancing-Konstanten im Code.
 
+**Zwei Geldbeutel, nie vermischt.** Wer ein Amt hält, hat weiterhin sein eigenes Vermögen
+— und verwaltet daneben fremdes. Jede Ausgabe muss deshalb sagen, aus welcher der beiden
+Kassen sie geht: Kauft der Bürgermeister ein Grundstück **für sich**, zahlt er selbst und
+wird Eigentümer; kauft er es **für die Stadt**, zahlt die Stadtkasse und die Stadt ist
+Eigentümerin. Dasselbe gilt für Bauten, Material und Löhne.
+
+Das ist keine Buchhaltungsfeinheit, sondern die Bedingung dafür, dass ein Amt überhaupt
+etwas bedeutet. Wo die Trennung verschwimmt, gibt es zwei Fehler, und beide sind schlimm:
+Der eine ist die Selbstbedienung — der Amtsinhaber baut sein Wohnhaus aus der Kasse. Der
+andere ist umgekehrt und subtiler: Ein Bürgermeister, der aus eigener Tasche zahlt und
+dafür Stadteigentum bekommt, hat die Stadt gekauft. Deshalb wird an jeder Amtshandlung
+mitgeführt, **wer zahlt und wem es gehört**, und beides muss zusammenpassen — wer die
+Stadtkasse belastet, erwirbt für die Stadt, nie für sich.
+
+Sichtbar sein muss es auch: Jede Ausgabe aus der Stadtkasse gehört in die Chronik. Ein Amt,
+das über fremdes Geld verfügt, wird an dem gemessen, was es damit getan hat.
+
+**Ein Amt wird entschädigt.** Wer regiert, wendet Zeit auf, die er sonst in seiner
+Werkstatt verbrächte — und ohne Ausgleich könnte sich nur leisten zu regieren, wer es nicht
+nötig hat. Genau das wäre das Gegenteil dessen, wofür „es zählen Köpfe, nicht Münzen"
+steht. Also zahlt die Stadtkasse dem Amtsinhaber eine laufende **Aufwandsentschädigung**.
+
+Sie ist bewusst kein Gehalt für Erfolg, sondern ein Ausgleich für Aufwand — und sie wird
+aus derselben Kasse gezahlt, die der Amtsinhaber selbst verwaltet. Damit ist sie
+mechanisch dasselbe wie der Sold der Stadtwache und politisch dasselbe wie jede andere
+Zahl: Ihre Höhe ist ein Gesetz, sie ist bei der nächsten Wahl zu rechtfertigen, und wer
+sich selbst großzügig bedenkt, hat es zu erklären. Ist die Kasse leer, wird sie nicht
+gezahlt; ein Amt ist keine Forderung an eine Stadt, die nichts hat.
+
 **Die Stadtkasse ist der Hebel.** Steuern und Pachteinnahmen fließen hinein, öffentliche
 Gebäude und die Erschließung neuen Baulands heraus. Wer ein Amt hält, verwaltet fremdes
 Geld — und entscheidet Fragen, an denen für andere viel hängt: Wer bekommt die Pacht auf
@@ -264,6 +573,38 @@ Schule oder eine Mauer?
 
 Da jede Stadt eigene Ämter hat, hat die Gründung einer neuen Stadt auch eine politische
 Seite: Sie schafft ein zweites Machtzentrum, in dem andere Häuser vorn liegen können.
+
+**Mehr als ein Amt — und drei Gewalten.** Der Bürgermeister ist das erste, aber nicht das
+einzige. Die Stadt hat inzwischen von selbst drei Zweige ausgebildet, ohne dass sie als
+solche geplant gewesen wären:
+
+- **Gesetze setzen** — der Bürgermeister verschiebt die Zahlen, die für alle gelten:
+  Zehnt, Standgeld, Grundsteuer, Schulgeld, Stadtreligion.
+- **Ausführen** — die Stadtwache greift auf, die Kasse zahlt, Bauten entstehen, Land wird
+  ausgewiesen und verpachtet.
+- **Richten** — jemand muss über den Räuber und den zahlungsunfähigen Schuldner
+  entscheiden: ob er in den Turm kommt und für wie lange.
+
+Der dritte Zweig fehlt bislang. Die Wache fängt jemanden, der Turm nimmt ihn auf — aber
+zwischen beidem steht ein Urteil, und dafür hat die Stadt niemanden. Also braucht sie
+einen **Richter**.
+
+**Und er darf nicht vom Bürgermeister abhängen.** Das ist die einzige Festlegung, die aus
+der Sache selbst folgt und deshalb schon steht: Wer die Gesetze macht, die Wache befehligt
+und obendrein bestimmt, wer sitzt, ist kein Bürgermeister, sondern ein Fürst. Ein Richter,
+den der Bürgermeister ein- und absetzen kann, ist kein Gegengewicht, sondern sein
+verlängerter Arm. Er muss also selbst gewählt sein — und am besten mit einer anderen
+Amtszeit, damit nicht dieselbe Stimmung beide Ämter besetzt.
+
+Der Gewinn dieser Aufteilung ist nicht die Zahl der Posten, sondern dass Macht verhandelt
+werden muss: Heute bekommt der Wahlsieger Kasse, Wache, Bauten und Gesetze in einer Hand.
+Verteilt muss er mit Leuten auskommen, die er sich nicht ausgesucht hat, und ein Haus, das
+die Bürgermeisterwahl verloren hat, kann trotzdem ein Amt halten.
+
+Welche Ämter es genau gibt, welche **gewählt** und welche vom Bürgermeister **ernannt**
+werden, ist die eigentliche Zuschnittsfrage und noch offen (Punkt 32). Zwei Leitplanken
+stehen dafür bereits fest: Der Richter wird gewählt, und die Stadtwache bleibt eine
+Anstellung und wird nie ein Amt.
 
 **Das Amt ist gerechnet, nicht gespeichert.** Bürgermeister ist der bestplatzierte
 Kandidat der letzten Wahl, der noch lebt. Daraus ergibt sich die Nachfolge von selbst:
@@ -299,6 +640,26 @@ Die **Grundsteuer** trifft den Besitz statt den Ertrag und ist die einzige Abgab
 der Zeit hängt: einmal im Spieljahr, je Grundstück. Sie macht Horten teuer. Wer nicht
 zahlen kann, zahlt, was er hat; der Rest wird erlassen, denn eine Schuld ohne
 Vollstreckung wäre nur eine Zahl, die wächst.
+
+**Die Stadtreligion ist die schärfste Gesetzesart.** Eine Stadt kann eine Konfession zur
+ihren erklären; wer ihr nicht angehört, zahlt eine zusätzliche Abgabe. Auch das ist keine
+neue Regel, sondern eine Zahl auf einer vorhandenen Stellschraube — nur wirkt sie nicht auf
+Besitz oder Umsatz, sondern auf eine Eigenschaft der Person.
+
+Genau deshalb ist sie ein anderes Kaliber als der Zehnt, und das Konzept sagt es lieber
+selbst, als es später zu entdecken: Sie erlaubt einer Mehrheit, eine Minderheit zu
+schröpfen. Das ist historisch der Normalfall gewesen und im Spiel eine echte Möglichkeit
+— aber sie hat einen Preis, und der ist keine Schranke im Code, sondern eine Folge:
+**Wer bedrängt wird, geht.** Eine Stadt, die ihre Andersgläubigen vertreibt, verliert
+Arbeitskräfte, Kundschaft und Steuerzahler an die Nachbarstadt, die sie mit offenen Armen
+nimmt. Die Abgabe bringt kurzfristig Geld in die Kasse und kostet langfristig Einwohner,
+und beides sieht man.
+
+Zwei Grenzen bleiben trotzdem im Code, aus demselben Grund wie beim Zehnt: Die Abgabe hat
+eine Obergrenze, und die Zugehörigkeit zu einer Konfession entscheidet über Geld, nie über
+Rechte. Niemand verliert sein Stimmrecht, sein Eigentum oder seine Ämter, weil er falsch
+getauft ist. Eine Stellschraube darf teuer machen; sie darf niemanden aus dem Spiel
+nehmen.
 
 **Es zählen Köpfe, nicht Münzen.** Jeder Erwachsene der Stadt hat eine Stimme; Besitz
 gibt keine. Wer politisch etwas will, braucht deshalb Leute: Kinder, Angestellte,
@@ -342,15 +703,21 @@ sich verfeindete Adelsgeschlechter abbilden: Wer in eine Familie hineingeboren w
 erbt zwar nicht die persönlichen Beziehungen seiner Eltern — aber er erbt deren Feinde
 und Freunde als Vorzeichen.
 
-Die Zuneigung zwischen zwei Charakteren setzt sich damit aus drei Schichten zusammen:
+Die Zuneigung zwischen zwei Charakteren setzt sich damit aus vier Schichten zusammen:
 
 1. **Verwandtschaft** — der Bonus aus dem Stammbaum
-2. **Haus zu Haus** — die Fehde oder Freundschaft der Dynastien
-3. **Person zu Person** — was die beiden konkret miteinander erlebt haben
+2. **Religion** — der Zuschlag für dieselbe Konfession (Abschnitt 13)
+3. **Haus zu Haus** — die Fehde oder Freundschaft der Dynastien
+4. **Person zu Person** — was die beiden konkret miteinander erlebt haben
+
+Die ersten drei sind der **Grundwert** und werden gerechnet, nicht gespeichert: Sie stehen
+schon fest, bevor sich zwei je begegnet sind. Nur die vierte hat eine Zeile, und nur wenn
+es etwas zu erzählen gibt.
 
 Die persönliche Schicht sticht dabei die anderen: Man kann sich mit einem Mitglied des
 verfeindeten Hauses anfreunden — Romeo und Julia bleiben möglich, sind aber ein Kampf
-gegen den Strom.
+gegen den Strom. Dasselbe gilt über die Konfession hinweg; auch dort ist es ein Kampf
+gegen den Strom und deshalb eine Geschichte.
 
 ### 7. Fertigkeiten — der zweite Querschnitt
 
@@ -408,6 +775,19 @@ was keine Wirkung hat, wird nicht gebaut.
 Damit greifen die Waren in **alle** bestehenden Mechaniken hinein statt in eine eigene:
 Rüstung und Gift in den Kampf, Duftwasser ins Werben, Heiltrank in die Sterblichkeit,
 Kleidung in Krankheit und Umgang, Werkzeug in die Produktion.
+
+**Der Brauer und die Taverne** sind das nächste Paar nach diesem Muster, und ein
+besonders sauberes. Bier ist eine Ware mit einer Kette, die schon steht: Getreide vom
+Acker, gemälzt und gebraut, ausgeschenkt in der Taverne. Damit bekommt der Acker einen
+zweiten Abnehmer neben der Mühle — bisher endet Getreide beim Brot, und ein Rohstoff mit
+nur einem Weg ist kein Markt, sondern eine Rohrleitung.
+
+Die **Taverne** ist dann kein Laden, der Bier verkauft, sondern ein Dienstleistungsbetrieb
+im Sinne von Abschnitt 4: Man geht hin, um Leute zu treffen. Damit hat das Werben einen
+Ort, das Zusammensitzen eine Wirkung auf die Zuneigung und der Wirt ein Auskommen davon,
+dass andere sich begegnen. Für die Bedürfnishierarchie ist es die erste Ausgabe auf der
+Stufe der Zugehörigkeit, die kein Ding ist — man kauft keinen Gegenstand, sondern einen
+Abend.
 
 **Die Jahreszeiten.** Das Jahr hat Frühling, Sommer, Herbst und Winter, und sie sind
 keine Kulisse: Getreide wächst nur zur Saison, der Winter verlangt Kleidung und Heizung,
@@ -528,6 +908,94 @@ auf die Chronik: geboren, verheiratet, im Amt, gestorben.
 Und sie hat eine politische Seite: Ein Unglück, von dem niemand erfährt, hat keine
 Folgen. Wer ein Amt hält, wird an dem gemessen, was in der Chronik steht.
 
+### 13. Religion — der dritte Querschnitt
+
+**Es gibt mehr als eine.** Das ist die entscheidende Festlegung, denn eine einzige Religion
+wäre Kulisse: Etwas, das alle teilen, unterscheidet niemanden. Zum Start zwei —
+**Katholiken und Protestanten** —, und die Bauart lässt jede weitere zu.
+
+**Beide sind gleich viel wert.** Keine Religion gibt bessere Boni, keine ist die richtige;
+was sie unterscheidet, ist ausschließlich, wer sonst noch dazugehört. Das ist nicht
+Zurückhaltung, sondern Spielmechanik: Sobald eine Seite mechanisch stärker wäre, gäbe es
+nichts mehr zu entscheiden, sondern nur noch eine falsche und eine richtige Wahl. Der Reiz
+liegt in der Verteilung, nicht in den Werten.
+
+**Zugehörigkeit entsteht durch Taufe.** Man kann sich taufen lassen, und man tauft seine
+Kinder bei der Geburt — das ist die übliche Weise, wie jemand zu einer Religion kommt, und
+sie macht aus einer Entscheidung der Eltern etwas, das das Kind ein Leben lang trägt. Wer
+ungetauft bleibt, gehört zu keiner; das ist erlaubt und kostet die Zugehörigkeit, die
+andere haben.
+
+**Die Wirkung liegt bei der Zuneigung.** Wer dieselbe Religion teilt, steht einander näher
+— ein Zuschlag auf den Grundwert, wie ihn Verwandtschaft und Hausbeziehung auch geben.
+Damit ist Religion kein eigenes System, sondern eine weitere Schicht in dem, was ohnehin
+das wichtigste Datum des Spiels ist (Abschnitt 6).
+
+Und weil an der Zuneigung die Wahl hängt, hängt an der Religion die Politik. Eine Stadt,
+in der eine Konfession die Mehrheit stellt, wählt ihresgleichen — nicht weil eine Regel es
+vorschriebe, sondern weil Stimmen der Zuneigung folgen. Ein Haus der Minderheit muss dann
+über andere Wege Stimmen sammeln: über Löhne, über Ehen, über Wohltaten. Wer die Konfession
+wechselt, um wählbar zu werden, tut etwas, das im Spiel sichtbar ist und in der Chronik
+steht.
+
+**Die Kirche gehört keiner Stadt, sondern jemandem.** Sie ist ein Betrieb wie eine
+Schmiede — ein Spieler oder ein NPC errichtet sie auf eigenem Grund, hält sie instand und
+stellt Leute ein. Sie ist keine Amtshandlung des Bürgermeisters und wird nicht aus der
+Stadtkasse bezahlt.
+
+Das ist die folgenreichere Bauart, und zwar in beide Richtungen. Sie macht aus dem Glauben
+einen **Wirtschaftszweig**: Die Kirche lebt von Gottesdiensten, Hochzeiten und
+Begräbnissen — Handlungen, die es ohnehin gibt und die künftig jemanden bezahlen. Ein
+Geistlicher ist damit ein Beruf, der ein Auskommen hat, und eine gut besuchte Kirche ein
+Vermögen, das sich vererbt.
+
+Und sie macht aus dem Konfessionsunterschied einen **Wettbewerb** statt einer
+Abstimmung. Wo zwei Kirchen stehen, wirbt jede um Gläubige, denn jeder Getaufte ist
+Kundschaft für ein Leben — Taufe, Hochzeit, Begräbnis. Wer die Mehrheit hinter sich hat,
+verdient daran; wer die Minderheit bedient, hat ein kleineres, aber sicheres Geschäft. Der
+Streit findet damit auf dem Markt statt und nicht im Rathaus, und niemand muss ihn
+entscheiden.
+
+Der Politik bleibt trotzdem ihr Zugriff: Wer Bauland ausweist, entscheidet, ob eine zweite
+Kirche überhaupt Platz findet, und wer Steuern setzt, trifft auch sie. Das ist der feinere
+Hebel — und der ehrlichere, weil er dieselbe Handhabe ist, die jeden anderen Betrieb
+trifft.
+
+Der **Friedhof** bleibt dagegen öffentlich (Abschnitt 4): Der Ort gehört der Stadt, die
+Feier der Kirche. Wer beerdigt wird, liegt bei allen anderen; wer ihn beerdigt, ist eine
+Frage des Glaubens und der Rechnung.
+
+**Und dann kann die Politik doch zugreifen — über das Gesetz.** Eine Stadt darf eine
+**Stadtreligion** ausrufen, und wer ihr nicht angehört, zahlt dafür (Abschnitt 5). Damit
+bekommt die Konfession dieselbe Eigenschaft wie Besitz und Umsatz: Sie ist besteuerbar,
+und damit ist sie ein Wahlkampfthema.
+
+Wer davon betroffen ist, hat drei Wege, und alle drei sind Spiel: **zahlen**, **übertreten**
+oder **fortziehen**. Der letzte ist der Grund, warum die Regel trägt, ohne dass sie
+begrenzt werden müsste — eine Stadt, die ihre Minderheit vertreibt, schrumpft, und die
+Nachbarstadt wächst. Wer bleibt und zahlt, hat ein Motiv, bei der nächsten Wahl anders
+abzustimmen; wer übertritt, verliert Zuneigung bei denen, die er verlässt. Aus einer
+einzigen Zahl im Gesetzbuch entstehen damit Wanderung, Wahlkampf und Konversion, ohne dass
+eines davon eigens gebaut werden müsste.
+
+### 14. Feste im Jahreslauf
+
+**Das Jahr hat wiederkehrende Tage, an denen etwas anderes gilt.** Erntedank nach der
+Ernte, ein Markttag, ein Fest der einen und eines der anderen Konfession. Sie stehen nicht
+in einer Tabelle, sondern **ergeben sich aus dem Tick** — dieselbe Rechnung, die Jahreszeit
+und Jahr liefert, liefert auch, welcher Tag heute ist. Ein Fest ist eine Eigenschaft der
+Zeit, kein Datensatz.
+
+Ihr Zweck ist, dass Zeit nicht gleichförmig verläuft. Ein Jahr, in dem jeder Tick wie der
+vorige ist, hat keinen Rhythmus; ein Jahr mit Terminen gibt Anlässe, an denen man dabei
+sein will. Was ein Fest bewirkt, ist noch offen — naheliegend ist die Zuneigung, weil ein
+Fest die Gelegenheit ist, viele auf einmal zu treffen, statt einen nach dem anderen zu
+besuchen.
+
+Die religiösen Feste erben dabei den Streit aus Abschnitt 13: Ein Fest, das die Stadt
+ausrichtet, ist das Fest einer Konfession, und wer es ausrichtet, hat gewonnen. Die
+weltlichen — Markttag, Erntedank — gehören allen und sind der Ausgleich dazu.
+
 ## Was das für das Datenmodell heißt
 
 Das Schema in Phase 1 des Umbauplans bildet die Grundzüge bereits ab, damit sie nicht
@@ -539,6 +1007,18 @@ nachträglich in jede Tabelle eingezogen werden müssen:
 - `character` braucht `birthTick`/`deathTick`, eine `role` (gespielt oder NPC), `gender`,
   den Aufenthaltsort sowie `motherId`/`fatherId` und `spouseId` als Selbstreferenzen für
   Stammbaum und Ehe.
+- **Adoption trennt Abstammung von Zugehörigkeit.** `motherId`/`fatherId` bleiben, was sie
+  sind — wer von wem abstammt, ändert sich durch keinen Rechtsakt. Das Haus steht dagegen
+  ohnehin schon als eigene Referenz am Charakter, und genau die wechselt bei der Adoption.
+  Erbfolge und Zugehörigkeit hängen am Haus, der Verwandtschaftsbonus der Zuneigung am
+  Stammbaum. Ein angenommenes Kind erbt damit wie ein leibliches, startet aber ohne den
+  Bonus — es muss sich einleben, und das ist die richtige Beschreibung.
+- **Die Ehe braucht eine Vergangenheit.** `spouseId` sagt, wer jetzt verheiratet ist; für
+  die Wiederheirat nach dem Tod des Partners genügt das, denn das Feld wird beim Sterben
+  frei. Was dabei verlorenginge, ist die Geschichte — mit wem jemand vorher verheiratet
+  war. Weil die Kinder ihre Eltern selbst tragen, ist das kein Datenverlust, sondern nur
+  eine Auskunft, die eine eigene `marriage`-Tabelle geben könnte. Sie ist der Grund, sie
+  später doch einzuführen.
 - Das Aktionsbudget hängt am Charakter (`actionPoints`, `lastTickProcessed`), die
   Weltzeit an einer eigenen, einzeiligen Tabelle. Nachgerechnet wird beim Zugriff, nicht
   in einem Durchlauf über alle Charaktere. Den Tick selbst zählt dagegen ein laufender
@@ -552,9 +1032,18 @@ nachträglich in jede Tabelle eingezogen werden müssen:
   hat einen Eigentümer, eine Lage und höchstens ein Gebäude. Wird ein Haus zur Ruine,
   verschwindet das `building`, die `plot`-Zeile bleibt. Dieselbe Tabelle trägt auch die
   Abbauflächen im Umland — ein Grundstück ist entweder Bauland oder Rohstofffläche.
-- `region` bildet die Karte: Städte und Umlandflächen als Orte, dazu `regionLink` mit der
-  Entfernung in Ticks als Verbindung zwischen zweien. Keine Koordinaten, keine Kacheln. Jeder `plot` liegt in einer Region, jeder Charakter hält sich in einer auf.
-  Eine Stadt führt zusätzlich eine **Stadtkasse**.
+- `region` bildet die Karte: Städte und Umlandflächen als Orte. Jeder `plot` liegt in
+  einer Region, jeder Charakter hält sich in einer auf. Eine Stadt führt zusätzlich eine
+  **Stadtkasse**.
+- Die Karte selbst liegt als **Kachel** darunter: Lage im Sechseckraster, Art der
+  Landschaft, und welche Region hier gegebenenfalls liegt. Die Entfernung zwischen zwei
+  Orten wird aus den Lagen **gerechnet, nicht gespeichert** — dieselbe Regel wie bei
+  Alter, Verfall und Zuneigung: Was sich ableiten lässt, bekommt keine Zeile.
+
+  **Das weicht vom Gebauten ab.** Heute steht dort `regionLink` mit einer Entfernung je
+  Verbindung, aus der Zeit der Ortsliste. Der Umbau steht aus und ist ein eigener Punkt
+  (offener Punkt 31) — er berührt Reisezeit, Fernhandel und die Erschließung.
+
 - Öffentliche Gebäude sind normale `building`-Zeilen **ohne** Eigentümer-Charakter,
   dafür mit Bezug zur Stadt. Kein zweites Gebäudesystem — dieselben Regeln für Bau,
   Verfall und Renovierung, nur eine andere Kasse.
@@ -567,6 +1056,12 @@ nachträglich in jede Tabelle eingezogen werden müssen:
 - `shipment` bildet unterwegs befindliche Ware ab: Herkunft, Ziel, Ankunfts-Tick,
   Eigentümer, Ladung. Passt bruchlos ins Tick-Modell — vor dem Ankunfts-Tick ist die Ware
   schlicht nicht verfügbar.
+- **Ein reisender Charakter ist derselbe Fall.** Der Aufenthaltsort steht bereits am
+  Charakter; dazu kommen Ziel und Ankunfts-Tick. Solange sie gesetzt sind, ist er
+  unterwegs und handelt nicht — dieselbe Prüfung wie bei der Ladung, an derselben Stelle,
+  und ohne eigene Tabelle. Erreicht die Weltuhr den Tick, wird der Aufenthalt zum Ziel und
+  die Felder werden frei. Nachgerechnet beim Zugriff, wie alles andere auch: Es braucht
+  keinen Durchlauf, der Ankünfte einsammelt.
 - Ämter hängen an einer Stadt, nicht an der Welt: Jede Stadt wählt ihre eigenen.
 - Verkaufsangebote sind ein nullbarer Preis an `plot` beziehungsweise `building` — kein
   eigenes Auktionswesen, passend zum Festpreisprinzip.
@@ -577,6 +1072,14 @@ nachträglich in jede Tabelle eingezogen werden müssen:
   Verwandten der Verwandtschaftsbonus; er wird aus dem Stammbaum **berechnet, nicht
   gespeichert**, und gilt automatisch, sobald keine Zeile existiert. Die Richtung ist
   bewusst asymmetrisch: A kann B schätzen, ohne dass es erwidert wird.
+- Die **Religion** ist ein nullbares Feld am Charakter, kein Verbund: Wer ungetauft ist,
+  hat keine. Sie geht als Schicht in den berechneten Grundwert der Zuneigung ein und muss
+  deshalb bei jedem Vergleich zur Hand sein — dieselbe Überlegung wie bei der
+  Persönlichkeit, und dieselbe Antwort. Der Zeitpunkt der Taufe gehört in die Chronik, nicht
+  an den Charakter: Er wird nie gerechnet, nur erzählt.
+- **Feste bekommen keine Tabelle.** Welcher Tag im Jahr heute ist, folgt aus dem Tick wie
+  Jahreszeit und Jahr; welches Fest darauf fällt, ist eine Liste im Code. Ein Fest ist eine
+  Eigenschaft der Zeit, und Eigenschaften der Zeit werden gerechnet.
 - `dynastyRelationship` (fromDynastyId, toDynastyId, standing) hält die Fehde oder
   Freundschaft zwischen Häusern — ebenfalls spärlich gespeichert. Sie geht als Schicht in
   den Grundwert der persönlichen Beziehung ein, ist also kein zweites, getrenntes System.
@@ -804,9 +1307,9 @@ deshalb, was von Anfang an im **Datenmodell** stehen muss, von dem, was als **Sp
 später dazukommt — das Modell nachträglich umzubauen ist teuer, ein weiterer Ort auf der
 Karte dagegen billig.
 
-Von Anfang an im Modell: `region` mit Entfernungen, `plot` mit Regionsbezug und Typ,
-Stadtkasse, Gebäude ohne privaten Eigentümer. Auch wenn die Welt zunächst nur aus einer
-Stadt und ein paar Umlandflächen besteht — die Struktur muss die zweite Stadt schon
+Von Anfang an im Modell: `region` mit Lage auf der Karte, `plot` mit Regionsbezug und
+Typ, Stadtkasse, Gebäude ohne privaten Eigentümer. Auch wenn die Welt zunächst nur aus
+einer Stadt und ein paar Umlandflächen besteht — die Struktur muss die zweite Stadt schon
 hergeben.
 
 Als Spielinhalt später: Fernhandel zwischen Städten, Gründung neuer Städte, Erschließung

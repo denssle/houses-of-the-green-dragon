@@ -17,6 +17,20 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
 | 15  | Weltinhalte: Berufe, Waren und Rezepte                                               | laufend                      | Entwurf      |
 | 16  | Balancing im engeren Sinn                                                            | laufend                      | laufend      |
+| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                      | zweite Stadt / Erschließung  | Entwurf      |
+| 32  | Die Ämter: Zuschnitt, was gewählt und was ernannt wird, der Richter                  | Ämter über den Bürgermeister | Entscheidung |
+| 33  | Lohn: Aushang, Verhandlung, wer wen einstellt                                        | laufend                      | Entwurf      |
+| 34  | Wer einen Handwerksbetrieb führen darf                                               | Berufe (Punkt 15)            | Entwurf      |
+| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                               | laufend                      | Entwurf      |
+| 36  | Gebäude und Betriebe benennen                                                        | laufend                      | Aufgabe      |
+| 37  | Gebäude verkaufen (Grundstücke gehen bereits) — entschieden, aber ungebaut           | laufend                      | Aufgabe      |
+| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                    | Ehe für alle                 | Entwurf      |
+| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit             | später                       | Entwurf      |
+| 40  | Der abwesende Spieler: ab wann, wie weit, und was beim Erbfall                       | erster öffentlicher Betrieb  | Entwurf      |
+| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist              | zweite Stadt                 | Entwurf      |
+| 42  | Kindern einen Namen geben                                                            | laufend                      | Aufgabe      |
+| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                          | erste verliehene Münze       | Entwurf      |
+| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                      | Punkt 43 / Punkt 23          | Entwurf      |
 | 25  | End-to-End-Test (Playwright)                                                         | erster öffentlicher Betrieb  | Aufgabe      |
 | 26  | Datensicherung per Cron, einmal wiederhergestellt                                    | erster öffentlicher Betrieb  | Aufgabe      |
 | 27  | Impressum, Datenschutz, Nutzungsbedingungen                                          | erster öffentlicher Betrieb  | Aufgabe      |
@@ -115,6 +129,10 @@ damit eine Stelle — wer eine größere Wache will, müsste ausbauen können, u
 heute nur ein privater Eigentümer. Ausbauen oder ein zweites danebenstellen sind zwei
 Wege zum selben Ziel; vermutlich braucht es nur einen.
 
+**Die Kirche gehört ausdrücklich nicht dazu** (Punkt 39): Sie ist ein privater Betrieb, der
+von Gottesdiensten, Hochzeiten und Begräbnissen lebt, kein Bau aus der Stadtkasse. Der
+**Friedhof** dagegen schon — der Ort gehört der Stadt, die Feier der Kirche.
+
 Der Prüfstein ist derselbe wie bei Waren und Fertigkeiten: **Wo wirkt der Bau?** Ein
 Brunnen gegen Seuchen setzt Punkt 5 voraus; eine Mauer gegen Räuber und ein Löschteich
 gegen Brände hätten seit 4.8 dagegen sofort eine Wirkung — die Unglücke sind da, nur
@@ -143,7 +161,448 @@ ob dieser Betrieb bleibt, wem er gehört und was ein Neuling sonst noch mitbekom
 
 ## Vor der Politik
 
+### 32. Die Ämter: Zuschnitt, Wahl und Ernennung
+
+**Was feststeht** (`KONZEPT.md`, Abschnitt 5): Die Stadt hat drei Gewalten ausgebildet —
+Gesetze setzen, ausführen, richten. Der dritte Zweig fehlt und bekommt einen **Richter**.
+Der wird **gewählt** und nicht ernannt, weil ein Richter, den der Bürgermeister absetzen
+kann, kein Gegengewicht ist, sondern sein verlängerter Arm. Die **Stadtwache** bleibt eine
+Anstellung und wird nie ein Amt.
+
+Alles andere ist offen. Der Zuschnitt beginnt nicht bei den Posten, sondern bei den
+**Befugnissen**, die es tatsächlich schon gibt — sie liegen heute sämtlich beim
+Bürgermeister:
+
+| Befugnis                                 | Zweig       | heute         |
+| ---------------------------------------- | ----------- | ------------- |
+| Gesetze erlassen (Sätze verschieben)     | Legislative | Bürgermeister |
+| Stadtkasse: auszahlen, Sold aussetzen    | Exekutive   | Bürgermeister |
+| Öffentliche Bauten errichten, herrichten | Exekutive   | Bürgermeister |
+| Land ausweisen und versteigern           | Exekutive   | Bürgermeister |
+| Abbauflächen verpachten                  | Exekutive   | Bürgermeister |
+| Urteil über Räuber und Schuldner         | Judikative  | niemand       |
+
+**Der Vorschlag zur Diskussion — wenige Wahlen, viele Ernennungen:**
+
+Gewählt werden **Bürgermeister** und **Richter**: zwei Wahlen, zwei Legitimationen, und der
+eine kann den anderen nicht loswerden. Ernannt werden vom Bürgermeister **Kämmerer**,
+**Baumeister** und **Wachmeister** — sie führen aus, was er verantwortet, und er trägt ihre
+Fehler bei der nächsten Wahl.
+
+Dafür sprechen drei Dinge. Erstens die **Größe der Stadt**: Bei zwölf Einwohnern sind fünf
+Wahlen absurd; zwei sind gerade noch ein Wahlkampf. Zweitens bleibt der Bürgermeister ein
+Amt, um das es sich zu kämpfen lohnt — lauter Einzelwahlen ergäben eine Ämterlandschaft
+ohne Mitte, in der niemand für das Ganze verantwortlich ist. Drittens entsteht dadurch
+etwas, das ein Spiel gut gebrauchen kann: **Ämter als Beute**. Wer einen Bürgermeister
+unterstützt, hofft auf die Kämmerei, und das ist ein Grund, Bündnisse zu schließen, den
+Einzelwahlen nicht hergeben.
+
+Dagegen spricht, dass die Gewaltenteilung dann nur halb ist — die Exekutive hängt komplett
+am Bürgermeister. Genau deshalb ist der Richter die Ausnahme: Der eine Zweig, der ihn
+bremsen können muss, ist der, der über Freiheit entscheidet.
+
+**Was in jedem Fall zu klären bleibt:**
+
+- **Die Höhe der Aufwandsentschädigung.** Entschieden ist, dass es sie gibt und dass ihre
+  Höhe ein Gesetz ist (`KONZEPT.md`, Abschnitt 5). Offen ist der Rahmen: zu niedrig, und
+  nur Wohlhabende regieren; zu hoch, und das Amt wird zum Selbstzweck — man kandidiert
+  fürs Geld, nicht fürs Gestalten. Ein Maß, das sich anbietet: ungefähr das, was dieselbe
+  Zeit in einem mittleren Betrieb einbrächte. Für jedes weitere Amt stellt sich die Frage
+  erneut, und ein Bürgermeister, der die Sätze seiner eigenen Ernannten setzt, bezahlt
+  seine Gefolgschaft aus öffentlicher Hand — was Spiel ist, aber sichtbar sein muss.
+- **Wie wird sie ausgezahlt?** Laufend wie der Sold der Wache (dieselbe Mechanik, dann
+  fällt sie bei leerer Kasse aus) oder am Ende der Amtszeit. Das Erste ist einfacher und
+  härter: Wer die Stadt ruiniert, bezahlt sich selbst nicht mehr.
+
+- **Die Amtszeit des Richters.** Länger als die des Bürgermeisters, damit nicht dieselbe
+  Stimmung beide Ämter besetzt — dann überdauert ein Richter den, der ihn nicht wollte.
+- **Wer zahlt, wenn ein anderer bestellt?** Baut der Baumeister und führt der Kämmerer die
+  Kasse, braucht es ein Vetorecht oder ein Budget. Das erste erzeugt Streit, das zweite
+  Buchhaltung — das eine ist Spiel, das andere Arbeit. Bei Ernennung durch den
+  Bürgermeister entschärft sich die Frage: Beide dienen demselben Herrn.
+- **Und wenn niemand da ist?** Ein unbesetztes Amt fällt an den Bürgermeister zurück; ein
+  unbesetztes **Richteramt** darf das nicht — sonst ist die Ausnahme wieder aufgehoben.
+  Naheliegend: Ohne Richter kann eine Stadt nicht vollstrecken, so wie sie es ohne Turm
+  nicht kann (Punkt 44). Das ist kein Fehler, sondern ein Zustand mit Folgen.
+- **Was, wenn der Richter befangen ist?** Er wird über Schuldner urteilen, deren Gläubiger
+  seine Verwandten sind — oder er selbst. Ein Verbot wäre schwer zu fassen und leicht zu
+  umgehen. Besser sichtbar machen: Die Chronik hält fest, wer wen wozu verurteilt hat, und
+  die nächste Wahl regelt es.
+- **Dürfen NPCs alle Ämter halten?** Sie kandidieren und regieren bereits als
+  Bürgermeister (4.15). Für jedes neue Amt muss dasselbe gelten, sonst steht die Stadt
+  still, sobald keine Spieler da sind — der Maßstab aus „Das Ziel" gilt auch hier.
+
+Das Amt ist gerechnet, nicht gespeichert (Abschnitt 5) — diese Bauart trägt mehrere
+gewählte Ämter ohne Änderung, solange jede Wahl ihr eigenes `office` hat. **Ernannte Ämter
+passen dagegen nicht hinein**: Sie haben keine Wahlliste, aus der sich der Inhaber
+errechnen ließe, und brauchen daher doch eine gespeicherte Zeile samt Regel für den Fall,
+dass der Ernannte stirbt. Das ist der Preis der Ernennung und gehört in die Abwägung.
+
 ## Laufend
+
+### 31. Die Karte als Sechseckraster
+
+**Entschieden (`KONZEPT.md`, Abschnitt 2):** Die Karte wird ein Raster aus Sechsecken.
+Jede Kachel hat eine Lage und eine Art — Gebirge, Wald, Grasland, Sumpf, Gewässer —, und
+die Art bestimmt, welche Rohstoffe dort zu gewinnen sind. Eine Kachel fasst eine begrenzte
+Zahl von Gebäuden; eine wachsende Stadt erstreckt sich über mehrere.
+
+**Das Gebaute weicht ab.** Heute steht `regionLink` mit einer Entfernung je Verbindung, aus
+der Zeit der Ortsliste. Der Umbau ist die eigentliche Arbeit an diesem Punkt und noch nicht
+zugeschnitten. Offen ist:
+
+- **Wie groß ist eine Kachel?** Daran hängt alles Weitere. Zu klein, und eine Stadt ist ein
+  Fleckenteppich aus zehn Kacheln; zu groß, und die Expansion findet nie statt. Der
+  Prüfstein: Grünau soll in absehbarer Spielzeit an seine erste Grenze stoßen.
+- **Wie entsteht die Landschaft?** Von Hand entworfen (schön, aber endlich) oder erzeugt
+  (unendlich, aber beliebig). Für eine Welt mit einer Startstadt reicht Handarbeit; für
+  die zweite und dritte Stadt vermutlich nicht.
+- **Was gibt der Sumpf her?** Und allgemein: die Zuordnung Kachelart → Rohstoff. Das
+  gehört zum Warenkatalog (Punkt 15). Nicht jede Kachel muss etwas abwerfen — eine
+  Landschaft, in der alles nutzbar ist, ist ein Vorratsschrank.
+- **Was wird aus der Entfernung?** Sie soll sich aus den Lagen rechnen statt gespeichert zu
+  werden. Das berührt Reisezeit, Transportkosten und `shipment` — alles, was heute an
+  `regionLink` hängt.
+- **Wie stark mindert Bebauung den Ertrag?** Das ist die Stellschraube, an der die ganze
+  Mechanik hängt. Zu schwach, und niemand verdichtet; zu stark, und die erste Hütte
+  ruiniert eine Kachel. Gesucht ist eine Kurve, bei der die ersten Bauten wenig kosten und
+  die letzten viel — dann entsteht der dichte Kern von selbst.
+- **Was ist eine Stadt, wenn sie eine Fläche ist?** Heute ist `region` ein Ort und ein
+  Charakter hält sich in einem auf. Erstreckt sich eine Stadt über Kacheln, muss die
+  Zugehörigkeit zur Stadt von der Lage getrennt werden — und der Transport innerhalb der
+  Stadt braucht dieselbe Rechnung wie der zwischen Städten, nur kürzer.
+- **Wann verschmelzen zwei Städte?** Berühren sich ihre Gebiete, ist die Verschmelzung
+  naheliegend — und niemand will sie, dessen Amt dabei verschwindet. Denkbar sind eine
+  Abstimmung beider Bürgerschaften, ein Übergewicht nach Einwohnern, oder gar keine
+  Verschmelzung: zwei Städte, die aneinandergrenzen, bleiben zwei Städte. Die letzte
+  Variante ist die billigste und vermutlich die klügste, solange nicht klar ist, was der
+  Konflikt spielerisch hergibt.
+
+Fällig ist das nicht sofort: Solange es eine Stadt gibt, tut die Ortsliste ihren Dienst.
+Fällig wird es mit der **zweiten Stadt** oder mit der **Erschließung**, denn beides fragt
+nach einer Richtung, und eine Richtung hat eine Liste nicht.
+
+### 33. Lohn: Aushang, Verhandlung, wer wen einstellt
+
+**Gebaut ist die halbe Sache:** Ein Betrieb hängt einen Lohn aus (4.14), wer will, tritt
+ein, und `employment` hält das Verhältnis. Damit ist der Lohn ein Preis, den eine Seite
+setzt und die andere nimmt oder lässt.
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitt 3): Über den Lohn soll verhandelt werden.
+Zu entwerfen ist, wie — und das ist schwieriger, als es klingt, weil auf der anderen Seite
+meist ein NPC steht:
+
+- **Wonach entscheidet ein NPC?** Er kennt die anderen Aushänge in der Stadt, sein eigenes
+  Können und seine Zuneigung zum Arbeitgeber. Naheliegend ist eine Schwelle: Unter dem
+  ortsüblichen Satz tritt er nicht ein, über der Zuneigungsschwelle bleibt er auch für
+  weniger. Damit zahlt sich aus, was ein Haus über Generationen aufgebaut hat.
+- **Kündigt er auch?** Ein Angestellter, der geht, sobald nebenan mehr geboten wird, macht
+  aus dem Lohn eine echte Größe — und aus dem Betrieb eine Sorge. Ohne das ist der einmal
+  gesetzte Satz für immer richtig.
+- **Kann man jemanden aktiv einstellen?** Heute bewirbt sich, wer will. Wer einen
+  bestimmten Schmied haben will (siehe Punkt 34), braucht einen Weg, ihn anzusprechen — und
+  der NPC einen Grund, zuzusagen.
+- **Was kostet Kündigen?** Eine Anstellung mit Laufzeit, die jederzeit folgenlos endet,
+  ist keine. Eine Frist oder eine Abfindung macht daraus eine Bindung — und beides muss
+  auch für den Arbeitgeber gelten, sonst ist es Willkür.
+
+### 34. Wer einen Handwerksbetrieb führen darf
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitte 3 und 4): Eine Schmiede zu betreiben
+setzt voraus, dass jemand schmieden kann — der Eigentümer selbst oder ein Angestellter mit
+der Qualifikation. Damit bekommen Fertigkeiten wirtschaftliches Gewicht und die Lehre
+einen handfesten Wert: Wer keinen Nachfolger ausbildet, hinterlässt eine Werkstatt, die
+stillsteht.
+
+Zu entscheiden ist die **Schwelle und was bei ihrem Verlust geschieht**:
+
+- **Welche Stufe?** Zu hoch, und ein Neuling kann nie einen eigenen Betrieb aufmachen —
+  das trifft genau die Gruppe, die Punkt 14 ohnehin Sorgen macht. Zu niedrig, und die Regel
+  ändert nichts.
+- **Was passiert beim Tod des Meisters?** Der Betrieb steht still, bis der Erbe jemanden
+  findet — das ist die gewollte Dramatik. Aber steht er still oder verfällt er? Und
+  bekommt der Erbe eine Frist, oder trifft es ihn am Tag der Beerdigung?
+- **Gilt das auch für NPCs?** Sie bauen seit 4.13 selbst Werkstätten. Die Regel muss auf
+  ihrer Seite dieselbe sein, sonst entsteht eine Schattenwirtschaft aus NPC-Betrieben ohne
+  Meister.
+- **Wie sieht man es?** Ein Betrieb, der nichts produziert, weil eine Bedingung fehlt,
+  muss das sagen — sonst sucht ein Spieler den Fehler bei sich.
+
+### 35. Der Bauherr als Beruf
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitt 4): Wer nicht selbst Holz und Stein
+einkaufen will, beauftragt jemanden, der es tut — Preis in Münzen, Material und Arbeit
+kommen vom Bauherrn. Die Baukette bleibt intakt, weil das Material trotzdem gekauft wird;
+der Unternehmer verdient an der Spanne.
+
+Zu entwerfen ist der **Auftrag als Sache im Spiel**: Wer bietet an, wer nimmt an, was
+passiert, wenn der Beauftragte stirbt, bevor er baut? Ein Auftrag über mehrere Ticks ist
+im Tick-Modell leicht abzubilden (wie `shipment`), aber er ist ein Vertrag zwischen zwei
+Charakteren — und davon gibt es bisher nur einen, die Anstellung.
+
+Offen ist auch, ob NPCs den Beruf ergreifen. Ohne das ist er nur für Spieler da, und ein
+Spieler, der drei Tage nicht hereinschaut, ist ein Bauherr, auf den niemand warten will.
+
+### 36. Gebäude und Betriebe benennen
+
+Eine kleine Sache mit sichtbarer Wirkung: „Bäckerei" ist eine Gattung, „Zum goldenen Weck"
+ein Betrieb. Der Name gehört dem Eigentümer und lässt sich ändern.
+
+Zu klären ist nur, was die Freiheit einschränkt — Länge, und ob zwei Gebäude in derselben
+Stadt gleich heißen dürfen. Beim ersten fremden Nutzer kommt die Frage nach anstößigen
+Namen dazu; sie gehört zu den Nutzungsbedingungen (Punkt 27).
+
+### 37. Gebäude verkaufen
+
+Hier ist nichts zu entscheiden — es fehlt die Umsetzung. Das Konzept sieht den
+Immobilienhandel seit jeher vor, und die Bauart steht fest: ein nullbarer Preis am
+Datensatz, kein eigenes Auktionswesen. Für `plot` ist genau das gebaut (`setPlotPrice`,
+`buyFromOwner`); für `building` fehlt es.
+
+Solange es fehlt, hat ein Haus nur zwei Wege aus dem Besitz: Erbschaft oder Verfall. Wer
+eine Werkstatt nicht mehr braucht, kann sie niemandem geben, der sie braucht — und ein
+Neuling (Punkt 14) findet nichts zu kaufen, obwohl anderswo etwas leersteht. Der Betrieb
+mit dem Grundstück darunter sollte in einem Zug den Besitzer wechseln können; getrennt
+verkauft entstünde ein Haus auf fremdem Boden, und dafür gibt es keine Regel.
+
+### 38. Adoption
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitt 1): Ein Haus kann ein Kind aufnehmen, das
+nicht von ihm abstammt. Es erbt wie ein leibliches und kann zum Erben benannt werden; die
+Abstammung bleibt unverändert, es wechselt die Zugehörigkeit zum Haus. Damit hat ein Haus
+ohne leibliche Kinder einen Weg weiter — und die Ehe für alle ist keine Falle.
+
+Zu entscheiden ist, **wer abgegeben werden darf und was es kostet**:
+
+- **Waisen ja — aber Kinder aus lebenden Häusern?** Ein Kind von seinen Eltern
+  wegzuverhandeln ist der interessantere Fall (zwei Spieler, eine Verhandlung) und der
+  heiklere. Wenn, dann sicher nur mit Zustimmung beider Elternteile.
+- **Was hindert den Missbrauch?** Ohne Kosten adoptiert ein Haus so viele Kinder, wie es
+  bekommen kann, und hat nie wieder ein Erbenproblem. Denkbar sind Aktionspunkte, eine
+  Gebühr an die Stadt, eine Zahl je Haus, oder die Zuneigung als Bedingung: Man nimmt kein
+  Kind an, das einen nicht mag.
+- **Was sagt das Kind?** Ein Mündel mit eigener Persönlichkeit, das nach Zuneigung
+  entscheidet, wäre folgerichtig — dann ist Adoption Werbung um ein Kind statt einer
+  Verfügung über es.
+- **Wie hält es die Chronik?** Die Annahme gehört festgehalten, und der Stammbaum (heute
+  eine Liste aus `motherId`/`fatherId`) muss sie zeigen können, ohne die Abstammung zu
+  verfälschen.
+
+Fällig ist der Punkt mit der Ehe für alle: Ohne Adoption wäre sie eine Erlaubnis, die das
+Haus kostet.
+
+### 39. Religion, Kirche und Feste
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitte 13 und 14): Es gibt mehrere Religionen,
+zum Start Katholiken und Protestanten, mechanisch gleichwertig. Zugehörigkeit entsteht
+durch Taufe — als Erwachsener oder als Kind bei der Geburt. Die Wirkung liegt bei der
+Zuneigung: gleiche Konfession, höherer Grundwert. Feste ergeben sich aus dem Tick, nicht
+aus einer Tabelle.
+
+Zu entscheiden bleibt:
+
+- **Wie groß ist der Zuschlag?** Er steht neben Verwandtschaft und Hausbeziehung und muss
+  sich zu ihnen verhalten. Zu groß, und die Stadt zerfällt in zwei Lager, die einander nie
+  wählen; zu klein, und die Konfession ist ein Abzeichen ohne Folgen. Das ist eine
+  Balancing-Frage (Punkt 16), aber eine mit politischer Sprengkraft.
+- **Wie kommt die erste Verteilung zustande?** Wenn alle Start-NPCs dieselbe Konfession
+  haben, gibt es nichts zu verteilen. Wenn sie gleich verteilt sind, hat die Stadt von
+  Anfang an einen Riss. Beides ist eine Setzung, und sie prägt die Startstadt stärker als
+  jede Gebäudeliste.
+- **Kann man wechseln?** Naheliegend ja — sonst ist die Taufe der Eltern ein
+  Lebensurteil. Aber ein Wechsel, der nichts kostet, macht die Konfession zur Tagesform:
+  Man tauft sich um, bevor man kandidiert. Denkbar sind Aktionspunkte, eine Frist, ein
+  Eintrag in der Chronik (den alle sehen), oder ein Verlust an Zuneigung bei denen, die
+  man verlässt. Das Letzte ist das eleganteste, weil es aus dem System selbst folgt.
+- **Was kostet welche Amtshandlung?** Die Kirche ist ein privater Betrieb
+  (`KONZEPT.md`, Abschnitt 13) und lebt von Taufe, Hochzeit, Begräbnis und Gottesdienst.
+  Damit ist der Preis eine Balancing-Frage mit einer Härte darin: Ein Begräbnis, das sich
+  ein Armer nicht leisten kann, ist eine Geschichte — oder eine Grausamkeit, je nachdem,
+  ob es einen Ausweg gibt. Naheliegend ist, dass das Nötige umsonst zu haben ist und nur
+  das Ansehnliche kostet.
+- **Setzt der Wirt den Preis selbst?** Bei Waren gilt das Festpreisprinzip, jeder Betrieb
+  legt seinen Preis fest. Für Leistungen sollte dasselbe gelten — dann unterbietet die
+  Kirche der Minderheit die der Mehrheit, und der Wettbewerb ist echt.
+- **Wer darf eine Kirche führen?** Dieselbe Frage wie bei jedem Handwerk (Punkt 34): Es
+  braucht wohl einen Geistlichen — den Eigentümer selbst oder einen Angestellten. Und
+  seine Konfession bestimmt die der Kirche, sonst wechselte ein Haus die Konfession seines
+  Baus wie einen Ladenanstrich.
+- **Braucht die Taufe eine Kirche?** Wenn ja, hat eine Stadt ohne Kirche eine ungetaufte
+  Bevölkerung — was gut ist (die erste Kirche lohnt sich) und schlecht (die Startstadt
+  hätte gar keine Konfession, bis jemand baut). Vermutlich braucht es zum Start eine
+  vorhandene Kirche, wie es die städtische Schmiede gibt.
+- **Wie hoch darf die Abgabe für Andersgläubige sein?** Die **Stadtreligion** ist als
+  Gesetzesart entschieden (`KONZEPT.md`, Abschnitt 5), samt der Grenze, dass sie nur Geld
+  kostet und nie Rechte. Offen ist die Obergrenze — und sie ist heikler als die des
+  Zehnten, weil eine Mehrheit sie gegen eine Minderheit setzt, die sich nicht wehren kann.
+  Zu hoch, und Auswanderung ist die einzige Antwort; das entvölkert Städte schneller, als
+  sie wachsen.
+- **Wie schnell wandert man aus?** Die Auswanderung ist das Gegengewicht zur Stadtreligion
+  und trägt nur, wenn sie tatsächlich geschieht — also müssen NPCs sie vollziehen (Punkt
+  41). Ohne wandernde NPCs bleibt die Abgabe eine Einnahme ohne Folgen, und dann ist die
+  Regel kaputt.
+- **Was bewirkt ein Fest?** Naheliegend die Zuneigung: viele auf einmal treffen, statt
+  einen nach dem anderen zu besuchen. Zu klären ist, ob es Aktionspunkte kostet, ob die
+  Stadtkasse zahlt, und ob NPCs hingehen — ein Fest, auf dem niemand ist, ist keins.
+- **Welche Feste, und wann?** Erntedank nach der Ernte und ein Markttag sind gesetzt, weil
+  sie an vorhandene Mechaniken andocken. Die religiösen Feste brauchen einen Platz im
+  Jahr, der zu den Jahreszeiten passt, und je Konfession mindestens eines — sonst ist die
+  Gleichwertigkeit nur behauptet.
+
+Der Prüfstein bleibt derselbe wie bei Waren und Bauten: **Wo wirkt es?** Eine Kirche ohne
+Wirkung ist ein teures Haus mit einem Turm.
+
+### 40. Der abwesende Spieler
+
+**Die Richtung steht** (`KONZEPT.md`, „Das Ziel"): Bleibt ein Spieler lange weg, übernimmt
+die Bedürfnishierarchie der NPCs seinen Charakter — er isst, arbeitet und hält sein Haus
+instand, baut aber nichts auf.
+
+Zu entscheiden ist:
+
+- **Ab wann?** Zu früh, und das Spiel spielt sich selbst, während man überlegt; zu spät,
+  und der Charakter ist verhungert, bevor die Hilfe greift. Ein Maß, das sich anbietet:
+  wenn die Aktionspunkte am Deckel anstehen und nichts geschieht — dann liegt Zeit brach,
+  und genau das ist Abwesenheit.
+- **Wie weit geht die Übernahme?** Essen und renovieren sind unstrittig. Heiraten,
+  Kinder bekommen, ein Grundstück ersteigern sind es nicht — sie legen fest, was der
+  Spieler bei seiner Rückkehr vorfindet. Die Grenze verläuft vermutlich dort: erhalten ja,
+  entscheiden nein.
+- **Was beim Erbfall?** Der Charakter altert und stirbt auch in Abwesenheit. Wer erbt,
+  steht durch die Benennung fest (oder das älteste volljährige Kind) — die Frage ist, ob
+  der Erbe dann ebenfalls selbstverwaltet weiterläuft. Naheliegend ja, sonst reißt die
+  Kette genau dort, wo sie gebraucht wird.
+- **Sagt es jemand?** Ein Spieler, der zurückkommt, sollte sehen, was in seiner
+  Abwesenheit geschah. Die Chronik hat dafür bereits die Form (4.7d).
+- **Und wo hört es auf?** Ein Konto, das nie wiederkommt, hält ein Haus für immer am
+  Leben. Irgendwann muss die Selbstverwaltung enden — das berührt die Kontolöschung
+  (Punkt 28) und die Frage, ob eine Dynastie ohne Spieler zum NPC-Haus wird.
+
+### 41. Reisen
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitt 2): Der Aufenthaltsort ist die Bedingung
+für Handlungen, die Stadt ist seine Einheit, gereist wird in Zeit — Ziel und Ankunfts-Tick
+am Charakter, unterwegs handelt er nicht. Die Grobeinteilung steht ebenfalls: Handgriffe
+brauchen Anwesenheit, Anweisungen nicht, gewählt wird am Wohnort.
+
+Zu entscheiden bleibt:
+
+- **Die Liste selbst.** Jede bestehende Handlung muss einmal danach durchgesehen werden,
+  ob sie Anwesenheit verlangt. Die Grenze „Handgriff oder Anweisung" trägt die meisten
+  Fälle, aber nicht alle: Ist eine Lehrstunde ein Handgriff (dann müssen beide am selben
+  Ort sein)? Ist ein Antrag einer? Und der Marktkauf — auf dem Marktplatz sicher, aber in
+  einem Laden am anderen Ende der Stadt?
+- **Was kostet eine Reise außer Zeit?** Zeit allein ist sauber, aber sie trifft den
+  Reichen wie den Armen gleich. Ein Fuhrwerk, das schneller ist und Geld kostet, machte
+  daraus eine Wahl — und wäre nebenbei eine Ware mit Wirkung (Punkt 15).
+- **Kann man umkehren?** Eine Reise, die man nicht abbrechen kann, ist hart, wenn sich die
+  Lage am Ziel ändert. Eine, die man jederzeit abbricht, nimmt der Entfernung ihr Gewicht.
+- **Wer reist außer Spielern?** Ohne wandernde NPCs bleibt jede Stadt eine geschlossene
+  Bevölkerung — Zuwanderung wäre der Weg, wie eine junge Stadt überhaupt wächst, und
+  Abwanderung die Strafe für eine schlecht regierte. Das ist ein eigenes Stück Simulation
+  und gehört zur Bedürfnishierarchie (Punkt 7).
+- **Wo wohnt man, wenn man unterwegs ist?** Der Wohnsitz bleibt, wo das Haus steht — daran
+  hängt das Wahlrecht. Aber ein Charakter, der dauerhaft in eine andere Stadt zieht,
+  braucht einen Weg, seinen Wohnsitz zu verlegen, und die alte Stadt verliert damit einen
+  Wähler.
+- **Und die Ehe über Entfernung?** Zwei Verheiratete an verschiedenen Orten sind
+  spielerisch möglich und mechanisch heikel: Wohnen, Kinder und Zuneigung setzen bisher
+  voraus, dass beide am selben Fleck sind.
+
+Fällig wird das mit der **zweiten Stadt** — vorher gibt es nichts, wohin man reisen
+könnte. Der Punkt hängt damit an 31.
+
+### 42. Kindern einen Namen geben
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitt 1): Die Welt vergibt bei der Geburt einen
+Namen, weil sie nicht auf den Spieler wartet; solange das Kind minderjährig ist, darf der
+Spieler ihn ändern. Mit der Volljährigkeit steht er fest.
+
+Hier ist wenig zu entwerfen und einiges zu tun. Zu klären ist nur, was die Freiheit
+begrenzt: Länge, ob zwei Geschwister gleich heißen dürfen (nein), und ob der Name eines
+Verstorbenen wieder vergeben werden darf (ja — genau so heißen Kinder nach ihren
+Großeltern). Beim ersten fremden Nutzer kommt die Frage nach anstößigen Namen dazu; sie
+gehört zu den Nutzungsbedingungen (Punkt 27) und trifft Gebäudenamen (Punkt 36)
+gleichermaßen.
+
+### 43. Geldverleih und Schulden
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitt 3): Ein Betrieb verleiht Geld gegen Zins.
+Er schließt die Lücke zwischen Vermögen und Liquidität — der Neuling vor dem Grundstück,
+der Erbe mit Werkstatt und ohne Bargeld, die ausgefallene Ernte bei fälliger Grundsteuer.
+Und er ist die schärfste Weise, sich zu ruinieren, was beabsichtigt ist: Ein Spiel, in dem
+man nur langsam wachsen kann, hat keine Fallhöhe.
+
+Alles Weitere ist offen, und zwei Fragen müssen **vor der ersten verliehenen Münze**
+beantwortet sein:
+
+- **Was geschieht bei Zahlungsunfähigkeit?** Die Stufenfolge steht (`KONZEPT.md`,
+  Abschnitt 3): erst das **Pfand** — Grundstück und Gebäude gehen an den Gläubiger, womit
+  der Geldverleiher nebenbei ein Weg ist, wie Grundbesitz den Eigentümer wechselt, ohne
+  dass jemand stirbt —, und wenn nichts zu pfänden ist, der **Schuldturm** (Punkt 44).
+  Offen bleibt, was genau haftet: alles, oder muss ein Dach über dem Kopf unantastbar
+  sein? Ohne eine solche Grenze pfändet man jemanden in die Obdachlosigkeit, und die
+  städtische Unterkunft zahlt die Zeche.
+- **Was wird aus einer Schuld beim Tod?** Erbt der Erbe sie mit, ist die Erbfolge
+  plötzlich etwas, das man ausschlagen möchte — und das Spiel hätte einen Zustand, den es
+  bisher nicht kennt. Erlischt sie, wird der Kredit an einen Greis zum Geschenk, und die
+  Häuser mit alten Oberhäuptern borgen sich reich. Denkbar ist der Mittelweg: Die Schuld
+  geht auf den Nachlass, nicht auf die Person — sie wird aus dem Erbe bedient, bevor
+  geteilt wird, und was übrig bleibt, ist weg.
+
+Dazu kommt:
+
+- **Wer setzt den Zins?** Der Verleiher selbst, wie jeder Betrieb seinen Preis. Dann ist
+  ein Höchstzins eine Gesetzesart, die auf eine vorhandene Stellschraube zeigt — genau die
+  Bauart, die das Konzept für Gesetze vorsieht. Wucher zu verbieten wäre damit ein
+  Wahlkampfthema.
+- **Wie oft wird abgerechnet?** Der Zins läuft mit der Zeit und lässt sich wie Pacht und
+  Verfall aus den verstrichenen Ticks rechnen — kein Durchlauf nötig.
+- **Verleihen NPCs?** Sie müssen, sonst gibt es das Geschäft nur, solange ein Spieler es
+  betreibt — und ein Neuling stünde vor einer Leihstube, deren Inhaber seit drei Tagen
+  nicht hereingeschaut hat. Die Regel, wem sie trauen, liegt bereit: die Zuneigung, dazu
+  die Frage, ob jemand schon einmal ausgefallen ist. Damit braucht ein NPC-Verleiher ein
+  Gedächtnis für Schuldner, das über den einzelnen Vertrag hinausreicht.
+- **Wie fragt man an?** Ein Kredit ist ein Vertrag zwischen zwei Charakteren, und davon
+  gibt es bisher nur einen — die Anstellung. Der Bauauftrag (Punkt 35) ist der zweite, der
+  Kredit der dritte. Vermutlich lohnt sich hier eine gemeinsame Form für „A bietet, B nimmt
+  an", statt dreimal dasselbe zu bauen.
+- **Sieht man, wer verschuldet ist?** Ein Haus, dessen Lage man einschätzen kann, ist ein
+  Haus, mit dem man verhandeln kann. Ganz offen wäre zu viel, ganz verborgen zu wenig.
+
+### 44. Der Schuldturm
+
+**Die Richtung steht** (`KONZEPT.md`, Abschnitte 3 und 4): Ein öffentliches Gebäude, in das
+kommt, wer überführt wurde — als Räuber oder als Schuldner, der nichts mehr zu pfänden hat.
+Wer sitzt, handelt nicht. Wer die Schuld begleicht, holt ihn heraus, und das darf jeder
+tun, nicht nur er selbst.
+
+Der Turm ist damit der erste Ort im Spiel, an dem einem Charakter **etwas gegen seinen
+Willen geschieht**, das ihn nicht umbringt. Das ist ein neuer Zustand und verlangt Sorgfalt:
+
+- **Wie lange?** Beim Räuber ist die Dauer ein Urteil, beim Schuldner müsste sie an der
+  Schuld hängen. Eine Haft, die endet, wenn abgesessen ist, macht aus dem Schuldturm eine
+  Wartezeit; eine, die nur durch Zahlung endet, kann ewig dauern. Beides ist unbrauchbar in
+  Reinform.
+- **Kann man dort arbeiten?** Naheliegend ja — wer im Turm schuftet, tilgt langsam. Das
+  gibt dem Zustand einen Ausweg aus eigener Kraft und nimmt ihm das Ausgeliefertsein. Und
+  es beantwortet nebenbei, wovon ein Häftling isst.
+- **Was geschieht draußen?** Der Besitz verfällt weiter, die Angestellten arbeiten oder
+  nicht, die Familie isst oder nicht. Ein halbes Jahr Haft könnte ein Haus vernichten, das
+  die Haft selbst nur bremsen sollte. Vermutlich braucht es eine Vertretung — wer im Turm
+  sitzt, kann Anweisungen geben (siehe die Trennung Handgriff/Anweisung in Punkt 41), nur
+  eben nichts selbst tun.
+- **Wer richtet?** Ein gewählter **Richter** (Punkt 32) — ausdrücklich nicht der
+  Bürgermeister und nicht der Wachmeister, der den Räuber fängt. Wer aufgreift, soll nicht
+  auch urteilen. Ein Amt, das über Freiheit entscheidet, braucht trotzdem ein Gegengewicht
+  im Code: eine Höchstdauer, so wie es Höchstsätze bei den Steuern gibt.
+- **Und was, wenn niemand einen Turm gebaut hat?** Dann kann eine Stadt nicht vollstrecken.
+  Das ist keine Lücke, sondern ein Zustand mit Folgen — dort verleiht niemand an
+  Besitzlose. Eine Stadt bekommt damit einen Charakter, den ihre Bürger gewählt haben.
+- **Trifft es auch Spieler?** Ja, sonst ist es keine Regel. Aber ein Spieler, der nach
+  einer Woche Abwesenheit im Turm sitzt, weil sein selbstverwalteter Charakter (Punkt 40)
+  sich verschuldet hat, ist ein Fall, der nicht eintreten darf — die Selbstverwaltung
+  nimmt keine Kredite auf.
 
 ### 15. Weltinhalte: Berufe, Waren und Rezepte
 
@@ -164,6 +623,13 @@ und der Nachweis, dass die Regel trägt: Die Ware wirkt, weil Bauen sie verbrauc
 
 **Mit Phase 4.11 gebaut:** **Schneider** und **Alchemist** — Gewand, Duftwasser und
 Stärkungstrank. Beide wirken auf Größen, die stehen: Zuneigung (4.3) und Aktionspunkte.
+
+**Als Nächstes vorgesehen** (`KONZEPT.md`, Abschnitt 8): **Brauer und Taverne**. Bier
+schließt an eine Kette an, die schon steht — Getreide vom Acker, gemälzt und gebraut —, und
+gibt dem Acker seinen zweiten Abnehmer neben der Mühle. Die Taverne ist dann kein Laden,
+sondern ein Dienstleistungsbetrieb: Man geht hin, um Leute zu treffen, und das wirkt auf
+die Zuneigung. Zu klären ist, was ein Abend dort genau bewirkt und ob er billiger ist als
+derselbe Besuch unter vier Augen — sonst geht niemand hin.
 
 Offen bleiben die Erzeugnisse, deren Wirkung an fehlenden Systemen hängt: Heiltrank und
 Winterkleidung warten auf Krankheit (Punkt 5), Waffen, Rüstung und Gift auf den Kampf
