@@ -1,0 +1,7 @@
+# Shell-Skripte laufen auf dem Uberspace, nicht hier.
+#
+# Mit CRLF wird aus der Shebang-Zeile `#!/usr/bin/env bash\r` — und Linux sucht dann einen
+# Interpreter namens „bash\r", den es nicht gibt. Die Meldung dazu („bad interpreter: No
+# such file or directory") nennt eine Datei, die sichtbar existiert, und kostet jeden
+# einmal eine Stunde. Hier nicht.
+*.sh text eol=lf

@@ -2026,13 +2026,58 @@ verlorenginge; die Geschichte teilt sich deshalb eine Seite.
 _Fertig, wenn:_ Ein kaputter Weg durch die Anwendung bricht den Build. — Erledigt, als
 eigener Job neben Unit-Tests und Rauchtest.
 
-**5.8 Eine Sicherung, die geprüft ist.** (Punkt 26) Dump per Cron, und einmal
-wiederhergestellt. Die Produktionsdatenbank enthält Generationen von Spielzeit, die sich
-nicht nachbauen lassen; ein Deploy ist kein Sicherungsplan, und eine Sicherung, die
-niemand zurückgespielt hat, ist eine Vermutung.
+**5.8 Eine Sicherung, die geprüft ist.** (Punkt 26) Zwei Skripte, die mit dem Deploy auf
+den Host wandern — `scripts/backup.sh` und `scripts/restore-check.sh`.
 
-_Fertig, wenn:_ Eine Sicherung wurde auf einem leeren System eingespielt und die Welt lief
-weiter.
+**Warum der Deploy-Dump nicht reicht:** Er läuft seit 2.4 vor jeder Auslieferung, und
+genau darin liegt seine Lücke. Wer zwei Wochen nichts ausliefert, hat zwei Wochen keine
+Sicherung — und ausgerechnet die ruhigen Zeiten sind die, in denen die Welt am meisten
+Spielzeit ansammelt.
+
+**`backup.sh`** zieht täglich per Cron einen Dump und behält die letzten vierzehn.
+Zwei Dinge macht er anders als der Deploy-Dump, und beide sind Lehren aus dem Hinsehen:
+
+- **Erst schreiben, dann benennen.** Bricht `mysqldump` mittendrin ab, bleibt sonst eine
+  halbe Datei liegen, die aussieht wie eine Sicherung. Genau darauf verlässt man sich im
+  Ernstfall. Die Umbenennung ist der Moment, in dem sie eine wird.
+- **Die Größe wird geprüft.** `mysqldump` gibt bei Teilfehlern gelegentlich 0 zurück; eine
+  Datei unter einem Kilobyte ist keine Welt.
+
+**`restore-check.sh`** ist die Probe aufs Exempel — und der eigentliche Punkt 26. Er spielt
+die jüngste Sicherung in eine **Prüfdatenbank** und sieht nach, ob darin eine Welt steht:
+Tabellenzahl, Weltzeit, lebende Einwohner. Ohne diese Prüfungen wäre er wertlos, denn ein
+leeres Schema spielt sich anstandslos ein.
+
+Die Produktionsdatenbank bleibt dabei unberührt. Das ist der Unterschied zwischen einer
+Übung und einem Ernstfall, und die Übung soll man ohne Bauchschmerzen machen können —
+sonst macht man sie nie. Der Ernstfall selbst steht als **Anleitung** am Ende des Skripts
+und nicht als ausführbarer Zweig: Eine Wiederherstellung überschreibt Generationen von
+Spielzeit und gehört nicht in einen Aufruf, den man versehentlich absetzt.
+
+**Was auf dem Host zu tun ist** (einmalig, per SSH):
+
+```sh
+# 1. Der Deploy bringt die Skripte mit — nachsehen, dass sie da sind:
+ls -l ~/houses-app/scripts/
+
+# 2. Eine Sicherung von Hand ziehen und prüfen:
+~/houses-app/scripts/backup.sh
+~/houses-app/scripts/restore-check.sh
+
+# 3. Erst wenn das durchläuft: den Cron einrichten.
+crontab -e
+#   17 4 * * * $HOME/houses-app/scripts/backup.sh >> $HOME/logs/backup.log 2>&1
+```
+
+Die krumme Minute mit Absicht: Zur vollen Stunde laufen auf einem geteilten Host die
+Aufgaben aller Nutzer gleichzeitig.
+
+`.gitattributes` nagelt `*.sh` dabei auf LF fest. Mit CRLF wird aus der Shebang-Zeile ein
+Interpreter namens „bash\r", und die Meldung dazu nennt eine Datei, die sichtbar
+existiert — ein Fehler, der jeden einmal eine Stunde kostet.
+
+_Fertig, wenn:_ Eine Sicherung wurde eingespielt und die Welt stand vollständig darin. —
+Skripte stehen; der Lauf auf dem Host fehlt noch.
 
 **5.9 Was ein Betreiber schuldet.** (Punkte 27, 28) Impressum, Datenschutz,
 Nutzungsbedingungen — und die Kontolöschung als Anonymisierung, weil eine Dynastie sich
