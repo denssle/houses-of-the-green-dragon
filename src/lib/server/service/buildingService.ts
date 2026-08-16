@@ -35,6 +35,7 @@ import * as characterService from '$lib/server/service/characterService';
 import * as needService from '$lib/server/service/needService';
 import * as electionService from '$lib/server/service/electionService';
 import * as skillService from '$lib/server/service/skillService';
+import * as tradeService from '$lib/server/service/tradeService';
 import * as worldService from '$lib/server/service/worldService';
 import { checkName, type NameCheck } from '$lib/game/naming.logic';
 import { seasonOf } from '$lib/game/time';
@@ -1187,9 +1188,14 @@ export async function maintainAsNpcMayor(
 /**
  * Material aus der Kammer nehmen — oder sagen, was fehlt.
  *
- * **Aus dem persönlichen Vorrat, nicht aus einem Betriebslager.** Wer baut, schleppt
- * sein Holz selbst herbei; das Lager gehört dem Betrieb, und der Bauherr ist hier
- * Kunde, nicht Eigentümer. Wer nichts hat, kauft beim Zimmerer — genau dafür gibt es ihn.
+ * **Aus allem, was dem Bauherrn gehört** (5.25, Punkt 72) — Kammer und eigene Häuser.
+ * Bis dahin zählte nur der persönliche Vorrat, mit der Begründung, der Bauherr schleppe
+ * sein Holz selbst herbei. Das stimmte, solange jedes Erzeugnis in der Kammer landete;
+ * seit es im Betrieb bleibt, hieße es, dass ein Zimmerer die eigenen Bretter nicht
+ * verbauen darf, die in seiner eigenen Werkstatt liegen.
+ *
+ * **Fremdes bleibt fremd:** `getOwnedStock` sieht nur in Häuser, die ihm gehören. Wer
+ * nichts hat, kauft weiterhin beim Zimmerer — genau dafür gibt es ihn.
  *
  * Gibt `undefined` zurück, wenn es gereicht hat, sonst die Fehlmenge.
  */
@@ -1200,16 +1206,15 @@ async function materialAbziehen(
 ): Promise<MaterialNeed[] | undefined> {
 	if (bedarf.length === 0) return undefined;
 
-	const vorrat = new Map<string, number>();
-	for (const posten of await needService.getStock(characterId)) {
-		vorrat.set(posten.itemId, posten.quantity);
-	}
-
-	const fehlt: MaterialNeed[] = missingMaterial(bedarf, vorrat);
+	const fehlt: MaterialNeed[] = missingMaterial(
+		bedarf,
+		await tradeService.getOwnedStock(characterId)
+	);
 	if (fehlt.length > 0) return fehlt;
 
 	for (const posten of bedarf) {
-		await needService.changeStock(characterId, posten.itemId, -posten.quantity, t);
+		// Kammer zuerst, dann die Häuser — dieselbe Reihenfolge wie beim Herstellen.
+		await tradeService.consumeOwned(characterId, posten.itemId, posten.quantity, t);
 	}
 	return undefined;
 }

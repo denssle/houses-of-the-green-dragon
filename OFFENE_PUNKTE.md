@@ -25,7 +25,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                  | —                            | erledigt     |
 | 70  | Niemand lernt ein Handwerk, das es nicht gibt — alle schmieden, keiner backt       | der Brotkette                | Entscheidung |
 | 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                             | —                            | erledigt     |
-| 72  | Ware liegt, wo sie entstand — und niemand trägt sie weiter                         | dem nächsten Messlauf        | Entscheidung |
+| 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                  | —                            | erledigt     |
 | 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                            | laufend                      | Entwurf      |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung             | laufend                      | Entwurf      |
@@ -1383,7 +1383,33 @@ Eine Sackgasse, in der niemand mehr jemanden heiraten darf, entsteht daraus nich
   es die zweite gibt (Punkt 31), wird daraus echte Wanderung zwischen Städten, und dieser
   Punkt geht darin auf.
 
-### 72. Ware liegt, wo sie entstand — und niemand trägt sie weiter
+### 72. Ware liegt, wo sie entstand — gelöst mit 5.25
+
+**Gelöst, aber anders als hier vorgeschlagen.** Beide unten skizzierten Wege bewegen die
+Ware; der dritte bewegt sie nicht, sondern **weitet den Blick**: `getOwnedStock` fasst
+Kammer und alle eigenen Häuser zu einem Vorrat zusammen, `consumeOwned` verbraucht daraus
+in fester Reihenfolge (Kammer zuerst). Herstellen, Bauen und Renovieren fragen seither
+dort. Damit konnte die Lagerung am Entstehungsort wieder eingeschaltet werden.
+
+**Der Preis ist eine Fiktion, und sie sei benannt:** Ein Handwerker greift damit auf Holz
+zu, das eine Wegstunde entfernt im Wald liegt. Solange Entfernungen nichts kosten, ist der
+Lagerort eine Frage der Buchung — sobald Punkt 31 (die Karte als Sechseckraster) sie
+einführt, gehört diese Stelle als erste überarbeitet: Dann wird aus dem Fernzugriff ein
+Fuhrwerk, und der zweite Weg unten ist der richtige.
+
+Gegen „als Handlung" sprach heute, dass die Antwort immer dieselbe wäre: Wer Holz im Hof
+und eine Zimmerei hat, will es _immer_ dort haben. Eine Handlung, deren Ausgang feststeht,
+ist keine Entscheidung, sondern eine Gebühr.
+
+**Was der Messlauf danach zeigte — und was nicht.** 694 Tests decken den Umbau ab, aber
+der Lauf über sechshundert Ticks konnte seine Wirkung **nicht belegen**: Es entstand kein
+einziger Betrieb, also gab es auch nichts zu lagern. Der Lauf davor hatte Glück (eine
+Zuwanderin mit `CONSTRUCTION` und genug Geld für die billigste Werkstatt), dieser nicht —
+die Ankömmlinge brachten 163 bis 258 Münzen mit, und ihre Fächer verlangen 190 bis 210
+plus Grundstück. Wer zwei Schritte braucht, scheitert am zweiten, weil zwischendurch
+niemand verdienen kann (Punkt 66: 2749 mal `EMPLOYER_BROKE`).
+
+**Der ursprüngliche Befund:**
 
 **Seit 5.24 bleibt Ware am Ort ihrer Entstehung:** die Ernte im Hof, das Erzeugnis in der
 Werkstatt. Das war die richtige Entscheidung — vorher trug jeder sein Werk nach Hause und

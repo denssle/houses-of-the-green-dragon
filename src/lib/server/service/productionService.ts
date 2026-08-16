@@ -288,12 +288,20 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 
 		await baeuerin.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
 
-		// **Vorerst in die Kammer** — siehe Punkt 72. Die Ernte auf dem Hof zu lagern, wo sie
-		// gewachsen ist, war gebaut und gemessen: Nach sechshundert Ticks lagen dort 512
-		// Stämme, und die Zimmerei desselben Besitzers verarbeitete keinen einzigen, weil
-		// `kannHerstellen` nur ins Lager des eigenen **Betriebs** sieht. Ware am Ort ihrer
-		// Entstehung braucht einen Weg von dort weg; der gehört in denselben Schritt.
-		await needService.changeStock(characterId, rezept.outputItemId, behalten, t);
+		// **Die Ernte bleibt auf dem Hof** (5.25) — dort, wo sie gewachsen ist. Seit 5.15
+		// gehört zu jeder Pacht einer, und damit gibt es einen Ort dafür.
+		//
+		// Steht kein Hof (eine Pacht aus der Zeit davor), geht es in die Kammer: Ernte darf
+		// nicht daran scheitern, dass ein Schuppen fehlt.
+		const hof = await Building.findOne({
+			where: { PlotId: plotId, optionId: buildingService.HOF_OPTION_ID },
+			transaction: t
+		});
+		if (hof) {
+			await tradeService.changeBuildingStock(hof.dataValues.id, rezept.outputItemId, behalten, t);
+		} else {
+			await needService.changeStock(characterId, rezept.outputItemId, behalten, t);
+		}
 		await skillService.addPractice(characterId, rezept.skill, rezept.actionPointCost, t);
 
 		if (zehnt > 0) {
@@ -348,22 +356,14 @@ export async function craft(
 		const handwerker = await characterService.loadForAction(characterId, tick, t);
 		if (!handwerker) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
-		// **Kammer und Betriebslager zusammen.** Wer sein Holz einlagert und dann nicht
-		// sägen kann, weil die Werkstatt „nichts mehr" hat, hält das für einen Fehler — und
-		// hat recht: Es liegt ja da. Verbraucht wird zuerst das Lager, dann die Kammer;
-		// eingelagertes Material ist erklärtermaßen für den Betrieb bestimmt.
-		const lager: Record<string, number> = {};
-		for (const posten of await tradeService.getBuildingStock(buildingId)) {
-			lager[posten.itemId] = posten.quantity;
-		}
-		const kammer: Record<string, number> = {};
-		for (const posten of await needService.getStock(characterId)) {
-			kammer[posten.itemId] = posten.quantity;
-		}
-		const vorrat: Record<string, number> = { ...kammer };
-		for (const [itemId, menge] of Object.entries(lager)) {
-			vorrat[itemId] = (vorrat[itemId] ?? 0) + menge;
-		}
+		// **Alles, was ihm gehört** (5.25, Punkt 72). Seit die Ernte auf dem Hof liegt und
+		// das Erzeugnis in der Werkstatt, ist Besitz auf mehrere Häuser verteilt — und wer
+		// sein Holz im Hof hat, kann in seiner Zimmerei trotzdem sägen. Vorher zählte nur
+		// das Lager *dieses* Betriebs und die Kammer; im Messlauf lagen 512 Stämme im Hof,
+		// während die Zimmerei desselben Menschen stillstand.
+		const vorrat: Record<string, number> = Object.fromEntries(
+			await tradeService.getOwnedStock(characterId)
+		);
 
 		const ergebnis = produce(
 			{
@@ -378,22 +378,20 @@ export async function craft(
 		if (!ergebnis.ok) return ergebnis;
 
 		for (const zutat of rezept.input) {
-			const ausDemLager: number = Math.min(lager[zutat.itemId] ?? 0, zutat.quantity);
-			if (ausDemLager > 0) {
-				await tradeService.changeBuildingStock(buildingId, zutat.itemId, -ausDemLager, t);
-			}
-			const ausDerKammer: number = zutat.quantity - ausDemLager;
-			if (ausDerKammer > 0) {
-				await needService.changeStock(characterId, zutat.itemId, -ausDerKammer, t);
+			// Kammer zuerst, dann die Häuser — `consumeOwned` kennt die Reihenfolge.
+			if (!(await tradeService.consumeOwned(characterId, zutat.itemId, zutat.quantity, t))) {
+				return { ok: false, reason: 'NOT_IN_STOCK' } as const;
 			}
 		}
-		// **Vorerst weiter in die Kammer** — siehe Punkt 72. Der Versuch, Ware am Ort ihrer
-		// Entstehung zu lagern, ist richtig und war gebaut; er reißt aber zwei Löcher,
-		// solange es keinen Weg zwischen zwei eigenen Häusern gibt: Die Zimmerei fand ihr
-		// Holz nicht mehr, das im Hof lag, und der Hausbau fand seine Bretter nicht mehr,
-		// die im Betrieb lagen. Beides gemessen. Der Umbau gehört deshalb zusammen mit dem
-		// Transport gemacht und nicht davor.
-		await needService.changeStock(characterId, rezept.outputItemId, ergebnis.produced, t);
+		// **Was hier entsteht, bleibt hier** (5.25). Der Handwerker trug sein Werk vorher
+		// nach Hause, und zum Verkauf musste es erst wieder eingelagert werden — ein Umweg,
+		// den `unverkauftes` eigens abfangen musste („erst ins Lager, dann ans Schild").
+		// Ware gehört an den Ort, an dem sie entsteht: Dort steht die Werkbank, dort hängt
+		// das Preisschild, und dort greift der Angestellte danach.
+		//
+		// Möglich wird das erst durch `getOwnedStock`: Solange jede Suche nur an einem Ort
+		// nachsah, hätte diese Zeile die Kette zerrissen.
+		await tradeService.changeBuildingStock(buildingId, rezept.outputItemId, ergebnis.produced, t);
 		await handwerker.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
 		await skillService.addPractice(characterId, rezept.skill, rezept.actionPointCost, t);
 

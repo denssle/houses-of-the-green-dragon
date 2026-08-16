@@ -912,13 +912,9 @@ async function kannHerstellen(
 	const rezepte = buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? [];
 	if (rezepte.length === 0) return false;
 
-	const vorrat = new Map<string, number>();
-	for (const posten of await tradeService.getBuildingStock(werkstatt.id)) {
-		vorrat.set(posten.itemId, posten.quantity);
-	}
-	for (const posten of await needService.getStock(characterId)) {
-		vorrat.set(posten.itemId, (vorrat.get(posten.itemId) ?? 0) + posten.quantity);
-	}
+	// **Alles, was ihm gehört** (5.25, Punkt 72) — Kammer und alle seine Häuser. Wer sein
+	// Holz auf dem Hof hat, kann in seiner Zimmerei trotzdem sägen.
+	const vorrat = await tradeService.getOwnedStock(characterId);
 
 	return rezepte.some((rezept) =>
 		rezept.input.every((zutat) => (vorrat.get(zutat.itemId) ?? 0) >= zutat.quantity)
@@ -979,10 +975,10 @@ async function fehlendesMaterial(
 ): Promise<{ itemId: string; quantity: number } | undefined> {
 	if (bedarf.length === 0) return undefined;
 
-	const vorrat = new Map<string, number>();
-	for (const posten of await needService.getStock(characterId)) {
-		vorrat.set(posten.itemId, posten.quantity);
-	}
+	// **Auch hier alles, was ihm gehört** (5.25): Bretter, die in seiner Zimmerei liegen,
+	// sind zum Bauen genauso da wie die in seiner Kammer. Vorher zählte nur die Kammer —
+	// und seit das Erzeugnis im Betrieb bleibt, wäre sie meist leer.
+	const vorrat = await tradeService.getOwnedStock(characterId);
 
 	for (const posten of bedarf) {
 		const da: number = vorrat.get(posten.itemId) ?? 0;

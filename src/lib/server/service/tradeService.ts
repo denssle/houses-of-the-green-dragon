@@ -124,6 +124,77 @@ export async function changeBuildingStock(
 	return true;
 }
 
+/**
+ * Was einer besitzt — in der Kammer **und** in allen seinen Häusern (5.25, Punkt 72).
+ *
+ * **Seit Ware dort liegt, wo sie entsteht, liegt sie selten dort, wo sie gebraucht wird.**
+ * Die Ernte fällt auf dem Hof an, verarbeitet wird in der Werkstatt, gebaut auf dem
+ * Grundstück — drei Orte, ein Besitzer. Vorher suchte jede dieser Stellen nur an je einem
+ * Ort, und im Messlauf lagen 512 Stämme im Hof, während die Zimmerei desselben Menschen
+ * stillstand.
+ *
+ * **Das ist bewusst eine Vereinfachung**, und sie sei benannt: Ein Handwerker greift
+ * hiermit auf Holz zu, das eine Wegstunde entfernt liegt. Solange Entfernungen im Spiel
+ * nichts kosten, ist der Lagerort ohnehin eine Frage der Buchung — es gibt heute keine
+ * Regel, die einen Weg bezahlt. Sobald es sie gibt (Punkt 31, die Karte als
+ * Sechseckraster), gehört diese Stelle als erste überarbeitet: Dann wird aus dem
+ * Fernzugriff ein Fuhrwerk.
+ */
+export async function getOwnedStock(characterId: string): Promise<Map<string, number>> {
+	const vorrat = new Map<string, number>();
+
+	for (const posten of await needService.getStock(characterId)) {
+		vorrat.set(posten.itemId, (vorrat.get(posten.itemId) ?? 0) + posten.quantity);
+	}
+	for (const haus of await buildingService.getBuildingsOfCharacter(characterId)) {
+		for (const posten of await getBuildingStock(haus.id)) {
+			vorrat.set(posten.itemId, (vorrat.get(posten.itemId) ?? 0) + posten.quantity);
+		}
+	}
+	return vorrat;
+}
+
+/**
+ * Etwas aus dem eigenen Besitz verbrauchen — woher auch immer.
+ *
+ * **Die Kammer zuerst**, dann die Häuser: Was einer bei sich trägt, ist am schnellsten zur
+ * Hand, und so bleibt in den Lagern liegen, was zum Verkauf gedacht ist. Gibt `false`
+ * zurück, wenn es insgesamt nicht reicht — dann wurde nichts angerührt, denn der Aufrufer
+ * steckt in einer Transaktion.
+ */
+export async function consumeOwned(
+	characterId: string,
+	itemId: string,
+	quantity: number,
+	t: Transaction
+): Promise<boolean> {
+	if (quantity <= 0) return true;
+	if (((await getOwnedStock(characterId)).get(itemId) ?? 0) < quantity) return false;
+
+	let offen: number = quantity;
+
+	const kammer: number =
+		(await needService.getStock(characterId)).find((posten) => posten.itemId === itemId)
+			?.quantity ?? 0;
+	const ausDerKammer: number = Math.min(kammer, offen);
+	if (ausDerKammer > 0) {
+		await needService.changeStock(characterId, itemId, -ausDerKammer, t);
+		offen -= ausDerKammer;
+	}
+
+	for (const haus of await buildingService.getBuildingsOfCharacter(characterId)) {
+		if (offen === 0) break;
+		const imLager: number =
+			(await getBuildingStock(haus.id)).find((posten) => posten.itemId === itemId)?.quantity ?? 0;
+		const daraus: number = Math.min(imLager, offen);
+		if (daraus > 0) {
+			await changeBuildingStock(haus.id, itemId, -daraus, t);
+			offen -= daraus;
+		}
+	}
+	return offen === 0;
+}
+
 export interface StockLine {
 	itemId: string;
 	name: string;
