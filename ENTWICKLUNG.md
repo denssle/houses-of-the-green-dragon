@@ -2306,6 +2306,62 @@ Tests. **Und ein Nebenbefund aus dem Testschreiben** (Punkt 65): Der Zehnt wird 
 Region der _Fläche_ nachgeschlagen, und die Umlandflächen liegen in eigenen Regionen. Der
 Erlass des Bürgermeisters erreicht sie nie.
 
+**5.16 Die erste Werkstatt der Welt.** ✓ (Punkt 63) Die Stadt bringt zum ersten Mal aus
+eigener Kraft einen Betrieb hervor — und danach läuft die ganze Kette durch.
+
+**Die Diagnose war falsch, das Messen hat es gezeigt.** Punkt 63 beschrieb einen
+geschlossenen Kreis: Jeder Bau brauche Material, Material gebe es nur zu kaufen, verkauft
+werde nur, was ein Betrieb hervorbringt. Die erste Zeile stimmt nicht.
+`producesBuildingMaterial` nimmt genau die Betriebe aus, die Baustoff herstellen, und die
+billigste fehlende Werkstatt in Grünau ist die **Zimmerei für 180 Münzen**. Die Tür stand
+die ganze Zeit offen; es ging nur nie jemand hindurch.
+
+**Woran es wirklich lag, stand in `savingsTarget`.** Alle acht Gründer waren verheiratet
+und ohne Haus, also griff der erste Zweig: das Dach der Familie. Für die Kate fehlen
+Bretter, Bretter bot niemand an — `materialPrice` war `null`, und die Funktion gab `null`
+zurück. Kein Sparziel heißt `sparziel = Rücklage`, und wer die voll hat, hört auf zu
+arbeiten. Gemessen an der frischen Seed-Welt über 400 Ticks: **2911 von 3200 Runden
+Müßiggang**, 122 Arbeitseinsätze, kein privates Gebäude. Dieselbe Falle wie bei Punkt 55,
+nur eine Ebene höher: nicht das Geld fehlte, sondern ein erreichbares Ziel.
+
+Drei Änderungen:
+
+**Ein Ziel, das man nicht kaufen kann, ist kein Ziel.** Fehlt das Baumaterial und bietet es
+niemand an, wird nicht mehr aufgegeben, sondern durchgefallen auf die Werkstatt. Das ist
+keine Ausweichhandlung, sondern die Lösung — die billigste fehlende ist die Zimmerei, und
+die stellt genau die Bretter her, an denen es scheitert. Wer kein Holz findet, macht sich
+welches.
+
+**Der Betrieb braucht Nachschub.** Wer eine Werkstatt hat, aber keine Fläche, spart auf die
+Pacht. Ohne das war der erste Betrieb eine Sackgasse: Die Zimmerei stand nach 900 Ticks
+noch ohne Holz da, weil ihre Besitzerin ihr Ziel erreicht hatte und keinen Grund mehr
+sah, über die Rücklage hinaus zu arbeiten.
+
+**`plotPrice` ist `null`, wenn kein Bauland frei ist.** Als feste Konstante war der Preis
+eine Zusage, die die Stadt nicht einlösen konnte — 466 Fehlversuche in 600 Ticks, weil der
+Kauf scheiterte, `hasFreePlot` falsch blieb und derselbe NPC es im nächsten Tick erneut
+versuchte. Dieselbe Bauart wie `leaseAvailable`, und derselbe Grund.
+
+Gemessen nach dem Umbau, 600 Ticks, frische Seed-Welt, nichts nachgesetzt:
+
+```
+BUILD: 1        Zimmerei          BUY_MATERIAL: 4   andere kaufen die Bretter
+LEASE: 1        Hof am Eichwald   BUILD_HOME: 2     Familien bauen eigene Häuser
+HARVEST: 123    Holz              SELL: 3           am Markt
+CRAFT: 349      Bretter           BUY_PLOT: 5       statt 466
+```
+
+Der Hof aus 5.15 trägt dabei zum ersten Mal: Die Zimmerei pachtet den Eichwald und holt
+sich ihr Holz selbst.
+
+_Fertig, wenn:_ Eine Welt, die niemand anfasst, bringt einen Betrieb hervor und hält ihn
+am Laufen. — Erledigt, gemessen und in fünf Tests festgehalten.
+
+**Was das für Punkt 66 heißt:** Der Tagelohn hat noch immer keinen Zahler und ist damit
+die Geldquelle der Welt. Aber jetzt gibt es einen zweiten Weg an Geld — Waren herstellen
+und verkaufen —, und das war die Voraussetzung dafür, die Quelle überhaupt schließen zu
+können, ohne die Wirtschaft stillzulegen.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

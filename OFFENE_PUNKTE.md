@@ -16,8 +16,10 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                           | 4.8                          | Entwurf      |
 | 14  | Startbedingungen für neue Spieler — **entschieden mit 5.6**                        | —                            | erledigt     |
 | 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter** | 4.8 / Punkt 6                | Entwurf      |
-| 63  | Der geschlossene Kreis: ohne Betrieb kein Material, ohne Material kein Betrieb     | dem nächsten Schritt         | Befund       |
+| 63  | Der geschlossene Kreis — **erledigt mit 5.16**                                     | —                            | erledigt     |
 | 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                       | laufend                      | Entwurf      |
+| 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
+| 66  | Wo Geld aus dem Nichts kommt und wohin es verschwindet                             | Punkt 63                     | Befund       |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung             | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                | laufend                      | Entwurf      |
@@ -1015,10 +1017,54 @@ Kleinigkeiten aus demselben Durchgang, die zusammen den Eindruck machen:
   jemand zusieht oder nicht" ist die Einladung an jeden Gast — und steht da, wo man ihn
   erst liest, wenn man die Liste schon nicht verstanden hat.
 
-### 63. Der geschlossene Kreis: ohne Betrieb kein Material, ohne Material kein Betrieb
+### 63. Der geschlossene Kreis — erledigt (5.16)
 
-**Der Befund vom 16. August 2026**, aus der Welt auf dem Server (Tick 4875, Jahr 97) —
-und die Fortsetzung von Punkt 55. Der Stillstand ist nicht mehr derselbe: Die Stadt
+**Erledigt, aber nicht wie gedacht.** Die Diagnose unten war in einem Punkt falsch, und
+das Messen hat es gezeigt — dieselbe Lehre wie bei Punkt 55. Die Kette „jeder Bau braucht
+Material vom Markt" stimmt so nicht: `producesBuildingMaterial` nimmt genau die Betriebe
+aus, die Baustoff herstellen, und die **billigste fehlende Werkstatt in Grünau ist die
+Zimmerei für 180 Münzen** — sie braucht kein Material. Die Tür stand die ganze Zeit offen.
+
+Woran es wirklich lag, stand in `savingsTarget`: **Alle acht Gründer waren verheiratet und
+ohne Haus.** Damit greift der erste Zweig, das Dach der Familie. Für die Kate fehlen
+Bretter, Bretter bot niemand an, also war `materialPrice` null — und die Funktion gab
+`null` zurück. Kein Sparziel heißt `sparziel = Rücklage`, und wer die voll hat, hört auf zu
+arbeiten. Gemessen an der frischen Seed-Welt über 400 Ticks: **2911 von 3200 Runden
+Müßiggang**, 122 Arbeitseinsätze, kein einziges privates Gebäude.
+
+Drei Änderungen, alle in 5.16:
+
+1. **Ein Ziel, das man nicht kaufen kann, ist kein Ziel.** Fehlt das Baumaterial und bietet
+   es niemand an, wird nicht mehr aufgegeben, sondern **durchgefallen** auf die Werkstatt.
+   Das ist keine Ausweichhandlung, sondern die Lösung: Die billigste fehlende ist die
+   Zimmerei, und die stellt genau die Bretter her, an denen es scheitert.
+2. **Der Betrieb braucht Nachschub.** Wer eine Werkstatt hat, aber keine Fläche, spart auf
+   die Pacht. Ohne das war der erste Betrieb eine Sackgasse: Die Zimmerei stand nach 900
+   Ticks noch ohne Holz da, weil ihre Besitzerin ihr Ziel erreicht hatte.
+3. **`plotPrice` ist null, wenn kein Bauland frei ist.** Als feste Konstante war der Preis
+   eine Zusage, die die Stadt nicht einlösen konnte — 466 Fehlversuche in 600 Ticks.
+
+Gemessen nach dem Umbau, 600 Ticks, frische Seed-Welt, nichts nachgesetzt:
+
+```
+BUILD: 1        Zimmerei          BUY_MATERIAL: 4   andere kaufen die Bretter
+LEASE: 1        Hof am Eichwald   BUILD_HOME: 2     Familien bauen eigene Häuser
+HARVEST: 123    Holz              SELL: 3           am Markt
+CRAFT: 349      Bretter           BUY_PLOT: 5       statt 466
+```
+
+**Damit läuft die Kette zum ersten Mal von selbst durch** — vom ersten Betrieb über Pacht,
+Ernte und Herstellung bis zum Verkauf und zum Wohnhaus, das jemand aus gekauften Brettern
+baut. Und mit dem Wohnraum steht auch der Bevölkerung nichts mehr im Weg (ohne Dach keine
+Kinder, 4.4).
+
+Offen bleibt Punkt 66: Der Tagelohn hat noch immer keinen Zahler. Aber jetzt gibt es einen
+zweiten Weg an Geld, und damit ist die Voraussetzung geschaffen, ihn zu schließen.
+
+**Der ursprüngliche Befund, zur Nachvollziehbarkeit:**
+
+Der Stand auf dem Server (Tick 4875, Jahr 97) war
+die Fortsetzung von Punkt 55. Der Stillstand ist nicht mehr derselbe: Die Stadt
 heiratet inzwischen (vier Hochzeiten im Herbst 96) und hat gewählt (Gertrud Müller,
 Frühling 97). Was immer noch nicht geschieht, ist Wirtschaft.
 
@@ -1045,6 +1091,12 @@ Kreis trifft auch den Hausbau: `eigenesDach` (`npc.logic.ts:549`) will Material 
 findet keinen Preis und gibt auf — deshalb wohnen die vier Paare in der Unterkunft und
 bleiben kinderlos.
 
+> **Nachtrag 5.16: Die erste Zeile dieser Kette stimmt nicht.** Ein Betrieb, der Baustoff
+> herstellt, braucht selbst keinen — `producesBuildingMaterial` nimmt ihn aus, und die
+> Zimmerei ist die billigste fehlende Werkstatt der Stadt. Der Kreis war nie geschlossen;
+> er wurde nur nie durchschritten, weil niemand einen Grund hatte, die 180 Münzen dafür
+> zusammenzuarbeiten. Der Rest des Befunds bleibt richtig, die Diagnose war es nicht.
+
 Was daraus folgt für den Zehnt: Gertrud hat ihn in vier Erlassen von 10 auf 30 gesetzt,
 das Maximum. Ihr Verhalten ist in sich stimmig — die Kasse lag unter der Rücklage, und
 sie spart auf ein Wachhaus (300 Münzen, Baugrenze 420, Kasse 204). Nur **bemisst sich der
@@ -1053,12 +1105,15 @@ sondern eine wirkungslose: Sie trifft ausschließlich die eine Pacht des Spieler
 Deswegen konnte der Satz auch ungebremst hochlaufen — die Rückkopplung, die ihn hätte
 anhalten sollen, hat keine Grundlage.
 
-Vier Stellen, an denen sich der Kreis öffnen ließe — welche, ist zu entscheiden:
+Vier Stellen, an denen sich der Kreis öffnen ließe — **keine davon war es am Ende**, außer
+Nummer 4:
 
 1. **Der Werkstatt-Vorbehalt beim Pachten** (`npc.logic.ts:466`). Eine Fläche kostet 20
    Münzen; die acht könnten es sich leisten, sie dürfen nur nicht. Pachten ohne eigenen
    Betrieb wäre der kleinste Eingriff — und Rohstoff, der am Markt landet, ist genau das,
-   was fehlt.
+   was fehlt. **Nicht angefasst (5.16):** Wer erst die Werkstatt baut, erfüllt die
+   Bedingung ohnehin, und die Reihenfolge „erst der Betrieb, dann sein Feld" ist die
+   stimmigere. Was fehlte, war nur das Sparziel für die Pacht.
 2. **Material aus eigener Hand.** Wer Holz erntet, hat Holz; dass er es trotzdem am Markt
    kaufen muss, ist eine Lücke und keine Regel.
 3. **Die Unternehmerschwelle** (`isEnterprising`, Schwelle 20). Die drei festgelegten
@@ -1108,6 +1163,57 @@ Zu entscheiden ist, **welcher Stadt eine Fläche zugeordnet ist**. Naheliegend �
 `RegionLink`, den `seed.ts` ohnehin zieht — jede Umlandregion ist mit genau einer Stadt
 verbunden. Das ist zugleich die Frage, die Punkt 31 (Karte als Sechseckraster) für die
 zweite Stadt beantworten muss; wer sie hier löst, sollte sie dort nicht neu erfinden.
+
+### 66. Wo Geld aus dem Nichts kommt und wohin es verschwindet
+
+**Die Richtlinie steht seit dem 16.08.2026 in `KONZEPT.md`:** Geld wechselt den Besitzer,
+es entsteht und vergeht nicht. Wer Lohn zahlt, zahlt aus seiner Kasse. Dieser Punkt ist
+die Bestandsaufnahme dessen, was heute dagegen verstößt.
+
+**Was bereits stimmt** — und deshalb nicht angefasst werden muss: Der Lohn eines
+**Anstellungsverhältnisses** ist gedeckt. `workShift` prüft die Kasse des Arbeitgebers und
+gibt `EMPLOYER_BROKE` zurück, bevor Aktionspunkte verbraucht sind; `kasseVon` holt das Geld
+beim Eigentümer oder, bei einem städtischen Haus, aus der Stadtkasse. Ebenso sauber sind
+Käufe, Standgeld, Verkaufssteuer, Schulgeld, Grundsteuer, Pachtgebühr und der Erbfall: Dort
+wandert Geld, es entsteht keines.
+
+**1. Der Tagelohn hat keinen Zahler** — die größte Quelle, und die älteste.
+
+```ts
+// buildingAction.logic.ts:73 — work()
+money: worker.money + earned;
+```
+
+Niemand wird belastet. Wer in der städtischen Schmiede eine Schicht arbeitet, erschafft
+seine drei Münzen. Das ist die „Krücke aus 3.3", die `economy.ts` beim `TAGELOHN` selbst
+so nennt — nur ist sie inzwischen die **Hauptgeldquelle der Welt**: In Grünau besitzt
+niemand einen Betrieb, also lebt jeder davon.
+
+Damit hängt der Eingriff an einer Abwägung, die vor dem Umbau zu entscheiden ist: Zahlt
+künftig die Stadtkasse, kann sie leerlaufen — und dann verdient niemand mehr etwas. Bei
+204 Münzen in Grünau und einem Zehnt, der nichts einbringt (Punkte 63 und 65), wäre das
+kein theoretischer Fall. Der Tagelohn ist heute das Ventil, das die Welt am Leben hält;
+wer es schließt, muss vorher wissen, was an seine Stelle tritt.
+
+**2. Der Zehnt macht aus Ware Münzen.** Bei der Ernte (`productionService.ts:144`) und
+seit 5.15 auch beim Knecht (`employmentService.ts:284`) verliert der Erntende einen Teil
+des Ertrags, und die Stadt bekommt **Münzen im Gegenwert**. Niemand hat sie bezahlt. Zwei
+Wege stehen offen: die Stadt nimmt den Zehnt in Ware (dann braucht sie ein Lager, was
+`harvest` ausdrücklich vermeiden wollte) — oder sie verkauft ihn und bekommt erst dann
+Geld, von einem Käufer, der es verliert.
+
+**3. Raubgut verschwindet.** `hazardService` zieht dem Opfer die Beute ab und schreibt sie
+niemandem gut — bei einer Person wie bei der Stadtkasse. Das ist dieselbe Lücke, die
+Punkt 23 von der anderen Seite beschreibt: Wo ein Täter fehlt, fehlt auch der Empfänger.
+Mit dem Räuber als Beruf löst sich beides zugleich.
+
+**4. Geld versickert in Kassen ohne Ausgaben** — das ist Punkt 65: Zehnt und Pachtgebühr
+gehen an die Region der Fläche, und die Umlandregionen haben weder Amt noch Bauten. Aus
+dem Kreislauf ist es damit ebenso heraus, als wäre es gelöscht.
+
+Die Reihenfolge ist keine Frage des Aufwands, sondern der Wirkung: **Punkt 1 zuerst zu
+schließen, ohne 63 gelöst zu haben, legt die Wirtschaft still.** Zuerst muss es einen
+zweiten Weg geben, an Geld zu kommen — nämlich Waren zu verkaufen, die jemand herstellt.
 
 ### 64. Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite
 

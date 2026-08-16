@@ -174,9 +174,22 @@ export function savingsTarget(state: NpcState): number | null {
 
 	// Ein Dach für die Familie — dieselbe Bedingung wie in `eigenesDach`.
 	if (state.isMarried && !state.ownsHome && state.homePrice !== null) {
-		if (state.materialMissing) return state.materialPrice;
-		if (!state.hasFreePlot) return state.plotPrice;
-		return state.homePrice;
+		if (!state.materialMissing) {
+			if (!state.hasFreePlot) return state.plotPrice;
+			return state.homePrice;
+		}
+		// **Ein Ziel, das man nicht kaufen kann, ist kein Ziel.** Fehlt das Baumaterial und
+		// bietet es niemand an, war das Sparen hier zu Ende: `materialPrice` ist `null`,
+		// das Vorhaben also unbezifferbar — und wer nichts vorhat, arbeitet nur bis zur
+		// Rücklage. Genau daran stand die Welt still (Punkt 63): Alle acht waren
+		// verheiratet und ohne Haus, keiner kam je über die Rücklage, 91 von 100 Runden
+		// Müßiggang bei vollem Aktionsvorrat.
+		//
+		// Deshalb wird hier **durchgefallen** statt aufgegeben. Wer bauen will und kein
+		// Holz findet, hat immer noch einen zweiten Weg: selbst eine Werkstatt aufmachen.
+		// Und das ist keine Ausweichhandlung, sondern die Lösung — die billigste fehlende
+		// ist die Zimmerei, und die stellt genau die Bretter her, an denen es scheitert.
+		if (state.materialPrice !== null) return state.materialPrice;
 	}
 
 	// Etwas Eigenes — nur, wen sein Wesen dazu drängt. Sonst spart die halbe Stadt auf eine
@@ -185,6 +198,15 @@ export function savingsTarget(state: NpcState): number | null {
 		if (!state.hasFreePlot) return state.plotPrice;
 		if (state.workshopMaterialMissing) return state.materialPrice;
 		return state.workshopPrice;
+	}
+
+	// **Und der Betrieb braucht Nachschub.** Wer eine Werkstatt hat, aber keine Fläche,
+	// spart auf die Pacht — dieselbe Voraussetzung, unter der `entfaltung` pachtet. Ohne
+	// das war der erste Betrieb der Welt eine Sackgasse: Die Zimmerei stand nach
+	// neunhundert Ticks noch immer ohne Holz da, weil ihre Besitzerin über die Rücklage
+	// hinaus keinen Grund mehr zu arbeiten hatte — sie hatte ihr Ziel ja erreicht.
+	if (state.ownsWorkshop && !state.hasLease && state.leaseAvailable) {
+		return state.leaseFee;
 	}
 
 	return null;

@@ -342,6 +342,7 @@ async function lageAufnehmen(
 		(haus) => buildingService.getBuildingOption(haus.optionId)?.type === 'CRAFT'
 	);
 	const grundstuecke = await plotService.getPlotsOfCharacter(npcId);
+	const freiesBauland: boolean = (await plotService.getFreeBuildingLand(werte.RegionId)).length > 0;
 	const flaechen = await productionService.getAreas(npcId);
 	const eigenePacht = flaechen.find((flaeche) => flaeche.leasedByMe);
 	const freieFlaeche = flaechen.find((flaeche) => !flaeche.leased && flaeche.resourceType);
@@ -442,7 +443,13 @@ async function lageAufnehmen(
 			leaseAvailable: freieFlaeche !== undefined,
 			ownStockToSell: zuVerkaufen?.quantity ?? 0,
 			canCraft: werkstatt ? await kannHerstellen(npcId, werkstatt) : false,
-			plotPrice: PLOT_PRICE,
+			// **Nur, wenn es überhaupt etwas zu kaufen gibt.** Als feste Konstante war der
+			// Preis eine Zusage, die die Stadt nicht einlösen konnte: Ist alles Bauland
+			// vergeben, scheitert der Kauf, `hasFreePlot` bleibt falsch — und im nächsten
+			// Tick versucht es derselbe NPC erneut. Im Messlauf zu 5.16 waren das 466
+			// Fehlversuche in sechshundert Ticks. Dieselbe Bauart wie `leaseAvailable`,
+			// und derselbe Grund.
+			plotPrice: freiesBauland ? PLOT_PRICE : null,
 			workshopPrice: werkstattLuecke?.price ?? null,
 			workshopMaterialMissing: (await fehlendesMaterial(npcId, werkstattMaterial)) !== undefined,
 			leaseFee: LEASE_FEE,

@@ -250,5 +250,75 @@ describe('Was ein NPC tut', () => {
 			// Nicht 180 für die Werkstatt, sondern 100 fürs Wohnhaus.
 			expect(savingsTarget(verheiratet)).toBe(100);
 		});
+
+		it('gibt das Dach nicht auf, sondern baut die Werkstatt, die es möglich macht', () => {
+			// **Der Befund vom 16.08.2026** (Punkt 63): Alle acht Gründer waren verheiratet
+			// und ohne Haus, für die Kate fehlten Bretter, und Bretter bot niemand an. Damit
+			// war `materialPrice` null, das Vorhaben unbezifferbar — und wer nichts vorhat,
+			// arbeitet nur bis zur Rücklage. Neunzig von hundert Runden Müßiggang bei vollem
+			// Aktionsvorrat.
+			//
+			// Ein Ziel, das man nicht kaufen kann, ist kein Ziel. Also fällt er durch auf
+			// das, was er selbst in der Hand hat — und die billigste fehlende Werkstatt ist
+			// ausgerechnet die, die Bretter macht.
+			const ohneBretter = gruender({
+				isMarried: true,
+				hasFreePlot: true,
+				materialMissing: true,
+				materialPrice: null
+			});
+
+			expect(savingsTarget(ohneBretter)).toBe(180);
+		});
+
+		it('spart weiter aufs Material, solange es welches zu kaufen gibt', () => {
+			// Die Gegenprobe: Wo ein Preis steht, bleibt das Haus das Ziel.
+			const mitAngebot = gruender({
+				isMarried: true,
+				hasFreePlot: true,
+				materialMissing: true,
+				materialPrice: 12
+			});
+
+			expect(savingsTarget(mitAngebot)).toBe(12);
+		});
+
+		it('spart auf die Pacht, wenn der Betrieb ohne Rohstoff dasteht', () => {
+			// Ohne das war der erste Betrieb der Welt eine Sackgasse: Die Zimmerei stand
+			// nach neunhundert Ticks noch ohne Holz da, weil ihre Besitzerin über die
+			// Rücklage hinaus keinen Grund mehr zu arbeiten hatte — ihr Ziel war ja erreicht.
+			const mitWerkstatt = gruender({
+				isMarried: true,
+				ownsHome: true,
+				ownsWorkshop: true,
+				hasLease: false,
+				leaseAvailable: true,
+				leaseFee: 20
+			});
+
+			expect(savingsTarget(mitWerkstatt)).toBe(20);
+		});
+
+		it('spart nicht auf eine Pacht, die es nicht gibt', () => {
+			const alleVergeben = gruender({
+				isMarried: true,
+				ownsHome: true,
+				ownsWorkshop: true,
+				hasLease: false,
+				leaseAvailable: false
+			});
+
+			expect(savingsTarget(alleVergeben)).toBeNull();
+		});
+
+		it('kauft kein Grundstück, wenn keines mehr zu haben ist', () => {
+			// `plotPrice` ist null, sobald die Stadt kein freies Bauland mehr hat. Ohne
+			// diese Rückmeldung versuchte derselbe NPC es in jedem Tick aufs Neue — im
+			// Messlauf 466 Fehlversuche in sechshundert Ticks.
+			const ausverkauft = gruender({ isMarried: true, ownsHome: true, plotPrice: null });
+
+			expect(decideNpcAction(ausverkauft)).not.toBe('BUY_PLOT');
+			expect(savingsTarget(ausverkauft)).toBeNull();
+		});
 	});
 });

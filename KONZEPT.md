@@ -378,6 +378,22 @@ Angestellte NPCs (eigene Kinder oder fremde) arbeiten im Betrieb, kosten Lohn un
 erzeugen Wert — das schließt den Kreis zur Familienmechanik: viele Kinder sind
 Arbeitskraft.
 
+**Geld wechselt den Besitzer, es entsteht und vergeht nicht.** Jede Münze, die jemand
+bekommt, hat ein anderer verloren — und jede, die jemand verliert, bekommt ein anderer.
+Wer Lohn zahlt, zahlt ihn aus seiner Kasse; ist sie leer, findet die Schicht nicht statt.
+Wer bestohlen wird, verliert an einen Dieb und nicht ins Nichts.
+
+Das ist keine Buchhalterei, sondern die Bedingung dafür, dass die Welt sich selbst trägt.
+Eine Wirtschaft mit einer verborgenen Geldquelle bildet nichts ab: Löhne, Preise und
+Steuersätze bedeuten nur dann etwas, wenn sie an einer endlichen Menge zehren. Wo Geld aus
+dem Nichts kommt, ist Armut eine Anzeige und kein Zustand, und keine Entscheidung eines
+Bürgermeisters hat Gewicht. Umgekehrt ist verschwundenes Geld eine stille Steuer, die
+niemand beschlossen hat.
+
+Daraus folgt für jede neue Regel die Frage: **Wer zahlt, und woher hat er es?** Wo sich
+darauf keine Antwort geben lässt, fehlt der Regel ein Teil. Das gilt auch für die Stadt —
+ihre Kasse ist ein Beutel wie jeder andere, nur mit einem Amt darüber.
+
 **Eine Anstellung ist ein Verhältnis, keine Schicht.** Wer jemanden fest einstellt, bindet
 ihn — und bindet sich: Der Lohn läuft, ob der Betrieb trägt oder nicht. Das ist der
 Unterschied zur Tagelöhnerei, und er ist für beide Seiten ein Geschäft mit Risiko. Der
