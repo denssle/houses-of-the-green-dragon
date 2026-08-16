@@ -2407,6 +2407,53 @@ sich das meiste davon innerhalb eines Ticks für alle Einwohner derselben Stadt 
 ändert. Das Zeitlimit von `worldComesAlive.spec.ts` steigt deshalb auf zehn Minuten, und
 sein Kommentar sagt jetzt die Wahrheit statt der Zahl von 5.11.
 
+**5.19 Wer etwas kann, baut es auch.** ✓ Die Werkstattwahl kannte den Menschen nicht, der
+sie trifft: `fehlendeWerkstatt` sortierte allein nach Preis. Damit machte eine Preisliste
+die Reihenfolge der Berufe — nach der Zimmerei (180) kam die Schneiderei (190), dann erst
+die Mühle (200) und das Backhaus (220). Eine Stadt nähte eher Kleider, als dass sie Brot
+buk, und niemand konnte sagen warum.
+
+Jetzt entscheidet **das eigene Handwerk**, und der Preis nur noch bei Gleichstand. Das ist
+nicht bloß stimmiger, sondern die wirtschaftlich richtige Wahl: Können geht über `yieldOf`
+in den Ertrag ein, ein Meister holt aus derselben Werkstatt mehr heraus. Wer nichts gelernt
+hat, bekommt weiterhin die billigste — für den Anfänger ist das richtig.
+
+Dabei zeigte sich eine hübsche Folge: **Mühle und Backhaus teilen sich `BAKING`.** Wer
+backen kann, baut deshalb zuerst die Mühle — sie ist die billigere von beiden. Das trifft
+genau die richtige Reihenfolge, denn ohne Mehl backt niemand. Steht sie, ist das Backhaus
+die nächste Wahl.
+
+_Fertig, wenn:_ Ein Bäcker baut ein Backhaus und keine Schmiede. — Erledigt, fünf Tests.
+
+**5.20 Der Stand ist gemietet, nicht die Ware.** ✓ (Punkt 68) Ein Messlauf über 2000 Ticks
+direkt nach 5.18 zeigte, dass der Verkauf jetzt läuft — **915 Verkaufsvorgänge statt 8** —
+und genau daran den nächsten Fehler:
+
+```
+WOOD x2857 zu 2 bei Marktplatz (Dietrich)      Dietrich: geld=22
+```
+
+Dietrich pachtet den Eichwald, erntet und legt nach, Tick für Tick. `placeOffer` berechnete
+das Standgeld bei **jedem** Aufruf, auch beim bloßen Aufstocken — er zahlte also nicht für
+den Stand, sondern für jede Nachlieferung. Nach vierzig Spieljahren lagen 2857 Stämme am
+Markt, und ihr Besitzer war der ärmste Mann der Stadt. Das widersprach der eigenen
+Beschreibung im Gesetz: „was ein Stand am Markt **je Angebot** kostet".
+
+Die Gebühr fällt jetzt nur für ein neues Angebot an. Bei anderem Preis entsteht weiterhin
+ein zweites Schild, und für das zahlt man — das ist eine andere Aussage. Und wer den Stand
+einmal bezahlt hat, darf nachlegen, auch wenn die Kasse leer ist: Sonst wäre ausgerechnet
+der Ärmste von dem ausgeschlossen, was ihn aus der Armut brächte.
+
+**Was der Messlauf sonst zeigte**, festgehalten statt behoben:
+
+- **Arbeitsteilung entsteht von selbst.** Dietrich erntet Holz und bietet es an, Cunne
+  kauft es für ihre Zimmerei und macht Bretter. Genau der Kreislauf, der gefehlt hat.
+- **Der Hof verfällt zur Ruine** (Punkt 69, ein Fehler aus 5.15). Zwischen Tick 1000 und
+  1250 verschwand „Hof am Eichwald 1". Die Pacht bleibt, geerntet wird weiter — aber der
+  Arbeitsplatz ist still weg.
+- **Immer noch kein zweiter Betrieb**: `BUILD: 2` in vierzig Spieljahren, alle zwischen 22
+  und 93 Münzen. Ob 5.19 und 5.20 daran etwas ändern, muss der nächste Messlauf zeigen.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

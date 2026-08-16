@@ -175,13 +175,36 @@ export async function placeOffer(
 				? ((await needService.getStock(sellerId)).find((p) => p.itemId === itemId)?.quantity ?? 0)
 				: ((await getBuildingStock(buildingId)).find((p) => p.itemId === itemId)?.quantity ?? 0);
 
+		// **Gleiche Ware, gleicher Preis, gleicher Ort: aufstocken statt danebenhängen.**
+		// Sonst steht am Ende ein Dutzend Schilder mit demselben Text — für Käufer eine
+		// Liste, die man durchblättern muss, und für den Verkäufer keine Übersicht mehr.
+		// Bei einem anderen Preis entsteht ein eigenes Angebot: Das ist eine andere
+		// Aussage und keine Nachlieferung.
+		const bestehendes = await ShopOffer.findOne({
+			where: { BuildingId: buildingId, SellerCharacterId: sellerId, itemId, pricePerUnit },
+			transaction: t,
+			lock: t.LOCK.UPDATE
+		});
+
+		// **Der Stand ist gemietet, nicht die Ware.** Wer nachlegt, zahlt nicht noch einmal
+		// — das Gesetz nennt es „was ein Stand am Markt je Angebot kostet", und ein
+		// aufgestocktes Schild ist dasselbe Angebot.
+		//
+		// Ohne diese Unterscheidung war das Standgeld eine Falle für genau den, dem die
+		// Ware liegen blieb: Im Messlauf zu 5.18 erntete ein Pächter Tick für Tick Holz,
+		// legte es nach und zahlte jedes Mal zwei Münzen. Nach vierzig Spieljahren lagen
+		// 2857 Stämme am Markt, und ihr Besitzer war mit 22 Münzen der ärmste Mann der
+		// Stadt. Wer nichts verkauft, soll nichts verdienen — arm werden soll er daran
+		// nicht.
+		const faellig: number = bestehendes ? 0 : standgeld;
+
 		const geplant = offerLogic(
 			{ money: verkaeufer.dataValues.money },
 			art,
 			vorrat,
 			quantity,
 			pricePerUnit,
-			standgeld
+			faellig
 		);
 		if (!geplant.ok) return geplant;
 
@@ -201,17 +224,6 @@ export async function placeOffer(
 				});
 			}
 		}
-
-		// **Gleiche Ware, gleicher Preis, gleicher Ort: aufstocken statt danebenhängen.**
-		// Sonst steht am Ende ein Dutzend Schilder mit demselben Text — für Käufer eine
-		// Liste, die man durchblättern muss, und für den Verkäufer keine Übersicht mehr.
-		// Bei einem anderen Preis entsteht ein eigenes Angebot: Das ist eine andere
-		// Aussage und keine Nachlieferung.
-		const bestehendes = await ShopOffer.findOne({
-			where: { BuildingId: buildingId, SellerCharacterId: sellerId, itemId, pricePerUnit },
-			transaction: t,
-			lock: t.LOCK.UPDATE
-		});
 
 		if (bestehendes) {
 			await bestehendes.update(

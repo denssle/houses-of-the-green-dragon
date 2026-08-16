@@ -36,6 +36,7 @@ import * as tradeService from '$lib/server/service/tradeService';
 import * as electionService from '$lib/server/service/electionService';
 import * as employmentService from '$lib/server/service/employmentService';
 import * as lawService from '$lib/server/service/lawService';
+import * as skillService from '$lib/server/service/skillService';
 import { isWorthTaking } from '$lib/game/employment.logic';
 
 /**
@@ -389,7 +390,7 @@ async function lageAufnehmen(
 	const eigenePacht = flaechen.find((flaeche) => flaeche.leasedByMe);
 	const freieFlaeche = flaechen.find((flaeche) => !flaeche.leased && flaeche.resourceType);
 	const zuVerkaufen = werkstatt ? await unverkauftes(npcId, werkstatt) : undefined;
-	const werkstattLuecke = werkstatt ? undefined : await fehlendeWerkstatt(werte.RegionId);
+	const werkstattLuecke = werkstatt ? undefined : await fehlendeWerkstatt(werte.RegionId, npcId);
 
 	// Ein eigenes Dach und was daran hängt (4.14).
 	const wohnhaus = eigene.find(
@@ -663,22 +664,43 @@ function menge(vorrat: { itemId: string; quantity: number }[], itemId: string): 
  * die auf Bretter wartet. Damit ergibt sich die Vielfalt der Berufe von selbst, ohne dass
  * jemand eine Quote pflegen müsste.
  *
- * Der Reihe nach durchgegangen wird der Katalog, wie er im Code steht — die günstigste
- * fehlende gewinnt, denn wer wenig hat, fängt klein an.
+ * **Und unter dem, was fehlt, gewinnt das eigene Handwerk** (5.19). Wer sein Leben lang
+ * gebacken hat, baut ein Backhaus und keine Schmiede — auch wenn die Schmiede zehn Münzen
+ * billiger wäre. Das ist zugleich die wirtschaftlich richtige Wahl: Können geht in Ertrag
+ * ein (`yieldOf`), ein Meister holt aus derselben Werkstatt mehr heraus als ein Anfänger.
+ *
+ * Vorher entschied allein der Preis. Das machte die Reihenfolge der Berufe zur Folge
+ * einer Preisliste: Nach der Zimmerei (180) kam die Schneiderei (190), dann erst die
+ * Mühle (200) und das Backhaus (220) — eine Stadt nähte eher Kleider, als dass sie Brot
+ * buk, und niemand konnte sagen warum.
+ *
+ * Bei gleichem Können bleibt der Preis der Ausschlag: Wer wenig hat, fängt klein an.
  */
 export async function fehlendeWerkstatt(
-	regionId: string
+	regionId: string,
+	characterId?: string
 ): Promise<{ optionId: number; price: number } | undefined> {
 	const vorhanden = await buildingService.getBuildingsInRegion(regionId);
 
 	const kandidaten = buildingService
 		.getBuildingOptions()
 		.filter((vorlage) => vorlage.type === 'CRAFT')
-		.filter((vorlage) => !vorhanden.some((haus) => haus.optionId === vorlage.optionId))
-		.map((vorlage) => ({ optionId: vorlage.optionId, price: levelOf(vorlage, 1).price }))
-		.sort((a, b) => a.price - b.price);
+		.filter((vorlage) => !vorhanden.some((haus) => haus.optionId === vorlage.optionId));
 
-	return kandidaten[0];
+	const bewertet: { optionId: number; price: number; koennen: number }[] = [];
+	for (const vorlage of kandidaten) {
+		bewertet.push({
+			optionId: vorlage.optionId,
+			price: levelOf(vorlage, 1).price,
+			// Ohne Person oder ohne Fertigkeit in der Vorlage zählt nur der Preis — dann
+			// verhält sich die Wahl wie vor 5.19.
+			koennen:
+				characterId && vorlage.skill ? await skillService.getLevel(characterId, vorlage.skill) : 0
+		});
+	}
+
+	bewertet.sort((a, b) => b.koennen - a.koennen || a.price - b.price);
+	return bewertet[0];
 }
 
 /**

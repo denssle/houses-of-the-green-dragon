@@ -21,6 +21,8 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
 | 66  | Wo Geld aus dem Nichts kommt und wohin es verschwindet                             | Punkt 63                     | Befund       |
 | 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern        | dem nächsten Messlauf        | Befund       |
+| 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt      | —                            | erledigt     |
+| 69  | Der Hof verfällt zur Ruine, die Pacht bleibt ohne Arbeitsplatz                     | dem nächsten Messlauf        | Fehler       |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung             | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                | laufend                      | Entwurf      |
@@ -29,7 +31,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 16  | Balancing im engeren Sinn                                                          | laufend                      | laufend      |
 | 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                    | zweite Stadt / Erschließung  | Entwurf      |
 | 32  | Die Ämter: Zuschnitt, was gewählt und was ernannt wird, der Richter                | Ämter über den Bürgermeister | Entscheidung |
-| 33  | Lohn: Aushang, Verhandlung, wer wen einstellt                                      | laufend                      | Entwurf      |
+| 33  | Lohn: Aushang, Verhandlung, wer wen einstellt — **und wer entlassen darf**         | laufend                      | Entwurf      |
 | 34  | Wer einen Handwerksbetrieb führen darf                                             | Berufe (Punkt 15)            | Entwurf      |
 | 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                      | zusammen mit Punkt 34        | Entwurf      |
 | 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                       | Punkt 34                     | Entwurf      |
@@ -331,9 +333,36 @@ meist ein NPC steht:
 - **Kann man jemanden aktiv einstellen?** Heute bewirbt sich, wer will. Wer einen
   bestimmten Schmied haben will (siehe Punkt 34), braucht einen Weg, ihn anzusprechen — und
   der NPC einen Grund, zuzusagen.
+- **Das Stellenangebot als eigenes Ding — wie ein Preisschild.** Der Vorschlag vom
+  16.08.2026: Ein Arbeitgeber hängt ein Angebot aus wie eine Ware, Interessierte sagen
+  direkt zu wie bei einem Kauf. Der **Ablauf** existiert bereits (`offeredWage` ist der
+  Aushang, `takeJob` die Zusage, `/jobs` die Liste für die ganze Stadt) — was fehlt, ist
+  die Bauart: Heute ist ein Angebot **ein Feld am Gebäude**, kein Gegenstand mit eigenem
+  Leben. Daraus folgt dreierlei, das man heute nicht kann: **mehrere Angebote je Betrieb**
+  (ein Meister für acht, zwei Gehilfen für drei), ein Angebot **zurückziehen** statt ein
+  Feld auf `null` zu setzen, und eine **Laufzeit**. Ein `JobOffer` in derselben Bauart wie
+  `ShopOffer` brächte das mit — samt allem, was dort schon gilt. Der Haken ist, dass daran
+  sofort die Verhandlung hängt: Wer ein Angebot annehmen kann, will auch eines machen
+  können.
 - **Was kostet Kündigen?** Eine Anstellung mit Laufzeit, die jederzeit folgenlos endet,
   ist keine. Eine Frist oder eine Abfindung macht daraus eine Bindung — und beides muss
   auch für den Arbeitgeber gelten, sonst ist es Willkür.
+
+**Zwei Dinge fehlen schon vor dem Entwurf** — beim Durchsehen der Gebäudeseite am
+16.08.2026 aufgefallen:
+
+- **Der Arbeitgeber kann niemanden entlassen.** `employmentService.endEmployment` gibt es,
+  aber verdrahtet ist es allein unter `/jobs` — und dort kündigt der **Angestellte selbst**.
+  Wer jemanden eingestellt hat, wird ihn nicht wieder los; der Lohn läuft, bis der andere
+  von sich aus geht. Ein Knopf auf der Gebäudeseite ist die kleine Lösung, aber er greift
+  der Frage nach Frist und Abfindung vor — deshalb steht er hier und nicht im Code.
+- **Der Lohn eines Bestehenden ist nicht änderbar.** Das ist bisher Absicht
+  (`employment.attributes.ts`: vereinbart wird zwischen zwei Seiten, ein neuer Aushang gilt
+  für den Nächsten). Sobald verhandelt wird, muss diese Entscheidung mit — sonst ist die
+  Verhandlung eine Ansage.
+
+Beides gehört in einen Zug: Wer über Lohn verhandeln kann, muss auch gehen können, und wer
+entlassen kann, braucht dafür einen Preis.
 
 ### 34. Wer einen Handwerksbetrieb führen darf
 
@@ -1215,6 +1244,82 @@ dem Kreislauf ist es damit ebenso heraus, als wäre es gelöscht.
 Die Reihenfolge ist keine Frage des Aufwands, sondern der Wirkung: **Punkt 1 zuerst zu
 schließen, ohne 63 gelöst zu haben, legt die Wirtschaft still.** Zuerst muss es einen
 zweiten Weg geben, an Geld zu kommen — nämlich Waren zu verkaufen, die jemand herstellt.
+
+### 68. Das Standgeld frisst den, der nichts verkauft — behoben (5.20)
+
+**Behoben:** Das Standgeld fällt nur noch für ein **neues** Angebot an, nicht fürs
+Aufstocken. Der Stand ist gemietet, nicht die Ware. Ein anderer Preis ergibt weiterhin ein
+zweites Schild und kostet entsprechend — das ist eine andere Aussage und keine
+Nachlieferung. Fünf Tests in `stallFee.spec.ts`, darunter die Folge daraus: Wer den Stand
+einmal bezahlt hat, darf nachlegen, auch wenn die Kasse inzwischen leer ist.
+
+**Offen bleibt die größere Frage dahinter** (sie gehört zu Punkt 16): Woher kommt die
+Nachfrage? Acht Einwohner brauchen keine 2857 Stämme. Ein NPC, der erntet, ohne dass
+jemand kauft, produziert für die Halde — und merkt es nicht, weil er kein Bild vom Absatz
+hat. Solange die Stadt so klein ist, hülfe schon der Blick auf den eigenen Bestand: Wer
+hundert Stämme am Markt liegen hat, muss nicht den hunderterstem ernten.
+
+**Der ursprüngliche Befund:**
+
+**Der Befund aus dem Messlauf vom 16.08.2026** (2000 Ticks, frische Seed-Welt, direkt nach
+5.18). Der Verkauf läuft jetzt — 915 Verkaufsvorgänge statt 8 —, und genau daran zeigt
+sich der Fehler:
+
+```
+WOOD x2857 zu 2 bei Marktplatz (Dietrich)      Dietrich: geld=22
+```
+
+Dietrich pachtet den Eichwald, erntet Holz und bietet es an. Jeden Tick aufs Neue: ernten,
+anbieten, **zwei Münzen Standgeld**. Gekauft wird davon fast nichts — die Zimmerei nimmt
+ein paar Stämme, mehr braucht die Stadt nicht. Nach vierzig Spieljahren liegen 2857 Stämme
+am Marktplatz, und ihr Besitzer ist der ärmste Mann der Stadt.
+
+**Der Fehler liegt im Aufstocken aus 5.18.** `placeOffer` berechnet das Standgeld bei
+jedem Aufruf, auch wenn nur ein bestehendes Angebot erhöht wird. Damit zahlt der Verkäufer
+nicht für den Stand, sondern für jede einzelne Nachlieferung — und wer nichts loswird,
+zahlt endlos. Das widerspricht der eigenen Beschreibung in `law.logic.ts`: „Was ein Stand
+am Markt **je Angebot** kostet."
+
+Naheliegend ist deshalb: **Standgeld nur für ein neues Angebot, nicht fürs Aufstocken.**
+Der Stand ist gemietet, nicht die Ware.
+
+Dahinter steht aber die größere Frage, und sie gehört zu Punkt 16: **Woher kommt die
+Nachfrage?** Acht Einwohner brauchen keine 2857 Stämme. Ein NPC, der erntet, ohne dass
+jemand kauft, produziert für die Halde — und merkt es nicht, weil er kein Bild vom Absatz
+hat. Solange die Stadt so klein ist, hilft der Blick auf den eigenen Bestand: Wer schon
+hundert Stämme am Markt liegen hat, muss nicht den hundertelften ernten.
+
+### 69. Der Hof verfällt, und mit ihm die Pacht
+
+**Ein Fehler aus 5.15**, sichtbar im selben Messlauf. Nach 1000 Ticks steht „Hof am
+Eichwald 1", nach 1250 nicht mehr:
+
+```
+--- nach 1000 Ticks: 10 Häuser ... Hof am Eichwald 1(13) ...
+--- nach 1250 Ticks:  9 Häuser ... (kein Hof mehr)
+```
+
+Der Hof ist ein Gebäude wie jedes andere und verfällt entsprechend — nach rund
+fünfundzwanzig Spieljahren wird er zur Ruine und `mitZustand` räumt ihn ab. Niemand
+renoviert ihn: `RENOVATE` kam im ganzen Lauf nicht vor, und ein NPC richtet ohnehin nur
+her, was unter die Hälfte gefallen ist und ihm gehört — der Hof fällt durch, weil er
+keinen Wert hat, den jemand verteidigen müsste.
+
+Die Folgen sind still: Die **Pacht bleibt bestehen** (sie hängt am `Lease`, nicht am
+Gebäude), geerntet wird weiter — aber der Arbeitsplatz ist weg. Wer Knechte auf seiner
+Fläche hatte, verliert sie, ohne dass es irgendwo steht.
+
+Zu entscheiden ist, was richtig ist:
+
+- **Der Hof verfällt nicht.** Ein Schuppen auf gepachtetem Grund ist kein Bauwerk, das
+  man pflegt; er gehört zur Fläche wie der Acker selbst. Das wäre die einfachste Regel und
+  passt zu `harvest`: „Ein Acker hat keinen Zustand wie ein Gebäude — er trägt immer voll."
+- **Oder er verfällt und wird nachgezogen**, wenn er fehlt — dann braucht `leasePlot`
+  einen Zwilling, der bestehende Pachten prüft.
+
+Für den Verfall spräche, dass Instandhaltung eine Entscheidung ist. Dagegen spricht, dass
+hier nichts zu entscheiden war: Der Hof ist mit der Pacht gekommen, ungefragt und
+kostenlos.
 
 ### 67. Die NPC-Schleife ist zu teuer geworden
 
