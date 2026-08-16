@@ -2496,6 +2496,41 @@ geworben worden. Ein Zeichen Code, seit 4.4 drin, nach dem Umbau null Fehlschlä
 
 _Fertig, wenn:_ Ein Messlauf beantwortet „warum passiert nichts" von selbst. — Erledigt.
 
+**5.22 Was in der Truhe liegt, bleibt am Server.** ✓ (Punkt 27) Beim Durchgehen der
+Rechtsseiten — dem letzten offenen Punkt vor `1.0.0` — stellte sich zuerst heraus, dass
+der Punkt selbst veraltet war: Impressum, Datenschutzerklärung und Spielregeln sind längst
+ausgearbeitet und nicht „eine Zeile lang". Damit wurde aus dem Schreiben ein **Prüfen**,
+und die Datenschutzerklärung nennt den Maßstab selbst: „Wer diesen Text ändert, ohne den
+Code zu ändern, macht ihn zur Behauptung."
+
+Fast alles hielt stand — bcrypt, das eine Sitzungscookie mit dreißig Tagen, die
+Fehlversuchssperre im Arbeitsspeicher statt in der Datenbank, die Anonymisierung beim
+Löschen, die freiwillige E-Mail-Adresse. **Eine Zusage nicht:**
+
+> Nicht sichtbar sind Geld, Aktionspunkte und der Zustand einer Figur.
+
+Sichtbar waren sie nicht — **ausgeliefert schon.** Ein `{#if data.self}` verbarg sie im
+Markup, während `load` den vollständigen Charakter zurückgab. Wer die Seite eines
+Mitspielers aufrief, hatte dessen Beutel in den Daten hinter der Seite. Dieselbe Sorte
+Fehler, die Punkt 25 schon an anderer Stelle fand: eine Freigabe, die für die Anzeige gilt
+und für die Daten nicht.
+
+Das war zweierlei zugleich, und das Zweite wiegt im Spiel schwerer: **ein Spielvorteil.**
+Wer den Beutel seines Gegenübers kennt, weiß bei jeder Versteigerung, wie weit er gehen
+kann.
+
+**Die Grenze zieht jetzt der Server.** Von einer fremden Person geht nur heraus, was auf
+der Gasse sichtbar wäre — als **Positivliste**, nicht als Streichung: Wer Felder entfernt,
+vergisst das nächste, das hinzukommt; so muss jedes neue einmal bewusst freigegeben werden.
+Der eigene Beutel steht als eigenes Feld `purse` daneben, das bei einer fremden Person gar
+nicht erst geladen wird. Damit sagt der Typ, was vorher nur ein Kommentar behauptete. Der
+Ehepartner geht denselben Weg — auch er wurde vollständig mitgeliefert.
+
+Zwei Tests sichern es, und sie prüfen **die Daten und nicht die Darstellung**: Ein Test,
+der nachsieht, ob eine Zahl auf dem Bildschirm steht, hätte diesen Fehler nie gefunden.
+
+_Fertig, wenn:_ Was die Datenschutzerklärung zusagt, hält auch der Server. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

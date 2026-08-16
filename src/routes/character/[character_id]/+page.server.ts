@@ -17,6 +17,7 @@ import { deathProbabilityPerYear } from '$lib/game/mortality.logic';
 import { fullName } from '$lib/game/naming.logic';
 import { personalityLabel } from '$lib/game/personality.logic';
 import { ageInYears, MAX_ACTION_POINTS, yearOf } from '$lib/game/time';
+import type { Character } from '$lib/model/character';
 
 /**
  * Die Seite einer Person — der eigenen oder einer fremden.
@@ -31,7 +32,38 @@ import { ageInYears, MAX_ACTION_POINTS, yearOf } from '$lib/game/time';
  * Was in seiner Truhe liegt, nicht: Geld, Aktionspunkte, Sättigung. Das ist keine
  * Geheimniskrämerei, sondern dieselbe Grenze, die auch das Spiel zieht — wer wissen will,
  * wie es einem anderen geht, muss ihn besuchen.
+ *
+ * **Und diese Grenze zieht der Server, nicht die Anzeige** (5.22). Bis dahin verbarg
+ * allein ein `{#if data.self}` im Markup, was nicht jeden angeht — geliefert wurde der
+ * vollständige Charakter, samt Geld und Aktionspunkten. Wer die Seite eines Mitspielers
+ * aufrief, bekam beides mit, sichtbar in den Daten hinter der Seite. Dieselbe Sorte
+ * Fehler, die Punkt 25 schon einmal an anderer Stelle fand: eine Freigabe, die für die
+ * Anzeige gilt und für die Daten nicht.
+ *
+ * Das war nicht nur ein gebrochenes Versprechen der Datenschutzerklärung, sondern ein
+ * Spielvorteil: Wer den Beutel seines Gegenübers kennt, weiß bei jeder Versteigerung, wie
+ * weit er gehen kann.
  */
+
+/**
+ * Was von einer fremden Person nach draußen geht.
+ *
+ * Eine **Positivliste**, keine Streichung: Wer Felder entfernt, vergisst das nächste, das
+ * hinzukommt. So muss jedes neue Feld einmal bewusst freigegeben werden, und die
+ * Voreinstellung ist Schweigen.
+ */
+function wieAufDerGasse(
+	person: Character
+): Pick<Character, 'id' | 'firstName' | 'title' | 'deathTick' | 'pregnantSinceTick'> {
+	return {
+		id: person.id,
+		firstName: person.firstName,
+		title: person.title,
+		deathTick: person.deathTick,
+		// Eine Schwangerschaft sieht man — das ist der Sinn der Anzeige.
+		pregnantSinceTick: person.pregnantSinceTick
+	};
+}
 export const load: PageServerLoad = async ({ locals, params }) => {
 	const eigener = locals.currentCharacter;
 	const gezeigt =
@@ -57,9 +89,14 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	// mehr ist als ein Namensbestandteil: Wer zu welchem Haus gehört, entscheidet über
 	// Erbfolge, Fehden und Zuneigung.
 	const haus = gezeigt.dynastyId ? await dynastyService.getDynasty(gezeigt.dynastyId) : undefined;
+	const gatte = gezeigt.spouseId
+		? await characterService.getCharacter(gezeigt.spouseId)
+		: undefined;
 
 	return {
-		character: gezeigt,
+		// **Nur die eigene Person geht vollständig heraus.** Bei jeder anderen bleibt am
+		// Server, was in ihrer Truhe liegt.
+		character: selbst ? gezeigt : wieAufDerGasse(gezeigt),
 		house: haus ? { id: haus.id, name: haus.name } : undefined,
 		displayName: fullName(gezeigt.firstName, haus?.name),
 		self: selbst,
@@ -81,10 +118,16 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		// Sättigung ist eine Auskunft über den Zustand einer Truhe, nicht über einen
 		// Menschen auf der Gasse.
 		hunger: selbst ? await needService.getHunger(gezeigt.id, jetzt) : undefined,
+		// **Was in der Truhe liegt, als eigenes Feld** — und nicht als Teil der Person.
+		// Vorher stand es im Charakter und wurde erst im Markup verborgen; so verlässt es
+		// den Server gar nicht erst, und der Typ sagt es jedem, der die Seite liest.
+		purse: selbst ? { money: gezeigt.money, actionPoints: gezeigt.actionPoints } : undefined,
 		// Der Ehepartner mit vollem Namen (5.10): Eine Ehe verbindet in aller Regel zwei
 		// Häuser, und genau das soll dastehen.
 		spouseName: await nameService.displayName(gezeigt.spouseId),
-		spouse: gezeigt.spouseId ? await characterService.getCharacter(gezeigt.spouseId) : undefined,
+		// Auch hier nur, was auf der Gasse sichtbar wäre: Der Verweis braucht einen Namen
+		// und eine Kennung, nicht den Beutel des Ehepartners.
+		spouse: gatte ? wieAufDerGasse(gatte) : undefined,
 		// Der Lebenslauf ist kein eigenes System, sondern die Chronik nach dieser Person
 		// gefiltert: geboren, verheiratet, im Amt, gestorben.
 		life: (await chronicleService.getChronicle({ characterId: gezeigt.id, limit: 12 })).map(

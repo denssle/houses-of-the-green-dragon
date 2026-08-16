@@ -1679,12 +1679,42 @@ Beides steht: `scripts/backup.sh` läuft täglich um 4:17 Uhr per Cron, und
 ein und zählt nach, ob die Welt darin vollständig ist. Beide sind auf dem Host gelaufen,
 die Rückspielprobe hat bestätigt.
 
-### 27. Impressum, Datenschutz und Nutzungsbedingungen
+### 27. Impressum, Datenschutz und Nutzungsbedingungen — weitgehend erledigt
 
-Beide Seiten stehen in `noAuthURLs` und sind **eine Zeile lang**. Vor dem ersten fremden
-Nutzer müssen sie Inhalt haben: Wer betreibt das, was wird gespeichert, was passiert mit
-E-Mail-Adressen und Anmeldeprotokollen. Dazu Spielregeln, in denen steht, was verboten
-ist — ein Verbot von Mehrfachaccounts setzt voraus, dass es irgendwo geschrieben steht.
+**Der ursprüngliche Text stimmt nicht mehr** (er stand bis zum 16.08.2026 hier und
+behauptete, die Seiten seien „eine Zeile lang"): Impressum, Datenschutzerklärung und
+Spielregeln sind ausgearbeitet — Verantwortlicher, Verarbeitungszwecke samt
+Rechtsgrundlagen, Cookies, Hosting, Speicherdauer, Betroffenenrechte, und in den Regeln
+Mehrfachkonten, Umgangston, Namen, Fehlerausnutzung und was der Betrieb zusagt.
+
+**Was daraus folgt, ist eine andere Aufgabe: prüfen statt schreiben.** Die
+Datenschutzerklärung sagt es selbst — „Wer diesen Text ändert, ohne den Code zu ändern,
+macht ihn zur Behauptung." Ein Durchgang am 16.08.2026 hat jede Zusage gegen den Code
+gehalten:
+
+**Gedeckt:** bcrypt für Passwörter; ein einziges Cookie `session` mit 30 Tagen, absolut ab
+Ausstellung; Fehlversuche nach IP und Nickname für 15 Minuten im Arbeitsspeicher statt in
+der Datenbank (`rateLimit.logic.ts`, fünf Versuche); Löschung als Anonymisierung mit
+„Namenlos" und „Ein vergessenes Haus"; E-Mail ohne `required` und damit freiwillig;
+vierzehn aufbewahrte Sicherungen.
+
+**Nicht gedeckt — behoben mit 5.22:** „Nicht sichtbar sind Geld, Aktionspunkte und der
+Zustand einer Figur." Sichtbar waren sie nicht, **ausgeliefert schon**: Ein `{#if
+data.self}` verbarg sie im Markup, während `load` den vollständigen Charakter zurückgab.
+Wer die Seite eines Mitspielers aufrief, hatte dessen Beutel in den Daten hinter der
+Seite. Dieselbe Sorte Fehler, die Punkt 25 an anderer Stelle fand.
+
+**Offen bleibt zweierlei:**
+
+- **Läuft die tägliche Sicherung wirklich?** Die Spielregeln sagen „Die Datenbank wird
+  täglich gesichert". `scripts/backup.sh` gibt es, und es ist ausdrücklich für Cron
+  gemacht — aber ob der Eintrag auf dem Uberspace steht, sagt kein Code. Nachzusehen mit
+  `crontab -l`; der Deploy allein sichert nur vor dem Ausliefern, und das ist kein
+  Sicherungsplan (so steht es auch im Kopf des Skripts).
+- **Der Entwurfsvermerk in den Spielregeln.** Im Markup steht „Nutzungsbedingungen —
+  ENTWURF". Vor dem ersten fremden Nutzer gehört entschieden, ob der Text gilt; ein
+  Regelwerk, das sich selbst als Entwurf bezeichnet, ist keine Grundlage, um jemandem ein
+  Konto zu sperren.
 
 ### 28. Kontolöschung als Anonymisierung — erledigt (5.9)
 

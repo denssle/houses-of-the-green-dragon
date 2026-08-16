@@ -38,13 +38,17 @@
 	<!--
 		Geld, Aktionspunkte und Sättigung stehen nur auf der eigenen Seite: Was jemand in
 		der Truhe hat, sieht man ihm nicht an.
+
+		Geprüft wird `data.purse` und nicht `data.self` — der Beutel ist bei einer fremden
+		Person gar nicht erst geladen, und diese Bedingung sagt das. Ein `{#if data.self}`
+		verbarg früher nur die Anzeige, während die Zahlen mit ausgeliefert wurden (5.22).
 	-->
-	{#if data.self}
+	{#if data.purse}
 		<dt>Geld</dt>
-		<dd>{data.character.money} Münzen</dd>
+		<dd>{data.purse.money} Münzen</dd>
 
 		<dt>Aktionspunkte</dt>
-		<dd>{data.character.actionPoints} von {data.maxActionPoints}</dd>
+		<dd>{data.purse.actionPoints} von {data.maxActionPoints}</dd>
 
 		<dt>Zustand</dt>
 		<dd>
