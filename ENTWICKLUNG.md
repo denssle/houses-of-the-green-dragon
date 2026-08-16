@@ -2241,6 +2241,31 @@ allein genügt.
 _Fertig, wenn:_ Eine Welt, die niemand anfasst, bringt aus eigener Kraft Eigentum hervor. —
 Erledigt, gemessen und im Test festgehalten.
 
+**5.14 Die Schmiede, die nie jemanden einstellte.** ✓ (Punkt 63) Zwei Tage unbeobachteter
+Lauf auf dem Server, und der Blick ins Rathaus zeigte: „Städtische Schmiede — Niemand ist
+angestellt." Seit dem ersten Tag der Welt, 97 Spieljahre lang.
+
+Der Grund war eine Zeile Suchbedingung. Der NPC-Bürgermeister suchte in seinen Häusern
+allein nach dem **Wachhaus** und hängte dort einen Sold aus; für jedes andere städtische
+Haus geschah nichts. Und ohne Aushang bewirbt sich niemand — die Schmiede aus `seed.ts`
+war damit per Konstruktion unbesetzbar. Ausgerechnet die, die das Konzept als Starthilfe
+vorsieht: der Ort, an dem ein Neuling seine ersten Münzen verdient.
+
+Aus `PAY_GUARD` wurde **`PAY_WAGE`**, und gesucht wird jetzt das erste Haus der Stadt mit
+einer offenen Stelle ohne Aushang. **Welche Häuser das sind, sagt die Vorlage und keine
+Liste im Dienst:** `positionsAt` kennt eine Stelle nur, wo es Lohn oder Rezept gibt — das
+Rathaus fällt von selbst heraus, und ein künftiger öffentlicher Bau ist ohne Zutun dabei.
+Die Frage „hat dieses Haus eine offene Stelle?" stand vorher zweimal im Code, einmal für
+den NPC und einmal hier; sie steht jetzt als `hasUnofferedPosition` an einer Stelle.
+
+Eine Rangfolge unter den Häusern gibt es bewusst nicht. Erst die Wache, dann das Handwerk
+wäre eine zweite Meinung darüber, was der Stadt wichtiger ist, und einen Tick später ist
+ohnehin das nächste dran.
+
+_Fertig, wenn:_ Ein Arbeitsplatz, den die Stadt besitzt, wird auch ausgeschrieben. —
+Erledigt, mit zwei Tests: einer für die Schmiede, einer dagegen, dass derselbe Aushang in
+jedem Tick neu gesetzt wird.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

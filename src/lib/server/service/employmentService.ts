@@ -59,6 +59,29 @@ export async function offerJob(
 	return { ok: true };
 }
 
+/**
+ * Hat dieses Haus eine Stelle frei, für die noch kein Lohn aushängt?
+ *
+ * Beides muss stimmen: Ein Aushang ohne freie Stelle lockt niemanden, eine freie Stelle
+ * ohne Aushang findet keinen. Dieselbe Frage stellen der NPC für seinen eigenen Betrieb
+ * und der Bürgermeister für die Häuser der Stadt — deshalb steht sie hier und nicht
+ * zweimal in den Diensten.
+ */
+export async function hasUnofferedPosition(building: {
+	id: string;
+	optionId: number;
+	level: number;
+	offeredWage: number | null;
+}): Promise<boolean> {
+	if (building.offeredWage !== null) return false;
+
+	const vorlage = buildingService.getBuildingOption(building.optionId);
+	if (!vorlage) return false;
+
+	const belegt: number = await Employment.count({ where: { BuildingId: building.id } });
+	return positionsAt(vorlage, building.level) - belegt > 0;
+}
+
 /** Eine Stelle antreten. */
 export async function takeJob(characterId: string, buildingId: string): Promise<EmploymentResult> {
 	const tick: number = await worldService.currentTick();

@@ -14,7 +14,7 @@ import { LAW_RULES, type LawKind } from '$lib/game/law.logic';
  */
 
 export const MAYOR_ACTIONS = [
-	'PAY_GUARD',
+	'PAY_WAGE',
 	'REPAIR',
 	'BUILD_PUBLIC',
 	'DEVELOP_LAND',
@@ -27,8 +27,15 @@ export type MayorAction = (typeof MAYOR_ACTIONS)[number];
 export interface CityState {
 	personality: Personality;
 	treasury: number;
-	/** Steht ein Wachhaus ohne ausgesetzten Sold? */
-	guardhouseUnpaid: boolean;
+	/**
+	 * Steht in einem städtischen Haus eine Stelle offen, für die kein Sold aushängt?
+	 *
+	 * Bis 5.14 fragte das nur nach dem Wachhaus — und die städtische Schmiede stand
+	 * deshalb seit dem ersten Tag der Welt ohne Schmied da: Für sie hing nie ein Aushang
+	 * aus, also konnte sich niemand bewerben. Ein Arbeitsplatz, den die Stadt besitzt,
+	 * aber nie ausschreibt, ist eine Kulisse.
+	 */
+	unstaffedWorkplace: boolean;
 	/** Verfällt ein öffentlicher Bau? */
 	repairNeeded: boolean;
 	repairCost: number;
@@ -92,9 +99,12 @@ export const NPC_MAYOR_LAW: LawKind = 'TITHE';
 export function decideMayorAction(state: CityState): MayorAction {
 	const ruecklage: number = treasuryReserve(state.developmentCost);
 
-	// 1. Die Wache. Ein Wachhaus ohne Sold ist ein leeres Haus, und Raubzüge kosten die
-	//    Stadt mehr als der Sold. Kostet nichts außer dem Aushang.
-	if (state.guardhouseUnpaid) return 'PAY_GUARD';
+	// 1. Die Stellen besetzen, die die Stadt zu vergeben hat. Ein Wachhaus ohne Sold ist
+	//    ein leeres Haus, und Raubzüge kosten die Stadt mehr als der Sold; eine Schmiede
+	//    ohne Schmied stellt nichts her, obwohl die Stadt sie bezahlt hat. Steht ganz
+	//    oben, weil es nichts kostet außer dem Aushang — der Lohn fließt erst, wenn
+	//    jemand annimmt und arbeitet.
+	if (state.unstaffedWorkplace) return 'PAY_WAGE';
 
 	// 2. Erhalten, was steht. Billiger als neu bauen, und der Verfall frisst still.
 	if (state.repairNeeded && state.treasury >= state.repairCost) return 'REPAIR';

@@ -61,6 +61,38 @@ async function fehlenderBau(
 }
 
 /**
+ * Das erste Haus der Stadt, in dem eine Stelle offensteht, für die kein Sold aushängt.
+ *
+ * **Jedes Haus, nicht nur das Wachhaus.** Bis 5.14 suchte der Bürgermeister allein nach
+ * dem Wachhaus — mit der Folge, dass die städtische Schmiede aus `seed.ts` per
+ * Konstruktion nie einen Schmied bekam: Ohne Aushang findet keine Bewerbung statt, und
+ * einen Aushang setzte niemand. In der Welt auf dem Server stand sie so 97 Spieljahre
+ * leer.
+ *
+ * Wonach die Stellen zählen, entscheidet `positionsAt` und damit die Vorlage: Ein
+ * Rathaus hat keinen Lohn und kein Rezept, also auch keine Stelle. Es fällt von selbst
+ * heraus, ohne dass hier eine Liste von Gebäudearten gepflegt werden müsste.
+ *
+ * Die Reihenfolge ist die der Häuser, wie sie stehen. Eine Rangfolge — erst die Wache,
+ * dann das Handwerk — wäre eine zweite Meinung darüber, was der Stadt wichtiger ist;
+ * dafür gibt es bisher keinen Grund, und ein Tick später ist ohnehin das nächste dran.
+ */
+async function offeneStelle(
+	haeuser: {
+		id: string;
+		optionId: number;
+		level: number;
+		offeredWage: number | null;
+		name: string;
+	}[]
+): Promise<{ id: string; name: string } | undefined> {
+	for (const haus of haeuser) {
+		if (await employmentService.hasUnofferedPosition(haus)) return haus;
+	}
+	return undefined;
+}
+
+/**
  * Ein Herzschlag Amtsführung.
  *
  * Wird vom Takt gerufen, gleich nach der Instandhaltung. Höchstens **eine** Handlung je
@@ -84,9 +116,7 @@ export async function governAsNpcMayor(
 	const baufaellig = oeffentliche
 		.filter((haus) => haus.condition < MAYOR_MAINTAINS_BELOW)
 		.sort((a, b) => a.condition - b.condition)[0];
-	const wachhaus = oeffentliche.find(
-		(haus) => haus.optionId === GUARDHOUSE_OPTION_ID && haus.offeredWage === null
-	);
+	const unbesetzt = await offeneStelle(oeffentliche);
 	const fehlt = await fehlenderBau(regionId);
 	const freiesLand = await buildingService.getFreeCityPlots(regionId);
 
@@ -100,7 +130,7 @@ export async function governAsNpcMayor(
 			agreeableness: amtsperson.dataValues.agreeableness
 		},
 		treasury: kasse,
-		guardhouseUnpaid: wachhaus !== undefined,
+		unstaffedWorkplace: unbesetzt !== undefined,
 		repairNeeded: baufaellig !== undefined,
 		repairCost:
 			Math.ceil(CONDITION_MAX - (baufaellig?.condition ?? CONDITION_MAX)) *
@@ -114,10 +144,10 @@ export async function governAsNpcMayor(
 	const entschluss: MayorAction = decideMayorAction(lage);
 
 	switch (entschluss) {
-		case 'PAY_GUARD':
-			if (wachhaus) {
-				await employmentService.offerJob(inhaber.characterId, wachhaus.id, TAGELOHN);
-				return { action: entschluss, detail: wachhaus.name };
+		case 'PAY_WAGE':
+			if (unbesetzt) {
+				await employmentService.offerJob(inhaber.characterId, unbesetzt.id, TAGELOHN);
+				return { action: entschluss, detail: unbesetzt.name, value: TAGELOHN };
 			}
 			return undefined;
 

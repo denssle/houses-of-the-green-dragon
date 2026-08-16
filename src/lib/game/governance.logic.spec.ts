@@ -23,7 +23,7 @@ function ruhig(werte: Partial<CityState> = {}): CityState {
 	return {
 		personality: anlagen(),
 		treasury: treasuryReserve(ERSCHLIESSUNG) * 2,
-		guardhouseUnpaid: false,
+		unstaffedWorkplace: false,
 		repairNeeded: false,
 		repairCost: 40,
 		missingBuildingPrice: null,
@@ -40,12 +40,12 @@ describe('Was ein Bürgermeister tut', () => {
 			expect(decideMayorAction(ruhig())).toBe('NOTHING');
 		});
 
-		it('bezahlt zuerst die Wache', () => {
-			// Ein Wachhaus ohne Sold ist ein leeres Haus, und Raubzüge kosten mehr als der
-			// Sold. Kostet nichts außer dem Aushang — deshalb ganz vorn.
-			const stadt = ruhig({ guardhouseUnpaid: true, repairNeeded: true });
+		it('besetzt zuerst die Stellen der Stadt', () => {
+			// Ein Wachhaus ohne Sold ist ein leeres Haus, eine Schmiede ohne Schmied stellt
+			// nichts her. Kostet nichts außer dem Aushang — deshalb ganz vorn.
+			const stadt = ruhig({ unstaffedWorkplace: true, repairNeeded: true });
 
-			expect(decideMayorAction(stadt)).toBe('PAY_GUARD');
+			expect(decideMayorAction(stadt)).toBe('PAY_WAGE');
 		});
 
 		it('erhält, bevor es baut', () => {

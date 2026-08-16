@@ -1,8 +1,6 @@
 ﻿import { garmentIntact } from '$lib/game/attire.logic';
 import { CAMPAIGN_TICKS, npcChoice } from '$lib/game/election.logic';
 import { Op } from 'sequelize';
-import { Employment } from '$lib/db/model/employment';
-import { positionsAt } from '$lib/game/employment.logic';
 import { levelOf } from '$lib/model/buildingTemplate';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
@@ -380,7 +378,7 @@ async function lageAufnehmen(
 	const material = fehltMaterial
 		? await tradeService.cheapestOffer(werte.RegionId, fehltMaterial.itemId, npcId)
 		: undefined;
-	const stelleFrei = werkstatt ? await freieStelleImEigenen(werkstatt) : false;
+	const stelleFrei = werkstatt ? await employmentService.hasUnofferedPosition(werkstatt) : false;
 
 	// Läuft eine Wahl, bei der er noch nicht abgestimmt hat? (4.16)
 	const wahlzettel = await electionService.getBallot(werte.RegionId, npcId);
@@ -694,25 +692,4 @@ async function fehlendesMaterial(
 		if (da < posten.quantity) return { itemId: posten.itemId, quantity: posten.quantity - da };
 	}
 	return undefined;
-}
-
-/**
- * Hat der eigene Betrieb eine Stelle frei, für die noch kein Lohn aushängt?
- *
- * Beides muss stimmen: Ein Aushang ohne freie Stelle lockt niemanden, eine freie Stelle
- * ohne Aushang findet keinen.
- */
-async function freieStelleImEigenen(werkstatt: {
-	id: string;
-	optionId: number;
-	level: number;
-	offeredWage: number | null;
-}): Promise<boolean> {
-	if (werkstatt.offeredWage !== null) return false;
-
-	const vorlage = buildingService.getBuildingOption(werkstatt.optionId);
-	if (!vorlage) return false;
-
-	const belegt: number = await Employment.count({ where: { BuildingId: werkstatt.id } });
-	return positionsAt(vorlage, werkstatt.level) - belegt > 0;
 }

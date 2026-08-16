@@ -28,6 +28,7 @@ import { yearsToTicks } from '$lib/game/time';
 
 const JETZT = 10_000;
 const WACHHAUS = 7;
+const SCHMIEDE = 2;
 let stadtId: string;
 
 async function person(name: string, rolle: 'PLAYER' | 'NPC' = 'NPC'): Promise<string> {
@@ -122,8 +123,38 @@ describe('Der Bürgermeister im Amt', () => {
 
 		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
 
-		expect(getan?.action).toBe('PAY_GUARD');
+		expect(getan?.action).toBe('PAY_WAGE');
 		expect((await Building.findByPk(wachhaus))!.dataValues.offeredWage).toBeGreaterThan(0);
+	});
+
+	it('schreibt auch die städtische Schmiede aus', async () => {
+		// **Der Befund vom 16.08.2026** (Punkt 63): In der Welt auf dem Server stand die
+		// Schmiede aus `seed.ts` 97 Spieljahre ohne Schmied. Der Bürgermeister suchte
+		// allein nach dem Wachhaus, also hing für sie nie ein Sold aus — und ohne Aushang
+		// bewirbt sich niemand. Ein Arbeitsplatz, den die Stadt besitzt, aber nie
+		// ausschreibt, ist eine Kulisse.
+		const npc = await person('Amtsperson');
+		await insAmt(npc);
+		const schmiede = await stadtgrund(SCHMIEDE);
+
+		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
+
+		expect(getan?.action).toBe('PAY_WAGE');
+		expect((await Building.findByPk(schmiede))!.dataValues.offeredWage).toBeGreaterThan(0);
+	});
+
+	it('schreibt nicht zweimal aus, was schon einen Sold hat', async () => {
+		// Sonst setzte er in jedem Tick denselben Aushang neu und käme nie dazu, etwas
+		// anderes zu tun — dieselbe Falle, in der die NPCs vor 4.14 vor ihrem leeren
+		// Bauplatz standen.
+		const npc = await person('Amtsperson');
+		await insAmt(npc);
+		const wachhaus = await stadtgrund(WACHHAUS);
+		await Building.update({ offeredWage: 3 }, { where: { id: wachhaus } });
+
+		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
+
+		expect(getan?.action).not.toBe('PAY_WAGE');
 	});
 
 	it('baut, was der Stadt fehlt', async () => {
@@ -159,7 +190,7 @@ describe('Der Bürgermeister im Amt', () => {
 
 		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
 
-		expect(getan?.action).toBe('PAY_GUARD');
+		expect(getan?.action).toBe('PAY_WAGE');
 		// Die Steuer bleibt, wo sie war — sie ist erst im nächsten Tick an der Reihe.
 		expect(await lawService.rate(stadtId, 'TITHE')).toBe(LAW_RULES.TITHE.fallback);
 	});
