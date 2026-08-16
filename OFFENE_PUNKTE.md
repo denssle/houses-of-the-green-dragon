@@ -22,7 +22,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 66  | Wo Geld aus dem Nichts kommt und wohin es verschwindet                             | Punkt 63                     | Befund       |
 | 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern        | dem nächsten Messlauf        | Befund       |
 | 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt      | —                            | erledigt     |
-| 69  | Der Hof verfällt zur Ruine, die Pacht bleibt ohne Arbeitsplatz                     | dem nächsten Messlauf        | Fehler       |
+| 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                  | —                            | erledigt     |
 | 70  | Niemand lernt ein Handwerk, das es nicht gibt — alle schmieden, keiner backt       | der Brotkette                | Entscheidung |
 | 71  | Zuzug: neue Seelen von außerhalb — Ventil, Handwerk und Erzählstoff                | Punkt 70 / Bürgerrecht       | Entwurf      |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
@@ -1291,7 +1291,20 @@ jemand kauft, produziert für die Halde — und merkt es nicht, weil er kein Bil
 hat. Solange die Stadt so klein ist, hilft der Blick auf den eigenen Bestand: Wer schon
 hundert Stämme am Markt liegen hat, muss nicht den hundertelften ernten.
 
-### 69. Der Hof verfällt, und mit ihm die Pacht
+### 69. Der Hof verfällt, und mit ihm die Pacht — behoben (5.23)
+
+**Entschieden: Der Hof verfällt nicht.** Von den beiden Wegen unten ist es der erste
+geworden, und zwar aus dem Grund, der dort schon steht: Instandhaltung ist sonst eine
+Entscheidung — hier war nie eine zu treffen, denn der Hof kommt ungefragt und kostenlos
+mit der Pacht. `zustandVon` gibt für Gebäude vom Typ `EXTRACTION` unverändert `CONDITION_MAX`
+zurück; damit verfällt er nicht, wird nie zur Ruine und trägt immer voll — dieselbe Regel,
+die `harvest` für den Acker längst nennt.
+
+Keine Migration nötig: Die gespeicherte `condition` wird für diesen Typ nicht mehr
+gelesen. Ein Hof, der vorher schon zur Ruine geworden ist, bleibt allerdings weg — dort
+hilft nur, die Pacht neu zu nehmen.
+
+**Der ursprüngliche Befund:**
 
 **Ein Fehler aus 5.15**, sichtbar im selben Messlauf. Nach 1000 Ticks steht „Hof am
 Eichwald 1", nach 1250 nicht mehr:

@@ -519,11 +519,24 @@ async function mitZustand(
  * weniger. Damit hat der Bürgermeister eine Aufgabe und die Stadtkasse einen Zweck.
  * Bis dahin waren sie ausgenommen, weil es niemanden gab, der sie hätte instand setzen
  * können.
+ *
+ * **Der Hof einer Pacht verfällt nicht** (5.23, Punkt 69). Er ist kein Bauwerk, das
+ * jemand pflegt, sondern gehört zur Fläche wie der Acker selbst — und `harvest` sagt über
+ * den schon: „Ein Acker hat keinen Zustand wie ein Gebäude, er trägt immer voll."
+ *
+ * Ohne diese Ausnahme lief die Sache still schief, und im Messlauf war es zu sehen:
+ * Zwischen Tick 1000 und 1250 verschwand „Hof am Eichwald 1" als Ruine. Die **Pacht blieb
+ * bestehen** — sie hängt am Vertrag, nicht am Gebäude —, geerntet wurde weiter, aber der
+ * Arbeitsplatz war weg, samt aller Knechte, und nirgends stand warum. Instandhaltung ist
+ * sonst eine Entscheidung; hier war nie eine zu treffen, denn der Hof kam ungefragt und
+ * kostenlos mit der Pacht.
  */
 function zustandVon(
 	instanz: Model<BuildingAttributes, BuildingCreationAttributes>,
 	tick: number
 ): number {
+	if (getBuildingOption(instanz.dataValues.optionId)?.type === 'EXTRACTION') return CONDITION_MAX;
+
 	return currentCondition(instanz.dataValues.condition, instanz.dataValues.lastConditionTick, tick);
 }
 

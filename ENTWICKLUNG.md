@@ -2531,6 +2531,27 @@ der nachsieht, ob eine Zahl auf dem Bildschirm steht, hätte diesen Fehler nie g
 
 _Fertig, wenn:_ Was die Datenschutzerklärung zusagt, hält auch der Server. — Erledigt.
 
+**5.23 Ein Hof ist kein Haus.** ✓ (Punkt 69) Der Hof aus 5.15 war ein Gebäude wie jedes
+andere — und verfiel entsprechend. Im Messlauf war es zu sehen: Zwischen Tick 1000 und
+1250 verschwand „Hof am Eichwald 1" als Ruine.
+
+**Der Schaden war still.** Die Pacht blieb bestehen — sie hängt am Vertrag, nicht am
+Gebäude —, geerntet wurde weiter, aber der Arbeitsplatz war weg, samt aller Knechte, und
+nirgends stand warum. Ein Pächter hätte davon nur erfahren, indem er nachsieht.
+
+Jetzt verfällt er nicht mehr: `zustandVon` gibt für den Typ `EXTRACTION` unverändert die
+volle Güte zurück. Die Begründung ist dieselbe, die `harvest` für den Acker längst nennt —
+„Ein Acker hat keinen Zustand wie ein Gebäude, er trägt immer voll." Ein Hof gehört zur
+Fläche, nicht zur Stadt.
+
+**Warum nicht die andere Lösung** (verfallen lassen und bei Bedarf nachziehen): Weil
+Instandhaltung sonst eine **Entscheidung** ist, und hier war nie eine zu treffen. Der Hof
+kommt ungefragt und kostenlos mit der Pacht; ihn dann verfallen zu lassen, bestrafte eine
+Unterlassung, die niemand begehen konnte.
+
+_Fertig, wenn:_ Eine Pacht behält ihren Arbeitsplatz, solange sie besteht. — Erledigt, mit
+einem Test über die dreifache Ruinendauer.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

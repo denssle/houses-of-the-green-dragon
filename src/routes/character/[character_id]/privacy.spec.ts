@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { load } from './+page.server';
-import type { ServerLoadEvent } from '@sveltejs/kit';
 import { randomUUID } from 'node:crypto';
 import { sequelize } from '$lib/db/sequelize';
 import '$lib/db/db';
@@ -30,12 +29,31 @@ import { yearsToTicks } from '$lib/game/time';
 
 const JETZT = 10_000;
 
+/**
+ * Was von der Seite zurückkommt — so viel davon, wie dieser Test prüft.
+ *
+ * Der Cast ist Absicht und eng gehalten: `load` von außen aufzurufen heißt, SvelteKits
+ * Ereignisobjekt nachzubilden, und dessen vollständiger Typ hat mit der Frage nichts zu
+ * tun. Geprüft wird, was **herauskommt** — und das steht hier ausgeschrieben.
+ */
+interface Seitendaten {
+	character: { firstName: string; money?: number; actionPoints?: number };
+	purse?: { money: number; actionPoints: number };
+	hunger?: unknown;
+	age: number;
+}
+
 /** Ein `load`-Aufruf, wie ihn SvelteKit macht — nur mit dem, was diese Seite benutzt. */
-function anfrage(characterId: string, angemeldetAls?: Awaited<ReturnType<typeof charakter>>) {
-	return {
+async function seiteFuer(
+	characterId: string,
+	angemeldetAls?: Awaited<ReturnType<typeof charakter>>
+): Promise<Seitendaten> {
+	const ereignis = {
 		params: { character_id: characterId },
 		locals: { currentCharacter: angemeldetAls }
-	} as unknown as ServerLoadEvent;
+	} as unknown as Parameters<typeof load>[0];
+
+	return (await load(ereignis)) as unknown as Seitendaten;
 }
 
 async function charakter(name: string, geld: number) {
@@ -65,7 +83,7 @@ describe('Die Seite einer fremden Person', () => {
 		const ich = await charakter('Ich', 10);
 		const andere = await charakter('Die Andere', 9999);
 
-		const daten = await load(anfrage(andere.id, ich));
+		const daten = await seiteFuer(andere.id, ich);
 
 		// Der Kern: Was in der Truhe liegt, verlässt den Server nicht.
 		expect(daten.purse).toBeUndefined();
@@ -87,7 +105,7 @@ describe('Die Seite einer fremden Person', () => {
 
 		const ich = await charakter('Ich selbst', 777);
 
-		const daten = await load(anfrage(ich.id, ich));
+		const daten = await seiteFuer(ich.id, ich);
 
 		expect(daten.purse?.money).toBe(777);
 		expect(daten.purse?.actionPoints).toBe(42);

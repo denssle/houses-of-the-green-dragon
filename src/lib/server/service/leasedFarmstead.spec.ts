@@ -17,6 +17,7 @@ import * as employmentService from '$lib/server/service/employmentService';
 import * as productionService from '$lib/server/service/productionService';
 import * as tradeService from '$lib/server/service/tradeService';
 import { yearsToTicks } from '$lib/game/time';
+import { CONDITION_MAX, YEARS_TO_RUIN } from '$lib/game/building.logic';
 
 /**
  * Phase 5.15: **auf einer Pacht arbeiten lassen.**
@@ -153,6 +154,31 @@ describe('Der Hof einer Pacht', () => {
 		await employmentService.workForEmployer(knecht);
 
 		expect(await kasse(flaechenRegion)).toBeGreaterThan(0);
+	});
+
+	it('verfällt nicht — auch nach Menschenaltern nicht', async () => {
+		// **Der Fehler aus 5.15** (Punkt 69): Der Hof war ein Gebäude wie jedes andere und
+		// wurde nach rund fünfundzwanzig Spieljahren zur Ruine. Im Messlauf verschwand
+		// „Hof am Eichwald 1" zwischen Tick 1000 und 1250 — die Pacht blieb bestehen,
+		// geerntet wurde weiter, aber der Arbeitsplatz war weg, samt aller Knechte, und
+		// nirgends stand warum.
+		//
+		// Er gehört zur Fläche wie der Acker selbst, und über den sagt `harvest`: „Ein
+		// Acker hat keinen Zustand wie ein Gebäude — er trägt immer voll."
+		const paechterin = await person('Pächterin');
+		const flaeche = await freieFlaeche();
+		await productionService.leasePlot(paechterin, flaeche);
+
+		// Weit über die Ruinenschwelle hinaus: dreimal so lange, wie ein Haus hält.
+		await World.update(
+			{ currentTick: JETZT + yearsToTicks(YEARS_TO_RUIN * 3) },
+			{ where: { id: WORLD_ID } }
+		);
+
+		const hof = await hofAuf(flaeche);
+		expect(hof).not.toBeNull();
+		// Und er trägt voll — ein halb verfallener Hof erntete weniger.
+		expect((await buildingService.getBuilding(hof!.dataValues.id))?.condition).toBe(CONDITION_MAX);
 	});
 
 	it('fällt mit der Pacht', async () => {
