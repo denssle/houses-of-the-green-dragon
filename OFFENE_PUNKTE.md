@@ -24,6 +24,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt      | —                            | erledigt     |
 | 69  | Der Hof verfällt zur Ruine, die Pacht bleibt ohne Arbeitsplatz                     | dem nächsten Messlauf        | Fehler       |
 | 70  | Niemand lernt ein Handwerk, das es nicht gibt — alle schmieden, keiner backt       | der Brotkette                | Entscheidung |
+| 71  | Zuzug: neue Seelen von außerhalb — Ventil, Handwerk und Erzählstoff                | Punkt 70 / Bürgerrecht       | Entwurf      |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung             | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                | laufend                      | Entwurf      |
@@ -1322,6 +1323,51 @@ Für den Verfall spräche, dass Instandhaltung eine Entscheidung ist. Dagegen sp
 hier nichts zu entscheiden war: Der Hof ist mit der Pacht gekommen, ungefragt und
 kostenlos.
 
+### 71. Zuzug: neue Seelen von außerhalb
+
+**Grünau ist eine geschlossene Welt.** Acht Gründer, und alles Weitere sind ihre
+Nachfahren. Das Konzept sieht Zuzug vor, aber **aus anderen Städten** (Abschnitt 2) — und
+es gibt nur eine. Faktisch kommt also niemand hinzu.
+
+**Der Anlass war die Sorge vor Inzest, und die trifft es nicht ganz:** `canMarry` prüft bis
+zu den Großeltern, Vettern dürfen heiraten, und das ist ausdrücklich so entschieden
+(mittelalterlich zutreffend, und es spart eine Suche über beliebig viele Generationen).
+Eine Sackgasse, in der niemand mehr jemanden heiraten darf, entsteht daraus nicht.
+
+**Die echten Gründe sind andere, und es sind drei:**
+
+1. **Kein Ventil nach unten.** Schrumpft die Bevölkerung — durch Hunger, fehlenden
+   Wohnraum, eine Seuche —, gibt es keine Erholung. Eine Stadt kann heute aussterben, und
+   dann ist die Welt zu Ende. Zuzug ist die einzige Gegenbewegung, die nicht davon abhängt,
+   dass die Überlebenden Kinder bekommen.
+2. **Er löst Punkt 70.** Alle acht können schmieden und niemand backen, weil man nur lernt,
+   wo etwas steht. **Ein zugezogener Bäcker bringt sein Handwerk mit** — das ist die
+   natürlichste Antwort auf das Henne-Ei der Fertigkeiten, weit besser als ein Grundstock
+   bei der Geburt oder eine Regel, die die Werkstattwahl wieder dem Preis überlässt.
+   Wissen kommt von außen; genau so war es.
+3. **Erzählerisch.** Nach fünf Generationen heißt jeder Müller oder Schmied und ist mit
+   jedem verwandt. Ein Fremder, der ankommt, ist ein Ereignis — und die Chronik lebt von
+   Ereignissen.
+
+**Zu entwerfen:**
+
+- **Wann kommt jemand?** „Unregelmäßig" heißt: nicht nach Uhr. Naheliegend ist ein Zug an
+  dem, was eine Stadt anziehend macht — freie Arbeit, freier Wohnraum, ein guter Ruf
+  (Punkt 47) — mal einer, mal keiner über Jahre. Eine feste Rate wäre eine Einwohnerpumpe.
+- **Was bringt er mit?** Ein Handwerk, etwas Geld, ein Alter, eine Persönlichkeit — also
+  dasselbe wie ein Gründer, nur mitten im Leben. Und **einen eigenen Nachnamen**, denn er
+  gründet ein neues Haus (5.10).
+- **Was fehlt ihm?** Das **Bürgerrecht** (Konzept, Abschnitt 16): Er darf arbeiten, kaufen,
+  heiraten und leben, aber nicht besitzen und nicht wählen, bis er lange genug da ist. Das
+  ist der Filter, der verhindert, dass jemand eine Wahl gewinnt, indem er Leute ansiedelt —
+  und er ist noch nicht gebaut. **Solange er fehlt, ist Zuzug nicht harmlos**, und deshalb
+  gehört mindestens eine einfache Frist dazu.
+- **Wo wohnt er?** Die städtische Unterkunft fasst zwanzig. Ist sie voll, kommt niemand
+  mehr — das ist von selbst die Bremse, die eine Stadt nicht überlaufen lässt.
+- **Woher kommt er, solange es eine Stadt gibt?** Von außerhalb, ohne Herkunftsort. Sobald
+  es die zweite gibt (Punkt 31), wird daraus echte Wanderung zwischen Städten, und dieser
+  Punkt geht darin auf.
+
 ### 70. Niemand lernt ein Handwerk, das es nicht gibt
 
 **Der Befund aus dem Messlauf nach 5.19** (2000 Ticks, frische Seed-Welt). Nach vierzig
@@ -1359,6 +1405,11 @@ Drei Wege, und keiner ist offensichtlich richtig:
 
 Der erste Weg ist der stimmigste und der teuerste. Solange keiner davon gebaut ist, bleibt
 Grünau eine Stadt aus Schmieden, die kein Brot backen kann.
+
+**Nachtrag: Es gibt einen vierten, und er ist vermutlich der beste** — der **Zuzug**
+(Punkt 71). Ein Bäcker, der von außerhalb ankommt, bringt sein Handwerk mit; damit kommt
+Wissen in die Stadt, ohne dass jemand es dort erst erlernen müsste. Das ist zugleich die
+historisch richtige Antwort: Handwerk wanderte mit den Handwerkern.
 
 ### 67. Die NPC-Schleife ist zu teuer geworden
 
