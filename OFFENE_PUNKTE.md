@@ -23,6 +23,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern        | dem nächsten Messlauf        | Befund       |
 | 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt      | —                            | erledigt     |
 | 69  | Der Hof verfällt zur Ruine, die Pacht bleibt ohne Arbeitsplatz                     | dem nächsten Messlauf        | Fehler       |
+| 70  | Niemand lernt ein Handwerk, das es nicht gibt — alle schmieden, keiner backt       | der Brotkette                | Entscheidung |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung             | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                | laufend                      | Entwurf      |
@@ -1320,6 +1321,44 @@ Zu entscheiden ist, was richtig ist:
 Für den Verfall spräche, dass Instandhaltung eine Entscheidung ist. Dagegen spricht, dass
 hier nichts zu entscheiden war: Der Hof ist mit der Pacht gekommen, ungefragt und
 kostenlos.
+
+### 70. Niemand lernt ein Handwerk, das es nicht gibt
+
+**Der Befund aus dem Messlauf nach 5.19** (2000 Ticks, frische Seed-Welt). Nach vierzig
+Spieljahren können alle acht Einwohner dasselbe:
+
+```
+Alheid   kann=[CONSTRUCTION:6 FORESTRY:8 SMITHING:6]
+Bertram  kann=[SMITHING:5]
+Cunne    kann=[CONSTRUCTION:5 SMITHING:7]
+...      kann=[SMITHING:5]
+```
+
+**`SMITHING` bei jedem, `BAKING` bei niemandem.** Der Grund ist einfach: Fertigkeiten
+wachsen durch Tun (`addPractice`), und getan wird, wo ein Gebäude steht. Die städtische
+Schmiede ist der einzige Arbeitsplatz für Tagelöhner, also schmieden alle. `CONSTRUCTION`
+haben die, die gebaut oder in der Zimmerei gearbeitet haben; `FORESTRY` hat, wer erntet.
+
+Damit läuft die Werkstattwahl aus 5.19 in eine Falle, die sie nicht selbst öffnen kann:
+Sie bevorzugt das eigene Handwerk — aber **wer nie gebacken hat, wird nie ein Backhaus
+bauen**, und backen kann nur, wo ein Backhaus steht. Ein Henne-Ei-Problem auf der Ebene
+der Fertigkeiten, und diesmal ein echtes: Anders als beim Baumaterial (Punkt 63) gibt es
+keine Ausnahme, die es von selbst auflöst.
+
+Drei Wege, und keiner ist offensichtlich richtig:
+
+- **Die Schule** (Punkt 24 und 4.7e). Sie bildet aus, und zwar unabhängig davon, was in
+  der Stadt schon steht — genau das wäre der Sinn: Wissen kommt von außen, nicht aus der
+  Nachahmung. Dann müssten NPCs ihre Kinder allerdings hinschicken **und** ein Fach
+  wählen, und beides ist offen.
+- **Ein Grundstock bei der Geburt.** Jeder bringt ein zufälliges Handwerk mit, in dem er
+  ein wenig kann. Billig zu bauen, aber es erklärt nicht, woher es kommt.
+- **Wer keinen Betrieb seines Fachs findet, baut den, den die Stadt braucht.** Also die
+  Regel aus 5.19 umkehren, sobald das eigene Können nirgends greift. Das löst die
+  Brotkette, macht die Wahl aber wieder zur Sache einer Preisliste.
+
+Der erste Weg ist der stimmigste und der teuerste. Solange keiner davon gebaut ist, bleibt
+Grünau eine Stadt aus Schmieden, die kein Brot backen kann.
 
 ### 67. Die NPC-Schleife ist zu teuer geworden
 

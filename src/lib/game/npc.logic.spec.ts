@@ -4,6 +4,7 @@ import {
 	desiredReserve,
 	eatingThreshold,
 	type NpcState,
+	idleReason,
 	savingsTarget
 } from '$lib/game/npc.logic';
 import { PERSONALITY_AXES, type Personality } from '$lib/game/personality.logic';
@@ -117,6 +118,20 @@ describe('Was ein NPC tut', () => {
 
 		it('wirbt, wenn alles andere geregelt ist', () => {
 			expect(decideNpcAction(zufrieden({ isMarried: false }))).toBe('COURT');
+		});
+
+		it('wirbt nur, wer die Punkte dafür ganz hat', () => {
+			// **Werben kostet zwei Punkte**, geprüft wurde auf mehr als null. Wer genau einen
+			// übrig hatte, wählte also das Werben und scheiterte daran — im ersten Messlauf
+			// mit Fehlschlagzählung 19 von 36 Versuchen. In der Statistik stand `COURT`, als
+			// wäre geworben worden; gesehen hat es deshalb nie jemand.
+			// Ohne Trank in der Kammer, sonst greift bei so wenig Punkten die Erholung aus
+			// der Sicherheitsstufe — richtig so, aber hier nicht die Frage.
+			const knapp = zufrieden({ isMarried: false, actionPoints: 1, tonicInStock: 0 });
+			const gerade = zufrieden({ isMarried: false, actionPoints: 2, tonicInStock: 0 });
+
+			expect(decideNpcAction(knapp)).not.toBe('COURT');
+			expect(decideNpcAction(gerade)).toBe('COURT');
 		});
 
 		it('wirbt nicht als Kind', () => {
@@ -366,6 +381,68 @@ describe('Was ein NPC tut', () => {
 
 			expect(decideNpcAction(ausverkauft)).not.toBe('BUY_PLOT');
 			expect(savingsTarget(ausverkauft)).toBeNull();
+		});
+	});
+
+	/**
+	 * Warum einer nichts tut (5.21).
+	 *
+	 * `IDLE` war die häufigste Handlung der Welt — 11357 von 16000 Runden in einem Messlauf
+	 * — und sagte nichts. Der schwerste Befund dieser Phase kam deshalb aus dem Lesen des
+	 * Codes und nicht aus dem Messen.
+	 */
+	describe('warum einer nichts tut', () => {
+		it('unterscheidet Zufriedenheit von Erschöpfung', () => {
+			expect(idleReason(zufrieden())).toBe('CONTENT');
+			expect(idleReason(zufrieden({ actionPoints: 0 }))).toBe('EXHAUSTED');
+			expect(idleReason(zufrieden({ isAdult: false }))).toBe('TOO_YOUNG');
+		});
+
+		it('erkennt das Ziel, das niemand verkauft', () => {
+			// **Der Fall, an dem die Welt stillstand** (Punkt 63): verheiratet, ohne Haus,
+			// Baumaterial fehlt und ist nirgends zu haben. Von außen sah das aus wie
+			// Zufriedenheit — und genau deshalb suchte niemand dort.
+			const festgefahren = zufrieden({
+				isMarried: true,
+				ownsHome: false,
+				materialMissing: true,
+				materialPrice: null,
+				plotPrice: null,
+				workshopPrice: null
+			});
+
+			expect(decideNpcAction(festgefahren)).toBe('IDLE');
+			expect(idleReason(festgefahren)).toBe('GOAL_UNREACHABLE');
+		});
+
+		it('nennt es Sparen, wo gespart wird', () => {
+			const sparend = zufrieden({
+				personality: anlagen({ ambition: 40, diligence: 40 }),
+				ownsHome: false,
+				isMarried: true,
+				materialMissing: false,
+				hasFreePlot: true,
+				homePrice: 100,
+				workAvailable: true
+			});
+
+			expect(idleReason(sparend)).toBe('STILL_SAVING');
+		});
+
+		it('nennt es fehlende Arbeit, wo keine zu haben ist', () => {
+			// Derselbe Mensch, dieselbe Absicht — nur gibt die Stadt nichts her. Das ist ein
+			// anderer Befund und gehört anders benannt.
+			const ohneArbeit = zufrieden({
+				personality: anlagen({ ambition: 40, diligence: 40 }),
+				ownsHome: false,
+				isMarried: true,
+				materialMissing: false,
+				hasFreePlot: true,
+				homePrice: 100,
+				workAvailable: false
+			});
+
+			expect(idleReason(ohneArbeit)).toBe('NO_WORK');
 		});
 	});
 });

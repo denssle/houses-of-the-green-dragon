@@ -8,6 +8,8 @@ import { Plot } from '$lib/db/model/plot';
 import {
 	decideCaretakerAction,
 	decideNpcAction,
+	type IdleReason,
+	idleReason,
 	isUnattended,
 	type NpcAction,
 	type NpcState,
@@ -63,10 +65,26 @@ import { isWorthTaking } from '$lib/game/employment.logic';
  */
 const EIGENER_VORRAT = 5;
 
-/** Was ein Durchlauf bewirkt hat — fürs Log und die Tests. */
+/**
+ * Was ein Durchlauf bewirkt hat — fürs Log, die Tests und vor allem fürs **Messen**.
+ *
+ * **`byAction` allein hat wiederholt in die Irre geführt.** Es zählt gewählte Handlungen,
+ * nicht gelungene: `BUY_PLOT: 466` in einem Messlauf waren 466 Versuche und fünf Käufe —
+ * aufgefallen ist das nur, weil die Zahl absurd aussah. Und `IDLE`, die häufigste
+ * Handlung überhaupt, sagte gar nichts.
+ *
+ * Deshalb zwei weitere Zählungen: **woran Handlungen scheitern** und **warum jemand nichts
+ * tut**. Beides bleibt im Speicher und wird nirgends gespeichert — die Schleife ist
+ * ohnehin die teuerste des Spiels (Punkt 67), und ein Diagnoseschreiben je Entscheidung
+ * machte sie unbrauchbar.
+ */
 export interface NpcTick {
 	acted: number;
 	byAction: Partial<Record<NpcAction, number>>;
+	/** Was schiefging, je Handlung und Grund — `WORK/EMPLOYER_BROKE` etwa. */
+	byFailure: Record<string, number>;
+	/** Warum die Untätigen untätig waren. */
+	byIdleReason: Partial<Record<IdleReason, number>>;
 }
 
 export async function actForNpcs(tick: number): Promise<NpcTick> {
@@ -75,12 +93,24 @@ export async function actForNpcs(tick: number): Promise<NpcTick> {
 	});
 
 	const gezaehlt: Partial<Record<NpcAction, number>> = {};
+	const gescheitert: Record<string, number> = {};
+	const gruende: Partial<Record<IdleReason, number>> = {};
 	let gehandelt = 0;
 
+	const buchen = (ergebnis: Ausgang): void => {
+		gezaehlt[ergebnis.action] = (gezaehlt[ergebnis.action] ?? 0) + 1;
+		if (ergebnis.action !== 'IDLE') gehandelt++;
+		if (ergebnis.failure) {
+			const schluessel = `${ergebnis.action}/${ergebnis.failure}`;
+			gescheitert[schluessel] = (gescheitert[schluessel] ?? 0) + 1;
+		}
+		if (ergebnis.idleReason) {
+			gruende[ergebnis.idleReason] = (gruende[ergebnis.idleReason] ?? 0) + 1;
+		}
+	};
+
 	for (const npc of npcs) {
-		const handlung: NpcAction = await ausfuehren(npc.dataValues.id, tick);
-		gezaehlt[handlung] = (gezaehlt[handlung] ?? 0) + 1;
-		if (handlung !== 'IDLE') gehandelt++;
+		buchen(await ausfuehren(npc.dataValues.id, tick));
 	}
 
 	// **Und die Charaktere, die gerade niemand spielt** (5.5). Sie laufen durch dieselbe
@@ -92,13 +122,23 @@ export async function actForNpcs(tick: number): Promise<NpcTick> {
 
 	for (const charakter of verwaist) {
 		if (!isUnattended(charakter.dataValues.lastSeenTick, tick)) continue;
-
-		const handlung: NpcAction = await ausfuehren(charakter.dataValues.id, tick, true);
-		gezaehlt[handlung] = (gezaehlt[handlung] ?? 0) + 1;
-		if (handlung !== 'IDLE') gehandelt++;
+		buchen(await ausfuehren(charakter.dataValues.id, tick, true));
 	}
 
-	return { acted: gehandelt, byAction: gezaehlt };
+	return {
+		acted: gehandelt,
+		byAction: gezaehlt,
+		byFailure: gescheitert,
+		byIdleReason: gruende
+	};
+}
+
+/** Was eine einzelne Entscheidung ergeben hat. */
+interface Ausgang {
+	action: NpcAction;
+	/** Der Grund, an dem die Handlung scheiterte — nichts heißt: sie ging durch. */
+	failure?: string;
+	idleReason?: IdleReason;
 }
 
 /**
@@ -111,18 +151,35 @@ async function ausfuehren(
 	npcId: string,
 	tick: number,
 	verwaltet: boolean = false
-): Promise<NpcAction> {
+): Promise<Ausgang> {
 	const lage = await lageAufnehmen(npcId, tick);
-	if (!lage) return 'IDLE';
+	// Kein Charakter mehr da (tot, gelöscht) — kein Grund, das als Müßiggang zu deuten.
+	if (!lage) return { action: 'IDLE' };
 
 	const handlung: NpcAction = verwaltet
 		? decideCaretakerAction(lage.state)
 		: decideNpcAction(lage.state);
 
+	/**
+	 * Was ein Dienst zurückgab, als Fehlschlag gebucht.
+	 *
+	 * **Die Dienste liefern alle dieselbe Form** (`{ ok: false, reason }`), und bis 5.21
+	 * warf `ausfuehren` sie samt und sonders weg. Deshalb sah ein Fehlversuch in der
+	 * Statistik aus wie eine getane Arbeit: `BUY_PLOT: 466` waren fünf Käufe und 461
+	 * vergebliche Anläufe.
+	 *
+	 * `undefined` heißt: gar nicht erst versucht — auch das ist ein Fehlschlag, nur einer
+	 * ohne Grund vom Dienst. Er heißt dann `NOT_ATTEMPTED`, denn eine Handlung, die
+	 * gewählt, aber nicht ausgeführt wurde, ist der stillste Fehler von allen.
+	 */
+	const buch = (action: NpcAction, ergebnis?: { ok: boolean; reason?: string }): Ausgang => {
+		if (ergebnis === undefined) return { action, failure: 'NOT_ATTEMPTED' };
+		return ergebnis.ok ? { action } : { action, failure: ergebnis.reason ?? 'UNKNOWN' };
+	};
+
 	switch (handlung) {
 		case 'EAT':
-			await needService.eatItem(npcId, 'BREAD');
-			return 'EAT';
+			return buch('EAT', await needService.eatItem(npcId, 'BREAD'));
 
 		case 'BUY_FOOD': {
 			// **Zuerst beim Nachbarn.** Das billigste Angebot in der Stadt geht dem
@@ -139,63 +196,76 @@ async function ausfuehren(
 				const wieviel: number = Math.min(5, angebot.quantity, bezahlbar);
 				if (wieviel > 0) {
 					const gekauft = await tradeService.buyFromOffer(npcId, angebot.id, wieviel);
-					if (gekauft.ok) return 'BUY_FOOD';
+					if (gekauft.ok) return { action: 'BUY_FOOD' };
 				}
 			}
-			await needService.buyFromGranary(npcId, 'BREAD', Math.max(1, Math.min(5, lage.leisten)));
-			return 'BUY_FOOD';
+			return buch(
+				'BUY_FOOD',
+				await needService.buyFromGranary(npcId, 'BREAD', Math.max(1, Math.min(5, lage.leisten)))
+			);
 		}
 
 		case 'TAKE_JOB':
-			if (lage.jobId) await employmentService.takeJob(npcId, lage.jobId);
-			return 'TAKE_JOB';
+			return buch(
+				'TAKE_JOB',
+				lage.jobId ? await employmentService.takeJob(npcId, lage.jobId) : undefined
+			);
 
 		case 'WORK':
 			// Wer eine Stelle hat, arbeitet dort — der Ertrag geht in den Betrieb, der Lohn
 			// an ihn. Nur wer keine hat, verdingt sich tageweise.
 			if (lage.state.hasJob) {
-				await employmentService.workForEmployer(npcId);
-			} else if (lage.workplaceId) {
-				await buildingActionService.doBuildingAction('WORK', npcId, lage.workplaceId);
+				return buch('WORK', await employmentService.workForEmployer(npcId));
 			}
-			return 'WORK';
+			return buch(
+				'WORK',
+				lage.workplaceId
+					? await buildingActionService.doBuildingAction('WORK', npcId, lage.workplaceId)
+					: undefined
+			);
 
 		case 'MOVE_IN':
 			// Derselbe Weg, den seit 5.6 auch ein Spieler nimmt — samt Prüfung und
 			// Chronikeintrag. Zwei Fassungen desselben Einzugs waren eine zu viel: Die
 			// eine kannte das eigene Haus nicht, die andere schon.
-			if (lage.homeId) await buildingService.moveInto(npcId, lage.homeId);
-			return 'MOVE_IN';
+			return buch(
+				'MOVE_IN',
+				lage.homeId ? await buildingService.moveInto(npcId, lage.homeId) : undefined
+			);
 
-		case 'COURT':
-			if (lage.matchId) {
-				await familyService.courtSomeone(npcId, lage.matchId);
-				// Und wenn die Zuneigung reicht, wird auch geheiratet. Der Antrag prüft das
-				// selbst — ein Fehlschlag ist hier kein Fehler, sondern ein „noch nicht".
-				await familyService.propose(npcId, lage.matchId);
-			}
-			return 'COURT';
+		case 'COURT': {
+			if (!lage.matchId) return buch('COURT', undefined);
+
+			const geworben = await familyService.courtSomeone(npcId, lage.matchId);
+			// Und wenn die Zuneigung reicht, wird auch geheiratet. Der Antrag prüft das
+			// selbst — ein Fehlschlag ist hier kein Fehler, sondern ein „noch nicht", und
+			// deshalb zählt für die Diagnose das Werben und nicht der Antrag.
+			await familyService.propose(npcId, lage.matchId);
+			return buch('COURT', geworben);
+		}
 
 		case 'WEAR_GARMENT':
-			await needService.wearGarment(npcId);
-			return 'WEAR_GARMENT';
+			return buch('WEAR_GARMENT', await needService.wearGarment(npcId));
 
 		case 'DRINK_TONIC':
-			await needService.drinkTonic(npcId);
-			return 'DRINK_TONIC';
+			return buch('DRINK_TONIC', await needService.drinkTonic(npcId));
 
 		case 'BUY_GARMENT': {
 			// Genau eines: Ein zweites Gewand im Schrank nützt niemandem, solange nur eines
 			// getragen werden kann.
 			const angebot = lage.cheapestGarment;
-			if (angebot) await tradeService.buyFromOffer(npcId, angebot.id, 1);
-			return 'BUY_GARMENT';
+			return buch(
+				'BUY_GARMENT',
+				angebot ? await tradeService.buyFromOffer(npcId, angebot.id, 1) : undefined
+			);
 		}
 
 		case 'BUY_TONIC': {
 			const angebot = lage.cheapestTonic;
-			if (angebot) await tradeService.buyFromOffer(npcId, angebot.id, 1);
-			return 'BUY_TONIC';
+			return buch(
+				'BUY_TONIC',
+				angebot ? await tradeService.buyFromOffer(npcId, angebot.id, 1) : undefined
+			);
 		}
 
 		case 'SELL': {
@@ -211,8 +281,10 @@ async function ausfuehren(
 					await tradeService.moveToStock(npcId, lage.workshopId, ware.itemId, ware.inChamber);
 				}
 				const preis: number = getItemTemplate(ware.itemId)?.basePrice ?? 1;
-				await tradeService.placeOffer(npcId, lage.workshopId, ware.itemId, ware.quantity, preis);
-				return 'SELL';
+				return buch(
+					'SELL',
+					await tradeService.placeOffer(npcId, lage.workshopId, ware.itemId, ware.quantity, preis)
+				);
 			}
 
 			// **Der zweite Weg** (5.18): Was nicht aus dem eigenen Betrieb kommt, geht an den
@@ -220,46 +292,56 @@ async function ausfuehren(
 			// Stand verkauft aus der eigenen Habe, das ist der Unterschied zum Laden.
 			if (lage.surplus && lage.marketId) {
 				const preis: number = getItemTemplate(lage.surplus.itemId)?.basePrice ?? 1;
-				await tradeService.placeOffer(
-					npcId,
-					lage.marketId,
-					lage.surplus.itemId,
-					lage.surplus.quantity,
-					preis
+				return buch(
+					'SELL',
+					await tradeService.placeOffer(
+						npcId,
+						lage.marketId,
+						lage.surplus.itemId,
+						lage.surplus.quantity,
+						preis
+					)
 				);
 			}
-			return 'SELL';
+			return buch('SELL', undefined);
 		}
 
 		case 'CRAFT':
-			if (lage.workshopId) await productionService.craft(npcId, lage.workshopId);
-			return 'CRAFT';
+			return buch(
+				'CRAFT',
+				lage.workshopId ? await productionService.craft(npcId, lage.workshopId) : undefined
+			);
 
 		case 'HARVEST':
-			if (lage.leaseId) await productionService.harvest(npcId, lage.leaseId);
-			return 'HARVEST';
+			return buch(
+				'HARVEST',
+				lage.leaseId ? await productionService.harvest(npcId, lage.leaseId) : undefined
+			);
 
 		case 'LEASE':
-			if (lage.leasableId) await productionService.leasePlot(npcId, lage.leasableId);
-			return 'LEASE';
+			return buch(
+				'LEASE',
+				lage.leasableId ? await productionService.leasePlot(npcId, lage.leasableId) : undefined
+			);
 
 		case 'BUILD': {
 			const vorlage =
 				lage.workshopOptionId !== undefined
 					? buildingService.getBuildingOption(lage.workshopOptionId)
 					: undefined;
-			if (vorlage && lage.freePlotId) {
-				await buildingService.build(vorlage, npcId, lage.freePlotId);
-			}
-			return 'BUILD';
+			return buch(
+				'BUILD',
+				vorlage && lage.freePlotId
+					? await buildingService.build(vorlage, npcId, lage.freePlotId)
+					: undefined
+			);
 		}
 
 		case 'BUY_PLOT': {
 			// Das erste freie Stück in der Stadt. Eine Wahl nach Lage gäbe es erst, wenn
 			// Lage etwas bedeutete — heute sind alle Grundstücke gleich.
 			const frei = await plotService.getFreeBuildingLand(lage.regionId);
-			if (frei[0]) await plotService.buyPlot(frei[0].id, npcId);
-			return 'BUY_PLOT';
+			return buch('BUY_PLOT', frei[0] ? await plotService.buyPlot(frei[0].id, npcId) : undefined);
 		}
 
 		case 'BUY_INPUT': {
@@ -267,60 +349,78 @@ async function ausfuehren(
 			// der das Mehl der Stadt aufkauft, nimmt es dem nächsten weg und bindet sein
 			// Geld in Vorrat, den er in dieser Woche nicht verarbeitet.
 			const angebot = lage.missingInputOffer;
-			if (angebot) {
-				const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
-				const wieviel: number = Math.min(lage.missingInputCount, angebot.quantity, bezahlbar);
-				if (wieviel > 0) await tradeService.buyFromOffer(npcId, angebot.id, wieviel);
-			}
-			return 'BUY_INPUT';
+			if (!angebot) return buch('BUY_INPUT', undefined);
+
+			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
+			const wieviel: number = Math.min(lage.missingInputCount, angebot.quantity, bezahlbar);
+			return buch(
+				'BUY_INPUT',
+				wieviel > 0 ? await tradeService.buyFromOffer(npcId, angebot.id, wieviel) : undefined
+			);
 		}
 
 		case 'BUY_MATERIAL': {
 			// So viel, wie fehlt — begrenzt durch das Angebot und den Beutel. Wer Stück für
 			// Stück kaufte, stünde vier Ticks lang auf einem leeren Bauplatz.
 			const angebot = lage.missingMaterialOffer;
-			if (angebot) {
-				const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
-				const wieviel: number = Math.min(lage.missingMaterialCount, angebot.quantity, bezahlbar);
-				if (wieviel > 0) await tradeService.buyFromOffer(npcId, angebot.id, wieviel);
-			}
-			return 'BUY_MATERIAL';
+			if (!angebot) return buch('BUY_MATERIAL', undefined);
+
+			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
+			const wieviel: number = Math.min(lage.missingMaterialCount, angebot.quantity, bezahlbar);
+			return buch(
+				'BUY_MATERIAL',
+				wieviel > 0 ? await tradeService.buyFromOffer(npcId, angebot.id, wieviel) : undefined
+			);
 		}
 
 		case 'BUILD_HOME': {
 			const vorlage = buildingService.getBuildingOption(WOHNHAUS_OPTION_ID);
-			if (vorlage && lage.freePlotId) await buildingService.build(vorlage, npcId, lage.freePlotId);
-			return 'BUILD_HOME';
+			return buch(
+				'BUILD_HOME',
+				vorlage && lage.freePlotId
+					? await buildingService.build(vorlage, npcId, lage.freePlotId)
+					: undefined
+			);
 		}
 
 		case 'RENOVATE':
-			if (lage.repairId) await buildingService.renovateBuilding(npcId, lage.repairId);
-			return 'RENOVATE';
+			return buch(
+				'RENOVATE',
+				lage.repairId ? await buildingService.renovateBuilding(npcId, lage.repairId) : undefined
+			);
 
 		case 'OFFER_JOB':
 			// Zum Lohn der Tagelöhnerei: Wer weniger böte, fände niemanden — mehr zu bieten
 			// wäre großzügig auf Kosten des eigenen Ertrags.
-			if (lage.workshopId) await employmentService.offerJob(npcId, lage.workshopId, TAGELOHN);
-			return 'OFFER_JOB';
+			return buch(
+				'OFFER_JOB',
+				lage.workshopId
+					? await employmentService.offerJob(npcId, lage.workshopId, TAGELOHN)
+					: undefined
+			);
 
 		case 'VOTE': {
 			// Gewählt wird nach Zuneigung — es gibt kein eigenes Wahlkampfsystem, und das
 			// ist der Punkt: Wer über Jahre Beziehungen gepflegt hat, hat Stimmen.
 			const zettel = lage.ballot;
-			if (zettel) {
-				const zuneigungen = [];
-				for (const kandidat of zettel.candidates) {
-					const stand = await relationshipService.getAffection(npcId, kandidat.id, tick);
-					zuneigungen.push({ candidateId: kandidat.id, affection: stand.affection });
-				}
-				const gewaehlt: string | undefined = npcChoice(npcId, zuneigungen);
-				if (gewaehlt) await electionService.vote(npcId, lage.regionId, gewaehlt);
+			if (!zettel) return buch('VOTE', undefined);
+
+			const zuneigungen = [];
+			for (const kandidat of zettel.candidates) {
+				const stand = await relationshipService.getAffection(npcId, kandidat.id, tick);
+				zuneigungen.push({ candidateId: kandidat.id, affection: stand.affection });
 			}
-			return 'VOTE';
+			const gewaehlt: string | undefined = npcChoice(npcId, zuneigungen);
+			return buch(
+				'VOTE',
+				gewaehlt ? await electionService.vote(npcId, lage.regionId, gewaehlt) : undefined
+			);
 		}
 
 		case 'IDLE':
-			return 'IDLE';
+			// **Der einzige Fall, in dem der Grund interessant ist.** Ein Verwalteter zählt
+			// nicht mit: Seine engeren Befugnisse sind der Grund, und den kennen wir.
+			return { action: 'IDLE', idleReason: verwaltet ? undefined : idleReason(lage.state) };
 	}
 }
 

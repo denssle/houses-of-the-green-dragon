@@ -1,4 +1,5 @@
 import { votingDelay } from '$lib/game/election.logic';
+import { COURT_ACTION_POINT_COST } from '$lib/game/family.logic';
 import type { Personality } from '$lib/game/personality.logic';
 import { SATIETY_COMFORTABLE, SATIETY_WEAKENED } from '$lib/game/need.logic';
 
@@ -264,6 +265,60 @@ export function decideNpcAction(state: NpcState): NpcAction {
 }
 
 /**
+ * Warum einer nichts tut.
+ *
+ * **`IDLE` ist die häufigste Handlung der Welt und sagt für sich genommen nichts.** In
+ * einem Messlauf über 2000 Ticks standen 11357 von 16000 Runden auf Müßiggang — und ob
+ * dahinter Zufriedenheit steckte, ein leerer Aktionsvorrat oder ein Ziel, das niemand je
+ * erreichen kann, war daraus nicht zu erkennen. Der schwerste Befund dieser Phase
+ * (Punkt 63: ein Sparziel, das mangels Angebot `null` wurde, und damit jeder Grund zu
+ * arbeiten) kam deshalb aus dem Lesen des Codes, nicht aus dem Messen. Das soll nicht
+ * wieder vorkommen.
+ *
+ * **Eine Diagnose, keine zweite Entscheidung.** Sie wird gestellt, _nachdem_
+ * `decideNpcAction` auf `IDLE` erkannt hat, und benennt die naheliegendste Blockade — sie
+ * bildet nicht jede Verzweigung der Hierarchie nach. Wer sie erweitert, sollte das im
+ * Blick behalten: Eine Diagnose, die von der Entscheidung abweicht, ist schlimmer als
+ * keine, weil man ihr glaubt.
+ */
+export const IDLE_REASONS = [
+	/** Ein Kind: Werben, bauen und pachten stehen ihm noch nicht offen. */
+	'TOO_YOUNG',
+	/** Kein Aktionspunkt übrig — er hat seinen Tag verbraucht. */
+	'EXHAUSTED',
+	/** Er hätte etwas vor, aber nirgends ist Arbeit zu bekommen. */
+	'NO_WORK',
+	/** Er spart auf etwas und ist noch nicht so weit. Der gesunde Fall. */
+	'STILL_SAVING',
+	/**
+	 * Sein Vorhaben ist unbezifferbar: Was er bräuchte, bietet niemand an. Genau hier
+	 * stand die Welt still, und genau das war von außen nicht zu sehen.
+	 */
+	'GOAL_UNREACHABLE',
+	/** Er hat alles, was er braucht, und nichts vor. Auch das ist ein gültiges Leben. */
+	'CONTENT'
+] as const;
+export type IdleReason = (typeof IDLE_REASONS)[number];
+
+export function idleReason(state: NpcState): IdleReason {
+	if (!state.isAdult) return 'TOO_YOUNG';
+	if (state.actionPoints <= 0) return 'EXHAUSTED';
+
+	// **Ein Ziel, das man nicht kaufen kann.** Wer ein Vorhaben hat, dem aber der Preis
+	// fehlt, weil es das Nötige nirgends gibt, spart auf nichts — und arbeitet deshalb
+	// nur bis zur Rücklage. Von außen sieht das aus wie Zufriedenheit.
+	const willBauen: boolean =
+		(state.isMarried && !state.ownsHome && state.homePrice !== null) ||
+		(!state.ownsWorkshop && isEnterprising(state.personality));
+	if (willBauen && savingsTarget(state) === null) return 'GOAL_UNREACHABLE';
+
+	if (savingsTarget(state) !== null) {
+		return state.workAvailable && !state.hasJob ? 'STILL_SAVING' : 'NO_WORK';
+	}
+	return 'CONTENT';
+}
+
+/**
  * Was ein Charakter tun darf, den gerade niemand spielt.
  *
  * **Erhalten ja, entscheiden nein.** Wer lange nicht hereinschaut, soll nicht verhungern
@@ -412,11 +467,16 @@ function zugehoerigkeit(state: NpcState): NpcAction | undefined {
 		return 'VOTE';
 	}
 
+	// **Genug Punkte für das ganze Werben, nicht nur für einen.** Es kostet zwei; geprüft
+	// wurde auf mehr als null. Wer genau einen übrig hatte, wählte also das Werben und
+	// scheiterte daran — im ersten Messlauf mit Fehlschlagzählung waren das 19 von 36
+	// Versuchen, und vorher hatte es nie jemand gesehen: In der Statistik stand `COURT`,
+	// als wäre geworben worden.
 	if (
 		!state.isMarried &&
 		state.isAdult &&
 		state.matchAvailable &&
-		state.actionPoints > 0 &&
+		state.actionPoints >= COURT_ACTION_POINT_COST &&
 		state.personality.sociability > -80
 	) {
 		return 'COURT';

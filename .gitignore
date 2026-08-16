@@ -35,3 +35,7 @@ smoke-health.json
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Der Bericht eines Messlaufs (5.21) — eine Momentaufnahme einer gewürfelten Welt.
+# Wer sie festhalten will, zitiert die Zahlen in ENTWICKLUNG.md, wo sie erklärt werden.
+/messung.txt

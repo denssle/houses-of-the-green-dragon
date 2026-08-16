@@ -2454,6 +2454,48 @@ der Ärmste von dem ausgeschlossen, was ihn aus der Armut brächte.
 - **Immer noch kein zweiter Betrieb**: `BUILD: 2` in vierzig Spieljahren, alle zwischen 22
   und 93 Münzen. Ob 5.19 und 5.20 daran etwas ändern, muss der nächste Messlauf zeigen.
 
+**5.21 Nicht mehr raten müssen.** ✓ Vier Messläufe in dieser Phase, und jedes Mal dieselbe
+Mühe: Ein Wegwerf-Spec schreiben, die Instrumentierung neu erfinden, beim ersten Anlauf
+scheitern (falscher Modellpfad, ein Feld, das es nicht gibt, eine fehlende Transaktion),
+laufen lassen, löschen. Und am Ende Zahlen, die die eigentliche Frage nicht beantworteten.
+
+**`IDLE` war die häufigste Handlung der Welt und sagte nichts** — 11357 von 16000 Runden.
+Ob dahinter Zufriedenheit stand, ein leerer Aktionsvorrat oder ein unerreichbares Ziel,
+war daraus nicht zu erkennen. Der schwerste Befund dieser Phase (Punkt 63) kam deshalb aus
+dem **Lesen** des Codes, nicht aus dem Messen. Und **gewählt hieß nicht gelungen**:
+`BUY_PLOT: 466` waren fünf Käufe und 461 vergebliche Anläufe — aufgefallen nur, weil die
+Zahl absurd aussah.
+
+Drei Dinge, die das ändern:
+
+**Ein Grund für jeden Müßiggang.** `idleReason` benennt die Blockade: `CONTENT`,
+`EXHAUSTED`, `STILL_SAVING`, `NO_WORK`, `TOO_YOUNG` — und `GOAL_UNREACHABLE` für genau den
+Fall, an dem die Welt stillstand. Ausdrücklich eine **Diagnose, keine zweite Entscheidung**:
+Sie wird gestellt, nachdem `decideNpcAction` auf `IDLE` erkannt hat, und bildet nicht jede
+Verzweigung nach. Eine Diagnose, die von der Entscheidung abweicht, wäre schlimmer als
+keine, weil man ihr glaubt.
+
+**Fehlschläge werden gezählt.** `ausfuehren` warf die Ergebnisse der Dienste bisher samt und
+sonders weg; jetzt gibt jeder Zweig zurück, was herauskam. `NpcTick` trägt neben `byAction`
+ein `byFailure` (`WORK/EMPLOYER_BROKE`) und ein `byIdleReason`. Eine Handlung, die gewählt,
+aber gar nicht erst versucht wurde, heißt `NOT_ATTEMPTED` — der stillste Fehler von allen.
+Alles bleibt im Speicher: Die Schleife ist ohnehin die teuerste des Spiels (Punkt 67).
+
+**Das Messwerkzeug bleibt.** `src/lib/server/simulation/measure.ts` zieht eine Welt hoch,
+lässt sie laufen und schreibt den Bericht — kein Test, denn es behauptet nichts, es
+_zeigt_. Aufruf über `npm run measure` (`MEASURE_TICKS=2000` für einen langen Lauf), der
+Bericht landet in `messung.txt`. Zwei kurze Tests sichern das Werkzeug selbst ab, darunter
+einer, der prüft, dass die Müßiggangsgründe lückenlos aufgehen — einem Werkzeug, dem man
+beim Messen nicht trauen kann, ist schlimmer als keines.
+
+**Und es zahlte sich sofort aus.** Der erste Lauf über zehn Ticks meldete
+`COURT/NOT_ENOUGH_ACTION_POINTS: 19` bei 36 Werbeversuchen: **Werben kostet zwei
+Aktionspunkte, die Entscheidung prüfte auf mehr als null.** Wer genau einen übrig hatte,
+wählte das Werben und scheiterte daran — und in der Statistik stand `COURT`, als wäre
+geworben worden. Ein Zeichen Code, seit 4.4 drin, nach dem Umbau null Fehlschläge.
+
+_Fertig, wenn:_ Ein Messlauf beantwortet „warum passiert nichts" von selbst. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird
