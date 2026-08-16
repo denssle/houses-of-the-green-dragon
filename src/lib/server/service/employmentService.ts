@@ -17,6 +17,7 @@ import * as electionService from '$lib/server/service/electionService';
 import * as lawService from '$lib/server/service/lawService';
 import * as nameService from '$lib/server/service/nameService';
 import * as productionService from '$lib/server/service/productionService';
+import * as regionService from '$lib/server/service/regionService';
 import * as skillService from '$lib/server/service/skillService';
 import * as tradeService from '$lib/server/service/tradeService';
 import * as worldService from '$lib/server/service/worldService';
@@ -53,7 +54,9 @@ async function abbauFlaeche(
 	const rezept = productionService.harvestRecipe(flaeche.dataValues.resourceType);
 	if (!rezept) return undefined;
 
-	return { recipe: rezept, regionId: flaeche.dataValues.RegionId };
+	// Die **Stadt** zur Fläche, nicht die Fläche selbst (5.24, Punkt 65): Dort wird der
+	// Zehnt beschlossen, und dorthin gehört er auch.
+	return { recipe: rezept, regionId: await regionService.cityOf(flaeche.dataValues.RegionId) };
 }
 
 /** Den Aushang setzen — oder mit `null` abnehmen. */
@@ -417,12 +420,18 @@ async function regionOf(buildingId: string): Promise<string | undefined> {
  * diese Unterscheidung müsste die Stadt einen eigenen Anstellungsweg bekommen, und
  * spätestens beim zweiten öffentlichen Arbeitgeber liefen die beiden auseinander.
  */
-interface Arbeitgeberkasse {
+export interface Arbeitgeberkasse {
 	money: number;
 	zahle: (rest: number, t: Transaction) => Promise<void>;
 }
 
-async function kasseVon(
+/**
+ * Exportiert seit 5.24: Auch die **Tagelöhnerei** zahlt aus einer echten Kasse, und sie
+ * läuft über `buildingActionService`. Zwei Fassungen derselben Frage — wer zahlt hier? —
+ * gingen mit der Zeit auseinander; genau das ist bei der Stellensuche schon einmal
+ * passiert (`hasUnofferedPosition`, 5.14).
+ */
+export async function kasseVon(
 	buildingId: string,
 	ownerCharacterId: string | null,
 	t: Transaction

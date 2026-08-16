@@ -12,6 +12,7 @@ import { seasonOf } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as needService from '$lib/server/service/needService';
+import * as regionService from '$lib/server/service/regionService';
 import * as lawService from '$lib/server/service/lawService';
 import * as tradeService from '$lib/server/service/tradeService';
 import * as skillService from '$lib/server/service/skillService';
@@ -141,9 +142,11 @@ export async function leasePlot(characterId: string, plotId: string): Promise<Le
 		}
 
 		await paechter.update({ money: paechter.dataValues.money - LEASE_FEE }, { transaction: t });
+		// **An die Stadt, nicht an den Acker** (5.24, Punkt 65): Die Umlandregionen haben
+		// eine Kasse, aber weder Amt noch Ausgaben — was dort einging, war aus dem Spiel.
 		await Region.increment('treasury', {
 			by: LEASE_FEE,
-			where: { id: flaeche.dataValues.RegionId },
+			where: { id: await regionService.cityOf(flaeche.dataValues.RegionId) },
 			transaction: t
 		});
 		await Lease.create(
@@ -274,12 +277,22 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 		);
 		if (!ergebnis.ok) return ergebnis;
 
-		// Der Zehnt ist seit 4.7b ein Gesetz: Der Satz kommt aus der Stadt, nicht aus dem Code.
-		const zehntsatz: number = await lawService.rate(flaeche.dataValues.RegionId, 'TITHE', t);
+		// Der Zehnt ist seit 4.7b ein Gesetz: Der Satz kommt aus der Stadt, nicht aus dem
+		// Code — und seit 5.24 wird er auch **dort** nachgeschlagen, wo er beschlossen
+		// wurde. Vorher fragte diese Zeile die Umlandregion, in der nie jemand etwas
+		// erlässt: Vier Erhöhungen des Bürgermeisters blieben deshalb wirkungslos.
+		const stadtId: string = await regionService.cityOf(flaeche.dataValues.RegionId);
+		const zehntsatz: number = await lawService.rate(stadtId, 'TITHE', t);
 		const zehnt: number = titheOn(ergebnis.produced, zehntsatz);
 		const behalten: number = ergebnis.produced - zehnt;
 
 		await baeuerin.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
+
+		// **Vorerst in die Kammer** — siehe Punkt 72. Die Ernte auf dem Hof zu lagern, wo sie
+		// gewachsen ist, war gebaut und gemessen: Nach sechshundert Ticks lagen dort 512
+		// Stämme, und die Zimmerei desselben Besitzers verarbeitete keinen einzigen, weil
+		// `kannHerstellen` nur ins Lager des eigenen **Betriebs** sieht. Ware am Ort ihrer
+		// Entstehung braucht einen Weg von dort weg; der gehört in denselben Schritt.
 		await needService.changeStock(characterId, rezept.outputItemId, behalten, t);
 		await skillService.addPractice(characterId, rezept.skill, rezept.actionPointCost, t);
 
@@ -288,7 +301,7 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 			if (wert > 0) {
 				await Region.increment('treasury', {
 					by: wert,
-					where: { id: flaeche.dataValues.RegionId },
+					where: { id: stadtId },
 					transaction: t
 				});
 			}
@@ -374,6 +387,12 @@ export async function craft(
 				await needService.changeStock(characterId, zutat.itemId, -ausDerKammer, t);
 			}
 		}
+		// **Vorerst weiter in die Kammer** — siehe Punkt 72. Der Versuch, Ware am Ort ihrer
+		// Entstehung zu lagern, ist richtig und war gebaut; er reißt aber zwei Löcher,
+		// solange es keinen Weg zwischen zwei eigenen Häusern gibt: Die Zimmerei fand ihr
+		// Holz nicht mehr, das im Hof lag, und der Hausbau fand seine Bretter nicht mehr,
+		// die im Betrieb lagen. Beides gemessen. Der Umbau gehört deshalb zusammen mit dem
+		// Transport gemacht und nicht davor.
 		await needService.changeStock(characterId, rezept.outputItemId, ergebnis.produced, t);
 		await handwerker.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
 		await skillService.addPractice(characterId, rezept.skill, rezept.actionPointCost, t);

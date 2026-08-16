@@ -278,7 +278,11 @@ export async function vote(
 		: null;
 
 	const geprueft = canVote(
-		{ birthTick: waehler.dataValues.birthTick, alreadyVoted: schon !== null },
+		{
+			birthTick: waehler.dataValues.birthTick,
+			alreadyVoted: schon !== null,
+			arrivedTick: waehler.dataValues.arrivedTick
+		},
 		{ open: wahl !== null, candidates: kandidaten.map((k) => k.dataValues.CharacterId) },
 		candidateId,
 		await worldService.currentTick()

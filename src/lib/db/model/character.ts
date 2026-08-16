@@ -61,6 +61,8 @@ export const Character: ModelStatic<Model<CharacterAttributes, CharacterCreation
 			satiety: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 100 },
 			wornSinceTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
 			lastSeenTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
+			// Wann jemand von auswärts ankam (5.24) — null heißt: hier geboren.
+			arrivedTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
 			lastNeedTick: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 }
 		},
 		{ timestamps: true }

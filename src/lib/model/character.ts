@@ -14,6 +14,8 @@ export interface Character {
 	title: string;
 	/** Wann zuletzt ein Mensch hereingeschaut hat — nur er selbst setzt es (5.5). */
 	lastSeenTick: number | null;
+	/** Wann jemand von auswärts ankam — nichts heißt: hier geboren (5.24). */
+	arrivedTick: number | null;
 	role: CharacterRole;
 	gender: Gender;
 	actionPoints: number;

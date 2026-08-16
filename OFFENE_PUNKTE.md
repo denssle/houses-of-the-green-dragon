@@ -24,7 +24,9 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt      | —                            | erledigt     |
 | 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                  | —                            | erledigt     |
 | 70  | Niemand lernt ein Handwerk, das es nicht gibt — alle schmieden, keiner backt       | der Brotkette                | Entscheidung |
-| 71  | Zuzug: neue Seelen von außerhalb — Ventil, Handwerk und Erzählstoff                | Punkt 70 / Bürgerrecht       | Entwurf      |
+| 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                             | —                            | erledigt     |
+| 72  | Ware liegt, wo sie entstand — und niemand trägt sie weiter                         | dem nächsten Messlauf        | Entscheidung |
+| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                            | laufend                      | Entwurf      |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung             | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                | laufend                      | Entwurf      |
@@ -1380,6 +1382,54 @@ Eine Sackgasse, in der niemand mehr jemanden heiraten darf, entsteht daraus nich
 - **Woher kommt er, solange es eine Stadt gibt?** Von außerhalb, ohne Herkunftsort. Sobald
   es die zweite gibt (Punkt 31), wird daraus echte Wanderung zwischen Städten, und dieser
   Punkt geht darin auf.
+
+### 72. Ware liegt, wo sie entstand — und niemand trägt sie weiter
+
+**Seit 5.24 bleibt Ware am Ort ihrer Entstehung:** die Ernte im Hof, das Erzeugnis in der
+Werkstatt. Das war die richtige Entscheidung — vorher trug jeder sein Werk nach Hause und
+musste es zum Verkauf erst wieder einlagern, ein Umweg, den `unverkauftes` eigens abfangen
+musste.
+
+**Nur fehlt jetzt der Weg dazwischen.** Der Messlauf zeigt es:
+
+```
+Hof am Eichwald 1: WOOD x512        HARVEST: 92     CRAFT: 0
+```
+
+Uta hat eine Zimmerei und einen Hof. Das Holz liegt im Hof, die Werkbank steht in der
+Zimmerei, und `kannHerstellen` sieht nur ins Lager des eigenen **Betriebs** — also
+verarbeitet sie nichts, obwohl ihr beides gehört. Vorher ging es, weil die Ernte in der
+Kammer landete und die Kammer mitgezählt wird.
+
+Zu entscheiden ist, wie Ware zwischen zwei eigenen Häusern wandert:
+
+- **Von selbst**, wenn der Betrieb sie braucht — bequem, aber dann ist Lagerort eine
+  Fiktion, und ein Fuhrwesen (Punkt 31, Wege und Entfernungen) hätte nie einen Gegenstand.
+- **Als Handlung**, die Aktionspunkte kostet — stimmiger, und sie hat später einen Preis,
+  wenn Entfernungen zählen. Für NPCs eine Handlung mehr in der Entfaltungsstufe.
+
+Die zweite Lösung passt besser zu dem, was die Welt sonst tut: `moveToStock` gibt es
+bereits für den umgekehrten Weg, und ein Spieler klickt heute schon auf „Einlagern".
+
+### 73. NPCs kaufen nur nach dem Preis, nicht nach dem Menschen
+
+**Wo einer kauft, ist im Spiel eine Beziehung und keine Rechenaufgabe.** Heute nimmt jeder
+NPC das billigste Angebot (`cheapestOffer`) — bei gleichem Preis entscheidet die
+Reihenfolge der Datenbank, und wer jahrelang beim selben Bäcker gekauft hat, wechselt für
+eine Münze.
+
+Das lässt eine Mechanik ungenutzt, die es längst gibt: **Zuneigung** (`relationshipService`)
+steht zwischen je zwei Personen und wird bereits bei Wahlen ausgewertet. Beim Einkauf wäre
+sie an der richtigen Stelle — und sie gäbe dem Zeitverbringen einen wirtschaftlichen Wert,
+der bisher fehlt.
+
+Zu entwerfen ist, **wie stark sie wiegt**: Bei ungefähr gleichem Preis soll die sympathische
+Alternative gewinnen, nicht bei jedem. Naheliegend ist ein Aufschlag, den ein Käufer
+gedanklich hinzurechnet — wer mir zuwider ist, verlangt für mich gefühlt mehr. Dann bleibt
+der Preis das Hauptargument, und die Zuneigung entscheidet das Kopf-an-Kopf-Rennen.
+
+Zwei Dinge hängen daran: Ein Betrieb, der Kundschaft an sich bindet, hat einen Grund, sie
+gut zu behandeln — und ein Neuankömmling (Punkt 71) muss sich seine erst erarbeiten.
 
 ### 70. Niemand lernt ein Handwerk, das es nicht gibt
 

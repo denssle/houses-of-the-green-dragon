@@ -150,6 +150,14 @@ function satz(entry: ChronicleLine): string {
 			return `${wer} hat ein Grundstück ersteigert — für ${entry.value ?? 0} Münzen.`;
 		case 'MOVED_IN':
 			return `${wer} wohnt jetzt in ${haus}.`;
+		case 'ARRIVED':
+			// **Das Handwerk gehört in den Satz.** Es ist der Grund, warum diese Ankunft für
+			// die Stadt etwas bedeutet: Wer einen Bäcker kommen sieht, weiß, dass es bald
+			// Brot geben könnte. `detail` trägt die Fertigkeit als Kennung; den Namen dazu
+			// weiß `SKILL_NAMES`.
+			return entry.detail
+				? `${wer} ist in der Stadt angekommen — ${fach(entry.detail)} ist sein Handwerk.`
+				: `${wer} ist in der Stadt angekommen.`;
 		case 'PLOT_BOUGHT':
 			// `detail` trägt die Lage: Ein Grundstück hat keinen Namen, nur eine Adresse, und
 			// die steht in der Plot-Zeile und nicht am Gebäude.

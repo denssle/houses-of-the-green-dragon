@@ -31,41 +31,59 @@ const RATHAUS: BuildingTemplate = {
 
 const IN_GRUENAU = { actionPoints: 10, money: 50, regionId: 'gruenau', skillLevel: 0 };
 
+/** Ein Arbeitgeber, an dessen Kasse es nicht scheitert — seit 5.24 braucht jede Schicht einen. */
+const ZAHLUNGSFAEHIG = { money: 10_000 };
+
 describe('Arbeiten', () => {
 	it('tauscht Aktionspunkte gegen den Lohn des Betriebs', () => {
-		const ergebnis = work(IN_GRUENAU, {
-			regionId: 'gruenau',
-			template: SCHMIEDE,
-			level: 1,
-			condition: 100
-		});
+		const ergebnis = work(
+			IN_GRUENAU,
+			{
+				regionId: 'gruenau',
+				template: SCHMIEDE,
+				level: 1,
+				condition: 100
+			},
+			ZAHLUNGSFAEHIG
+		);
 
 		expect(ergebnis).toEqual({
 			ok: true,
 			actionPoints: 10 - WORK_ACTION_POINT_COST,
 			money: 53,
-			earned: 3
+			earned: 3,
+			// Seit 5.24 steht daneben, was es den Arbeitgeber kostet — der Lohn kommt nicht
+			// mehr aus dem Nichts.
+			employerMoney: 10_000 - 3
 		});
 	});
 
 	it('weist ab, wo es nichts zu verdienen gibt', () => {
-		const ergebnis = work(IN_GRUENAU, {
-			regionId: 'gruenau',
-			template: WOHNHAUS,
-			level: 1,
-			condition: 100
-		});
+		const ergebnis = work(
+			IN_GRUENAU,
+			{
+				regionId: 'gruenau',
+				template: WOHNHAUS,
+				level: 1,
+				condition: 100
+			},
+			ZAHLUNGSFAEHIG
+		);
 
 		expect(ergebnis).toEqual({ ok: false, reason: 'NOT_A_WORKPLACE' });
 	});
 
 	it('weist ab, wer anderswo steht', () => {
-		const ergebnis = work(IN_GRUENAU, {
-			regionId: 'eichwald',
-			template: SCHMIEDE,
-			level: 1,
-			condition: 100
-		});
+		const ergebnis = work(
+			IN_GRUENAU,
+			{
+				regionId: 'eichwald',
+				template: SCHMIEDE,
+				level: 1,
+				condition: 100
+			},
+			ZAHLUNGSFAEHIG
+		);
 
 		expect(ergebnis).toEqual({ ok: false, reason: 'WRONG_REGION' });
 	});
@@ -73,20 +91,53 @@ describe('Arbeiten', () => {
 	it('weist ab, wem die Kraft fehlt', () => {
 		const erschöpft = { ...IN_GRUENAU, actionPoints: 0 };
 
-		const ergebnis = work(erschöpft, {
-			regionId: 'gruenau',
-			template: SCHMIEDE,
-			level: 1,
-			condition: 100
-		});
+		const ergebnis = work(
+			erschöpft,
+			{
+				regionId: 'gruenau',
+				template: SCHMIEDE,
+				level: 1,
+				condition: 100
+			},
+			ZAHLUNGSFAEHIG
+		);
 
 		expect(ergebnis).toEqual({ ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' });
+	});
+
+	it('weist ab, wo niemand zahlen kann', () => {
+		// **Der Kern von Punkt 66.** Bis 5.24 stand hier schlicht `money + earned` — niemand
+		// wurde belastet, und wer in der städtischen Schmiede arbeitete, erschuf seine drei
+		// Münzen. Das war die Hauptgeldquelle der Welt und widersprach der Regel aus
+		// `KONZEPT.md`: Geld wechselt den Besitzer, es entsteht und vergeht nicht.
+		const ergebnis = work(
+			IN_GRUENAU,
+			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 },
+			{ money: 2 }
+		);
+
+		expect(ergebnis).toEqual({ ok: false, reason: 'EMPLOYER_BROKE' });
+	});
+
+	it('nimmt dem Arbeitgeber, was es dem Arbeiter gibt', () => {
+		// Die Probe aufs Exempel: Die Summe bleibt gleich.
+		const ergebnis = work(
+			IN_GRUENAU,
+			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 },
+			{ money: 100 }
+		);
+
+		expect(ergebnis.ok && ergebnis.money + ergebnis.employerMoney).toBe(50 + 100);
 	});
 
 	it('lässt den Zustand unangetastet, wenn die Handlung scheitert', () => {
 		const vorher = { ...IN_GRUENAU };
 
-		work(vorher, { regionId: 'eichwald', template: SCHMIEDE, level: 1, condition: 100 });
+		work(
+			vorher,
+			{ regionId: 'eichwald', template: SCHMIEDE, level: 1, condition: 100 },
+			ZAHLUNGSFAEHIG
+		);
 
 		expect(vorher).toEqual(IN_GRUENAU);
 	});
@@ -96,15 +147,20 @@ describe('Können beim Arbeiten', () => {
 	it('hebt den Lohn schon auf der zweiten Stufe sichtbar', () => {
 		// Der Grund für das Runden statt Abrunden: Sonst blieben die ersten drei Stufen
 		// ohne jede Wirkung, und zwanzig Schichten Arbeit sähen aus wie nichts.
-		const ungelernt = work(IN_GRUENAU, {
-			regionId: 'gruenau',
-			template: SCHMIEDE,
-			level: 1,
-			condition: 100
-		});
+		const ungelernt = work(
+			IN_GRUENAU,
+			{
+				regionId: 'gruenau',
+				template: SCHMIEDE,
+				level: 1,
+				condition: 100
+			},
+			ZAHLUNGSFAEHIG
+		);
 		const geuebt = work(
 			{ ...IN_GRUENAU, skillLevel: 2 },
-			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 }
+			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 },
+			ZAHLUNGSFAEHIG
 		);
 
 		expect(ungelernt.ok && ungelernt.earned).toBe(3);
@@ -114,7 +170,8 @@ describe('Können beim Arbeiten', () => {
 	it('verdoppelt den Lohn auf der Höchststufe', () => {
 		const meister = work(
 			{ ...IN_GRUENAU, skillLevel: 10 },
-			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 }
+			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 },
+			ZAHLUNGSFAEHIG
 		);
 
 		expect(meister.ok && meister.earned).toBe(6);

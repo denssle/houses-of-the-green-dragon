@@ -10,6 +10,7 @@ import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import type { IdleReason, NpcAction } from '$lib/game/npc.logic';
 import * as npcService from '$lib/server/service/npcService';
 import * as needService from '$lib/server/service/needService';
+import * as migrationService from '$lib/server/service/migrationService';
 import * as buildingService from '$lib/server/service/buildingService';
 
 /**
@@ -68,6 +69,7 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 
 	for (let i = 0; i < ticks; i++) {
 		const lauf = await npcService.actForNpcs(start + i);
+		await migrationService.admitNewcomers(stadtId, start + i);
 		for (const [was, wieoft] of Object.entries(lauf.byAction)) {
 			handlungen[was as NpcAction] = (handlungen[was as NpcAction] ?? 0) + wieoft;
 		}

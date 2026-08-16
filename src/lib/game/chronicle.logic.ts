@@ -35,7 +35,11 @@ export const EVENT_KINDS = [
 	// Wo jemand gewohnt hat und was er erworben hat, gehört zu den wenigen Angaben, die ein
 	// ganzes Leben umspannen — und stand bis 5.3 nirgends.
 	'MOVED_IN',
-	'PLOT_BOUGHT'
+	'PLOT_BOUGHT',
+	// **Wer von außerhalb kommt** (5.24). Ein Fremder, der ankommt, ist ein Ereignis: Nach
+	// fünf Generationen heißt sonst jeder Müller oder Schmied, und niemand sähe, woher das
+	// Handwerk kam, das die Stadt plötzlich hat.
+	'ARRIVED'
 ] as const;
 
 export type EventKind = (typeof EVENT_KINDS)[number];

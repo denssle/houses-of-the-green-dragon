@@ -55,6 +55,13 @@ export interface CharacterAttributes {
 	wornSinceTick: number | null;
 	/** Wann zuletzt ein Mensch hereingeschaut hat — nur er selbst setzt es. */
 	lastSeenTick: number | null;
+	/**
+	 * Wann jemand von auswärts ankam — `null` heißt: hier geboren (5.24).
+	 *
+	 * Daran hängt das Wahlrecht: Wer zuzieht, stimmt erst nach einer Wahlperiode mit.
+	 * Ohne diese Frist gewänne eine Wahl, wer Leute ansiedelt.
+	 */
+	arrivedTick: number | null;
 	HomeBuildingId: string | null;
 }
 
@@ -82,6 +89,7 @@ export type CharacterCreationAttributes = Optional<
 	| 'lastNeedTick'
 	| 'wornSinceTick'
 	| 'lastSeenTick'
+	| 'arrivedTick'
 	| 'HomeBuildingId'
 >;
 
@@ -96,6 +104,7 @@ export function convertToCharacter(attributes: CharacterAttributes): Character {
 		money: attributes.money,
 		wornSinceTick: attributes.wornSinceTick,
 		lastSeenTick: attributes.lastSeenTick,
+		arrivedTick: attributes.arrivedTick,
 		birthTick: attributes.birthTick,
 		deathTick: attributes.deathTick,
 		regionId: attributes.RegionId,

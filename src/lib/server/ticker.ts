@@ -7,6 +7,7 @@ import * as electionService from '$lib/server/service/electionService';
 import * as hazardService from '$lib/server/service/hazardService';
 import * as lawService from '$lib/server/service/lawService';
 import * as mayorService from '$lib/server/service/mayorService';
+import * as migrationService from '$lib/server/service/migrationService';
 import * as npcService from '$lib/server/service/npcService';
 import { findStartRegionId } from '$lib/db/seed';
 
@@ -82,9 +83,22 @@ async function schlagen(): Promise<void> {
 			console.info(`${npcs.acted} Einwohner haben gehandelt:`, npcs.byAction);
 		}
 
+		const stadtId: string = await findStartRegionId();
+
+		// **Wer von auswaerts kommt** (5.24, Punkt 71). Im Mittel einer alle zwei
+		// Spieljahre, und nur solange ein Bett frei ist — wer ankommt und nichts findet,
+		// zieht weiter. Er bringt ein Handwerk mit, das der Stadt fehlt, und das Geld, das
+		// er anderswo verdient hat.
+		const zugezogen = await migrationService.admitNewcomers(stadtId, geschehen.currentTick);
+		if (zugezogen) {
+			console.info(
+				`${zugezogen.name} ${zugezogen.house} ist angekommen — ` +
+					`${zugezogen.skill}, ${zugezogen.money} Muenzen.`
+			);
+		}
+
 		// Politik: eine Wahl ausrufen oder auszaehlen. Passiert alle fuenf Spieljahre und
 		// ist deshalb billig, auch wenn es hier in der Schleife steht.
-		const stadtId: string = await findStartRegionId();
 		const wahl = await electionService.advanceElections(stadtId, geschehen.currentTick);
 		if (wahl.opened) {
 			console.info('Eine Wahl ist ausgerufen.');

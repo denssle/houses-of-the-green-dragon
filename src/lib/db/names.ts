@@ -52,3 +52,31 @@ export const NEUGEBORENE = {
 		'Wigbert'
 	]
 } as const satisfies Record<'FEMALE' | 'MALE', readonly string[]>;
+
+/**
+ * Hausnamen für Zugezogene (5.24).
+ *
+ * **Nach der Herkunft, nicht nach dem Handwerk.** Die Gründer heißen Müller, Schmied und
+ * Weber — sie sind, was sie tun. Wer von auswärts kommt, ist in Grünau zuerst einmal der
+ * Fremde von irgendwoher, und genau so entstanden Herkunftsnamen. Nebenbei erkennt man
+ * einen Zugezogenen dadurch am Namen, und die Chronik erzählt von selbst, wer wann kam.
+ *
+ * Die Orte gibt es in dieser Welt nicht — sie liegen hinter dem Rand der Karte. Sobald es
+ * eine zweite Stadt gibt (Punkt 31), sollten hier deren Namen stehen.
+ */
+export const HERKUNFT = [
+	'von Ahlen',
+	'von Bergheim',
+	'von Dornbach',
+	'von Elmstein',
+	'von Falkenau',
+	'von Hagen',
+	'von Kirchdorf',
+	'von Lindau',
+	'von Moorbach',
+	'von Nesselberg',
+	'von Rodach',
+	'von Steinfurt',
+	'von Talheim',
+	'von Wehrbach'
+] as const;

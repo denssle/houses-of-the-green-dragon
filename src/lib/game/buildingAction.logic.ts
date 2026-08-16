@@ -30,7 +30,7 @@ export interface Worker {
 }
 
 export type WorkOutcome =
-	| { ok: true; actionPoints: number; money: number; earned: number }
+	| { ok: true; actionPoints: number; money: number; earned: number; employerMoney: number }
 	| { ok: false; reason: ActionFailureReason };
 
 /**
@@ -40,10 +40,22 @@ export type WorkOutcome =
  * Schmiede mehr als die Kate, und eine Änderung wirkt sofort für alle Betriebe. Ein
  * richtiges Anstellungsverhältnis mit Vertrag und Laufzeit kommt erst mit 4.6; bis dahin
  * arbeitet man tageweise für den, bei dem man gerade steht.
+ *
+ * **Und der Lohn hat seit 5.24 einen Zahler** (Punkt 66). Bis dahin stand hier schlicht
+ * `money: worker.money + earned` — niemand wurde belastet. Wer in der städtischen Schmiede
+ * eine Schicht arbeitete, **erschuf** seine drei Münzen; `economy.ts` nennt die Tagelöhnerei
+ * selbst „die Krücke aus 3.3", nur war sie längst die Hauptgeldquelle der Welt: In Grünau
+ * besitzt niemand einen Betrieb, also lebt jeder davon.
+ *
+ * Das widersprach der Regel, die `KONZEPT.md` für die Wirtschaft aufstellt — Geld wechselt
+ * den Besitzer, es entsteht und vergeht nicht. Jetzt gilt hier dieselbe Regel wie beim
+ * Anstellungslohn (`workShift`): **Wer nicht zahlen kann, bei dem wird nicht gearbeitet**,
+ * und zwar bevor Aktionspunkte verbraucht sind.
  */
 export function work(
 	worker: Worker,
-	workplace: { regionId: string; template: BuildingTemplate; level: number; condition: number }
+	workplace: { regionId: string; template: BuildingTemplate; level: number; condition: number },
+	employer: { money: number }
 ): WorkOutcome {
 	// Der Lohn hängt an vier Dingen: an der Vorlage, an der Ausbaustufe, am Zustand und
 	// am Können des Arbeiters. Eine verfallene Hütte produziert weniger, ein Meister
@@ -67,11 +79,20 @@ export function work(
 	}
 
 	const earned: number = lohn * WORK_ACTION_POINT_COST;
+
+	// **Zuletzt geprüft, aber vor jedem Verbrauch.** Wer umsonst arbeitete, weil die Kasse
+	// leer war, hätte seinen Tag verloren, ohne es vorher wissen zu können — dasselbe
+	// Argument wie bei `workShift`, und deshalb dieselbe Reihenfolge.
+	if (!canAfford(employer.money, earned)) {
+		return { ok: false, reason: 'EMPLOYER_BROKE' };
+	}
+
 	return {
 		ok: true,
 		actionPoints: worker.actionPoints - WORK_ACTION_POINT_COST,
 		money: worker.money + earned,
-		earned
+		earned,
+		employerMoney: employer.money - earned
 	};
 }
 

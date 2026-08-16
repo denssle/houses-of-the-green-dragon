@@ -300,7 +300,15 @@ describe('Bauen und Arbeiten', () => {
 			return gebaut.building.id;
 		}
 
-		it('schreibt Lohn und verbrauchte Aktionspunkte fort', async () => {
+		it('kostet Aktionspunkte — und zahlt im eigenen Betrieb keinen Lohn', async () => {
+			// **Geändert mit 5.24** (Punkt 66): Vorher bekam der Eigentümer hier drei Münzen
+			// gutgeschrieben, die niemand bezahlte — die Tagelöhnerei erschuf sie. Seit der
+			// Lohn eine Kasse hat, wäre der Eigentümer sein eigener Zahler, und das ist ein
+			// Nullsummenspiel: Wer an seiner eigenen Werkbank steht, arbeitet für sich, und
+			// sein Verdienst ist das Erzeugnis.
+			//
+			// Die Schicht findet trotzdem statt: Der Aktionspunkt geht drauf, die Übung
+			// wächst. Nur wandert keine Münze.
 			const adelbert = await charakterMitGeld(300);
 			const werkstatt = await schmiede(adelbert);
 			const vorher = await CharacterModel.findByPk(adelbert);
@@ -309,7 +317,7 @@ describe('Bauen und Arbeiten', () => {
 
 			expect(ergebnis).toEqual({ ok: true, earned: 3 });
 			const nachher = await CharacterModel.findByPk(adelbert);
-			expect(nachher!.dataValues.money).toBe(vorher!.dataValues.money + 3);
+			expect(nachher!.dataValues.money).toBe(vorher!.dataValues.money);
 			expect(nachher!.dataValues.actionPoints).toBe(vorher!.dataValues.actionPoints - 1);
 		});
 

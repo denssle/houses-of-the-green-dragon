@@ -5,6 +5,7 @@ import { sequelize } from '$lib/db/sequelize';
 import { work, WORK_ACTION_POINT_COST } from '$lib/game/buildingAction.logic';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
+import * as employmentService from '$lib/server/service/employmentService';
 import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
 
@@ -47,6 +48,21 @@ async function arbeiten(characterId: string, buildingId: string): Promise<Action
 		const arbeiter = await characterService.loadForAction(characterId, tick, t);
 		if (!arbeiter) return { ok: false, reason: 'NOT_A_WORKPLACE' } as const;
 
+		// **Wer zahlt hier?** Bei der städtischen Schmiede die Stadtkasse, bei einem
+		// privaten Betrieb sein Eigentümer — dieselbe Kasse und dieselbe Frage wie beim
+		// Anstellungslohn, deshalb dieselbe Funktion (5.24, Punkt 66).
+		//
+		// **Im eigenen Betrieb zahlt niemand Lohn.** Wer an seiner eigenen Werkbank steht,
+		// arbeitet für sich: Sein Verdienst ist das Erzeugnis, nicht eine Münze aus der
+		// eigenen Tasche. Ohne diese Ausnahme wären Arbeiter und Zahler dieselbe Person,
+		// zwei Schreibzugriffe gingen auf dieselbe Zeile, und der letzte gewänne — im Test
+		// verlor der Eigentümer dabei drei Münzen je Schicht.
+		const eigenerBetrieb: boolean = gebäude.ownerCharacterId === characterId;
+		const kasse = eigenerBetrieb
+			? undefined
+			: await employmentService.kasseVon(buildingId, gebäude.ownerCharacterId, t);
+		if (!eigenerBetrieb && !kasse) return { ok: false, reason: 'NOT_A_WORKPLACE' } as const;
+
 		const ergebnis = work(
 			{
 				actionPoints: arbeiter.dataValues.actionPoints,
@@ -58,14 +74,23 @@ async function arbeiten(characterId: string, buildingId: string): Promise<Action
 			},
 			// Zustand und Ausbaustufe kommen aus dem Gebäude, das `getBuilding` bereits mit
 			// verrechnetem Verfall geliefert hat — eine verfallene Hütte zahlt weniger.
-			{ regionId, template: option, level: gebäude.level, condition: gebäude.condition }
+			{ regionId, template: option, level: gebäude.level, condition: gebäude.condition },
+			// Im eigenen Betrieb wird der Lohn nicht gezahlt, sondern verrechnet: Die Prüfung
+			// auf Zahlungsfähigkeit soll ihn nicht am eigenen Werk hindern.
+			{ money: eigenerBetrieb ? Number.MAX_SAFE_INTEGER : kasse!.money }
 		);
 		if (!ergebnis.ok) return ergebnis;
 
 		await arbeiter.update(
-			{ actionPoints: ergebnis.actionPoints, money: ergebnis.money },
+			{
+				actionPoints: ergebnis.actionPoints,
+				// Am eigenen Werk verdient man nichts — man schafft etwas.
+				money: eigenerBetrieb ? arbeiter.dataValues.money : ergebnis.money
+			},
 			{ transaction: t }
 		);
+		// Und was er bekommt, fehlt dem, der es zahlt.
+		if (!eigenerBetrieb) await kasse!.zahle(ergebnis.employerMoney, t);
 		// In derselben Transaktion: Wer eine Schicht arbeitet, ohne dafür besser zu
 		// werden, hätte einen Aktionspunkt umsonst ausgegeben.
 		if (option.skill) {

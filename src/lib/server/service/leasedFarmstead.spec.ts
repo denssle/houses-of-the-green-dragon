@@ -134,26 +134,25 @@ describe('Der Hof einer Pacht', () => {
 		await productionService.leasePlot(paechterin, flaeche);
 		const hof = (await hofAuf(flaeche))!;
 
-		// **Der Erlass gilt der Region der Fläche, nicht der Stadt** — genauso, wie
-		// `harvest` ihn nachschlägt. Dass das für die Umlandregionen der Startwelt
-		// bedeutet, dass der Zehnt des Bürgermeisters sie nie erreicht, ist ein eigener
-		// Befund (Punkt 65) und nicht Sache dieses Tests.
-		const flaechenRegion: string = (await Plot.findByPk(flaeche))!.dataValues.RegionId;
+		// **Der Erlass gilt der Stadt** — und seit 5.24 wird er auch dort nachgeschlagen und
+		// dorthin abgeführt (Punkt 65). Vorher fragte `harvest` die Umlandregion, in der nie
+		// jemand etwas erlässt: Die Erhöhungen des Bürgermeisters blieben wirkungslos, und
+		// was einging, landete in einer Kasse ohne Amt und ohne Ausgaben.
 		await Law.create({
 			id: randomUUID(),
-			RegionId: flaechenRegion,
+			RegionId: stadtId,
 			kind: 'TITHE',
 			value: 30,
 			enactedTick: JETZT,
 			EnactedByCharacterId: null
 		});
-		await Region.update({ treasury: 0 }, { where: { id: flaechenRegion } });
+		await Region.update({ treasury: 0 }, { where: { id: stadtId } });
 
 		await employmentService.offerJob(paechterin, hof.dataValues.id, 3);
 		await employmentService.takeJob(knecht, hof.dataValues.id);
 		await employmentService.workForEmployer(knecht);
 
-		expect(await kasse(flaechenRegion)).toBeGreaterThan(0);
+		expect(await kasse(stadtId)).toBeGreaterThan(0);
 	});
 
 	it('verfällt nicht — auch nach Menschenaltern nicht', async () => {

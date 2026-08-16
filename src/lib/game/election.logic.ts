@@ -64,16 +64,41 @@ export function canStand(
 export type VoteOutcome = { ok: true } | { ok: false; reason: ActionFailureReason };
 
 export function canVote(
-	voter: { birthTick: number; alreadyVoted: boolean },
+	voter: { birthTick: number; alreadyVoted: boolean; arrivedTick?: number | null },
 	election: { open: boolean; candidates: string[] },
 	candidateId: string,
 	currentTick: number
 ): VoteOutcome {
 	if (!election.open) return { ok: false, reason: 'NO_ELECTION' };
 	if (!isEligible(voter.birthTick, currentTick)) return { ok: false, reason: 'TOO_YOUNG' };
+	// **Wer zugezogen ist, wählt erst nach einer Wahlperiode mit** (5.24, Punkt 71). Das
+	// Bürgerrecht in seiner kleinsten Form: Ohne diese Frist gewänne eine Wahl, wer Leute
+	// ansiedelt — das Konzept nennt genau diesen Fall in Abschnitt 16. Wer hier geboren
+	// ist, hat `arrivedTick` auf `null` und ist nie betroffen.
+	if (!isSettled(voter.arrivedTick ?? null, currentTick)) {
+		return { ok: false, reason: 'NOT_A_CITIZEN' };
+	}
 	if (voter.alreadyVoted) return { ok: false, reason: 'ALREADY_VOTED' };
 	if (!election.candidates.includes(candidateId)) return { ok: false, reason: 'NO_SUCH_PERSON' };
 	return { ok: true };
+}
+
+/**
+ * Wie lange ein Zugezogener warten muss, bis er mitwählt.
+ *
+ * Eine Wahlperiode — wer eine ganze abgewartet hat, gehört dazu. Das Vollbild aus dem
+ * Konzept (Bürgerrecht als eigener Status, der auch über Eigentum entscheidet) bleibt
+ * offen; dies ist der Riegel, den es vorher braucht.
+ */
+export const CITIZENSHIP_AFTER_YEARS = TERM_YEARS;
+
+export function isSettled(
+	arrivedTick: number | null,
+	currentTick: number,
+	afterYears: number = CITIZENSHIP_AFTER_YEARS
+): boolean {
+	if (arrivedTick === null) return true;
+	return currentTick - arrivedTick >= afterYears * TICKS_PER_YEAR;
 }
 
 /** Ein Kandidat mit seinen Stimmen. */
