@@ -18,6 +18,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter** | 4.8 / Punkt 6                | Entwurf      |
 | 63  | Der geschlossene Kreis: ohne Betrieb kein Material, ohne Material kein Betrieb     | dem nächsten Schritt         | Befund       |
 | 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                       | laufend                      | Entwurf      |
+| 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung             | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                        | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -1073,6 +1074,40 @@ Vier Stellen, an denen sich der Kreis öffnen ließe — welche, ist zu entschei
 Zu prüfen ist außerdem, ob `selfSustainingEconomy.spec.ts` das je erkannt hätte: Der Test
 setzt Anlagen und Startkapital vorab: genau die Voraussetzungen, an denen es in der
 laufenden Welt scheitert.
+
+### 65. Der Zehnt erreicht die Felder nicht, auf die er gelegt wird
+
+**Beim Schreiben der Tests zu 5.15 aufgefallen**, und es erklärt Punkt 63 noch einmal von
+einer anderen Seite.
+
+Der Zehnt wird in der Region **der Fläche** nachgeschlagen und dorthin abgeführt:
+
+```ts
+// productionService.harvest — und ebenso beim Knecht auf dem Hof
+const zehntsatz = await lawService.rate(flaeche.dataValues.RegionId, 'TITHE', t);
+await Region.increment('treasury', { where: { id: flaeche.dataValues.RegionId } });
+```
+
+Die Umlandflächen liegen aber in **eigenen Regionen**: `seed.ts` legt Eichwald,
+Steinbruch, Mühlenfeld, Erzgrube, Schafweide und Kräuterwiese als je eigene Region an, mit
+je eigener Kasse. Daraus folgt beides:
+
+- **Der Erlass des Bürgermeisters greift nie.** Gertrud hat den Zehnt für die Region
+  _Grünau_ auf 30 % gesetzt; geerntet wird auf _Eichwald_, wo kein Erlass steht und
+  deshalb der Rückfallwert von 10 % gilt. Die vier Erlasse aus Punkt 63 waren nicht nur
+  wirkungslos, weil niemand erntet — sie wären es auch dann, wenn alle zehn Flächen
+  bestellt würden.
+- **Die Einnahme landet in einer Kasse, die niemandem gehört.** Die Region „Eichwald" hat
+  eine `treasury`, aber keinen Bürgermeister, keine Bauten und keine Ausgaben. Was dort
+  eingeht, ist aus dem Spiel.
+
+Dasselbe gilt für die Pachtgebühr: `leasePlot` bucht die 20 Münzen ebenfalls auf die
+Region der Fläche.
+
+Zu entscheiden ist, **welcher Stadt eine Fläche zugeordnet ist**. Naheliegend über den
+`RegionLink`, den `seed.ts` ohnehin zieht — jede Umlandregion ist mit genau einer Stadt
+verbunden. Das ist zugleich die Frage, die Punkt 31 (Karte als Sechseckraster) für die
+zweite Stadt beantworten muss; wer sie hier löst, sollte sie dort nicht neu erfinden.
 
 ### 64. Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite
 

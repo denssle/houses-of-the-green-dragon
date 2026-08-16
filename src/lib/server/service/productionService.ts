@@ -1,6 +1,8 @@
 import { type Transaction } from 'sequelize';
+import { randomUUID } from 'node:crypto';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
+import { Building } from '$lib/db/model/building';
 import { Lease } from '$lib/db/model/lease';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
@@ -148,8 +150,42 @@ export async function leasePlot(characterId: string, plotId: string): Promise<Le
 			{ PlotId: plotId, CharacterId: characterId, sinceTick: tick },
 			{ transaction: t }
 		);
+		await errichteHof(flaeche.dataValues.id, flaeche.dataValues.address, characterId, tick, t);
 		return { ok: true } as const;
 	});
+}
+
+/**
+ * Der Hof, der mit der Pacht entsteht.
+ *
+ * **Damit eine Fläche Leute beschäftigen kann, braucht sie ein Haus.** Die Anstellung
+ * hängt im ganzen Spiel an einem Gebäude — Aushang, Stellenzahl, Schicht, Lohnkasse und
+ * Lager. Ein zweiter Weg nur für Pachtflächen wäre dieselbe Buchhaltung ein zweites Mal,
+ * und jede spätere Regel über Arbeitgeber müsste sich an zwei Stellen erinnern.
+ *
+ * Der Hof kostet nichts: Bezahlt wird die Pacht, und der Schuppen daneben ist keine
+ * eigene Entscheidung. Er gehört dem Pächter — deshalb zahlt der auch den Lohn, und
+ * deshalb fällt der Hof mit der Pacht (siehe `releaseLeases`).
+ */
+async function errichteHof(
+	plotId: string,
+	adresse: string,
+	paechterId: string,
+	tick: number,
+	t: Transaction
+): Promise<void> {
+	await Building.create(
+		{
+			id: randomUUID(),
+			name: `Hof am ${adresse}`,
+			optionId: buildingService.HOF_OPTION_ID,
+			lastConditionTick: tick,
+			PlotId: plotId,
+			ownerType: 'CHARACTER',
+			OwnerCharacterId: paechterId
+		},
+		{ transaction: t }
+	);
 }
 
 /**
@@ -160,6 +196,18 @@ export async function leasePlot(characterId: string, plotId: string): Promise<Le
  * Wird aus `lifecycleService` gerufen, damit der Erbfall an einer Stelle bleibt.
  */
 export async function releaseLeases(characterId: string, t?: Transaction): Promise<void> {
+	// **Der Hof fällt mit der Pacht.** Er stand auf fremdem Grund und war nie gekauft;
+	// bliebe er stehen, hätte der nächste Pächter das Haus des Verstorbenen auf seiner
+	// Fläche — samt dessen Knechten und dessen Lager. Die Anstellungen enden mit dem
+	// Gebäude, dafür sorgt `workForEmployer` bereits von sich aus.
+	const pachten = await Lease.findAll({ where: { CharacterId: characterId }, transaction: t });
+	for (const pacht of pachten) {
+		await Building.destroy({
+			where: { PlotId: pacht.dataValues.PlotId, optionId: buildingService.HOF_OPTION_ID },
+			transaction: t
+		});
+	}
+
 	await Lease.destroy({ where: { CharacterId: characterId }, transaction: t });
 }
 

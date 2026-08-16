@@ -31,7 +31,13 @@ export interface BuildingTemplate {
 	optionId: number;
 	initialName: string;
 	description: string;
-	type: 'PUBLIC' | 'RESIDENCE' | 'CRAFT';
+	/**
+	 * `EXTRACTION` ist der Hof einer Pacht (5.15) und **bewusst kein `CRAFT`**: Wer einen
+	 * Hof hat, hat noch keinen Betrieb. Zählte er als Werkstatt, hielte sich jeder Pächter
+	 * für einen Unternehmer — ein NPC baute nie eine echte, weil er ja schon eine zu haben
+	 * glaubt, und in der Bauliste des Spielers stünde ein Haus, das man nicht baut.
+	 */
+	type: 'PUBLIC' | 'RESIDENCE' | 'CRAFT' | 'EXTRACTION';
 	limited: boolean;
 	limitedTo: number;
 	actions: BuildingAction[];

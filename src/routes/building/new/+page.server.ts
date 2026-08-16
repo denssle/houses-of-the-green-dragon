@@ -14,10 +14,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 	return {
 		// Nur, was einem selbst gehören kann. Öffentliche Bauten errichtet der
 		// Amtsinhaber aus der Stadtkasse (Rathaus); sie hier anzubieten hieße, einen Weg
-		// zu zeigen, den der Server ohnehin verweigert.
+		// zu zeigen, den der Server ohnehin verweigert. Und der Hof einer Pacht (5.15)
+		// wird nicht gebaut, sondern kommt mit der Fläche — er stünde hier zum Preis von
+		// null und wäre die verwirrendste Zeile der Liste.
 		buildingsOptions: buildingService
 			.getBuildingOptions()
-			.filter((vorlage) => vorlage.type !== 'PUBLIC')
+			.filter((vorlage) => vorlage.type !== 'PUBLIC' && vorlage.type !== 'EXTRACTION')
 			.map((vorlage) => ({
 				...vorlage,
 				// Seit 4.10 kostet ein Bau auch Material. Wer es erst beim Fehlschlag erfährt,

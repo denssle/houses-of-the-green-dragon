@@ -6,14 +6,17 @@ import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Employment } from '$lib/db/model/employment';
 import { canTakeJob, positionsAt, workShift } from '$lib/game/employment.logic';
-import { yieldOf } from '$lib/game/production.logic';
+import { type Recipe, titheOn, yieldOf } from '$lib/game/production.logic';
+import { getItemTemplate } from '$lib/model/itemTemplate';
 import { AGE_OF_MAJORITY, ageInYears, seasonOf } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
 import { Region } from '$lib/db/model/region';
 import { Plot } from '$lib/db/model/plot';
 import * as characterService from '$lib/server/service/characterService';
 import * as electionService from '$lib/server/service/electionService';
+import * as lawService from '$lib/server/service/lawService';
 import * as nameService from '$lib/server/service/nameService';
+import * as productionService from '$lib/server/service/productionService';
 import * as skillService from '$lib/server/service/skillService';
 import * as tradeService from '$lib/server/service/tradeService';
 import * as worldService from '$lib/server/service/worldService';
@@ -31,6 +34,27 @@ import * as worldService from '$lib/server/service/worldService';
  */
 
 export type EmploymentResult = { ok: true } | { ok: false; reason: ActionFailureReason };
+
+/**
+ * Steht dieses Gebäude auf einer Abbaufläche? Dann liefert der Boden das Rezept.
+ *
+ * Nur für Häuser ohne eigenes Rezept gedacht — den Hof einer Pacht. Eine Werkstatt auf
+ * einem Acker (die es nicht geben kann, weil Bauland und Abbaufläche verschiedene
+ * `PlotType` sind) behielte ihres.
+ */
+async function abbauFlaeche(
+	plotId: string | null
+): Promise<{ recipe: Recipe; regionId: string } | undefined> {
+	if (!plotId) return undefined;
+
+	const flaeche = await Plot.findByPk(plotId);
+	if (!flaeche || flaeche.dataValues.type !== 'RESOURCE') return undefined;
+
+	const rezept = productionService.harvestRecipe(flaeche.dataValues.resourceType);
+	if (!rezept) return undefined;
+
+	return { recipe: rezept, regionId: flaeche.dataValues.RegionId };
+}
 
 /** Den Aushang setzen — oder mit `null` abnehmen. */
 export async function offerJob(
@@ -195,8 +219,21 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 
 	// Angestellte machen das **erste** Erzeugnis des Betriebs: Wer wählt, ist der
 	// Eigentümer; wer arbeitet, tut das, wofür der Laden bekannt ist.
-	const rezept = vorlage.recipes?.[0];
+	//
+	// **Der Hof einer Pacht hat kein eigenes Rezept — seines steht im Boden.** Ein Hof am
+	// Mühlenfeld erntet Getreide, derselbe Hof an der Erzgrube bricht Erz. So braucht es
+	// weder sechs Vorlagen noch einen zweiten Anstellungsweg für Flächen.
+	const boden = vorlage.recipes?.length ? undefined : await abbauFlaeche(gebaeude.plotId);
+	const rezept = vorlage.recipes?.[0] ?? boden?.recipe;
 	const kosten: number = rezept?.actionPointCost ?? 1;
+
+	// **Die Jahreszeit gilt auch für den Knecht.** Was im Januar am Waldrand nicht wächst,
+	// wächst dort auch nicht für Lohn — sonst wäre eine Anstellung der Weg, die
+	// Kräutersaison zu umgehen. Die eigene Ernte prüft das über `produce`; hier steht es,
+	// weil die Schicht ihren Ertrag anders errechnet.
+	if (rezept?.seasons && !rezept.seasons.includes(seasonOf(tick))) {
+		return { ok: false, reason: 'WRONG_SEASON' };
+	}
 
 	return sequelize.transaction(async (t: Transaction) => {
 		const angestellter = await characterService.loadForAction(employeeId, tick, t);
@@ -229,8 +266,28 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 				);
 				if (!gereicht) return { ok: false, reason: 'NOT_IN_STOCK' } as const;
 			}
-			await tradeService.changeBuildingStock(gebaeude.id, rezept.outputItemId, menge, t);
+			// **Auch der Knecht zahlt den Zehnt.** Er trifft die Ernte und nicht den
+			// Erntenden — sonst wäre eine Handvoll Angestellter der Weg, ihn zu umgehen,
+			// und der Satz, den die Stadt beschließt, gälte nur für die, die selbst
+			// aufs Feld gehen. Wie bei der eigenen Ernte geht er in Münzen an die Stadt:
+			// Die Stadtkasse ist ein Betrag, kein Kornspeicher.
+			const zehnt: number = boden
+				? titheOn(menge, await lawService.rate(boden.regionId, 'TITHE', t))
+				: 0;
+
+			await tradeService.changeBuildingStock(gebaeude.id, rezept.outputItemId, menge - zehnt, t);
 			await skillService.addPractice(employeeId, rezept.skill, kosten, t);
+
+			if (zehnt > 0 && boden) {
+				const wert: number = zehnt * (getItemTemplate(rezept.outputItemId)?.basePrice ?? 0);
+				if (wert > 0) {
+					await Region.increment('treasury', {
+						by: wert,
+						where: { id: boden.regionId },
+						transaction: t
+					});
+				}
+			}
 		}
 
 		await angestellter.update(

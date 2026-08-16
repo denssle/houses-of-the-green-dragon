@@ -2266,6 +2266,46 @@ _Fertig, wenn:_ Ein Arbeitsplatz, den die Stadt besitzt, wird auch ausgeschriebe
 Erledigt, mit zwei Tests: einer für die Schmiede, einer dagegen, dass derselbe Aushang in
 jedem Tick neu gesetzt wird.
 
+**5.15 Auf einer Pacht arbeiten lassen.** ✓ Bis hierher war eine Abbaufläche etwas, das
+man selbst bestellt: Wer nicht persönlich aufs Feld ging, bekam nichts. Jetzt kann ein
+Pächter Leute anstellen, die für ihn ernten.
+
+**Die Hürde war das Datenmodell.** Eine Anstellung hängt im ganzen Spiel an einem
+_Gebäude_ — Aushang, Stellenzahl, Schicht, Lohnkasse, Lager. Eine Pachtfläche ist ein
+`Plot` mit einem `Lease` und hat von alldem nichts. Der Weg, `Employment` polymorph zu
+machen, hätte eine Migration und jede Stelle gekostet, die heute eine `BuildingId`
+voraussetzt.
+
+**Stattdessen bekommt die Fläche ein Haus:** den **Hof**, der mit der Pacht entsteht und
+mit ihr fällt. Damit greift die vorhandene Maschinerie unverändert — der Pächter hängt
+einen Lohn aus wie jeder Betrieb, und der Bürgermeister-Umbau aus 5.14 gilt automatisch
+mit.
+
+Zwei Entscheidungen tragen das:
+
+**Der Hof hat kein eigenes Rezept — seines steht im Boden.** Ein Hof am Mühlenfeld erntet
+Getreide, derselbe Hof an der Erzgrube bricht Erz. Eine Vorlage je Rohstoffart wären sechs
+Vorlagen, die sich in einer Zeile unterscheiden; `workForEmployer` holt das Rezept deshalb
+aus dem Grundstück. Die Jahreszeit gilt dabei auch für den Knecht — sonst wäre eine
+Anstellung der Weg, die Kräutersaison zu umgehen.
+
+**Der Hof ist ein eigener Gebäudetyp und ausdrücklich kein `CRAFT`.** Wer einen Hof hat,
+hat noch keinen Betrieb. Zählte er als Werkstatt, hielte sich jeder Pächter für einen
+Unternehmer: Ein NPC baute nie eine echte, weil er ja schon eine zu haben glaubt, und in
+der Bauliste des Spielers stünde ein Haus zum Preis von null, das man nicht baut.
+
+Der **Zehnt trifft auch den Ertrag des Knechts**. Sonst wäre eine Handvoll Angestellter
+der Weg, ihn zu umgehen, und der Satz, den die Stadt beschließt, gälte nur für die, die
+selbst aufs Feld gehen.
+
+Migration `0021` trägt den Hof für Pachten nach, die es vorher schon gab — sonst könnte
+ausgerechnet der erste Pächter der Welt als einziger niemanden beschäftigen.
+
+_Fertig, wenn:_ Ein Pächter kann jemanden für sich ernten lassen. — Erledigt, mit fünf
+Tests. **Und ein Nebenbefund aus dem Testschreiben** (Punkt 65): Der Zehnt wird in der
+Region der _Fläche_ nachgeschlagen, und die Umlandflächen liegen in eigenen Regionen. Der
+Erlass des Bürgermeisters erreicht sie nie.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

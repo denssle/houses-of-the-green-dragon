@@ -71,7 +71,12 @@ describe('Die Welt trägt sich selbst', () => {
 
 		// Fünf Spieljahre ohne einen einzigen Spieler.
 		await weltLaufenLassen(TICKS_PER_YEAR * 5, gesteuerterZufall(42));
-	}, 180_000);
+		// **Großzügig bemessen, und das mit Absicht.** Allein braucht der Aufbau gut zwei
+		// Minuten; neben den übrigen Dateien teilen sich die Worker die Kerne, und mit
+		// 180 Sekunden riss er, sobald eine Spec-Datei dazukam (5.15). Ein Zeitlimit, das
+		// von der Zahl der Nachbardateien abhängt, meldet keinen Fehler — es meldet die
+		// Auslastung des Rechners.
+	}, 420_000);
 
 	it('lässt die Stadt nicht aussterben', () => {
 		// Vor diesem Schritt wäre hier null herausgekommen: Niemand außer den Spielern

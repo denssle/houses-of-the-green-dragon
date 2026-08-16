@@ -40,6 +40,14 @@ import { checkName, type NameCheck } from '$lib/game/naming.logic';
 import { seasonOf } from '$lib/game/time';
 
 /**
+ * Der Hof, der zu jeder Pacht gehört.
+ *
+ * Steht hier und nicht im `productionService`, weil er eine Gebäudevorlage ist wie jede
+ * andere — die Pacht legt ihn nur an.
+ */
+export const HOF_OPTION_ID = 13;
+
+/**
  * Die Vorlagen bleiben Code und wandern nicht in die Datenbank: Preise, Aktionen und
  * Grenzen sollen sich ändern lassen, ohne dass Bestandsgebäude davon unberührt bleiben.
  */
@@ -219,6 +227,27 @@ export function getBuildingOptions(): BuildingTemplate[] {
 				{ price: 210, name: 'Kräuterküche' },
 				{ price: 400, name: 'Alchemistenküche' }
 			]
+		},
+		{
+			optionId: HOF_OPTION_ID,
+			initialName: 'Hof',
+			type: 'EXTRACTION',
+			description: 'Das Wirtschaftsgebäude einer Pacht — wo die Hände arbeiten, die sie bestellen.',
+			limited: false,
+			limitedTo: 0,
+			actions: [],
+			// **Kein eigenes Rezept: Was hier entsteht, sagt der Boden.** Ein Hof am
+			// Mühlenfeld erntet Getreide, derselbe Hof an der Erzgrube bricht Erz — eine
+			// Vorlage je Rohstoffart wären sechs Vorlagen, die sich nur in einer Zeile
+			// unterscheiden. `workForEmployer` holt das Rezept deshalb aus dem Grundstück.
+			//
+			// Der Lohn steht hier, damit `positionsAt` den Hof überhaupt als Arbeitsplatz
+			// sieht — was ein Knecht bekommt, hängt der Pächter aus, wie überall.
+			//
+			// Preis 0 und keine zweite Stufe: Der Hof wird nicht gekauft, er kommt mit der
+			// Pacht und fällt mit ihr. Wer mehr Hände auf der Fläche will, pachtet eine
+			// zweite — Ausbau wäre eine Bodenverbesserung und gehört zu Punkt 12.
+			levels: [{ price: 0, name: 'Hof', wagePerActionPoint: 3 }]
 		},
 		{
 			optionId: 6,
