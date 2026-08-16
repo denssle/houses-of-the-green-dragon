@@ -2362,6 +2362,51 @@ die Geldquelle der Welt. Aber jetzt gibt es einen zweiten Weg an Geld — Waren 
 und verkaufen —, und das war die Voraussetzung dafür, die Quelle überhaupt schließen zu
 können, ohne die Wirtschaft stillzulegen.
 
+**5.17 Zutaten kaufen.** ✓ Die zweite Stufe jeder Produktionskette hat keine Fläche: Mehl
+wächst nicht, es wird gemahlen. Bis hierher konnte ein NPC nur **Baumaterial** kaufen —
+für Rezeptzutaten gab es keine Handlung. Ein Müller kommt noch durch, weil er Getreide
+selbst pachten und ernten kann; ein Bäcker hätte sein Leben lang vor einem leeren Backhaus
+gestanden.
+
+`BUY_INPUT` schließt das, samt Sparziel — sonst hätte der Bäcker wieder keinen Grund zu
+arbeiten, dieselbe Falle wie in 5.16. Gekauft wird genau so viel, wie ein Durchgang
+braucht: Wer das Mehl der Stadt aufkauft, nimmt es dem nächsten weg und bindet Geld in
+Vorrat, den er in dieser Woche nicht verarbeitet. Die gekaufte Zutat geht der Pacht vor,
+weil sie der kürzere Weg ist — und für die zweite Stufe der einzige.
+
+**5.18 Der zweite Verkaufsweg.** ✓ (Punkt 30) Ein Messlauf über 2000 Ticks zeigte den
+Stau: **1233 Durchgänge Bretter**, von denen die Stadt nie mehr als das erste Schild zu
+sehen bekam. Die Zimmerei produzierte in eine Kammer hinein, und weil die nächsten
+Werkstätten Bretter als Baumaterial brauchen, kam niemand über sie hinaus — keine Mühle,
+kein Backhaus, `BUY_INPUT: 0`.
+
+Zwei Ursachen, beide behoben:
+
+**Ein liegengebliebenes Angebot sperrte den Nachschub für immer.** `unverkauftes` übersprang,
+wofür schon ein Schild hing. Nötig war die Sperre nie: `placeOffer` nimmt die Ware aus
+Lager und Kammer ins Angebot hinein, wer alles ausgehängt hat, hat nichts mehr übrig. Damit
+daraus kein Schilderwald wird, **stockt gleiche Ware zu gleichem Preis das bestehende
+Angebot auf**, statt danebenzuhängen. Bei anderem Preis entsteht ein eigenes: Das ist eine
+andere Aussage und keine Nachlieferung.
+
+**Und es verkaufte nur, wer einen Betrieb hatte.** Der Marktplatz — der einzige Laden, der
+niemandem gehört — wurde von der Simulation nie betreten. Jetzt geht der Überschuss dorthin,
+gegen Standgeld. Behalten wird, was man braucht: Essen bis zum Wochenvorrat (wer sein letztes
+Brot verkauft, verhungert am eigenen Geschäftssinn), Zutaten des eigenen Betriebs, und
+Baumaterial, solange ein Bau ansteht. Wer das Standgeld nicht aufbringt, wählt die Handlung
+gar nicht erst — sonst scheiterte sie in jedem Tick aufs Neue.
+
+Damit steht die Regel aus `KONZEPT.md` auch für NPCs: **Eine Ware ohne Verkaufsweg ist eine
+tote Ware.**
+
+**Ein Befund nebenbei** (Punkt 67): Vierzig Ticks einer Acht-Einwohner-Stadt brauchen rund
+fünfundzwanzig Sekunden. Mit `git stash` gegengeprüft — auf dem Stand von 5.16 ist es
+genauso langsam, es liegt also nicht an diesen beiden Schritten, sondern an der Summe
+vieler. `lageAufnehmen` nimmt für jede einzelne Entscheidung die halbe Welt auf, obwohl
+sich das meiste davon innerhalb eines Ticks für alle Einwohner derselben Stadt nicht
+ändert. Das Zeitlimit von `worldComesAlive.spec.ts` steigt deshalb auf zehn Minuten, und
+sein Kommentar sagt jetzt die Wahrheit statt der Zahl von 5.11.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

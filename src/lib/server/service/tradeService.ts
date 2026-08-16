@@ -202,17 +202,35 @@ export async function placeOffer(
 			}
 		}
 
-		await ShopOffer.create(
-			{
-				id: randomUUID(),
-				BuildingId: buildingId,
-				SellerCharacterId: sellerId,
-				itemId,
-				quantity,
-				pricePerUnit
-			},
-			{ transaction: t }
-		);
+		// **Gleiche Ware, gleicher Preis, gleicher Ort: aufstocken statt danebenhängen.**
+		// Sonst steht am Ende ein Dutzend Schilder mit demselben Text — für Käufer eine
+		// Liste, die man durchblättern muss, und für den Verkäufer keine Übersicht mehr.
+		// Bei einem anderen Preis entsteht ein eigenes Angebot: Das ist eine andere
+		// Aussage und keine Nachlieferung.
+		const bestehendes = await ShopOffer.findOne({
+			where: { BuildingId: buildingId, SellerCharacterId: sellerId, itemId, pricePerUnit },
+			transaction: t,
+			lock: t.LOCK.UPDATE
+		});
+
+		if (bestehendes) {
+			await bestehendes.update(
+				{ quantity: bestehendes.dataValues.quantity + quantity },
+				{ transaction: t }
+			);
+		} else {
+			await ShopOffer.create(
+				{
+					id: randomUUID(),
+					BuildingId: buildingId,
+					SellerCharacterId: sellerId,
+					itemId,
+					quantity,
+					pricePerUnit
+				},
+				{ transaction: t }
+			);
+		}
 		return { ok: true } as const;
 	});
 }

@@ -25,8 +25,14 @@ import type { NpcAction } from '$lib/game/npc.logic';
 
 /**
  * Vier Spieljahre. Lang genug, dass aus Arbeit Besitz werden kann — die Tagelöhnerei
- * bringt drei Münzen je Aktionspunkt, ein Grundstück kostet vierzig —, und kurz genug,
- * dass der Test in einer halben Minute durch ist.
+ * bringt drei Münzen je Aktionspunkt, ein Grundstück kostet vierzig.
+ *
+ * **Der Satz „in einer halben Minute durch" stimmte einmal** und stammt aus 5.11. Ein
+ * Block von vierzig Ticks braucht heute rund fünfundzwanzig Sekunden, vierhundert also
+ * gut vier Minuten — gemessen mit und ohne die Änderungen aus 5.18, mit demselben
+ * Ergebnis. Die Last ist über viele Schritte gewachsen: `lageAufnehmen` nimmt für jede
+ * einzelne Entscheidung die halbe Welt auf. Das gehört angegangen (Punkt 67), aber nicht
+ * dadurch, dass ein Zeitlimit den Befund verdeckt.
  */
 const TICKS = 400;
 
@@ -61,7 +67,7 @@ describe('Die Welt aus eigener Kraft', () => {
 				unternehmend: (p.dataValues.ambition + p.dataValues.diligence) / 2 >= 20
 			}))
 		);
-	}, 300_000);
+	}, 600_000);
 
 	// Die Grundlage: Wer nicht arbeitet, kann nichts weiter tun. Schlägt dieser Test fehl,
 	// sind alle folgenden Aussagen wertlos.

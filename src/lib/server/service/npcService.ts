@@ -35,6 +35,7 @@ import * as relationshipService from '$lib/server/service/relationshipService';
 import * as tradeService from '$lib/server/service/tradeService';
 import * as electionService from '$lib/server/service/electionService';
 import * as employmentService from '$lib/server/service/employmentService';
+import * as lawService from '$lib/server/service/lawService';
 import { isWorthTaking } from '$lib/game/employment.logic';
 
 /**
@@ -51,6 +52,15 @@ import { isWorthTaking } from '$lib/game/employment.logic';
  * gehört er gestaffelt oder auf einen eigenen Prozess. Der Punkt, an dem es weh tut,
  * liegt bei einigen tausend Einwohnern, und bis dahin ist die Einfachheit mehr wert.
  */
+
+/**
+ * Wie viele Mahlzeiten einer zurückbehält, bevor er Essbares anbietet.
+ *
+ * Fünf Laibe — dieselbe Menge, die er bei `BUY_FOOD` auf einmal kauft, und knapp eine
+ * Woche Vorrat. Wer weniger behielte, verkaufte sich in den Hunger; wer mehr behielte,
+ * hielte den Markt leer, an dem die anderen essen wollen.
+ */
+const EIGENER_VORRAT = 5;
 
 /** Was ein Durchlauf bewirkt hat — fürs Log und die Tests. */
 export interface NpcTick {
@@ -201,6 +211,21 @@ async function ausfuehren(
 				}
 				const preis: number = getItemTemplate(ware.itemId)?.basePrice ?? 1;
 				await tradeService.placeOffer(npcId, lage.workshopId, ware.itemId, ware.quantity, preis);
+				return 'SELL';
+			}
+
+			// **Der zweite Weg** (5.18): Was nicht aus dem eigenen Betrieb kommt, geht an den
+			// Marktplatz — gegen Standgeld, aber überhaupt. Hier wird nicht eingelagert: Der
+			// Stand verkauft aus der eigenen Habe, das ist der Unterschied zum Laden.
+			if (lage.surplus && lage.marketId) {
+				const preis: number = getItemTemplate(lage.surplus.itemId)?.basePrice ?? 1;
+				await tradeService.placeOffer(
+					npcId,
+					lage.marketId,
+					lage.surplus.itemId,
+					lage.surplus.quantity,
+					preis
+				);
 			}
 			return 'SELL';
 		}
@@ -234,6 +259,19 @@ async function ausfuehren(
 			const frei = await plotService.getFreeBuildingLand(lage.regionId);
 			if (frei[0]) await plotService.buyPlot(frei[0].id, npcId);
 			return 'BUY_PLOT';
+		}
+
+		case 'BUY_INPUT': {
+			// Genau so viel, wie ein Durchgang braucht — nicht das ganze Angebot. Ein Bäcker,
+			// der das Mehl der Stadt aufkauft, nimmt es dem nächsten weg und bindet sein
+			// Geld in Vorrat, den er in dieser Woche nicht verarbeitet.
+			const angebot = lage.missingInputOffer;
+			if (angebot) {
+				const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
+				const wieviel: number = Math.min(lage.missingInputCount, angebot.quantity, bezahlbar);
+				if (wieviel > 0) await tradeService.buyFromOffer(npcId, angebot.id, wieviel);
+			}
+			return 'BUY_INPUT';
 		}
 
 		case 'BUY_MATERIAL': {
@@ -312,6 +350,10 @@ async function lageAufnehmen(
 			repairId?: string;
 			missingMaterialOffer?: { id: string; quantity: number; pricePerUnit: number };
 			missingMaterialCount: number;
+			missingInputOffer?: { id: string; quantity: number; pricePerUnit: number };
+			missingInputCount: number;
+			marketId?: string;
+			surplus?: { itemId: string; quantity: number };
 	  }
 	| undefined
 > {
@@ -380,6 +422,31 @@ async function lageAufnehmen(
 		? await tradeService.cheapestOffer(werte.RegionId, fehltMaterial.itemId, npcId)
 		: undefined;
 	const stelleFrei = werkstatt ? await employmentService.hasUnofferedPosition(werkstatt) : false;
+	const kannHerstellenJetzt = werkstatt ? await kannHerstellen(npcId, werkstatt) : false;
+	const fehlendeZutat =
+		werkstatt && !kannHerstellenJetzt ? await fehlendeRezeptZutat(npcId, werkstatt) : undefined;
+	const zutatAngebot = fehlendeZutat
+		? await tradeService.cheapestOffer(werte.RegionId, fehlendeZutat.itemId, npcId)
+		: undefined;
+	// Der zweite Verkaufsweg (5.18) — nur befragt, wenn der eigene Laden nichts hergibt:
+	// Was dort hängt, kostet kein Standgeld.
+	// **Erst fragen, ob es etwas zu verkaufen gibt — dann erst, wo und zu welchem Preis.**
+	// Die Reihenfolge ist eine Frage der Kosten: Der Überschuss steht in der eigenen
+	// Kammer (eine Abfrage), der Marktplatz verlangt die Häuserzeile der Stadt und das
+	// Standgeld einen Blick ins Gesetzbuch. Beides je NPC und Tick abzufragen, obwohl im
+	// Regelfall nichts übrig ist, hat den Durchlauf spürbar verteuert.
+	const rohUeberschuss = zuVerkaufen
+		? undefined
+		: await marktUeberschuss(npcId, werkstatt, [...materialBedarf, ...werkstattMaterial]);
+	const marktplatz = rohUeberschuss ? await marktplatzIn(werte.RegionId) : undefined;
+	const standgeld: number = rohUeberschuss ? await lawService.rate(werte.RegionId, 'STALL_FEE') : 0;
+	// **Wer das Standgeld nicht hat, hat keinen Stand.** Ohne diese Frage wählte ein
+	// mittelloser NPC `SELL` in jedem Tick aufs Neue, die Handlung scheiterte am
+	// Standgeld, die Ware blieb liegen — und der nächste Tick begann von vorn. Dieselbe
+	// Falle wie beim leeren Bauplatz (4.14), nur teurer: Jeder Versuch ist eine
+	// Transaktion.
+	const ueberschuss =
+		rohUeberschuss && marktplatz && werte.money >= standgeld ? rohUeberschuss : undefined;
 
 	// Läuft eine Wahl, bei der er noch nicht abgestimmt hat? (4.16)
 	const wahlzettel = await electionService.getBallot(werte.RegionId, npcId);
@@ -441,8 +508,10 @@ async function lageAufnehmen(
 			hasFreePlot: grundstuecke.some((flaeche) => !flaeche.hasBuilding),
 			hasLease: eigenePacht !== undefined,
 			leaseAvailable: freieFlaeche !== undefined,
-			ownStockToSell: zuVerkaufen?.quantity ?? 0,
-			canCraft: werkstatt ? await kannHerstellen(npcId, werkstatt) : false,
+			ownStockToSell:
+				(zuVerkaufen?.quantity ?? 0) + (marktplatz ? (ueberschuss?.quantity ?? 0) : 0),
+			canCraft: kannHerstellenJetzt,
+			inputPrice: zutatAngebot?.pricePerUnit ?? null,
 			// **Nur, wenn es überhaupt etwas zu kaufen gibt.** Als feste Konstante war der
 			// Preis eine Zusage, die die Stadt nicht einlösen konnte: Ist alles Bauland
 			// vergeben, scheitert der Kauf, `hasFreePlot` bleibt falsch — und im nächsten
@@ -474,6 +543,10 @@ async function lageAufnehmen(
 		ballot: wahlzettel,
 		repairId: baufaellig?.id,
 		missingMaterialOffer: material,
+		missingInputOffer: zutatAngebot,
+		missingInputCount: fehlendeZutat?.quantity ?? 0,
+		marketId: marktplatz,
+		surplus: ueberschuss,
 		missingMaterialCount: fehltMaterial?.quantity ?? 0,
 		workshopId: werkstatt?.id,
 		workshopOptionId: werkstattLuecke?.optionId,
@@ -626,18 +699,79 @@ async function unverkauftes(
 	).map((rezept) => rezept.outputItemId);
 	if (erzeugnisse.length === 0) return undefined;
 
-	const angebote = await tradeService.getOffersAt(werkstatt.id, characterId);
 	const lager = await tradeService.getBuildingStock(werkstatt.id);
 	const kammer = await needService.getStock(characterId);
 
+	// **Kein Blick auf bestehende Angebote mehr.** Bis 5.18 wurde übersprungen, wofür schon
+	// ein Schild hing — mit der Folge, dass ein liegengebliebenes Angebot den Nachschub für
+	// immer sperrte: Die Zimmerei des Messlaufs stellte 1233 Durchgänge lang Bretter her,
+	// von denen die Stadt nie mehr als das erste Schild zu sehen bekam.
+	//
+	// Nötig ist die Sperre auch nicht: `placeOffer` nimmt die Ware aus Lager und Kammer
+	// ins Angebot hinein. Wer alles ausgehängt hat, hat nichts mehr übrig und kommt von
+	// selbst nicht wieder her — bis er Neues herstellt. Und gleiche Ware zu gleichem Preis
+	// stockt das bestehende Schild auf, statt danebenzuhängen.
 	for (const itemId of erzeugnisse) {
-		if (angebote.some((angebot) => angebot.itemId === itemId)) continue;
-
 		const imLager: number = lager.find((posten) => posten.itemId === itemId)?.quantity ?? 0;
 		const inDerKammer: number = kammer.find((posten) => posten.itemId === itemId)?.quantity ?? 0;
 		if (imLager + inDerKammer > 0) {
 			return { itemId, quantity: imLager + inDerKammer, inChamber: inDerKammer };
 		}
+	}
+	return undefined;
+}
+
+/** Der Marktplatz der Stadt — der einzige Laden, der niemandem gehört. */
+async function marktplatzIn(regionId: string): Promise<string | undefined> {
+	const haeuser = await buildingService.getBuildingsInRegion(regionId);
+	return haeuser.find((haus) => haus.optionId === tradeService.MARKET_OPTION_ID)?.id;
+}
+
+/**
+ * Was einer entbehren kann — und am Marktplatz anbietet.
+ *
+ * **Der zweite Verkaufsweg** (5.18). Bis dahin hängte nur aus, wer einen Betrieb hatte,
+ * und nur dessen Erzeugnisse: Ein Pächter mit dreißig Getreide in der Kammer bot nichts
+ * an, obwohl der Müller nebenan darauf wartete. Damit brach jede Kette an der Stelle ab,
+ * an der die Ware den Besitzer hätte wechseln müssen.
+ *
+ * Der Marktplatz kostet Standgeld und ist trotzdem der richtige Ort dafür: Er ist der
+ * einzige, der niemandem gehört.
+ *
+ * **Behalten wird, was man braucht** — und nur das:
+ *
+ * - **Essen** bis zu einem Wochenvorrat. Wer sein letztes Brot verkauft, verhungert am
+ *   eigenen Geschäftssinn.
+ * - **Zutaten des eigenen Betriebs.** Sie sind kein Überschuss, sondern Vorprodukt; wer
+ *   sie verkauft, steht morgen vor der leeren Werkbank.
+ * - **Baumaterial**, solange ein Bau ansteht. Dasselbe Argument, nur für den Hausbau.
+ */
+async function marktUeberschuss(
+	characterId: string,
+	werkstatt: { id: string; optionId: number } | undefined,
+	materialBedarf: { itemId: string; quantity: number }[]
+): Promise<{ itemId: string; quantity: number } | undefined> {
+	const behalten = new Map<string, number>();
+
+	for (const posten of materialBedarf) {
+		behalten.set(posten.itemId, (behalten.get(posten.itemId) ?? 0) + posten.quantity);
+	}
+	if (werkstatt) {
+		for (const rezept of buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? []) {
+			for (const zutat of rezept.input) {
+				behalten.set(zutat.itemId, Math.max(behalten.get(zutat.itemId) ?? 0, zutat.quantity));
+			}
+		}
+	}
+
+	for (const posten of await needService.getStock(characterId)) {
+		const vorlage = getItemTemplate(posten.itemId);
+		if (!vorlage) continue;
+
+		const noetig: number =
+			(behalten.get(posten.itemId) ?? 0) + (vorlage.nourishment ? EIGENER_VORRAT : 0);
+		const uebrig: number = posten.quantity - noetig;
+		if (uebrig > 0) return { itemId: posten.itemId, quantity: uebrig };
 	}
 	return undefined;
 }
@@ -683,6 +817,40 @@ const WOHNHAUS_OPTION_ID = 1;
  * Die Menge muss mit: Ein NPC, der Stück für Stück kauft, braucht vier Ticks für vier
  * Bretter und steht so lange auf einem leeren Bauplatz. Wer bauen will, kauft, was fehlt.
  */
+/**
+ * Was dem eigenen Betrieb zum nächsten Durchgang fehlt.
+ *
+ * **Das erste Rezept, dem am wenigsten fehlt** — nicht irgendeines. Die Alchemistenküche
+ * kennt zwei, und wer sich am unerreichbaren festbeißt, kauft nie das, was ihn wirklich
+ * weiterbrächte. Gezählt wird über Betriebslager und Kammer zusammen, wie in
+ * `kannHerstellen`: Wo die Ware liegt, ist eine Frage der Buchung und keine des Könnens.
+ */
+async function fehlendeRezeptZutat(
+	characterId: string,
+	werkstatt: { id: string; optionId: number }
+): Promise<{ itemId: string; quantity: number } | undefined> {
+	const rezepte = buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? [];
+	if (rezepte.length === 0) return undefined;
+
+	const vorrat = new Map<string, number>();
+	for (const posten of await tradeService.getBuildingStock(werkstatt.id)) {
+		vorrat.set(posten.itemId, posten.quantity);
+	}
+	for (const posten of await needService.getStock(characterId)) {
+		vorrat.set(posten.itemId, (vorrat.get(posten.itemId) ?? 0) + posten.quantity);
+	}
+
+	let beste: { itemId: string; quantity: number } | undefined;
+	for (const rezept of rezepte) {
+		for (const zutat of rezept.input) {
+			const fehlt: number = zutat.quantity - (vorrat.get(zutat.itemId) ?? 0);
+			if (fehlt <= 0) continue;
+			if (!beste || fehlt < beste.quantity) beste = { itemId: zutat.itemId, quantity: fehlt };
+		}
+	}
+	return beste;
+}
+
 async function fehlendesMaterial(
 	characterId: string,
 	bedarf: { itemId: string; quantity: number }[]

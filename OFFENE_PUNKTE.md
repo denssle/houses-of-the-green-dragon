@@ -20,6 +20,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                       | laufend                      | Entwurf      |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
 | 66  | Wo Geld aus dem Nichts kommt und wohin es verschwindet                             | Punkt 63                     | Befund       |
+| 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern        | dem nächsten Messlauf        | Befund       |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung             | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                | laufend                      | Entwurf      |
@@ -1215,6 +1216,36 @@ Die Reihenfolge ist keine Frage des Aufwands, sondern der Wirkung: **Punkt 1 zue
 schließen, ohne 63 gelöst zu haben, legt die Wirtschaft still.** Zuerst muss es einen
 zweiten Weg geben, an Geld zu kommen — nämlich Waren zu verkaufen, die jemand herstellt.
 
+### 67. Die NPC-Schleife ist zu teuer geworden
+
+**Gemessen am 16.08.2026:** Vierzig Ticks einer Acht-Einwohner-Stadt brauchen rund
+**fünfundzwanzig Sekunden** — gut 700 ms je Tick, knapp 90 ms je einzelner
+NPC-Entscheidung. Der Messtest `worldComesAlive.spec.ts` verspricht in seinem Kommentar
+noch „eine halbe Minute" für vierhundert Ticks; das stammt aus 5.11 und stimmt längst
+nicht mehr. Sein Zeitlimit steht jetzt auf zehn Minuten, damit er nicht am Takt scheitert
+statt an der Sache.
+
+**Es ist nicht ein Schritt, sondern die Summe.** Gegengeprüft mit `git stash`: Derselbe
+Lauf auf dem Stand von 5.16, ohne die Änderungen aus 5.17 und 5.18, ist genauso langsam.
+Die Last ist über viele Phasen gewachsen.
+
+Die Ursache steht in `lageAufnehmen`: Für **jede** Entscheidung **jedes** NPC in **jedem**
+Tick wird die halbe Welt aufgenommen — Gebäude der Region, eigene Gebäude, Grundstücke,
+Pachtflächen, offene Stellen, Wahlzettel, Marktangebote für Brot, Gewand und Trank, der
+Materialbedarf und seit 5.17 die fehlende Rezeptzutat. Vieles davon ändert sich innerhalb
+eines Ticks für alle NPCs derselben Stadt **nicht**: die Häuserzeile, das freie Bauland,
+die freien Pachtflächen, die Gesetze, die billigsten Angebote.
+
+Naheliegend ist deshalb eine **Stadtlage je Tick**, einmal erhoben und an alle Einwohner
+gereicht, und daneben nur noch das, was wirklich an der Person hängt. Das ist kein
+Zwischenspeicher mit Verfallsdatum, sondern ein Parameter — und damit prüfbar.
+
+Der Kommentar in `npcService.ts` nennt den Punkt, an dem es weh tut, bei „einigen tausend
+Einwohnern". Das war zu optimistisch: Bei acht Einwohnern und einer Stadt ist ein Tick
+bereits siebenhundertmal langsamer als der Herzschlag, den er bedienen soll. Solange die
+Welt stündlich tickt, fällt es nicht auf — für jeden Messlauf über mehrere Spieljahre
+aber schon, und das ist inzwischen das Werkzeug, mit dem hier Befunde entstehen.
+
 ### 64. Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite
 
 Zurzeit ist ein Gebäude eine Zeile in einer Liste, und eine gepachtete Fläche steht als
@@ -1411,8 +1442,11 @@ Offen bleibt:
 - **Kinder zur Schule schicken** (das ist Punkt 24 und gehört hierher).
 - ~~Sich um Ämter kümmern~~ **(4.15 erledigt):** Ein NPC-Bürgermeister bezahlt seine
   Wache, erhält die Bauten, errichtet was fehlt, weist Land aus und setzt den Zehnt.
-- **Verkaufen, was sie nicht brauchen.** Sie hängen nur Erzeugnisse des eigenen Betriebs
-  aus. Ein Bauer mit dreißig Getreide in der Kammer bietet nichts an.
+- ~~**Verkaufen, was sie nicht brauchen.**~~ **Erledigt (5.18):** Sie hängten nur
+  Erzeugnisse des eigenen Betriebs aus — ein Bauer mit dreißig Getreide in der Kammer bot
+  nichts an, und wer gar keinen Betrieb hatte, verkaufte nie etwas. Jetzt geht der
+  Überschuss an den **Marktplatz**, gegen Standgeld. Behalten wird, was man braucht: Essen
+  bis zum Wochenvorrat, Zutaten des eigenen Betriebs, Baumaterial für den anstehenden Bau.
 
 ### 16. Balancing
 

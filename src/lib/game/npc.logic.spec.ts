@@ -46,6 +46,7 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		leaseAvailable: false,
 		ownStockToSell: 0,
 		canCraft: false,
+		inputPrice: null,
 		plotPrice: null,
 		workshopPrice: null,
 		workshopMaterialMissing: false,
@@ -309,6 +310,52 @@ describe('Was ein NPC tut', () => {
 			});
 
 			expect(savingsTarget(alleVergeben)).toBeNull();
+		});
+
+		it('kauft die Zutat, die auf keinem Feld wächst', () => {
+			// **Ohne das endet jede Kette nach der ersten Stufe** (5.17): Wer Getreide erntet,
+			// kann mahlen — wer Mehl braucht, muss es kaufen, und dafür gab es keine
+			// Handlung. Ein Bäcker stand sein Leben lang vor einem leeren Backhaus.
+			const baecker = gruender({
+				isMarried: true,
+				ownsHome: true,
+				ownsWorkshop: true,
+				canCraft: false,
+				inputPrice: 6
+			});
+
+			expect(decideNpcAction(baecker)).toBe('BUY_INPUT');
+			expect(savingsTarget(baecker)).toBe(6);
+		});
+
+		it('zieht die gekaufte Zutat der Pacht vor', () => {
+			// Wo es sie zu kaufen gibt, ist sie der kürzere Weg — und für die zweite Stufe
+			// einer Kette der einzige.
+			const beides = gruender({
+				isMarried: true,
+				ownsHome: true,
+				ownsWorkshop: true,
+				canCraft: false,
+				inputPrice: 6,
+				leaseAvailable: true,
+				leaseFee: 20
+			});
+
+			expect(savingsTarget(beides)).toBe(6);
+		});
+
+		it('pachtet, wo die Zutat nicht zu kaufen ist', () => {
+			const nurBoden = gruender({
+				isMarried: true,
+				ownsHome: true,
+				ownsWorkshop: true,
+				canCraft: false,
+				inputPrice: null,
+				leaseAvailable: true,
+				leaseFee: 20
+			});
+
+			expect(savingsTarget(nurBoden)).toBe(20);
 		});
 
 		it('kauft kein Grundstück, wenn keines mehr zu haben ist', () => {

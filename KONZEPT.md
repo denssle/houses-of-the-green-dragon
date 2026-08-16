@@ -374,6 +374,25 @@ notwendig zum Überleben, Werkzeug steigert die Produktion. Waren sind keine abs
 Punkte, sondern greifen in die Bedürfnisse der Charaktere ein. Damit entsteht echte
 Nachfrage statt eines reinen Zahlenkreislaufs.
 
+**Und jede Ware muss sich verkaufen lassen — auch ohne eigenen Laden.** Dafür gibt es
+zwei Wege, und beide stehen jedem offen:
+
+- **Im eigenen Betrieb**, wo die Ware hergestellt, geerntet oder gebacken wurde. Das
+  kostet nichts; der Laden gehört einem ja bereits.
+- **Auf dem Marktplatz**, gegen Standgeld. Er ist der Ort für alle, die keinen Betrieb
+  haben — und für alles, was nebenbei anfällt: die Ernte einer Pacht, der Überschuss aus
+  der Kammer, das Erbstück. Für Käufer ist er die Abkürzung, damit niemand ein Dutzend
+  Werkstätten abklappern muss, um ein Brot zu finden.
+
+Das Standgeld ist der Preis dieser Bequemlichkeit und zugleich eine Einnahme der Stadt —
+womit der Marktplatz nicht nur Handelsplatz ist, sondern eine Stellschraube, an der ein
+Bürgermeister drehen kann.
+
+**Eine Ware ohne Verkaufsweg ist eine tote Ware.** Wer erntet und nichts anbieten kann,
+hortet; wer sie bräuchte, geht leer aus, und die Kette bricht an der Stelle ab, wo sie
+den Besitzer wechseln müsste. Deshalb ist der zweite Weg kein Zusatz, sondern die
+Bedingung dafür, dass Produktionsketten über die erste Stufe hinauskommen.
+
 Angestellte NPCs (eigene Kinder oder fremde) arbeiten im Betrieb, kosten Lohn und
 erzeugen Wert — das schließt den Kreis zur Familienmechanik: viele Kinder sind
 Arbeitskraft.

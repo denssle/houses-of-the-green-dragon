@@ -43,6 +43,7 @@ export const NPC_ACTIONS = [
 	'SELL',
 	// Seit 4.14: ein eigenes Dach, Instandhaltung und Leute (Punkt 30).
 	'BUY_MATERIAL',
+	'BUY_INPUT',
 	'BUILD_HOME',
 	'RENOVATE',
 	'OFFER_JOB',
@@ -99,6 +100,15 @@ export interface NpcState {
 	ownStockToSell: number;
 	/** Reichen die Zutaten für einen Durchgang? */
 	canCraft: boolean;
+	/**
+	 * Was die fehlende Zutat je Stück kostet — nichts heißt: nicht zu kaufen.
+	 *
+	 * **Ohne das endet jede Produktionskette nach der ersten Stufe.** Wer Getreide erntet,
+	 * kann mahlen; wer Mehl braucht, muss es kaufen — und dafür gab es bis 5.17 keine
+	 * Handlung. Ein Bäcker stand deshalb sein Leben lang vor einem leeren Backhaus, denn
+	 * Mehl wächst auf keinem Feld.
+	 */
+	inputPrice: number | null;
 	/** Was ein Grundstück kostet — nichts heißt: keines zu haben. */
 	plotPrice: number | null;
 	/** Was die billigste Werkstatt kostet, die hier fehlt. */
@@ -205,8 +215,13 @@ export function savingsTarget(state: NpcState): number | null {
 	// das war der erste Betrieb der Welt eine Sackgasse: Die Zimmerei stand nach
 	// neunhundert Ticks noch immer ohne Holz da, weil ihre Besitzerin über die Rücklage
 	// hinaus keinen Grund mehr zu arbeiten hatte — sie hatte ihr Ziel ja erreicht.
-	if (state.ownsWorkshop && !state.hasLease && state.leaseAvailable) {
-		return state.leaseFee;
+	//
+	// Die gekaufte Zutat geht der Pacht vor: Wo es sie zu kaufen gibt, ist sie der kürzere
+	// Weg — und für die zweite Stufe einer Kette der einzige, weil Mehl auf keinem Feld
+	// wächst.
+	if (state.ownsWorkshop && !state.canCraft) {
+		if (state.inputPrice !== null) return state.inputPrice;
+		if (!state.hasLease && state.leaseAvailable) return state.leaseFee;
 	}
 
 	return null;
@@ -483,6 +498,14 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 	if (state.hasLease) return 'HARVEST';
 
 	const uebrig: number = state.money - desiredReserve(state.personality, state.foodPrice);
+
+	// **Zutaten kaufen, was nicht aus dem Boden kommt.** Die zweite Stufe jeder Kette hat
+	// keine Fläche: Mehl wächst nicht, es wird gemahlen. Wer einen Betrieb hat, dem die
+	// Zutat fehlt, und sie am Markt findet, holt sie sich dort — das ist zugleich die
+	// Nachfrage, von der die Stufe davor lebt.
+	if (state.ownsWorkshop && !state.canCraft && state.inputPrice !== null) {
+		if (uebrig >= state.inputPrice) return 'BUY_INPUT';
+	}
 
 	// Eine Fläche pachten, wenn der eigene Betrieb Rohstoff braucht.
 	if (state.ownsWorkshop && !state.hasLease && state.leaseAvailable && uebrig >= state.leaseFee) {

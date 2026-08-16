@@ -55,6 +55,7 @@ function lage(werte: Partial<NpcState> = {}): NpcState {
 		leaseAvailable: false,
 		ownStockToSell: 0,
 		canCraft: false,
+		inputPrice: null,
 		plotPrice: null,
 		workshopPrice: null,
 		workshopMaterialMissing: false,
