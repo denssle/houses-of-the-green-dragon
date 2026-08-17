@@ -32,11 +32,26 @@ export interface BuildingAttributes {
 	forSalePrice: number | null;
 	/** Der Aushang: was der Betrieb kuenftigen Angestellten bietet. */
 	offeredWage: number | null;
+	/**
+	 * Was der Eigentümer für die Instandsetzung zahlt — nichts heißt: kein Auftrag (5.27).
+	 *
+	 * Getrennt von `offeredWage`: Das ist der Lohn einer **Anstellung**, dies der Preis für
+	 * eine **Arbeit**. Wer beides in ein Feld legte, könnte nicht gleichzeitig einen Gesellen
+	 * suchen und sein Dach richten lassen.
+	 */
+	repairWage: number | null;
 }
 
 export type BuildingCreationAttributes = Optional<
 	BuildingAttributes,
-	'level' | 'condition' | 'PlotId' | 'ownerType' | 'OwnerCharacterId' | 'forSalePrice'
+	| 'level'
+	| 'condition'
+	| 'PlotId'
+	| 'ownerType'
+	| 'OwnerCharacterId'
+	| 'forSalePrice'
+	| 'offeredWage'
+	| 'repairWage'
 >;
 
 export function convertToBuilding(attributes: BuildingAttributes): Building {
@@ -50,6 +65,7 @@ export function convertToBuilding(attributes: BuildingAttributes): Building {
 		ownerType: attributes.ownerType,
 		ownerCharacterId: attributes.OwnerCharacterId,
 		forSalePrice: attributes.forSalePrice,
-		offeredWage: attributes.offeredWage
+		offeredWage: attributes.offeredWage,
+		repairWage: attributes.repairWage
 	};
 }

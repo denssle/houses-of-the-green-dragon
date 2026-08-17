@@ -179,3 +179,36 @@ describe('Für Lohn herrichten', () => {
 		expect(meister.ok && meister.earned).toBeGreaterThan(3);
 	});
 });
+
+/**
+ * Der private Auftrag (5.27, Punkt 74).
+ *
+ * Bei städtischen Bauten ist der Lohn der Tagelohn — den setzt niemand aus, er ist der
+ * Satz, den die Stadt für einen Handschlag zahlt. Bei einem privaten Auftrag steht dort,
+ * was der Eigentümer geboten hat.
+ */
+describe('Der ausgeschriebene Lohn', () => {
+	const ARBEITER = { actionPoints: 10, money: 50, buildingSkill: 0 };
+
+	it('zahlt, was der Auftraggeber bietet', () => {
+		const ergebnis = repairForHire(ARBEITER, { money: 1000 }, 60, 9);
+
+		expect(ergebnis.ok && ergebnis.earned).toBe(9);
+	});
+
+	it('nimmt ohne Angabe den Tagelohn', () => {
+		// Der Satz der Stadt — sie schreibt ihre Instandsetzung nicht aus, sie zahlt sie.
+		const ergebnis = repairForHire(ARBEITER, { money: 1000 }, 60);
+
+		expect(ergebnis.ok && ergebnis.earned).toBe(3);
+	});
+
+	it('weist ab, wenn der Auftraggeber sein Angebot nicht deckt', () => {
+		// Ein Auftrag über zwanzig Münzen, aber nur zehn in der Kasse: Wer nicht zahlen
+		// kann, bei dem wird nicht gearbeitet.
+		expect(repairForHire(ARBEITER, { money: 10 }, 60, 20)).toEqual({
+			ok: false,
+			reason: 'EMPLOYER_BROKE'
+		});
+	});
+});

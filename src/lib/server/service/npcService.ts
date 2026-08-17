@@ -554,7 +554,7 @@ async function lageAufnehmen(
 	const wahlLaeuft: boolean =
 		wahlzettel !== undefined && !wahlzettel.iVoted && wahlzettel.candidates.length > 0;
 
-	const arbeitsplatz = await freierArbeitsplatz(werte.RegionId);
+	const arbeitsplatz = await freierArbeitsplatz(werte.RegionId, npcId);
 	const stelle = await employmentService.getJobOf(npcId);
 	// Wer schon eine Stelle hat, sieht sich nicht um — ein NPC, der jede Stunde den
 	// Arbeitgeber wechselt, wäre kein Handwerker, sondern ein Flattermann.
@@ -675,12 +675,26 @@ async function lageAufnehmen(
  *
  * Genommen wird der schlechteste Bau: Wo es am nötigsten ist, wird zuerst gearbeitet.
  */
-async function freierArbeitsplatz(regionId: string): Promise<string | undefined> {
-	const baufaellig = (await buildingService.getBuildingsInRegion(regionId))
-		.filter((haus) => haus.ownerType === 'CITY' && haus.condition < CONDITION_MAX)
-		.sort((a, b) => a.condition - b.condition);
+async function freierArbeitsplatz(
+	regionId: string,
+	characterId: string
+): Promise<string | undefined> {
+	const zuHaben = (await buildingService.getBuildingsInRegion(regionId)).filter(
+		(haus) =>
+			haus.condition < CONDITION_MAX &&
+			haus.ownerCharacterId !== characterId &&
+			// **Städtisch immer, privat nur mit Auftrag** (5.27, Punkt 74). Damit findet ein
+			// NPC auch die Arbeit, die ein Hausbesitzer ausgeschrieben hat — sonst blieben
+			// private Aufträge liegen, und die Instandsetzung städtischer Bauten wäre die
+			// einzige Lohnarbeit der Welt. Drei Schichten je Spieljahr sind kein Einstieg.
+			(haus.ownerType === 'CITY' || haus.repairWage !== null)
+	);
 
-	return baufaellig[0]?.id;
+	// **Der beste Lohn zuerst, dann der schlechteste Zustand.** Wer arbeitet, nimmt das
+	// bessere Angebot — und unter gleichen Angeboten das, wo es am nötigsten ist.
+	return zuHaben.sort(
+		(a, b) => (b.repairWage ?? TAGELOHN) - (a.repairWage ?? TAGELOHN) || a.condition - b.condition
+	)[0]?.id;
 }
 
 /**

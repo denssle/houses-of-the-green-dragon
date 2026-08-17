@@ -20,4 +20,6 @@ export interface Building {
 	forSalePrice: number | null;
 	/** Der Aushang: was der Betrieb kuenftigen Angestellten bietet. */
 	offeredWage: number | null;
+	/** Der Auftrag: was der Eigentümer für die Instandsetzung zahlt (5.27). */
+	repairWage: number | null;
 }

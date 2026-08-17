@@ -34,21 +34,36 @@ const BASIS = '/houses';
  * sonst gezählt, was noch gar nicht geladen ist. Das ist der Unterschied zwischen einer
  * Prüfung, die wartet (`expect`), und einer, die nur nachsieht.
  */
+/**
+ * Eine Schicht Lohnarbeit — seit 5.26 die Instandsetzung eines städtischen Baus.
+ *
+ * **Vorher war das die Tagelöhnerei in der städtischen Schmiede**, und dieser Helfer war
+ * der Beweis, dass ein neuer Spieler sich sein erstes Grundstück erarbeiten kann. Die
+ * Schmiede ist als Arbeitsplatz gefallen (sie zahlte Lohn ohne Gegenwert); der Weg führt
+ * jetzt über die Bauten, die die Stadt unterhält.
+ *
+ * Gibt `false` zurück, wenn es nichts zu tun gibt — dann stehen alle Bauten in voller
+ * Güte, und das ist eine Auskunft und kein Fehler.
+ */
 async function eineSchicht(page: Page): Promise<boolean> {
-	await page.goto(BASIS + '/');
-	const schmiede = page.getByRole('link', { name: 'Städtische Schmiede' });
-	if ((await schmiede.count()) === 0) return false;
+	// Über das Rathaus: Dort steht, was der Stadt gehört, mit Verweis auf jedes Haus.
+	await page.goto(BASIS + '/council');
+	const wieviele: number = await page
+		.locator('section:has(h3:text("Was der Stadt gehört")) a.link')
+		.count();
 
-	await schmiede.first().click();
-	await page.waitForURL(/\/building\//);
+	for (let i = 0; i < wieviele; i++) {
+		await page.goto(BASIS + '/council');
+		await page.locator('section:has(h3:text("Was der Stadt gehört")) a.link').nth(i).click();
+		await page.waitForURL(new RegExp('/building/'));
 
-	// **Genau dieser Knopf.** Auf der Seite steht daneben „Arbeiten (1 AP)" — das ist das
-	// Herstellen aus eigenem Vorrat und scheitert ohne Erz. Die Tagelöhnerei heißt bloß
-	// „Arbeiten". Dass die beiden sich so ähnlich sehen, ist ein Fund für sich.
-	const arbeiten = page.getByRole('button', { name: 'Arbeiten', exact: true });
-	if (!(await arbeiten.first().isVisible())) return false;
-	await arbeiten.first().click();
-	return true;
+		const herrichten = page.getByRole('button', { name: 'Für Lohn herrichten' });
+		if ((await herrichten.count()) > 0) {
+			await herrichten.first().click();
+			return true;
+		}
+	}
+	return false;
 }
 
 test.describe.serial('Ein Leben von vorn', () => {

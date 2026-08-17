@@ -62,14 +62,20 @@ export type RepairForHireOutcome =
 export function repairForHire(
 	worker: { actionPoints: number; money: number; buildingSkill: number },
 	employer: { money: number },
-	condition: number
+	condition: number,
+	/**
+	 * Was der Auftraggeber bietet (5.27). Bei städtischen Bauten ist es der Tagelohn — den
+	 * setzt niemand aus, er ist der Satz, den die Stadt für einen Handschlag zahlt. Bei
+	 * einem privaten Auftrag steht hier, was der Eigentümer geboten hat.
+	 */
+	offeredWage: number = TAGELOHN
 ): RepairForHireOutcome {
 	if (condition >= CONDITION_MAX) return { ok: false, reason: 'NOTHING_TO_DO' };
 	if (worker.actionPoints < REPAIR_ACTION_POINT_COST) {
 		return { ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' };
 	}
 
-	const lohn: number = Math.max(1, Math.round(TAGELOHN * skillFactor(worker.buildingSkill)));
+	const lohn: number = Math.max(1, Math.round(offeredWage * skillFactor(worker.buildingSkill)));
 	if (!canAfford(employer.money, lohn)) return { ok: false, reason: 'EMPLOYER_BROKE' };
 
 	return {

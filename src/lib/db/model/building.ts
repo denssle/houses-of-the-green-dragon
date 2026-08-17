@@ -37,7 +37,9 @@ export const Building: ModelStatic<Model<BuildingAttributes, BuildingCreationAtt
 			OwnerCharacterId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
 			forSalePrice: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
 			// Der Aushang. Was ein bestehendes Verhaeltnis zahlt, steht in employments.
-			offeredWage: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
+			offeredWage: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
+			// Der Preis, den der Eigentümer für die Instandsetzung bietet (5.27).
+			repairWage: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
 		},
 		{ timestamps: true }
 	);

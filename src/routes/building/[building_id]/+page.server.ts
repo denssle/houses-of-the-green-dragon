@@ -54,6 +54,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		mine: gehoertMir,
 		freeRoom: freiePlaetze,
 		canMoveIn: darfEinziehen,
+		// **Arbeit für Lohn** (5.26): Ein städtischer Bau bietet sie, solange er nicht in
+		// voller Güte steht. Das hängt am Zustand und nicht an der Vorlage — dieselbe
+		// Vorlage bietet heute Arbeit und morgen nicht, sobald sie hergerichtet ist.
+		repairForHire:
+			locals.currentCharacter !== undefined &&
+			building.condition < CONDITION_MAX &&
+			building.ownerCharacterId !== locals.currentCharacter.id &&
+			// Städtisch immer, privat nur mit Auftrag (5.27, Punkt 74).
+			(building.ownerType === 'CITY' || building.repairWage !== null),
 		livesHere: locals.currentCharacter?.homeBuildingId === building.id,
 		levelName: option ? levelOf(option, building.level).name : undefined,
 		maxLevel: option ? maxLevel(option) : 1,
@@ -327,6 +336,26 @@ export const actions = {
 	},
 
 	/** Dem eigenen Haus einen Namen geben — „Bäckerei" ist eine Gattung, kein Betrieb. */
+	/**
+	 * Einen Reparaturauftrag aushängen — oder zurückziehen (5.27, Punkt 74).
+	 *
+	 * Wer sein Haus nicht selbst richten kann, weil ihm Aktionspunkte, Material oder das
+	 * Können fehlen, bietet dafür Lohn. Ein leeres Feld nimmt den Auftrag wieder ab.
+	 */
+	offerRepair: async ({ request, params, locals }) => {
+		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
+		const roh = (await request.formData()).get('wage')?.toString();
+		const lohn: number | null = roh ? Number(roh) : null;
+
+		const ergebnis = await buildingService.offerRepair(
+			locals.currentCharacter.id,
+			params.building_id,
+			lohn
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: lohn === null ? 'Der Auftrag ist zurückgezogen.' : 'Der Auftrag hängt aus.' };
+	},
+
 	rename: async ({ request, params, locals }) => {
 		if (!locals.currentCharacter) {
 			return fail(401, { message: 'Kein Charakter, der etwas zu benennen hätte' });

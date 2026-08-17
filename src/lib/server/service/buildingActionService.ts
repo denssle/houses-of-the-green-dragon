@@ -60,8 +60,17 @@ async function fuerLohnHerrichten(characterId: string, buildingId: string): Prom
 	const regionId = await buildingService.getBuildingRegionId(buildingId);
 	if (!gebäude || !regionId) return { ok: false, reason: 'NOT_A_WORKPLACE' };
 
-	// Vorerst nur öffentliche Bauten: Der private Auftrag fehlt (Punkt 74).
-	if (gebäude.ownerType !== 'CITY') return { ok: false, reason: 'NOT_A_WORKPLACE' };
+	// **Städtisch immer, privat nur mit Auftrag** (5.27, Punkt 74). Ohne den Auftrag richtete
+	// jeder ungefragt fremde Häuser her und schickte die Rechnung — deshalb ist er die
+	// Bedingung und nicht bloß der Preis.
+	const staedtisch: boolean = gebäude.ownerType === 'CITY';
+	if (!staedtisch && gebäude.repairWage === null) {
+		return { ok: false, reason: 'NO_JOB_OFFERED' };
+	}
+	// Am eigenen Haus arbeitet man ohne Lohn — dafür gibt es `renovateBuilding`.
+	if (gebäude.ownerCharacterId === characterId) {
+		return { ok: false, reason: 'ALREADY_OWNED' };
+	}
 	if (gebäude.condition >= CONDITION_MAX) return { ok: false, reason: 'NOTHING_TO_DO' };
 
 	const tick = await worldService.currentTick();
@@ -82,7 +91,8 @@ async function fuerLohnHerrichten(characterId: string, buildingId: string): Prom
 				buildingSkill: await skillService.getLevel(characterId, 'CONSTRUCTION', t)
 			},
 			{ money: kasse.money },
-			gebäude.condition
+			gebäude.condition,
+			staedtisch ? undefined : (gebäude.repairWage ?? undefined)
 		);
 		if (!ergebnis.ok) return ergebnis;
 

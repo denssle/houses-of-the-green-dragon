@@ -6,9 +6,6 @@
 
 	let { data, form }: PageProps = $props();
 
-	// Seit 5.26 gibt es nur noch eine Gebäudehandlung: für Lohn herrichten.
-	const BESCHRIFTUNG: Record<string, string> = { REPAIR_FOR_HIRE: 'Für Lohn herrichten' };
-
 	/**
 	 * Ein Wort für den Zustand. Die Zahl steht daneben — anders als bei Zuneigung und
 	 * Wesensart ist sie hier keine Verlockung, sondern die Grundlage der Entscheidung:
@@ -111,12 +108,27 @@
 		</p>
 	</section>
 {/if}
-{#each data.option?.actions ?? [] as action (action)}
+<!--
+	**Die Instandsetzung hängt nicht an der Vorlage, sondern am Zustand** (5.26). Ein
+	städtischer Bau bietet Arbeit, solange er nicht in voller Güte steht — das lässt sich
+	nicht in `actions` schreiben, denn dieselbe Vorlage bietet heute Arbeit und morgen
+	nicht.
+
+	Ohne diesen Knopf könnten nur NPCs die Arbeit annehmen, und das wäre ein zweiter Satz
+	Regeln für die Simulation — genau das, was `npcService` ausdrücklich vermeidet.
+-->
+{#if data.repairForHire}
 	<form method="POST" action="?/act" use:enhance>
-		<input type="hidden" name="action" value={action} />
-		<button type="submit">{BESCHRIFTUNG[action] ?? action}</button>
+		<input type="hidden" name="action" value="REPAIR_FOR_HIRE" />
+		<button type="submit">Für Lohn herrichten</button>
 	</form>
-{/each}
+	<p>
+		<small>
+			Die Stadt zahlt für jeden Handschlag an ihren Bauten — solange etwas zu richten ist und die
+			Kasse es hergibt.
+		</small>
+	</p>
+{/if}
 
 <section>
 	<h3>{data.isMarket ? 'Stände' : 'Zu haben'}</h3>
@@ -214,6 +226,19 @@
 			<p>
 				<small>Wer früh renoviert, zahlt wenig — gezahlt wird nach dem, was fehlt.</small>
 			</p>
+
+			<!--
+				**Oder man lässt richten** (5.27): Wer die Aktionspunkte, das Material oder das
+				Können nicht hat, bietet Lohn und wartet, bis jemand kommt. Ein leeres Feld nimmt
+				den Auftrag wieder ab.
+			-->
+			<form method="POST" action="?/offerRepair" use:enhance>
+				<label>
+					Auftrag: Lohn je Handschlag
+					<input type="number" name="wage" min="1" step="1" value={data.building.repairWage} />
+				</label>
+				<button type="submit">Ausschreiben</button>
+			</form>
 		{:else}
 			<p><i>Hier ist nichts zu tun.</i></p>
 		{/if}

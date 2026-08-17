@@ -1245,3 +1245,32 @@ export async function setCondition(
 		{ where: { id: buildingId }, transaction: t }
 	);
 }
+
+/**
+ * Einen Reparaturauftrag aushängen — oder mit `null` zurückziehen (5.27, Punkt 74).
+ *
+ * **Der Auftrag ist die Bedingung, nicht bloß der Preis.** Ohne ihn richtete jeder
+ * ungefragt fremde Häuser her und schickte die Rechnung; mit ihm ist es ein Geschäft
+ * zwischen zwei Seiten. Deshalb steht er am Gebäude wie das Preisschild und der Aushang
+ * für eine Anstellung — ein Haus trägt seine Angebote.
+ *
+ * Nur der Eigentümer, und nur ein sinnvoller Satz: Ein Auftrag über null Münzen wäre ein
+ * Aufruf zur Nachbarschaftshilfe, und die kennt dieses Spiel nicht.
+ */
+export async function offerRepair(
+	characterId: string,
+	buildingId: string,
+	wage: number | null
+): Promise<{ ok: true } | { ok: false; reason: ActionFailureReason }> {
+	const gebäude = await BuildingModel.findByPk(buildingId);
+	if (!gebäude) return { ok: false, reason: 'PLOT_NOT_OWNED' };
+	if (gebäude.dataValues.OwnerCharacterId !== characterId) {
+		return { ok: false, reason: 'PLOT_NOT_OWNED' };
+	}
+	if (wage !== null && (!Number.isInteger(wage) || wage < 1)) {
+		return { ok: false, reason: 'NOTHING_TO_DO' };
+	}
+
+	await gebäude.update({ repairWage: wage });
+	return { ok: true };
+}

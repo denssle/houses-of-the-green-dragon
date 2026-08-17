@@ -52,6 +52,29 @@ const GASSEN = ['Am Markt', 'Gerbergasse', 'Töpferweg'] as const;
  * Angestellter anfangen und Geld verdienen. Die städtische Schmiede ist der Anfang davon
  * (siehe Punkt 14 in `OFFENE_PUNKTE.md`, der die Starthilfe endgültig regelt).
  */
+/**
+ * In welchem Zustand die Stadt bei Weltbeginn steht.
+ *
+ * Gut in Schuss, aber nicht neu: Dreißig Punkte Arbeit an vier Bauten sind etwa
+ * vierundzwanzig Schichten — genug, dass ein Ankömmling sich sein erstes Grundstück
+ * erarbeiten kann (das kostet dreizehn), und wenig genug, dass die Stadtkasse es trägt.
+ */
+const STADT_BEI_WELTBEGINN = 70;
+
+/**
+ * Was in der Stadtkasse liegt, wenn die Welt beginnt.
+ *
+ * **Eine Stadt, die schon steht, hat Rücklagen** — und sie braucht sie: Seit 5.26 zahlt sie
+ * ihre Instandsetzung an Menschen statt an niemanden, und mit leerer Kasse gäbe es keine
+ * Lohnarbeit. Der Rundlauf hat das gezeigt: Der Knopf war da, die Handlung scheiterte an
+ * `EMPLOYER_BROKE`, und ein neuer Spieler stand ohne Verdienst da.
+ *
+ * Zweihundert Münzen — genug für die vierundzwanzig Schichten, die ihre Bauten brauchen,
+ * und wenig genug, dass ein Bürgermeister damit haushalten muss. Danach lebt sie von ihren
+ * Einnahmen: Zehnt, Standgeld, Pacht, Einzugsgeld.
+ */
+const STADTKASSE_BEI_WELTBEGINN = 200;
+
 const STADTGEBAEUDE = [
 	{ optionId: 0, name: 'Rathaus', adresse: 'Am Markt 1' },
 	{ optionId: 2, name: 'Städtische Schmiede', adresse: 'Am Markt 2' },
@@ -133,7 +156,12 @@ export async function seedWorld(): Promise<boolean> {
 	await World.create({ id: WORLD_ID, currentTick: jetzt, lastTickAt: new Date() });
 
 	const stadtId = randomUUID();
-	await Region.create({ id: stadtId, name: STADT, type: 'CITY', treasury: 0 });
+	await Region.create({
+		id: stadtId,
+		name: STADT,
+		type: 'CITY',
+		treasury: STADTKASSE_BEI_WELTBEGINN
+	});
 
 	for (const gasse of GASSEN) {
 		for (let hausnummer = 1; hausnummer <= 4; hausnummer++) {
@@ -156,6 +184,13 @@ export async function seedWorld(): Promise<boolean> {
 			id: randomUUID(),
 			name: bauwerk.name,
 			optionId: bauwerk.optionId,
+			// **Die Stadt ist nicht neu gebaut** (5.27). Sie steht schon, wenn die Welt
+			// beginnt — mit Bauten, an denen die Jahre zu sehen sind. Das ist nicht bloß
+			// stimmiger, sondern die Voraussetzung dafür, dass jemand überhaupt Lohnarbeit
+			// findet: Seit die Tagelöhnerei in der Instandsetzung besteht (5.26), gäbe es in
+			// einer Stadt aus lauter neuen Häusern nichts zu verdienen. Der Rundlauf hat
+			// genau das gezeigt — ein neuer Spieler stand vor vier Bauten in voller Güte.
+			condition: STADT_BEI_WELTBEGINN,
 			lastConditionTick: jetzt,
 			PlotId: grundstück.dataValues.id,
 			ownerType: 'CITY'
