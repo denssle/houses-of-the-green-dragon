@@ -54,6 +54,24 @@ export const ARRIVAL_MONEY_MIN = 150;
 export const ARRIVAL_MONEY_MAX = 400;
 
 /**
+ * Was ein Zuzug die Stadt kostet — und ihr einbringt (5.26).
+ *
+ * **Das Einzugsgeld.** Wer sich in einer Stadt niederließ, zahlte dafür; historisch war das
+ * der Normalfall und die Kehrseite des Bürgerrechts. Hier ist es zugleich die Einnahme, die
+ * eine junge Stadt am dringendsten braucht: Sie kommt genau dann, wenn die Stadt wächst,
+ * und sie hängt nicht an einer Wirtschaft, die es noch nicht gibt.
+ *
+ * Ein Zehntel des Mitgebrachten — spürbar, aber kein Hindernis. Wer mit 300 Münzen
+ * ankommt, zahlt 30 und kann sein Handwerk trotzdem anfangen. Eine feste Summe wäre für
+ * den Armen eine Mauer und für den Reichen ein Trinkgeld.
+ */
+export const SETTLEMENT_FEE_SHARE = 0.1;
+
+export function settlementFee(broughtMoney: number): number {
+	return Math.floor(broughtMoney * SETTLEMENT_FEE_SHARE);
+}
+
+/**
  * Wie gut er sein Handwerk beherrscht.
  *
  * Kein Meister, aber auch kein Anfänger: Er hat es gelernt, wo er herkam. Die Stufe

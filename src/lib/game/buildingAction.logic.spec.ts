@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { build, buyPlot, work, WORK_ACTION_POINT_COST } from '$lib/game/buildingAction.logic';
+import { build, buyPlot, repairForHire } from '$lib/game/buildingAction.logic';
 import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 
 const SCHMIEDE: BuildingTemplate = {
@@ -9,7 +9,7 @@ const SCHMIEDE: BuildingTemplate = {
 	type: 'CRAFT',
 	limited: false,
 	limitedTo: 0,
-	actions: ['WORK'],
+	actions: [],
 	levels: [{ price: 250, name: 'Schmiede', wagePerActionPoint: 3 }]
 };
 
@@ -28,155 +28,6 @@ const RATHAUS: BuildingTemplate = {
 	limitedTo: 1,
 	levels: [{ price: 0, name: 'Rathaus' }]
 };
-
-const IN_GRUENAU = { actionPoints: 10, money: 50, regionId: 'gruenau', skillLevel: 0 };
-
-/** Ein Arbeitgeber, an dessen Kasse es nicht scheitert — seit 5.24 braucht jede Schicht einen. */
-const ZAHLUNGSFAEHIG = { money: 10_000 };
-
-describe('Arbeiten', () => {
-	it('tauscht Aktionspunkte gegen den Lohn des Betriebs', () => {
-		const ergebnis = work(
-			IN_GRUENAU,
-			{
-				regionId: 'gruenau',
-				template: SCHMIEDE,
-				level: 1,
-				condition: 100
-			},
-			ZAHLUNGSFAEHIG
-		);
-
-		expect(ergebnis).toEqual({
-			ok: true,
-			actionPoints: 10 - WORK_ACTION_POINT_COST,
-			money: 53,
-			earned: 3,
-			// Seit 5.24 steht daneben, was es den Arbeitgeber kostet — der Lohn kommt nicht
-			// mehr aus dem Nichts.
-			employerMoney: 10_000 - 3
-		});
-	});
-
-	it('weist ab, wo es nichts zu verdienen gibt', () => {
-		const ergebnis = work(
-			IN_GRUENAU,
-			{
-				regionId: 'gruenau',
-				template: WOHNHAUS,
-				level: 1,
-				condition: 100
-			},
-			ZAHLUNGSFAEHIG
-		);
-
-		expect(ergebnis).toEqual({ ok: false, reason: 'NOT_A_WORKPLACE' });
-	});
-
-	it('weist ab, wer anderswo steht', () => {
-		const ergebnis = work(
-			IN_GRUENAU,
-			{
-				regionId: 'eichwald',
-				template: SCHMIEDE,
-				level: 1,
-				condition: 100
-			},
-			ZAHLUNGSFAEHIG
-		);
-
-		expect(ergebnis).toEqual({ ok: false, reason: 'WRONG_REGION' });
-	});
-
-	it('weist ab, wem die Kraft fehlt', () => {
-		const erschöpft = { ...IN_GRUENAU, actionPoints: 0 };
-
-		const ergebnis = work(
-			erschöpft,
-			{
-				regionId: 'gruenau',
-				template: SCHMIEDE,
-				level: 1,
-				condition: 100
-			},
-			ZAHLUNGSFAEHIG
-		);
-
-		expect(ergebnis).toEqual({ ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' });
-	});
-
-	it('weist ab, wo niemand zahlen kann', () => {
-		// **Der Kern von Punkt 66.** Bis 5.24 stand hier schlicht `money + earned` — niemand
-		// wurde belastet, und wer in der städtischen Schmiede arbeitete, erschuf seine drei
-		// Münzen. Das war die Hauptgeldquelle der Welt und widersprach der Regel aus
-		// `KONZEPT.md`: Geld wechselt den Besitzer, es entsteht und vergeht nicht.
-		const ergebnis = work(
-			IN_GRUENAU,
-			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 },
-			{ money: 2 }
-		);
-
-		expect(ergebnis).toEqual({ ok: false, reason: 'EMPLOYER_BROKE' });
-	});
-
-	it('nimmt dem Arbeitgeber, was es dem Arbeiter gibt', () => {
-		// Die Probe aufs Exempel: Die Summe bleibt gleich.
-		const ergebnis = work(
-			IN_GRUENAU,
-			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 },
-			{ money: 100 }
-		);
-
-		expect(ergebnis.ok && ergebnis.money + ergebnis.employerMoney).toBe(50 + 100);
-	});
-
-	it('lässt den Zustand unangetastet, wenn die Handlung scheitert', () => {
-		const vorher = { ...IN_GRUENAU };
-
-		work(
-			vorher,
-			{ regionId: 'eichwald', template: SCHMIEDE, level: 1, condition: 100 },
-			ZAHLUNGSFAEHIG
-		);
-
-		expect(vorher).toEqual(IN_GRUENAU);
-	});
-});
-
-describe('Können beim Arbeiten', () => {
-	it('hebt den Lohn schon auf der zweiten Stufe sichtbar', () => {
-		// Der Grund für das Runden statt Abrunden: Sonst blieben die ersten drei Stufen
-		// ohne jede Wirkung, und zwanzig Schichten Arbeit sähen aus wie nichts.
-		const ungelernt = work(
-			IN_GRUENAU,
-			{
-				regionId: 'gruenau',
-				template: SCHMIEDE,
-				level: 1,
-				condition: 100
-			},
-			ZAHLUNGSFAEHIG
-		);
-		const geuebt = work(
-			{ ...IN_GRUENAU, skillLevel: 2 },
-			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 },
-			ZAHLUNGSFAEHIG
-		);
-
-		expect(ungelernt.ok && ungelernt.earned).toBe(3);
-		expect(geuebt.ok && geuebt.earned).toBe(4);
-	});
-
-	it('verdoppelt den Lohn auf der Höchststufe', () => {
-		const meister = work(
-			{ ...IN_GRUENAU, skillLevel: 10 },
-			{ regionId: 'gruenau', template: SCHMIEDE, level: 1, condition: 100 },
-			ZAHLUNGSFAEHIG
-		);
-
-		expect(meister.ok && meister.earned).toBe(6);
-	});
-});
 
 describe('Bauen', () => {
 	const BAUHERR = { id: 'adelbert', money: 300 };
@@ -275,5 +126,56 @@ describe('Grundstück kaufen', () => {
 			ok: false,
 			reason: 'NOT_ENOUGH_MONEY'
 		});
+	});
+});
+
+/**
+ * Instandsetzung gegen Lohn (5.26) — der Ersatz für die Tagelöhnerei.
+ *
+ * Die bestand darin, in die städtische Schmiede zu gehen und drei Münzen mitzunehmen;
+ * niemand bekam etwas dafür. Jetzt hinterlässt die Arbeit etwas: Wer hier schuftet, hebt
+ * den Zustand des Hauses, und der Eigentümer zahlt für einen Gegenwert.
+ */
+describe('Für Lohn herrichten', () => {
+	const ARBEITER = { actionPoints: 10, money: 50, buildingSkill: 0 };
+	const STADTKASSE = { money: 1000 };
+
+	it('hebt den Zustand und zahlt dafür', () => {
+		const ergebnis = repairForHire(ARBEITER, STADTKASSE, 60);
+
+		expect(ergebnis.ok && ergebnis.condition).toBe(65);
+		expect(ergebnis.ok && ergebnis.earned).toBe(3);
+		// Die Probe: Was der eine bekommt, fehlt dem anderen.
+		expect(ergebnis.ok && ergebnis.money + ergebnis.employerMoney).toBe(50 + 1000);
+	});
+
+	it('richtet nie über die volle Güte hinaus', () => {
+		const ergebnis = repairForHire(ARBEITER, STADTKASSE, 98);
+
+		expect(ergebnis.ok && ergebnis.condition).toBe(100);
+	});
+
+	it('weist ab, wo nichts zu richten ist', () => {
+		expect(repairForHire(ARBEITER, STADTKASSE, 100)).toEqual({
+			ok: false,
+			reason: 'NOTHING_TO_DO'
+		});
+	});
+
+	it('weist ab, wo niemand zahlen kann', () => {
+		// **Der Kern von Punkt 66:** Auch diese Arbeit kommt nicht aus dem Nichts. Eine
+		// Stadt mit leerer Kasse kann ihre Mauern nicht richten lassen.
+		expect(repairForHire(ARBEITER, { money: 2 }, 60)).toEqual({
+			ok: false,
+			reason: 'EMPLOYER_BROKE'
+		});
+	});
+
+	it('zahlt dem Könner mehr', () => {
+		// Wer bauen kann, schafft mehr — und bekommt mehr. Anders als beim Renovieren auf
+		// eigene Rechnung senkt Können hier nicht die Kosten, sondern hebt den Verdienst.
+		const meister = repairForHire({ ...ARBEITER, buildingSkill: 10 }, STADTKASSE, 60);
+
+		expect(meister.ok && meister.earned).toBeGreaterThan(3);
 	});
 });

@@ -3,6 +3,7 @@ import { type Transaction } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 import { Character } from '$lib/db/model/character';
 import { Dynasty } from '$lib/db/model/dynasty';
+import { Region } from '$lib/db/model/region';
 import { Skill } from '$lib/db/model/skill';
 import { NEUGEBORENE } from '$lib/db/names';
 import { HERKUNFT } from '$lib/db/names';
@@ -13,6 +14,7 @@ import { TICKS_PER_YEAR } from '$lib/game/time';
 import {
 	arrivalGifts,
 	skillToBring,
+	settlementFee,
 	someoneArrives,
 	ZUZUG_EHRGEIZ,
 	ZUZUG_FLEISS
@@ -70,6 +72,8 @@ export async function admitNewcomers(
 	const koennen: SkillType = skillToBring(SKILL_TYPES, await handwerkeInDerStadt(regionId), roll());
 	const mitgebracht = arrivalGifts({ money: roll(), skill: roll(), age: roll() });
 
+	const einzugsgeld: number = settlementFee(mitgebracht.money);
+
 	const characterId = randomUUID();
 	await sequelize.transaction(async (t: Transaction) => {
 		// **Ein eigenes Haus** (5.10): Wer ankommt, gründet eine Linie. Ohne das hinge er
@@ -92,7 +96,10 @@ export async function admitNewcomers(
 				satiety: SATIETY_MAX,
 				lastNeedTick: tick,
 				actionPoints: 0,
-				money: mitgebracht.money,
+				// **Abzüglich Einzugsgeld** (5.26): Wer sich niederlässt, zahlt der Stadt dafür.
+				// Historisch der Normalfall — und hier die Einnahme, die eine junge Stadt am
+				// dringendsten braucht, weil sie keine laufende Wirtschaft voraussetzt.
+				money: mitgebracht.money - einzugsgeld,
 				RegionId: regionId,
 				DynastyId: hausId,
 				// **Der Tag der Ankunft** — daran hängt das Wahlrecht (`CITIZENSHIP_AFTER_YEARS`).
@@ -126,6 +133,15 @@ export async function admitNewcomers(
 			},
 			{ transaction: t }
 		);
+
+		// Das Einzugsgeld in die Stadtkasse — Geld wechselt den Besitzer, es entsteht nicht.
+		if (einzugsgeld > 0) {
+			await Region.increment('treasury', {
+				by: einzugsgeld,
+				where: { id: regionId },
+				transaction: t
+			});
+		}
 
 		// **Der Zuzug gehört in die Chronik.** Ein Fremder, der ankommt, ist ein Ereignis —
 		// nach fünf Generationen heißt sonst jeder Müller oder Schmied, und niemand sähe,

@@ -291,58 +291,64 @@ describe('Bauen und Arbeiten', () => {
 		});
 	});
 
-	describe('Arbeiten', () => {
-		async function schmiede(besitzerId: string): Promise<string> {
-			const grundstück = await eigenesGrundstueck(besitzerId);
-			const option = buildingService.getBuildingOption(SCHMIEDE)!;
-			const gebaut = await buildingService.build(option, besitzerId, grundstück);
-			if (!gebaut.ok) throw new Error('Die Schmiede ließ sich nicht bauen');
-			return gebaut.building.id;
-		}
-
-		it('kostet Aktionspunkte — und zahlt im eigenen Betrieb keinen Lohn', async () => {
-			// **Geändert mit 5.24** (Punkt 66): Vorher bekam der Eigentümer hier drei Münzen
-			// gutgeschrieben, die niemand bezahlte — die Tagelöhnerei erschuf sie. Seit der
-			// Lohn eine Kasse hat, wäre der Eigentümer sein eigener Zahler, und das ist ein
-			// Nullsummenspiel: Wer an seiner eigenen Werkbank steht, arbeitet für sich, und
-			// sein Verdienst ist das Erzeugnis.
-			//
-			// Die Schicht findet trotzdem statt: Der Aktionspunkt geht drauf, die Übung
-			// wächst. Nur wandert keine Münze.
-			const adelbert = await charakterMitGeld(300);
-			const werkstatt = await schmiede(adelbert);
-			const vorher = await CharacterModel.findByPk(adelbert);
-
-			const ergebnis = await buildingActionService.doBuildingAction('WORK', adelbert, werkstatt);
-
-			expect(ergebnis).toEqual({ ok: true, earned: 3 });
-			const nachher = await CharacterModel.findByPk(adelbert);
-			expect(nachher!.dataValues.money).toBe(vorher!.dataValues.money);
-			expect(nachher!.dataValues.actionPoints).toBe(vorher!.dataValues.actionPoints - 1);
-		});
-
-		it('weist ab, wem die Aktionspunkte fehlen — ohne Lohn', async () => {
-			const adelbert = await charakterMitGeld(300);
-			const werkstatt = await schmiede(adelbert);
-			await CharacterModel.update({ actionPoints: 0 }, { where: { id: adelbert } });
-			const vorher = await geld(adelbert);
-
-			const ergebnis = await buildingActionService.doBuildingAction('WORK', adelbert, werkstatt);
-
-			expect(ergebnis).toEqual({ ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' });
-			expect(await geld(adelbert)).toBe(vorher);
-		});
-
-		it('gibt im Wohnhaus keine Arbeit', async () => {
-			const adelbert = await charakterMitGeld(300);
-			const grundstück = await eigenesGrundstueck(adelbert);
-			const wohnhaus = buildingService.getBuildingOption(WOHNHAUS)!;
-			const gebaut = await buildingService.build(wohnhaus, adelbert, grundstück);
+	describe('Für Lohn herrichten', () => {
+		/**
+		 * **Der Ersatz für die Tagelöhnerei** (5.26). Die bestand darin, in die städtische
+		 * Schmiede zu gehen und drei Münzen mitzunehmen; niemand bekam etwas dafür. Jetzt
+		 * arbeitet man an öffentlichen Bauten, hebt ihren Zustand, und die Stadt zahlt aus
+		 * derselben Kasse, aus der sie die Instandhaltung ohnehin bezahlt hat.
+		 */
+		it('hebt den Zustand und zahlt aus der Stadtkasse', async () => {
+			const adelbert = await charakterMitGeld(50);
+			// Ein städtischer Bau, der Instandsetzung braucht — `beforeEach` räumt die Welt
+			// leer, also wird er hier gestellt.
+			const rathausId: string = await haus(null, { condition: 40 });
+			await RegionModel.update({ treasury: 500 }, { where: { id: stadtId } });
 
 			const ergebnis = await buildingActionService.doBuildingAction(
-				'WORK',
+				'REPAIR_FOR_HIRE',
 				adelbert,
-				gebaut.ok ? gebaut.building.id : ''
+				rathausId
+			);
+
+			expect(ergebnis.ok).toBe(true);
+			expect(await geld(adelbert)).toBeGreaterThan(50);
+			// Und was er bekommt, fehlt der Stadt.
+			const kasse = (await RegionModel.findByPk(stadtId))!.dataValues.treasury ?? 0;
+			expect(kasse).toBeLessThan(500);
+			const nachher = await buildingService.getBuilding(rathausId);
+			expect(nachher!.condition).toBeGreaterThan(40);
+		});
+
+		it('weist ab, wo nichts zu richten ist', async () => {
+			const adelbert = await charakterMitGeld(50);
+			const rathausId: string = await haus(null, { condition: CONDITION_MAX });
+
+			const ergebnis = await buildingActionService.doBuildingAction(
+				'REPAIR_FOR_HIRE',
+				adelbert,
+				rathausId
+			);
+
+			expect(ergebnis).toEqual({ ok: false, reason: 'NOTHING_TO_DO' });
+		});
+
+		it('gibt an einem privaten Haus keine Arbeit', async () => {
+			// Der private Auftrag fehlt noch (Punkt 74) — sonst richtete jeder ungefragt
+			// fremde Häuser her und schickte die Rechnung.
+			const adelbert = await charakterMitGeld(300);
+			const grundstueck = await eigenesGrundstueck(adelbert);
+			const gebaut = await buildingService.build(
+				buildingService.getBuildingOption(SCHMIEDE)!,
+				adelbert,
+				grundstueck
+			);
+			const werkstatt: string = gebaut.ok ? gebaut.building.id : '';
+
+			const ergebnis = await buildingActionService.doBuildingAction(
+				'REPAIR_FOR_HIRE',
+				adelbert,
+				werkstatt
 			);
 
 			expect(ergebnis).toEqual({ ok: false, reason: 'NOT_A_WORKPLACE' });

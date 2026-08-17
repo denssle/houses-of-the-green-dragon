@@ -312,7 +312,8 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Schmiedet aus Erz das Eisen, das ein Haus zusammenhält.',
 			limited: false,
 			limitedTo: 0,
-			actions: ['WORK'],
+			// **Keine Tagelöhnerei mehr** (5.26): Wer hier arbeiten will, wird angestellt.
+			actions: [],
 			skill: 'SMITHING',
 			// Seit 4.10 hat sie ein Rezept. Bis dahin war sie ein Arbeitsplatz ohne Werk:
 			// Man konnte dort Lohn verdienen, aber es entstand nichts.
@@ -1225,4 +1226,22 @@ export function materialForBuilding(price: number): MaterialNeed[] {
 
 export function materialForRenovation(missingCondition: number): MaterialNeed[] {
 	return renovationMaterial(missingCondition);
+}
+
+/**
+ * Den Zustand eines Hauses setzen — für die Instandsetzung gegen Lohn (5.26).
+ *
+ * `lastConditionTick` wandert mit: Ohne ihn liefe der Verfall ab dem alten Stichtag
+ * weiter, und die Arbeit wäre im selben Moment wieder verbraucht.
+ */
+export async function setCondition(
+	buildingId: string,
+	condition: number,
+	tick: number,
+	t: Transaction
+): Promise<void> {
+	await BuildingModel.update(
+		{ condition, lastConditionTick: tick },
+		{ where: { id: buildingId }, transaction: t }
+	);
 }

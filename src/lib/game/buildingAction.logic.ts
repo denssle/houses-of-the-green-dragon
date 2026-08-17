@@ -1,8 +1,8 @@
 import { type BuildingTemplate, buildPrice } from '$lib/model/buildingTemplate';
-import { wageAt } from '$lib/game/building.logic';
+import { CONDITION_MAX } from '$lib/game/building.logic';
 import { skillFactor } from '$lib/game/skill.logic';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
-import { canAfford } from '$lib/game/economy';
+import { canAfford, TAGELOHN } from '$lib/game/economy';
 
 /**
  * Die Regeln hinter den Gebäudehandlungen — als reine Funktionen, ohne Datenbank.
@@ -15,84 +15,71 @@ import { canAfford } from '$lib/game/economy';
  * Fehlschläge tragen einen Grund als Code aus `actionFailure.ts`, keinen fertigen Satz.
  */
 
-/** Wie viel Zustand ein Charakter für eine Schicht einsetzt. */
-export const WORK_ACTION_POINT_COST = 1;
-
 // --- Arbeiten ------------------------------------------------------------------------
 
-/** Der Ausschnitt des Charakters, auf den es beim Arbeiten ankommt. */
-export interface Worker {
-	actionPoints: number;
-	money: number;
-	regionId: string;
-	/** Die Stufe der Fertigkeit, die dieser Betrieb verlangt — null bei Ungelernten. */
-	skillLevel: number;
-}
+/**
+ * Was eine Schicht Instandsetzung kostet — an Aktionspunkten des Arbeiters.
+ *
+ * Weniger als eine Renovierung auf eigene Rechnung (die kostet vier und bringt das Haus
+ * auf einen Schlag in Ordnung): Hier arbeitet einer für Lohn und schafft ein Stück, nicht
+ * das Ganze. So kann eine Stadt mehrere Leute an einem Bau beschäftigen, und ein
+ * Tagelöhner muss nicht einen halben Tag am Stück aufbringen, um überhaupt anzufangen.
+ */
+export const REPAIR_ACTION_POINT_COST = 1;
 
-export type WorkOutcome =
-	| { ok: true; actionPoints: number; money: number; earned: number; employerMoney: number }
+/**
+ * Wie viele Zustandspunkte eine Schicht einbringt.
+ *
+ * Bei einem Verfall von hundert Punkten über fünfundzwanzig Spieljahre ist ein Bau nach
+ * gut zwanzig Schichten wieder heil — genug Arbeit, dass sie sich lohnt, und wenig genug,
+ * dass die Stadt nicht ewig daran zahlt.
+ */
+export const REPAIR_PER_SHIFT = 5;
+
+export type RepairForHireOutcome =
+	| {
+			ok: true;
+			actionPoints: number;
+			money: number;
+			earned: number;
+			employerMoney: number;
+			condition: number;
+	  }
 	| { ok: false; reason: ActionFailureReason };
 
 /**
- * Eine Schicht: Aktionspunkte hinein, Lohn heraus.
+ * Für Lohn an einem fremden Haus arbeiten (5.26).
  *
- * Der Lohn kommt aus der Gebäudevorlage, nicht aus einer Konstanten — so zahlt die
- * Schmiede mehr als die Kate, und eine Änderung wirkt sofort für alle Betriebe. Ein
- * richtiges Anstellungsverhältnis mit Vertrag und Laufzeit kommt erst mit 4.6; bis dahin
- * arbeitet man tageweise für den, bei dem man gerade steht.
+ * **Arbeit, die etwas hinterlässt** — der Ersatz für die Tagelöhnerei, bei der drei Münzen
+ * den Besitzer wechselten und sonst nichts geschah. Der Arbeiter setzt instand, der
+ * Eigentümer zahlt, und beide haben etwas davon: Das ist dieselbe Deckung, die für die
+ * Anstellung längst gilt.
  *
- * **Und der Lohn hat seit 5.24 einen Zahler** (Punkt 66). Bis dahin stand hier schlicht
- * `money: worker.money + earned` — niemand wurde belastet. Wer in der städtischen Schmiede
- * eine Schicht arbeitete, **erschuf** seine drei Münzen; `economy.ts` nennt die Tagelöhnerei
- * selbst „die Krücke aus 3.3", nur war sie längst die Hauptgeldquelle der Welt: In Grünau
- * besitzt niemand einen Betrieb, also lebt jeder davon.
- *
- * Das widersprach der Regel, die `KONZEPT.md` für die Wirtschaft aufstellt — Geld wechselt
- * den Besitzer, es entsteht und vergeht nicht. Jetzt gilt hier dieselbe Regel wie beim
- * Anstellungslohn (`workShift`): **Wer nicht zahlen kann, bei dem wird nicht gearbeitet**,
- * und zwar bevor Aktionspunkte verbraucht sind.
+ * **Der Lohn steigt mit dem Können**, wie bei jeder Arbeit: Wer bauen kann, schafft mehr
+ * und bekommt mehr. Anders als beim Renovieren auf eigene Rechnung senkt Können hier
+ * nicht die Kosten — es hebt den Verdienst, denn den Preis bestimmt der, der zahlt.
  */
-export function work(
-	worker: Worker,
-	workplace: { regionId: string; template: BuildingTemplate; level: number; condition: number },
-	employer: { money: number }
-): WorkOutcome {
-	// Der Lohn hängt an vier Dingen: an der Vorlage, an der Ausbaustufe, am Zustand und
-	// am Können des Arbeiters. Eine verfallene Hütte produziert weniger, ein Meister
-	// mehr — damit ist die Schicht nicht mehr für jeden dieselbe.
-	const grundlohn: number = wageAt(workplace.template, workplace.level, workplace.condition);
-	if (grundlohn === 0) {
-		return { ok: false, reason: 'NOT_A_WORKPLACE' };
-	}
-	// Gerundet und nicht abgerundet: Bei einem Grundlohn von 3 Münzen verschluckte das
-	// Abrunden die ersten drei Stufen vollständig — wer zwanzig Schichten gearbeitet hat,
-	// verdiente noch immer dasselbe und sähe für seine Mühe nichts. Am laufenden Server
-	// aufgefallen, und es ist kein Rechenfehler, sondern eine Frage der Rückmeldung.
-	const lohn: number = Math.max(1, Math.round(grundlohn * skillFactor(worker.skillLevel)));
-	// Wer in Grünau steht, kann nicht im Eichwald arbeiten. Wege kosten Zeit (4.9), aber
-	// die Prüfung gibt es ab heute — sonst gewöhnt sich die Oberfläche an das Gegenteil.
-	if (worker.regionId !== workplace.regionId) {
-		return { ok: false, reason: 'WRONG_REGION' };
-	}
-	if (worker.actionPoints < WORK_ACTION_POINT_COST) {
+export function repairForHire(
+	worker: { actionPoints: number; money: number; buildingSkill: number },
+	employer: { money: number },
+	condition: number
+): RepairForHireOutcome {
+	if (condition >= CONDITION_MAX) return { ok: false, reason: 'NOTHING_TO_DO' };
+	if (worker.actionPoints < REPAIR_ACTION_POINT_COST) {
 		return { ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' };
 	}
 
-	const earned: number = lohn * WORK_ACTION_POINT_COST;
-
-	// **Zuletzt geprüft, aber vor jedem Verbrauch.** Wer umsonst arbeitete, weil die Kasse
-	// leer war, hätte seinen Tag verloren, ohne es vorher wissen zu können — dasselbe
-	// Argument wie bei `workShift`, und deshalb dieselbe Reihenfolge.
-	if (!canAfford(employer.money, earned)) {
-		return { ok: false, reason: 'EMPLOYER_BROKE' };
-	}
+	const lohn: number = Math.max(1, Math.round(TAGELOHN * skillFactor(worker.buildingSkill)));
+	if (!canAfford(employer.money, lohn)) return { ok: false, reason: 'EMPLOYER_BROKE' };
 
 	return {
 		ok: true,
-		actionPoints: worker.actionPoints - WORK_ACTION_POINT_COST,
-		money: worker.money + earned,
-		earned,
-		employerMoney: employer.money - earned
+		actionPoints: worker.actionPoints - REPAIR_ACTION_POINT_COST,
+		money: worker.money + lohn,
+		earned: lohn,
+		employerMoney: employer.money - lohn,
+		// Nie über die volle Güte hinaus — der letzte Handschlag richtet nur, was fehlt.
+		condition: Math.min(CONDITION_MAX, condition + REPAIR_PER_SHIFT)
 	};
 }
 

@@ -6,7 +6,8 @@
 
 	let { data, form }: PageProps = $props();
 
-	const BESCHRIFTUNG: Record<string, string> = { WORK: 'Arbeiten' };
+	// Seit 5.26 gibt es nur noch eine Gebäudehandlung: für Lohn herrichten.
+	const BESCHRIFTUNG: Record<string, string> = { REPAIR_FOR_HIRE: 'Für Lohn herrichten' };
 
 	/**
 	 * Ein Wort für den Zustand. Die Zahl steht daneben — anders als bei Zuneigung und

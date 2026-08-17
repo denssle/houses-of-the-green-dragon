@@ -220,7 +220,7 @@ async function ausfuehren(
 			return buch(
 				'WORK',
 				lage.workplaceId
-					? await buildingActionService.doBuildingAction('WORK', npcId, lage.workplaceId)
+					? await buildingActionService.doBuildingAction('REPAIR_FOR_HIRE', npcId, lage.workplaceId)
 					: undefined
 			);
 
@@ -661,18 +661,26 @@ async function lageAufnehmen(
 }
 
 /**
- * Wo man in dieser Stadt arbeiten kann.
+ * Wo man in dieser Stadt für Lohn arbeiten kann.
  *
- * Genommen wird der erstbeste Betrieb — eine Wahl nach Lohn und Können wäre besser und
- * gehört zu 4.6d, wo es Anstellungsverhältnisse gibt. Bis dahin arbeitet man tageweise
- * dort, wo man gerade steht, und das gilt für NPCs wie für Spieler.
+ * **Seit 5.26 ist das die Instandsetzung öffentlicher Bauten** und nicht mehr die
+ * Tagelöhnerei in der städtischen Schmiede. Die war eine Krücke: hineingehen, drei Münzen
+ * mitnehmen, und niemand bekam etwas dafür. Jetzt hinterlässt die Arbeit etwas — wer hier
+ * schuftet, hält die Stadt instand, und die Stadt zahlt dafür aus derselben Kasse, aus der
+ * sie die Instandhaltung ohnehin bezahlt hat.
+ *
+ * **Das macht Arbeit knapp**, und das ist gewollt: Stehen alle Bauten in voller Güte, gibt
+ * es nichts zu tun. Wer nichts hat, muss sich dann anstellen lassen oder selbst etwas
+ * anfangen — die Stadt ist kein Arbeitgeber letzter Instanz mehr.
+ *
+ * Genommen wird der schlechteste Bau: Wo es am nötigsten ist, wird zuerst gearbeitet.
  */
 async function freierArbeitsplatz(regionId: string): Promise<string | undefined> {
-	for (const gebäude of await buildingService.getBuildingsInRegion(regionId)) {
-		const vorlage = buildingService.getBuildingOption(gebäude.optionId);
-		if (vorlage?.actions.includes('WORK')) return gebäude.id;
-	}
-	return undefined;
+	const baufaellig = (await buildingService.getBuildingsInRegion(regionId))
+		.filter((haus) => haus.ownerType === 'CITY' && haus.condition < CONDITION_MAX)
+		.sort((a, b) => a.condition - b.condition);
+
+	return baufaellig[0]?.id;
 }
 
 /**

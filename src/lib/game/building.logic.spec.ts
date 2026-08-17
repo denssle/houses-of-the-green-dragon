@@ -36,7 +36,7 @@ const SCHMIEDE: BuildingTemplate = {
 	...WOHNHAUS,
 	optionId: 2,
 	type: 'CRAFT',
-	actions: ['WORK'],
+	actions: [],
 	levels: [
 		{ price: 250, name: 'Schmiede', wagePerActionPoint: 3 },
 		{ price: 400, name: 'Werkstatt', wagePerActionPoint: 5 }

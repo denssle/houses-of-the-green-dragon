@@ -2552,6 +2552,65 @@ Unterlassung, die niemand begehen konnte.
 _Fertig, wenn:_ Eine Pacht behält ihren Arbeitsplatz, solange sie besteht. — Erledigt, mit
 einem Test über die dreifache Ruinendauer.
 
+**5.26 Arbeit, die etwas hinterlässt.** ✓ (Punkt 66) Der Tagelohn hatte seit 5.24 einen
+Zahler — und legte die Welt still: Die Stadtkasse war nach hundert Ticks leer, 85 Prozent
+der Arbeitsversuche scheiterten an `EMPLOYER_BROKE`, die Geldmenge fror ein. Die Frage
+war, wie man die Stadtkasse verlässlich füllt, ohne den Realismus zu verletzen.
+
+**Die Antwort war, dass man das nicht kann — und nicht muss.** Eine arme Stadt hat eine
+arme Kasse, und das ist richtig. Der Fehler lag woanders: **Die Stadt zahlte Lohn und
+bekam nichts.** Wer in der städtischen Schmiede eine Schicht arbeitete, nahm drei Münzen
+mit, und es entstand kein Eisen, keine Ware, gar nichts. Bei der Anstellung
+(`workShift`) geht der Ertrag längst ins Betriebslager; bei der Tagelöhnerei entstand nie
+etwas. Keine mittelalterliche Stadt hat Tagelöhner als Sozialsystem beschäftigt.
+
+**Die städtische Schmiede ist als Arbeitsplatz gefallen.** `BuildingAction` heißt jetzt
+`REPAIR_FOR_HIRE` statt `WORK`, und `work()` ist ganz weg. An seine Stelle tritt die
+**Instandsetzung öffentlicher Bauten**: Wer dort schuftet, hebt den Zustand um fünf Punkte
+und bekommt Lohn nach Können. Für die Stadt ändert sich weniger, als es klingt — sie hat
+Instandhaltung immer schon aus der Kasse bezahlt, nur an niemanden.
+
+Anders als beim Renovieren auf eigene Rechnung senkt Können hier nicht die Kosten, sondern
+hebt den Verdienst: Den Preis bestimmt der, der zahlt. Und die NPCs suchen den
+**schlechtesten** Bau — wo es am nötigsten ist, wird zuerst gearbeitet.
+
+**Das macht Arbeit knapp, und das ist gewollt.** Stehen alle Bauten in voller Güte, gibt es
+nichts zu tun; die Stadt ist kein Arbeitgeber letzter Instanz mehr. Die Schmiede bleibt als
+Gebäude stehen — man kann sich dort **anstellen** lassen (5.14 schreibt die Stelle aus),
+nur das Hineinspazieren-und-Lohn-Abholen ist vorbei.
+
+Dazu das **Einzugsgeld**: Ein Zehntel des Mitgebrachten geht beim Zuzug an die Stadt.
+Historisch der Normalfall, und hier die Einnahme, die eine junge Stadt am dringendsten
+braucht — sie kommt, wenn die Stadt wächst, und setzt keine Wirtschaft voraus. Ein Anteil
+statt einer festen Summe, weil eine feste für den Armen eine Mauer und für den Reichen ein
+Trinkgeld wäre.
+
+**Gemessen, 600 Ticks, frische Seed-Welt:**
+
+```
+                        vorher      jetzt
+Häuser                       4         10      Zimmerei, Steinmetzhütte, 2 Höfe, 2 Wohnhäuser
+Lebende                     12         18
+Geld bei Leuten            886       1806
+Stadtkasse                   0        727
+CRAFT / SELL              0 / 0  225 / 225
+HARVEST                     92        397
+WORK/EMPLOYER_BROKE      2110          0      ← die Fehlschlagliste ist leer
+```
+
+**Zum ersten Mal läuft die Kette vollständig und ohne einen einzigen Fehlschlag**: ernten,
+verarbeiten, verkaufen, bauen, wohnen — und keine Münze entsteht aus dem Nichts.
+
+Der Müßiggang hat sich dabei verwandelt, und das ist die aufschlussreichste Zahl:
+`STILL_SAVING: 3807` (sie sparen auf etwas, der gesunde Fall), `NO_WORK: 1458` (die neue
+Knappheit), `GOAL_UNREACHABLE: 938` — vorher waren es 2685 unerreichbare Ziele und keine
+Sparer.
+
+Ein Nebenbefund: Die Gründer können jetzt alle `CONSTRUCTION` statt `SMITHING`. Sie lernen,
+was sie tun, und sie richten Häuser her statt zu schmieden.
+
+_Fertig, wenn:_ Wer Lohn bekommt, hat dafür etwas geschaffen. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

@@ -2,7 +2,8 @@ import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { type Transaction } from 'sequelize';
 import type { BuildingAction } from '$lib/model/buildingAction';
 import { sequelize } from '$lib/db/sequelize';
-import { work, WORK_ACTION_POINT_COST } from '$lib/game/buildingAction.logic';
+import { repairForHire, REPAIR_ACTION_POINT_COST } from '$lib/game/buildingAction.logic';
+import { CONDITION_MAX } from '$lib/game/building.logic';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as employmentService from '$lib/server/service/employmentService';
@@ -27,18 +28,41 @@ export async function doBuildingAction(
 	buildingId: string
 ): Promise<ActionResult> {
 	switch (action) {
-		case 'WORK':
-			return arbeiten(characterId, buildingId);
+		case 'REPAIR_FOR_HIRE':
+			return fuerLohnHerrichten(characterId, buildingId);
 	}
 }
 
-async function arbeiten(characterId: string, buildingId: string): Promise<ActionResult> {
+/**
+ * Für Lohn an einem fremden Haus arbeiten — und es dabei instand setzen (5.26).
+ *
+ * **Der Ersatz für die Tagelöhnerei.** Die bestand darin, in die städtische Schmiede zu
+ * gehen und drei Münzen mitzunehmen; niemand bekam etwas dafür. Solange die Münzen aus
+ * dem Nichts kamen, fiel das nicht auf — seit der Lohn eine Kasse hat (5.24), war es ein
+ * Fass ohne Boden, und die Stadt lief binnen hundert Ticks leer.
+ *
+ * Jetzt hinterlässt die Arbeit etwas: **Wer hier schuftet, hebt den Zustand des Hauses.**
+ * Damit ist der Lohn gedeckt — und für die Stadt ändert sich weniger, als es klingt: Sie
+ * hat Instandhaltung immer schon bezahlt (`renovatePublicBuilding` nimmt es aus der
+ * Kasse), nur zahlte sie an niemanden. Jetzt zahlt sie Menschen.
+ *
+ * **Wer zahlt, ist der Eigentümer** — bei einem öffentlichen Bau die Stadt. Am eigenen
+ * Haus arbeitet man ohne Lohn: Das ist dann keine Lohnarbeit, sondern Eigenleistung, und
+ * dafür gibt es `renovateBuilding`.
+ *
+ * Was fehlt und als Punkt 74 festgehalten ist: **der private Auftrag.** Ein Hausbesitzer
+ * kann heute nicht ausschreiben, dass er sein Dach gerichtet haben will — sonst richtete
+ * jeder ungefragt fremde Häuser her und schickte die Rechnung. Bis dahin ist diese
+ * Handlung auf städtische Bauten beschränkt.
+ */
+async function fuerLohnHerrichten(characterId: string, buildingId: string): Promise<ActionResult> {
 	const gebäude = await buildingService.getBuilding(buildingId);
-	const option = gebäude ? buildingService.getBuildingOption(gebäude.optionId) : undefined;
 	const regionId = await buildingService.getBuildingRegionId(buildingId);
-	if (!gebäude || !option || !regionId) {
-		return { ok: false, reason: 'NOT_A_WORKPLACE' };
-	}
+	if (!gebäude || !regionId) return { ok: false, reason: 'NOT_A_WORKPLACE' };
+
+	// Vorerst nur öffentliche Bauten: Der private Auftrag fehlt (Punkt 74).
+	if (gebäude.ownerType !== 'CITY') return { ok: false, reason: 'NOT_A_WORKPLACE' };
+	if (gebäude.condition >= CONDITION_MAX) return { ok: false, reason: 'NOTHING_TO_DO' };
 
 	const tick = await worldService.currentTick();
 
@@ -48,54 +72,31 @@ async function arbeiten(characterId: string, buildingId: string): Promise<Action
 		const arbeiter = await characterService.loadForAction(characterId, tick, t);
 		if (!arbeiter) return { ok: false, reason: 'NOT_A_WORKPLACE' } as const;
 
-		// **Wer zahlt hier?** Bei der städtischen Schmiede die Stadtkasse, bei einem
-		// privaten Betrieb sein Eigentümer — dieselbe Kasse und dieselbe Frage wie beim
-		// Anstellungslohn, deshalb dieselbe Funktion (5.24, Punkt 66).
-		//
-		// **Im eigenen Betrieb zahlt niemand Lohn.** Wer an seiner eigenen Werkbank steht,
-		// arbeitet für sich: Sein Verdienst ist das Erzeugnis, nicht eine Münze aus der
-		// eigenen Tasche. Ohne diese Ausnahme wären Arbeiter und Zahler dieselbe Person,
-		// zwei Schreibzugriffe gingen auf dieselbe Zeile, und der letzte gewänne — im Test
-		// verlor der Eigentümer dabei drei Münzen je Schicht.
-		const eigenerBetrieb: boolean = gebäude.ownerCharacterId === characterId;
-		const kasse = eigenerBetrieb
-			? undefined
-			: await employmentService.kasseVon(buildingId, gebäude.ownerCharacterId, t);
-		if (!eigenerBetrieb && !kasse) return { ok: false, reason: 'NOT_A_WORKPLACE' } as const;
+		const kasse = await employmentService.kasseVon(buildingId, gebäude.ownerCharacterId, t);
+		if (!kasse) return { ok: false, reason: 'NOT_A_WORKPLACE' } as const;
 
-		const ergebnis = work(
+		const ergebnis = repairForHire(
 			{
 				actionPoints: arbeiter.dataValues.actionPoints,
 				money: arbeiter.dataValues.money,
-				regionId: arbeiter.dataValues.RegionId,
-				// Ungelernte Arbeit gibt es auch: Fehlt der Vorlage eine Fertigkeit, zählt
-				// Können hier nicht.
-				skillLevel: option.skill ? await skillService.getLevel(characterId, option.skill, t) : 0
+				buildingSkill: await skillService.getLevel(characterId, 'CONSTRUCTION', t)
 			},
-			// Zustand und Ausbaustufe kommen aus dem Gebäude, das `getBuilding` bereits mit
-			// verrechnetem Verfall geliefert hat — eine verfallene Hütte zahlt weniger.
-			{ regionId, template: option, level: gebäude.level, condition: gebäude.condition },
-			// Im eigenen Betrieb wird der Lohn nicht gezahlt, sondern verrechnet: Die Prüfung
-			// auf Zahlungsfähigkeit soll ihn nicht am eigenen Werk hindern.
-			{ money: eigenerBetrieb ? Number.MAX_SAFE_INTEGER : kasse!.money }
+			{ money: kasse.money },
+			gebäude.condition
 		);
 		if (!ergebnis.ok) return ergebnis;
 
 		await arbeiter.update(
-			{
-				actionPoints: ergebnis.actionPoints,
-				// Am eigenen Werk verdient man nichts — man schafft etwas.
-				money: eigenerBetrieb ? arbeiter.dataValues.money : ergebnis.money
-			},
+			{ actionPoints: ergebnis.actionPoints, money: ergebnis.money },
 			{ transaction: t }
 		);
-		// Und was er bekommt, fehlt dem, der es zahlt.
-		if (!eigenerBetrieb) await kasse!.zahle(ergebnis.employerMoney, t);
-		// In derselben Transaktion: Wer eine Schicht arbeitet, ohne dafür besser zu
-		// werden, hätte einen Aktionspunkt umsonst ausgegeben.
-		if (option.skill) {
-			await skillService.addPractice(characterId, option.skill, WORK_ACTION_POINT_COST, t);
-		}
+		await kasse.zahle(ergebnis.employerMoney, t);
+		// `lastConditionTick` mitschreiben: Ohne ihn liefe der Verfall ab dem alten
+		// Stichtag weiter und die Arbeit wäre im selben Moment wieder verbraucht.
+		await buildingService.setCondition(buildingId, ergebnis.condition, tick, t);
+		// Wer Häuser herrichtet, lernt das Bauen — wie beim Renovieren auf eigene Rechnung.
+		await skillService.addPractice(characterId, 'CONSTRUCTION', REPAIR_ACTION_POINT_COST, t);
+
 		return { ok: true, earned: ergebnis.earned } as const;
 	});
 }

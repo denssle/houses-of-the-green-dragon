@@ -19,7 +19,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 63  | Der geschlossene Kreis — **erledigt mit 5.16**                                     | —                            | erledigt     |
 | 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                       | laufend                      | Entwurf      |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
-| 66  | Wo Geld aus dem Nichts kommt und wohin es verschwindet                             | Punkt 63                     | Befund       |
+| 66  | Wo Geld aus dem Nichts kam — **im Kern behoben (5.26)**; Zehnt und Raubgut offen   | Punkt 23 / 74                | teilweise    |
 | 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern        | dem nächsten Messlauf        | Befund       |
 | 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt      | —                            | erledigt     |
 | 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                  | —                            | erledigt     |
@@ -27,6 +27,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                             | —                            | erledigt     |
 | 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                  | —                            | erledigt     |
 | 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                            | laufend                      | Entwurf      |
+| 74  | Der Auftrag an Tagelöhner — privates Renovieren gegen Lohn                         | Punkt 66 / 33                | Entwurf      |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung             | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                | laufend                      | Entwurf      |
@@ -1198,7 +1199,21 @@ Zu entscheiden ist, **welcher Stadt eine Fläche zugeordnet ist**. Naheliegend �
 verbunden. Das ist zugleich die Frage, die Punkt 31 (Karte als Sechseckraster) für die
 zweite Stadt beantworten muss; wer sie hier löst, sollte sie dort nicht neu erfinden.
 
-### 66. Wo Geld aus dem Nichts kommt und wohin es verschwindet
+### 66. Wo Geld aus dem Nichts kam — behoben (5.24 bis 5.26)
+
+**Behoben.** Der Tagelohn hat einen Zahler (5.24), und seit 5.26 hinterlässt die Arbeit
+auch etwas: Die Tagelöhnerei in der städtischen Schmiede ist gefallen, an ihrer Stelle
+setzen Tagelöhner öffentliche Bauten instand. Damit ist die Ausgabe der Stadt gedeckt —
+sie hat Instandhaltung immer schon bezahlt, nur an niemanden. Gemessen: null Fehlschläge,
+Stadtkasse bei 727 statt 0, und die ganze Produktionskette läuft.
+
+**Was offen bleibt:** Der Zehnt macht weiterhin aus Ware Münzen — `titheOn` nimmt den
+Ertrag, und die Stadt bekommt den Gegenwert, den niemand bezahlt hat. Raubgut verschwindet
+ersatzlos (löst sich mit Punkt 23, sobald ein Überfall einen Täter hat). Und privates
+Renovieren zieht dem Eigentümer Geld ab, das niemand bekommt — dafür braucht es den Auftrag
+an Tagelöhner (Punkt 74).
+
+**Der ursprüngliche Befund:**
 
 **Die Richtlinie steht seit dem 16.08.2026 in `KONZEPT.md`:** Geld wechselt den Besitzer,
 es entsteht und vergeht nicht. Wer Lohn zahlt, zahlt aus seiner Kasse. Dieser Punkt ist
@@ -1816,3 +1831,24 @@ namenloses Haus in der Geschichte stehen lassen, den Besitz an die Stadt geben.
 Das berührt die Chronik aus 4.7d unmittelbar: Sie hält Namen fest, und zwar dauerhaft.
 Weil dort Kennungen und keine Namen gespeichert sind, genügt es, den Charakternamen zu
 ändern — die Chronik zeigt dann „jemand", ohne dass ein Eintrag verschwindet.
+
+### 74. Der Auftrag an Tagelöhner
+
+**Die Gegenseite zu 5.26.** Öffentliche Bauten lassen sich seither für Lohn instand setzen —
+der Bürgermeister ist der Auftraggeber, und `PAY_WAGE` schreibt die Arbeit aus. Für private
+Häuser fehlt das: `renovateBuilding` zieht dem Eigentümer Geld ab, das **niemand** bekommt,
+und ein Hausbesitzer kann nicht ausschreiben, dass er sein Dach gerichtet haben will.
+
+Ohne Auftrag geht es nicht: Sonst richtete jeder ungefragt fremde Häuser her und schickte
+die Rechnung. Deshalb ist `REPAIR_FOR_HIRE` heute auf städtische Bauten beschränkt.
+
+**Zu entwerfen ist der Auftrag als Ding.** Naheliegend derselbe Weg wie beim Preisschild:
+Der Eigentümer hängt aus, was er zahlt; wer will, arbeitet und bekommt es. Damit hängen zwei
+Dinge zusammen, die es schon gibt — `offeredWage` am Gebäude (heute der Anstellungslohn) und
+der Vorschlag aus Punkt 33, Stellenangebote als eigene Zeilen zu führen. Wer beides baut,
+sollte es in einem Zug tun: Ein Betrieb, der Leute sucht, und ein Haus, das gerichtet werden
+will, sind dieselbe Bauart.
+
+**Was es löst:** die letzte Stelle, an der Geld beim Renovieren verschwindet (Punkt 66) —
+und den Fall, dass ein Erbe ein verfallenes Haus übernimmt, das er selbst nicht herrichten
+kann, weil ihm die Aktionspunkte oder das Können fehlen. Dann stellt er jemanden dafür an.
