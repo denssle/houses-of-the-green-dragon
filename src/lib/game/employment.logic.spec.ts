@@ -9,7 +9,6 @@ const BAECKEREI: BuildingTemplate = {
 	type: 'CRAFT',
 	limited: false,
 	limitedTo: 0,
-	actions: [],
 	skill: 'BAKING',
 	recipes: [
 		{

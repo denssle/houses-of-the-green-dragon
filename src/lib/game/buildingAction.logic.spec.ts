@@ -9,7 +9,7 @@ const SCHMIEDE: BuildingTemplate = {
 	type: 'CRAFT',
 	limited: false,
 	limitedTo: 0,
-	actions: [],
+
 	levels: [{ price: 250, name: 'Schmiede', wagePerActionPoint: 3 }]
 };
 

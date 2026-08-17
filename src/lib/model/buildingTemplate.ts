@@ -1,4 +1,3 @@
-import type { BuildingAction } from '$lib/model/buildingAction';
 import type { SkillType } from '$lib/game/skill.logic';
 import type { Recipe } from '$lib/game/production.logic';
 
@@ -40,7 +39,6 @@ export interface BuildingTemplate {
 	type: 'PUBLIC' | 'RESIDENCE' | 'CRAFT' | 'EXTRACTION';
 	limited: boolean;
 	limitedTo: number;
-	actions: BuildingAction[];
 	/**
 	 * Die Ausbaustufen, aufsteigend. Steht hier und nicht in der Datenbank: Sonst fröre
 	 * jedes Gebäude beim Bau die damaligen Werte ein, und eine Balancing-Änderung

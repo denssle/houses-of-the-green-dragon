@@ -334,8 +334,10 @@ describe('Bauen und Arbeiten', () => {
 		});
 
 		it('gibt an einem privaten Haus keine Arbeit', async () => {
-			// Der private Auftrag fehlt noch (Punkt 74) — sonst richtete jeder ungefragt
-			// fremde Häuser her und schickte die Rechnung.
+			// **Ohne Auftrag keine Arbeit** (5.27, Punkt 74): Sonst richtete jeder ungefragt
+			// fremde Häuser her und schickte die Rechnung. Der Grund ist seither präzise —
+			// nicht 'kein Arbeitsplatz', sondern 'kein Angebot': Es liegt am fehlenden
+			// Auftrag und nicht an der Art des Hauses.
 			const adelbert = await charakterMitGeld(300);
 			const grundstueck = await eigenesGrundstueck(adelbert);
 			const gebaut = await buildingService.build(
@@ -351,7 +353,29 @@ describe('Bauen und Arbeiten', () => {
 				werkstatt
 			);
 
-			expect(ergebnis).toEqual({ ok: false, reason: 'NOT_A_WORKPLACE' });
+			expect(ergebnis).toEqual({ ok: false, reason: 'NO_JOB_OFFERED' });
+		});
+
+		it('gibt an einem privaten Haus Arbeit, sobald ein Auftrag aushängt', async () => {
+			// **Die andere Hälfte von Punkt 74.** Wer sein Haus nicht selbst richten kann,
+			// bietet Lohn — und dann ist es ein Geschäft zwischen zwei Seiten.
+			const eigentuemer = await charakterMitGeld(300);
+			const arbeiter = await charakterMitGeld(10);
+			const hausId: string = await haus(eigentuemer, { condition: 50 });
+			await buildingService.offerRepair(eigentuemer, hausId, 4);
+
+			const ergebnis = await buildingActionService.doBuildingAction(
+				'REPAIR_FOR_HIRE',
+				arbeiter,
+				hausId
+			);
+
+			expect(ergebnis.ok).toBe(true);
+			// Der Eigentümer zahlt, der Arbeiter bekommt — und das Haus steht besser da.
+			expect(await geld(arbeiter)).toBeGreaterThan(10);
+			expect(await geld(eigentuemer)).toBeLessThan(300);
+			const nachher = await buildingService.getBuilding(hausId);
+			expect(nachher!.condition).toBeGreaterThan(50);
 		});
 	});
 });

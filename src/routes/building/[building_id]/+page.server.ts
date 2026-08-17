@@ -115,7 +115,21 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 };
 
 export const actions = {
-	/** Die Handlungen aus der Vorlage — heute nur Arbeiten. */
+	/**
+	 * Für Lohn herrichten.
+	 *
+	 * **Ohne Vorlagenprüfung** (5.27): Bis dahin stand hier `option.actions.includes(action)`,
+	 * und das war richtig, solange eine Handlung an der Bauart hing — die Schmiede erlaubte
+	 * Arbeit, das Wohnhaus nicht. Seit 5.26 hängt sie am **Zustand** und am **Auftrag**, und
+	 * damit ging die Prüfung ins Leere: `actions` ist bei jeder Vorlage leer, also lehnte die
+	 * Route jede Handlung mit 403 ab. Der Knopf war da, der Klick kam an, und die Antwort war
+	 * „Diese Handlung ist hier nicht möglich" — gefunden vom Rundlauf, nachdem ich dreimal
+	 * daneben geraten hatte.
+	 *
+	 * Geprüft wird jetzt nur noch dort, wo die Regeln stehen: `fuerLohnHerrichten` nennt den
+	 * Grund genau (kein Auftrag, nichts zu richten, eigenes Haus, Kasse leer). Eine Prüfung an
+	 * zwei Stellen läuft auseinander — genau das ist hier passiert.
+	 */
 	act: async ({ request, params, locals }) => {
 		const building = await buildingService.getBuilding(params.building_id);
 		if (!building) error(404, 'Not Found');
@@ -125,12 +139,6 @@ export const actions = {
 
 		const data = await request.formData();
 		const action = data.get('action')?.toString() as BuildingAction;
-		const option = buildingService.getBuildingOption(building.optionId);
-
-		if (!option?.actions.includes(action)) {
-			return fail(403, { message: 'Diese Handlung ist hier nicht möglich' });
-		}
-
 		const ergebnis = await buildingActionService.doBuildingAction(
 			action,
 			locals.currentCharacter.id,

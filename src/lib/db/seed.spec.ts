@@ -1,7 +1,12 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { sequelize } from '$lib/db/sequelize';
 import '$lib/db/db';
-import { findStartRegionId, seedWorld, WORLD_STARTS_AT_TICK } from '$lib/db/seed';
+import {
+	findStartRegionId,
+	seedWorld,
+	STADTKASSE_BEI_WELTBEGINN,
+	WORLD_STARTS_AT_TICK
+} from '$lib/db/seed';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
@@ -28,7 +33,11 @@ describe('Weltaufbau', () => {
 		const umland = await Region.count({ where: { type: ['FOREST', 'QUARRY', 'FIELD', 'MINE'] } });
 
 		expect(stadt?.dataValues.name).toBe('Grünau');
-		expect(stadt?.dataValues.treasury).toBe(0);
+		// **Nicht mehr leer** (5.27): Eine Stadt, die schon steht, hat Rücklagen — und sie
+		// braucht sie, seit sie ihre Instandsetzung an Menschen zahlt statt an niemanden
+		// (5.26). Mit leerer Kasse gäbe es keine Lohnarbeit, und ein neuer Spieler stünde
+		// ohne Verdienst da.
+		expect(stadt?.dataValues.treasury).toBe(STADTKASSE_BEI_WELTBEGINN);
 		// Wald, Steinbruch, Acker, Erzgrube (4.10), Schafweide und Kräuterwiese (4.11).
 		expect(umland).toBe(6);
 	});

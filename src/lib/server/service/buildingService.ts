@@ -60,7 +60,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Das Rathaus der Stadt',
 			limited: true,
 			limitedTo: 1,
-			actions: [],
+
 			levels: [{ price: 0, name: 'Rathaus' }]
 		},
 		{
@@ -75,7 +75,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			// betrifft — Rathaus, Marktplatz, später die Mauer.
 			limited: false,
 			limitedTo: 0,
-			actions: [],
+
 			// Aus dem Konzept: Wer sein Haus verliert, braucht einen Ort, an dem es
 			// weitergeht. Ohne ein Auffangnetz wäre Obdachlosigkeit eine Sackgasse — und
 			// seit 4.6a auch ein Todesurteil, weil ohne Wohnraum keine Kinder kommen.
@@ -88,7 +88,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Ein einfaches Wohnhaus',
 			limited: false,
 			limitedTo: 0,
-			actions: [],
+
 			// Die Leiter, an der die Bevölkerung hängt: Wer viele Kinder will, muss
 			// zweimal ausbauen — und danach ein zweites Grundstück kaufen. Spürbare
 			// Sprünge, aber kein Vervielfachen, damit knappes Bauland die härtere Grenze
@@ -106,7 +106,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Wo die Stadtwache sitzt — bezahlt aus der Stadtkasse.',
 			limited: false,
 			limitedTo: 0,
-			actions: [],
+
 			// **Der Lohn steht hier nur, damit es überhaupt ein Arbeitsplatz ist.** Was ein
 			// Wächter wirklich bekommt, setzt der Bürgermeister als Aushang — der Sold ist
 			// eine Amtsentscheidung und keine Konstante.
@@ -122,7 +122,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Wo Kinder lernen, was sie als Erwachsene können sollen.',
 			limited: false,
 			limitedTo: 0,
-			actions: [],
+
 			// Der Lohn steht hier, damit die Schule ein Arbeitsplatz ist; was ein Lehrer
 			// bekommt, setzt der Bürgermeister als Aushang — wie bei der Wache.
 			levels: [{ price: 350, name: 'Schule', wagePerActionPoint: 4 }]
@@ -134,7 +134,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Sägt aus Stämmen die Bretter für Dach und Diele.',
 			limited: false,
 			limitedTo: 0,
-			actions: [],
+
 			skill: 'CONSTRUCTION',
 			recipes: [
 				{
@@ -157,7 +157,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Behaut Bruchstein zu Quadern für Mauern und Fundamente.',
 			limited: false,
 			limitedTo: 0,
-			actions: [],
+
 			skill: 'MINING',
 			recipes: [
 				{
@@ -180,7 +180,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Näht aus Wolle Gewänder, die man ansieht.',
 			limited: false,
 			limitedTo: 0,
-			actions: [],
+
 			skill: 'TAILORING',
 			recipes: [
 				{
@@ -203,7 +203,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Zieht aus Kräutern Duftwasser und Stärkungstrank.',
 			limited: false,
 			limitedTo: 0,
-			actions: [],
+
 			skill: 'ALCHEMY',
 			// Zwei Erzeugnisse aus demselben Rohstoff — der Grund, warum eine Vorlage
 			// mehrere Rezepte tragen kann.
@@ -235,7 +235,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Das Wirtschaftsgebäude einer Pacht — wo die Hände arbeiten, die sie bestellen.',
 			limited: false,
 			limitedTo: 0,
-			actions: [],
+
 			// **Kein eigenes Rezept: Was hier entsteht, sagt der Boden.** Ein Hof am
 			// Mühlenfeld erntet Getreide, derselbe Hof an der Erzgrube bricht Erz — eine
 			// Vorlage je Rohstoffart wären sechs Vorlagen, die sich nur in einer Zeile
@@ -256,7 +256,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Wo jeder seinen Stand aufschlagen darf — gegen Standgeld.',
 			limited: true,
 			limitedTo: 1,
-			actions: [],
+
 			levels: [{ price: 0, name: 'Marktplatz' }]
 		},
 		{
@@ -266,7 +266,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Mahlt Getreide zu Mehl.',
 			limited: false,
 			limitedTo: 0,
-			actions: [],
+
 			skill: 'BAKING',
 			recipes: [
 				{
@@ -289,7 +289,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Backt aus Mehl Brot.',
 			limited: false,
 			limitedTo: 0,
-			actions: [],
+
 			skill: 'BAKING',
 			recipes: [
 				{
@@ -312,8 +312,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			description: 'Schmiedet aus Erz das Eisen, das ein Haus zusammenhält.',
 			limited: false,
 			limitedTo: 0,
-			// **Keine Tagelöhnerei mehr** (5.26): Wer hier arbeiten will, wird angestellt.
-			actions: [],
+
 			skill: 'SMITHING',
 			// Seit 4.10 hat sie ein Rezept. Bis dahin war sie ein Arbeitsplatz ohne Werk:
 			// Man konnte dort Lohn verdienen, aber es entstand nichts.

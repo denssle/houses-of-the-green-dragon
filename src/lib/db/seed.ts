@@ -59,7 +59,7 @@ const GASSEN = ['Am Markt', 'Gerbergasse', 'Töpferweg'] as const;
  * vierundzwanzig Schichten — genug, dass ein Ankömmling sich sein erstes Grundstück
  * erarbeiten kann (das kostet dreizehn), und wenig genug, dass die Stadtkasse es trägt.
  */
-const STADT_BEI_WELTBEGINN = 70;
+export const STADT_BEI_WELTBEGINN = 70;
 
 /**
  * Was in der Stadtkasse liegt, wenn die Welt beginnt.
@@ -73,7 +73,7 @@ const STADT_BEI_WELTBEGINN = 70;
  * und wenig genug, dass ein Bürgermeister damit haushalten muss. Danach lebt sie von ihren
  * Einnahmen: Zehnt, Standgeld, Pacht, Einzugsgeld.
  */
-const STADTKASSE_BEI_WELTBEGINN = 200;
+export const STADTKASSE_BEI_WELTBEGINN = 200;
 
 const STADTGEBAEUDE = [
 	{ optionId: 0, name: 'Rathaus', adresse: 'Am Markt 1' },
