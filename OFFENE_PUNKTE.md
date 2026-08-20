@@ -1852,3 +1852,56 @@ will, sind dieselbe Bauart.
 **Was es löst:** die letzte Stelle, an der Geld beim Renovieren verschwindet (Punkt 66) —
 und den Fall, dass ein Erbe ein verfallenes Haus übernimmt, das er selbst nicht herrichten
 kann, weil ihm die Aktionspunkte oder das Können fehlen. Dann stellt er jemanden dafür an.
+
+### 75. Die Testläufe dauern zu lange
+
+**Gemessen am 20.08.2026, auf vier Kernen:** Die volle Suite braucht rund **sieben
+Minuten** für 715 Tests — 428 Sekunden Wanduhr, 812 Sekunden Testzeit zusammengenommen.
+Das ist die Zahl, die jeder Änderung im Weg steht, denn vor jedem Commit läuft sie einmal.
+
+**Die reinen Logiktests sind es nicht.** `src/lib/game/` bringt 374 Tests in **fünf
+Sekunden** durch. Die Last liegt woanders:
+
+```
+src/lib/game/ (374 Tests)              5,0 s
+buildingService.spec.ts (36 Tests)    13,6 s   davon 4,2 s Tests, der Rest Laden
+measure.spec.ts (2 Tests)             18,7 s   davon 15,0 s Tests
+```
+
+Zwei Ursachen, die sich überlagern: **Startkosten je Datei** — Transform und Import, bei
+58 Dateien auf vier Kernen — und **Dateien, die Ticks simulieren**. Ein Tick kostet rund
+700 ms (Punkt 67), und daran hängt alles, was Zeit vergehen lässt.
+
+**Was schon ausprobiert und verworfen ist:** `--pool=threads` statt der Vorgabe `forks`
+ist **langsamer** (7,1 s statt 5,0 s auf `src/lib/game/`). Kein Weg.
+
+**Was als Nächstes zu tun wäre:** Ein Lauf, der die Zeit **je Datei** ausgibt. Bekannt ist
+bisher nur, dass `buildingService` mit 4,2 Sekunden nicht der Grund sein kann — die 812
+Sekunden müssen sich auf wenige Dateien ballen, vermutlich die, die Welt und Ticks
+simulieren. Erst danach lohnt es, irgendwo zu kürzen.
+
+**Was unabhängig davon geht:** die Suite teilen. Ein Skript nur für `src/lib/game/` gäbe
+eine innere Schleife von fünf Sekunden; Datenbank und Simulation liefen dann nur noch vor
+dem Commit. Das ändert nichts an der Gesamtdauer, aber viel an der Arbeit damit.
+
+**Und was es nicht löst:** Der Messlauf selbst wird nicht schneller, solange ein Tick 700
+ms kostet — 1200 Ticks sind knapp fünfzehn Minuten Untergrenze. Das ist Punkt 67 und ein
+eigenes Vorhaben.
+
+### 76. Niemand kann sich einen Ausbau leisten
+
+**Der Befund aus 5.30.** Ausbauen ist gebaut, hat Wirkung (Ertrag, Kraftvorrat) und die
+NPCs haben die Handlungen dafür — geprüft und getestet. Nur: In 1200 Ticks baut niemand
+aus. Alheid stand am Ende bei **86 Münzen**, ihre Zimmerei kostet **340**.
+
+Dabei erzeugt und verkauft sie mehr als je zuvor (966 Ernten, 410 Durchgänge, 409
+Angebote). Was hereinkommt, geht für Brot wieder hinaus.
+
+**Das ist keine Frage der Entscheidungslogik mehr, sondern der Preise.** Ein Brett zu
+sechs Münzen trägt keine Werkstatt für dreihundertvierzig. Zu prüfen wäre, welche der
+Stellschrauben es sein soll — der Erlös je Ware, die Ausbaukosten, oder die Menge, die ein
+Durchgang bringt. Es gehört zu Punkt 16.
+
+**Eine Warnung dazu:** Der naheliegende Weg, ein Sparziel zu setzen und die NPCs darauf
+hinarbeiten zu lassen, ist bereits gegangen und hat 5.30 ausgelöst — er machte aus
+Unternehmern Tagelöhner. Die Rangfolge ist jetzt in Ordnung; die Kasse ist es nicht.
