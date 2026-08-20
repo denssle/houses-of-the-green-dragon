@@ -33,6 +33,37 @@ export interface Recipe {
 	seasons?: Season[];
 }
 
+/**
+ * Der Betrieb, in dem gearbeitet wird.
+ *
+ * Zustand **und** Ausbau, als ein Wert: Beide gehören dem Gebäude und beide gehen in den
+ * Ertrag ein. Als zwei Zahlen nebeneinander wären sie über kurz oder lang vertauscht —
+ * `(rezept, koennen, 100, 2)` sagt nicht, welche welche ist.
+ */
+export interface Workshop {
+	condition: number;
+	/** Die Ausbaustufe, eins-basiert. Ein Acker hat keine und steht auf 1. */
+	level: number;
+}
+
+/**
+ * Wie viel mehr eine ausgebaute Werkstatt hergibt — je Stufe über der ersten.
+ *
+ * **Am Ausbau bemessen, nicht je Vorlage aufgezählt**, wie schon das Baumaterial: Jede
+ * neue Werkstatt bringt ihre Steigerung von selbst mit, statt sie in einer Tabellenzeile
+ * gepflegt zu bekommen, die man beim Hinzufügen vergisst.
+ *
+ * Die Hälfte je Stufe ist der Sinn des Ausbaus: Eine Zimmerei kostet knapp das Doppelte
+ * des Sägeschuppens und macht aus denselben zwei Stämmen fünf Bretter statt drei. Damit
+ * rechnet sich der Ausbau über die Zeit — und nur über die Zeit, denn die Aktionspunkte
+ * je Durchgang bleiben dieselben.
+ */
+export const OUTPUT_PER_LEVEL = 0.5;
+
+export function levelFactor(level: number): number {
+	return 1 + Math.max(0, level - 1) * OUTPUT_PER_LEVEL;
+}
+
 export type ProductionOutcome =
 	| { ok: true; actionPoints: number; produced: number }
 	| { ok: false; reason: ActionFailureReason };
@@ -40,15 +71,24 @@ export type ProductionOutcome =
 /**
  * Wie viel ein Durchgang bringt.
  *
- * Drei Faktoren, und jeder war schon vorher da: das Können des Handwerkers (4.5a), der
- * Zustand des Betriebs (4.5) und die Grundmenge aus dem Rezept. Mindestens eines, sonst
- * wäre der Aktionspunkt verloren, ohne dass es jemand angesagt hätte — dieselbe Regel
- * wie beim Lohn.
+ * Vier Faktoren: das Können des Handwerkers (4.5a), der Zustand des Betriebs (4.5), sein
+ * Ausbau und die Grundmenge aus dem Rezept. Mindestens eines, sonst wäre der
+ * Aktionspunkt verloren, ohne dass es jemand angesagt hätte — dieselbe Regel wie beim
+ * Lohn.
+ *
+ * **Der Ausbau kam zuletzt dazu**, und er ist der einzige der drei Faktoren, den man
+ * kaufen kann: Können muss man sich erarbeiten, der Zustand hält bestenfalls den vollen
+ * Ertrag. Wer mehr will als das, baut aus.
  */
-export function yieldOf(recipe: Recipe, skillLevel: number, condition: number): number {
+export function yieldOf(recipe: Recipe, skillLevel: number, workshop: Workshop): number {
 	return Math.max(
 		1,
-		Math.round(recipe.baseOutput * skillFactor(skillLevel) * outputFactor(condition))
+		Math.round(
+			recipe.baseOutput *
+				skillFactor(skillLevel) *
+				outputFactor(workshop.condition) *
+				levelFactor(workshop.level)
+		)
 	);
 }
 
@@ -63,7 +103,7 @@ export function produce(
 	worker: { actionPoints: number; skillLevel: number },
 	recipe: Recipe,
 	stock: Record<string, number>,
-	condition: number,
+	workshop: Workshop,
 	season: Season
 ): ProductionOutcome {
 	if (recipe.seasons && !recipe.seasons.includes(season)) {
@@ -81,7 +121,7 @@ export function produce(
 	return {
 		ok: true,
 		actionPoints: worker.actionPoints - recipe.actionPointCost,
-		produced: yieldOf(recipe, worker.skillLevel, condition)
+		produced: yieldOf(recipe, worker.skillLevel, workshop)
 	};
 }
 

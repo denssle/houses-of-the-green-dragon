@@ -9,6 +9,7 @@ import {
 	RENOVATION_ACTION_POINT_COST,
 	RENOVATION_COST_PER_POINT,
 	residentsAt,
+	restAt,
 	upgrade,
 	UPGRADE_ACTION_POINT_COST,
 	wageAt,
@@ -26,9 +27,9 @@ const WOHNHAUS: BuildingTemplate = {
 	limitedTo: 0,
 
 	levels: [
-		{ price: 100, name: 'Kate', residents: 4 },
-		{ price: 150, name: 'Haus', residents: 6 },
-		{ price: 400, name: 'Großhaus', residents: 9 }
+		{ price: 100, name: 'Kate', residents: 4, restActionPoints: 4 },
+		{ price: 150, name: 'Haus', residents: 6, restActionPoints: 10 },
+		{ price: 400, name: 'Großhaus', residents: 9, restActionPoints: 18 }
 	]
 };
 
@@ -102,11 +103,33 @@ describe('Gebäude', () => {
 			expect(wageAt(WOHNHAUS, 1, 100)).toBe(0);
 		});
 
+		it('mindert den Kraftvorrat, den das Dach trägt', () => {
+			// Ein Großhaus, durch dessen Dach es regnet, ist keine bessere Bleibe als eine
+			// gepflegte Kate — das ist der zweite Grund zu renovieren, und er hat nichts
+			// mit Geld verdienen zu tun.
+			expect(restAt(WOHNHAUS, 3, 100)).toBe(18);
+			expect(restAt(WOHNHAUS, 3, 50)).toBe(9);
+			expect(restAt(WOHNHAUS, 3, 0)).toBe(0);
+		});
+
+		it('trägt in einer Werkstatt gar keinen Vorrat', () => {
+			// Wer in seiner Schmiede schläft, schläft nicht besser — dort wohnt niemand.
+			expect(restAt(SCHMIEDE, 1, 100)).toBe(0);
+		});
+
 		it('lässt den Wohnraum unberührt', () => {
 			// Ein verfallenes Haus wärmt schlecht — aber es hat dieselbe Zahl Betten.
 			expect(residentsAt(WOHNHAUS, 1)).toBe(4);
 			expect(residentsAt(WOHNHAUS, 3)).toBe(9);
 			expect(residentsAt(SCHMIEDE, 1)).toBe(0);
+		});
+
+		it('hebt den Kraftvorrat mit jeder Ausbaustufe', () => {
+			// Der Sinn des Ausbaus für den, der keine Kinder will: nicht mehr Betten,
+			// sondern mehr Kraft, die sich ansammeln darf, ehe Stunden ungenutzt verfallen.
+			expect(restAt(WOHNHAUS, 1, 100)).toBe(4);
+			expect(restAt(WOHNHAUS, 2, 100)).toBe(10);
+			expect(restAt(WOHNHAUS, 3, 100)).toBe(18);
 		});
 	});
 

@@ -2611,6 +2611,56 @@ was sie tun, und sie richten Häuser her statt zu schmieden.
 
 _Fertig, wenn:_ Wer Lohn bekommt, hat dafür etwas geschaffen. — Erledigt.
 
+**5.28 Wofür man ausbaut.** ✓ Beim Durchgehen der Gebäudeseite fiel zuerst auf, dass der
+Ausbau dort nicht zu finden war: Der Knopf saß am Seitenende unter „Instandhaltung", weit
+weg von der Zeile _Ausbaustufe_, und nannte nur eine Zahl. Er nannte sie sogar falsch — den
+Grundpreis, während `upgrade()` mit dem Winteraufschlag rechnet. Im Frost stand „200
+Münzen" auf dem Knopf und 250 wurden abgebucht.
+
+Die Auskunft steht jetzt bei der Stufe und nennt Preis, Aktionspunkte und Wirkung. Damit
+kam die eigentliche Frage: **Welche Wirkung eigentlich?** Bis hierher hob eine Ausbaustufe
+nur die Zahl der Betten und, bei öffentlichen Bauten, den Grundlohn. Eine Zimmerei für 340
+Münzen sägte genauso viele Bretter wie der Sägeschuppen für 180. Wer kein Kinderzimmer
+brauchte, hatte keinen Grund auszubauen — die größte Ausgabe des Spiels führte ins Leere.
+
+**Zwei Wirkungen kamen dazu:**
+
+**Ein Wohnhaus trägt Kraft.** `restActionPoints` hebt die Obergrenze des Aktionsbudgets:
+Kate 4, Haus 10, Großhaus 18 auf die achtundvierzig Grundpunkte. Das ist die Erholung, die
+ein besseres Dach gibt — und der Grund, ein Haus zu besitzen statt nur irgendwo zu wohnen.
+Es wirkt am stärksten für den, der unregelmäßig hereinschaut, weil ihm sonst am ehesten
+Stunden ungenutzt verfallen.
+
+**Der Deckel und nicht der Zufluss**, dieselbe Bauart wie beim Hunger und aus demselben
+Grund: Der Nachschub wird faul ausgewertet, aus einer Differenz zweier Ticks. Ein Zufluss,
+der vom Wohnort abhinge, verlangte zu wissen, wo jemand in der Zwischenzeit gewohnt hat —
+dieses Wissen gibt es nicht, und eine gebrochene Rate ließe obendrein den, der oft
+nachsieht, schlechter dastehen als den, der selten nachsieht.
+
+Damit sind die allgemeine Obergrenze und die persönliche nicht mehr dasselbe, und das zog
+zwei Stellen nach: Der Stärkungstrank deckelte gegen `MAX_ACTION_POINTS` und wäre
+ausgerechnet beim Großhausbesitzer wirkungslos geworden; die Charakterseite zeigte „von
+48", was für die meisten schlicht falsch dagestanden hätte. Beide fragen jetzt
+`actionPointCeiling`.
+
+**Eine Werkstatt gibt mehr her.** `levelFactor` hebt den Ertrag um die Hälfte je Stufe
+über der ersten — die Zimmerei macht aus denselben zwei Stämmen fünf Bretter statt drei.
+**Am Ausbau bemessen und nicht je Vorlage aufgezählt**, wie schon das Baumaterial: Jede
+neue Werkstatt bringt ihre Steigerung von selbst mit. Die Aktionspunkte je Durchgang
+bleiben dieselben, der Ausbau kauft also Ertrag und nicht Zeit — er rechnet sich über die
+Zeit und nur über sie.
+
+Der Ertrag hing bis dahin an Zustand und Können, die beide gemeinsam als lose Zahlen
+gereicht wurden. Sie stehen jetzt als `Workshop` zusammen: `(rezept, koennen, 100, 2)`
+sagt nicht, welche Zahl welche ist.
+
+**Was dabei offen bleibt:** NPCs bauen nicht aus. In `NPC_ACTIONS` gibt es `BUILD`,
+`BUILD_HOME` und `RENOVATE`, aber kein `UPGRADE` — die Wirkung erreicht also vorerst
+nur Spieler. Solange die Werkstatt eines NPC auf der ersten Stufe steht, ändert sich für
+die Simulation nichts. Das gehört entschieden, jetzt wo Ausbauen etwas bedeutet.
+
+_Fertig, wenn:_ Wer ausbaut, sieht vorher, was es bringt — und es bringt etwas. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

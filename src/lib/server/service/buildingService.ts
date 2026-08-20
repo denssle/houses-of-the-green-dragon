@@ -20,6 +20,7 @@ import {
 	purchase,
 	renovate,
 	residentsAt,
+	restAt,
 	RENOVATION_ACTION_POINT_COST,
 	renovationMaterial,
 	upgrade,
@@ -79,6 +80,10 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			// Aus dem Konzept: Wer sein Haus verliert, braucht einen Ort, an dem es
 			// weitergeht. Ohne ein Auffangnetz wäre Obdachlosigkeit eine Sackgasse — und
 			// seit 4.6a auch ein Todesurteil, weil ohne Wohnraum keine Kinder kommen.
+			// **Kein Kraftbonus.** Die Unterkunft ist ein Dach und ein Auffangnetz, kein
+			// Zuhause: Zwanzig Menschen in einem Saal erholen sich nicht besser als
+			// draußen. Wer mehr will, baut sich eine Kate — genau dorthin soll der Weg
+			// führen, sonst bliebe das Auffangnetz die bequemste Bleibe der Stadt.
 			levels: [{ price: 0, name: 'Unterkunft', residents: 20 }]
 		},
 		{
@@ -93,10 +98,16 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			// zweimal ausbauen — und danach ein zweites Grundstück kaufen. Spürbare
 			// Sprünge, aber kein Vervielfachen, damit knappes Bauland die härtere Grenze
 			// bleibt.
+			//
+			// **Der Kraftvorrat steigt mit dem Ausbau.** Die achtundvierzig Grundpunkte
+			// sind zwei Tage; das Großhaus legt noch einen halben drauf. Das ist der
+			// Grund, ein Haus zu besitzen statt nur irgendwo zu wohnen — und er wirkt für
+			// den am stärksten, der unregelmäßig hereinschaut, weil ihm sonst am ehesten
+			// Stunden ungenutzt verfallen.
 			levels: [
-				{ price: 100, name: 'Kate', residents: 4 },
-				{ price: 150, name: 'Haus', residents: 6 },
-				{ price: 400, name: 'Großhaus', residents: 9 }
+				{ price: 100, name: 'Kate', residents: 4, restActionPoints: 4 },
+				{ price: 150, name: 'Haus', residents: 6, restActionPoints: 10 },
+				{ price: 400, name: 'Großhaus', residents: 9, restActionPoints: 18 }
 			]
 		},
 		{
@@ -580,6 +591,31 @@ export async function getBuilding(buildingId: string): Promise<Building | undefi
 	if (!gefunden) return undefined;
 
 	return (await mitZustand(gefunden, await worldService.currentTick())) ?? undefined;
+}
+
+/**
+ * Wie viel Kraftvorrat das Dach eines Menschen trägt — 0 ohne Dach.
+ *
+ * **Ohne Ruinenprüfung**, anders als `getBuilding`: Diese Frage wird bei jedem Laden
+ * eines Charakters gestellt, und eine Auskunft, die dabei nebenbei Häuser abreißt, wäre
+ * genau die Art Seiteneffekt, die der Verfall sonst vermeidet („Lesen ändert nichts").
+ * Eine Ruine gibt hier ohnehin nichts her: Ihr Zustand ist null, und damit auch der
+ * Vorrat, den sie trägt.
+ */
+export async function restAtHome(
+	homeBuildingId: string | null,
+	tick: number,
+	transaction?: Transaction
+): Promise<number> {
+	if (!homeBuildingId) return 0;
+
+	const zuhause = await BuildingModel.findByPk(homeBuildingId, { transaction });
+	if (!zuhause) return 0;
+
+	const vorlage = getBuildingOption(zuhause.dataValues.optionId);
+	if (!vorlage) return 0;
+
+	return restAt(vorlage, zuhause.dataValues.level, zustandVon(zuhause, tick));
 }
 
 /** In welcher Region ein Gebäude steht — über sein Grundstück. */

@@ -244,7 +244,12 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 		if (!angestellter || !kasse) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
 		const koennen: number = rezept ? await skillService.getLevel(employeeId, rezept.skill, t) : 0;
-		const menge: number = rezept ? yieldOf(rezept, koennen, gebaeude.condition) : 0;
+		// **Der Ausbau zählt auch für den Knecht** — es ist dieselbe Werkstatt. Stünde hier
+		// die erste Stufe fest, brächte ein Ausbau dem Betrieb nur etwas, solange der
+		// Eigentümer selbst an der Säge steht; wer Leute anstellt, hätte ihn umsonst bezahlt.
+		const menge: number = rezept
+			? yieldOf(rezept, koennen, { condition: gebaeude.condition, level: gebaeude.level })
+			: 0;
 
 		const ergebnis = workShift(
 			{

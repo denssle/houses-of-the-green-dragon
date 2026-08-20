@@ -12,7 +12,6 @@ import { currentSatiety, eat, satietyLabel, wouldBeWasted } from '$lib/game/need
 import { getItemTemplate, type ItemTemplate } from '$lib/model/itemTemplate';
 import { canAfford } from '$lib/game/economy';
 import { tonicRestores } from '$lib/game/attire.logic';
-import { MAX_ACTION_POINTS } from '$lib/game/time';
 import * as characterService from '$lib/server/service/characterService';
 import * as worldService from '$lib/server/service/worldService';
 
@@ -246,7 +245,20 @@ export async function drinkTonic(
 		const person = await characterService.loadForAction(characterId, tick, t);
 		if (!person) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
-		const zurueck: number = tonicRestores(person.dataValues.actionPoints, MAX_ACTION_POINTS);
+		// **Die persönliche Obergrenze**, nicht die allgemeine: Seit ein Dach den Vorrat
+		// hebt, sind die beiden nicht mehr dasselbe. Stünde hier weiter `MAX_ACTION_POINTS`,
+		// verpuffte der Trank ausgerechnet bei dem, der sich das Großhaus geleistet hat —
+		// und der Trank wäre bei ihm nicht schwächer, sondern wirkungslos.
+		const grenze: number = await characterService.actionPointCeiling(
+			{
+				satiety: person.dataValues.satiety,
+				lastNeedTick: person.dataValues.lastNeedTick,
+				homeBuildingId: person.dataValues.HomeBuildingId
+			},
+			tick,
+			t
+		);
+		const zurueck: number = tonicRestores(person.dataValues.actionPoints, grenze);
 		if (zurueck <= 0) return { ok: false, reason: 'NOTHING_TO_DO' } as const;
 
 		if (!(await changeStock(characterId, 'TONIC', -1, t))) {

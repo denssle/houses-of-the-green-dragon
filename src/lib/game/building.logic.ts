@@ -79,6 +79,18 @@ export function residentsAt(template: BuildingTemplate, level: number): number {
 	return levelOf(template, level).residents ?? 0;
 }
 
+/**
+ * Wie viel Kraftvorrat dieses Dach zusätzlich trägt — 0, wenn es keines ist.
+ *
+ * Gemindert um den Zustand, wie der Lohn: In einem Großhaus, durch dessen Dach es regnet,
+ * schläft niemand besser als in einer gepflegten Kate. Das ist der zweite Grund zu
+ * renovieren, der nichts mit Geld verdienen zu tun hat.
+ */
+export function restAt(template: BuildingTemplate, level: number, condition: number): number {
+	const grundwert: number = levelOf(template, level).restActionPoints ?? 0;
+	return Math.floor(grundwert * outputFactor(condition));
+}
+
 /** Was der Betrieb auf dieser Stufe zahlt, gemindert um den Zustand. */
 export function wageAt(template: BuildingTemplate, level: number, condition: number): number {
 	const grundlohn: number = levelOf(template, level).wagePerActionPoint ?? 0;

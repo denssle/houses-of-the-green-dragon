@@ -271,8 +271,9 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 			},
 			rezept,
 			{},
-			// Ein Acker hat keinen Zustand wie ein Gebäude — er trägt immer voll.
-			100,
+			// Ein Acker hat keinen Zustand wie ein Gebäude — er trägt immer voll —, und
+			// ausbauen lässt er sich auch nicht: Eine Bodenverbesserung gehört zu Punkt 12.
+			{ condition: 100, level: 1 },
 			seasonOf(tick)
 		);
 		if (!ergebnis.ok) return ergebnis;
@@ -372,7 +373,7 @@ export async function craft(
 			},
 			rezept,
 			vorrat,
-			gebaeude.condition,
+			{ condition: gebaeude.condition, level: gebaeude.level },
 			seasonOf(tick)
 		);
 		if (!ergebnis.ok) return ergebnis;

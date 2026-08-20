@@ -16,7 +16,7 @@ import * as worldService from '$lib/server/service/worldService';
 import { deathProbabilityPerYear } from '$lib/game/mortality.logic';
 import { fullName } from '$lib/game/naming.logic';
 import { personalityLabel } from '$lib/game/personality.logic';
-import { ageInYears, MAX_ACTION_POINTS, yearOf } from '$lib/game/time';
+import { ageInYears, yearOf } from '$lib/game/time';
 import type { Character } from '$lib/model/character';
 
 /**
@@ -108,7 +108,11 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		// Nicht die Zahl, sondern ob überhaupt eines besteht: Ein Prozentwert lüde dazu
 		// ein, den Tod auszurechnen statt sich auf ihn vorzubereiten.
 		mortal: deathProbabilityPerYear(alter) > 0,
-		maxActionPoints: MAX_ACTION_POINTS,
+		// **Die eigene Obergrenze, nicht die allgemeine.** Sie hängt am Dach (ein besseres
+		// Haus trägt mehr Vorrat) und am Hunger — eine feste 48 daneben stünde für die
+		// meisten schlicht falsch da, und der Ausbau, den man dafür bezahlt hat, wäre
+		// nirgends abzulesen.
+		maxActionPoints: await characterService.actionPointCeilingOf(gezeigt.id, jetzt),
 		region: await regionService.getRegion(gezeigt.regionId),
 		home: zuhause,
 		plots: await plotService.getPlotsOfCharacter(gezeigt.id),

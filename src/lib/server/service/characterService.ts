@@ -72,19 +72,72 @@ export async function create(
  * gegen den alten Stand abgerechnet würde. Die Rechnung ist idempotent — zweimal
  * ausgeführt kommt dasselbe heraus.
  */
+/**
+ * Wie viel Kraft dieser Mensch überhaupt ansammeln kann.
+ *
+ * Zwei Einflüsse, und **beide wirken auf die Obergrenze statt auf den Zufluss**: Hunger
+ * senkt sie, ein gutes Dach hebt sie. Der Grund ist derselbe wie bei `actionPointFactor`
+ * — die Rechnung bleibt über beliebige Tick-Abstände exakt. Ein Zufluss, der vom Wohnort
+ * abhinge, verlangte zu wissen, wo jemand in der Zwischenzeit gewohnt hat, und dieses
+ * Wissen gibt es nicht: Der Nachschub wird faul ausgewertet, aus einer Differenz.
+ *
+ * Der Hunger greift dabei **auf das Ganze** und nicht nur auf den Grundwert. Wer nichts
+ * isst, hält auch in einem Großhaus nicht durch; das Haus ersetzt keine Mahlzeit.
+ *
+ * Muss überall dort gefragt werden, wo eine Obergrenze gebraucht wird — auch beim
+ * Stärkungstrank, der bis dahin gegen `MAX_ACTION_POINTS` deckelte und einem Bewohner
+ * eines Großhauses deshalb nichts mehr gegeben hätte, sobald er über achtundvierzig stand.
+ */
+export async function actionPointCeiling(
+	character: { satiety: number; lastNeedTick: number; homeBuildingId: string | null },
+	tick: number,
+	transaction?: Transaction
+): Promise<number> {
+	const vomDach: number = await buildingService.restAtHome(
+		character.homeBuildingId,
+		tick,
+		transaction
+	);
+	return Math.floor(
+		(MAX_ACTION_POINTS + vomDach) *
+			actionPointFactor(currentSatiety(character.satiety, character.lastNeedTick, tick))
+	);
+}
+
+/**
+ * Dieselbe Auskunft für jemanden, von dem man nur die Kennung hat.
+ *
+ * Sättigung und Wohnort stehen nicht im `Character`, den die Anzeige bekommt — sie sind
+ * Innereien und sollen es bleiben. Diese Zeile holt sie einmal und gibt nur die Zahl
+ * heraus, die dort hingehört.
+ */
+export async function actionPointCeilingOf(characterId: string, tick: number): Promise<number> {
+	const instanz = await CharacterModel.findByPk(characterId);
+	if (!instanz) return MAX_ACTION_POINTS;
+
+	return actionPointCeiling(
+		{
+			satiety: instanz.dataValues.satiety,
+			lastNeedTick: instanz.dataValues.lastNeedTick,
+			homeBuildingId: instanz.dataValues.HomeBuildingId
+		},
+		tick
+	);
+}
+
 async function nachwachsenLassen(
 	instanz: Model<CharacterAttributes, CharacterCreationAttributes>,
 	tick: number,
 	transaction?: Transaction
 ): Promise<void> {
-	// Hunger senkt die **Obergrenze**, nicht den Zufluss: Die Rechnung bleibt damit ueber
-	// beliebige Tick-Abstaende exakt, und niemandem wird genommen, was er sich satt
-	// erarbeitet hat.
-	const grenze: number = Math.floor(
-		MAX_ACTION_POINTS *
-			actionPointFactor(
-				currentSatiety(instanz.dataValues.satiety, instanz.dataValues.lastNeedTick, tick)
-			)
+	const grenze: number = await actionPointCeiling(
+		{
+			satiety: instanz.dataValues.satiety,
+			lastNeedTick: instanz.dataValues.lastNeedTick,
+			homeBuildingId: instanz.dataValues.HomeBuildingId
+		},
+		tick,
+		transaction
 	);
 	const gewachsen: number = Math.max(
 		instanz.dataValues.actionPoints,

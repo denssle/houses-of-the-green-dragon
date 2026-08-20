@@ -24,6 +24,19 @@ export interface BuildingLevel {
 	 * Gebäude kein Arbeitsplatz.
 	 */
 	wagePerActionPoint?: number;
+	/**
+	 * Um wie viel dieses Dach den Kraftvorrat seiner Bewohner hebt.
+	 *
+	 * **Der Deckel, nicht der Zufluss** — dieselbe Bauart wie beim Hunger
+	 * (`actionPointFactor`), und aus demselben Grund: Der Nachschub wird faul
+	 * ausgewertet, und ein Zufluss, der vom Wohnort abhinge, verlangte zu wissen, wo
+	 * jemand in der Zwischenzeit gewohnt hat. Der Deckel verlangt das nicht.
+	 *
+	 * Ein besseres Haus lässt einen also **mehr Kraft ansammeln**, ehe die Stunden
+	 * ungenutzt verfallen. Wer am Abend eine Kammer hat statt einer Ecke, kann eine
+	 * längere Abwesenheit später aufholen. Fehlt der Wert, ist das Dach bloß ein Dach.
+	 */
+	restActionPoints?: number;
 }
 
 export interface BuildingTemplate {

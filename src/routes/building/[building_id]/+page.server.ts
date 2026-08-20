@@ -15,13 +15,29 @@ import * as worldService from '$lib/server/service/worldService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
 import * as schoolService from '$lib/server/service/schoolService';
 import type { SkillType } from '$lib/game/skill.logic';
-import { AGE_OF_MAJORITY } from '$lib/game/time';
 import {
 	CONDITION_MAX,
 	RENOVATION_COST_PER_POINT,
-	renovationMaterial
+	renovationMaterial,
+	residentsAt,
+	restAt,
+	UPGRADE_ACTION_POINT_COST,
+	wageAt
 } from '$lib/game/building.logic';
-import { levelOf, maxLevel, upgradePrice } from '$lib/model/buildingTemplate';
+import { levelFactor } from '$lib/game/production.logic';
+import {
+	type BuildingTemplate,
+	levelOf,
+	maxLevel,
+	upgradePrice
+} from '$lib/model/buildingTemplate';
+import {
+	AGE_OF_MAJORITY,
+	buildingCostFactor,
+	type Season,
+	seasonOf,
+	SEASON_NAMES
+} from '$lib/game/time';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const building = await buildingService.getBuilding(params.building_id);
@@ -32,6 +48,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	const option = buildingService.getBuildingOption(building.optionId);
+	const jahreszeit: Season = seasonOf(await worldService.currentTick());
 	const gehoertMir: boolean =
 		locals.currentCharacter !== undefined &&
 		building.ownerCharacterId === locals.currentCharacter.id;
@@ -66,7 +83,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		livesHere: locals.currentCharacter?.homeBuildingId === building.id,
 		levelName: option ? levelOf(option, building.level).name : undefined,
 		maxLevel: option ? maxLevel(option) : 1,
-		upgradeCost: option ? upgradePrice(option, building.level) : undefined,
+		// **Was der nächste Ausbau kostet und was er bringt** — beides dort, wo die Stufe
+		// steht. Bis hierher gab es unten nur einen Knopf mit dem Grundpreis: Er verschwieg
+		// die acht Aktionspunkte, verschwieg den Winteraufschlag — und nannte damit im
+		// Frost einen Preis, den das Spiel nicht hielt — und verschwieg vor allem, wofür
+		// man zahlt. Ein Ausbau ist die größte Ausgabe des Spiels; wer sie blind tätigt,
+		// entscheidet nicht, sondern probiert.
+		upgrade: naechsteStufe(option, building.level, building.condition, jahreszeit),
 		// Was eine Renovierung jetzt kostete — sichtbar, damit man abwägen kann, ob man
 		// sie noch aufschiebt.
 		// Ein Betrieb kann mehreres herstellen (die Alchemistenküche etwa), deshalb eine
@@ -113,6 +136,51 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		)
 	};
 };
+
+/**
+ * Die nächste Ausbaustufe, wie sie vor der Entscheidung aussieht — `undefined`, wenn die
+ * Höchststufe steht.
+ *
+ * Der Zustand geht in den Lohn ein, weil er es auch sonst tut: Eine verfallene Werkstatt
+ * zahlt auf jeder Stufe weniger (`wageAt`). Eine Zahl, die den Verfall wegließe,
+ * verspräche mehr, als der Ausbau einbrächte.
+ */
+function naechsteStufe(
+	option: BuildingTemplate | undefined,
+	level: number,
+	condition: number,
+	season: Season
+) {
+	if (!option) return undefined;
+	const grundpreis: number | undefined = upgradePrice(option, level);
+	if (grundpreis === undefined) return undefined;
+
+	const naechste = levelOf(option, level + 1);
+	return {
+		name: naechste.name,
+		// Der Frost verteuert den Bau — derselbe Faktor, mit dem `upgrade()` rechnet.
+		// Stünde hier der Grundpreis, wäre die Anzeige im Winter schlicht falsch.
+		price: Math.ceil(grundpreis * buildingCostFactor(season)),
+		basePrice: grundpreis,
+		surcharge: buildingCostFactor(season) > 1 ? SEASON_NAMES[season] : undefined,
+		actionPoints: UPGRADE_ACTION_POINT_COST,
+		// Nur nennen, was sich ändert: Ein Betrieb ohne Wohnraum braucht keine Zeile
+		// „0 Plätze", und ein Wohnhaus keine über den Lohn.
+		residents: naechste.residents ?? 0,
+		residentsNow: residentsAt(option, level),
+		wage: wageAt(option, level + 1, condition),
+		wageNow: wageAt(option, level, condition),
+		// Der Kraftvorrat, den das Dach trägt — beim Wohnhaus der eigentliche Gewinn des
+		// Ausbaus, denn Plätze nützen nur, wer Kinder will.
+		rest: restAt(option, level + 1, condition),
+		restNow: restAt(option, level, condition),
+		// Und der Ertrag der Werkstatt, in Prozent des Grundwerts: Was hier steht, ist
+		// dieselbe Rechnung, die `yieldOf` beim Sägen anstellt.
+		output: Math.round(levelFactor(level + 1) * 100),
+		outputNow: Math.round(levelFactor(level) * 100),
+		crafts: (option.recipes ?? []).length > 0
+	};
+}
 
 export const actions = {
 	/**

@@ -40,6 +40,51 @@
 	<dd>
 		{data.levelName ?? data.building.level}
 		<small>(Stufe {data.building.level} von {data.maxLevel})</small>
+
+		<!--
+			**Der Ausbau steht dort, wo die Stufe steht.** Der Knopf gab es schon, aber unten
+			unter „Instandhaltung", zwischen Renovieren und Reparaturauftrag — dort sucht ihn
+			niemand, der wissen will, was aus seiner Kate werden kann. Und was er brachte,
+			stand nirgends.
+		-->
+		{#if data.upgrade}
+			<p>
+				<small>
+					Als <b>{data.upgrade.name}</b>:
+					{#if data.upgrade.residents > data.upgrade.residentsNow}
+						Platz für {data.upgrade.residents} statt {data.upgrade.residentsNow}.
+					{/if}
+					{#if data.upgrade.rest > data.upgrade.restNow}
+						Wer hier wohnt, sammelt {data.upgrade.rest} Aktionspunkte Vorrat statt
+						{data.upgrade.restNow}.
+					{/if}
+					{#if data.upgrade.crafts && data.upgrade.output > data.upgrade.outputNow}
+						Jeder Durchgang bringt {data.upgrade.output} statt {data.upgrade.outputNow} Prozent.
+					{/if}
+					{#if data.upgrade.wage > data.upgrade.wageNow}
+						{data.upgrade.wage} statt {data.upgrade.wageNow} Münzen je Aktionspunkt.
+					{/if}
+				</small>
+			</p>
+			<p>
+				<small>
+					Kostet {data.upgrade.price} Münzen und {data.upgrade.actionPoints} Aktionspunkte.
+					{#if data.upgrade.surcharge}
+						<i>
+							Im {data.upgrade.surcharge} liegt der Bau schwerer — sonst wären es
+							{data.upgrade.basePrice}.
+						</i>
+					{/if}
+				</small>
+			</p>
+			{#if data.mine}
+				<form method="POST" action="?/upgrade" use:enhance class="actions">
+					<button type="submit">Ausbauen</button>
+				</form>
+			{/if}
+		{:else}
+			<p><small><i>Weiter lässt sich hier nicht ausbauen.</i></small></p>
+		{/if}
 	</dd>
 
 	{#if data.building.forSalePrice !== null}
@@ -241,14 +286,6 @@
 			</form>
 		{:else}
 			<p><i>Hier ist nichts zu tun.</i></p>
-		{/if}
-
-		{#if data.upgradeCost !== undefined}
-			<form method="POST" action="?/upgrade" use:enhance>
-				<button type="submit">Ausbauen ({data.upgradeCost} Münzen)</button>
-			</form>
-		{:else}
-			<p><i>Weiter lässt sich hier nicht ausbauen.</i></p>
 		{/if}
 	</section>
 
