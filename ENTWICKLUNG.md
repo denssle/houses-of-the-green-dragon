@@ -2752,6 +2752,59 @@ _Fertig, wenn:_ Eine Werkstatt der Stadt kann auf der zweiten Stufe stehen, ohne
 Spieler sie gebaut hat. — Erledigt, gemessen. Wie oft sie es tut, bleibt offen und hängt
 an der Rangfolge, nicht am Ausbau.
 
+**5.30 Wer eigene Arbeit liegen hat, verdingt sich nicht.** ✓ Der offene Punkt aus 5.29,
+und er saß tiefer als der Ausbau: **Tagelohn steht in der Sicherheitsstufe, eine ganze
+Stufe über der Entfaltung.** Wer unter seinem Sparziel lag, ging deshalb arbeiten — auch
+der, dessen Werkstatt voller Zutaten stand und dessen Pacht reif war.
+
+Solange niemand ein Sparziel hatte, das er nicht ohnehin erreichte, fiel das nicht auf.
+Die Ausbau-Sparziele aus 5.29 machten es sichtbar und richteten dabei Schaden an; die
+Notlösung dort war, die Sparziele wieder zu streichen. Das kurierte das Symptom.
+
+Jetzt greift der Tagelohn nicht mehr bei dem, der eigene Arbeit liegen hat:
+
+```ts
+function hatEigeneArbeit(state: NpcState): boolean {
+	return state.isAdult && (state.ownStockToSell > 0 || state.canCraft || state.hasLease);
+}
+```
+
+Genau die drei Handlungen der Entfaltung, die Geld einbringen. Geprüft wird auf **jetzt**
+verfügbare Arbeit und nicht auf Besitz: Wem die Zutaten ausgegangen sind, für den ist der
+Tagelohn wieder der richtige Weg — und genau so kommt er an das Geld für Nachschub.
+`isAdult` muss dabeistehen, weil die Entfaltung erst mit der Volljährigkeit greift; ein
+Kind, dem man hier den Tagelohn nähme, stünde untätig da.
+
+**Damit durften die Sparziele zurück** — beide. Der Kommentar an der Stelle sagt es: Die
+Reihenfolge der beiden Änderungen ist keine Laune, das Sparziel ohne diese Prüfung ist ein
+Rückschritt, und ein gemessener.
+
+**Gemessen, 1200 Ticks:**
+
+```
+                   ohne Sparziel   mit Sparziel und Rangfolge
+HARVEST                     123                          966
+CRAFT                       346                          410
+SELL                        345                          409
+WORK                        416                          375
+Lebende                      24                           20
+Stadtkasse                     ~                        1317
+```
+
+**Die Erzeugung hat sich verachtfacht**, und die Stadtkasse füllt sich, statt für Tagelohn
+auszubluten. Das ist der eigentliche Gewinn dieses Schritts, und er hat mit dem Ausbau
+nichts zu tun — er lag die ganze Zeit in der Rangfolge.
+
+**Ausgebaut hat trotzdem niemand.** Alheid stand nach 1200 Ticks bei 86 Münzen, Ulrich bei
+einer; der Ausbau ihrer Zimmerei kostet 340. Sie erzeugen und verkaufen mehr als je zuvor,
+aber was hereinkommt, geht für Brot wieder hinaus. Das ist keine Frage der Entscheidung
+mehr — die Regel steht und ist geprüft —, sondern eine der **Preise**: Ein Brett zu sechs
+Münzen trägt keine Werkstatt für dreihundertvierzig. Wer das ändern will, ändert Preise
+oder Ausbaukosten, nicht die Bedürfnishierarchie.
+
+_Fertig, wenn:_ Ein Unternehmer lässt seinen Betrieb nicht stehen, um fremde Häuser zu
+richten. — Erledigt, und die Stadt erzeugt das Achtfache.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

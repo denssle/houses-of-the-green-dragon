@@ -216,6 +216,13 @@ export function savingsTarget(state: NpcState): number | null {
 		if (state.materialPrice !== null) return state.materialPrice;
 	}
 
+	// **Und ein volles Haus spart auf den Anbau** (5.30). Dieselbe Bedingung wie in
+	// `eigenesDach`: Laufen Sparen und Handeln auseinander, spart einer auf etwas, das er
+	// nie tut.
+	if (state.isMarried && state.ownsHome && !state.homeHasRoom) {
+		if (state.homeUpgradePrice !== null) return state.homeUpgradePrice;
+	}
+
 	// Etwas Eigenes — nur, wen sein Wesen dazu drängt. Sonst spart die halbe Stadt auf eine
 	// Werkstatt, und es gäbe niemanden mehr, der darin arbeitet.
 	if (!state.ownsWorkshop && isEnterprising(state.personality)) {
@@ -238,22 +245,19 @@ export function savingsTarget(state: NpcState): number | null {
 		if (!state.hasLease && state.leaseAvailable) return state.leaseFee;
 	}
 
-	// **Auf einen Ausbau wird nicht gespart** (5.29) — und das ist ein Messbefund, kein
-	// Versäumnis. Der erste Entwurf nannte hier beide Ausbaupreise, und zwei Läufe über
-	// sechshundert Ticks zeigten dasselbe Bild: `WORK` fast verdoppelt, `HARVEST` um
-	// dreiundneunzig Prozent eingebrochen. Der Grund steht in `sicherheit`: Wer unter
-	// seinem Sparziel liegt, geht **arbeiten**, und Arbeit heißt Tagelohn an städtischen
-	// Bauten — die Stufe steht über der Entfaltung. Ausgerechnet die Bäuerin mit Hof und
-	// Zimmerei ließ beides liegen und richtete fremde Häuser her, um auf eine Zimmerei zu
-	// sparen, die sie nicht nutzte.
+	// **Und wer sie zu nutzen weiß, spart auf die größere** (5.30). Der letzte Punkt der
+	// Liste, weil er der teuerste und der am wenigsten dringliche ist: Eine Werkstatt, die
+	// läuft, ernährt ihren Mann auch auf der ersten Stufe.
 	//
-	// **Das Sparziel ist für den gedacht, der keinen anderen Weg hat** (Punkt 55): Wer
-	// nichts besitzt, kommt an ein Grundstück nur über Lohn. Wer eine Werkstatt und eine
-	// Pacht hat, hat einen besseren — er erntet, verarbeitet und verkauft. Ihn zum
-	// Tagelöhner zu machen, kehrt die Bedürfnishierarchie um.
-	//
-	// Der Ausbau kommt deshalb aus dem, was der Betrieb abwirft. Im Messlauf reichte das:
-	// Alheids Sägeschuppen stand nach sechshundert Ticks als Zimmerei.
+	// **Dass das hier stehen darf, hängt an `hatEigeneArbeit`.** Ohne jene Prüfung war
+	// dieses Ziel verheerend — es schickte den Werkstattbesitzer zum Tagelohn und ließ
+	// seinen Betrieb stillstehen. Mit ihr sagt es nur noch, was es sagen soll: Arbeite
+	// weiter, du hast noch etwas vor. Die Reihenfolge der beiden Änderungen ist deshalb
+	// keine Laune — die zweite ohne die erste ist ein Rückschritt, und ein gemessener.
+	if (state.ownsWorkshop && state.canCraft && isEnterprising(state.personality)) {
+		if (state.workshopUpgradePrice !== null) return state.workshopUpgradePrice;
+	}
+
 	return null;
 }
 
@@ -453,7 +457,29 @@ function sicherheit(state: NpcState): NpcAction | undefined {
 
 	// Verdienen, bis die Rücklage steht. Wie hoch sie ist, sagt die Gier — und wer etwas
 	// vorhat, arbeitet darüber hinaus, bis der nächste Schritt bezahlt ist (Punkt 55).
-	if (state.workAvailable && state.actionPoints > 0 && state.money < sparziel(state)) {
+	//
+	// **Aber nicht, wer eigene Arbeit liegen hat** (5.30). Tagelohn steht hier, eine
+	// ganze Stufe über der Entfaltung, und griff deshalb bei jedem, der ein Sparziel
+	// hatte — auch bei dem, der eine Werkstatt voller Zutaten und eine reife Pacht besaß.
+	// Gemessen an zwei Läufen mit Ausbau-Sparzielen: `WORK` fast verdoppelt, `HARVEST`
+	// um dreiundneunzig Prozent eingebrochen. Die Bäuerin ließ Hof und Zimmerei liegen
+	// und richtete fremde Häuser her.
+	//
+	// Das war nie gemeint. Der Tagelohn ist der Weg dessen, der **keinen anderen hat** —
+	// wer nichts besitzt, kommt an ein Grundstück nur über Lohn, und dafür wurde das
+	// Sparziel erfunden. Wer erntet, verarbeitet und verkauft, hat einen besseren Weg und
+	// verdient daran mehr; sich daneben zu verdingen, ist die schlechtere Wahl und wäre
+	// es auch für einen Menschen.
+	//
+	// Geprüft wird auf **jetzt** verfügbare eigene Arbeit, nicht auf Besitz: Wem die
+	// Zutaten ausgegangen sind und wer keine Fläche hat, für den ist der Tagelohn wieder
+	// der richtige Weg — und genau so kommt er an das Geld für Nachschub.
+	if (
+		state.workAvailable &&
+		state.actionPoints > 0 &&
+		state.money < sparziel(state) &&
+		!hatEigeneArbeit(state)
+	) {
 		return 'WORK';
 	}
 
@@ -655,6 +681,20 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 	}
 
 	return undefined;
+}
+
+/**
+ * Hat er Arbeit, die auf ihn wartet?
+ *
+ * Die drei Handlungen der Entfaltung, die Geld einbringen: verkaufen, was im Lager liegt,
+ * verarbeiten, was an Zutaten da ist, ernten, was die Pacht hergibt. Wer eines davon
+ * kann, verdingt sich nicht für Tagelohn.
+ *
+ * **Volljährig muss er sein**, denn nur dann kommt die Entfaltung überhaupt zum Zug — ein
+ * Kind, dem man hier den Tagelohn nähme, stünde untätig da.
+ */
+function hatEigeneArbeit(state: NpcState): boolean {
+	return state.isAdult && (state.ownStockToSell > 0 || state.canCraft || state.hasLease);
 }
 
 /**

@@ -395,6 +395,66 @@ describe('Was ein NPC tut', () => {
 	 * — und sagte nichts. Der schwerste Befund dieser Phase kam deshalb aus dem Lesen des
 	 * Codes und nicht aus dem Messen.
 	 */
+	describe('wer eigene Arbeit liegen hat', () => {
+		/** Einer, der unter seinem Sparziel liegt und dem Tagelohn offensteht. */
+		function sparsam(werte: Partial<NpcState> = {}): NpcState {
+			return zufrieden({
+				personality: anlagen({ ambition: 40, diligence: 40 }),
+				isMarried: false,
+				ownsHome: false,
+				money: 50,
+				plotPrice: 40,
+				workshopPrice: 180,
+				workAvailable: true,
+				// Ohne das wirbt er: Zugehörigkeit steht vor der Entfaltung, und die Frage
+				// hier ist eine andere.
+				matchAvailable: false,
+				...werte
+			});
+		}
+
+		it('verdingt sich, solange er nichts Eigenes hat', () => {
+			// Der Fall, für den das Sparziel erfunden wurde (Punkt 55): Wer nichts besitzt,
+			// kommt an ein Grundstück nur über Lohn.
+			expect(decideNpcAction(sparsam())).toBe('WORK');
+		});
+
+		it('geht nicht zum Tagelohn, wenn die Werkstatt voller Zutaten steht', () => {
+			// **Der Messbefund aus 5.30.** Tagelohn steht in der Sicherheitsstufe, eine
+			// ganze Stufe über der Entfaltung — und griff deshalb bei jedem, der ein
+			// Sparziel hatte. Zwei Läufe: HARVEST um dreiundneunzig Prozent eingebrochen,
+			// während Hof und Zimmerei stillstanden.
+			const meisterin = sparsam({ ownsWorkshop: true, canCraft: true });
+
+			expect(decideNpcAction(meisterin)).toBe('CRAFT');
+		});
+
+		it('erntet lieber, als sich zu verdingen', () => {
+			expect(decideNpcAction(sparsam({ ownsWorkshop: true, hasLease: true }))).toBe('HARVEST');
+		});
+
+		it('verkauft lieber, als sich zu verdingen', () => {
+			expect(decideNpcAction(sparsam({ ownsWorkshop: true, ownStockToSell: 5 }))).toBe('SELL');
+		});
+
+		it('kehrt zum Tagelohn zurück, wenn die Zutaten ausgehen', () => {
+			// Geprüft wird auf **jetzt** verfügbare Arbeit, nicht auf Besitz — sonst stünde
+			// der Werkstattbesitzer ohne Rohstoff untätig da, statt sich das Geld für
+			// Nachschub zu verdienen.
+			const leer = sparsam({ ownsWorkshop: true, canCraft: false, inputPrice: 8, money: 38 });
+
+			expect(decideNpcAction(leer)).toBe('WORK');
+		});
+
+		it('nimmt dem Kind den Tagelohn nicht', () => {
+			// Die Entfaltung greift erst mit der Volljährigkeit. Ohne diese Prüfung stünde
+			// ein Kind mit Pacht untätig da.
+			const kind = sparsam({ isAdult: false, hasLease: true, money: 10 });
+
+			expect(decideNpcAction(kind)).toBe('WORK');
+		});
+	});
+
 	describe('ausbauen, was steht', () => {
 		it('baut das Haus an, wenn kein Bett mehr frei ist', () => {
 			// Derselbe Beweggrund, der es hat bauen lassen: ohne Platz keine Kinder.
@@ -414,14 +474,13 @@ describe('Was ein NPC tut', () => {
 			);
 		});
 
-		it('spart nicht auf einen Ausbau', () => {
-			// **Ein Messbefund** (5.29): Der erste Entwurf nannte den Ausbaupreis als
-			// Sparziel, und zwei Läufe zeigten dasselbe — wer unter seinem Sparziel liegt,
-			// geht Tagelohn arbeiten, und die Bäuerin mit Hof und Zimmerei ließ beides
-			// liegen. Der Ausbau kommt aus dem, was der Betrieb abwirft.
+		it('spart auf den Anbau, statt bei der Rücklage aufzuhören', () => {
+			// Ohne das käme es zur Handlung nie: Wer sein Haus hat, hat sein Ziel erreicht
+			// — dieselbe Falle, an der vor Punkt 55 die ganze Stadt hing.
 			const eng = zufrieden({ homeHasRoom: false, homeUpgradePrice: 150, money: 50 });
 
-			expect(savingsTarget(eng)).toBeNull();
+			expect(savingsTarget(eng)).toBe(150);
+			expect(decideNpcAction(eng)).toBe('WORK');
 		});
 
 		it('baut nicht an, wem die Kraft dafür fehlt', () => {
@@ -470,10 +529,21 @@ describe('Was ein NPC tut', () => {
 			expect(decideNpcAction(gemuetlich)).toBe('CRAFT');
 		});
 
-		it('lässt den Werkstattbesitzer bei seiner Arbeit', () => {
-			// Er hat einen besseren Weg als den Tagelohn: ernten, verarbeiten, verkaufen.
-			expect(savingsTarget(meister({ money: 50 }))).toBeNull();
+		it('arbeitet auf die größere Werkstatt hin', () => {
+			expect(savingsTarget(meister({ money: 50 }))).toBe(340);
+		});
+
+		it('geht dafür aber nicht zum Tagelohn', () => {
+			// **Der Messbefund aus 5.30.** Ohne `hatEigeneArbeit` wählte genau dieser
+			// Mensch `WORK` — er lag unter seinem Sparziel, und Tagelohn steht eine Stufe
+			// darüber. Zwei Läufe zeigten es: HARVEST um dreiundneunzig Prozent
+			// eingebrochen, während die Werkstatt voller Zutaten stand.
+			// Er kann sich den Ausbau (noch) nicht leisten und arbeitet weiter — aber in
+			// seiner eigenen Werkstatt, nicht an fremden Häusern.
 			expect(decideNpcAction(meister({ money: 50 }))).toBe('CRAFT');
+			expect(decideNpcAction(meister({ money: 50, hasLease: true, canCraft: false }))).toBe(
+				'HARVEST'
+			);
 		});
 	});
 
