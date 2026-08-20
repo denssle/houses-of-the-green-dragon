@@ -1,7 +1,7 @@
 ﻿import { garmentIntact } from '$lib/game/attire.logic';
 import { CAMPAIGN_TICKS, npcChoice } from '$lib/game/election.logic';
 import { Op } from 'sequelize';
-import { levelOf } from '$lib/model/buildingTemplate';
+import { levelOf, upgradePrice } from '$lib/model/buildingTemplate';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
@@ -25,7 +25,13 @@ import {
 } from '$lib/game/building.logic';
 import { PLOT_PRICE, TAGELOHN } from '$lib/game/economy';
 import { LEASE_FEE } from '$lib/server/service/productionService';
-import { AGE_OF_MAJORITY, ageInYears } from '$lib/game/time';
+import {
+	AGE_OF_MAJORITY,
+	ageInYears,
+	buildingCostFactor,
+	type Season,
+	seasonOf
+} from '$lib/game/time';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
@@ -389,6 +395,21 @@ async function ausfuehren(
 				lage.repairId ? await buildingService.renovateBuilding(npcId, lage.repairId) : undefined
 			);
 
+		// **Dieselbe Tür wie beim Spieler** (5.29): `upgradeBuilding` prüft Eigentum,
+		// Höchststufe, Geld und Kraft. Ein zweiter Satz Regeln für die Simulation wäre
+		// genau das, was dieser Dienst durchgehend vermeidet.
+		case 'UPGRADE_HOME':
+			return buch(
+				'UPGRADE_HOME',
+				lage.ownHomeId ? await buildingService.upgradeBuilding(npcId, lage.ownHomeId) : undefined
+			);
+
+		case 'UPGRADE_WORKSHOP':
+			return buch(
+				'UPGRADE_WORKSHOP',
+				lage.workshopId ? await buildingService.upgradeBuilding(npcId, lage.workshopId) : undefined
+			);
+
 		case 'OFFER_JOB':
 			// Zum Lohn der Tagelöhnerei: Wer weniger böte, fände niemanden — mehr zu bieten
 			// wäre großzügig auf Kosten des eigenen Ertrags.
@@ -449,6 +470,7 @@ async function lageAufnehmen(
 			sellable?: { itemId: string; quantity: number; inChamber: number };
 			ballot?: Awaited<ReturnType<typeof electionService.getBallot>>;
 			repairId?: string;
+			ownHomeId?: string;
 			missingMaterialOffer?: { id: string; quantity: number; pricePerUnit: number };
 			missingMaterialCount: number;
 			missingInputOffer?: { id: string; quantity: number; pricePerUnit: number };
@@ -499,6 +521,17 @@ async function lageAufnehmen(
 	const platz: number | null = await buildingService.freierWohnraum(werte.HomeBuildingId);
 	const hausVorlage = buildingService.getBuildingOption(WOHNHAUS_OPTION_ID);
 	const baufaellig = eigene.filter((haus) => haus.condition < REPAIR_BELOW)[0];
+
+	// Was ein Ausbau jetzt kostete — **mit dem Winteraufschlag**, mit dem auch `upgrade()`
+	// rechnet. Ohne ihn nennte die Entscheidung im Frost einen Preis, den die Handlung
+	// nicht hält, und der NPC versuchte es Tick für Tick vergeblich.
+	const jahreszeit: Season = seasonOf(tick);
+	const ausbaupreis = (haus: { optionId: number; level: number } | undefined): number | null => {
+		if (!haus) return null;
+		const vorlage = buildingService.getBuildingOption(haus.optionId);
+		const grundpreis: number | undefined = vorlage ? upgradePrice(vorlage, haus.level) : undefined;
+		return grundpreis === undefined ? null : Math.ceil(grundpreis * buildingCostFactor(jahreszeit));
+	};
 	const materialBedarf = baufaellig
 		? renovationMaterial(Math.ceil(CONDITION_MAX - baufaellig.condition))
 		: hausVorlage
@@ -633,6 +666,9 @@ async function lageAufnehmen(
 			repairCost:
 				Math.ceil(CONDITION_MAX - (baufaellig?.condition ?? CONDITION_MAX)) *
 				RENOVATION_COST_PER_POINT,
+			// Ausbauen, was steht (5.29).
+			homeUpgradePrice: ausbaupreis(wohnhaus),
+			workshopUpgradePrice: ausbaupreis(werkstatt),
 			canOfferJob: stelleFrei,
 			// Teilhabe (4.16). Der Fortschritt ist ein Anteil, damit `votingDelay` ihn
 			// unabhängig von der Wahlkampfdauer vergleichen kann.
@@ -643,6 +679,7 @@ async function lageAufnehmen(
 		},
 		ballot: wahlzettel,
 		repairId: baufaellig?.id,
+		ownHomeId: wohnhaus?.id,
 		missingMaterialOffer: material,
 		missingInputOffer: zutatAngebot,
 		missingInputCount: fehlendeZutat?.quantity ?? 0,

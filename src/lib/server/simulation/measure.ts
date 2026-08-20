@@ -91,7 +91,10 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 			);
 			zeilen.push(
 				`    ${haeuser
-					.map((haus) => `${haus.dataValues.name}(${haus.dataValues.optionId})`)
+					.map(
+						(haus) =>
+							`${haus.dataValues.name}(${haus.dataValues.optionId}) Stufe ${haus.dataValues.level}`
+					)
 					.sort()
 					.join(', ')}`
 			);
@@ -137,7 +140,7 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		const koennen = await Skill.findAll({ where: { CharacterId: werte.id } });
 		zeilen.push(
 			`  ${werte.firstName}  geld=${werte.money}  ` +
-				`bauten=[${eigene.map((haus) => haus.optionId).join('/') || '-'}]  ` +
+				`bauten=[${eigene.map((haus) => `${haus.optionId}@${haus.level}`).join('/') || '-'}]  ` +
 				`kammer=[${kammer.map((posten) => `${posten.itemId}:${posten.quantity}`).join(' ')}]  ` +
 				`kann=[${koennen
 					.map((fertigkeit) => `${fertigkeit.dataValues.type}:${fertigkeit.dataValues.level}`)

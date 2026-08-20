@@ -60,6 +60,10 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		materialPrice: 20,
 		repairNeeded: false,
 		repairCost: 40,
+		// Sein Haus ist nicht voll und seine Werkstatt gibt es nicht — der Ausbau aus 5.29
+		// schlägt bei ihm nicht zu.
+		homeUpgradePrice: 150,
+		workshopUpgradePrice: null,
 		canOfferJob: false,
 		// Es läuft keine Wahl — die neue Stufe aus 4.16 schlägt nicht zu.
 		canVote: false,
@@ -391,6 +395,88 @@ describe('Was ein NPC tut', () => {
 	 * — und sagte nichts. Der schwerste Befund dieser Phase kam deshalb aus dem Lesen des
 	 * Codes und nicht aus dem Messen.
 	 */
+	describe('ausbauen, was steht', () => {
+		it('baut das Haus an, wenn kein Bett mehr frei ist', () => {
+			// Derselbe Beweggrund, der es hat bauen lassen: ohne Platz keine Kinder.
+			const eng = zufrieden({ homeHasRoom: false, homeUpgradePrice: 150 });
+
+			expect(decideNpcAction(eng)).toBe('UPGRADE_HOME');
+		});
+
+		it('lässt ein Haus in Ruhe, in dem noch Platz ist', () => {
+			// Sonst baute jeder Verheiratete bis zum Großhaus aus, bloß weil er es kann.
+			expect(decideNpcAction(zufrieden({ homeHasRoom: true }))).toBe('IDLE');
+		});
+
+		it('baut nicht aus, wenn die Höchststufe steht', () => {
+			expect(decideNpcAction(zufrieden({ homeHasRoom: false, homeUpgradePrice: null }))).toBe(
+				'IDLE'
+			);
+		});
+
+		it('spart nicht auf einen Ausbau', () => {
+			// **Ein Messbefund** (5.29): Der erste Entwurf nannte den Ausbaupreis als
+			// Sparziel, und zwei Läufe zeigten dasselbe — wer unter seinem Sparziel liegt,
+			// geht Tagelohn arbeiten, und die Bäuerin mit Hof und Zimmerei ließ beides
+			// liegen. Der Ausbau kommt aus dem, was der Betrieb abwirft.
+			const eng = zufrieden({ homeHasRoom: false, homeUpgradePrice: 150, money: 50 });
+
+			expect(savingsTarget(eng)).toBeNull();
+		});
+
+		it('baut nicht an, wem die Kraft dafür fehlt', () => {
+			// Acht Aktionspunkte kostet ein Ausbau. Ohne diese Prüfung versuchte er es
+			// Tick für Tick vergeblich — die Art Fehlschlag, die in der Statistik als
+			// Handlung dasteht.
+			const müde = zufrieden({
+				homeHasRoom: false,
+				homeUpgradePrice: 150,
+				actionPoints: 4,
+				workAvailable: false,
+				hasJob: false,
+				tonicInStock: 0
+			});
+
+			expect(decideNpcAction(müde)).not.toBe('UPGRADE_HOME');
+		});
+
+		/** Ein Unternehmer mit laufender Werkstatt und Geld darüber. */
+		function meister(werte: Partial<NpcState> = {}): NpcState {
+			return zufrieden({
+				personality: anlagen({ ambition: 40, diligence: 40 }),
+				ownsWorkshop: true,
+				canCraft: true,
+				workshopUpgradePrice: 340,
+				...werte
+			});
+		}
+
+		it('vergrößert die Werkstatt, ehe es in ihr weitergeht', () => {
+			// Die Stelle vor `CRAFT` ist die einzige, die ein laufender Betrieb je
+			// erreicht: Wer Zutaten hat, kehrt dort um.
+			expect(decideNpcAction(meister())).toBe('UPGRADE_WORKSHOP');
+		});
+
+		it('lässt den Ausbau, wenn nichts zu verarbeiten da ist', () => {
+			// Dem fehlt Rohstoff, nicht Platz — eine größere leere Werkstatt hilft nicht.
+			expect(decideNpcAction(meister({ canCraft: false }))).not.toBe('UPGRADE_WORKSHOP');
+		});
+
+		it('baut nur aus, wen sein Wesen dazu drängt', () => {
+			// Dieselbe Schwelle wie beim Bauen: Sonst stünde nach zwei Generationen in
+			// jeder Gasse eine Großwerkstatt.
+			const gemuetlich = meister({ personality: anlagen({ ambition: -50, diligence: -50 }) });
+
+			expect(decideNpcAction(gemuetlich)).toBe('CRAFT');
+		});
+
+		it('lässt den Werkstattbesitzer bei seiner Arbeit', () => {
+			// Er hat einen besseren Weg als den Tagelohn: ernten, verarbeiten, verkaufen.
+			expect(savingsTarget(meister({ money: 50 }))).toBeNull();
+			expect(decideNpcAction(meister({ money: 50 }))).toBe('CRAFT');
+		});
+	});
+
 	describe('warum einer nichts tut', () => {
 		it('unterscheidet Zufriedenheit von Erschöpfung', () => {
 			expect(idleReason(zufrieden())).toBe('CONTENT');

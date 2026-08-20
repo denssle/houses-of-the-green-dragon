@@ -2,6 +2,7 @@ import { votingDelay } from '$lib/game/election.logic';
 import { COURT_ACTION_POINT_COST } from '$lib/game/family.logic';
 import type { Personality } from '$lib/game/personality.logic';
 import { SATIETY_COMFORTABLE, SATIETY_WEAKENED } from '$lib/game/need.logic';
+import { UPGRADE_ACTION_POINT_COST } from '$lib/game/building.logic';
 
 /**
  * Was ein NPC als Nächstes tut.
@@ -48,6 +49,10 @@ export const NPC_ACTIONS = [
 	'BUILD_HOME',
 	'RENOVATE',
 	'OFFER_JOB',
+	// Seit 5.29: ausbauen, was steht. Zwei Handlungen und nicht eine, weil sie auf
+	// verschiedenen Stufen stehen — das Haus ist Vorsorge, die Werkstatt ist Unternehmen.
+	'UPGRADE_HOME',
+	'UPGRADE_WORKSHOP',
 	// Seit 4.16: Wählen ist eine Handlung wie jede andere.
 	'VOTE',
 	'IDLE'
@@ -131,6 +136,14 @@ export interface NpcState {
 	/** Steht ein eigenes Gebäude schlecht genug für eine Renovierung? */
 	repairNeeded: boolean;
 	repairCost: number;
+	/**
+	 * Was die nächste Stufe des eigenen Wohnhauses kostet — nichts heißt: keines, oder
+	 * schon das Großhaus. Der Winteraufschlag steckt darin, sonst nennte die Rechnung
+	 * einen Preis, den die Handlung nicht hält.
+	 */
+	homeUpgradePrice: number | null;
+	/** Dasselbe für den eigenen Betrieb. */
+	workshopUpgradePrice: number | null;
 	/** Hat sein Betrieb eine freie Stelle, für die noch kein Lohn aushängt? */
 	canOfferJob: boolean;
 
@@ -225,6 +238,22 @@ export function savingsTarget(state: NpcState): number | null {
 		if (!state.hasLease && state.leaseAvailable) return state.leaseFee;
 	}
 
+	// **Auf einen Ausbau wird nicht gespart** (5.29) — und das ist ein Messbefund, kein
+	// Versäumnis. Der erste Entwurf nannte hier beide Ausbaupreise, und zwei Läufe über
+	// sechshundert Ticks zeigten dasselbe Bild: `WORK` fast verdoppelt, `HARVEST` um
+	// dreiundneunzig Prozent eingebrochen. Der Grund steht in `sicherheit`: Wer unter
+	// seinem Sparziel liegt, geht **arbeiten**, und Arbeit heißt Tagelohn an städtischen
+	// Bauten — die Stufe steht über der Entfaltung. Ausgerechnet die Bäuerin mit Hof und
+	// Zimmerei ließ beides liegen und richtete fremde Häuser her, um auf eine Zimmerei zu
+	// sparen, die sie nicht nutzte.
+	//
+	// **Das Sparziel ist für den gedacht, der keinen anderen Weg hat** (Punkt 55): Wer
+	// nichts besitzt, kommt an ein Grundstück nur über Lohn. Wer eine Werkstatt und eine
+	// Pacht hat, hat einen besseren — er erntet, verarbeitet und verkauft. Ihn zum
+	// Tagelöhner zu machen, kehrt die Bedürfnishierarchie um.
+	//
+	// Der Ausbau kommt deshalb aus dem, was der Betrieb abwirft. Im Messlauf reichte das:
+	// Alheids Sägeschuppen stand nach sechshundert Ticks als Zimmerei.
 	return null;
 }
 
@@ -551,6 +580,30 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 	// Angestellten stellen her, während der Eigentümer anderes tut.
 	if (state.canOfferJob) return 'OFFER_JOB';
 
+	// **Die Werkstatt ertüchtigen, ehe man in ihr arbeitet** (5.29).
+	//
+	// Die Stelle ist keine Bequemlichkeit, sondern die einzige, die je erreicht wird: Wer
+	// Zutaten hat, kehrt bei `CRAFT` um, und wer eine Pacht hat, bei `HARVEST`. Alles,
+	// was danach steht, sieht ein laufender Betrieb nie. Genau deshalb baut hier niemand
+	// eine zweite Werkstatt — was für `BUILD` gewollt ist (`!state.ownsWorkshop`), wäre
+	// für den Ausbau das Ende gewesen.
+	//
+	// `canCraft` als Bedingung, nicht bloß als Reihenfolge: Wer nichts zu verarbeiten
+	// hat, braucht keine größere Werkstatt — dem fehlt Rohstoff, und dafür gibt es
+	// `BUY_INPUT` und `LEASE` weiter unten. Es kostet ihn einen Durchgang, und den ist
+	// es wert.
+	if (state.ownsWorkshop && state.canCraft && isEnterprising(state.personality)) {
+		const uebrigFuerAusbau: number =
+			state.money - desiredReserve(state.personality, state.foodPrice);
+		if (
+			state.workshopUpgradePrice !== null &&
+			uebrigFuerAusbau >= state.workshopUpgradePrice &&
+			state.actionPoints >= UPGRADE_ACTION_POINT_COST
+		) {
+			return 'UPGRADE_WORKSHOP';
+		}
+	}
+
 	// Herstellen, solange Zutaten da sind.
 	if (state.canCraft) return 'CRAFT';
 
@@ -643,6 +696,25 @@ export const REPAIR_BELOW = 50;
  * Geld nicht reicht; dann wartet er eben und arbeitet weiter.
  */
 function eigenesDach(state: NpcState): NpcAction | undefined {
+	// **Ist das eigene Haus voll, wird angebaut** (5.29). Derselbe Beweggrund, der es
+	// hat bauen lassen: ohne Platz keine Kinder. Und dieselbe Zurückhaltung — geprüft
+	// wird, ob wirklich kein Bett mehr frei ist, sonst baute jeder Verheiratete sein Haus
+	// bis zum Großhaus aus, bloß weil er es sich leisten kann.
+	//
+	// Der Kraftvorrat, den die höhere Stufe trägt, kommt dabei mit heraus, ist aber nicht
+	// der Grund: Ein NPC, der ausbaut, um mehr Aktionspunkte anzusammeln, rechnet — und
+	// diese Welt entscheidet aus Bedürfnissen.
+	if (state.isMarried && state.ownsHome && !state.homeHasRoom) {
+		const uebrig: number = state.money - desiredReserve(state.personality, state.foodPrice);
+		if (
+			state.homeUpgradePrice !== null &&
+			uebrig >= state.homeUpgradePrice &&
+			state.actionPoints >= UPGRADE_ACTION_POINT_COST
+		) {
+			return 'UPGRADE_HOME';
+		}
+	}
+
 	// Nur wer eine Familie hat, braucht ein Haus. Ein Alleinstehender ist in der
 	// Unterkunft versorgt — und wer schon eines besitzt, baut kein zweites.
 	if (!state.isMarried || state.ownsHome) return undefined;

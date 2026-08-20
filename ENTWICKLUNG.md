@@ -2661,6 +2661,97 @@ die Simulation nichts. Das gehört entschieden, jetzt wo Ausbauen etwas bedeutet
 
 _Fertig, wenn:_ Wer ausbaut, sieht vorher, was es bringt — und es bringt etwas. — Erledigt.
 
+**5.29 Und die NPCs bauen auch aus.** ✓ Der offene Punkt aus 5.28: Ausbauen bedeutete
+seit einem Schritt etwas, aber in `NPC_ACTIONS` stand kein `UPGRADE`. Die Wirkung
+erreichte nur Spieler; jede Werkstatt der Stadt blieb auf der ersten Stufe, jedes NPC-Haus
+auf der Kate.
+
+**Zwei Handlungen und nicht eine**, weil sie auf verschiedenen Stufen der
+Bedürfnishierarchie stehen. `UPGRADE_HOME` gehört zur **Sicherheit**, gleich neben den
+Hausbau: Derselbe Beweggrund, der bauen lässt, lässt auch anbauen — ohne Platz keine
+Kinder. Ausgelöst wird es deshalb von `homeHasRoom`, also davon, dass wirklich kein Bett
+mehr frei ist. Ohne diese Bedingung baute jeder Verheiratete sein Haus bis zum Großhaus
+aus, bloß weil er es sich leisten kann.
+
+Der Kraftvorrat, den die höhere Stufe trägt, kommt dabei mit heraus, ist aber ausdrücklich
+nicht der Grund. Ein NPC, der ausbaut, um Aktionspunkte anzusammeln, rechnet — und diese
+Welt entscheidet aus Bedürfnissen.
+
+`UPGRADE_WORKSHOP` gehört zur **Entfaltung** und steht dort **vor `CRAFT`**. Das ist
+keine Bequemlichkeit, sondern die einzige Stelle, die je erreicht wird: Wer Zutaten hat,
+kehrt bei `CRAFT` um, wer eine Pacht hat, bei `HARVEST` — alles Spätere sieht ein
+laufender Betrieb nie. Genau deshalb baut dort auch niemand eine zweite Werkstatt, was für
+`BUILD` gewollt ist (`!state.ownsWorkshop`) und für den Ausbau das Ende gewesen wäre.
+
+Bedingung ist `canCraft`: Wer nichts zu verarbeiten hat, braucht keine größere Werkstatt
+— dem fehlt Rohstoff, und dafür gibt es `BUY_INPUT` und `LEASE`. Dazu `isEnterprising`,
+dieselbe Schwelle wie beim Bauen, sonst stünde nach zwei Generationen in jeder Gasse eine
+Großwerkstatt.
+
+**Auf einen Ausbau wird nicht gespart — und das ist der Befund dieses Schritts.** Der
+erste Entwurf nannte beide Ausbaupreise in `savingsTarget`, aus dem naheliegenden Grund:
+Wer sein Haus hat, hat sein Ziel erreicht und arbeitet nur noch bis zur Rücklage; das war
+die Falle von Punkt 55. Zwei Messläufe über sechshundert Ticks zeigten dasselbe Bild:
+
+```
+                    ohne NPC-Ausbau   mit Sparziel      ohne Sparziel
+WORK                        246        484 / 414              331
+HARVEST                     547         31 /  38              288
+CRAFT                       166         73 /  94              180
+SELL                        166         72 /  93              180
+```
+
+**Die Bäuerin ließ Hof und Zimmerei liegen und richtete fremde Häuser her.** Der Grund
+steht in `sicherheit`: Wer unter seinem Sparziel liegt, geht **arbeiten**, und Arbeit
+heißt Tagelohn an städtischen Bauten — die Stufe steht über der Entfaltung. Ein Sparziel
+macht aus jedem, der eines hat, zuerst einen Tagelöhner.
+
+**Das Sparziel ist für den gedacht, der keinen anderen Weg hat.** Wer nichts besitzt,
+kommt an ein Grundstück nur über Lohn — dafür wurde es erfunden. Wer eine Werkstatt und
+eine Pacht hat, hat einen besseren Weg: ernten, verarbeiten, verkaufen. Ihn zum
+Tagelöhner zu machen kehrt die Bedürfnishierarchie um, und es kostete die Stadt beinahe
+ihre ganze Erzeugung.
+
+Der Ausbau kommt deshalb aus dem, was der Betrieb abwirft. Dass er so überhaupt zustande
+kommt, ist bewiesen: Im Lauf mit Sparziel stand Alheids Sägeschuppen nach sechshundert
+Ticks als **Zimmerei** da (`bauten=[9@2/13@1/1@1]`) — die Handlung hängt nicht am
+Sparziel, nur am Geld.
+
+**Wie oft er zustande kommt, ist die offene Frage, und die Antwort lautet vorerst:
+selten.** Ein Lauf über zwölfhundert Ticks ohne Sparziel zeigt eine blühende Stadt — 24
+Lebende, 2973 Münzen bei den Leuten, 1170 in der Kasse, 346 Durchgänge in der Werkstatt —
+und **keinen einzigen Ausbau**. Cunne, der die Zimmerei und der Hof gehören, stand am Ende
+bei 254 Münzen; sie braucht 340 plus Rücklage. Sie kommt dort an, aber nicht in diesem
+Leben.
+
+**Der Grund ist nicht der Ausbau, sondern die Rangfolge.** Solange Tagelohn in der
+Sicherheitsstufe über der Entfaltung steht, hat jedes Sparziel dieselbe Wirkung: Es macht
+aus einem Unternehmer einen Tagelöhner. Wer will, dass NPCs auf etwas hinarbeiten, das sie
+schon besitzen, muss dort ansetzen — etwa, indem sich nicht verdingt, wer eigene Arbeit
+liegen hat (`canCraft || hasLease`). Das ist ein Eingriff in die Rangfolge selbst und
+gehört eigens entschieden, nicht nebenbei.
+
+Bis dahin gilt: **Sie können es, und gelegentlich tun sie es.** Das ist mehr als vorher,
+wo es die Handlung nicht gab — und es kostet die Stadt nichts.
+
+Nebenbei zeigt der Bericht jetzt die Ausbaustufe (`Zimmerei(9) Stufe 1`,
+`bauten=[9@2/13@1]`). Ohne sie war am Bericht nicht abzulesen, ob überhaupt jemand
+ausbaut — die Zahl in Klammern ist die Vorlage, nicht die Stufe.
+
+Zwei Feinheiten, die sonst zu stillen Fehlschlägen geführt hätten: Geprüft wird auf
+`UPGRADE_ACTION_POINT_COST` und nicht auf „mehr als null Punkte" — ein Ausbau kostet acht.
+Und der Preis, den die Entscheidung sieht, trägt den **Winteraufschlag**, mit dem auch
+`upgrade()` rechnet; ohne ihn versuchte ein NPC es im Frost Tick für Tick vergeblich, und
+in der Statistik stünde `UPGRADE_HOME`, als wäre ausgebaut worden.
+
+**Der Verwalter darf es nicht.** `CARETAKER_ACTIONS` bleibt unverändert: Wer abwesend ist,
+soll essen, arbeiten und renovieren — aber nicht das Geld eines Spielers in einen Anbau
+stecken, den dieser nicht beschlossen hat. Erhalten ja, entscheiden nein.
+
+_Fertig, wenn:_ Eine Werkstatt der Stadt kann auf der zweiten Stufe stehen, ohne dass ein
+Spieler sie gebaut hat. — Erledigt, gemessen. Wie oft sie es tut, bleibt offen und hängt
+an der Rangfolge, nicht am Ausbau.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

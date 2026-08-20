@@ -67,6 +67,8 @@ function lage(werte: Partial<NpcState> = {}): NpcState {
 		materialPrice: 20,
 		repairNeeded: false,
 		repairCost: 40,
+		homeUpgradePrice: null,
+		workshopUpgradePrice: null,
 		canOfferJob: false,
 		canVote: false,
 		campaignProgress: 0,
