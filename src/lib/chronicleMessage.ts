@@ -132,6 +132,11 @@ function satz(entry: ChronicleLine): string {
 		case 'JOB_TAKEN':
 			return `${wer} hat eine Stelle in ${haus} angetreten.`;
 		case 'JOB_ENDED':
+			// Wer geht, ist eine andere Geschichte als wer gehen muss — und wessen Betrieb
+			// unter ihm verschwand, eine dritte. Ältere Einträge haben kein `detail`; für
+			// die bleibt der Satz, der vorher für alle galt.
+			if (entry.detail === 'DISMISSED') return `${wer} wurde aus ${haus} entlassen.`;
+			if (entry.detail === 'QUIT') return `${wer} hat die Stelle in ${haus} gekündigt.`;
 			return `${wer} arbeitet nicht mehr in ${haus}.`;
 		case 'RAID':
 			// Was geraubt wurde, sagt `detail`: eine Ware, „Münzen" oder die Stadtkasse.

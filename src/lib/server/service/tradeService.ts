@@ -125,6 +125,31 @@ export async function changeBuildingStock(
 }
 
 /**
+ * Liegt im Betriebslager, was ein Rezept verlangt — alles davon?
+ *
+ * **Erst fragen, dann nehmen.** `changeBuildingStock` gibt zwar `false` zurück, wenn eine
+ * Zutat fehlt, aber da sind die vorherigen schon aus dem Lager. Wer bei der dritten Zutat
+ * abbricht, hat zwei verbraucht und nichts hergestellt — und in einer Transaktion, die
+ * hinterher trotzdem festgeschrieben wird, bleibt genau das stehen. Deshalb diese Frage
+ * vorweg: Sie rührt nichts an.
+ */
+export async function buildingHasStock(
+	buildingId: string,
+	needed: { itemId: string; quantity: number }[],
+	t: Transaction
+): Promise<boolean> {
+	for (const posten of needed) {
+		if (posten.quantity <= 0) continue;
+		const zeile = await BuildingStock.findOne({
+			where: { BuildingId: buildingId, itemId: posten.itemId },
+			transaction: t
+		});
+		if ((zeile?.dataValues.quantity ?? 0) < posten.quantity) return false;
+	}
+	return true;
+}
+
+/**
  * Was einer besitzt — in der Kammer **und** in allen seinen Häusern (5.25, Punkt 72).
  *
  * **Seit Ware dort liegt, wo sie entsteht, liegt sie selten dort, wo sie gebraucht wird.**

@@ -2805,6 +2805,58 @@ oder Ausbaukosten, nicht die Bedürfnishierarchie.
 _Fertig, wenn:_ Ein Unternehmer lässt seinen Betrieb nicht stehen, um fremde Häuser zu
 richten. — Erledigt, und die Stadt erzeugt das Achtfache.
 
+**5.31 Die beiden Enden einer Anstellung.** ✓ Zwei Lücken aus Punkt 33, beim Durchsehen
+der Gebäudeseite am 16.08.2026 notiert und seither liegengeblieben. Sie sehen verschieden
+aus und sind dieselbe Frage: **Wer trägt, was schiefgeht?**
+
+**Der Arbeitgeber wurde niemanden wieder los.** `endEmployment` gab es seit 4.6c, gerufen
+wurde es allein unter `/jobs` — und dort kündigt der Angestellte selbst. Wer jemanden
+eingestellt hatte, zahlte, bis der andere von sich aus ging. Jetzt gibt es `dismiss`, und
+die Befugnis dafür ist dieselbe wie beim Aushang: Wer aushängen darf, darf auch abberufen.
+Beide fragen über `darfBestimmen` — zweimal geschrieben liefe die Frage mit der Zeit
+auseinander, und dann könnte einer aushängen, was der andere nicht abnehmen darf.
+
+Gesucht wird die Anstellung über **Person und Gebäude**. Nur über die Person gesucht,
+träfe ein Kennungswurf den Knecht des Nachbarn.
+
+**Ohne Frist und ohne Abfindung** — das ist eine Entscheidung, keine Auslassung. Was das
+Ende einer Anstellung kosten soll, hängt an der Verhandlung über den Lohn, und beides
+gehört in einen Zug (Punkt 33). Bis dahin gilt für beide Seiten dasselbe: Wer geht, geht
+heute.
+
+**Und die Schicht ohne Material fällt nicht mehr aus.** Bisher scheiterte sie an einem
+leeren Lager (`NOT_IN_STOCK`) oder an der falschen Jahreszeit (`WRONG_SEASON`) — und der
+Angestellte hatte den Tag umsonst angetreten, für ein Versäumnis, das nicht seines war.
+Dafür zu sorgen, dass Arbeit da ist, ist Sache des Arbeitgebers. Jetzt steht der
+Angestellte trotzdem in der Werkstatt und bekommt seinen Lohn; nur bleibt das Lager leer,
+und die Rechnung trägt der, der hätte einkaufen müssen.
+
+**Der Unterschied zur leeren Kasse bleibt scharf:** Dort fehlt der Lohn, hier fehlt die
+Arbeit. Nur eines davon kann der Angestellte am Abend in der Hand halten — die Schicht bei
+einem zahlungsunfähigen Chef findet weiterhin nicht statt, und zwar bevor Aktionspunkte
+verbraucht sind.
+
+Gelernt wird im Leerlauf nichts: Übung braucht etwas unter den Händen. Verzehntet wird
+auch nichts, denn es gibt keine Ernte.
+
+**Nebenbei ein stiller Fehler behoben.** Die Zutaten wurden nacheinander aus dem Lager
+genommen, und erst wenn eine fehlte, brach die Schicht ab — die vorherigen waren dann
+schon verbraucht, und weil eine Sequelize-Transaktion auch bei einer zurückgegebenen
+Fehlermeldung festgeschrieben wird, blieb genau das stehen. Jetzt fragt
+`tradeService.buildingHasStock` vorweg, ohne etwas anzurühren.
+
+**Dazu Punkt 53, ein Einzeiler:** Der Knopf bei den Rezepten heißt nicht mehr „Arbeiten
+(1 AP)", sondern **„Herstellen (1 AP)"**. Auf derselben Seite stand ein zweiter fast
+gleichen Namens für die Schicht auf fremde Rechnung; für einen Neuling war der erste der
+sichtbarere und der falsche.
+
+Und `JOB_ENDED` wird endlich geschrieben — die Ereignisart gab es, gerufen hat sie nie
+jemand. Sie unterscheidet jetzt drei Fälle: gekündigt, entlassen, oder der Betrieb ist
+unter dem Angestellten verschwunden.
+
+_Fertig, wenn:_ Ein Meister kann seinen Knecht entlassen, und ein Knecht verliert den Tag
+nicht dafür, dass sein Meister kein Holz gekauft hat. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

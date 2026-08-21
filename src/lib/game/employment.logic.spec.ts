@@ -98,7 +98,32 @@ describe('Anstellung', () => {
 				wage: 5,
 				employeeMoney: 5,
 				employerMoney: 95,
-				produced: 3
+				produced: 3,
+				idle: false
+			});
+		});
+
+		/**
+		 * **Leerlauf ist kein Fehlschlag** (5.31). Wer kommt und niemanden vorfindet, der
+		 * ihm Material hinlegt, hat trotzdem seinen Tag gegeben. Der Schaden liegt beim
+		 * Arbeitgeber: Er zahlt und bekommt nichts.
+		 */
+		it('zahlt auch, wenn es nichts zu tun gab — und bringt dann nichts hervor', () => {
+			expect(workShift({ actionPoints: 10, money: 0 }, { money: 100 }, 5, 1, 3, true)).toEqual({
+				ok: true,
+				wage: 5,
+				employeeMoney: 5,
+				employerMoney: 95,
+				produced: 0,
+				idle: true
+			});
+		});
+
+		/** Leere Kasse schlägt Leerlauf: Ohne Lohn kommt niemand. */
+		it('findet auch im Leerlauf nicht statt, wenn die Kasse leer ist', () => {
+			expect(workShift({ actionPoints: 10, money: 0 }, { money: 2 }, 5, 1, 3, true)).toEqual({
+				ok: false,
+				reason: 'EMPLOYER_BROKE'
 			});
 		});
 

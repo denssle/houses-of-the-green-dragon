@@ -141,7 +141,12 @@
 				</i>
 				<form method="POST" action="?/craft" use:enhance>
 					<input type="hidden" name="itemId" value={rezept.itemId} />
-					<button type="submit">Arbeiten ({rezept.cost} AP)</button>
+					<!--
+						**Nicht „Arbeiten"** (Punkt 53): Auf derselben Seite stand ein zweiter Knopf
+						fast gleichen Namens, der etwas anderes tut — die Schicht für fremde
+						Rechnung. Für einen Neuling war der hier der sichtbarere und der falsche.
+					-->
+					<button type="submit">Herstellen ({rezept.cost} AP)</button>
 				</form>
 			</div>
 		{/each}
@@ -299,6 +304,10 @@
 					<li>
 						<a href="{base}/character/{person.id}" class="link">{person.name}</a>
 						— {person.wage} Münzen je Aktionspunkt
+						<form method="POST" action="?/dismiss" use:enhance>
+							<input type="hidden" name="employeeId" value={person.id} />
+							<button type="submit" class="link">Entlassen</button>
+						</form>
 					</li>
 				{/each}
 			</ul>
@@ -313,7 +322,8 @@
 		<p>
 			<small>
 				Der Lohn kommt aus deiner Kasse. Ist sie leer, arbeitet niemand — und du merkst es daran,
-				dass nichts ins Lager kommt.
+				dass nichts ins Lager kommt. Fehlt dagegen das Material, wird trotzdem gezahlt: Für Arbeit
+				zu sorgen ist deine Sache, nicht ihre. Wer geht, geht sofort — für beide Seiten.
 			</small>
 		</p>
 	</section>

@@ -74,16 +74,22 @@ export const load: PageServerLoad = async ({ locals }) => {
 		})),
 		// Die öffentlichen Bauten und ihr Zustand. Ohne diese Liste fiele der Verfall erst
 		// auf, wenn die Unterkunft niemanden mehr aufnimmt.
-		publicBuildings: (await buildingService.getPublicBuildings(character.regionId)).map((haus) => ({
-			id: haus.id,
-			name: haus.name,
-			condition: haus.condition,
-			offeredWage: haus.offeredWage,
-			employer: buildingService.getBuildingOption(haus.optionId)?.levels[0]?.wagePerActionPoint
-				? true
-				: false,
-			renovationCost: Math.ceil(CONDITION_MAX - haus.condition) * RENOVATION_COST_PER_POINT
-		})),
+		publicBuildings: await Promise.all(
+			(await buildingService.getPublicBuildings(character.regionId)).map(async (haus) => ({
+				id: haus.id,
+				name: haus.name,
+				condition: haus.condition,
+				offeredWage: haus.offeredWage,
+				employer: buildingService.getBuildingOption(haus.optionId)?.levels[0]?.wagePerActionPoint
+					? true
+					: false,
+				// **Wer im Sold der Stadt steht** (5.31). Der Bürgermeister setzte den Sold
+				// aus, sah aber nie, wer ihn bezieht — und wurde niemanden wieder los. Ein
+				// Wächter, der nichts taugt, blieb bis an sein Lebensende Wächter.
+				staff: await employmentService.getStaff(haus.id),
+				renovationCost: Math.ceil(CONDITION_MAX - haus.condition) * RENOVATION_COST_PER_POINT
+			}))
+		),
 		// Was die Wache bringt, in einer Zahl: Ohne sie wäre ihr Sold eine Ausgabe ohne
 		// sichtbaren Gegenwert — und der erste Bürgermeister, der spart, hätte recht.
 		safety: await hazardService.getSafety(character.regionId),
@@ -191,6 +197,28 @@ export const actions = {
 		return {
 			message: wage === null ? 'Der Aushang ist abgenommen.' : `Sold: ${wage} je Aktionspunkt.`
 		};
+	},
+
+	/**
+	 * Aus dem Dienst der Stadt entlassen.
+	 *
+	 * Dieselbe Handlung wie beim privaten Betrieb, dieselbe Prüfung — nur bestimmt hier
+	 * das Amt und nicht der Besitz. Deshalb steht sie auf dieser Seite: Ein städtisches
+	 * Haus gehört niemandem, also findet der Bürgermeister seine Belegschaft dort, wo er
+	 * auch den Sold aussetzt.
+	 */
+	dismiss: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const daten = await request.formData();
+		const buildingId = daten.get('buildingId')?.toString();
+		const employeeId = daten.get('employeeId')?.toString();
+		if (!buildingId || !employeeId) return fail(400, { message: 'Wen aus welchem Haus?' });
+
+		const ergebnis = await employmentService.dismiss(character.id, buildingId, employeeId);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: 'Aus dem Dienst entlassen.' };
 	},
 
 	develop: async ({ request, locals }) => {

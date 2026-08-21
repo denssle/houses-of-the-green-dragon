@@ -29,7 +29,9 @@
 		<p>
 			<small>
 				Was du herstellst, gehört dem Betrieb; was du bekommst, ist Lohn. Ist die Kasse deines
-				Arbeitgebers leer, findet die Schicht nicht statt — und kostet dich auch nichts.
+				Arbeitgebers leer, findet die Schicht nicht statt — und kostet dich auch nichts. Fehlt
+				dagegen das Material, arbeitest du trotzdem und wirst bezahlt: Dass Arbeit da ist, ist nicht
+				deine Sorge.
 			</small>
 		</p>
 	</section>

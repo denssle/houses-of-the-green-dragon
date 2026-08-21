@@ -365,5 +365,27 @@ describe('Öffentliche Bauten', () => {
 			// Dieselbe Regel wie beim privaten Arbeitgeber: Es kostet ihn auch nichts.
 			expect((await Character.findByPk(waechter))!.dataValues.actionPoints).toBe(48);
 		});
+
+		/**
+		 * **Entlassen ist eine Amtshandlung** (5.31). Bei einem privaten Betrieb bestimmt
+		 * der Besitz, wer die Belegschaft zusammenstellt; ein städtisches Haus gehört
+		 * niemandem, also bestimmt das Amt. Ohne diese Möglichkeit bliebe ein Wächter, der
+		 * nichts taugt, bis an sein Lebensende Wächter.
+		 */
+		it('lässt sich vom Bürgermeister entlassen — und nur von ihm', async () => {
+			const { id, mayor } = await wachhausMitSold(4);
+			const waechter = await person('Wächterin');
+			await employmentService.takeJob(waechter, id);
+			const buerger = await person('Bürger');
+
+			expect(await employmentService.dismiss(buerger, id, waechter)).toEqual({
+				ok: false,
+				reason: 'NOT_IN_OFFICE'
+			});
+			expect(await employmentService.getJobOf(waechter)).toBeDefined();
+
+			expect(await employmentService.dismiss(mayor, id, waechter)).toEqual({ ok: true });
+			expect(await employmentService.getJobOf(waechter)).toBeUndefined();
+		});
 	});
 });

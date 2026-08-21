@@ -51,7 +51,15 @@ export function canTakeJob(
 }
 
 export type ShiftOutcome =
-	| { ok: true; wage: number; employeeMoney: number; employerMoney: number; produced: number }
+	| {
+			ok: true;
+			wage: number;
+			employeeMoney: number;
+			employerMoney: number;
+			produced: number;
+			/** Gearbeitet, aber nichts zu arbeiten gehabt — der Lohn lief trotzdem. */
+			idle: boolean;
+	  }
 	| { ok: false; reason: ActionFailureReason };
 
 /**
@@ -61,13 +69,22 @@ export type ShiftOutcome =
  * Angestellten. **Kann der Eigentümer nicht zahlen, findet die Schicht nicht statt** —
  * und zwar bevor Aktionspunkte verbraucht sind: Ein Angestellter, der umsonst arbeitet,
  * weil die Kasse leer war, hätte seinen Tag verloren, ohne es vorher wissen zu können.
+ *
+ * **Leerlauf ist kein Fehlschlag.** Fehlt im Betriebslager, was das Rezept verlangt, oder
+ * steht die Jahreszeit gegen die Arbeit, dann ist der Angestellte trotzdem gekommen — und
+ * er wird bezahlt. Für Arbeit zu sorgen ist Sache des Arbeitgebers, und hier zahlt er für
+ * sein Versäumnis. Der Unterschied zur leeren Kasse ist genau dieser: Dort fehlt der
+ * Lohn, hier fehlt die Arbeit. Nur eines davon kann der Angestellte am Abend in der Hand
+ * halten.
  */
 export function workShift(
 	employee: { actionPoints: number; money: number },
 	employer: { money: number },
 	wagePerActionPoint: number,
 	actionPointCost: number,
-	produced: number
+	produced: number,
+	/** Nichts zu tun — kein Material im Lager oder die falsche Jahreszeit. */
+	idle: boolean = false
 ): ShiftOutcome {
 	if (employee.actionPoints < actionPointCost) {
 		return { ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' };
@@ -83,7 +100,10 @@ export function workShift(
 		wage: lohn,
 		employeeMoney: employee.money + lohn,
 		employerMoney: employer.money - lohn,
-		produced
+		// Wer nichts herstellen konnte, hat nichts hergestellt. Der Lohn bleibt davon
+		// unberührt, der Ertrag nicht.
+		produced: idle ? 0 : produced,
+		idle
 	};
 }
 

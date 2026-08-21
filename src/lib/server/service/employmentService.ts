@@ -59,6 +59,33 @@ async function abbauFlaeche(
 	return { recipe: rezept, regionId: await regionService.cityOf(flaeche.dataValues.RegionId) };
 }
 
+/**
+ * Wer über die Belegschaft eines Hauses bestimmt.
+ *
+ * Bei einem staedtischen Gebaeude ist es der Amtsinhaber: Der Sold der Wache ist eine
+ * Amtsentscheidung, kein Gesetz und keine Konstante. Damit braucht die Stadt keinen
+ * eigenen Anstellungsweg — sie ist einfach ein Arbeitgeber wie andere.
+ *
+ * Dieselbe Frage stellen der Aushang und die Entlassung. Zweimal geschrieben liefe sie
+ * mit der Zeit auseinander, und dann könnte einer aushängen, was der andere nicht wieder
+ * abnehmen darf.
+ */
+async function darfBestimmen(
+	gebaeude: { id: string; ownerType: string; OwnerCharacterId: string | null },
+	characterId: string
+): Promise<EmploymentResult> {
+	if (gebaeude.ownerType === 'CITY') {
+		const regionId: string | undefined = await regionOf(gebaeude.id);
+		const inhaber = regionId ? await electionService.getHolder(regionId) : undefined;
+		if (inhaber?.characterId !== characterId) return { ok: false, reason: 'NOT_IN_OFFICE' };
+		return { ok: true };
+	}
+	if (gebaeude.OwnerCharacterId !== characterId) {
+		return { ok: false, reason: 'PLOT_NOT_OWNED' };
+	}
+	return { ok: true };
+}
+
 /** Den Aushang setzen — oder mit `null` abnehmen. */
 export async function offerJob(
 	ownerId: string,
@@ -68,16 +95,9 @@ export async function offerJob(
 	const gebaeude = await Building.findByPk(buildingId);
 	if (!gebaeude) return { ok: false, reason: 'PLOT_NOT_OWNED' };
 
-	// Bei einem staedtischen Gebaeude setzt der Amtsinhaber den Aushang: Der Sold der
-	// Wache ist eine Amtsentscheidung, kein Gesetz und keine Konstante. Damit braucht die
-	// Stadt keinen eigenen Anstellungsweg — sie ist einfach ein Arbeitgeber wie andere.
-	if (gebaeude.dataValues.ownerType === 'CITY') {
-		const regionId: string | undefined = await regionOf(buildingId);
-		const inhaber = regionId ? await electionService.getHolder(regionId) : undefined;
-		if (inhaber?.characterId !== ownerId) return { ok: false, reason: 'NOT_IN_OFFICE' };
-	} else if (gebaeude.dataValues.OwnerCharacterId !== ownerId) {
-		return { ok: false, reason: 'PLOT_NOT_OWNED' };
-	}
+	const erlaubt = await darfBestimmen(gebaeude.dataValues, ownerId);
+	if (!erlaubt.ok) return erlaubt;
+
 	if (wage !== null && (!Number.isInteger(wage) || wage < 1)) {
 		return { ok: false, reason: 'NOTHING_TO_DO' };
 	}
@@ -186,14 +206,79 @@ export async function takeJob(characterId: string, buildingId: string): Promise<
 	});
 }
 
-/** Kündigen — von beiden Seiten dieselbe Handlung. */
-export async function endEmployment(employeeId: string): Promise<EmploymentResult> {
+/**
+ * Warum eine Anstellung endet.
+ *
+ * Die Chronik hält `JOB_ENDED` fest, seit es die Art gibt — nur geschrieben hat sie
+ * bisher niemand. Der Unterschied gehört mit hinein: Wer geht, ist eine andere Geschichte
+ * als wer gehen muss, und wessen Betrieb unter ihm zur Ruine wurde, eine dritte.
+ */
+export type EndOfJob = 'QUIT' | 'DISMISSED' | 'GONE';
+
+/**
+ * Kündigen — von beiden Seiten dieselbe Handlung.
+ *
+ * Ohne Frist und ohne Abfindung: Wer geht, geht heute. Dass eine Anstellung, die
+ * jederzeit folgenlos endet, streng genommen keine Bindung ist, steht als Punkt 33 in
+ * `OFFENE_PUNKTE.md` und wartet dort auf die Verhandlung über den Lohn — beides gehört in
+ * einen Zug.
+ */
+export async function endEmployment(
+	employeeId: string,
+	grund: EndOfJob = 'QUIT'
+): Promise<EmploymentResult> {
+	const stelle = await Employment.findOne({ where: { EmployeeCharacterId: employeeId } });
+	if (!stelle) return { ok: true };
+
+	const buildingId: string = stelle.dataValues.BuildingId;
 	await Employment.destroy({ where: { EmployeeCharacterId: employeeId } });
+
+	const gebaeude = await Building.findByPk(buildingId);
+	await chronicleService.record(
+		'JOB_ENDED',
+		(await regionOf(buildingId)) ?? null,
+		await worldService.currentTick(),
+		{
+			subjectId: employeeId,
+			objectId: gebaeude?.dataValues.OwnerCharacterId ?? null,
+			buildingId,
+			detail: grund
+		}
+	);
 	return { ok: true };
 }
 
+/**
+ * Entlassen: das Gegenstück zur Kündigung, von der anderen Seite des Tisches.
+ *
+ * Bis hierher wurde ein Arbeitgeber niemanden wieder los — der Lohn lief, bis der andere
+ * von sich aus ging. Wer aushängen darf, darf jetzt auch abberufen; es ist dieselbe
+ * Befugnis über dasselbe Haus.
+ *
+ * **Nur aus dem eigenen Haus.** Die Anstellung wird über Person *und* Gebäude gesucht:
+ * Sonst entließe ein Kennungswurf den Knecht des Nachbarn.
+ */
+export async function dismiss(
+	ownerId: string,
+	buildingId: string,
+	employeeId: string
+): Promise<EmploymentResult> {
+	const gebaeude = await Building.findByPk(buildingId);
+	if (!gebaeude) return { ok: false, reason: 'PLOT_NOT_OWNED' };
+
+	const erlaubt = await darfBestimmen(gebaeude.dataValues, ownerId);
+	if (!erlaubt.ok) return erlaubt;
+
+	const stelle = await Employment.findOne({
+		where: { EmployeeCharacterId: employeeId, BuildingId: buildingId }
+	});
+	if (!stelle) return { ok: false, reason: 'NO_JOB_OFFERED' };
+
+	return endEmployment(employeeId, 'DISMISSED');
+}
+
 export type ShiftResult =
-	| { ok: true; wage: number; produced: number; itemId?: string }
+	| { ok: true; wage: number; produced: number; itemId?: string; idle: boolean }
 	| { ok: false; reason: ActionFailureReason };
 
 /**
@@ -202,6 +287,13 @@ export type ShiftResult =
  * Was dabei entsteht, gehört dem Betrieb; was der Angestellte bekommt, ist Lohn. Fehlt
  * das Rezept — etwa in einer Schmiede, die noch keins hat —, bleibt es beim Lohn allein:
  * Der Angestellte hat gearbeitet, auch wenn nichts Greifbares dabei herauskam.
+ *
+ * **Dasselbe gilt, wenn das Material fehlt oder die Jahreszeit nicht mitspielt** (5.31).
+ * Vorher scheiterte die Schicht daran, und der Angestellte hatte den Tag umsonst
+ * angetreten — für ein Versäumnis, das nicht seines war. Jetzt steht er trotzdem in der
+ * Werkstatt und bekommt seinen Lohn; nur bleibt das Lager leer, und die Rechnung trägt
+ * der, der für Arbeit hätte sorgen müssen. Gelernt wird dabei nichts: Übung braucht etwas
+ * unter den Händen.
  */
 export async function workForEmployer(employeeId: string): Promise<ShiftResult> {
 	const tick: number = await worldService.currentTick();
@@ -216,7 +308,7 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 	if (!gebaeude || !vorlage) {
 		// Der Betrieb ist verschwunden — zur Ruine geworden oder verkauft. Die Stelle
 		// endet mit ihm.
-		await endEmployment(employeeId);
+		await endEmployment(employeeId, 'GONE');
 		return { ok: false, reason: 'NO_JOB_OFFERED' };
 	}
 
@@ -232,16 +324,24 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 
 	// **Die Jahreszeit gilt auch für den Knecht.** Was im Januar am Waldrand nicht wächst,
 	// wächst dort auch nicht für Lohn — sonst wäre eine Anstellung der Weg, die
-	// Kräutersaison zu umgehen. Die eigene Ernte prüft das über `produce`; hier steht es,
-	// weil die Schicht ihren Ertrag anders errechnet.
-	if (rezept?.seasons && !rezept.seasons.includes(seasonOf(tick))) {
-		return { ok: false, reason: 'WRONG_SEASON' };
-	}
+	// Kräutersaison zu umgehen. Sie kostet ihn seit 5.31 aber nicht mehr den Tag: Wer im
+	// Januar zur Kräuterfrau bestellt wird, hat sich nicht ausgesucht, wann er kommt.
+	const falscheJahreszeit: boolean = Boolean(
+		rezept?.seasons && !rezept.seasons.includes(seasonOf(tick))
+	);
 
 	return sequelize.transaction(async (t: Transaction) => {
 		const angestellter = await characterService.loadForAction(employeeId, tick, t);
 		const kasse = await kasseVon(gebaeude.id, gebaeude.ownerCharacterId, t);
 		if (!angestellter || !kasse) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+
+		// **Erst nachsehen, ob das Lager hergibt, was das Rezept verlangt** — und zwar
+		// bevor etwas herausgenommen wird. Sonst wären bei einer fehlenden dritten Zutat
+		// die ersten beiden schon verbraucht.
+		const zutatenDa: boolean = rezept
+			? await tradeService.buildingHasStock(gebaeude.id, rezept.input, t)
+			: true;
+		const leerlauf: boolean = Boolean(rezept) && (falscheJahreszeit || !zutatenDa);
 
 		const koennen: number = rezept ? await skillService.getLevel(employeeId, rezept.skill, t) : 0;
 		// **Der Ausbau zählt auch für den Knecht** — es ist dieselbe Werkstatt. Stünde hier
@@ -259,20 +359,17 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 			{ money: kasse.money },
 			stelle.dataValues.wagePerActionPoint,
 			kosten,
-			menge
+			menge,
+			leerlauf
 		);
 		if (!ergebnis.ok) return ergebnis;
 
-		// Der Ertrag braucht Zutaten aus dem Betriebslager — sonst mahlt niemand.
-		if (rezept) {
+		// Der Ertrag braucht Zutaten aus dem Betriebslager — sonst mahlt niemand. Beim
+		// Leerlauf bleibt dieser ganze Absatz aus: Es wird nichts verbraucht, nichts
+		// hergestellt, nichts gelernt und nichts verzehntet. Nur der Lohn läuft.
+		if (rezept && !leerlauf) {
 			for (const zutat of rezept.input) {
-				const gereicht: boolean = await tradeService.changeBuildingStock(
-					gebaeude.id,
-					zutat.itemId,
-					-zutat.quantity,
-					t
-				);
-				if (!gereicht) return { ok: false, reason: 'NOT_IN_STOCK' } as const;
+				await tradeService.changeBuildingStock(gebaeude.id, zutat.itemId, -zutat.quantity, t);
 			}
 			// **Auch der Knecht zahlt den Zehnt.** Er trifft die Ernte und nicht den
 			// Erntenden — sonst wäre eine Handvoll Angestellter der Weg, ihn zu umgehen,
@@ -310,8 +407,9 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 		return {
 			ok: true,
 			wage: ergebnis.wage,
-			produced: menge,
-			itemId: rezept?.outputItemId
+			produced: ergebnis.produced,
+			itemId: rezept?.outputItemId,
+			idle: ergebnis.idle
 		} as const;
 	});
 }

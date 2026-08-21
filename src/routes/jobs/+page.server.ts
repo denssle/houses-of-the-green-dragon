@@ -38,6 +38,15 @@ export const actions = {
 
 		const ergebnis = await employmentService.workForEmployer(locals.currentCharacter.id);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+
+		// Der Leerlauf bekommt einen eigenen Satz: „Feierabend, 3 Münzen Lohn." allein
+		// verschwiege, dass der Tag nichts hervorgebracht hat — und der Angestellte hätte
+		// nichts, was er seinem Arbeitgeber vorhalten könnte.
+		if (ergebnis.idle) {
+			return {
+				message: `Feierabend. ${ergebnis.wage} Münzen Lohn — es lag nichts zu tun an.`
+			};
+		}
 		return {
 			message:
 				`Feierabend. ${ergebnis.wage} Münzen Lohn` +

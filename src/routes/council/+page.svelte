@@ -110,9 +110,32 @@
 				{/if}
 				{#if haus.employer}
 					{#if haus.offeredWage === null}
-						<i>Niemand ist angestellt.</i>
+						<i>Es hängt kein Sold aus.</i>
 					{:else}
 						<i>Sold: {haus.offeredWage} je Aktionspunkt.</i>
+					{/if}
+					{#if haus.staff.length === 0}
+						<!--
+							Nur wenn ein Sold aushängt: Steht kein Angebot, ist „niemand im Dienst"
+							keine Nachricht, sondern die Wiederholung der Zeile davor.
+						-->
+						{#if haus.offeredWage !== null}<i>Niemand hat sich gemeldet.</i>{/if}
+					{:else}
+						<ul>
+							{#each haus.staff as person (person.id)}
+								<li>
+									<a href="{base}/character/{person.id}" class="link">{person.name}</a>
+									— {person.wage} Münzen je Aktionspunkt
+									{#if data.holder?.mine}
+										<form method="POST" action="?/dismiss" use:enhance>
+											<input type="hidden" name="buildingId" value={haus.id} />
+											<input type="hidden" name="employeeId" value={person.id} />
+											<button type="submit" class="link">Entlassen</button>
+										</form>
+									{/if}
+								</li>
+							{/each}
+						</ul>
 					{/if}
 					{#if data.holder?.mine}
 						<form method="POST" action="?/pay" use:enhance>

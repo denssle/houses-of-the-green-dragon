@@ -354,6 +354,27 @@ export const actions = {
 		return { message: lohn === null ? 'Der Aushang ist ab.' : 'Der Aushang hängt.' };
 	},
 
+	/**
+	 * Jemanden entlassen.
+	 *
+	 * Das Gegenstück zum Kündigen unter `/jobs` — dieselbe Handlung, nur von der anderen
+	 * Seite. Ohne Frist und ohne Abfindung: Was eine Anstellung kosten soll, wenn sie
+	 * endet, hängt an der Verhandlung über den Lohn (Punkt 33).
+	 */
+	dismiss: async ({ request, params, locals }) => {
+		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
+		const employeeId = (await request.formData()).get('employeeId')?.toString();
+		if (!employeeId) return fail(400, { message: 'Wen denn?' });
+
+		const ergebnis = await employmentService.dismiss(
+			locals.currentCharacter.id,
+			params.building_id,
+			employeeId
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: 'Entlassen.' };
+	},
+
 	buy: async ({ params, locals }) => {
 		if (!locals.currentCharacter) {
 			return fail(401, { message: 'Kein Charakter, der kaufen könnte' });

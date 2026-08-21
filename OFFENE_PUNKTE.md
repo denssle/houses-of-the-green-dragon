@@ -8,67 +8,67 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 bis 10). Die Spalte „Fällig vor" sagt etwas anderes und bleibt deshalb: nicht wann er
 gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen ist.
 
-| #   | Punkt                                                                              | Fällig vor                   | Art          |
-| --- | ---------------------------------------------------------------------------------- | ---------------------------- | ------------ |
-| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                            | Heiltrank (4.6c)             | Entwurf      |
-| 6   | Kämpfe und Verletzungen                                                            | Waffen und Gift (4.6c)       | Entwurf      |
-| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                  | 4.7 / Punkt 6                | Entwurf      |
-| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                           | 4.8                          | Entwurf      |
-| 14  | Startbedingungen für neue Spieler — **entschieden mit 5.6**                        | —                            | erledigt     |
-| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter** | 4.8 / Punkt 6                | Entwurf      |
-| 63  | Der geschlossene Kreis — **erledigt mit 5.16**                                     | —                            | erledigt     |
-| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                       | laufend                      | Entwurf      |
-| 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
-| 66  | Wo Geld aus dem Nichts kam — **im Kern behoben (5.26)**; Zehnt und Raubgut offen   | Punkt 23 / 74                | teilweise    |
-| 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern        | dem nächsten Messlauf        | Befund       |
-| 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt      | —                            | erledigt     |
-| 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                  | —                            | erledigt     |
-| 70  | Niemand lernt ein Handwerk, das es nicht gibt — alle schmieden, keiner backt       | der Brotkette                | Entscheidung |
-| 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                             | —                            | erledigt     |
-| 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                  | —                            | erledigt     |
-| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                            | laufend                      | Entwurf      |
-| 74  | Der Auftrag an Tagelöhner — privates Renovieren gegen Lohn                         | Punkt 66 / 33                | Entwurf      |
-| 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                        | dem nächsten Schritt         | Befund       |
-| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung             | laufend                      | Entwurf      |
-| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                | laufend                      | Entwurf      |
-| 20  | Verschleiß von Gegenständen                                                        | Kleidung und Werkzeug (4.6c) | Entwurf      |
-| 15  | Weltinhalte: Berufe, Waren und Rezepte                                             | laufend                      | Entwurf      |
-| 16  | Balancing im engeren Sinn                                                          | laufend                      | laufend      |
-| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                    | zweite Stadt / Erschließung  | Entwurf      |
-| 32  | Die Ämter: Zuschnitt, was gewählt und was ernannt wird, der Richter                | Ämter über den Bürgermeister | Entscheidung |
-| 33  | Lohn: Aushang, Verhandlung, wer wen einstellt — **und wer entlassen darf**         | laufend                      | Entwurf      |
-| 34  | Wer einen Handwerksbetrieb führen darf                                             | Berufe (Punkt 15)            | Entwurf      |
-| 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                      | zusammen mit Punkt 34        | Entwurf      |
-| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                       | Punkt 34                     | Entwurf      |
-| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt               | Punkte 23, 39, 43            | Entwurf      |
-| 48  | Was beim Tod aus den Zurückbleibenden wird — **erledigt mit 5.1**                  | —                            | erledigt     |
-| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                 | Zuwanderung (Punkt 41)       | Entwurf      |
-| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten  | Fernhandel                   | Entwurf      |
-| 51  | Mitgift, Testament und Stiftung                                                    | laufend                      | Entwurf      |
-| 52  | Der Lebenslauf — **erledigt mit 5.3**                                              | —                            | erledigt     |
-| 53  | Zwei Knöpfe namens „Arbeiten" auf derselben Gebäudeseite                           | laufend                      | Aufgabe      |
-| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                             | laufend                      | Entwurf      |
-| 36  | Gebäude und Betriebe benennen — **erledigt mit 5.2**                               | —                            | erledigt     |
-| 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum      | —                            | erledigt     |
-| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                  | Ehe für alle                 | Entwurf      |
-| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit           | später                       | Entwurf      |
-| 40  | Der abwesende Spieler — **erledigt mit 5.5**, zwei Restfragen                      | —                            | erledigt     |
-| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist            | zweite Stadt                 | Entwurf      |
-| 42  | Kindern einen Namen geben — **erledigt mit 5.2**                                   | —                            | erledigt     |
-| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                        | erste verliehene Münze       | Entwurf      |
-| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                    | Punkt 43 / Punkt 23          | Entwurf      |
-| 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                | —                            | erledigt     |
-| 26  | Datensicherung per Cron, einmal wiederhergestellt — **erledigt mit 5.8**           | —                            | erledigt     |
-| 55  | Die Stadt kommt nicht in Gang — **erledigt mit 5.11**, ein Rest bleibt             | —                            | erledigt     |
-| 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt — **erledigt mit 5.11**     | —                            | erledigt     |
-| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe              | laufend                      | Entwurf      |
-| 62  | Geburts- und Errichtungsdatum sichtbar machen                                      | laufend                      | Aufgabe      |
-| 57  | Der Takt der Welt steht nirgends — wann kommen Aktionspunkte wieder?               | erster fremder Spieler       | Aufgabe      |
-| 58  | Wege, die nur beschrieben und nicht verlinkt sind                                  | laufend                      | Aufgabe      |
-| 59  | Aktionen, die scheitern müssen, sehen aus wie Aktionen, die gehen                  | laufend                      | Aufgabe      |
-| 60  | Listen ohne Ordnung, Wahlen ohne Termin                                            | laufend                      | Aufgabe      |
-| 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen  | —                            | erledigt     |
-| 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                            | —                            | erledigt     |
+| #   | Punkt                                                                                | Fällig vor                   | Art          |
+| --- | ------------------------------------------------------------------------------------ | ---------------------------- | ------------ |
+| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                              | Heiltrank (4.6c)             | Entwurf      |
+| 6   | Kämpfe und Verletzungen                                                              | Waffen und Gift (4.6c)       | Entwurf      |
+| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                    | 4.7 / Punkt 6                | Entwurf      |
+| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                             | 4.8                          | Entwurf      |
+| 14  | Startbedingungen für neue Spieler — **entschieden mit 5.6**                          | —                            | erledigt     |
+| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**   | 4.8 / Punkt 6                | Entwurf      |
+| 63  | Der geschlossene Kreis — **erledigt mit 5.16**                                       | —                            | erledigt     |
+| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                         | laufend                      | Entwurf      |
+| 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                          | dem nächsten Schritt         | Befund       |
+| 66  | Wo Geld aus dem Nichts kam — **im Kern behoben (5.26)**; Zehnt und Raubgut offen     | Punkt 23 / 74                | teilweise    |
+| 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern          | dem nächsten Messlauf        | Befund       |
+| 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt        | —                            | erledigt     |
+| 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                    | —                            | erledigt     |
+| 70  | Niemand lernt ein Handwerk, das es nicht gibt — alle schmieden, keiner backt         | der Brotkette                | Entscheidung |
+| 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                               | —                            | erledigt     |
+| 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                    | —                            | erledigt     |
+| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                              | laufend                      | Entwurf      |
+| 74  | Der Auftrag an Tagelöhner — privates Renovieren gegen Lohn                           | Punkt 66 / 33                | Entwurf      |
+| 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                          | dem nächsten Schritt         | Befund       |
+| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
+| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
+| 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
+| 15  | Weltinhalte: Berufe, Waren und Rezepte                                               | laufend                      | Entwurf      |
+| 16  | Balancing im engeren Sinn                                                            | laufend                      | laufend      |
+| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                      | zweite Stadt / Erschließung  | Entwurf      |
+| 32  | Die Ämter: Zuschnitt, was gewählt und was ernannt wird, der Richter                  | Ämter über den Bürgermeister | Entscheidung |
+| 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen | laufend                      | Entwurf      |
+| 34  | Wer einen Handwerksbetrieb führen darf                                               | Berufe (Punkt 15)            | Entwurf      |
+| 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                        | zusammen mit Punkt 34        | Entwurf      |
+| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                         | Punkt 34                     | Entwurf      |
+| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                 | Punkte 23, 39, 43            | Entwurf      |
+| 48  | Was beim Tod aus den Zurückbleibenden wird — **erledigt mit 5.1**                    | —                            | erledigt     |
+| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                   | Zuwanderung (Punkt 41)       | Entwurf      |
+| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten    | Fernhandel                   | Entwurf      |
+| 51  | Mitgift, Testament und Stiftung                                                      | laufend                      | Entwurf      |
+| 52  | Der Lebenslauf — **erledigt mit 5.3**                                                | —                            | erledigt     |
+| 53  | Zwei Knöpfe namens „Arbeiten" — **erledigt mit 5.31**                                | —                            | erledigt     |
+| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                               | laufend                      | Entwurf      |
+| 36  | Gebäude und Betriebe benennen — **erledigt mit 5.2**                                 | —                            | erledigt     |
+| 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum        | —                            | erledigt     |
+| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                    | Ehe für alle                 | Entwurf      |
+| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit             | später                       | Entwurf      |
+| 40  | Der abwesende Spieler — **erledigt mit 5.5**, zwei Restfragen                        | —                            | erledigt     |
+| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist              | zweite Stadt                 | Entwurf      |
+| 42  | Kindern einen Namen geben — **erledigt mit 5.2**                                     | —                            | erledigt     |
+| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                          | erste verliehene Münze       | Entwurf      |
+| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                      | Punkt 43 / Punkt 23          | Entwurf      |
+| 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                  | —                            | erledigt     |
+| 26  | Datensicherung per Cron, einmal wiederhergestellt — **erledigt mit 5.8**             | —                            | erledigt     |
+| 55  | Die Stadt kommt nicht in Gang — **erledigt mit 5.11**, ein Rest bleibt               | —                            | erledigt     |
+| 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt — **erledigt mit 5.11**       | —                            | erledigt     |
+| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                | laufend                      | Entwurf      |
+| 62  | Geburts- und Errichtungsdatum sichtbar machen                                        | laufend                      | Aufgabe      |
+| 57  | Der Takt der Welt steht nirgends — wann kommen Aktionspunkte wieder?                 | erster fremder Spieler       | Aufgabe      |
+| 58  | Wege, die nur beschrieben und nicht verlinkt sind                                    | laufend                      | Aufgabe      |
+| 59  | Aktionen, die scheitern müssen, sehen aus wie Aktionen, die gehen                    | laufend                      | Aufgabe      |
+| 60  | Listen ohne Ordnung, Wahlen ohne Termin                                              | laufend                      | Aufgabe      |
+| 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen    | —                            | erledigt     |
+| 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                              | —                            | erledigt     |
 
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
@@ -353,14 +353,15 @@ meist ein NPC steht:
   ist keine. Eine Frist oder eine Abfindung macht daraus eine Bindung — und beides muss
   auch für den Arbeitgeber gelten, sonst ist es Willkür.
 
-**Zwei Dinge fehlen schon vor dem Entwurf** — beim Durchsehen der Gebäudeseite am
-16.08.2026 aufgefallen:
+**Zwei Dinge fehlten schon vor dem Entwurf** — beim Durchsehen der Gebäudeseite am
+16.08.2026 aufgefallen. Das erste ist mit 5.31 gebaut, das zweite steht noch:
 
-- **Der Arbeitgeber kann niemanden entlassen.** `employmentService.endEmployment` gibt es,
-  aber verdrahtet ist es allein unter `/jobs` — und dort kündigt der **Angestellte selbst**.
-  Wer jemanden eingestellt hat, wird ihn nicht wieder los; der Lohn läuft, bis der andere
-  von sich aus geht. Ein Knopf auf der Gebäudeseite ist die kleine Lösung, aber er greift
-  der Frage nach Frist und Abfindung vor — deshalb steht er hier und nicht im Code.
+- **~~Der Arbeitgeber kann niemanden entlassen.~~** Gebaut mit 5.31:
+  `employmentService.dismiss`, ein Knopf bei der Belegschaft, und die Befugnis dieselbe wie
+  beim Aushang (`darfBestimmen`). **Bewusst die kleine Lösung** — sofort und folgenlos, für
+  beide Seiten gleich. Die Frage nach **Frist und Abfindung** ist damit nicht beantwortet,
+  sondern freigelegt: Solange Gehen nichts kostet, ist eine Anstellung eine Verabredung von
+  Tag zu Tag. Sie gehört zur Verhandlung und wird mit ihr entschieden.
 - **Der Lohn eines Bestehenden ist nicht änderbar.** Das ist bisher Absicht
   (`employment.attributes.ts`: vereinbart wird zwischen zwei Seiten, ein neuer Aushang gilt
   für den Nächsten). Sobald verhandelt wird, muss diese Entscheidung mit — sonst ist die
@@ -368,6 +369,14 @@ meist ein NPC steht:
 
 Beides gehört in einen Zug: Wer über Lohn verhandeln kann, muss auch gehen können, und wer
 entlassen kann, braucht dafür einen Preis.
+
+**Was 5.31 nebenbei entschieden hat:** Wenn im Betrieb das Material fehlt, arbeitet der
+Angestellte trotzdem und wird bezahlt — Leerlauf statt Fehlschlag. Das ist eine Aussage
+über das Verhältnis und gehört deshalb hierher: **Ein Angestellter schuldet seine Zeit,
+nicht den Erfolg.** Für Arbeit zu sorgen ist Sache des Arbeitgebers, und er zahlt, wenn er
+es versäumt. Was daran noch fehlt, ist die andere Richtung: Ein NPC, der Tag für Tag in
+einer leeren Werkstatt steht, sollte irgendwann kündigen — das hängt an der Frage weiter
+oben, ob ein NPC überhaupt kündigt.
 
 ### 34. Wer einen Handwerksbetrieb führen darf
 
@@ -899,19 +908,21 @@ Umzug eines Einzelnen interessiert die Stadt weniger als ihn selbst. Wenn die Si
 verschiedene Schwellen brauchen, ist das der erste Fall, in dem eine Ereignisart nicht in
 jeder Sicht auftaucht.
 
-### 53. Zwei Knöpfe namens „Arbeiten"
+### 53. Zwei Knöpfe namens „Arbeiten" — erledigt (5.31)
 
-Ein Fund des Rundlaufs (5.7): Auf der Gebäudeseite eines Betriebs stehen zwei Knöpfe, die
-fast gleich heißen und Verschiedenes tun.
+Ein Fund des Rundlaufs (5.7): Auf der Gebäudeseite eines Betriebs standen zwei Knöpfe, die
+fast gleich hießen und Verschiedenes taten.
 
 - **„Arbeiten (1 AP)"** steht bei den Rezepten und stellt aus **eigenem** Vorrat her. Ohne
   Zutaten scheitert es mit „Davon hast du nichts mehr".
 - **„Arbeiten"** ist die Schicht: Man verdingt sich und bekommt Lohn.
 
-Für einen Neuling in der städtischen Schmiede ist der erste Knopf der sichtbarere und der
-falsche. Zu klären ist nur die Benennung — „Schmieden (1 AP)" für das Handwerk und
-„Eine Schicht arbeiten" für den Lohn wären schon zwei verschiedene Sätze. Der Test greift
-inzwischen den exakten Namen ab und würde eine Umbenennung merken.
+Für einen Neuling in der städtischen Schmiede war der erste der sichtbarere und der
+falsche. Der erste heißt jetzt **„Herstellen (1 AP)"** — passend zur Überschrift des
+Abschnitts, unter dem er steht; der zweite heißt seit jeher „Eine Schicht arbeiten" und
+steht ohnehin auf einer anderen Seite. Ein betriebsspezifischer Name („Schmieden",
+„Sägen") wäre schöner, verlangte aber ein Verb je Vorlage; das ist mehr Aufwand als der
+Unterschied wert, den es macht.
 
 ### 61. Wer ledig ist, baut nie etwas
 
