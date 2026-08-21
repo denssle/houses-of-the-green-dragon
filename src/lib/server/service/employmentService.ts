@@ -86,6 +86,21 @@ async function darfBestimmen(
 	return { ok: true };
 }
 
+/**
+ * Darf dieser Charakter hier aushängen und entlassen?
+ *
+ * Dieselbe Frage wie in `darfBestimmen`, nur für die **Anzeige** — und deshalb dieselbe
+ * Antwort. Die Gebäudeseite zeigte den Abschnitt „Leute" bis hierher nach ihrer eigenen
+ * Regel („gehört mir"), und die war enger als die des Dienstes: Der Bürgermeister durfte
+ * die Wache besetzen, aber es gab keinen Knopf dafür. Eine Befugnis, die nur der
+ * NPC-Bürgermeister ausüben kann, ist keine.
+ */
+export async function mayDecideStaff(characterId: string, buildingId: string): Promise<boolean> {
+	const gebaeude = await Building.findByPk(buildingId);
+	if (!gebaeude) return false;
+	return (await darfBestimmen(gebaeude.dataValues, characterId)).ok;
+}
+
 /** Den Aushang setzen — oder mit `null` abnehmen. */
 export async function offerJob(
 	ownerId: string,
@@ -107,6 +122,24 @@ export async function offerJob(
 }
 
 /**
+ * Wie viele Stellen dieses Haus hat und wie viele davon besetzt sind.
+ *
+ * Die Zahl, ohne die ein Aushang eine Behauptung ins Leere ist: Ein Wohnhaus hat keine
+ * Stelle, eine Werkstatt der ersten Stufe genau eine — und ist die besetzt, findet auch
+ * der schönste Lohn niemanden mehr. Wer aushängt, soll das **vorher** sehen und nicht
+ * daran merken, dass wochenlang niemand kommt.
+ */
+export async function positionCount(building: {
+	id: string;
+	optionId: number;
+	level: number;
+}): Promise<{ positions: number; taken: number }> {
+	const vorlage = buildingService.getBuildingOption(building.optionId);
+	const belegt: number = await Employment.count({ where: { BuildingId: building.id } });
+	return { positions: vorlage ? positionsAt(vorlage, building.level) : 0, taken: belegt };
+}
+
+/**
  * Hat dieses Haus eine Stelle frei, für die noch kein Lohn aushängt?
  *
  * Beides muss stimmen: Ein Aushang ohne freie Stelle lockt niemanden, eine freie Stelle
@@ -122,11 +155,8 @@ export async function hasUnofferedPosition(building: {
 }): Promise<boolean> {
 	if (building.offeredWage !== null) return false;
 
-	const vorlage = buildingService.getBuildingOption(building.optionId);
-	if (!vorlage) return false;
-
-	const belegt: number = await Employment.count({ where: { BuildingId: building.id } });
-	return positionsAt(vorlage, building.level) - belegt > 0;
+	const { positions, taken } = await positionCount(building);
+	return positions - taken > 0;
 }
 
 /** Eine Stelle antreten. */

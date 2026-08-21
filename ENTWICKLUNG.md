@@ -2990,6 +2990,68 @@ Seiten. Anmeldung und Registrierung haben dadurch gar keinen Skriptblock mehr.
 _Fertig, wenn:_ Man sieht, ob eine Handlung geklappt hat, ohne nach oben zu scrollen. —
 Erledigt.
 
+**5.36 Der Aushang sagt, was er tut.** ✓ Einen Aushang aushängen war bis hierher ein
+Zahlenfeld und ein Knopf „Suchen", und danach ein Satz: „Der Aushang hängt." Wahr, und
+sonst nichts. Drei Auskünfte fehlten, und alle drei entscheiden:
+
+- **Ob dieses Haus überhaupt einen Arbeitsplatz hat.** `positionsAt` gibt für ein
+  Wohnhaus null, und das Formular stand trotzdem da: Man trug einen Lohn ein, bekam „Der
+  Aushang hängt." zu lesen — und wartete auf jemanden, der nie kommen konnte.
+- **Wie viele Stellen frei sind.** Eine Werkstatt der ersten Stufe hat genau eine. Ist sie
+  besetzt, findet auch der schönste Lohn niemanden mehr; `getOpenJobs` blendet den Aushang
+  dann aus, ohne dass es jemand erführe.
+- **Was der Lohn kostet.** Je Aktionspunkt eingetragen, je Schicht bezahlt — bei einem
+  Rezept über acht Punkte ist das der achtfache Betrag aus der eigenen Kasse.
+
+Neu ist `positionCount()` im Anstellungsdienst; `hasUnofferedPosition` rechnet jetzt damit
+statt mit einer zweiten Zählung derselben Sache. Die Gebäudeseite stellt die Lage über das
+Feld — „Es hängt ein Aushang: 3 Münzen je Aktionspunkt. 1 von 2 Stellen frei, eine Schicht
+kostet dich 24 Münzen." —, der Knopf heißt „Aushängen" oder „Lohn ändern", je nachdem, was
+gerade gilt, und der Toast nennt dieselben Zahlen noch einmal.
+
+**Und das Abnehmen bekommt einen Knopf.** Möglich war es immer: `offerJob(…, null)`, in
+der Anzeige erreichbar nur über ein leergeräumtes Zahlenfeld — ein Weg, den niemand
+findet, der ihn nicht gebaut hat. Jetzt steht dort „Aushang abnehmen", genau wie „Doch
+nicht verkaufen" beim Preisschild, und die Antwort sagt dazu, was es **nicht** tut:
+abnehmen ist nicht entlassen. Der Reparaturauftrag daneben hatte dasselbe Loch und bekommt
+denselben Knopf.
+
+**Ein ungültiger Lohn heißt jetzt so.** Vorher lief eine Null oder ein Bruch in
+`NOTHING_TO_DO` — „Daran gibt es nichts zu tun.", ein Satz, der zu allem passt und nichts
+erklärt. Die Route prüft selbst und nennt die Regel.
+
+_Fertig, wenn:_ Wer einen Aushang aushängt, weiß vorher, ob sich jemand melden kann, und
+findet den Weg zurück. — Erledigt.
+
+**5.37 Der Bürgermeister bekommt seinen Knopf.** ✓ Die Befugnis war da, der Weg nicht:
+`darfBestimmen` im Anstellungsdienst lässt den **Amtsinhaber** über die Belegschaft
+städtischer Häuser entscheiden — der Sold der Wache ist eine Amtsentscheidung und kein
+Gesetz —, aber die Gebäudeseite zeigte den Abschnitt „Leute" im Block `{#if data.mine}`.
+Ein städtisches Haus hat keinen Eigentümer; wer nach dem Eigentum fragt, schließt die
+Stadt für immer aus. Ausgeübt wurde die Befugnis deshalb nur vom **NPC**-Bürgermeister
+über `mayorService`, und ein gewählter Spieler stand vor einer Wache, die er nicht
+besetzen konnte.
+
+**Die Seite fragt jetzt den Dienst.** `mayDecideStaff()` gibt dieselbe Antwort wie die
+Handlung, die der Knopf auslöst — die Lehre aus 5.27, wo eine zweite Prüfung in der Route
+gegen die Regeln im Dienst lief und jede Handlung mit 403 abwies. Zwei Formulierungen
+derselben Frage laufen auseinander; hier gibt es nur noch eine.
+
+**Was der Stadt gehört, klingt anders.** Bei einem städtischen Haus heißt es _Sold_ statt
+Lohn, „kostet die Stadt" statt „kostet dich", und statt „Hier arbeitet niemand für dich"
+steht „Hier steht niemand im Dienst der Stadt". Dazu der **Kassenstand** der Tasche, aus
+der gezahlt wird — die eigene Börse beim Betrieb, die Stadtkasse beim Wachhaus: Wer den
+Sold festsetzt, ohne zu sehen, was die Kasse hergibt, beschließt ins Blaue, und leer heißt
+hier, dass die Schicht nicht stattfindet.
+
+**Und der Abschnitt erscheint nur, wo Arbeit möglich ist** — bisher stand er unter jedem
+eigenen Haus, auch unter der Kate ohne einen einzigen Arbeitsplatz. Jetzt braucht es eine
+Stelle oder jemanden, der noch angestellt ist; sonst verschwände mit der letzten Stufe
+auch der Knopf zum Entlassen.
+
+_Fertig, wenn:_ Ein gewählter Bürgermeister kann die Wache seiner Stadt besetzen, ohne die
+Datenbank anzufassen. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

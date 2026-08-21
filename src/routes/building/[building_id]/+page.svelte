@@ -6,6 +6,16 @@
 
 	let { data }: PageProps = $props();
 
+	/** Wie viele Stellen offenstehen — die Zahl, an der der Aushang hängt. */
+	const frei: number = $derived(data.hiring.positions - data.hiring.taken);
+
+	/**
+	 * Ein Haus der Stadt: Dann zahlt die Stadtkasse, und es heißt Sold statt Lohn. Wer
+	 * hier entscheidet, tut es kraft Amtes und nicht kraft Eigentums — dieselbe Handlung,
+	 * eine andere Tasche.
+	 */
+	const stadtHaus: boolean = $derived(data.building.ownerType === 'CITY');
+
 	/**
 	 * Ein Wort für den Zustand. Die Zahl steht daneben — anders als bei Zuneigung und
 	 * Wesensart ist sie hier keine Verlockung, sondern die Grundlage der Entscheidung:
@@ -308,45 +318,24 @@
 					Auftrag: Lohn je Handschlag
 					<input type="number" name="wage" min="1" step="1" value={data.building.repairWage} />
 				</label>
-				<button type="submit">Ausschreiben</button>
+				<button type="submit">
+					{data.building.repairWage === null ? 'Ausschreiben' : 'Lohn ändern'}
+				</button>
 			</form>
+			{#if data.building.repairWage !== null}
+				<p>
+					<small>
+						Ausgeschrieben: {data.building.repairWage} Münzen je Handschlag.
+					</small>
+				</p>
+				<!-- Dasselbe wie beim Aushang: Zurückziehen war möglich, aber unsichtbar. -->
+				<form method="POST" action="?/offerRepair" use:enhance>
+					<button type="submit" class="link">Auftrag zurückziehen</button>
+				</form>
+			{/if}
 		{:else}
 			<p><i>Hier ist nichts zu tun.</i></p>
 		{/if}
-	</section>
-
-	<section>
-		<h3>Leute</h3>
-		{#if data.staff.length === 0}
-			<p><i>Hier arbeitet niemand für dich.</i></p>
-		{:else}
-			<ul>
-				{#each data.staff as person (person.id)}
-					<li>
-						<a href="{base}/character/{person.id}" class="link">{person.name}</a>
-						— {person.wage} Münzen je Aktionspunkt
-						<form method="POST" action="?/dismiss" use:enhance>
-							<input type="hidden" name="employeeId" value={person.id} />
-							<button type="submit" class="link">Entlassen</button>
-						</form>
-					</li>
-				{/each}
-			</ul>
-		{/if}
-		<form method="POST" action="?/hire" use:enhance>
-			<label>
-				Aushang: Lohn je Aktionspunkt
-				<input type="number" name="wage" min="1" step="1" value={data.building.offeredWage} />
-			</label>
-			<button type="submit">Suchen</button>
-		</form>
-		<p>
-			<small>
-				Der Lohn kommt aus deiner Kasse. Ist sie leer, arbeitet niemand — und du merkst es daran,
-				dass nichts ins Lager kommt. Fehlt dagegen das Material, wird trotzdem gezahlt: Für Arbeit
-				zu sorgen ist deine Sache, nicht ihre. Wer geht, geht sofort — für beide Seiten.
-			</small>
-		</p>
 	</section>
 
 	<section>
@@ -370,6 +359,111 @@
 		<form method="POST" action="?/buy" use:enhance>
 			<button type="submit">Kaufen für {data.building.forSalePrice} Münzen</button>
 		</form>
+	</section>
+{/if}
+
+<!--
+	**Leute — und zwar für jeden, der hier bestimmen darf.** Der Abschnitt stand bis 5.37
+	im Block „gehört mir", und damit war die Anzeige enger als die Handlung dahinter:
+	`darfBestimmen` im Anstellungsdienst lässt den Amtsinhaber über die Häuser der Stadt
+	entscheiden, aber ein gewählter Bürgermeister fand keinen Knopf, um die Wache zu
+	besetzen. Ein städtisches Haus hat keinen Eigentümer; wer die Frage nach dem Eigentum
+	stellt, schließt die Stadt für immer aus.
+
+	**Und nur dort, wo Arbeit möglich ist.** Ein Wohnhaus hat keine Stelle und wird nie
+	eine haben; ein Abschnitt „Leute" unter jeder Kate und jedem Rathaus wäre eine
+	Überschrift ohne Inhalt. Bleibt er stehen, solange noch jemand angestellt ist — sonst
+	verschwände mit der letzten Stufe auch der Knopf zum Entlassen.
+-->
+{#if data.hiring.mayDecide && (data.hiring.positions > 0 || data.staff.length > 0)}
+	<section>
+		<h3>Leute</h3>
+		{#if data.staff.length === 0}
+			<p>
+				<i>
+					{stadtHaus
+						? 'Hier steht niemand im Dienst der Stadt.'
+						: 'Hier arbeitet niemand für dich.'}
+				</i>
+			</p>
+		{:else}
+			<ul>
+				{#each data.staff as person (person.id)}
+					<li>
+						<a href="{base}/character/{person.id}" class="link">{person.name}</a>
+						— {person.wage} Münzen je Aktionspunkt
+						<form method="POST" action="?/dismiss" use:enhance>
+							<input type="hidden" name="employeeId" value={person.id} />
+							<button type="submit" class="link">Entlassen</button>
+						</form>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+		<!--
+			**Was der Aushang gerade tut, steht über dem Feld.** Vorher stand dort ein
+			Zahlenfeld mit einem Knopf „Suchen": Ob ein Aushang hängt, war nur am
+			vorausgefüllten Wert zu erraten, wie viele Stellen das Haus hat, an keiner
+			Stelle — und wer ihn wieder abnehmen wollte, musste ahnen, dass ein leeres Feld
+			das tut.
+		-->
+		<p>
+			{#if data.hiring.positions === 0}
+				<i>Hier ist kein Arbeitsplatz — dieses Haus stellt niemanden ein.</i>
+			{:else if data.building.offeredWage === null}
+				Kein Aushang. {frei} von {data.hiring.positions}
+				{data.hiring.positions === 1 ? 'Stelle' : 'Stellen'} unbesetzt.
+			{:else}
+				<b>
+					Es hängt ein Aushang: {data.building.offeredWage} Münzen je Aktionspunkt.
+				</b>
+				{#if frei > 0}
+					{frei} von {data.hiring.positions}
+					{data.hiring.positions === 1 ? 'Stelle' : 'Stellen'} frei — eine Schicht kostet
+					{stadtHaus ? 'die Stadt' : 'dich'}
+					{data.building.offeredWage * data.hiring.actionPointCost} Münzen.
+				{:else}
+					Alle {data.hiring.positions} Stellen sind besetzt; es meldet sich niemand mehr.
+				{/if}
+			{/if}
+		</p>
+		{#if data.hiring.positions > 0}
+			<form method="POST" action="?/hire" use:enhance>
+				<label>
+					Aushang: {stadtHaus ? 'Sold' : 'Lohn'} je Aktionspunkt
+					<input type="number" name="wage" min="1" step="1" value={data.building.offeredWage} />
+				</label>
+				<button type="submit">
+					{data.building.offeredWage === null ? 'Aushängen' : 'Lohn ändern'}
+				</button>
+			</form>
+			{#if data.building.offeredWage !== null}
+				<!--
+					Das Gegenstück, das es serverseitig immer gab (`wage = null`) und in der
+					Anzeige nie: derselbe Weg wie „Doch nicht verkaufen" beim Preisschild — ein
+					Formular ohne Feld.
+				-->
+				<form method="POST" action="?/hire" use:enhance>
+					<button type="submit" class="link">Aushang abnehmen</button>
+				</form>
+			{/if}
+		{/if}
+		<p>
+			<small>
+				{#if stadtHaus}
+					Der Sold kommt aus der Stadtkasse{#if data.hiring.purse}
+						, und darin liegen {data.hiring.purse.money} Münzen{/if}. Ist sie leer, tritt niemand
+					seinen Dienst an.
+				{:else}
+					Der Lohn kommt aus deiner Kasse{#if data.hiring.purse}
+						, und darin liegen {data.hiring.purse.money} Münzen{/if}. Ist sie leer, arbeitet niemand
+					— und du merkst es daran, dass nichts ins Lager kommt.
+				{/if}
+				Fehlt dagegen das Material, wird trotzdem gezahlt: Für Arbeit zu sorgen ist Sache des Arbeitgebers,
+				nicht die der Angestellten. Wer geht, geht sofort — für beide Seiten. Den Aushang abzunehmen
+				entlässt niemanden; es kommt nur keiner mehr dazu.
+			</small>
+		</p>
 	</section>
 {/if}
 

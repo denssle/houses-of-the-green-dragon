@@ -16,6 +16,9 @@ import * as employmentService from '$lib/server/service/employmentService';
 import * as skillService from '$lib/server/service/skillService';
 import * as tradeService from '$lib/server/service/tradeService';
 import { yearsToTicks } from '$lib/game/time';
+import { CAMPAIGN_TICKS } from '$lib/game/election.logic';
+import { Candidacy, Election, Vote } from '$lib/db/model/election';
+import * as electionService from '$lib/server/service/electionService';
 
 /**
  * Phase 5.31: **die beiden Enden einer Anstellung.**
@@ -75,6 +78,39 @@ async function zimmerei(besitzerId: string): Promise<string> {
 	return id;
 }
 
+/** Eine Zimmerei, die der Stadt gehört — ein Arbeitgeber ohne Eigentümer. */
+async function staedtischeZimmerei(): Promise<string> {
+	const plotId = randomUUID();
+	await Plot.create({
+		id: plotId,
+		address: `Ratsgasse ${plotId.slice(0, 4)}`,
+		type: 'BUILDING_LAND',
+		RegionId: stadtId,
+		ownerType: 'CITY',
+		OwnerCharacterId: null
+	});
+	const id = randomUUID();
+	await Building.create({
+		id,
+		name: 'Städtische Zimmerei',
+		optionId: ZIMMEREI,
+		level: 1,
+		condition: 100,
+		lastConditionTick: JETZT,
+		PlotId: plotId,
+		ownerType: 'CITY',
+		OwnerCharacterId: null
+	});
+	return id;
+}
+
+/** Macht jemanden zum Bürgermeister — über eine echte Wahl, nicht per Hand. */
+async function insAmt(characterId: string): Promise<void> {
+	await electionService.advanceElections(stadtId, JETZT);
+	await electionService.stand(characterId, stadtId);
+	await electionService.advanceElections(stadtId, JETZT + CAMPAIGN_TICKS);
+}
+
 async function geld(characterId: string): Promise<number> {
 	return (await Character.findByPk(characterId))!.dataValues.money;
 }
@@ -109,10 +145,81 @@ describe('Anstellung', () => {
 	beforeEach(async () => {
 		await World.update({ currentTick: JETZT }, { where: { id: WORLD_ID } });
 		await Employment.destroy({ where: {} });
+		await Vote.destroy({ where: {} });
+		await Candidacy.destroy({ where: {} });
+		await Election.destroy({ where: {} });
 		await Building.destroy({ where: { optionId: ZIMMEREI } });
 		await Skill.destroy({ where: {} });
 		await Character.destroy({ where: { role: 'PLAYER' } });
 		await Region.update({ treasury: 0 }, { where: { id: stadtId } });
+	});
+
+	/**
+	 * Die Zahlen, die der Aushang braucht, um mehr zu sein als ein Eingabefeld: wie viele
+	 * Stellen es gibt und wie viele davon besetzt sind. Die Gebäudeseite sagt beides
+	 * jetzt, bevor jemand einen Lohn einträgt.
+	 */
+	describe('wie viele Stellen ein Haus hat', () => {
+		it('zählt die Ausbaustufe und die Besetzten', async () => {
+			const { betrieb } = await angestellt();
+
+			expect(
+				await employmentService.positionCount({ id: betrieb, optionId: ZIMMEREI, level: 1 })
+			).toEqual({ positions: 1, taken: 1 });
+		});
+
+		it('kennt das Haus ohne Arbeitsplatz', async () => {
+			// Ein Wohnhaus nimmt den Aushang klaglos entgegen und findet nie jemanden —
+			// deshalb muss die Anzeige die Null nennen können.
+			const bewohnerin = await person('Bewohnerin');
+			const betrieb = await zimmerei(bewohnerin);
+
+			expect(
+				await employmentService.positionCount({ id: betrieb, optionId: 1, level: 1 })
+			).toMatchObject({ positions: 0, taken: 0 });
+		});
+	});
+
+	/**
+	 * Wer aushängen und entlassen darf — die Frage, die bis 5.37 zweimal beantwortet
+	 * wurde: im Dienst nach dem Amt, auf der Gebäudeseite nach dem Eigentum. Die zweite
+	 * Antwort war enger, und deshalb fand ein gewählter Bürgermeister keinen Knopf für
+	 * die Häuser seiner Stadt.
+	 */
+	describe('wer über die Belegschaft bestimmt', () => {
+		it('ist beim eigenen Betrieb der Eigentümer', async () => {
+			const meister = await person('Meisterin', 500);
+			const betrieb = await zimmerei(meister);
+			const fremder = await person('Fremder');
+
+			expect(await employmentService.mayDecideStaff(meister, betrieb)).toBe(true);
+			expect(await employmentService.mayDecideStaff(fremder, betrieb)).toBe(false);
+		});
+
+		it('ist beim städtischen Haus der Amtsinhaber', async () => {
+			const buergermeisterin = await person('Amtsperson');
+			const buergerin = await person('Bürgerin');
+			const haus = await staedtischeZimmerei();
+
+			// Vor der Wahl darf niemand: Ein Haus ohne Eigentümer und ohne Amtsinhaber
+			// stellt niemanden ein.
+			expect(await employmentService.mayDecideStaff(buergermeisterin, haus)).toBe(false);
+
+			await insAmt(buergermeisterin);
+
+			expect(await employmentService.mayDecideStaff(buergermeisterin, haus)).toBe(true);
+			expect(await employmentService.mayDecideStaff(buergerin, haus)).toBe(false);
+		});
+
+		it('lässt den Amtsinhaber wirklich aushängen', async () => {
+			// Die Anzeige ist nur so viel wert wie die Handlung dahinter.
+			const buergermeisterin = await person('Amtsperson');
+			const haus = await staedtischeZimmerei();
+			await insAmt(buergermeisterin);
+
+			expect(await employmentService.offerJob(buergermeisterin, haus, 4)).toEqual({ ok: true });
+			expect((await Building.findByPk(haus))!.dataValues.offeredWage).toBe(4);
+		});
 	});
 
 	describe('eine Schicht ohne Material', () => {

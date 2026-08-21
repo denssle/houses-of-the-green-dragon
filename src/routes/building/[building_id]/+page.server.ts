@@ -11,6 +11,7 @@ import * as tradeService from '$lib/server/service/tradeService';
 import * as needService from '$lib/server/service/needService';
 import * as employmentService from '$lib/server/service/employmentService';
 import * as lawService from '$lib/server/service/lawService';
+import * as electionService from '$lib/server/service/electionService';
 import * as worldService from '$lib/server/service/worldService';
 import * as lifecycleService from '$lib/server/service/lifecycleService';
 import * as schoolService from '$lib/server/service/schoolService';
@@ -53,6 +54,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		locals.currentCharacter !== undefined &&
 		building.ownerCharacterId === locals.currentCharacter.id;
 
+	// Einmal geladen und zweimal gebraucht: für die Lage und für die Stadt, deren Kasse
+	// den Sold eines städtischen Hauses zahlt.
+	const grundstueck = building.plotId ? await plotService.getPlot(building.plotId) : undefined;
+
+	// **Wer hier über Leute bestimmt** — gefragt wird der Dienst und nicht die Seite: Beim
+	// eigenen Betrieb ist es der Eigentümer, bei einem städtischen Haus der Amtsinhaber.
+	const darfBestimmen: boolean =
+		locals.currentCharacter !== undefined &&
+		(await employmentService.mayDecideStaff(locals.currentCharacter.id, building.id));
+
 	// Wohnraum mit freiem Platz, der einem selbst oder der Stadt gehört — dann darf man
 	// einziehen (5.6). Die Zahl steht daneben: „Noch zwei Plätze" ist die Auskunft, die
 	// über Bleiben oder Weitersuchen entscheidet.
@@ -67,7 +78,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	return {
 		building,
 		option,
-		plot: building.plotId ? await plotService.getPlot(building.plotId) : undefined,
+		plot: grundstueck,
 		mine: gehoertMir,
 		freeRoom: freiePlaetze,
 		canMoveIn: darfEinziehen,
@@ -122,6 +133,30 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			? await lawService.rate(locals.currentCharacter.regionId, 'STALL_FEE')
 			: 0,
 		staff: await employmentService.getStaff(params.building_id),
+		// **Was der Aushang bewirkt, bevor man ihn aushängt** (Punkt: Feedback beim
+		// Anstellen). Bis hierher stand im Abschnitt „Leute" ein Zahlenfeld und ein Knopf
+		// „Suchen" — ob das Haus überhaupt einen Arbeitsplatz hat, ob schon ein Aushang
+		// hängt und für wie viel, stand nirgends. Ein Wohnhaus nahm den Aushang klaglos
+		// entgegen und fand nie jemanden.
+		hiring: {
+			...(await employmentService.positionCount(building)),
+			// Was eine Schicht kostet, hängt am Rezept: Wer acht Aktionspunkte je Durchgang
+			// verlangt, zahlt achtmal den Lohn. Ohne Rezept ist es einer.
+			actionPointCost: option?.recipes?.[0]?.actionPointCost ?? 1,
+			// **Wer hier bestimmen darf — und das ist nicht nur der Eigentümer.** Ein
+			// städtisches Haus hat keinen; über seine Belegschaft entscheidet der
+			// Amtsinhaber. Die Frage stellt der Dienst, nicht die Seite: Die Seite fragte
+			// bis hierher „gehört mir?" und war damit enger als die Handlung, die sie
+			// auslöst — der Bürgermeister durfte die Wache besetzen und fand keinen Knopf.
+			mayDecide: darfBestimmen,
+			// Aus welcher Kasse der Lohn kommt und was darin liegt. Beim eigenen Betrieb
+			// die eigene, beim städtischen die der Stadt — und in beiden Fällen die Zahl,
+			// an der hängt, ob morgen jemand arbeitet.
+			purse:
+				darfBestimmen && locals.currentCharacter
+					? await kasse(building, grundstueck?.regionId, locals.currentCharacter)
+					: null
+		},
 		// Die Schule: wer hier unterrichtet, was ein Tag kostet und welche eigenen Kinder
 		// man hinschicken könnte.
 		school:
@@ -144,6 +179,26 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		)
 	};
 };
+
+/**
+ * Aus welcher Kasse der Lohn hier käme — und was darin liegt.
+ *
+ * Ein privater Betrieb zahlt aus der Börse seines Eigentümers, ein städtischer aus der
+ * Stadtkasse (`kasseVon` im Anstellungsdienst rechnet genauso). Für den, der aushängt,
+ * ist das keine Feinheit: **Wer nicht zahlen kann, dessen Schicht findet nicht statt.**
+ * Ein Bürgermeister, der den Sold der Wache festsetzt, ohne den Kassenstand daneben zu
+ * sehen, beschließt ins Blaue.
+ */
+async function kasse(
+	building: { ownerType: string },
+	regionId: string | undefined,
+	betrachter: { money: number; regionId: string }
+): Promise<{ city: boolean; money: number }> {
+	if (building.ownerType !== 'CITY') return { city: false, money: betrachter.money };
+	// Die Stadt, in der das Haus steht — nicht die, in der der Betrachter wohnt. Beides
+	// fällt fast immer zusammen, aber „fast immer" ist bei einer Zahl zu wenig.
+	return { city: true, money: await electionService.getTreasury(regionId ?? betrachter.regionId) };
+}
 
 /**
  * Die nächste Ausbaustufe, wie sie vor der Entscheidung aussieht — `undefined`, wenn die
@@ -374,10 +429,25 @@ export const actions = {
 		return { message: `${menge} gekauft.` };
 	},
 
+	/**
+	 * Einen Aushang aushängen — oder mit leerem Feld wieder abnehmen.
+	 *
+	 * **Die Antwort nennt, was jetzt gilt.** „Der Aushang hängt." war wahr und half
+	 * niemandem: Ob überhaupt eine Stelle frei ist, was der Lohn eine Schicht kostet und
+	 * dass ein abgenommener Aushang die vorhandene Belegschaft nicht anrührt — das alles
+	 * entschied sich hier und wurde verschwiegen. Ein Aushang an einem Wohnhaus ist kein
+	 * Fehler der Regeln (er hängt eben), aber er findet nie jemanden, und das darf man
+	 * sofort erfahren statt nach drei Wochen Warten.
+	 */
 	hire: async ({ request, params, locals }) => {
 		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
-		const roh = (await request.formData()).get('wage')?.toString();
+		const roh = (await request.formData()).get('wage')?.toString().trim();
 		const lohn: number | null = roh ? Number(roh) : null;
+		// Eigene Prüfung vor dem Dienst: Der lehnt zwar auch ab, aber mit „Daran gibt es
+		// nichts zu tun." — einem Satz, der zu allem passt und nichts erklärt.
+		if (lohn !== null && (!Number.isInteger(lohn) || lohn < 1)) {
+			return fail(400, { message: 'Der Lohn muss eine ganze Zahl ab 1 Münze sein.' });
+		}
 
 		const ergebnis = await employmentService.offerJob(
 			locals.currentCharacter.id,
@@ -385,7 +455,30 @@ export const actions = {
 			lohn
 		);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
-		return { message: lohn === null ? 'Der Aushang ist ab.' : 'Der Aushang hängt.' };
+
+		const gebaeude = await buildingService.getBuilding(params.building_id);
+		if (!gebaeude) error(404, 'Not Found');
+		const { positions, taken } = await employmentService.positionCount(gebaeude);
+		if (lohn === null) {
+			return {
+				message:
+					'Der Aushang ist ab.' +
+					(taken > 0
+						? ' Wer schon angestellt ist, bleibt es — abnehmen heißt nicht entlassen.'
+						: '')
+			};
+		}
+
+		const kosten: number =
+			buildingService.getBuildingOption(gebaeude.optionId)?.recipes?.[0]?.actionPointCost ?? 1;
+		const frei: number = positions - taken;
+		const nachsatz: string =
+			positions === 0
+				? ' Hier ist allerdings kein Arbeitsplatz — es wird sich niemand melden.'
+				: frei <= 0
+					? ` Alle ${positions} Stellen sind aber besetzt; frei wird erst, wer geht oder entlassen wird.`
+					: ` ${frei} von ${positions} ${positions === 1 ? 'Stelle' : 'Stellen'} frei, jede Schicht kostet ${gebaeude.ownerType === 'CITY' ? 'die Stadt' : 'dich'} ${lohn * kosten} Münzen.`;
+		return { message: `Der Aushang hängt: ${lohn} Münzen je Aktionspunkt.${nachsatz}` };
 	},
 
 	/**
