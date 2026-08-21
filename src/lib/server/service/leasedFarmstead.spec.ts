@@ -155,6 +155,40 @@ describe('Der Hof einer Pacht', () => {
 		expect(await kasse(stadtId)).toBeGreaterThan(0);
 	});
 
+	/**
+	 * **Vom Umland zum Hof** (5.32). Die Liste der Flächen nennt jetzt das Haus, das
+	 * darauf steht — sonst führte von hier kein Weg dorthin: zum eigenen nur über den
+	 * Umweg der Häuserliste, zu dem eines anderen gar keiner.
+	 */
+	it('steht in der Liste des Umlands mit Namen und Kennung', async () => {
+		const paechterin = await person('Pächterin');
+		const fremde = await person('Fremde');
+		const flaeche = await freieFlaeche();
+		await productionService.leasePlot(paechterin, flaeche);
+		const hof = (await hofAuf(flaeche))!;
+
+		const eintrag = (await productionService.getAreas(fremde)).find((f) => f.plotId === flaeche);
+
+		// Auch für die Fremde: Wo ein Haus steht, sieht man es — wem es gehört, steht auf
+		// seiner Seite.
+		expect(eintrag).toMatchObject({
+			leased: true,
+			leasedByMe: false,
+			buildingId: hof.dataValues.id,
+			buildingName: hof.dataValues.name
+		});
+	});
+
+	it('lässt eine freie Fläche ohne Haus in der Liste', async () => {
+		// Sonst zeigte die Umlandliste einen Weg zu einem Gebäude, das es nicht gibt.
+		const jemand = await person('Jemand');
+		const flaeche = await freieFlaeche();
+
+		const eintrag = (await productionService.getAreas(jemand)).find((f) => f.plotId === flaeche);
+
+		expect(eintrag).toMatchObject({ leased: false, buildingId: null, buildingName: null });
+	});
+
 	it('verfällt nicht — auch nach Menschenaltern nicht', async () => {
 		// **Der Fehler aus 5.15** (Punkt 69): Der Hof war ein Gebäude wie jedes andere und
 		// wurde nach rund fünfundzwanzig Spieljahren zur Ruine. Im Messlauf verschwand

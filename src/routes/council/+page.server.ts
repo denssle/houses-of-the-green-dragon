@@ -75,20 +75,27 @@ export const load: PageServerLoad = async ({ locals }) => {
 		// Die öffentlichen Bauten und ihr Zustand. Ohne diese Liste fiele der Verfall erst
 		// auf, wenn die Unterkunft niemanden mehr aufnimmt.
 		publicBuildings: await Promise.all(
-			(await buildingService.getPublicBuildings(character.regionId)).map(async (haus) => ({
-				id: haus.id,
-				name: haus.name,
-				condition: haus.condition,
-				offeredWage: haus.offeredWage,
-				employer: buildingService.getBuildingOption(haus.optionId)?.levels[0]?.wagePerActionPoint
-					? true
-					: false,
-				// **Wer im Sold der Stadt steht** (5.31). Der Bürgermeister setzte den Sold
-				// aus, sah aber nie, wer ihn bezieht — und wurde niemanden wieder los. Ein
-				// Wächter, der nichts taugt, blieb bis an sein Lebensende Wächter.
-				staff: await employmentService.getStaff(haus.id),
-				renovationCost: Math.ceil(CONDITION_MAX - haus.condition) * RENOVATION_COST_PER_POINT
-			}))
+			(await buildingService.getPublicBuildings(character.regionId)).map(async (haus) => {
+				const zahlt: boolean = Boolean(
+					buildingService.getBuildingOption(haus.optionId)?.levels[0]?.wagePerActionPoint
+				);
+				return {
+					id: haus.id,
+					name: haus.name,
+					condition: haus.condition,
+					offeredWage: haus.offeredWage,
+					employer: zahlt,
+					// **Wer im Sold der Stadt steht** (5.31). Der Bürgermeister setzte den Sold
+					// aus, sah aber nie, wer ihn bezieht — und wurde niemanden wieder los. Ein
+					// Wächter, der nichts taugt, blieb bis an sein Lebensende Wächter.
+					//
+					// **Nur bei den Häusern, die überhaupt zahlen.** Ein Rathaus stellt
+					// niemanden ein; für alle vier öffentlichen Bauten nachzuschlagen kostete
+					// vier Abfragen je Aufruf, und diese Seite wird oft geladen.
+					staff: zahlt ? await employmentService.getStaff(haus.id) : [],
+					renovationCost: Math.ceil(CONDITION_MAX - haus.condition) * RENOVATION_COST_PER_POINT
+				};
+			})
 		),
 		// Was die Wache bringt, in einer Zahl: Ohne sie wäre ihr Sold eine Ausgabe ohne
 		// sichtbaren Gegenwert — und der erste Bürgermeister, der spart, hätte recht.

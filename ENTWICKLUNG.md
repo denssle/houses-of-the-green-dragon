@@ -2857,6 +2857,20 @@ unter dem Angestellten verschwunden.
 _Fertig, wenn:_ Ein Meister kann seinen Knecht entlassen, und ein Knecht verliert den Tag
 nicht dafür, dass sein Meister kein Holz gekauft hat. — Erledigt.
 
+**5.32 Vom Umland zum Hof.** ✓ Ein Weg, der fehlte: Die Liste der Abbauflächen nannte
+Adresse, Ertrag und den Pachtstand — aber nicht das Haus, das seit 5.15 auf jeder Pacht
+steht. Dabei liegt genau dort alles, was eine Pacht zu einem Betrieb macht: Lager,
+Aushang, Belegschaft. Zum eigenen Hof kam man nur über den Umweg der Häuserliste, zu dem
+eines anderen überhaupt nicht.
+
+`getAreas` gibt jetzt `buildingId` und `buildingName` mit, und die Umlandseite verlinkt
+darauf — **auch bei fremden Pachten**: Wo ein Haus steht, sieht man es; wem es gehört,
+steht auf seiner Seite. Der Hof wird eigens gesucht und nicht aus dem Bestehen der Pacht
+gefolgert, denn eine Fläche aus der Zeit vor 5.15 hat keinen.
+
+_Fertig, wenn:_ Vom Umland führt ein Klick auf den Hof, der auf der Fläche steht. —
+Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

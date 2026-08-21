@@ -221,6 +221,15 @@ export interface LeasableArea {
 	resourceType: string | null;
 	leasedByMe: boolean;
 	leased: boolean;
+	/**
+	 * Der Hof auf der Fläche, sofern sie verpachtet ist.
+	 *
+	 * **Damit führt vom Umland ein Weg zu dem Haus, das darauf steht** (5.32). Der Hof
+	 * trägt das Lager, den Aushang und die Belegschaft der Pacht — man kam bisher nur
+	 * über die eigene Häuserliste dorthin, und zur Pacht eines anderen überhaupt nicht.
+	 */
+	buildingId: string | null;
+	buildingName: string | null;
 }
 
 export async function getAreas(characterId: string): Promise<LeasableArea[]> {
@@ -229,12 +238,20 @@ export async function getAreas(characterId: string): Promise<LeasableArea[]> {
 	const liste: LeasableArea[] = [];
 	for (const flaeche of flaechen) {
 		const pacht = await Lease.findOne({ where: { PlotId: flaeche.dataValues.id } });
+		// Der Hof entsteht mit der Pacht und fällt mit ihr; er wird trotzdem eigens
+		// gesucht und nicht aus dem Bestehen der Pacht gefolgert — eine Fläche aus der
+		// Zeit vor 5.15 hat keinen.
+		const hof = await Building.findOne({
+			where: { PlotId: flaeche.dataValues.id, optionId: buildingService.HOF_OPTION_ID }
+		});
 		liste.push({
 			plotId: flaeche.dataValues.id,
 			address: flaeche.dataValues.address,
 			resourceType: flaeche.dataValues.resourceType,
 			leasedByMe: pacht?.dataValues.CharacterId === characterId,
-			leased: pacht !== null
+			leased: pacht !== null,
+			buildingId: hof?.dataValues.id ?? null,
+			buildingName: hof?.dataValues.name ?? null
 		});
 	}
 	return liste;
