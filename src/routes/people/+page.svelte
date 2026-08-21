@@ -3,7 +3,7 @@
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data }: PageProps = $props();
 
 	/** Das Wort für die Verwandtschaft — 'NONE' bleibt unerwähnt. */
 	const VERWANDT: Record<string, string> = {
@@ -26,10 +26,6 @@
 {/if}
 
 <h2>Leute in {data.region?.name ?? 'der Stadt'}</h2>
-
-{#if form?.message}
-	<p><b>{form.message}</b></p>
-{/if}
 
 <p>
 	<i>

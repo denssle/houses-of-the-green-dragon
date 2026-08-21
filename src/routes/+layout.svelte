@@ -2,6 +2,7 @@
 	import { base } from '$app/paths';
 	import '../app.css';
 	import { enhance } from '$app/forms';
+	import Toast from '$lib/Toast.svelte';
 
 	let { data, children } = $props();
 </script>
@@ -52,3 +53,9 @@
 		</nav>
 	</footer>
 </div>
+
+<!--
+	Außerhalb der Spalte: Die Rückmeldung gehört keiner Seite, sondern der Handlung, die
+	man gerade getan hat — und die tut man überall.
+-->
+<Toast />

@@ -1,9 +1,8 @@
-<script lang="ts">
-	import type { PageProps } from './$types';
-
-	let { form }: PageProps = $props();
-</script>
-
+<!--
+	Kein Skriptblock mehr: Was beim Anlegen eines Kontos schiefging, stand hier über dem
+	Abschicken-Knopf. Seit 5.35 sagt es der Toast — mit demselben Satz, nur an der Stelle,
+	an der jede Rückmeldung steht.
+-->
 <div class="flex justify-center">
 	<div class="w-sm md:w-md lg:w-lg gap-4">
 		<h2>Registrieren</h2>
@@ -37,12 +36,6 @@
 					Name der Dynastie
 					<input name="dynasty" type="text" required />
 				</label>
-			</section>
-
-			<section>
-				{#if form?.message}
-					<b>Fehler: {form?.message}</b>
-				{/if}
 			</section>
 
 			<section>

@@ -5,7 +5,7 @@
 	import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '$lib/game/naming.logic';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data }: PageProps = $props();
 </script>
 
 <h2>{data.displayName}</h2>
@@ -18,10 +18,6 @@
 		<b>— gestorben im Jahr {data.diedInYear}</b>
 	{/if}
 </p>
-
-{#if form?.message}
-	<p><b>{form.message}</b></p>
-{/if}
 
 <dl>
 	<dt>Alter</dt>

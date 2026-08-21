@@ -3,7 +3,7 @@
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data }: PageProps = $props();
 </script>
 
 <h2>Was in der Stadt zu haben ist</h2>
@@ -12,10 +12,6 @@
 		Feste Preise, kein Feilschen — wer vorbeikommt, kauft oder lässt es. Du hast {data.money} Münzen.
 	</i>
 </p>
-
-{#if form?.message}
-	<p><b>{form.message}</b></p>
-{/if}
 
 {#if data.offers.length === 0}
 	<p><i>Niemand bietet gerade etwas an.</i></p>

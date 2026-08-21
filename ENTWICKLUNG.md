@@ -2949,6 +2949,47 @@ erst am abgewiesenen Knopf, dass kein Platz mehr ist.
 _Fertig, wenn:_ Ware lässt sich in beide Richtungen zwischen Kammer und Betriebslager
 bewegen. — Erledigt.
 
+**5.35 Eine Rückmeldung, die man sieht.** ✓ Was eine Handlung ergab, stand bisher
+**sechzehnmal** im Code: Jede Seite trug ihr eigenes `{#if form?.message}<p><b>…</b></p>`
+gleich unter der Überschrift. Drei Dinge gingen damit schief:
+
+- **Sie stand oben, gedrückt hatte man unten.** Auf der Gebäudeseite liegen Herstellen,
+  Lager, Instandhaltung und Belegschaft weit auseinander; die Antwort auf einen Klick ganz
+  unten erschien außerhalb des sichtbaren Bereichs. Man drückte und sah nichts.
+- **Erfolg sah aus wie Fehlschlag.** Beides ist ein fettgedruckter Satz. Ob etwas
+  geschehen war oder gerade nicht, musste man dem Wortlaut entnehmen.
+- **Sie blieb stehen.** Bis zum Seitenwechsel — und beim nächsten Klick war nicht zu
+  erkennen, ob dort noch die alte Antwort steht oder schon die neue.
+
+Jetzt gibt es `Toast.svelte`, einmal im Layout. Er sitzt unten in der Mitte, kommt mit
+einem grünen Streifen für Erfolg und einem rosa für Fehlschlag, stellt dem Fehlschlag ein
+**„Geht nicht:"** voran und geht nach vier beziehungsweise neun Sekunden von selbst wieder
+— ein Missgeschick will länger gelesen werden als ein Gelingen.
+
+**Der Unterschied war schon da, er wurde nur nie angesehen.** Ein `fail(400, …)` setzt den
+Status der Seite, ein `return { message }` lässt ihn bei 200; `applyAction` schreibt beides
+nach `page.status`. Keine der rund vierzig Handlungen im Server brauchte dafür ein
+zusätzliches Feld.
+
+**Auch ohne JavaScript.** Die Anmeldeseite kommt ohne `use:enhance` aus — dort lädt das
+Formular die Seite neu, und die Antwort steht beim Rendern schon in `page.form`. Deshalb
+baut der Toast seine erste Meldung **beim Initialisieren** und nicht erst in einem Effekt;
+sonst wäre er ausgerechnet dort ausgefallen, wo es sonst nichts gibt. Im Browser
+gegengeprüft: Der Fehlschlag der Anmeldung erscheint nach dem vollen Seitenwechsel. Was
+ohne JavaScript fehlt, ist allein die Uhr.
+
+**Barrierefrei heißt hier: der Bereich steht immer da.** Ein `aria-live`-Bereich, der erst
+mit seiner Meldung entsteht, wird nicht vorgelesen — Vorleseprogramme müssen ihn vorher
+kennen. `polite` und nicht `assertive`, denn die Antwort auf den eigenen Klick ist keine
+Warnung, die einen Satz unterbrechen dürfte. Wer `prefers-reduced-motion` gesetzt hat,
+bekommt die Meldung ohne Bewegung.
+
+Damit sind die sechzehn Blöcke weg, und mit ihnen die `form`-Eigenschaft aus achtzehn
+Seiten. Anmeldung und Registrierung haben dadurch gar keinen Skriptblock mehr.
+
+_Fertig, wenn:_ Man sieht, ob eine Handlung geklappt hat, ohne nach oben zu scrollen. —
+Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

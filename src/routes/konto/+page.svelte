@@ -3,14 +3,10 @@
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data }: PageProps = $props();
 </script>
 
 <h2>Dein Konto</h2>
-
-{#if form?.message}
-	<p><b>{form.message}</b></p>
-{/if}
 
 <dl>
 	<dt>Nickname</dt>

@@ -3,15 +3,11 @@
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data }: PageProps = $props();
 </script>
 
 <h2>Das Umland</h2>
 <p><i>{data.season}. Abbauflächen gehören der Stadt und werden verpachtet, nicht verkauft.</i></p>
-
-{#if form?.message}
-	<p><b>{form.message}</b></p>
-{/if}
 
 <ul>
 	{#each data.areas as flaeche (flaeche.plotId)}

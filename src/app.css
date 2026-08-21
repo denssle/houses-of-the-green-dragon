@@ -74,6 +74,18 @@ button.link {
 }
 
 /*
+	Das Kreuz an der Rückmeldung.
+
+	Weder Knopf noch Link: Mit dem Rahmen aller Knöpfe säße ein Kasten neben dem Satz, und
+	als `.link` wäre es blau und unterstrichen — beides zieht Aufmerksamkeit auf das
+	Wegräumen statt auf das, was zu lesen ist. Grau, ohne Rahmen, und erst beim Überfahren
+	deutlich.
+*/
+.toast-schliessen {
+	@apply my-0 rounded-none border-0 p-0 leading-none text-gray-400 hover:text-gray-700;
+}
+
+/*
 	Eine Liste, deren Einträge mehr sind als eine Zeile — eine Person mit ihren
 	Handlungen etwa. Kein Aufzählungspunkt, dafür eine feine Linie: Sie sagt, wo der
 	eine Eintrag aufhört und der nächste beginnt, ohne jeden in einen Kasten zu sperren.

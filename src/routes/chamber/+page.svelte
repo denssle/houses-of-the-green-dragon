@@ -3,17 +3,13 @@
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data }: PageProps = $props();
 
 	/** Wie viel noch hineingeht — nie unter null, auch wenn man schon darüber liegt. */
 	const frei: number = $derived(Math.max(0, data.capacity - data.used));
 </script>
 
 <h2>Deine Kammer</h2>
-
-{#if form?.message}
-	<p><b>{form.message}</b></p>
-{/if}
 
 <p>
 	<b>{data.used} von {data.capacity} Stück.</b>

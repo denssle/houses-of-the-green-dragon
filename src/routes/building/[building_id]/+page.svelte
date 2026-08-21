@@ -4,7 +4,7 @@
 	import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '$lib/game/naming.logic';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data }: PageProps = $props();
 
 	/**
 	 * Ein Wort für den Zustand. Die Zahl steht daneben — anders als bei Zuneigung und
@@ -22,10 +22,6 @@
 
 <h2>{data.building.name}</h2>
 <p><i>{data.option?.description}</i></p>
-
-{#if form?.message}
-	<p><b>{form.message}</b></p>
-{/if}
 
 <dl>
 	{#if data.plot}
