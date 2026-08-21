@@ -304,8 +304,6 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 		const zehnt: number = titheOn(ergebnis.produced, zehntsatz);
 		const behalten: number = ergebnis.produced - zehnt;
 
-		await baeuerin.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
-
 		// **Die Ernte bleibt auf dem Hof** (5.25) — dort, wo sie gewachsen ist. Seit 5.15
 		// gehört zu jeder Pacht einer, und damit gibt es einen Ort dafür.
 		//
@@ -317,9 +315,15 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 		});
 		if (hof) {
 			await tradeService.changeBuildingStock(hof.dataValues.id, rezept.outputItemId, behalten, t);
-		} else {
-			await needService.changeStock(characterId, rezept.outputItemId, behalten, t);
+		} else if (!(await needService.changeStock(characterId, rezept.outputItemId, behalten, t))) {
+			// **Vor dem Abbuchen der Aktionspunkte** (5.33): Passt die Ernte nicht mehr in
+			// die Kammer, bleibt sie am Halm — und der Tag ist nicht verloren. Eine
+			// Transaktion, die mit einer Fehlermeldung zurückkehrt, wird trotzdem
+			// festgeschrieben; die Reihenfolge ist deshalb keine Kosmetik.
+			return { ok: false, reason: 'CHAMBER_FULL' } as const;
 		}
+
+		await baeuerin.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
 		await skillService.addPractice(characterId, rezept.skill, rezept.actionPointCost, t);
 
 		if (zehnt > 0) {

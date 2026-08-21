@@ -1,4 +1,3 @@
-import { garmentYearsLeft } from '$lib/game/attire.logic';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as needService from '$lib/server/service/needService';
@@ -20,12 +19,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const jetzt: number = await worldService.currentTick();
 	return {
 		offers: needService.granaryOffers(),
-		stock: await needService.getStock(character.id),
-		// Was das Äußere hergibt — die Kammer ist der Ort, an dem man sich damit befasst.
-		garmentYearsLeft: garmentYearsLeft(
-			character.wornSinceTick ?? null,
-			await worldService.currentTick()
-		),
+		// **Nur noch die beiden Zahlen** (5.33): Der Vorrat selbst wohnt unter `/chamber`.
+		// Hier steht, was man beim Einkaufen wissen muss — wie viel noch hineinpasst.
+		used: await needService.chamberUsed(character.id),
+		capacity: await needService.chamberCapacityOf(character.id),
 		hunger: await needService.getHunger(character.id, jetzt),
 		money: character.money
 	};
@@ -44,34 +41,8 @@ export const actions = {
 		const ergebnis = await needService.buyFromGranary(locals.currentCharacter.id, itemId, menge);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return { message: `${menge} eingekauft.` };
-	},
-
-	eat: async ({ request, locals }) => {
-		if (!locals.currentCharacter) {
-			return fail(401, { message: 'Kein Charakter, der essen könnte' });
-		}
-		const itemId = (await request.formData()).get('itemId')?.toString();
-		if (!itemId) return fail(400, { message: 'Was denn?' });
-
-		const ergebnis = await needService.eatItem(locals.currentCharacter.id, itemId);
-		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
-		return { message: 'Gegessen.' };
-	},
-
-	/** Ein Gewand anlegen — es ersetzt das bisherige. */
-	wear: async ({ locals }) => {
-		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
-
-		const ergebnis = await needService.wearGarment(locals.currentCharacter.id);
-		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
-		return { message: 'Du trägst jetzt ein neues Gewand.' };
-	},
-
-	drink: async ({ locals }) => {
-		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
-
-		const ergebnis = await needService.drinkTonic(locals.currentCharacter.id);
-		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
-		return { message: `Getrunken. ${ergebnis.restored} Aktionspunkte zurück.` };
 	}
+	// **Essen, Anziehen und Trinken sind mit 5.33 in die Kammer gezogen.** Sie hingen hier,
+	// weil hier der Vorrat stand; mit ihm gehören sie dorthin, wo er jetzt wohnt. Ein Laden
+	// verkauft — was man mit dem Gekauften tut, ist nicht seine Sache.
 } satisfies Actions;

@@ -83,10 +83,18 @@ export async function moveToStock(
 			}
 			await changeBuildingStock(buildingId, itemId, quantity, t);
 		} else {
-			if (!(await changeBuildingStock(buildingId, itemId, quantity, t))) {
+			// **Auslagern kann jetzt auch an der Kammer scheitern** (5.33) — deshalb beide
+			// Fragen vorweg und die Buchungen danach. Eine Transaktion, die mit einer
+			// Fehlermeldung zurückkehrt, wird trotzdem festgeschrieben: Wer zwischendrin
+			// abbricht, hat die Ware zweimal oder gar nicht.
+			const menge: number = -quantity;
+			if (!(await buildingHasStock(buildingId, [{ itemId, quantity: menge }], t))) {
 				return { ok: false, reason: 'NOT_IN_STOCK' } as const;
 			}
-			await needService.changeStock(characterId, itemId, -quantity, t);
+			if (!(await needService.changeStock(characterId, itemId, menge, t))) {
+				return { ok: false, reason: 'CHAMBER_FULL' } as const;
+			}
+			await changeBuildingStock(buildingId, itemId, quantity, t);
 		}
 		return { ok: true } as const;
 	});
@@ -360,12 +368,19 @@ export async function withdrawOffer(sellerId: string, offerId: string): Promise<
 				t
 			);
 		} else {
-			await needService.changeStock(
-				sellerId,
-				angebot.dataValues.itemId,
-				angebot.dataValues.quantity,
-				t
-			);
+			// **Das Angebot bleibt hängen, wenn die Kammer nicht reicht** (5.33). Ware
+			// verschwinden zu lassen wäre schlimmer als ein Preisschild, das noch einen Tag
+			// länger hängt — und der Ausweg steht daneben: erst etwas einlagern oder essen.
+			if (
+				!(await needService.changeStock(
+					sellerId,
+					angebot.dataValues.itemId,
+					angebot.dataValues.quantity,
+					t
+				))
+			) {
+				return { ok: false, reason: 'CHAMBER_FULL' } as const;
+			}
 		}
 
 		await angebot.destroy({ transaction: t });
@@ -406,6 +421,14 @@ export async function buyFromOffer(
 		);
 		if (!ergebnis.ok) return ergebnis;
 
+		// **Die Ware zuerst.** Passt sie nicht in die Kammer des Käufers, findet der Kauf
+		// nicht statt — und zwar bevor Geld geflossen ist. Eine Transaktion, die mit einer
+		// Fehlermeldung zurückkehrt, wird trotzdem festgeschrieben; wer hier erst zahlt
+		// und dann prüft, hat einen Käufer ohne Ware und ohne Münzen.
+		if (!(await needService.changeStock(buyerId, angebot.dataValues.itemId, wanted, t))) {
+			return { ok: false, reason: 'CHAMBER_FULL' } as const;
+		}
+
 		await kaeufer.update({ money: ergebnis.buyerMoney }, { transaction: t });
 		await Character.increment('money', {
 			by: ergebnis.total,
@@ -420,7 +443,6 @@ export async function buyFromOffer(
 				transaction: t
 			});
 		}
-		await needService.changeStock(buyerId, angebot.dataValues.itemId, wanted, t);
 
 		// Ein leeres Angebot verschwindet — wie Beziehungen und Vorräte, die auf null
 		// fallen.

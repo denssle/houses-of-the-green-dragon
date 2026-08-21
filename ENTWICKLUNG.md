@@ -2871,6 +2871,61 @@ gefolgert, denn eine Fläche aus der Zeit vor 5.15 hat keinen.
 _Fertig, wenn:_ Vom Umland führt ein Klick auf den Hof, der auf der Fläche steht. —
 Erledigt.
 
+**5.33 Die Kammer bekommt einen Boden — und eine eigene Seite.** ✓ Der persönliche Vorrat
+gab es von Anfang an (`Inventory`), aber er hatte weder Grenze noch Ort.
+
+**Ohne Ort:** Er hing als Abschnitt „Dein Vorrat" am **städtischen Kornspeicher**, also an
+einem fremden Laden, und war sonst über die Bau- und Gebäudeseiten verstreut. Wer wissen
+wollte, was er besitzt, musste raten, wo er nachsieht. Jetzt gibt es `/chamber`, verlinkt
+unter „Besitz"; Essen, Anziehen und Trinken sind mitgezogen, und der Kornspeicher ist
+wieder das, was er ist — ein Laden. Was dort bleibt, sind zwei Zahlen: wie viel die Kammer
+fasst und wie viel schon drin liegt. Das ist es, was man beim Einkaufen wissen muss.
+
+**Ohne Grenze:** Damit war die Kammer das bequemste Lager der Welt — kostenlos,
+unverderblich und bei Raubzügen ausgenommen (`KONZEPT.md`, Abschnitt 11). Wer
+dreihundert Bretter mit sich herumtrug, hatte keinen Grund, je ein Betriebslager
+anzurühren.
+
+**Die Grenze hängt am Dach über dem Kopf.** Zwanzig Stück trägt jeder am Leib; eine Kate
+gibt zwanzig dazu, ein Haus vierzig, ein Großhaus achtzig — gemindert um den Zustand, wie
+Lohn und Kraftvorrat. Damit hat Wohnen einen **zweiten** handfesten Zweck neben dem
+Kraftvorrat, und Renovieren einen dritten Grund. Die Alternative — ein Gewicht je Ware —
+wurde verworfen: Sie hätte mehr Farbe, aber jede künftige Ware bräuchte einen Wert, und
+„17 von 60 Pfund" lässt sich schlechter überschlagen als „17 von 60 Stück".
+
+**Nicht null ohne Dach**, aus demselben Grund, aus dem es die städtische Unterkunft gibt:
+Wer nichts tragen könnte, könnte kein Brot kaufen und käme aus der Obdachlosigkeit nie
+wieder heraus.
+
+**Die Prüfung steht an genau einer Stelle.** Jeder Weg in den persönlichen Vorrat führt
+durch `needService.changeStock` — Kauf im Kornspeicher, Kauf am Marktstand, Ernte ohne
+Hof, Auslagern, zurückgezogenes Angebot. Also steht sie dort und nicht fünfmal daneben.
+
+**Und überall davor eine Reihenfolge.** Eine Sequelize-Transaktion wird auch dann
+festgeschrieben, wenn der Rumpf eine Fehlermeldung **zurückgibt** statt zu werfen — hier
+zum zweiten Mal in drei Schritten aufgefallen (siehe 5.31). Deshalb kommt jetzt überall
+die Ware zuerst und das Geld danach: Wer erst zahlt und dann prüft, hat einen Käufer ohne
+Ware und ohne Münzen. Beim Ernten steht die Prüfung vor dem Abbuchen der Aktionspunkte,
+beim Auslagern fragen beide Seiten vorweg.
+
+**Wer schon darüber liegt, verliert nichts** — er nimmt nur nichts mehr auf. Diesen Fall
+gibt es in jeder bestehenden Welt, denn bis heute war die Kammer unbegrenzt; und ein
+Umzug in eine kleinere Bleibe oder ein verfallendes Dach führen jederzeit wieder dorthin.
+Eine Grenze, die Bestände wegwirft, wäre eine Strafe für etwas, das niemand entschieden
+hat.
+
+**Der Ausweg steht neben der Grenze:** Auf der Kammerseite lässt sich jeder Posten direkt
+in ein eigenes Haus einlagern — ein Betriebslager fasst weiterhin unbegrenzt. Ohne das
+wäre die Grenze nur eine Absage.
+
+**Gemessen, 400 Ticks:** Die Welt merkt nichts davon. Unter „Woran es scheiterte" steht
+nichts, und die vollste Kammer hielt vier Laibe Brot — weil Ware seit 5.24 dort liegen
+bleibt, wo sie entsteht. Die Grenze trifft heute den Spieler, der hortet, und niemanden
+sonst. Das ist die richtige Reihenfolge: erst die Regel, dann der Fall, in dem sie beißt.
+
+_Fertig, wenn:_ Es gibt eine Seite, auf der steht, was man besitzt — und eine Zahl, die
+sagt, wie viel noch hineingeht. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

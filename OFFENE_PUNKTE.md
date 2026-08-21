@@ -28,6 +28,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                    | —                            | erledigt     |
 | 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                              | laufend                      | Entwurf      |
 | 74  | Der Auftrag an Tagelöhner — privates Renovieren gegen Lohn                           | Punkt 66 / 33                | Entwurf      |
+| 77  | Was die Kammer noch nicht kann: Gewicht, Einzelstücke, Vererben                      | Punkte 15, 20, 51            | Entwurf      |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                          | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
@@ -1916,3 +1917,30 @@ Durchgang bringt. Es gehört zu Punkt 16.
 **Eine Warnung dazu:** Der naheliegende Weg, ein Sparziel zu setzen und die NPCs darauf
 hinarbeiten zu lassen, ist bereits gegangen und hat 5.30 ausgelöst — er machte aus
 Unternehmern Tagelöhner. Die Rangfolge ist jetzt in Ordnung; die Kasse ist es nicht.
+
+### 77. Was die Kammer noch nicht kann
+
+**Gebaut ist die Grenze** (5.33): Zwanzig Stück am Leib, dazu, was das Dach hergibt,
+geprüft an der einen Stelle, durch die jeder Zugang führt. Drei Fragen bleiben offen —
+alle drei erst fällig, wenn der Warenkatalog wächst.
+
+- **Gezählt wird in Stücken, nicht in Pfund.** Ein Gewicht je Ware hätte mehr Farbe: Ein
+  Bruchstein ist kein Kräuterbüschel. Verworfen wurde es, weil jede künftige Ware einen
+  Wert bräuchte und „17 von 60 Pfund" sich schlechter überschlagen lässt als „17 von 60
+  Stück". Die Entscheidung lässt sich nachholen, ohne dass mehr als die Innereien von
+  `inventory.logic.ts` sich ändern — fällig mit Punkt 15, sobald Werkzeug und Waffen
+  dazukommen, denn spätestens dann steht ein Amboss neben einer Nadel in derselben Zeile.
+- **Die Kammer trägt keine Einzelstücke.** Solange eine Ware nur eine Menge ist, geht das
+  auf; ein Schwert mit einem Namen, ein Gewand mit einem Zustand oder ein Erbstück
+  (`KONZEPT.md`, Abschnitt 6) verlangt eine Zeile je Gegenstand statt je Sorte. Das ist
+  derselbe Umbau, den Punkt 20 (Verschleiß) ohnehin verlangt.
+- **Beim Tod fällt sie einfach weg.** `Inventory` hängt per `onDelete: CASCADE` am
+  Charakter; was jemand bei sich hatte, ist mit ihm verschwunden. Für Brot ist das
+  gleichgültig, für ein Erbstück nicht. Gehört zu Punkt 51 (Mitgift, Testament, Stiftung)
+  und wird mit ihm entschieden.
+
+**Was heute schon zu beobachten wäre:** Der Messlauf über 400 Ticks kannte keinen einzigen
+Fall von `CHAMBER_FULL` — die vollste NPC-Kammer hielt vier Laibe Brot, weil Ware seit
+5.24 dort liegen bleibt, wo sie entsteht. Die Grenze trifft heute nur den Spieler, der
+hortet. Beißt sie später auch bei NPCs, ist das ein Befund und keine Panne: Dann hat einer
+mehr, als er tragen kann, und muss etwas damit anfangen.

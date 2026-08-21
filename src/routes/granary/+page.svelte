@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 
@@ -35,47 +36,21 @@
 	</ul>
 </section>
 
+<!--
+	**Der Vorrat ist mit 5.33 ausgezogen.** Er hing hier, weil hier das Brot herkam — aber
+	die eigene Kammer gehört nicht in einen fremden Laden. Was bleibt, ist der Hinweis, wie
+	viel noch hineinpasst: Das ist die Zahl, die man beim Einkaufen braucht.
+-->
 <section>
-	<h3>Dein Vorrat</h3>
-	{#if data.garmentYearsLeft > 0}
-		<p>
-			<i>
-				Du trägst ein Gewand; es hält noch {data.garmentYearsLeft}
-				{data.garmentYearsLeft === 1 ? 'Jahr' : 'Jahre'}.
-			</i>
-		</p>
-	{/if}
-	{#if data.stock.length === 0}
-		<p><i>Deine Kammer ist leer.</i></p>
-	{:else}
-		<ul>
-			{#each data.stock as posten (posten.itemId)}
-				<li>
-					{posten.quantity} × {posten.name}
-					{#if posten.nourishment}
-						<form method="POST" action="?/eat" use:enhance>
-							<input type="hidden" name="itemId" value={posten.itemId} />
-							<button type="submit">Essen</button>
-						</form>
-					{/if}
-					{#if posten.itemId === 'GARMENT'}
-						<form method="POST" action="?/wear" use:enhance>
-							<button type="submit">Anziehen</button>
-						</form>
-					{/if}
-					{#if posten.itemId === 'TONIC'}
-						<form method="POST" action="?/drink" use:enhance>
-							<button type="submit">Trinken</button>
-						</form>
-					{/if}
-				</li>
-			{/each}
-		</ul>
-	{/if}
+	<h3>Deine Kammer</h3>
+	<p>
+		{data.used} von {data.capacity} Stück belegt.
+		<a href="{base}/chamber" class="link">Ansehen</a>
+	</p>
 	<p>
 		<small>
-			Was über die Sättigung hinausginge, verfällt — wer vorsorgen will, lässt das Brot in der
-			Kammer.
+			Was über die Sättigung hinausginge, verfällt beim Essen — wer vorsorgen will, lässt das Brot
+			liegen.
 		</small>
 	</p>
 </section>

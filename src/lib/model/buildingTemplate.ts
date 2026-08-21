@@ -37,6 +37,18 @@ export interface BuildingLevel {
 	 * längere Abwesenheit später aufholen. Fehlt der Wert, ist das Dach bloß ein Dach.
 	 */
 	restActionPoints?: number;
+	/**
+	 * Um wie viele Stücke dieses Dach die **Kammer** seiner Bewohner erweitert (5.33).
+	 *
+	 * Was ein Mensch ohne Dach bei sich trägt, steht in `inventory.logic.ts` und ist für
+	 * alle gleich; hierher gehört nur, was das Haus dazugibt. Dieselbe Bauart wie beim
+	 * Kraftvorrat, und aus demselben Grund: Ein Deckel lässt sich jederzeit ausrechnen,
+	 * ein Zufluss müsste wissen, wo jemand in der Zwischenzeit gewohnt hat.
+	 *
+	 * **Ein Saal ist keine Kammer.** Die städtische Unterkunft gibt nichts dazu — wie
+	 * beim Kraftvorrat: Zwischen zwanzig Fremden hat niemand eine Truhe, die ihm gehört.
+	 */
+	storage?: number;
 }
 
 export interface BuildingTemplate {

@@ -21,6 +21,7 @@ import {
 	renovate,
 	residentsAt,
 	restAt,
+	storageAt,
 	RENOVATION_ACTION_POINT_COST,
 	renovationMaterial,
 	upgrade,
@@ -105,9 +106,9 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			// den am stärksten, der unregelmäßig hereinschaut, weil ihm sonst am ehesten
 			// Stunden ungenutzt verfallen.
 			levels: [
-				{ price: 100, name: 'Kate', residents: 4, restActionPoints: 4 },
-				{ price: 150, name: 'Haus', residents: 6, restActionPoints: 10 },
-				{ price: 400, name: 'Großhaus', residents: 9, restActionPoints: 18 }
+				{ price: 100, name: 'Kate', residents: 4, restActionPoints: 4, storage: 20 },
+				{ price: 150, name: 'Haus', residents: 6, restActionPoints: 10, storage: 40 },
+				{ price: 400, name: 'Großhaus', residents: 9, restActionPoints: 18, storage: 80 }
 			]
 		},
 		{
@@ -616,6 +617,30 @@ export async function restAtHome(
 	if (!vorlage) return 0;
 
 	return restAt(vorlage, zuhause.dataValues.level, zustandVon(zuhause, tick));
+}
+
+/**
+ * Wie viel Vorrat das Dach über diesem Kopf zusätzlich fasst (5.33).
+ *
+ * Zwilling von `restAtHome`, und bewusst daneben: Beide beantworten dieselbe Frage — was
+ * gibt dieses Zuhause seinem Bewohner? — und beide brauchen dafür Vorlage, Stufe und
+ * Zustand. Wer ohne Dach ist, bekommt 0; was er trotzdem tragen kann, sagt
+ * `inventory.logic.ts`.
+ */
+export async function storageAtHome(
+	homeBuildingId: string | null,
+	tick: number,
+	transaction?: Transaction
+): Promise<number> {
+	if (!homeBuildingId) return 0;
+
+	const zuhause = await BuildingModel.findByPk(homeBuildingId, { transaction });
+	if (!zuhause) return 0;
+
+	const vorlage = getBuildingOption(zuhause.dataValues.optionId);
+	if (!vorlage) return 0;
+
+	return storageAt(vorlage, zuhause.dataValues.level, zustandVon(zuhause, tick));
 }
 
 /** In welcher Region ein Gebäude steht — über sein Grundstück. */

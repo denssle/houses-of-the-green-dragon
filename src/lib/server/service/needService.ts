@@ -9,6 +9,8 @@ import type {
 	CharacterCreationAttributes
 } from '$lib/db/attributes/character.attributes';
 import { currentSatiety, eat, satietyLabel, wouldBeWasted } from '$lib/game/need.logic';
+import { chamberCapacity, fitsInChamber } from '$lib/game/inventory.logic';
+import * as buildingService from '$lib/server/service/buildingService';
 import { getItemTemplate, type ItemTemplate } from '$lib/model/itemTemplate';
 import { canAfford } from '$lib/game/economy';
 import { tonicRestores } from '$lib/game/attire.logic';
@@ -77,11 +79,39 @@ export async function getStock(characterId: string): Promise<StockItem[]> {
 }
 
 /**
+ * Wie viel die Kammer dieses Menschen fasst.
+ *
+ * Was er am Leib trägt, plus das, was sein Dach hergibt — die Zahl, die auf der
+ * Kammerseite hinter dem Schrägstrich steht.
+ */
+export async function chamberCapacityOf(characterId: string, t?: Transaction): Promise<number> {
+	const person = await Character.findByPk(characterId, { transaction: t });
+	if (!person) return chamberCapacity(0);
+
+	const tick: number = await worldService.currentTick();
+	return chamberCapacity(
+		await buildingService.storageAtHome(person.dataValues.HomeBuildingId, tick, t)
+	);
+}
+
+/** Wie viele Stücke insgesamt in der Kammer liegen — jede Sorte zählt gleich. */
+export async function chamberUsed(characterId: string, t?: Transaction): Promise<number> {
+	const alle = await Inventory.findAll({ where: { CharacterId: characterId }, transaction: t });
+	return alle.reduce((summe, zeile) => summe + zeile.dataValues.quantity, 0);
+}
+
+/**
  * Legt etwas ins Lager oder nimmt es heraus.
  *
  * Zeilen, die auf null fallen, verschwinden — dieselbe Sparsamkeit wie bei der Zuneigung.
  * Gibt `false` zurück, wenn nicht genug da ist; die Prüfung gehört hierher, weil nur hier
  * gesperrt wird.
+ *
+ * **Seit 5.33 auch nach oben begrenzt.** Was hereinkommt, muss in die Kammer passen —
+ * und weil jeder Weg in den persönlichen Vorrat durch diese eine Zeile führt (Kauf,
+ * Ernte ohne Hof, Auslagern, zurückgezogenes Angebot), steht die Prüfung hier und nicht
+ * viermal daneben. Wer schon darüber liegt, verliert nichts; er nimmt nur nichts mehr
+ * auf.
  */
 export async function changeStock(
 	characterId: string,
@@ -89,6 +119,11 @@ export async function changeStock(
 	delta: number,
 	t: Transaction
 ): Promise<boolean> {
+	if (delta > 0) {
+		const platz: number = await chamberCapacityOf(characterId, t);
+		if (!fitsInChamber(await chamberUsed(characterId, t), platz, delta)) return false;
+	}
+
 	const zeile = await Inventory.findOne({
 		where: { CharacterId: characterId, itemId },
 		transaction: t,
@@ -186,8 +221,12 @@ export async function buyFromGranary(
 			return { ok: false, reason: 'NOT_ENOUGH_MONEY' } as const;
 		}
 
+		// **Erst hineinlegen, dann zahlen.** Passt es nicht in die Kammer, findet der Kauf
+		// nicht statt — sonst wäre das Geld weg und die Ware nirgends.
+		if (!(await changeStock(characterId, itemId, quantity, t))) {
+			return { ok: false, reason: 'CHAMBER_FULL' } as const;
+		}
 		await käufer.update({ money: käufer.dataValues.money - kosten }, { transaction: t });
-		await changeStock(characterId, itemId, quantity, t);
 		await Region.increment('treasury', {
 			by: kosten,
 			where: { id: käufer.dataValues.RegionId },

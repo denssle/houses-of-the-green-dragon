@@ -10,6 +10,7 @@ import {
 	RENOVATION_COST_PER_POINT,
 	residentsAt,
 	restAt,
+	storageAt,
 	upgrade,
 	UPGRADE_ACTION_POINT_COST,
 	wageAt,
@@ -27,9 +28,9 @@ const WOHNHAUS: BuildingTemplate = {
 	limitedTo: 0,
 
 	levels: [
-		{ price: 100, name: 'Kate', residents: 4, restActionPoints: 4 },
-		{ price: 150, name: 'Haus', residents: 6, restActionPoints: 10 },
-		{ price: 400, name: 'Großhaus', residents: 9, restActionPoints: 18 }
+		{ price: 100, name: 'Kate', residents: 4, restActionPoints: 4, storage: 20 },
+		{ price: 150, name: 'Haus', residents: 6, restActionPoints: 10, storage: 40 },
+		{ price: 400, name: 'Großhaus', residents: 9, restActionPoints: 18, storage: 80 }
 	]
 };
 
@@ -115,6 +116,16 @@ describe('Gebäude', () => {
 		it('trägt in einer Werkstatt gar keinen Vorrat', () => {
 			// Wer in seiner Schmiede schläft, schläft nicht besser — dort wohnt niemand.
 			expect(restAt(SCHMIEDE, 1, 100)).toBe(0);
+		});
+
+		it('mindert auch die Kammer, die das Dach hergibt', () => {
+			// Was durch ein undichtes Dach regnet, verdirbt — derselbe Faktor wie beim
+			// Kraftvorrat und beim Lohn (5.33).
+			expect(storageAt(WOHNHAUS, 3, 100)).toBe(80);
+			expect(storageAt(WOHNHAUS, 3, 50)).toBe(40);
+			expect(storageAt(WOHNHAUS, 1, 100)).toBe(20);
+			// Eine Werkstatt ist keine Bleibe und gibt deshalb auch keine Truhe dazu.
+			expect(storageAt(SCHMIEDE, 1, 100)).toBe(0);
 		});
 
 		it('lässt den Wohnraum unberührt', () => {

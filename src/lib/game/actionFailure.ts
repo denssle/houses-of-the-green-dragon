@@ -34,6 +34,7 @@ export type ActionFailureReason =
 	| 'TEACHER_TOO_TIRED'
 	| 'NOT_EDIBLE'
 	| 'NOT_IN_STOCK'
+	| 'CHAMBER_FULL'
 	| 'WRONG_SEASON'
 	| 'NOT_LEASED'
 	| 'NO_JOB_OFFERED'
