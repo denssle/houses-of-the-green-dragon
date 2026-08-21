@@ -245,9 +245,28 @@
 		{#if data.stock.length === 0}
 			<p><i>Nichts eingelagert.</i></p>
 		{:else}
+			<!--
+				**Der Weg zurück** (5.34): Bis hierher führte er nur hinein. Das Lager fasst
+				unbegrenzt, die Kammer nicht — wer etwas essen, anziehen oder am Marktplatz
+				anbieten will, muss es wieder bei sich haben.
+			-->
 			<ul>
 				{#each data.stock as posten (posten.itemId)}
-					<li>{posten.quantity} × {posten.name}</li>
+					<li>
+						{posten.quantity} × {posten.name}
+						<form method="POST" action="?/stockOut" use:enhance>
+							<input type="hidden" name="itemId" value={posten.itemId} />
+							<input
+								type="number"
+								name="quantity"
+								min="1"
+								max={posten.quantity}
+								value="1"
+								aria-label="Wie viel {posten.name} herausnehmen"
+							/>
+							<button type="submit">Herausnehmen</button>
+						</form>
+					</li>
 				{/each}
 			</ul>
 		{/if}
@@ -261,6 +280,12 @@
 				<button type="submit">Einlagern</button>
 			</form>
 		{/each}
+		<p>
+			<small>
+				In der Kammer liegen {data.chamber.used} von {data.chamber.capacity} Stück. Was hier im Lager
+				liegt, zählt nicht dagegen — ein Lager fasst, so viel man hineinträgt.
+			</small>
+		</p>
 	</section>
 
 	<section>

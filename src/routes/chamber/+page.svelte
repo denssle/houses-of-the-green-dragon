@@ -119,4 +119,44 @@
 	</p>
 </section>
 
+{#if data.buildings.length > 0}
+	<section>
+		<h3>In deinen Lagern</h3>
+		<!--
+			**Die Gegenrichtung** (5.34): Ein Lager fasst unbegrenzt, die Kammer nicht — also
+			liegt dort das Meiste, und geholt wird, was man gerade braucht. Essen, Anziehen
+			und ein Stand am Marktplatz gehen nur aus der Kammer.
+		-->
+		{#each data.buildings as haus (haus.id)}
+			<h4>
+				<a href="{base}/building/{haus.id}" class="link">{haus.name}</a>
+			</h4>
+			{#if haus.stock.length === 0}
+				<p><i>Nichts eingelagert.</i></p>
+			{:else}
+				<ul>
+					{#each haus.stock as posten (posten.itemId)}
+						<li>
+							{posten.quantity} × {posten.name}
+							<form method="POST" action="?/fetch" use:enhance>
+								<input type="hidden" name="itemId" value={posten.itemId} />
+								<input type="hidden" name="buildingId" value={haus.id} />
+								<input
+									type="number"
+									name="quantity"
+									min="1"
+									max={posten.quantity}
+									value="1"
+									aria-label="Wie viel {posten.name} aus {haus.name}"
+								/>
+								<button type="submit">Holen</button>
+							</form>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		{/each}
+	</section>
+{/if}
+
 <p><a href="{base}/" class="link">Zurück in die Stadt</a></p>

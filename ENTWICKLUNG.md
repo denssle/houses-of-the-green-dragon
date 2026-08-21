@@ -2926,6 +2926,29 @@ sonst. Das ist die richtige Reihenfolge: erst die Regel, dann der Fall, in dem s
 _Fertig, wenn:_ Es gibt eine Seite, auf der steht, was man besitzt — und eine Zahl, die
 sagt, wie viel noch hineingeht. — Erledigt.
 
+**5.34 Der Weg zurück aus dem Lager.** ✓ `moveToStock` versteht die Richtung seit jeher am
+Vorzeichen der Menge — nur schickte die Oberfläche nie ein negatives. Ware ging ins Lager
+und blieb dort. Solange die Kammer unbegrenzt war, fiel das niemandem auf; seit 5.33 ist
+es die halbe Mechanik: Das Lager fasst unbegrenzt, die Kammer nicht, also liegt dort das
+Meiste — und geholt wird, was man gerade braucht. Essen, Anziehen und ein Stand am
+Marktplatz gehen nur aus der Kammer.
+
+**Beide Seiten können jetzt beides.** Auf der Gebäudeseite steht neben jedem Posten im
+Betriebslager ein „Herausnehmen", auf der Kammerseite unter „In deinen Lagern" jedes eigene
+Haus mit seinem Bestand und einem „Holen". Wer von der Ware herkommt, findet den Weg; wer
+vom Haus herkommt, auch.
+
+**Eine eigene Handlung statt eines Vorzeichens im Formular.** `stockOut` und `fetch` rufen
+dasselbe `moveToStock` mit negativer Menge — aber ein verstecktes Minus in einem
+Eingabefeld ist keine Bauart, sondern eine Falle: Wer das Formular liest, sähe nicht, was
+es tut. Der Dienst behält seine Vorzeichenregel, die Route gibt ihr einen Namen.
+
+Dazu steht die Füllung der Kammer jetzt auch auf der Gebäudeseite. Ohne sie erführe man
+erst am abgewiesenen Knopf, dass kein Platz mehr ist.
+
+_Fertig, wenn:_ Ware lässt sich in beide Richtungen zwischen Kammer und Betriebslager
+bewegen. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

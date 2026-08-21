@@ -193,6 +193,38 @@ describe('Die Kammer', () => {
 			expect(await needService.buyFromGranary(jemand, 'BREAD', 5)).toEqual({ ok: true });
 		});
 
+		it('geht den ganzen Weg hin und zurück', async () => {
+			// **Der Punkt von 5.34**: Ein Lager fasst unbegrenzt, die Kammer nicht — also
+			// liegt dort das Meiste, und geholt wird, was man gerade braucht. Ein Weg, der
+			// nur hineinführt, wäre eine Einbahn.
+			const jemand = await person();
+			const haus = await wohntIn(jemand, 1);
+			await needService.buyFromGranary(jemand, 'BREAD', 30);
+
+			expect(await tradeService.moveToStock(jemand, haus, 'BREAD', 25)).toEqual({ ok: true });
+			expect(await inDerKammer(jemand, 'BREAD')).toBe(5);
+
+			expect(await tradeService.moveToStock(jemand, haus, 'BREAD', -10)).toEqual({ ok: true });
+			expect(await inDerKammer(jemand, 'BREAD')).toBe(15);
+			const lager = await tradeService.getBuildingStock(haus);
+			expect(lager.find((posten) => posten.itemId === 'BREAD')?.quantity).toBe(15);
+		});
+
+		it('holt nichts aus dem Lager eines anderen', async () => {
+			// Ein fremdes Lager zu leeren wäre Diebstahl — geprüft wird der Eigentümer,
+			// nicht die Nachbarschaft.
+			const jemand = await person();
+			const nachbarin = await person();
+			const ihrHaus = await wohntIn(nachbarin, 1);
+			await sequelize.transaction((t) => tradeService.changeBuildingStock(ihrHaus, 'PLANK', 10, t));
+
+			expect(await tradeService.moveToStock(jemand, ihrHaus, 'PLANK', -5)).toEqual({
+				ok: false,
+				reason: 'PLOT_NOT_OWNED'
+			});
+			expect(await inDerKammer(jemand, 'PLANK')).toBe(0);
+		});
+
 		it('lagert nicht mehr aus, als hineinpasst', async () => {
 			const jemand = await person();
 			const haus = await wohntIn(jemand, 1);

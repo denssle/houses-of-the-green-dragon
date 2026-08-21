@@ -41,12 +41,17 @@ export const load: PageServerLoad = async ({ locals }) => {
 		hunger: await needService.getHunger(character.id, jetzt),
 		// Was das Äußere hergibt — die Kammer ist der Ort, an dem man sich damit befasst.
 		garmentYearsLeft: garmentYearsLeft(character.wornSinceTick ?? null, jetzt),
-		// Die eigenen Häuser: wohin man einlagern kann, wenn es hier zu eng wird. Der
-		// Ausweg gehört neben die Grenze, sonst ist sie nur eine Absage.
-		buildings: (await buildingService.getBuildingsOfCharacter(character.id)).map((haus) => ({
-			id: haus.id,
-			name: haus.name
-		}))
+		// **Die eigenen Häuser samt Lager** — wohin man einlagern kann, wenn es hier zu eng
+		// wird, und woher man zurückholt, was man braucht (5.34). Der Ausweg gehört neben
+		// die Grenze, sonst ist sie nur eine Absage; und ein Weg, der nur hineinführt, ist
+		// eine Einbahn.
+		buildings: await Promise.all(
+			(await buildingService.getBuildingsOfCharacter(character.id)).map(async (haus) => ({
+				id: haus.id,
+				name: haus.name,
+				stock: await tradeService.getBuildingStock(haus.id)
+			}))
+		)
 	};
 };
 
@@ -89,6 +94,27 @@ export const actions = {
 		);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return { message: `${menge} eingelagert.` };
+	},
+
+	/** Und zurück: aus einem eigenen Lager in die Kammer. */
+	fetch: async ({ request, locals }) => {
+		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
+
+		const daten = await request.formData();
+		const itemId = daten.get('itemId')?.toString();
+		const buildingId = daten.get('buildingId')?.toString();
+		const menge = Number(daten.get('quantity') ?? 0);
+		if (!itemId || !buildingId) return fail(400, { message: 'Was denn woher?' });
+		if (!Number.isInteger(menge) || menge < 1) return fail(400, { message: 'Wie viel denn?' });
+
+		const ergebnis = await tradeService.moveToStock(
+			locals.currentCharacter.id,
+			buildingId,
+			itemId,
+			-menge
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `${menge} geholt.` };
 	},
 
 	/** Ein Gewand anlegen — es ersetzt das bisherige. */

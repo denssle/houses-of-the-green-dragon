@@ -108,6 +108,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		stock: await tradeService.getBuildingStock(params.building_id),
 		offers: await tradeService.getOffersAt(params.building_id, locals.currentCharacter?.id),
 		myStock: locals.currentCharacter ? await needService.getStock(locals.currentCharacter.id) : [],
+		// **Wie voll die Kammer ist, dort wo umgelagert wird** (5.34). Ohne die Zahl
+		// erfährt man erst am abgewiesenen Knopf, dass kein Platz mehr ist.
+		chamber: {
+			used: locals.currentCharacter ? await needService.chamberUsed(locals.currentCharacter.id) : 0,
+			capacity: locals.currentCharacter
+				? await needService.chamberCapacityOf(locals.currentCharacter.id)
+				: 0
+		},
 		isMarket: building.optionId === tradeService.MARKET_OPTION_ID,
 		// Der Satz gilt je Stadt, und der Betrachter steht in einer — seine ist die richtige.
 		stallFee: locals.currentCharacter
@@ -307,6 +315,32 @@ export const actions = {
 		);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return { message: menge > 0 ? 'Eingelagert.' : 'Ausgelagert.' };
+	},
+
+	/**
+	 * Aus dem Lager zurück in die Kammer.
+	 *
+	 * **Eine eigene Handlung statt eines Vorzeichens im Formular** (5.34): `moveToStock`
+	 * versteht die Richtung an der Menge, aber ein verstecktes Minus in einem
+	 * Eingabefeld ist keine Bauart, sondern eine Falle — wer das Formular liest, sieht
+	 * nicht, was es tut. Das Umdrehen gehört hierher, wo es einen Namen hat.
+	 */
+	stockOut: async ({ request, params, locals }) => {
+		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
+		const data = await request.formData();
+		const itemId = data.get('itemId')?.toString();
+		const menge = Number(data.get('quantity') ?? 0);
+		if (!itemId) return fail(400, { message: 'Was denn?' });
+		if (!Number.isInteger(menge) || menge < 1) return fail(400, { message: 'Wie viel denn?' });
+
+		const ergebnis = await tradeService.moveToStock(
+			locals.currentCharacter.id,
+			params.building_id,
+			itemId,
+			-menge
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `${menge} in die Kammer geholt.` };
 	},
 
 	sellOffer: async ({ request, params, locals }) => {
