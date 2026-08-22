@@ -16,6 +16,7 @@ import {
 	socialize,
 	standingNow
 } from '$lib/game/relationship.logic';
+import { AGE_OF_MAJORITY, ageInYears } from '$lib/game/time';
 import * as characterService from '$lib/server/service/characterService';
 import * as worldService from '$lib/server/service/worldService';
 
@@ -143,6 +144,12 @@ export interface PersonOnList {
 	kinship: Kinship;
 	/** Anderweitig vergeben — dann erübrigt sich das Werben. */
 	married: boolean;
+	/**
+	 * Volljährig — sonst erübrigt sich das Werben ebenfalls (Punkt 78).
+	 *
+	 * Die Seite bietet daraufhin keinen Knopf an; abgewiesen wird es ohnehin in `court()`.
+	 */
+	adult: boolean;
 	isSpouse: boolean;
 	/** Er hat dir einen Antrag gemacht und wartet auf Antwort. */
 	hasProposedToYou: boolean;
@@ -194,6 +201,7 @@ export async function getNeighbours(
 			affectionToYou: affectionLabel(stand.affection),
 			kinship: stand.kinship,
 			married: person.dataValues.spouseId !== null,
+			adult: ageInYears(person.dataValues.birthTick, tick) >= AGE_OF_MAJORITY,
 			isSpouse: person.dataValues.spouseId === characterId,
 			hasProposedToYou: person.dataValues.proposedToId === characterId
 		});

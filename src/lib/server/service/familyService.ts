@@ -92,9 +92,11 @@ export async function courtSomeone(
 		const geplant = court(
 			{
 				actionPoints: werbender.dataValues.actionPoints,
-				regionId: werbender.dataValues.RegionId
+				regionId: werbender.dataValues.RegionId,
+				birthTick: werbender.dataValues.birthTick
 			},
-			{ regionId: umworben.dataValues.RegionId }
+			{ regionId: umworben.dataValues.RegionId, birthTick: umworben.dataValues.birthTick },
+			tick
 		);
 		if (!geplant.ok) return geplant;
 

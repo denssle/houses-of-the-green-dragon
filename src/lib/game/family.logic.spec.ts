@@ -95,22 +95,73 @@ describe('Familie', () => {
 	});
 
 	describe('werben', () => {
+		const erwachsen: number = JETZT - yearsToTicks(25);
+		const kind: number = JETZT - yearsToTicks(AGE_OF_MAJORITY - 1);
+
 		it('kostet Punkte und bringt Zuneigung', () => {
-			const ergebnis = court({ actionPoints: 10, regionId: 'stadt' }, { regionId: 'stadt' });
+			const ergebnis = court(
+				{ actionPoints: 10, regionId: 'stadt', birthTick: erwachsen },
+				{ regionId: 'stadt', birthTick: erwachsen },
+				JETZT
+			);
 
 			expect(ergebnis).toMatchObject({ ok: true, actionPoints: 10 - COURT_ACTION_POINT_COST });
 		});
 
 		it('geht nicht über die Ferne', () => {
-			const ergebnis = court({ actionPoints: 10, regionId: 'stadt' }, { regionId: 'wald' });
+			const ergebnis = court(
+				{ actionPoints: 10, regionId: 'stadt', birthTick: erwachsen },
+				{ regionId: 'wald', birthTick: erwachsen },
+				JETZT
+			);
 
 			expect(ergebnis).toEqual({ ok: false, reason: 'WRONG_REGION' });
 		});
 
 		it('scheitert ohne Kraft', () => {
-			const ergebnis = court({ actionPoints: 1, regionId: 'stadt' }, { regionId: 'stadt' });
+			const ergebnis = court(
+				{ actionPoints: 1, regionId: 'stadt', birthTick: erwachsen },
+				{ regionId: 'stadt', birthTick: erwachsen },
+				JETZT
+			);
 
 			expect(ergebnis).toEqual({ ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' });
+		});
+
+		it('gilt nicht einem Kind', () => {
+			// Punkt 78: Die Grenze stand allein in `canMarry`, also am Ende eines Weges, den
+			// man Besuch für Besuch gegangen war. Jetzt steht sie am Anfang.
+			const ergebnis = court(
+				{ actionPoints: 10, regionId: 'stadt', birthTick: erwachsen },
+				{ regionId: 'stadt', birthTick: kind },
+				JETZT
+			);
+
+			expect(ergebnis).toEqual({ ok: false, reason: 'TOO_YOUNG' });
+		});
+
+		it('steht auch einem Kind nicht zu', () => {
+			// Beide Seiten, nicht nur die umworbene: Ein Kind wirbt so wenig, wie um eines
+			// geworben wird.
+			const ergebnis = court(
+				{ actionPoints: 10, regionId: 'stadt', birthTick: kind },
+				{ regionId: 'stadt', birthTick: erwachsen },
+				JETZT
+			);
+
+			expect(ergebnis).toEqual({ ok: false, reason: 'TOO_YOUNG' });
+		});
+
+		it('wiegt schwerer als die fehlende Kraft', () => {
+			// Die Rückmeldung soll den ersten wirklichen Grund nennen: Wer zu jung ist,
+			// erfährt das und nicht, dass ihm zwei Punkte fehlen.
+			const ergebnis = court(
+				{ actionPoints: 0, regionId: 'stadt', birthTick: kind },
+				{ regionId: 'stadt', birthTick: erwachsen },
+				JETZT
+			);
+
+			expect(ergebnis).toEqual({ ok: false, reason: 'TOO_YOUNG' });
 		});
 	});
 

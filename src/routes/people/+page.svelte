@@ -80,7 +80,7 @@
 						Regeln prüft der Server noch einmal — hier geht es nur darum, keine
 						Knöpfe anzubieten, die immer scheitern.
 					-->
-					{#if !data.married && !person.married && person.kinship === 'NONE'}
+					{#if !data.married && !person.married && person.adult && person.kinship === 'NONE'}
 						<form method="POST" action="?/court" use:enhance>
 							<button type="submit">Werben ({data.courtCost} AP)</button>
 							{#if data.attire.perfume > 0}

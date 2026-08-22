@@ -112,13 +112,28 @@ export type CourtOutcome =
  * vor allem in größeren Schritten. Von „gleichgültig" bis zur Heiratsbereitschaft sind
  * es damit rund vier Besuche — nah genug, um erreichbar zu sein, weit genug, dass eine
  * Ehe eine Entscheidung bleibt und kein Knopfdruck.
+ *
+ * **Beide müssen volljährig sein** (Punkt 78). Bis 5.41 stand die Altersgrenze allein in
+ * `canMarry`, also am Ende eines Weges, den man Besuch für Besuch gegangen war: Man
+ * konnte einem Kind über Jahre den Hof machen, und erst der Antrag sagte nein. Das ist
+ * kein Feinschliff — es ist der Unterschied zwischen einer Regel, die etwas verhindert,
+ * und einer, die es nur nicht belohnt.
+ *
+ * Geprüft werden **beide Seiten**: Ein Kind wirbt so wenig, wie um eines geworben wird.
  */
 export function court(
-	suitor: { actionPoints: number; regionId: string },
-	other: { regionId: string }
+	suitor: { actionPoints: number; regionId: string; birthTick: number },
+	other: { regionId: string; birthTick: number },
+	currentTick: number
 ): CourtOutcome {
 	if (suitor.regionId !== other.regionId) {
 		return { ok: false, reason: 'WRONG_REGION' };
+	}
+	if (
+		ageInYears(suitor.birthTick, currentTick) < AGE_OF_MAJORITY ||
+		ageInYears(other.birthTick, currentTick) < AGE_OF_MAJORITY
+	) {
+		return { ok: false, reason: 'TOO_YOUNG' };
 	}
 	if (suitor.actionPoints < COURT_ACTION_POINT_COST) {
 		return { ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' };

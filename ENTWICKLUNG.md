@@ -3161,6 +3161,28 @@ spart, wäre die Armutsfalle noch einmal, nur ohne Räuber.
 _Fertig, wenn:_ Eine Stadt kann ansparen, was ein öffentlicher Bau kostet. — Erledigt, und
 in Grünau nachzusehen: Die Kasse sollte ab jetzt steigen statt zu pendeln.
 
+**5.41 Werben kennt jetzt ein Alter.** ✓ (Punkt 78) `court()` prüfte, ob der Werbende
+genug Aktionspunkte hat und ob beide in derselben Stadt sind — mehr nicht. Die
+Altersgrenze stand allein in `canMarry`, also am **Ende** eines Weges, den man Besuch für
+Besuch gegangen war: Man konnte einem Kind über Jahre den Hof machen, und erst der Antrag
+sagte nein.
+
+Der Fehlschlaggrund `TOO_YOUNG` gab es längst; er wurde nur an der falschen Stelle
+geprüft. Jetzt steht er dort, wo die Handlung entsteht — und für **beide Seiten**: Ein
+Kind wirbt so wenig, wie um eines geworben wird.
+
+**NPCs waren nicht betroffen.** `naechsterPartner` filtert seine Kandidaten in der Abfrage
+auf Volljährigkeit, `decideNpcAction` prüft den Werbenden mit `isAdult`. Es traf allein
+den Spieler — und ausgerechnet die Leute-Seite bot ihm den Knopf an, obwohl der Kommentar
+darüber sagt, dass sie keine Knöpfe zeigen will, die immer scheitern. `PersonOnList` trägt
+deshalb jetzt ein `adult`, und der Knopf erscheint nur, wo er etwas werden kann.
+
+Beim Nachsehen fiel in `naechsterPartner` die Tickzahl je Spieljahr als ausgeschriebene
+50 auf (`tick - AGE_OF_MAJORITY * 50`). Sie hat einen Namen: `yearsToTicks`.
+
+_Fertig, wenn:_ Der Werbe-Knopf steht nicht mehr unter dem Namen eines Kindes, und der
+Server weist es auch dann ab, wenn ihn jemand doch schickt. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

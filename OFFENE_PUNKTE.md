@@ -29,6 +29,12 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                              | laufend                      | Entwurf      |
 | 74  | Der Auftrag an Tagelöhner — privates Renovieren gegen Lohn                           | Punkt 66 / 33                | Entwurf      |
 | 77  | Was die Kammer noch nicht kann: Gewicht, Einzelstücke, Vererben                      | Punkte 15, 20, 51            | Entwurf      |
+| 78  | Werben kennt kein Alter — geprüft wird es erst bei der Hochzeit                      | dem nächsten Schritt         | Befund       |
+| 79  | Erbenloser Besitz bleibt bei der Stadt liegen, statt vergeben zu werden              | Punkt 13 / laufend           | Befund       |
+| 80  | Von der Grundstücksliste führt kein Weg zum Haus darauf                              | laufend                      | Aufgabe      |
+| 81  | Fremde Häuser haben keine Seite — „aus dem Haus" verlinkt ins Leere                  | Punkt 64                     | Entwurf      |
+| 82  | Kammer oder Inventar — wie der persönliche Besitz heißt                              | dem ersten fremden Spieler   | Entscheidung |
+| 83  | Die Stadtseite trennt nicht, was der Stadt gehört und was den Leuten                 | Punkt 79                     | Aufgabe      |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                          | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
@@ -73,13 +79,8 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 
 #### Noch zu erfassen:
 
-- man sollte nicht um Minderjährige werben können.
-- Von der Grundstück Liste sollte man auf die dort gebauten Gebäude gehen können
-- Wenn die Stadt an private Gebäude kommt (z.B. wenn jemand seine Gebäude an die Stadt vererbt) - dann soll die Stadt diese Gebäude asap verkaufen - versteigern.
-- auf der Seite eines Users soll man mit "aus dem Haus" auf die Dynastie springen können
-- "Deine Kammer" in "dein Inventar" übenennen - als Zeichen dass es das persönliches Inventar ist.
-- Seite der Stadt umstrukturieren - öffentliche Gebäude, private Gebäude trennen
-  
+_(Die Notizen vom 22.08.2026 sind als Punkte 78 bis 83 erfasst.)_
+
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
 `paths.base`, wie bei Festival), mit Phase 4.5a der **Fertigkeitenkatalog** samt
@@ -1974,3 +1975,105 @@ Fall von `CHAMBER_FULL` — die vollste NPC-Kammer hielt vier Laibe Brot, weil W
 5.24 dort liegen bleibt, wo sie entsteht. Die Grenze trifft heute nur den Spieler, der
 hortet. Beißt sie später auch bei NPCs, ist das ein Befund und keine Panne: Dann hat einer
 mehr, als er tragen kann, und muss etwas damit anfangen.
+
+### 78. Werben kennt kein Alter
+
+**Befund vom 22.08.2026.** `court()` (`family.logic.ts`) prüft, ob der Werbende genug
+Aktionspunkte hat und ob beide in derselben Stadt sind. Mehr nicht. Die Altersgrenze steht
+erst in `canMarry`: Dort wird `TOO_YOUNG` geworfen, wenn einer der beiden noch nicht
+volljährig ist.
+
+Die Folge ist ein Werben, das ins Leere läuft und dabei anstößig aussieht: Man kann einem
+Kind über Jahre den Hof machen, Besuch für Besuch Zuneigung aufbauen — und erst am
+Traualtar sagt das Spiel nein.
+
+**NPCs sind nicht betroffen**: `naechsterPartner` filtert die Kandidaten in der Abfrage auf
+Volljährigkeit, und `decideNpcAction` prüft den Werbenden mit `isAdult`. Es trifft allein
+den Spieler — und die Leute-Seite bot ihm den Knopf sogar an, obwohl sie ausdrücklich
+keine Knöpfe zeigen will, die immer scheitern.
+
+Der Fehlschlaggrund existiert bereits; er wird nur an der falschen Stelle geprüft. Die
+Prüfung gehört dorthin, wo die Handlung entsteht — nicht dorthin, wo sie sich vier Jahre
+später auszahlen soll.
+
+Zu klären ist dabei nur eines: **ob ein Kind auch nicht werben darf**. Für den Werbenden
+prüft die NPC-Hierarchie es schon; für einen Spielercharakter prüft es niemand. Nach
+derselben Regel wie oben sollte beides gelten.
+
+### 79. Erbenloser Besitz bleibt bei der Stadt liegen
+
+**Befund vom 22.08.2026.** Wer ohne Erben stirbt, dessen Häuser und Grundstücke fallen an
+die Stadt (`anDieStadt()` in `lifecycleService.ts`) — `ownerType` wechselt auf `CITY`,
+und dort bleiben sie. Es gibt keinen Weg zurück in private Hand.
+
+Das ist mehr als totes Kapital, weil `CITY` an drei Stellen „öffentlicher Bau" bedeutet:
+
+- `getPublicBuildings` fragt allein nach `ownerType === 'CITY'`. Eine geerbte Kate steht
+  damit im **Rathaus unter „Was der Stadt gehört"**, zwischen Marktplatz und Schmiede.
+- Der NPC-Bürgermeister zählt sie zu dem, was er instand zu halten hat.
+- `freierArbeitsplatz` behandelt städtische Häuser als **immer beauftragt**: Jeder NPC darf
+  an ihnen für Lohn arbeiten, den die Stadtkasse zahlt. Die Stadt bezahlt also die
+  Instandhaltung einer Kate, die niemandem nützt — Geld, das ihr für eigene Bauten fehlt
+  (siehe die Kassenlage in 5.40).
+- Das Grundstück gilt als bebaut und ist für Neubauten blockiert. Bei knappem Bauland ist
+  das der teuerste Teil.
+
+**Die Richtung steht fest:** Die Stadt soll solchen Besitz zügig weitergeben — versteigern,
+wie sie es mit erschlossenem Bauland tut. Zu klären ist, ob `auctionService` auch **Häuser**
+versteigern kann oder bisher nur Grundstücke, und was mit dem Erlös geschieht (in die
+Stadtkasse, wie beim Bauland). Bis dahin bleibt jeder erbenlose Tod ein Haus weniger auf
+dem Markt.
+
+### 80. Von der Grundstücksliste führt kein Weg zum Haus darauf
+
+Auf der Grundstücksseite steht bei bebautem Land „— bebaut (verkauft wird über das
+Gebäude)" — und der Satz nennt das Ziel, ohne hinzuführen. Der Grund liegt im Dienst:
+`PlotOnList` (`plotService.ts`) trägt `hasBuilding: boolean`, nicht die Kennung des
+Hauses. Wer sein Haus verkaufen will, muss über die Stadtseite gehen und es dort suchen.
+
+Gehört zu Punkt 58 (Wege, die nur beschrieben und nicht verlinkt sind) und ist derselbe
+Handgriff wie dort: ein Feld mehr im Dienst, ein Link mehr auf der Seite.
+
+### 81. Fremde Häuser haben keine Seite
+
+Auf der Seite eines Charakters steht „— aus dem Haus Müller", ohne Weg dorthin. Das ist
+kein vergessener Link: `/dynasty` zeigt **immer das eigene** Haus, weil die Seite über
+`locals.currentUser` lädt. Für ein fremdes Haus gibt es keine Adresse.
+
+Nötig wäre eine Route `/dynasty/[id]` — und damit die Frage, die daran hängt: **Was darf
+man über ein fremdes Haus sehen?** Die Mitglieder und ihre Verwandtschaft sind öffentlich,
+das steht schon in der Chronik. Besitz und Vermögen sind es nicht ohne Weiteres: Wer sieht,
+wo etwas zu holen ist, hat mit Punkt 23 (Räuber als Beruf) einen handfesten Grund
+hinzusehen.
+
+Gehört zu Punkt 64 (jedes Gebäude und jede Fläche braucht eine eigene Seite) und folgt
+derselben Linie: Was einen Namen hat, soll eine Adresse haben.
+
+### 82. Kammer oder Inventar
+
+**Zu entscheiden.** Der Vorschlag lautet, „Deine Kammer" in „Dein Inventar" umzubenennen,
+damit deutlich wird, dass es sich um den **persönlichen** Besitz handelt und nicht um einen
+Raum im Haus.
+
+Dagegen spricht die Sprache des Spiels: Es hat keine Menüs, sondern Orte — Kornspeicher,
+Marktplatz, Rathaus, Aushang, Handschlag. „Inventar" ist das erste Wort, das aus der
+Mechanik statt aus der Welt käme, und es öffnet die Tür für die nächsten.
+
+Dafür spricht, dass die Klarheit vorgeht, wenn ein Fremder in fünf Sekunden verstehen
+muss, wo seine Sachen liegen. Ein Mittelweg wäre die Überschrift **„Deine Kammer — was du
+bei dir trägst"**: Sie sagt dasselbe und bleibt in der Welt.
+
+Umfang, falls umbenannt wird: 104 Fundstellen, davon rund fünfzehn sichtbarer Text; der
+Rest sind Kommentare, Tests und Bezeichner (`chamberUsed`, `chamberCapacityOf`, die Route
+`/chamber`). Mitzuentscheiden wäre, ob die Adresse mit umzieht — sie steht seit 5.33 in
+Links und Lesezeichen.
+
+### 83. Die Stadtseite trennt nicht, was der Stadt gehört
+
+Die Übersicht listet unter „Was hier steht" alle Häuser der Stadt in einer Reihe: Rathaus
+neben Zimmerei neben Wohnhaus. Getrennt gehören sie, weil man sie aus verschiedenen
+Gründen aufsucht — das eine ist Politik, das andere Nachbarschaft und Handel.
+
+**Erst nach Punkt 79 richtig zu bauen.** Solange erbenlose Katen als städtisch gelten,
+stünde in der Spalte „öffentlich" ein Haufen Privathäuser, und die Trennung machte den
+Fehler nur sichtbarer, statt ihn zu beheben.

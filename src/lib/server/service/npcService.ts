@@ -30,7 +30,8 @@ import {
 	ageInYears,
 	buildingCostFactor,
 	type Season,
-	seasonOf
+	seasonOf,
+	yearsToTicks
 } from '$lib/game/time';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
 import * as buildingService from '$lib/server/service/buildingService';
@@ -788,7 +789,9 @@ async function naechsterPartner(
 			spouseId: null,
 			gender: { [Op.ne]: werte.gender },
 			id: { [Op.ne]: werte.id },
-			birthTick: { [Op.lte]: tick - AGE_OF_MAJORITY * 50 }
+			// Volljährig — dieselbe Grenze, die `court()` seit Punkt 78 selbst zieht. Hier
+			// stand die Tickzahl je Spieljahr als 50 ausgeschrieben; sie hat einen Namen.
+			birthTick: { [Op.lte]: tick - yearsToTicks(AGE_OF_MAJORITY) }
 		}
 	});
 
