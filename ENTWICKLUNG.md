@@ -3343,6 +3343,40 @@ die schon immer hier lebte" statt einer leeren Zeile.
 _Fertig, wenn:_ Von jedem Charakter führt ein Klick zu seinem Haus. — Erledigt; in der
 laufenden App nachgesehen, wo der Weg über einen Nachbarn zu „Haus Steinmetz" führte.
 
+**5.47 Der Zuzug zählt die Zeit mit.** ✓ Die Frage kam von außen: „Grünau hat immer noch
+keinen Zuwachs bekommen — ist die Stadt so unpopulär?" Die Chronik gab ihr recht: von
+Frühling 96 bis Sommer 100, gut 215 Ticks, keine einzige Ankunft.
+
+**Zuerst die Entlastung:** Die Mechanik läuft. Ein Messlauf über 300 Ticks brachte zwei
+Zugezogene — Ludolf mit Forstwirtschaft, Thankmar mit Bäckerei — bei einer Erwartung von
+drei. Und rein rechnerisch sind 215 Würfe ohne Treffer mit 11,5 % kein Beweis für einen
+Fehler.
+
+**Dann der Fund.** `admitNewcomers` würfelt **einmal je Herzschlag**, aber die Weltuhr
+stellt nach einem Neustart mehrere Stunden auf einmal vor (`planWorldAdvance` nennt sie
+`missed`). Für diese Stunden alterte die Welt, ohne dass jemand in ihr ankommen konnte —
+**jeder Deploy kostete die Stadt Ankunftschancen**, und in den Tagen davor gab es einige.
+Die echten 11,5 % waren also deutlich höher.
+
+**Warum die Regel hier falsch stand.** „Übersprungene Zeit hat nicht stattgefunden" ist
+fürs Sterben und fürs Nachwachsen gemacht: Niemand soll sterben oder Ernte verlieren, weil
+der Prozess lag. Das ist ein **Schutz**. Beim Zuzug gibt es nichts zu schützen — er nimmt
+niemandem etwas, er bringt der Stadt jemanden. Dort kostete die Regel nur.
+
+`someoneArrives` bekommt deshalb die verstrichene Zeit und rechnet die
+Gegenwahrscheinlichkeit: Bei zwanzig übersprungenen Stunden kommt jemand mit 18 % statt
+mit 1 %. **Höchstens einer je Herzschlag** — wer nach einer Woche Stillstand hereinschaut,
+findet eine Stadt vor und keine Karawane. Die Bremse bleibt der Wohnraum.
+
+**Der Normalfall bleibt bitgenau, was er war.** `1 - (1 - 0.01) ** 1` ergibt
+0.010000000000000009 und nicht 0.01; ein Wurf genau auf der Schwelle fiele damit anders
+aus als vorher. Folgenlos, aber falsch — deshalb ein ausdrücklicher Kurzschluss für den
+Fall ohne Ausfall. Aufgefallen ist es nur, weil ein Test genau auf der Schwelle prüfte.
+
+**Was offen bleibt und von außen nicht zu prüfen war:** ob Grünaus städtische Unterkunft
+überhaupt noch Platz hat. Ist sie voll, kommt niemand mehr, ganz ohne Würfel — das ist die
+zweite mögliche Antwort auf dieselbe Frage.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

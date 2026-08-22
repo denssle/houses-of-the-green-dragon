@@ -90,7 +90,15 @@ async function schlagen(): Promise<void> {
 		// Spieljahre, und nur solange ein Bett frei ist — wer ankommt und nichts findet,
 		// zieht weiter. Er bringt ein Handwerk mit, das der Stadt fehlt, und das Geld, das
 		// er anderswo verdient hat.
-		const zugezogen = await migrationService.admitNewcomers(stadtId, geschehen.currentTick);
+		// **Mit der Zeit, die dieser Schlag vorgerueckt ist** (5.47). Nach einem Neustart sind
+		// das mehrere Stunden; ohne sie fiele der Zuzug fuer die uebersprungene Zeit aus, und
+		// jeder Deploy kostete die Stadt Ankuenfte.
+		const zugezogen = await migrationService.admitNewcomers(
+			stadtId,
+			geschehen.currentTick,
+			Math.random,
+			geschehen.ticks
+		);
 		if (zugezogen) {
 			console.info(
 				`${zugezogen.name} ${zugezogen.house} ist angekommen — ` +

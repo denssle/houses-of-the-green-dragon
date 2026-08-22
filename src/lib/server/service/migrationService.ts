@@ -51,18 +51,23 @@ export interface Arrival {
 }
 
 /**
- * Ein Tick Zuwanderung.
+ * Ein Herzschlag Zuwanderung.
  *
  * Wird vom Welt-Takt gerufen. Gibt zurück, wer gekommen ist — oder nichts, was der
  * Normalfall ist.
+ *
+ * **`ticks` ist die Zeit, die die Weltuhr in diesem Schlag vorgerückt ist** (5.47). Nach
+ * einem Neustart sind das mehrere Stunden auf einmal, und sie zählen mit: Sonst kostete
+ * jeder Deploy der Stadt Ankünfte, weil hier nur einmal je Herzschlag gewürfelt wird.
  */
 export async function admitNewcomers(
 	regionId: string,
 	tick: number,
-	roll: () => number = Math.random
+	roll: () => number = Math.random,
+	ticks = 1
 ): Promise<Arrival | undefined> {
 	const platz = await freierWohnraum(regionId);
-	if (!someoneArrives(roll(), platz)) return undefined;
+	if (!someoneArrives(roll(), platz, ticks)) return undefined;
 
 	const geschlecht: 'FEMALE' | 'MALE' = roll() < 0.5 ? 'FEMALE' : 'MALE';
 	const vorname: string =

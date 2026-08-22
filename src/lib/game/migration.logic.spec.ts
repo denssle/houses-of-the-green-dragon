@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+	ARRIVAL_CHANCE_PER_TICK,
 	ARRIVAL_MONEY_MAX,
 	ARRIVAL_MONEY_MIN,
 	arrivalGifts,
@@ -30,6 +31,33 @@ describe('Wer ankommt', () => {
 		// Im Mittel einer alle zwei Spieljahre. Ein Wurf knapp über der Schwelle bringt
 		// niemanden — sonst stünde bald jeder Zweite als Fremder in der Stadt.
 		expect(someoneArrives(0.5, true)).toBe(false);
+	});
+
+	it('holt nach, was ein Ausfall übersprungen hat', () => {
+		// **Der Befund vom 22.08.2026:** Der Takt würfelt einmal je Herzschlag, die Weltuhr
+		// stellt nach einem Neustart aber mehrere Stunden auf einmal vor. Diese Stunden
+		// fielen für den Zuzug aus — die Welt alterte, aber niemand konnte in ihr ankommen,
+		// und jeder Deploy kostete die Stadt Ankünfte. In Grünau kam über gut 215 Ticks
+		// niemand an; allein aus dem Zufall wären das 11,5 %, mit den verlorenen Würfen
+		// deutlich mehr.
+		const knappDarueber = 0.05;
+
+		expect(someoneArrives(knappDarueber, true)).toBe(false);
+		// Zwanzig übersprungene Stunden: rund 18 % statt 1 %.
+		expect(someoneArrives(knappDarueber, true, 20)).toBe(true);
+	});
+
+	it('bleibt bei einer Stunde, was es war', () => {
+		// Der Normalfall darf sich nicht verschoben haben: Ein Herzschlag ohne Ausfall
+		// würfelt gegen dieselbe Schwelle wie vor 5.47.
+		expect(someoneArrives(ARRIVAL_CHANCE_PER_TICK - 0.0001, true, 1)).toBe(true);
+		expect(someoneArrives(ARRIVAL_CHANCE_PER_TICK, true, 1)).toBe(false);
+	});
+
+	it('lässt auch nach langem Ausfall niemanden ohne Dach ein', () => {
+		// Die Bremse bleibt die Bremse — sonst stünde nach jedem Neustart jemand vor einer
+		// vollen Unterkunft und zöge trotzdem ein.
+		expect(someoneArrives(0, false, 500)).toBe(false);
 	});
 
 	it('bringt mit, was er anderswo verdient hat', () => {

@@ -108,12 +108,36 @@ export const ARRIVAL_AGE_MAX = 40;
  */
 export const CITIZENSHIP_AFTER_YEARS = 5;
 
-/** Kommt in diesem Tick jemand an? */
-export function someoneArrives(roll: number, hasRoom: boolean): boolean {
-	// **Ohne Dach kommt niemand.** Die städtische Unterkunft fasst zwanzig; ist sie voll,
-	// bremst das den Zuzug von selbst, ohne dass jemand eine Obergrenze pflegen müsste.
-	// Und es ist die stimmigere Regel: Wer ankommt und nichts findet, zieht weiter.
-	return hasRoom && roll < ARRIVAL_CHANCE_PER_TICK;
+/**
+ * Kommt jemand an?
+ *
+ * **Ohne Dach kommt niemand.** Die städtische Unterkunft fasst zwanzig; ist sie voll,
+ * bremst das den Zuzug von selbst, ohne dass jemand eine Obergrenze pflegen müsste. Und
+ * es ist die stimmigere Regel: Wer ankommt und nichts findet, zieht weiter.
+ *
+ * **`ticks` ist die Zeit, die seit dem letzten Wurf vergangen ist** (5.47). Sie steht hier,
+ * weil der Takt nur einmal je Herzschlag würfelt, die Weltuhr aber nach einem Neustart
+ * mehrere Stunden auf einmal vorstellt. Bis hierher fielen diese Stunden für den Zuzug
+ * aus: Die Welt alterte, aber niemand konnte in ihr ankommen — und jeder Deploy kostete
+ * die Stadt Ankünfte.
+ *
+ * **Warum das hier anders ist als beim Sterben.** „Übersprungene Zeit hat nicht
+ * stattgefunden" schützt Spieler davor, dass ein Serverausfall sie etwas kostet: Niemand
+ * soll sterben oder Ernte verlieren, weil der Prozess lag. Beim Zuzug gibt es nichts zu
+ * schützen — er nimmt niemandem etwas, er bringt jemanden. Die Regel kostete hier nur.
+ *
+ * Gerechnet wird die Gegenwahrscheinlichkeit: Bei zwanzig übersprungenen Stunden kommt
+ * jemand mit 18 % statt mit 1 %. **Höchstens einer je Herzschlag** — wer nach einer Woche
+ * Ausfall hereinschaut, findet eine Stadt vor und keine Karawane.
+ */
+export function someoneArrives(roll: number, hasRoom: boolean, ticks = 1): boolean {
+	if (!hasRoom) return false;
+	// Der Normalfall bleibt bitgenau, was er war: `1 - (1 - 0.01) ** 1` ergibt
+	// 0.010000000000000009 und nicht 0.01 — ein Wurf genau auf der Schwelle fiele damit
+	// anders aus als vor 5.47. Das ist folgenlos und trotzdem falsch.
+	if (ticks <= 1) return roll < ARRIVAL_CHANCE_PER_TICK;
+
+	return roll < 1 - Math.pow(1 - ARRIVAL_CHANCE_PER_TICK, ticks);
 }
 
 /** Was der Ankommende mitbringt — aus einem Wurf je Größe. */
