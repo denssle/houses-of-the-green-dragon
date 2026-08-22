@@ -90,20 +90,21 @@ export const NPC_MAYOR_LAW: LawKind = 'TITHE';
 /**
  * Die Entscheidung.
  *
- * Die Rangfolge ist dieselbe Idee wie beim Einwohner: **erst was schützt, dann was
- * trägt, dann was wächst.** Eine Stadt ohne Wache verliert Geld an Räuber, eine mit
- * verfallenen Bauten verliert Ertrag, eine ohne Bauland kann nicht wachsen — und die
- * Steuer ist das Mittel, nicht der Zweck: Sie kommt zuletzt, wenn das Geld für all das
- * nicht reicht.
+ * Die Rangfolge ist dieselbe Idee wie beim Einwohner: **erst was trägt, dann was
+ * wächst.** Eine Stadt mit unbesetzten Werkstätten und verfallenen Bauten verliert
+ * Ertrag, eine ohne Bauland kann nicht wachsen — und die Steuer ist das Mittel, nicht der
+ * Zweck: Sie kommt zuletzt, wenn das Geld für all das nicht reicht.
+ *
+ * Bis 5.40 stand hier „erst was schützt": Das galt der Wache gegen die Räuber, und beide
+ * sind vorerst aus dem Spiel.
  */
 export function decideMayorAction(state: CityState): MayorAction {
 	const ruecklage: number = treasuryReserve(state.developmentCost);
 
-	// 1. Die Stellen besetzen, die die Stadt zu vergeben hat. Ein Wachhaus ohne Sold ist
-	//    ein leeres Haus, und Raubzüge kosten die Stadt mehr als der Sold; eine Schmiede
-	//    ohne Schmied stellt nichts her, obwohl die Stadt sie bezahlt hat. Steht ganz
-	//    oben, weil es nichts kostet außer dem Aushang — der Lohn fließt erst, wenn
-	//    jemand annimmt und arbeitet.
+	// 1. Die Stellen besetzen, die die Stadt zu vergeben hat. Eine Schmiede ohne Schmied
+	//    stellt nichts her, obwohl die Stadt sie bezahlt hat. Steht ganz oben, weil es
+	//    nichts kostet außer dem Aushang — der Lohn fließt erst, wenn jemand annimmt und
+	//    arbeitet.
 	if (state.unstaffedWorkplace) return 'PAY_WAGE';
 
 	// 2. Erhalten, was steht. Billiger als neu bauen, und der Verfall frisst still.

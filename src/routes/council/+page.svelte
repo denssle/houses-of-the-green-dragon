@@ -33,13 +33,6 @@
 		<p><i>Niemand führt die Stadt. Es muss gewählt werden.</i></p>
 	{/if}
 	<p><i>Stadtkasse: {data.treasury} Münzen</i></p>
-	<p>
-		<i>
-			Stadtwache: {data.safety.guards}
-			{data.safety.guards === 1 ? 'Wächter' : 'Wächter'} — mit
-			{data.safety.raidChancePerYear} Raubzügen im Jahr ist zu rechnen.
-		</i>
-	</p>
 </section>
 
 {#if data.ballot}

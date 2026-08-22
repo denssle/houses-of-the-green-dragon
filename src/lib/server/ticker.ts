@@ -166,16 +166,12 @@ async function schlagen(): Promise<void> {
 			}
 		}
 
-		// Unglueck: hoechstens eins je Herzschlag. Vor dem Sterben, damit ein Ueberfall
-		// noch in die Chronik kommt, ehe das Opfer stirbt — und nach dem Handeln, damit
-		// niemand um Geld gebracht wird, das er in derselben Stunde noch ausgeben wollte.
+		// Unglueck: hoechstens eins je Herzschlag. Vor dem Sterben, damit ein Brand noch in
+		// die Chronik kommt, ehe sein Opfer stirbt — und nach dem Handeln, damit niemandem
+		// die Werkstatt abbrennt, in der er in derselben Stunde noch arbeiten wollte.
 		const unglueck = await hazardService.strike(stadtId, geschehen.currentTick);
 		if (unglueck) {
-			console.info(
-				unglueck.kind === 'RAID'
-					? `Raubzug: ${unglueck.what} um ${unglueck.value} erleichtert.`
-					: `Brand in ${unglueck.what} — Zustand um ${unglueck.value} gefallen.`
-			);
+			console.info(`Brand in ${unglueck.what} — Zustand um ${unglueck.value} gefallen.`);
 		}
 
 		for (const fall of await lifecycleService.reapTheDead(geschehen.currentTick)) {

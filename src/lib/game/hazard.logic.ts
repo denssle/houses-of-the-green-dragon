@@ -1,17 +1,25 @@
 import { TICKS_PER_YEAR } from '$lib/game/time';
 
 /**
- * Unglücke: Raub und Brand.
+ * Unglücke: der Brand.
  *
- * **Sie erfinden keinen neuen Zustand, sie nehmen von dem, was da ist.** Ein Raub
- * verschiebt Münzen und Waren, ein Brand senkt den Zustand eines Gebäudes — beides sind
- * Größen, die es seit 4.5 und 4.6 gibt. Damit ist ein Unglück von Anfang an spürbar und
- * braucht keine eigene Buchhaltung.
+ * **Es erfindet keinen neuen Zustand, es nimmt von dem, was da ist.** Ein Brand senkt den
+ * Zustand eines Gebäudes — eine Größe, die es seit 4.6 gibt. Damit ist das Unglück von
+ * Anfang an spürbar und braucht keine eigene Buchhaltung.
  *
- * **Es trifft, wo etwas zu holen ist.** Die Zielauswahl ist nach Beutewert gewichtet, und
- * das ist nicht nur stimmig, sondern nötig: Ein Räuber, der dem Verhungernden das letzte
- * Brot nimmt, erzeugt eine Spirale, aus der niemand mehr herauskommt. Wer nichts hat,
- * lohnt den Weg nicht.
+ * **Es trifft, wo etwas zu holen ist.** Die Zielauswahl ist nach Wert gewichtet: Die
+ * Feuersbrunst im nagelneuen Haus tut mehr weh als die in der halben Ruine.
+ *
+ * **Der Raubzug ist mit 5.40 herausgenommen** — nicht, weil er nicht funktionierte,
+ * sondern weil er zu gut funktionierte: Ein Viertel der Stadtkasse, zweimal im Spieljahr,
+ * deckelte sie strukturell unter dem Preis des Wachhauses, das die Raubzüge hätte
+ * eindämmen sollen. Grünau stand nach 97 Spieljahren bei 109 Münzen und hatte nie eine
+ * Wache. Eine Armutsfalle, aus der die Stadt nicht selbst herausfand.
+ *
+ * Damit ist auch die Wache vorerst ein Haus ohne Aufgabe. Beides gehört zusammen
+ * überarbeitet (`OFFENE_PUNKTE.md`): Räuber, gegen die man sich wehren kann, und eine
+ * Wache, die mehr tut, als eine Wahrscheinlichkeit zu senken. Die Ereignisart `RAID`
+ * bleibt bekannt, weil die Chronik alte Raubzüge weiter erzählen können muss.
  */
 
 export const HAZARD_KINDS = ['RAID', 'FIRE'] as const;
@@ -20,41 +28,21 @@ export type HazardKind = (typeof HAZARD_KINDS)[number];
 /**
  * Wie oft ein Unglück geschieht — als Erwartungswert je Spieljahr.
  *
- * Zwei Raubzüge im Jahr sind spürbar, ohne dass Handel sinnlos würde; ein Brand alle zwei
- * Jahre trifft statistisch jedes Gebäude selten genug, dass Bauen sich noch lohnt. Beide
- * Zahlen sind Balancing (Punkt 16) und stehen deshalb hier und nicht verstreut im Code.
+ * Ein Brand alle zwei Jahre trifft statistisch jedes Gebäude selten genug, dass Bauen
+ * sich noch lohnt. Die Zahl ist Balancing (Punkt 16) und steht deshalb hier und nicht
+ * verstreut im Code.
  */
-export const RAIDS_PER_YEAR = 2;
 export const FIRES_PER_YEAR = 0.5;
 
 export function chancePerTick(perYear: number): number {
 	return perYear / TICKS_PER_YEAR;
 }
 
-/**
- * Was die Wache ausrichtet.
- *
- * Jeder Wächter senkt die Wahrscheinlichkeit eines Raubzugs um ein Drittel des
- * Verbleibenden — drei Wächter lassen knapp dreißig Prozent übrig, aber **nie null**.
- * Eine Stadt, die sich vollständig freikaufen kann, hätte ein Problem gelöst statt es zu
- * verwalten; und ein Bürgermeister, der die Wache abschafft, soll den Unterschied merken,
- * nicht den Zusammenbruch erleben.
- *
- * Gegen Feuer hilft die Wache nicht. Dafür bräuchte es einen Brunnen — der gehört in den
- * Katalog öffentlicher Bauten (Punkt 12).
- */
-export const GUARD_EFFECT = 1 / 3;
-
-export function raidChance(guards: number, perYear: number = RAIDS_PER_YEAR): number {
-	const grund: number = chancePerTick(perYear);
-	return grund * Math.pow(1 - GUARD_EFFECT, Math.max(0, guards));
-}
-
 export function fireChance(perYear: number = FIRES_PER_YEAR): number {
 	return chancePerTick(perYear);
 }
 
-/** Ein mögliches Ziel mit dem, was dort zu holen wäre. */
+/** Ein mögliches Ziel mit dem, was dort auf dem Spiel steht. */
 export interface Target<T> {
 	ref: T;
 	worth: number;
@@ -63,9 +51,9 @@ export interface Target<T> {
 /**
  * Wen es trifft.
  *
- * Gewichtet nach Beutewert: Wer das Zehnfache besitzt, wird zehnmal so wahrscheinlich
- * heimgesucht. Ziele ohne Wert fallen ganz heraus — sonst überfiele der Würfel
- * regelmäßig leere Kammern, und das Ereignis verpuffte, statt zu treffen.
+ * Gewichtet nach Wert: Was das Zehnfache wert ist, wird zehnmal so wahrscheinlich
+ * heimgesucht. Ziele ohne Wert fallen ganz heraus — sonst träfe der Würfel regelmäßig
+ * ins Leere, und das Ereignis verpuffte, statt zu treffen.
  */
 export function pickTarget<T>(targets: Target<T>[], roll: number): T | undefined {
 	const lohnende = targets.filter((ziel) => ziel.worth > 0);
@@ -79,20 +67,6 @@ export function pickTarget<T>(targets: Target<T>[], roll: number): T | undefined
 		if (schwelle <= 0) return ziel.ref;
 	}
 	return lohnende[lohnende.length - 1].ref;
-}
-
-/**
- * Wie viel eine Bande mitnimmt.
- *
- * Ein Viertel, aufgerundet — genug, dass es weh tut, wenig genug, dass niemand über Nacht
- * mittellos ist. Das Aufrunden sorgt dafür, dass auch beim kleinen Ziel etwas fehlt: Ein
- * Raub, bei dem nichts wegkommt, wäre eine Meldung ohne Folge.
- */
-export const RAID_SHARE = 0.25;
-
-export function loot(available: number): number {
-	if (available <= 0) return 0;
-	return Math.min(available, Math.ceil(available * RAID_SHARE));
 }
 
 /**

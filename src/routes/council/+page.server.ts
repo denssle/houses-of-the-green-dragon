@@ -4,7 +4,6 @@ import * as auctionService from '$lib/server/service/auctionService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as electionService from '$lib/server/service/electionService';
 import * as employmentService from '$lib/server/service/employmentService';
-import * as hazardService from '$lib/server/service/hazardService';
 import * as lawService from '$lib/server/service/lawService';
 import * as worldService from '$lib/server/service/worldService';
 import { actionMessage } from '$lib/actionMessage';
@@ -97,9 +96,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 				};
 			})
 		),
-		// Was die Wache bringt, in einer Zahl: Ohne sie wäre ihr Sold eine Ausgabe ohne
-		// sichtbaren Gegenwert — und der erste Bürgermeister, der spart, hätte recht.
-		safety: await hazardService.getSafety(character.regionId),
 		// Erschließen: was es kostet und wie viel auf einmal geht.
 		development: {
 			costPerPlot: DEVELOPMENT_COST_PER_PLOT,

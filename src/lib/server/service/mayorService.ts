@@ -1,5 +1,3 @@
-import { Op } from 'sequelize';
-import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Region } from '$lib/db/model/region';
 import {
@@ -18,7 +16,6 @@ import * as electionService from '$lib/server/service/electionService';
 import * as employmentService from '$lib/server/service/employmentService';
 import * as lawService from '$lib/server/service/lawService';
 import { MAYOR_MAINTAINS_BELOW } from '$lib/server/service/buildingService';
-import { GUARDHOUSE_OPTION_ID } from '$lib/server/service/hazardService';
 import { TAGELOHN } from '$lib/game/economy';
 
 /**
@@ -45,10 +42,15 @@ async function fehlenderBau(
 ): Promise<{ optionId: number; price: number; name: string } | undefined> {
 	const vorhanden = await buildingService.getBuildingsInRegion(regionId);
 
-	// **Nur Bauten mit Wirkung.** Ein Rathaus mehr ändert nichts; das Wachhaus senkt die
-	// Gefahr (4.8), die Schule bildet aus (4.7e), die Unterkunft schafft Wohnraum.
-	// Erst wenn es einen Grund gibt, gibt es einen Bau — dieselbe Regel wie bei den Waren.
-	const gewuenscht: number[] = [GUARDHOUSE_OPTION_ID, 8, 3];
+	// **Nur Bauten mit Wirkung.** Ein Rathaus mehr ändert nichts; die Schule bildet aus
+	// (4.7e), die Unterkunft schafft Wohnraum. Erst wenn es einen Grund gibt, gibt es einen
+	// Bau — dieselbe Regel wie bei den Waren.
+	//
+	// **Das Wachhaus stand hier an erster Stelle und ist mit 5.40 herausgefallen**, weil es
+	// seit dem Ende der Raubzüge nichts mehr bewirkt. Es bleibt baubar — ein Bürgermeister
+	// darf eine Wache aufstellen —, aber ein NPC soll nicht länger auf ein Haus sparen, das
+	// keine Aufgabe hat. Mit den überarbeiteten Räubern kommt es zurück.
+	const gewuenscht: number[] = [8, 3];
 
 	for (const optionId of gewuenscht) {
 		const vorlage = buildingService.getBuildingOption(optionId);
@@ -201,17 +203,4 @@ export async function governAsNpcMayor(
 		case 'NOTHING':
 			return undefined;
 	}
-}
-
-/** Nur für die Anzeige: Gibt es überhaupt ein Wachhaus ohne Wächter? */
-export async function unbesetzteWache(regionId: string): Promise<boolean> {
-	const wachhaeuser = (await buildingService.getBuildingsInRegion(regionId)).filter(
-		(haus) => haus.optionId === GUARDHOUSE_OPTION_ID
-	);
-	if (wachhaeuser.length === 0) return false;
-
-	const belegt: number = await Building.count({
-		where: { id: { [Op.in]: wachhaeuser.map((haus) => haus.id) }, offeredWage: { [Op.ne]: null } }
-	});
-	return belegt < wachhaeuser.length;
 }

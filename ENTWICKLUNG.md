@@ -3114,6 +3114,53 @@ vier Punkte weiterhin nicht aufbringen, weil er sie verarbeitet, sobald er einen
 Sold gibt ihm einen Grund, im Amt zu bleiben; die Reparatur selbst braucht den nächsten
 Schritt — die Stadt schreibt sie aus, und wer will, leistet sie gegen Lohn.
 
+**5.40 Die Räuber gehen, damit die Stadt bauen kann.** ✓ Der Ausgangspunkt war eine
+Beobachtung an der laufenden Welt: „So wie ich das sehe, richtet niemand der NPCs
+öffentliche Häuser her." Das Nachsehen führte über zwei falsche Fährten zur eigentlichen
+Ursache — und beide Umwege stehen in 5.38 und 5.39, weil sie echte Fehler zutage
+gefördert haben.
+
+**Grünau widerlegte den Verdacht.** Auf dem Server standen die vier städtischen Bauten bei
+99, 100, 99 und 100 — hergerichtet wird sehr wohl, der Lohnauftrag aus 5.26 trägt. Ein
+Messlauf über 300 Ticks bestätigte es: alle vier auf voller Güte, häufigster
+Müßiggangsgrund `NO_WORK`, weil es nichts zu tun gab.
+
+**Was tatsächlich nie geschah, war das Errichten.** Nach 97 Spieljahren hatte Grünau kein
+Wachhaus und keine Schule, nur die vier Häuser aus dem Seed. Die Rechnung dahinter:
+
+|                                           |                |
+| ----------------------------------------- | -------------- |
+| Wachhaus                                  | 300 Münzen     |
+| Rücklage (`TREASURY_RESERVE_FACTOR` × 60) | 120 Münzen     |
+| nötig für `BUILD_PUBLIC`                  | **420 Münzen** |
+| Stadtkasse Grünau                         | **109 Münzen** |
+
+Und dorthin kam die Kasse nie. `RAID_SHARE` ist ein Viertel, `RAIDS_PER_YEAR` sind zwei —
+die Chronik verzeichnet „Räuber haben die Stadtkasse geplündert — 57 Münzen", also einen
+Höchststand von etwa 228. **Die Stadt konnte sich die Wache nicht leisten, weil ihr das
+Fehlen der Wache das Geld nahm.** `GUARD_EFFECT` hätte die Raubzüge gedrittelt, aber der
+Bau, der das leistet, war genau der, den die Raubzüge unbezahlbar machten.
+
+**Entschieden wurde, die Räuber ganz herauszunehmen** statt an Preisen oder Anteilen zu
+drehen — im Einklang mit dem, was in `OFFENE_PUNKTE.md` (Punkt 23) schon am 16.08.2026
+beschlossen war: Ein Überfall braucht einen Täter, die Zufalls-Raubzüge aus 4.8 sind ein
+Platzhalter. Sie kommen mit dem Beruf zurück, und dann gehört ihnen auch die Wache wieder.
+
+Gegangen sind `raidChance`, `GUARD_EFFECT`, `loot`, `RAID_SHARE`, `RAIDS_PER_YEAR`, der
+Raub-Zweig samt Zielauswahl, `countGuards`, `getSafety` und die Sicherheitszeile im
+Rathaus — die den Bürgern ohnehin ein Verbrechen ankündigte, das niemand beging.
+Geblieben sind drei Dinge: die Ereignisart `RAID`, weil die Chronik alte Raubzüge weiter
+erzählen können muss; `pickTarget`, weil der Brand dieselbe gewichtete Auswahl braucht;
+und das Wachhaus als Vorlage — mit einer Beschreibung, die sagt, dass es zurzeit nichts zu
+bewachen gibt, statt 300 Münzen für nichts zu nehmen.
+
+**Der NPC-Bürgermeister spart nicht mehr darauf.** In `fehlenderBau` stand das Wachhaus an
+erster Stelle; jetzt kommen Schule und Unterkunft. Ein Amt, das auf ein Haus ohne Aufgabe
+spart, wäre die Armutsfalle noch einmal, nur ohne Räuber.
+
+_Fertig, wenn:_ Eine Stadt kann ansparen, was ein öffentlicher Bau kostet. — Erledigt, und
+in Grünau nachzusehen: Die Kasse sollte ab jetzt steigen statt zu pendeln.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

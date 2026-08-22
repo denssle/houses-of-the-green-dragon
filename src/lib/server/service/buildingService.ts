@@ -115,7 +115,11 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			optionId: 7,
 			initialName: 'Wachhaus',
 			type: 'PUBLIC',
-			description: 'Wo die Stadtwache sitzt — bezahlt aus der Stadtkasse.',
+			// **Vorerst ein Haus ohne Aufgabe** (5.40): Es gab die Raubzüge im Zaum, und die
+			// sind aus dem Spiel, bis sie neu gebaut sind. Die Vorlage bleibt stehen, weil sie
+			// mit ihnen zurückkommt — aber sie sagt es, statt 300 Münzen für nichts zu nehmen.
+			description:
+				'Wo die Stadtwache sitzt — bezahlt aus der Stadtkasse. Zurzeit ohne Aufgabe: Räuber gibt es keine.',
 			limited: false,
 			limitedTo: 0,
 

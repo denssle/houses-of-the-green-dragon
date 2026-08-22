@@ -71,12 +71,15 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen    | —                            | erledigt     |
 | 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                              | —                            | erledigt     |
 
+#### Noch zu erfassen:
 
-#### Noch zu erfassen: 
-- man sollte nicht um Minderjährige werben können. 
+- man sollte nicht um Minderjährige werben können.
 - Von der Grundstück Liste sollte man auf die dort gebauten Gebäude gehen können
-- Wenn die Stadt an private Gebäude kommt (z.B. wenn jemand seine Gebäude an die Stadt vererbt) - dann soll die Stadt diese Gebäude asap verkaufen - versteigern. 
-
+- Wenn die Stadt an private Gebäude kommt (z.B. wenn jemand seine Gebäude an die Stadt vererbt) - dann soll die Stadt diese Gebäude asap verkaufen - versteigern.
+- auf der Seite eines Users soll man mit "aus dem Haus" auf die Dynastie springen können
+- "Deine Kammer" in "dein Inventar" übenennen - als Zeichen dass es das persönliches Inventar ist.
+- Seite der Stadt umstrukturieren - öffentliche Gebäude, private Gebäude trennen
+  
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
 `paths.base`, wie bei Festival), mit Phase 4.5a der **Fertigkeitenkatalog** samt
@@ -1742,6 +1745,26 @@ In Grünau war das am 16.08. konkret zu sehen: Alheid Schmied wurde zweimal übe
 (Winter 96, Sommer 97, 11 und 6 Münzen) in einer Stadt aus acht besitzlosen Einwohnern,
 von denen keiner ein Räuber ist. Die Münzen sind niemandem zugefallen, sie sind
 verschwunden — und das in einer Wirtschaft, der ohnehin jede Münze fehlt (Punkt 63).
+
+**Vollzogen mit 5.40: Die Zufalls-Raubzüge sind entfernt.** Den Ausschlag gab ein zweiter
+Blick auf dieselbe Stadt. Grünau stand nach 97 Spieljahren bei 109 Münzen in der Kasse und
+hatte nie ein Wachhaus — `RAID_SHARE` nimmt ein Viertel der Stadtkasse, zweimal im
+Spieljahr, und deckelte sie damit strukturell unter den 420 Münzen, die ein Wachhaus samt
+Rücklage kostet. Die Stadt konnte sich die Wache nicht leisten, weil ihr das Fehlen der
+Wache das Geld nahm. Eine Armutsfalle, aus der sie nicht selbst herausfand: Ohne Kasse
+kein Bau, ohne Bau keine Kasse.
+
+Was gegangen ist: `raidChance`, `GUARD_EFFECT`, `loot`, `RAID_SHARE`, `RAIDS_PER_YEAR`,
+der Raub-Zweig in `hazardService` samt Zielauswahl und die Sicherheitszeile im Rathaus.
+Was geblieben ist: die Ereignisart `RAID`, damit die Chronik alte Raubzüge weiter erzählen
+kann, und das Wachhaus als Vorlage — es sagt jetzt in seiner Beschreibung, dass es zurzeit
+nichts zu bewachen gibt, statt 300 Münzen für nichts zu nehmen. Der NPC-Bürgermeister
+spart nicht mehr darauf: In `fehlenderBau` stand es an erster Stelle, jetzt kommen Schule
+und Unterkunft.
+
+Damit ist dieser Punkt kein Aufräumen mehr, sondern eine Lücke: **In Grünau geschieht
+zurzeit nur noch Feuer.** Was hier entworfen wird — Räuber mit Gesicht, eine Wache mit
+Gegner —, füllt sie.
 
 ### 30. Was NPCs noch nicht tun
 
