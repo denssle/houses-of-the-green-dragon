@@ -3580,6 +3580,39 @@ Logik gezogen und dort geprüft.
 
 _Fertig, wenn:_ Wer nicht bauen kann, erfährt es vor dem Klick. — Erledigt.
 
+**5.55 Ein Würfel, den man festhalten kann.** ✓ (Punkt 54) `selfSustainingEconomy` schlug
+bei 5.10 einmal fehl und lief danach zwanzigmal durch. **Ein Test, der gelegentlich rot
+ist, ist auf Dauer schlimmer als keiner:** Man gewöhnt sich an, ihn noch einmal laufen zu
+lassen — und übersieht das eine Mal, bei dem er recht hatte.
+
+**Der Zufall saß nicht, wo der Punkt ihn vermutete.** Er nannte die Handlungswahl; die ist
+längst frei davon — `npcService` und `npc.logic` enthalten kein `Math.random`, und die
+Dienste, die würfeln (Familie, Unglück, Sterben, Zuzug), nehmen den Würfel seit langem als
+Parameter. Übrig blieb der **Weltaufbau**: `seedWorld` würfelte Startkapital und Anlagen
+der Gründer, und ob in zwanzig Ticks jemand unternimmt, hängt genau daran.
+
+`seedWorld(roll = Math.random)` nimmt ihn jetzt entgegen — dieselbe Bauart wie überall
+sonst. Der Betrieb würfelt wie bisher, die Tests bekommen eine Welt, die sich wiederholen
+lässt.
+
+**Kein fester Wert, sondern eine feste Folge.** `() => 0.5` wäre einfacher, machte aber
+alle Gründer gleich — dieselbe Anlage, dasselbe Geld. Eine Welt ohne Unterschiede ist
+keine Probe für ein Spiel, das von Unterschieden lebt. `seededRoll` (mulberry32, vier
+Zeilen) streut wie ein Würfel und kommt bei gleichem Startwert doch immer gleich heraus.
+Er steht in `src/lib/game/`, weil ihn drei Specs teilen: ein Werkzeug, das nur in einer
+Datei lebt, wird beim zweiten Bedarf kopiert.
+
+**Bei `worldComesAlive` ist es ein Tausch, kein Gewinn**, und das steht dort auch so: Der
+Test prüft ausdrücklich die Welt, „wie `seedWorld` sie anlegt". Mit festem Wurf prüft er
+**eine bestimmte** Stadt, dafür verlässlich. Ob die Welt auch bei anderen Ausgangslagen
+lebt, beantwortet kein Test, sondern ein Messlauf — und `measure` würfelt weiter frei.
+
+Zwei Tests in `seed.spec.ts` halten fest, dass der Würfel wirklich durchgereicht wird:
+gleicher Wurf, gleiche Welt — anderer Wurf, andere Welt. Der zweite ist der wichtigere,
+denn ohne ihn wäre auch eine Attrappe grün, die immer dieselbe Stadt baut.
+
+_Fertig, wenn:_ Derselbe Testlauf ergibt dieselbe Welt. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

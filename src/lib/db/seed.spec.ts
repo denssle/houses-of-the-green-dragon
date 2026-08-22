@@ -7,6 +7,7 @@ import {
 	STADTKASSE_BEI_WELTBEGINN,
 	WORLD_STARTS_AT_TICK
 } from '$lib/db/seed';
+import { seededRoll } from '$lib/game/testRoll';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
@@ -119,4 +120,48 @@ describe('Weltaufbau', () => {
 
 		expect(await Region.count()).toBe(vorher);
 	});
+});
+
+describe('Der Würfel des Weltaufbaus', () => {
+	/**
+	 * **Punkt 54.** Zwei Größen werden hier gewürfelt: das Startkapital der Gründer und
+	 * ihre Anlagen. Beide entscheiden mit, ob in den ersten Ticks jemand unternimmt — und
+	 * damit über den Ausgang von Tests, die genau das prüfen. Seit 5.55 nimmt `seedWorld`
+	 * den Würfel entgegen; dieser Test hält fest, dass er auch wirklich durchgereicht wird.
+	 */
+	async function abdruck(): Promise<string> {
+		const leute = await Character.findAll({ order: [['firstName', 'ASC']] });
+		return leute
+			.map((p) => `${p.dataValues.firstName} ${p.dataValues.money} ${p.dataValues.greed}`)
+			.join('|');
+	}
+
+	it('ergibt bei gleichem Wurf dieselbe Welt', async () => {
+		await sequelize.sync();
+		await Character.destroy({ where: {} });
+		await World.destroy({ where: { id: WORLD_ID } });
+		await seedWorld(seededRoll(54));
+		const erste: string = await abdruck();
+
+		await Character.destroy({ where: {} });
+		await World.destroy({ where: { id: WORLD_ID } });
+		await seedWorld(seededRoll(54));
+
+		expect(await abdruck()).toBe(erste);
+	}, 120_000);
+
+	it('ergibt bei anderem Wurf eine andere Welt', async () => {
+		// Sonst wäre der Würfel eine Attrappe: Eine Welt, die immer gleich anfängt, ist
+		// keine Probe für ein Spiel, das von Unterschieden lebt.
+		await Character.destroy({ where: {} });
+		await World.destroy({ where: { id: WORLD_ID } });
+		await seedWorld(seededRoll(54));
+		const eine: string = await abdruck();
+
+		await Character.destroy({ where: {} });
+		await World.destroy({ where: { id: WORLD_ID } });
+		await seedWorld(seededRoll(4711));
+
+		expect(await abdruck()).not.toBe(eine);
+	}, 120_000);
 });

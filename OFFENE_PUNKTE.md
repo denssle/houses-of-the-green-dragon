@@ -29,7 +29,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                              | laufend                      | Entwurf      |
 | 74  | Der Auftrag an Tagelöhner — privates Renovieren gegen Lohn                           | Punkt 66 / 33                | Entwurf      |
 | 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                    | Punkte 15, 20, 51            | Entwurf      |
-| 54  | Ein Test, der würfelt — er kann durchlaufen, ohne dass etwas geschah                 | laufend                      | Befund       |
+| 54  | Ein Test, der würfelt — **erledigt mit 5.55**                                        | —                            | erledigt     |
 | 75  | Die Testläufe dauern zu lange — jede Änderung wartet darauf                          | laufend                      | Befund       |
 | 76  | Niemand kann sich einen Ausbau leisten — 86 Münzen gegen 340                         | dem nächsten Messlauf        | Befund       |
 | 78  | Werben kennt kein Alter — **behoben mit 5.41**                                       | —                            | erledigt     |
@@ -1639,7 +1639,7 @@ Offen ist der Zuschnitt: Was steht auf so einer Seite, was davon sieht nur der B
 und was ist für jeden Einwohner sichtbar. Die Chronik ist der Maßstab — sie zeigt, dass
 öffentlich Sichtbares dem Spiel guttut.
 
-### 54. Ein Test, der würfelt
+### 54. Ein Test, der würfelt — erledigt mit 5.55
 
 `selfSustainingEconomy.spec.ts` → „lässt darin auch arbeiten" schlug bei 5.10 einmal fehl
 und lief danach zwanzigmal durch. Er lässt zwanzig Ticks NPC-Entscheidungen laufen und
@@ -1651,6 +1651,11 @@ Handlungswahl selbst nicht.
 sich an, ihn noch einmal laufen zu lassen — und übersieht das eine Mal, bei dem er recht
 hatte. Der Weg dahin ist derselbe wie bei den Anlagen: den Zufall hineinreichen statt ihn
 im Dienst zu ziehen, damit der Test ihn festhalten kann.
+
+**Erledigt mit 5.55** — und der Zufall saß nicht in der Handlungswahl, wie hier vermutet:
+`npcService` und `npc.logic` enthalten kein `Math.random`. Er saß im **Weltaufbau**.
+`seedWorld` nimmt den Würfel jetzt entgegen, `seededRoll` liefert eine feste Folge, und
+drei Specs bauen damit eine Welt, die sich wiederholen lässt.
 
 ### 15. Weltinhalte: Berufe, Waren und Rezepte
 

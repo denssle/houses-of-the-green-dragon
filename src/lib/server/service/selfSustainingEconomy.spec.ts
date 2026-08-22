@@ -9,6 +9,7 @@ import { Plot } from '$lib/db/model/plot';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { seedWorld } from '$lib/db/seed';
+import { seededRoll } from '$lib/game/testRoll';
 import * as npcService from '$lib/server/service/npcService';
 
 /**
@@ -29,12 +30,18 @@ describe('Die Wirtschaft trägt sich selbst', () => {
 
 	beforeAll(async () => {
 		await sequelize.sync();
-		await seedWorld();
+		// **Eine Welt, die sich wiederholen lässt** (Punkt 54). Dieser Test schlug bei 5.10
+		// einmal fehl und lief danach zwanzigmal durch: `seedWorld` würfelte Startkapital
+		// und Anlagen der Gründer, und ob in zwanzig Ticks jemand unternimmt, hing daran
+		// mit. Ein Test, der gelegentlich rot ist, ist auf Dauer schlimmer als keiner — man
+		// gewöhnt sich an, ihn noch einmal laufen zu lassen, und übersieht das eine Mal, bei
+		// dem er recht hatte.
+		await seedWorld(seededRoll(54));
 
-		// Startkapital **und** Unternehmergeist, beides ausdrücklich gesetzt: Die Anlagen
-		// der Gründer würfelt `seedWorld` mit `Math.random`, und ob zufällig jemand
-		// ehrgeizig genug ist, wäre die Frage nicht wert — geprüft wird, ob ein
-		// Unternehmungslustiger auch unternimmt, nicht ob der Würfel einen hervorbringt.
+		// Startkapital **und** Unternehmergeist bleiben trotzdem ausdrücklich gesetzt:
+		// Geprüft wird, ob ein Unternehmungslustiger auch unternimmt — nicht, ob die feste
+		// Folge zufällig einen hervorbringt. Die übrigen Anlagen (Mut, Gier, Geselligkeit)
+		// kommen jetzt aus dem Würfel oben und sind damit in jedem Lauf dieselben.
 		await Character.update({ money: 400, ambition: 60, diligence: 60 }, { where: { role: 'NPC' } });
 
 		vorher = await Building.count({ where: { ownerType: 'CHARACTER' } });
@@ -77,7 +84,9 @@ describe('Die Wirtschaft trägt sich selbst', () => {
 describe('Die Bevölkerung baut sich ihr Dach', () => {
 	beforeAll(async () => {
 		await sequelize.sync();
-		await seedWorld();
+		// Dieselbe feste Welt wie oben (Punkt 54) — ein anderer Startwert, damit die beiden
+		// Blöcke nicht dieselbe Stadt prüfen.
+		await seedWorld(seededRoll(140));
 
 		// Verheiratet, wohlhabend, tatkräftig — und in einer Unterkunft, die voll ist.
 		// Geprüft wird, ob ein Versorgter für seine Familie baut, nicht ob der Würfel ihn

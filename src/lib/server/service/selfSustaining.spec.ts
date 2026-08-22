@@ -6,6 +6,7 @@ import { Character } from '$lib/db/model/character';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
+import { seededRoll } from '$lib/game/testRoll';
 import * as electionService from '$lib/server/service/electionService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as familyService from '$lib/server/service/familyService';
@@ -66,7 +67,10 @@ describe('Die Welt trägt sich selbst', () => {
 
 	beforeAll(async () => {
 		await sequelize.sync();
-		await seedWorld();
+		// **Auch der Weltaufbau würfelt** (Punkt 54). Der Lauf darunter benutzt längst einen
+		// gesteuerten Zufall; die Ausgangslage tat es nicht, und damit prüfte dieser Test
+		// jedes Mal eine andere Stadt.
+		await seedWorld(seededRoll(42));
 		amAnfang = await lebende();
 
 		// Fünf Spieljahre ohne einen einzigen Spieler.

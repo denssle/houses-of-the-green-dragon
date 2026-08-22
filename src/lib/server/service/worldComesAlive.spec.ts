@@ -7,6 +7,7 @@ import { Plot } from '$lib/db/model/plot';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { seedWorld } from '$lib/db/seed';
+import { seededRoll } from '$lib/game/testRoll';
 import * as npcService from '$lib/server/service/npcService';
 import type { NpcAction } from '$lib/game/npc.logic';
 
@@ -42,7 +43,13 @@ describe('Die Welt aus eigener Kraft', () => {
 
 	beforeAll(async () => {
 		await sequelize.sync();
-		await seedWorld();
+		// **Fest gewürfelt** (Punkt 54), und das verdient eine Erklärung: Dieser Test prüft
+		// ausdrücklich die Welt, „wie `seedWorld` sie anlegt" — mit `Math.random` prüfte er
+		// jedes Mal eine andere und konnte deshalb gelegentlich rot sein, ohne dass sich
+		// etwas geändert hätte. Er prüft jetzt **eine bestimmte** Stadt, dafür verlässlich.
+		// Ob die Welt auch bei anderen Ausgangslagen lebt, beantwortet kein Test, sondern
+		// ein Messlauf (`measure`), der weiter frei würfelt.
+		await seedWorld(seededRoll(96));
 
 		const start: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
 		for (let i = 0; i < TICKS; i++) {

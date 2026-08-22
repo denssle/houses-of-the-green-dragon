@@ -147,7 +147,20 @@ const GRUENDER_FLEISS = 45;
 const STARTKAPITAL_MIN = 20;
 const STARTKAPITAL_MAX = 90;
 
-export async function seedWorld(): Promise<boolean> {
+/**
+ * Der Weltaufbau — mit einem Würfel, den man festhalten kann (Punkt 54).
+ *
+ * **Warum der Parameter.** Zwei Größen werden hier gewürfelt: das Startkapital der Gründer
+ * und ihre Anlagen. Beide entscheiden mit darüber, ob in den ersten Ticks jemand
+ * unternimmt — und damit über den Ausgang von Tests, die genau das prüfen. Der Test
+ * `selfSustainingEconomy` schlug bei 5.10 einmal fehl und lief danach zwanzigmal durch;
+ * ein Test, der gelegentlich rot ist, ist auf Dauer schlimmer als keiner, weil man sich
+ * angewöhnt, ihn noch einmal laufen zu lassen.
+ *
+ * Wer nichts übergibt, bekommt `Math.random` — der Betrieb würfelt wie bisher. Wer eine
+ * feste Folge übergibt, bekommt jedes Mal dieselbe Welt.
+ */
+export async function seedWorld(roll: () => number = Math.random): Promise<boolean> {
 	if (await World.findByPk(WORLD_ID)) {
 		return false;
 	}
@@ -249,13 +262,12 @@ export async function seedWorld(): Promise<boolean> {
 			RegionId: stadtId,
 			DynastyId: hausId,
 			// Was einer mitbringt — gewürfelt, damit die Stadt ungleich anfängt.
-			money:
-				STARTKAPITAL_MIN + Math.floor(Math.random() * (STARTKAPITAL_MAX - STARTKAPITAL_MIN + 1)),
+			money: STARTKAPITAL_MIN + Math.floor(roll() * (STARTKAPITAL_MAX - STARTKAPITAL_MIN + 1)),
 			// Die Anlagen gewürfelt — sie sind die erste Generation und haben niemanden,
 			// von dem sie etwas erben könnten. Ehrgeiz und Fleiß der drei Gründer stehen
 			// allerdings fest: Ob die Stadt je einen Betrieb bekommt, darf nicht am Würfel
 			// hängen.
-			...randomPersonality(Math.random),
+			...randomPersonality(roll),
 			...(person.unternehmend ? { ambition: GRUENDER_EHRGEIZ, diligence: GRUENDER_FLEISS } : {})
 		});
 	}
