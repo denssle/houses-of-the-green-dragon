@@ -657,19 +657,29 @@ export async function getBuildingRegionId(buildingId: string): Promise<string | 
 }
 
 /** Alle Gebäude einer Region — die Häuserzeile der Stadt. */
-export async function getBuildingsInRegion(regionId: string): Promise<Building[]> {
+export async function getBuildingsInRegion(regionId: string, tick?: number): Promise<Building[]> {
 	const alle = await BuildingModel.findAll({
 		include: [{ model: PlotModel, as: 'plot', where: { RegionId: regionId }, required: true }]
 	});
-	return lebende(alle, await worldService.currentTick());
+	return lebende(alle, tick ?? (await worldService.currentTick()));
 }
 
-/** Was einem Charakter gehört. */
-export async function getBuildingsOfCharacter(characterId: string): Promise<Building[]> {
+/**
+ * Was einem Charakter gehört.
+ *
+ * **Die Weltzeit darf mitgegeben werden** (Punkt 67). Wer sie kennt — die NPC-Schleife
+ * bekommt sie als Parameter —, spart die Abfrage; wer sie nicht kennt, schlägt sie wie
+ * bisher nach. Gemessen war das der größte Einzelposten auf `worlds`: zwei Abfragen je
+ * Einwohner und Tick, allein aus dieser und der Regionsliste.
+ */
+export async function getBuildingsOfCharacter(
+	characterId: string,
+	tick?: number
+): Promise<Building[]> {
 	const alle = await BuildingModel.findAll({
 		where: { OwnerCharacterId: characterId, ownerType: 'CHARACTER' }
 	});
-	return lebende(alle, await worldService.currentTick());
+	return lebende(alle, tick ?? (await worldService.currentTick()));
 }
 
 /** Wendet die Ruinen-Prüfung auf eine ganze Liste an. */

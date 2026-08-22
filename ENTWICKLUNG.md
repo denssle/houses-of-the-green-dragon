@@ -3431,6 +3431,40 @@ nachgeschlagen wird.
 _Fertig, wenn:_ Die auffälligsten Nester sind weg und die Zahl ist kleiner. — Erledigt.
 **Als Nächstes** der Tick als Parameter statt als Abfrage, dann die Stadtlage.
 
+**5.50 Die Weltzeit wird gereicht, nicht gesucht.** ✓ (Punkt 67) Einundfünfzig Abfragen je
+Tick gingen auf `worlds` — auf eine Zahl, die sich innerhalb eines Ticks nie ändert.
+
+**Gemessen statt geraten, wer fragt.** Ein Stapelzähler in `currentTick()` nannte die
+Verursacher: `getBuildingsInRegion` (16/Tick), `getBuildingsOfCharacter` (16) und
+`getCharacter` (8) — zusammen vier Fünftel. Drei Funktionen, nicht dreiundvierzig.
+
+Sie nehmen die Weltzeit jetzt **optional** entgegen, wie sie längst eine Transaktion
+entgegennehmen: Wer sie kennt, gibt sie mit; wer nicht, schlägt sie nach. Die NPC-Schleife
+kennt sie — sie bekommt den Tick als Parameter —, also gibt sie ihn weiter. Kein
+Zwischenspeicher, der veralten könnte, und für jede Seite ändert sich nichts.
+
+|           | Abfragen je Tick | ms je Tick |
+| --------- | ---------------- | ---------- |
+| vor 5.48  | 801              | 1031       |
+| nach 5.49 | 571              | 689        |
+| nach 5.50 | **541**          | **625**    |
+
+Zusammen **ein Drittel weniger Abfragen** und knapp vierzig Prozent weniger Zeit.
+
+`worlds` ist dabei **nicht verschwunden, sondern halbiert**: 26 Abfragen je Tick bleiben
+übrig, aus `getBuilding`, `fuerLohnHerrichten`, `moveInto`, `courtSomeone` und `propose`.
+Die stehen nicht in der Lageaufnahme, sondern in den **Handlungen** — und die sind der
+Grund, warum der Tick dort nicht so leicht durchzureichen ist: Ihre Türen benutzen auch
+Spielerseiten, die ihn nicht kennen. Der nächste Schritt dort wäre, ihn wie hier optional
+zu machen.
+
+**Was bleibt:** `characters` (121), `buildings` (111), `skills` (52) und die
+Beziehungstabellen (je 36). Das sind keine Nester mehr, sondern die Breite der Aufnahme
+selbst — dafür ist die Stadtlage je Tick der Entwurf, mit der Fußangel, dass NPCs
+innerhalb eines Ticks handeln.
+
+_Fertig, wenn:_ Die Weltzeit steht nicht mehr in der Messung. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

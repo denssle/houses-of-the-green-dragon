@@ -210,11 +210,17 @@ export async function getCharacterForUser(userId: string): Promise<Character | u
 	return convertToCharacter(gefunden.dataValues);
 }
 
-export async function getCharacter(characterId: string): Promise<Character | undefined> {
+export async function getCharacter(
+	characterId: string,
+	tick?: number
+): Promise<Character | undefined> {
 	const gefunden = await CharacterModel.findByPk(characterId);
 	if (!gefunden) return undefined;
 
-	await nachwachsenLassen(gefunden, await worldService.currentTick());
+	// **Die Weltzeit darf mitgegeben werden** (Punkt 67): Die NPC-Schleife kennt sie und
+	// spart damit eine Abfrage je Einwohner und Tick. Wer sie nicht kennt — jede Seite —,
+	// schlägt sie wie bisher nach.
+	await nachwachsenLassen(gefunden, tick ?? (await worldService.currentTick()));
 	return convertToCharacter(gefunden.dataValues);
 }
 

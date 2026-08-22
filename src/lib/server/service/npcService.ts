@@ -486,7 +486,7 @@ async function lageAufnehmen(
 	// von der letzten Handlung; ein NPC, der seit Stunden nichts getan hat, stünde darin
 	// bei null und käme nie wieder zum Zug. `getCharacter` schreibt den Zuwachs fort,
 	// genau wie beim Aufruf einer Spielerseite — und das ist der Punkt: dieselbe Tür.
-	const geladen = await characterService.getCharacter(npcId);
+	const geladen = await characterService.getCharacter(npcId, tick);
 	const npc = geladen ? await Character.findByPk(npcId) : null;
 	if (!npc) return undefined;
 
@@ -506,7 +506,7 @@ async function lageAufnehmen(
 	 * veralten — anders als eine Stadtlage über den ganzen Tick, die nach dem ersten
 	 * gebauten Haus falsch wäre.
 	 */
-	const haeuserDerStadt = await buildingService.getBuildingsInRegion(werte.RegionId);
+	const haeuserDerStadt = await buildingService.getBuildingsInRegion(werte.RegionId, tick);
 
 	const vorrat = await needService.getStock(npcId);
 	const essbar: number = vorrat
@@ -519,7 +519,7 @@ async function lageAufnehmen(
 	const trank = await tradeService.cheapestOffer(werte.RegionId, 'TONIC', npcId);
 
 	// Was er selbst besitzt und betreibt (4.13).
-	const eigene = await buildingService.getBuildingsOfCharacter(npcId);
+	const eigene = await buildingService.getBuildingsOfCharacter(npcId, tick);
 	const werkstatt = eigene.find(
 		(haus) => buildingService.getBuildingOption(haus.optionId)?.type === 'CRAFT'
 	);

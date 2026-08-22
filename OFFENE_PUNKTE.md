@@ -1586,11 +1586,11 @@ aber schon, und das ist inzwischen das Werkzeug, mit dem hier Befunde entstehen.
 Das sind **rund hundert Abfragen je NPC-Entscheidung**, und bei SQLite im Arbeitsspeicher
 geht die Tickzeit fast vollständig in sie hinein — gut eine Millisekunde je Abfrage.
 
-**Bemerkenswert ist `worlds`: sechzig Abfragen je Tick.** Die Weltzeit ändert sich
-innerhalb eines Ticks nie, wird aber von 43 Stellen in den Diensten einzeln nachgeschlagen
-(`worldService.currentTick()`). Ein Zwischenspeicher verbietet sich, weil Tests die Uhr
-direkt in der Datenbank stellen — der Tick gehört stattdessen durchgereicht, wie es
-`actForNpcs` schon tut.
+~~**Bemerkenswert ist `worlds`: sechzig Abfragen je Tick.**~~ **Erledigt mit 5.50.** Ein
+Stapelzähler nannte drei Verursacher statt dreiundvierzig: `getBuildingsInRegion`,
+`getBuildingsOfCharacter` und `getCharacter`. Sie nehmen die Weltzeit jetzt optional
+entgegen, wie sie längst eine Transaktion entgegennehmen — kein Zwischenspeicher, der
+veralten könnte.
 
 **Mit 5.49 sind es 571 Abfragen je Tick** (689 ms) — die Pachtflächen und die
 Verwandtschaft holten je Fläche und je Person einzeln, was sich in einem Zug holen lässt.
