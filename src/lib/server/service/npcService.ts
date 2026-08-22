@@ -3,6 +3,7 @@ import { CAMPAIGN_TICKS, npcChoice } from '$lib/game/election.logic';
 import { Op } from 'sequelize';
 import { levelOf, upgradePrice } from '$lib/model/buildingTemplate';
 import { Building } from '$lib/db/model/building';
+import type { Building as Haus } from '$lib/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
 import {
@@ -492,6 +493,21 @@ async function lageAufnehmen(
 	const werte = npc.dataValues;
 	const brot = getItemTemplate('BREAD')!;
 
+	/**
+	 * **Die Häuser der Stadt, einmal je Lageaufnahme** (Punkt 67).
+	 *
+	 * Bis 5.48 holte sich jeder Helfer die Zeile selbst — der freie Arbeitsplatz, die
+	 * fehlende Werkstatt, der Marktplatz —, also dreimal dieselbe Abfrage je NPC und je
+	 * Tick. Gemessen wurden 801 Abfragen für einen Tick mit acht Einwohnern, davon fast
+	 * zweihundert auf `buildings`.
+	 *
+	 * **Ein Parameter, kein Zwischenspeicher**: Die Liste lebt genau so lange wie diese
+	 * eine Aufnahme. Innerhalb einer Aufnahme handelt niemand, also kann sie nicht
+	 * veralten — anders als eine Stadtlage über den ganzen Tick, die nach dem ersten
+	 * gebauten Haus falsch wäre.
+	 */
+	const haeuserDerStadt = await buildingService.getBuildingsInRegion(werte.RegionId);
+
 	const vorrat = await needService.getStock(npcId);
 	const essbar: number = vorrat
 		.filter((posten) => posten.nourishment)
@@ -513,7 +529,7 @@ async function lageAufnehmen(
 	const eigenePacht = flaechen.find((flaeche) => flaeche.leasedByMe);
 	const freieFlaeche = flaechen.find((flaeche) => !flaeche.leased && flaeche.resourceType);
 	const zuVerkaufen = werkstatt ? await unverkauftes(npcId, werkstatt) : undefined;
-	const werkstattLuecke = werkstatt ? undefined : await fehlendeWerkstatt(werte.RegionId, npcId);
+	const werkstattLuecke = werkstatt ? undefined : await fehlendeWerkstatt(haeuserDerStadt, npcId);
 
 	// Ein eigenes Dach und was daran hängt (4.14).
 	const wohnhaus = eigene.find(
@@ -573,7 +589,7 @@ async function lageAufnehmen(
 	const rohUeberschuss = zuVerkaufen
 		? undefined
 		: await marktUeberschuss(npcId, werkstatt, [...materialBedarf, ...werkstattMaterial]);
-	const marktplatz = rohUeberschuss ? await marktplatzIn(werte.RegionId) : undefined;
+	const marktplatz = rohUeberschuss ? marktplatzIn(haeuserDerStadt) : undefined;
 	const standgeld: number = rohUeberschuss ? await lawService.rate(werte.RegionId, 'STALL_FEE') : 0;
 	// **Wer das Standgeld nicht hat, hat keinen Stand.** Ohne diese Frage wählte ein
 	// mittelloser NPC `SELL` in jedem Tick aufs Neue, die Handlung scheiterte am
@@ -588,7 +604,7 @@ async function lageAufnehmen(
 	const wahlLaeuft: boolean =
 		wahlzettel !== undefined && !wahlzettel.iVoted && wahlzettel.candidates.length > 0;
 
-	const arbeitsplatz = await freierArbeitsplatz(werte.RegionId, npcId);
+	const arbeitsplatz = await freierArbeitsplatz(haeuserDerStadt, npcId);
 	const stelle = await employmentService.getJobOf(npcId);
 	// Wer schon eine Stelle hat, sieht sich nicht um — ein NPC, der jede Stunde den
 	// Arbeitgeber wechselt, wäre kein Handwerker, sondern ein Flattermann.
@@ -714,10 +730,10 @@ async function lageAufnehmen(
  * Genommen wird der schlechteste Bau: Wo es am nötigsten ist, wird zuerst gearbeitet.
  */
 async function freierArbeitsplatz(
-	regionId: string,
+	haeuser: Haus[],
 	characterId: string
 ): Promise<string | undefined> {
-	const zuHaben = (await buildingService.getBuildingsInRegion(regionId)).filter(
+	const zuHaben = haeuser.filter(
 		(haus) =>
 			haus.condition < CONDITION_MAX &&
 			haus.ownerCharacterId !== characterId &&
@@ -844,10 +860,10 @@ function menge(vorrat: { itemId: string; quantity: number }[], itemId: string): 
  * Bei gleichem Können bleibt der Preis der Ausschlag: Wer wenig hat, fängt klein an.
  */
 export async function fehlendeWerkstatt(
-	regionId: string,
+	haeuser: Haus[],
 	characterId?: string
 ): Promise<{ optionId: number; price: number } | undefined> {
-	const vorhanden = await buildingService.getBuildingsInRegion(regionId);
+	const vorhanden = haeuser;
 
 	const kandidaten = buildingService
 		.getBuildingOptions()
@@ -911,8 +927,7 @@ async function unverkauftes(
 }
 
 /** Der Marktplatz der Stadt — der einzige Laden, der niemandem gehört. */
-async function marktplatzIn(regionId: string): Promise<string | undefined> {
-	const haeuser = await buildingService.getBuildingsInRegion(regionId);
+function marktplatzIn(haeuser: Haus[]): string | undefined {
 	return haeuser.find((haus) => haus.optionId === tradeService.MARKET_OPTION_ID)?.id;
 }
 

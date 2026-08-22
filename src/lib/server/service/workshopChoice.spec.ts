@@ -7,6 +7,7 @@ import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
 import { Skill } from '$lib/db/model/skill';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as npcService from '$lib/server/service/npcService';
 import * as skillService from '$lib/server/service/skillService';
 import { yearsToTicks } from '$lib/game/time';
@@ -96,7 +97,10 @@ describe('Welche Werkstatt einer baut', () => {
 		// Wer wenig hat, fängt klein an.
 		const neuling = await person('Neuling');
 
-		const wahl = await npcService.fehlendeWerkstatt(stadtId, neuling);
+		const wahl = await npcService.fehlendeWerkstatt(
+			await buildingService.getBuildingsInRegion(stadtId),
+			neuling
+		);
 
 		expect(wahl?.optionId).toBe(ZIMMEREI);
 	});
@@ -112,7 +116,10 @@ describe('Welche Werkstatt einer baut', () => {
 		const baeckerin = await person('Bäckerin');
 		await skillService.addPractice(baeckerin, 'BAKING', 500);
 
-		const wahl = await npcService.fehlendeWerkstatt(stadtId, baeckerin);
+		const wahl = await npcService.fehlendeWerkstatt(
+			await buildingService.getBuildingsInRegion(stadtId),
+			baeckerin
+		);
 
 		expect(wahl?.optionId).toBe(MUEHLE);
 		expect(wahl?.price).toBeGreaterThan(180);
@@ -125,7 +132,10 @@ describe('Welche Werkstatt einer baut', () => {
 		await skillService.addPractice(baeckerin, 'BAKING', 500);
 		await hausMitGrund(MUEHLE, baeckerin);
 
-		const wahl = await npcService.fehlendeWerkstatt(stadtId, baeckerin);
+		const wahl = await npcService.fehlendeWerkstatt(
+			await buildingService.getBuildingsInRegion(stadtId),
+			baeckerin
+		);
 
 		expect(wahl?.optionId).toBe(BACKHAUS);
 	});
@@ -136,7 +146,10 @@ describe('Welche Werkstatt einer baut', () => {
 		await skillService.addPractice(vielseitig, 'BAKING', 500);
 		await skillService.addPractice(vielseitig, 'CONSTRUCTION', 500);
 
-		const wahl = await npcService.fehlendeWerkstatt(stadtId, vielseitig);
+		const wahl = await npcService.fehlendeWerkstatt(
+			await buildingService.getBuildingsInRegion(stadtId),
+			vielseitig
+		);
 
 		expect(wahl?.optionId).toBe(ZIMMEREI);
 	});
@@ -150,7 +163,10 @@ describe('Welche Werkstatt einer baut', () => {
 		await hausMitGrund(MUEHLE, baeckerin);
 		await hausMitGrund(BACKHAUS, baeckerin);
 
-		const wahl = await npcService.fehlendeWerkstatt(stadtId, baeckerin);
+		const wahl = await npcService.fehlendeWerkstatt(
+			await buildingService.getBuildingsInRegion(stadtId),
+			baeckerin
+		);
 
 		expect(wahl?.optionId).not.toBe(MUEHLE);
 		expect(wahl?.optionId).not.toBe(BACKHAUS);

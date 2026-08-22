@@ -1568,6 +1568,37 @@ bereits siebenhundertmal langsamer als der Herzschlag, den er bedienen soll. Sol
 Welt stündlich tickt, fällt es nicht auf — für jeden Messlauf über mehrere Spieljahre
 aber schon, und das ist inzwischen das Werkzeug, mit dem hier Befunde entstehen.
 
+**Nachgemessen am 22.08.2026 — es sind die Abfragen, nicht die Rechenzeit.** Ein Zähler auf
+`sequelize.options.logging` über fünf Ticks einer Acht-Einwohner-Stadt:
+
+| Tabelle                                  | Abfragen je Tick |
+| ---------------------------------------- | ---------------- |
+| `buildings`                              | 196              |
+| `characters`                             | 183              |
+| `leases`                                 | 80               |
+| `worlds`                                 | 60               |
+| `skills`                                 | 56               |
+| `relationships` + `dynastyRelationships` | 68               |
+| `shopOffers`                             | 32               |
+| `plots`                                  | 30               |
+| **gesamt**                               | **801**          |
+
+Das sind **rund hundert Abfragen je NPC-Entscheidung**, und bei SQLite im Arbeitsspeicher
+geht die Tickzeit fast vollständig in sie hinein — gut eine Millisekunde je Abfrage.
+
+**Bemerkenswert ist `worlds`: sechzig Abfragen je Tick.** Die Weltzeit ändert sich
+innerhalb eines Ticks nie, wird aber von 43 Stellen in den Diensten einzeln nachgeschlagen
+(`worldService.currentTick()`). Ein Zwischenspeicher verbietet sich, weil Tests die Uhr
+direkt in der Datenbank stellen — der Tick gehört stattdessen durchgereicht, wie es
+`actForNpcs` schon tut.
+
+**Ein erster Versuch mit 5.48 brachte zwei Prozent.** Die Häuserzeile der Stadt wird jetzt
+einmal je Lageaufnahme geholt statt dreimal (freier Arbeitsplatz, fehlende Werkstatt,
+Marktplatz). Das ist richtig und reicht nicht: Die verbleibenden 190 `buildings`-Abfragen
+stecken in den **Diensten**, die `lageAufnehmen` ruft — jeder holt sich, was er braucht,
+selbst. Wer hier weiterkommen will, muss an die Stadtlage je Tick oder an die Dienste, nicht
+an einzelne Aufrufe.
+
 ### 64. Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite
 
 Zurzeit ist ein Gebäude eine Zeile in einer Liste, und eine gepachtete Fläche steht als

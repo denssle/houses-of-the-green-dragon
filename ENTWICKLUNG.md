@@ -3377,6 +3377,31 @@ Fall ohne Ausfall. Aufgefallen ist es nur, weil ein Test genau auf der Schwelle 
 überhaupt noch Platz hat. Ist sie voll, kommt niemand mehr, ganz ohne Würfel — das ist die
 zweite mögliche Antwort auf dieselbe Frage.
 
+**5.48 Nachgemessen, wohin die Tickzeit geht.** ✓ (Punkt 67) Der Befund vom 16.08. nannte
+700 ms je Tick bei acht Einwohnern und vermutete die Ursache in `lageAufnehmen`. Ein
+Zähler auf `sequelize.options.logging` beziffert sie jetzt: **801 Abfragen je Tick**, rund
+hundert je NPC-Entscheidung. Bei SQLite im Arbeitsspeicher geht die Zeit fast vollständig
+dorthin — es ist kein Rechen-, sondern ein Abfrageproblem.
+
+Die Verteilung steht in `OFFENE_PUNKTE.md`; auffällig sind `buildings` (196) und
+`worlds` (60). Die Weltzeit ändert sich innerhalb eines Ticks nie und wird trotzdem von 43
+Stellen einzeln nachgeschlagen.
+
+**Der erste Eingriff brachte zwei Prozent**, und das gehört genauso festgehalten wie ein
+Erfolg: Die Häuserzeile der Stadt wird jetzt einmal je Lageaufnahme geholt statt dreimal
+(freier Arbeitsplatz, fehlende Werkstatt, Marktplatz). **Ein Parameter, kein
+Zwischenspeicher** — die Liste lebt genau so lange wie die Aufnahme, und innerhalb einer
+Aufnahme handelt niemand, also kann sie nicht veralten. Eine Stadtlage über den ganzen
+Tick hätte diese Eigenschaft nicht: Nach dem ersten gebauten Haus wäre sie falsch.
+
+Dass es so wenig brachte, sagt, wo die Last wirklich liegt — nicht in den Aufrufen aus
+`lageAufnehmen`, sondern in den **Diensten** dahinter, die sich jeder selbst holen, was
+sie brauchen.
+
+_Fertig, wenn:_ Die Zahl steht, statt geschätzt zu werden. — Erledigt. **Als Nächstes**
+liegt der Tick an: durchreichen statt nachschlagen, wie es `actForNpcs` schon tut. Das
+sind mechanische 8 %, und danach ist die Stadtlage dran.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird
