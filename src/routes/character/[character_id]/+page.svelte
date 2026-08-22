@@ -26,6 +26,7 @@
 	<dt>Alter</dt>
 	<dd>
 		{data.age} Jahre
+		<small>— geboren im {data.born.season} {data.born.year}</small>
 		{#if data.mortal && data.diedInYear === null}
 			<i>— die Jahre zählen</i>
 		{/if}

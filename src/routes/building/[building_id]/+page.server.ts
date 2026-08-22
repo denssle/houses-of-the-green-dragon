@@ -1,6 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as buildingService from '$lib/server/service/buildingService';
+import * as chronicleService from '$lib/server/service/chronicleService';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
 import * as plotService from '$lib/server/service/plotService';
 import type { BuildingAction } from '$lib/model/buildingAction';
@@ -37,7 +38,8 @@ import {
 	buildingCostFactor,
 	type Season,
 	seasonOf,
-	SEASON_NAMES
+	SEASON_NAMES,
+	yearOf
 } from '$lib/game/time';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -75,8 +77,18 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		freiePlaetze !== null &&
 		freiePlaetze > 0;
 
+	// **Wann es errichtet wurde** (Punkt 62) — aus der Chronik, nicht aus einer neuen
+	// Spalte: Der Bau steht dort seit jeher. Wo nichts steht, gab es den Bau nie, weil das
+	// Haus mit der Welt entstanden ist.
+	const gebaut = (await chronicleService.getChronicle({ buildingId: building.id, limit: 50 })).find(
+		(eintrag) => eintrag.kind === 'BUILDING_BUILT'
+	);
+
 	return {
 		building,
+		built: gebaut
+			? { season: SEASON_NAMES[seasonOf(gebaut.tick)], year: yearOf(gebaut.tick) }
+			: undefined,
 		option,
 		plot: grundstueck,
 		mine: gehoertMir,

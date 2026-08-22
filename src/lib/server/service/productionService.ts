@@ -233,7 +233,13 @@ export interface LeasableArea {
 }
 
 export async function getAreas(characterId: string): Promise<LeasableArea[]> {
-	const flaechen = await Plot.findAll({ where: { type: 'RESOURCE' } });
+	// **Geordnet, weil man daraus wählt** (Punkt 60). Vorher stand da Mühlenfeld 1,
+	// Kräuterwiese, Schafweide 2, Eichwald 1 — die Reihenfolge der Datenbank, also keine.
+	// Nach der Adresse heißt: nach Ort und darin nach Nummer, so wie eine Gasse zählt.
+	const flaechen = await Plot.findAll({
+		where: { type: 'RESOURCE' },
+		order: [['address', 'ASC']]
+	});
 	if (flaechen.length === 0) return [];
 
 	// **Zwei Abfragen statt zwei je Fläche** (Punkt 67). Vorher lief je Fläche ein eigenes

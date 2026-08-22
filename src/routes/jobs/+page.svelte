@@ -35,7 +35,31 @@
 	<section>
 		<h3>Offene Stellen</h3>
 		{#if data.jobs.length === 0}
-			<p><i>Niemand sucht gerade Leute. Bleibt die Tagelöhnerei in der städtischen Schmiede.</i></p>
+			<!--
+				**Wer den Ort nennt, soll hinführen** (Punkt 58) — und ihn richtig nennen: Für
+				Lohn arbeitet seit 5.26 nicht mehr, wer in der Schmiede vorbeischaut, sondern
+				wer einen öffentlichen Bau instand setzt.
+			-->
+			{#if data.repairable}
+				<p>
+					<i>
+						<!-- Der Name steht für sich: „Arbeit an Rathaus" wäre falsch, und welcher
+						     Fall vor einem Hausnamen richtig wäre, weiß die Seite nicht. -->
+						Niemand sucht gerade Leute. Zu tun gibt es trotzdem etwas:
+						<a href="{base}/building/{data.repairable.id}" class="link">{data.repairable.name}</a>
+						— wer dort herrichtet, bekommt Lohn aus der Stadtkasse.
+					</i>
+				</p>
+			{:else}
+				<p>
+					<i>
+						Niemand sucht gerade Leute, und die Häuser der Stadt sind in Ordnung. Wer nichts hat,
+						fängt selbst etwas an: ein
+						<a href="{base}/plot" class="link">Grundstück</a>
+						oder eine <a href="{base}/land" class="link">Pacht im Umland</a>.
+					</i>
+				</p>
+			{/if}
 		{:else}
 			<ul>
 				{#each data.jobs as stelle (stelle.buildingId)}

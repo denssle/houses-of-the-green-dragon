@@ -31,6 +31,20 @@
 </script>
 
 <h2>{data.building.name}</h2>
+
+<!--
+	**Ein Haus hat ein Alter** (Punkt 62). „Errichtet im Herbst 71" macht aus einem
+	Gebäude ein altes Gebäude; wo nichts steht, stand es schon beim Weltaufbau.
+-->
+<p>
+	<small>
+		{#if data.built}
+			Errichtet im {data.built.season} {data.built.year}.
+		{:else}
+			Steht hier, solange die Stadt steht.
+		{/if}
+	</small>
+</p>
 <p><i>{data.option?.description}</i></p>
 
 <dl>

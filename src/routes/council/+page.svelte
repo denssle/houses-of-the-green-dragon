@@ -29,6 +29,13 @@
 				</small>
 			</p>
 		{/if}
+	{:else if data.ballot}
+		<!--
+			**Nicht „es muss gewählt werden", während gewählt wird** (Punkt 60). Der Satz stand
+			direkt über einer laufenden Wahl und las sich wie eine Aufforderung, etwas zu tun,
+			was gerade geschieht.
+		-->
+		<p><i>Niemand führt die Stadt — die Wahl darüber läuft.</i></p>
 	{:else}
 		<p><i>Niemand führt die Stadt. Es muss gewählt werden.</i></p>
 	{/if}
@@ -38,6 +45,19 @@
 {#if data.ballot}
 	<section>
 		<h3>Wahl</h3>
+		<!--
+			**Wann ausgezählt wird** (Punkt 60): Der Termin steht seit der Ausrufung fest, stand
+			aber nirgends. Gerechnet in Spieljahren, weil ein Tick keine Auskunft ist.
+		-->
+		<p>
+			<small>
+				Ausgezählt wird in {Math.max(0, data.ballot.closesTick - data.currentTick)} Stunden — das ist
+				{Math.max(1, Math.round((data.ballot.closesTick - data.currentTick) / 24))}
+				{Math.max(1, Math.round((data.ballot.closesTick - data.currentTick) / 24)) === 1
+					? 'Tag'
+					: 'Tage'} in der Wirklichkeit.
+			</small>
+		</p>
 		{#if data.ballot.candidates.length === 0}
 			<p><i>Noch stellt sich niemand auf.</i></p>
 		{:else}

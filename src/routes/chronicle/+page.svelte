@@ -14,6 +14,23 @@
 
 <h2>Chronik {data.regionName}</h2>
 
+<!--
+	**Über die Liste, nicht darunter** (Punkt 60). Der Satz ist die Einladung an jeden
+	Gast — und stand da, wo man ihn erst liest, wenn man die Liste schon nicht verstanden
+	hat.
+-->
+<p>
+	<small>
+		{#if data.guest}
+			Diese Welt läuft weiter, ob jemand zusieht oder nicht: Ihre Bewohner arbeiten, heiraten,
+			bekommen Kinder, wählen ihren Bürgermeister und sterben. Hier steht, was ihnen zugestoßen ist.
+		{:else}
+			Die Welt läuft weiter, während niemand zusieht. Hier steht, was in der Zwischenzeit geschehen
+			ist — vorerst alles, was geschieht.
+		{/if}
+	</small>
+</p>
+
 {#if !data.guest}
 	<p>
 		{#each SICHTEN as sicht, i (sicht.key)}
@@ -40,19 +57,6 @@
 	</ul>
 {/if}
 
-{#if data.guest}
-	<p>
-		<small>
-			Diese Welt läuft weiter, ob jemand zusieht oder nicht: Ihre Bewohner arbeiten, heiraten,
-			bekommen Kinder, wählen ihren Bürgermeister und sterben. Hier steht, was ihnen zugestoßen ist.
-		</small>
-	</p>
-{:else}
-	<p>
-		<small>
-			Die Welt läuft weiter, während niemand zusieht. Hier steht, was in der Zwischenzeit geschehen
-			ist — vorerst alles, was geschieht.
-		</small>
-	</p>
+{#if !data.guest}
 	<p><a href="{base}/" class="link">Zurück in die Stadt</a></p>
 {/if}

@@ -1,7 +1,9 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as employmentService from '$lib/server/service/employmentService';
 import { actionMessage } from '$lib/actionMessage';
+import { CONDITION_MAX } from '$lib/game/building.logic';
 
 /** Was in der Stadt an Arbeit zu haben ist. */
 export const load: PageServerLoad = async ({ locals }) => {
@@ -12,7 +14,14 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	return {
 		jobs: await employmentService.getOpenJobs(character.regionId, character.id),
-		mine: await employmentService.getJobOf(character.id)
+		mine: await employmentService.getJobOf(character.id),
+		// **Der Weg zur Lohnarbeit, nicht nur ihr Name** (Punkt 58). Der Satz hier nannte
+		// bis 5.52 die „Tagelöhnerei in der städtischen Schmiede" — die es seit 5.26 nicht
+		// mehr gibt: Für Lohn arbeitet, wer einen öffentlichen Bau instand setzt. Jetzt
+		// steht dort das Haus, an dem es gerade etwas zu tun gibt, und man kommt hin.
+		repairable: (await buildingService.getPublicBuildings(character.regionId))
+			.filter((haus) => haus.condition < CONDITION_MAX)
+			.sort((a, b) => a.condition - b.condition)[0]
 	};
 };
 

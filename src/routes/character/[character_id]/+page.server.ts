@@ -16,7 +16,7 @@ import * as worldService from '$lib/server/service/worldService';
 import { deathProbabilityPerYear } from '$lib/game/mortality.logic';
 import { fullName } from '$lib/game/naming.logic';
 import { personalityLabel } from '$lib/game/personality.logic';
-import { ageInYears, yearOf } from '$lib/game/time';
+import { ageInYears, SEASON_NAMES, seasonOf, yearOf } from '$lib/game/time';
 import type { Character } from '$lib/model/character';
 
 /**
@@ -101,6 +101,10 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		displayName: fullName(gezeigt.firstName, haus?.name),
 		self: selbst,
 		age: alter,
+		// **Ein Datum ist mehr als eine Zahl** (Punkt 62): „geboren im Frühling 96" verankert
+		// einen Menschen in der Geschichte der Stadt, wo „52 Jahre" nur eine Größe nennt.
+		// Beides steht seit jeher in `birthTick` und musste nur gerechnet werden.
+		born: { season: SEASON_NAMES[seasonOf(gezeigt.birthTick)], year: yearOf(gezeigt.birthTick) },
 		// Wer tot ist, soll nicht lebendig wirken: Ein Verweis aus der Chronik führt oft zu
 		// jemandem, den es längst nicht mehr gibt.
 		diedInYear: gezeigt.deathTick === null ? null : yearOf(gezeigt.deathTick),

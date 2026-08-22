@@ -99,6 +99,14 @@ export interface ChronicleQuery {
 	characterId?: string;
 	/** Nur Einträge, die dieses Haus betreffen. */
 	dynastyId?: string;
+	/**
+	 * Nur Einträge zu diesem Gebäude — seine Geschichte (Punkt 62).
+	 *
+	 * Damit braucht ein Errichtungsdatum keine eigene Spalte: Der Bau steht seit jeher als
+	 * `BUILDING_BUILT` in der Chronik, es fehlte nur der Weg, danach zu fragen. Wo kein
+	 * Eintrag ist, stand das Haus schon beim Weltaufbau.
+	 */
+	buildingId?: string;
 	limit?: number;
 	before?: number;
 }
@@ -114,6 +122,7 @@ export interface ChronicleQuery {
 export async function getChronicle(query: ChronicleQuery = {}): Promise<ChronicleEntry[]> {
 	const wo: Record<string | symbol, unknown> = {};
 	if (query.regionId) wo.RegionId = query.regionId;
+	if (query.buildingId) wo.buildingId = query.buildingId;
 	if (query.before !== undefined) wo.tick = { [Op.lt]: query.before };
 
 	if (query.characterId) {

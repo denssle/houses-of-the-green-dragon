@@ -3491,6 +3491,41 @@ den Tick jetzt entgegen, und der Kommentar sagt, warum.
 
 _Fertig, wenn:_ Ein falscher Zehntsatz bricht einen Test. — Erledigt.
 
+**5.52 Sätze, die hinführen, und Daten, die schon da waren.** ✓ (Punkte 58, 60, 62) Drei
+Aufgaben aus demselben Durchgang, alle an der Oberfläche und alle nach demselben Muster:
+Die Auskunft war da, sie stand nur an der falschen Stelle oder ohne Weg.
+
+**Punkt 60 — Ordnung und Termine.** Das Umland stand in der Reihenfolge der Datenbank
+(Mühlenfeld 1, Kräuterwiese, Schafweide 2, Eichwald 1 …); eine Liste, aus der man wählt,
+ist jetzt nach Adresse sortiert. Das Rathaus sagte „Niemand führt die Stadt. Es muss
+gewählt werden" — direkt über einer laufenden Wahl; es unterscheidet jetzt, ob eine läuft.
+Und **wann ausgezählt wird**, steht dabei: in Stunden und in Tagen der Wirklichkeit, denn
+der Termin steht seit der Ausrufung fest. Die Chronik erklärt sich schließlich **über** der
+Liste statt darunter — der Satz ist die Einladung an jeden Gast und stand da, wo man ihn
+erst liest, wenn man die Liste schon nicht verstanden hat.
+
+**Punkt 58 — der Satz, der einen Weg nennt.** Auf der Arbeit-Seite stand „Bleibt die
+Tagelöhnerei in der städtischen Schmiede": kein Link, und seit 5.26 auch nicht mehr wahr —
+für Lohn arbeitet, wer einen öffentlichen Bau instand setzt. Jetzt steht dort das Haus, an
+dem es gerade etwas zu tun gibt, und man kommt hin. Ist alles in Ordnung, verweist der
+Satz auf Grundstück und Pacht statt ins Leere.
+
+**Punkt 62 — Geburt und Errichtung.** „52 Jahre" nennt eine Größe, „geboren im Frühling
+96" verankert einen Menschen in der Geschichte der Stadt. Beides stand längst in
+`birthTick`. Für Gebäude gab es **keinen** Errichtungszeitpunkt — und es braucht auch
+keinen: Der Bau steht seit jeher als `BUILDING_BUILT` in der Chronik, es fehlte nur der
+Weg, danach zu fragen. `ChronicleQuery` kennt jetzt `buildingId`, und wo kein Eintrag ist,
+stand das Haus schon beim Weltaufbau: „Steht hier, solange die Stadt steht."
+
+**Zwei Fallen beim Prüfen**, beide in der laufenden App gesehen: „Es gibt Arbeit an
+Rathaus" war grammatisch falsch, und welcher Fall vor einem Hausnamen richtig wäre, weiß
+die Seite nicht — der Name steht deshalb für sich. Und ein Playwright-Muster mit `w+`
+fand die Geburtszeile nicht, weil `w` kein „ü" kennt und die Jahreszeit „Frühling" heißt.
+
+_Fertig, wenn:_ Kein Satz nennt einen Ort, ohne hinzuführen; keine Liste steht ungeordnet.
+— Erledigt für diese drei. **Offen bleiben** aus demselben Durchgang Punkt 57 (wann kommt
+der nächste Aktionspunkt) und Punkt 59 (Knöpfe, die scheitern müssen).
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

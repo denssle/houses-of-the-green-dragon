@@ -68,11 +68,11 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 55  | Die Stadt kommt nicht in Gang — **erledigt mit 5.11**, ein Rest bleibt               | —                            | erledigt     |
 | 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt — **erledigt mit 5.11**       | —                            | erledigt     |
 | 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                | laufend                      | Entwurf      |
-| 62  | Geburts- und Errichtungsdatum sichtbar machen                                        | laufend                      | Aufgabe      |
+| 62  | Geburts- und Errichtungsdatum — **erledigt mit 5.52**                                | —                            | erledigt     |
 | 57  | Der Takt der Welt steht nirgends — wann kommen Aktionspunkte wieder?                 | erster fremder Spieler       | Aufgabe      |
-| 58  | Wege, die nur beschrieben und nicht verlinkt sind                                    | laufend                      | Aufgabe      |
+| 58  | Wege, die nur beschrieben und nicht verlinkt sind — **erledigt mit 5.52**            | —                            | erledigt     |
 | 59  | Aktionen, die scheitern müssen, sehen aus wie Aktionen, die gehen                    | laufend                      | Aufgabe      |
-| 60  | Listen ohne Ordnung, Wahlen ohne Termin                                              | laufend                      | Aufgabe      |
+| 60  | Listen ohne Ordnung, Wahlen ohne Termin — **erledigt mit 5.52**                      | —                            | erledigt     |
 | 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen    | —                            | erledigt     |
 | 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                              | —                            | erledigt     |
 
