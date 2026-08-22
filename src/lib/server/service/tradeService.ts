@@ -508,11 +508,19 @@ async function zuListe(
 		angebote.map((a) => a.dataValues.SellerCharacterId).filter((id): id is string => Boolean(id))
 	);
 
+	// **Zwei Abfragen statt zwei je Angebot** (Punkt 67). Vorher lief je Zeile ein
+	// `findByPk` für den Verkäufer und eines für das Haus — bei dreißig Angeboten sechzig
+	// Abfragen, und `cheapestOffer` ruft diese Liste für jede Ware auf, nach der ein NPC
+	// fragt. Gemessen waren das allein hier über dreißig `buildings`-Abfragen je Tick.
+	const haeuser = await Building.findAll({
+		where: { id: { [Op.in]: angebote.map((a) => a.dataValues.BuildingId) } }
+	});
+	const hausJeId = new Map(haeuser.map((haus) => [haus.dataValues.id, haus]));
+
 	const liste: OfferOnList[] = [];
 	for (const angebot of angebote) {
 		const vorlage = getItemTemplate(angebot.dataValues.itemId);
-		const verkaeufer = await Character.findByPk(angebot.dataValues.SellerCharacterId);
-		const gebaeude = await Building.findByPk(angebot.dataValues.BuildingId);
+		const gebaeude = hausJeId.get(angebot.dataValues.BuildingId);
 		if (!vorlage || !gebaeude) continue;
 
 		liste.push({
@@ -522,7 +530,11 @@ async function zuListe(
 			quantity: angebot.dataValues.quantity,
 			pricePerUnit: angebot.dataValues.pricePerUnit,
 			sellerId: angebot.dataValues.SellerCharacterId,
-			sellerName: verkaeufer ? (namen.get(verkaeufer.dataValues.id) ?? 'jemand') : 'jemand',
+			// `displayNames` hat die Namen oben in einem Zug geholt; die einzelne
+			// Charakterzeile war nur der Umweg dorthin.
+			sellerName: angebot.dataValues.SellerCharacterId
+				? (namen.get(angebot.dataValues.SellerCharacterId) ?? 'jemand')
+				: 'jemand',
 			buildingId: gebaeude.dataValues.id,
 			buildingName: gebaeude.dataValues.name,
 			mine: angebot.dataValues.SellerCharacterId === viewerId
@@ -542,8 +554,28 @@ export async function cheapestOffer(
 	itemId: string,
 	exceptSellerId?: string
 ): Promise<OfferOnList | undefined> {
-	const alle = await getOffersInRegion(regionId);
-	return alle
-		.filter((angebot) => angebot.itemId === itemId && angebot.sellerId !== exceptSellerId)
-		.sort((a, b) => a.pricePerUnit - b.pricePerUnit)[0];
+	// **Nur die gefragte Ware** (Punkt 67). Vorher baute diese Funktion die vollständige
+	// Angebotsliste der Stadt auf — mit Namen, Häusern und allem — und warf davon alles
+	// weg außer einer Zeile. Ein NPC fragt in jeder Lageaufnahme nach Brot, Gewand, Trank
+	// und je nach Lage nach Material und Zutat: fünfmal die ganze Stadt für fünf Zeilen.
+	const gebaeude = await Building.findAll({
+		include: [{ model: Plot, as: 'plot', where: { RegionId: regionId }, required: true }],
+		attributes: ['id']
+	});
+	const ids: string[] = gebaeude.map((haus) => haus.dataValues.id);
+	if (ids.length === 0) return undefined;
+
+	const angebote = await ShopOffer.findAll({
+		where: { BuildingId: { [Op.in]: ids }, itemId },
+		order: [['pricePerUnit', 'ASC']]
+	});
+	const passend = angebote.filter(
+		(angebot) => angebot.dataValues.SellerCharacterId !== exceptSellerId
+	);
+	if (passend.length === 0) return undefined;
+
+	// Aufbereitet wird genau eines — die Liste bleibt einzeilig.
+	// Ohne Betrachter: Wer nach dem billigsten Angebot fragt, ist nicht sein Verkäufer —
+	// die eigenen sind eine Zeile darüber schon ausgeschlossen.
+	return (await zuListe([passend[0]]))[0];
 }

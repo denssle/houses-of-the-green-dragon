@@ -154,3 +154,51 @@ describe('Standgeld am Marktplatz', () => {
 		expect((await ShopOffer.findOne({}))!.dataValues.quantity).toBe(4);
 	});
 });
+
+describe('Wie viele Abfragen eine Angebotsliste kostet', () => {
+	/**
+	 * **Punkt 67.** `zuListe` holte je Angebot den Verkäufer und das Haus einzeln — bei
+	 * zwanzig Angeboten vierzig Abfragen, und `cheapestOffer` baut diese Liste für jede
+	 * Ware auf, nach der ein NPC fragt. In der frischen Messwelt fällt das nicht auf, weil
+	 * dort ein einziges Angebot hängt; in einer gewachsenen Stadt schon.
+	 *
+	 * Dieser Test hält das Verhältnis fest: **Die Zahl der Abfragen darf nicht mit der Zahl
+	 * der Angebote wachsen.**
+	 */
+	async function abfragenBeim(lauf: () => Promise<unknown>): Promise<number> {
+		let gezaehlt = 0;
+		// @ts-expect-error — zur Laufzeit vorhanden, im Typ nicht vorgesehen.
+		sequelize.options.logging = () => {
+			gezaehlt++;
+		};
+		await lauf();
+		// @ts-expect-error — s. o.
+		sequelize.options.logging = false;
+		return gezaehlt;
+	}
+
+	it('bleibt gleich, ob eine Ware aushängt oder zwanzig', async () => {
+		const haendlerin = await person(500);
+		await insInventar(haendlerin, 'WOOD', 100);
+
+		await tradeService.placeOffer(haendlerin, marktId, 'WOOD', 1, 2);
+		const beiEinem: number = await abfragenBeim(() => tradeService.getOffersInRegion(stadtId));
+
+		// Neunzehn weitere Angebote, jedes mit eigener Zeile.
+		for (let i = 0; i < 19; i++) {
+			await ShopOffer.create({
+				id: randomUUID(),
+				BuildingId: marktId,
+				SellerCharacterId: haendlerin,
+				itemId: 'WOOD',
+				quantity: 1,
+				pricePerUnit: 2 + i
+			});
+		}
+		const beiZwanzig: number = await abfragenBeim(() => tradeService.getOffersInRegion(stadtId));
+
+		expect((await tradeService.getOffersInRegion(stadtId)).length).toBe(20);
+		// Vor 5.56 waren es zwei Abfragen je Angebot — also gut vierzig statt einer Handvoll.
+		expect(beiZwanzig).toBeLessThanOrEqual(beiEinem + 1);
+	});
+});

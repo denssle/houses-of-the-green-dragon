@@ -3613,6 +3613,29 @@ denn ohne ihn wäre auch eine Attrappe grün, die immer dieselbe Stadt baut.
 
 _Fertig, wenn:_ Derselbe Testlauf ergibt dieselbe Welt. — Erledigt.
 
+**5.56 Die Angebotsliste hört auf, je Zeile nachzufragen.** ✓ (Punkt 67) Ein Stapelzähler
+auf `characters`, `buildings` und `skills` nannte die nächsten Verursacher. Der greifbarste:
+`zuListe` im Handel holte **je Angebot** den Verkäufer und das Haus einzeln — bei zwanzig
+Angeboten vierzig Abfragen. Und `cheapestOffer` baut diese Liste für **jede** Ware auf,
+nach der ein NPC fragt: Brot, Gewand, Trank, dazu Material und Zutat.
+
+Jetzt holt `zuListe` die Häuser in einem Zug; die Namen kamen ohnehin schon gebündelt aus
+`displayNames`, und die einzelne Charakterzeile war nur der Umweg dorthin. `cheapestOffer`
+lädt nicht mehr die vollständige Angebotsliste der Stadt, um davon alles bis auf eine Zeile
+wegzuwerfen, sondern fragt gezielt nach der einen Ware.
+
+**Gemessen hat sich nichts geändert — und das gehört dazu.** Die frische Messwelt hat ein
+einziges Angebot; 540 Abfragen je Tick vorher wie nachher. Der Gewinn wächst mit der Zahl
+der Angebote, und die ist in einer jungen Stadt eins. In Grünau, wo eine Zimmerei seit
+Wochen aushängt, sieht es anders aus.
+
+Belegt ist er deshalb nicht durch eine Messung, sondern durch einen Test: **Die Zahl der
+Abfragen darf nicht mit der Zahl der Angebote wachsen** — einmal mit einem Angebot, einmal
+mit zwanzig, und der Unterschied ist höchstens eine Abfrage. Die Gegenprobe mit dem alten
+Verhalten lässt ihn umfallen.
+
+_Fertig, wenn:_ Eine lange Angebotsliste kostet nicht mehr als eine kurze. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

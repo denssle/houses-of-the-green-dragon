@@ -1611,7 +1611,11 @@ Stapelzähler nannte drei Verursacher statt dreiundvierzig: `getBuildingsInRegio
 entgegen, wie sie längst eine Transaktion entgegennehmen — kein Zwischenspeicher, der
 veralten könnte.
 
-**Mit 5.49 sind es 571 Abfragen je Tick** (689 ms) — die Pachtflächen und die
+**Mit 5.56 sind es 540 Abfragen je Tick** (613 ms). Die Angebotsliste fragt seither nicht
+mehr je Zeile nach — was sich in der frischen Messwelt nicht zeigt, weil dort ein einziges
+Angebot hängt, wohl aber in einer gewachsenen Stadt; ein Test hält es fest.
+
+**Mit 5.49 waren es 571 Abfragen je Tick** (689 ms) — die Pachtflächen und die
 Verwandtschaft holten je Fläche und je Person einzeln, was sich in einem Zug holen lässt.
 Der Rest verteilt sich auf `characters` (118), `buildings` (115), `skills` (55) und
 `worlds` (51).
