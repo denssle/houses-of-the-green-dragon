@@ -32,7 +32,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 78  | Werben kennt kein Alter — geprüft wird es erst bei der Hochzeit                      | dem nächsten Schritt         | Befund       |
 | 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                 | —                            | erledigt     |
 | 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                   | —                            | erledigt     |
-| 81  | Fremde Häuser haben keine Seite — „aus dem Haus" verlinkt ins Leere                  | Punkt 64                     | Entwurf      |
+| 81  | Fremde Häuser haben keine Seite — **erledigt mit 5.46**                              | —                            | erledigt     |
 | 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                            | —                            | erledigt     |
 | 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**            | —                            | erledigt     |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                          | dem nächsten Schritt         | Befund       |
@@ -2044,7 +2044,7 @@ Handgriff wie dort: ein Feld mehr im Dienst, ein Link mehr auf der Seite.
 **Erledigt mit 5.43** — auf der Grundstücksseite und auf der Charakterseite, die dieselbe
 Liste zeigt.
 
-### 81. Fremde Häuser haben keine Seite
+### 81. Fremde Häuser haben keine Seite — erledigt mit 5.46
 
 Auf der Seite eines Charakters steht „— aus dem Haus Müller", ohne Weg dorthin. Das ist
 kein vergessener Link: `/dynasty` zeigt **immer das eigene** Haus, weil die Seite über
@@ -2058,6 +2058,12 @@ hinzusehen.
 
 Gehört zu Punkt 64 (jedes Gebäude und jede Fläche braucht eine eigene Seite) und folgt
 derselben Linie: Was einen Namen hat, soll eine Adresse haben.
+
+**Entschieden am 22.08.2026 und erledigt mit 5.46:** Die Seite zeigt Gründer und
+Stammbaum, und das ist nichts Vertrauliches — es steht ohnehin in der Chronik. Besitz und
+Vermögen bleiben draußen; mit Punkt 23 im Rücken wäre eine Vermögensübersicht fremder
+Familien eine Einladung. Das eigene Haus wird auf `/dynasty` weitergereicht, weil
+Gründung, Nachfolge und Ahnengalerie dem Spieler gehören und nicht dem Haus.
 
 ### 82. Kammer oder Inventar — entschieden mit 5.45
 

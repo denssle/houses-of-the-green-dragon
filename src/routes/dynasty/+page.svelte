@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
+	import FamilyTree from '$lib/FamilyTree.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -30,37 +31,7 @@
 {#if data.tree.length > 0}
 	<section>
 		<h3>Stammbaum</h3>
-		<!--
-			Bewusst eine Liste und kein gezeichneter Baum: Die Verwandtschaft steht als
-			Text daneben, und das trägt, solange ein Haus wenige Generationen umfasst.
-			Eine echte Darstellung mit Linien lohnt erst, wenn es etwas zu verzweigen
-			gibt — dann aber gern.
-		-->
-		<ul>
-			{#each data.tree as person (person.id)}
-				{@const eltern = data.tree.filter(
-					(m) => m.id === person.motherId || m.id === person.fatherId
-				)}
-				<li>
-					<a href="{base}/character/{person.id}" class="link">
-						{#if person.isPlayed}<b>{person.firstName}</b>{:else}{person.firstName}{/if}
-					</a>
-					— {person.age} Jahre{person.alive ? '' : ', gestorben'}
-					{#if eltern.length > 0}
-						<!-- Auch die Eltern sind Personen, die man nachschlagen können soll. -->
-						<small>
-							Kind von
-							{#each eltern as elternteil, i (elternteil.id)}
-								{#if i > 0}und{/if}
-								<a href="{base}/character/{elternteil.id}" class="link">{elternteil.firstName}</a>
-							{/each}
-						</small>
-					{:else}
-						<small>Beginn der Linie</small>
-					{/if}
-				</li>
-			{/each}
-		</ul>
+		<FamilyTree tree={data.tree} />
 	</section>
 {/if}
 

@@ -3317,6 +3317,32 @@ Raubzügen sicher". Es gibt keine Raubzüge mehr; jetzt steht dort der Brand.
 _Fertig, wenn:_ Kein „chamber" mehr im Code, kein toter Link auf die alte Adresse. —
 Erledigt, in der laufenden App nachgesehen.
 
+**5.46 Fremde Häuser bekommen eine Adresse.** ✓ (Punkt 81) Auf der Seite eines Charakters
+stand „aus dem Haus Müller", ohne Weg dorthin — und das war kein vergessener Link:
+`/dynasty` lädt über `locals.currentUser` und zeigt deshalb immer das **eigene** Haus. Für
+ein fremdes gab es keine Adresse.
+
+**Die Frage dahinter war, was man über ein fremdes Haus sehen darf**, und sie ist am
+22.08.2026 entschieden: Die Seite zeigt, wer gegründet hat und wer dazugehört — beides
+steht ohnehin in der Chronik, also ist nichts davon vertraulich. Besitz und Vermögen
+stehen **nicht** dort; dafür gibt es die Häuserliste der Stadt, und spätestens mit Punkt 23
+(Räuber als Beruf) wäre eine Vermögensübersicht fremder Familien eine Einladung.
+
+Neu ist `/dynasty/[dynasty_id]`. Das eigene Haus wird von dort auf `/dynasty`
+weitergereicht: Gründung, Nachfolge und die Ahnengalerie gehören dem **Spieler** und nicht
+dem Haus, und sie haben auf einer fremden Seite nichts zu suchen.
+
+**Der Stammbaum ist eine Komponente geworden** (`FamilyTree.svelte`), weil ihn jetzt zwei
+Seiten zeigen. Zweimal dieselbe Liste zu pflegen hieße, dass sie irgendwann verschieden
+aussehen — und niemand könnte sagen, welche die richtige ist.
+
+Ein Haus **ohne Gründer** ist dabei der Normalfall und kein Sonderfall: NPC-Familien haben
+seit 5.10 einen Namen, aber keinen Spieler dahinter. Auf ihrer Seite steht „Eine Familie,
+die schon immer hier lebte" statt einer leeren Zeile.
+
+_Fertig, wenn:_ Von jedem Charakter führt ein Klick zu seinem Haus. — Erledigt; in der
+laufenden App nachgesehen, wo der Weg über einen Nachbarn zu „Haus Steinmetz" führte.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

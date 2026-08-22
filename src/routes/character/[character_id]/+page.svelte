@@ -12,7 +12,10 @@
 <p>
 	<i>{data.character.title}</i>
 	{#if data.house}
-		— aus dem Haus {data.house.name}
+		<!-- Der Name führt jetzt hin (Punkt 81): Wer zu einer Familie gehört, soll
+		     nachschlagen können, zu welcher. -->
+		— aus dem Haus
+		<a href="{base}/dynasty/{data.house.id}" class="link">{data.house.name}</a>
 	{/if}
 	{#if data.diedInYear !== null}
 		<b>— gestorben im Jahr {data.diedInYear}</b>
