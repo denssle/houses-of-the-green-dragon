@@ -156,6 +156,92 @@ describe('Der Hof einer Pacht', () => {
 	});
 
 	/**
+	 * **Wem eine Fläche zinst** (Punkt 65).
+	 *
+	 * Die Umlandflächen liegen in eigenen Regionen — Eichwald, Steinbruch, Mühlenfeld —,
+	 * jede mit eigener `treasury`, aber ohne Bürgermeister, ohne Bauten, ohne Ausgaben.
+	 * Wurde dort nachgeschlagen und dorthin abgeführt, war beides still: Der Erlass des
+	 * Bürgermeisters griff nie, und die Einnahme fiel aus dem Spiel.
+	 *
+	 * Seit 5.24 geht beides über `regionService.cityOf` an die Stadt. Diese Tests halten
+	 * es fest — der bestehende prüfte nur, dass **irgendetwas** in der Stadtkasse ankommt,
+	 * und hätte einen falschen Satz nicht bemerkt.
+	 */
+	describe('wem eine Fläche zinst', () => {
+		/**
+		 * Der Zehntsatz, den die Stadt beschließt — und nur sie.
+		 *
+		 * **Der Tick gehört dazu.** Es gilt der jüngste Erlass, und bei gleichem Tick
+		 * behält `currentValue` den zuerst gefundenen: Zwei Sätze im selben Augenblick sind
+		 * kein Fall, den die Welt kennt, wohl aber einer, den ein Test versehentlich baut.
+		 */
+		async function zehntSetzen(wert: number, tick: number = JETZT): Promise<void> {
+			await Law.create({
+				id: randomUUID(),
+				RegionId: stadtId,
+				kind: 'TITHE',
+				value: wert,
+				enactedTick: tick,
+				EnactedByCharacterId: null
+			});
+			await Region.update({ treasury: 0 }, { where: { id: stadtId } });
+		}
+
+		/** Die Region, in der die Fläche selbst liegt — eine andere als die Stadt. */
+		async function umlandVon(plotId: string): Promise<string> {
+			return (await Plot.findByPk(plotId))!.dataValues.RegionId;
+		}
+
+		it('bucht die Pachtgebühr in die Stadtkasse, nicht ins Umland', async () => {
+			const paechterin = await person('Pächterin', 200);
+			const flaeche = await freieFlaeche();
+			await Region.update({ treasury: 0 }, { where: { id: stadtId } });
+
+			await productionService.leasePlot(paechterin, flaeche);
+
+			const umland: string = await umlandVon(flaeche);
+			expect(umland).not.toBe(stadtId);
+			expect(await kasse(stadtId)).toBe(productionService.LEASE_FEE);
+			expect(await kasse(umland)).toBe(0);
+		});
+
+		it('rechnet die eigene Ernte nach dem Satz der Stadt ab', async () => {
+			// Der Kern des Befunds: Auf Eichwald steht kein Erlass, also galt dort der
+			// Rückfallwert von zehn Prozent — was der Bürgermeister beschloss, war ohne
+			// Wirkung. Bei dreißig Prozent muss mehr eingehen als bei null.
+			const paechterin = await person('Pächterin', 200);
+			const flaeche = await freieFlaeche();
+			await productionService.leasePlot(paechterin, flaeche);
+
+			await zehntSetzen(0);
+			expect((await productionService.harvest(paechterin, flaeche)).ok).toBe(true);
+			const ohneZehnt: number = await kasse(stadtId);
+
+			await zehntSetzen(30, JETZT + 1);
+			expect((await productionService.harvest(paechterin, flaeche)).ok).toBe(true);
+			const mitZehnt: number = await kasse(stadtId);
+
+			expect(ohneZehnt).toBe(0);
+			expect(mitZehnt).toBeGreaterThan(0);
+		});
+
+		it('lässt die Kasse des Umlands unberührt', async () => {
+			// Eine Kasse ohne Amt und ohne Ausgaben ist ein Loch: Was dort eingeht, ist aus
+			// dem Spiel. Deshalb die Gegenprobe zu allem, was Geld bewegt.
+			const paechterin = await person('Pächterin', 200);
+			const flaeche = await freieFlaeche();
+			const umland: string = await umlandVon(flaeche);
+			await Region.update({ treasury: 0 }, { where: { id: umland } });
+			await zehntSetzen(30);
+
+			await productionService.leasePlot(paechterin, flaeche);
+			await productionService.harvest(paechterin, flaeche);
+
+			expect(await kasse(umland)).toBe(0);
+		});
+	});
+
+	/**
 	 * **Vom Umland zum Hof** (5.32). Die Liste der Flächen nennt jetzt das Haus, das
 	 * darauf steht — sonst führte von hier kein Weg dorthin: zum eigenen nur über den
 	 * Umweg der Häuserliste, zu dem eines anderen gar keiner.

@@ -3465,6 +3465,32 @@ innerhalb eines Ticks handeln.
 
 _Fertig, wenn:_ Die Weltzeit steht nicht mehr in der Messung. — Erledigt.
 
+**5.51 Der Zehnt, festgehalten.** ✓ (Punkt 65) Der Befund war, dass Zehnt und Pachtgebühr
+in der Region der **Fläche** nachgeschlagen und dorthin abgeführt wurden — nach Eichwald,
+Steinbruch, Mühlenfeld, die je eine eigene Kasse haben, aber keinen Bürgermeister, keine
+Bauten und keine Ausgaben. Der Erlass des Bürgermeisters griff nie, und was einging, fiel
+aus dem Spiel.
+
+**Behoben war er längst** — `regionService.cityOf` kam mit 5.24 und wird von `harvest`,
+`leasePlot` und dem Knecht auf dem Hof benutzt. Offen war er trotzdem: in der Liste, und
+vor allem im Test. Der eine bestehende prüfte, dass **irgendetwas** in der Stadtkasse
+ankommt; einen falschen Satz hätte er nicht bemerkt.
+
+Jetzt halten drei Tests den Punkt fest: dass die Pachtgebühr in der Stadtkasse landet und
+nicht im Umland, dass die eigene Ernte nach dem Satz der **Stadt** abgerechnet wird (bei
+null bleibt die Kasse leer, bei dreißig Prozent nicht), und dass die Kasse des Umlands
+unberührt bleibt.
+
+**Der erste Anlauf schlug fehl, und zwar aufschlussreich:** Beide Erlasse trugen denselben
+Tick, und bei Gleichstand behält `currentValue` den zuerst gefundenen — der Test setzte
+dreißig Prozent und maß weiter mit null. In der Welt ist das kein Fall (zwei Sätze im
+selben Augenblick beschließt niemand), in einem Test aber schnell gebaut. Der Helfer nimmt
+den Tick jetzt entgegen, und der Kommentar sagt, warum.
+
+**Keine neue Version:** Es sind Tests und Dokumentation, auf dem Server ändert sich nichts.
+
+_Fertig, wenn:_ Ein falscher Zehntsatz bricht einen Test. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

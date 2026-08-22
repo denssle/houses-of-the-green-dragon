@@ -18,7 +18,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**   | 4.8 / Punkt 6                | Entwurf      |
 | 63  | Der geschlossene Kreis — **erledigt mit 5.16**                                       | —                            | erledigt     |
 | 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                         | laufend                      | Entwurf      |
-| 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                          | dem nächsten Schritt         | Befund       |
+| 65  | Der Zehnt erreicht die Felder nicht — **behoben (5.24), festgehalten (5.51)**        | —                            | erledigt     |
 | 66  | Wo Geld aus dem Nichts kam — **im Kern behoben (5.26)**; Zehnt und Raubgut offen     | Punkt 23 / 74                | teilweise    |
 | 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern          | dem nächsten Messlauf        | Befund       |
 | 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt        | —                            | erledigt     |
@@ -35,7 +35,6 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 81  | Fremde Häuser haben keine Seite — **erledigt mit 5.46**                              | —                            | erledigt     |
 | 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                            | —                            | erledigt     |
 | 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**            | —                            | erledigt     |
-| 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                          | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -1188,7 +1187,7 @@ Zu prüfen ist außerdem, ob `selfSustainingEconomy.spec.ts` das je erkannt hät
 setzt Anlagen und Startkapital vorab: genau die Voraussetzungen, an denen es in der
 laufenden Welt scheitert.
 
-### 65. Der Zehnt erreicht die Felder nicht, auf die er gelegt wird
+### 65. Der Zehnt erreicht die Felder nicht, auf die er gelegt wird — erledigt
 
 **Beim Schreiben der Tests zu 5.15 aufgefallen**, und es erklärt Punkt 63 noch einmal von
 einer anderen Seite.
@@ -1217,10 +1216,15 @@ je eigener Kasse. Daraus folgt beides:
 Dasselbe gilt für die Pachtgebühr: `leasePlot` bucht die 20 Münzen ebenfalls auf die
 Region der Fläche.
 
-Zu entscheiden ist, **welcher Stadt eine Fläche zugeordnet ist**. Naheliegend über den
+Zu entscheiden war, **welcher Stadt eine Fläche zugeordnet ist**. Naheliegend über den
 `RegionLink`, den `seed.ts` ohnehin zieht — jede Umlandregion ist mit genau einer Stadt
 verbunden. Das ist zugleich die Frage, die Punkt 31 (Karte als Sechseckraster) für die
 zweite Stadt beantworten muss; wer sie hier löst, sollte sie dort nicht neu erfinden.
+
+**So gelöst mit 5.24** (`regionService.cityOf`), und mit **5.51 durch Tests festgehalten**:
+Pachtgebühr in die Stadtkasse, eigene Ernte nach dem Satz der Stadt, Umlandkasse
+unberührt. Der bestehende Test prüfte nur, dass irgendetwas ankommt — einen falschen Satz
+hätte er nicht bemerkt.
 
 ### 66. Wo Geld aus dem Nichts kam — behoben (5.24 bis 5.26)
 
