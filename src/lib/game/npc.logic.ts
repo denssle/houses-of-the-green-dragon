@@ -2,7 +2,7 @@ import { votingDelay } from '$lib/game/election.logic';
 import { COURT_ACTION_POINT_COST } from '$lib/game/family.logic';
 import type { Personality } from '$lib/game/personality.logic';
 import { SATIETY_COMFORTABLE, SATIETY_WEAKENED } from '$lib/game/need.logic';
-import { UPGRADE_ACTION_POINT_COST } from '$lib/game/building.logic';
+import { RENOVATION_ACTION_POINT_COST, UPGRADE_ACTION_POINT_COST } from '$lib/game/building.logic';
 
 /**
  * Was ein NPC als Nächstes tut.
@@ -491,11 +491,20 @@ function sicherheit(state: NpcState): NpcAction | undefined {
 
 	// Was verfällt, verliert Wohnraum und Ertrag. Wer nicht renoviert, steht in zwanzig
 	// Spieljahren vor einer Ruine.
-	if (state.repairNeeded && state.actionPoints > 0) {
+	// **Genug Punkte für die ganze Reparatur, nicht nur für einen.** Sie kostet vier;
+	// geprüft wurde auf mehr als null — derselbe Fehler wie einst beim Werben, und mit
+	// derselben Folge: Der Entschluss fiel, `renovateBuilding` scheiterte an
+	// `NOT_ENOUGH_ACTION_POINTS`, und in der Statistik stand `RENOVATE`, als wäre
+	// hergerichtet worden. Weil ein NPC bei jedem einzelnen Punkt arbeiten geht, solange
+	// er unter seinem Sparziel liegt, traf das praktisch jeden Versuch: Kein NPC hat je
+	// ein eigenes Haus instand gesetzt.
+	if (state.repairNeeded) {
 		const uebrig: number = state.money - desiredReserve(state.personality, state.foodPrice);
 		if (state.materialMissing) {
+			// Material besorgen kostet Geld, aber keine Kraft — es liegt bereit, wenn die
+			// Punkte zusammen sind. Deshalb steht der Kauf vor der Schwelle, nicht dahinter.
 			if (state.materialPrice !== null && uebrig >= state.materialPrice) return 'BUY_MATERIAL';
-		} else if (uebrig >= state.repairCost) {
+		} else if (state.actionPoints >= RENOVATION_ACTION_POINT_COST && uebrig >= state.repairCost) {
 			return 'RENOVATE';
 		}
 	}

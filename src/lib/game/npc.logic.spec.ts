@@ -159,6 +159,31 @@ describe('Was ein NPC tut', () => {
 			expect(decideNpcAction(erschoepft)).toBe('DRINK_TONIC');
 		});
 
+		it('richtet nur her, wer die Punkte dafür ganz hat', () => {
+			// **Herrichten kostet vier Punkte**, geprüft wurde auf mehr als null — derselbe
+			// Fehler wie beim Werben, nur folgenschwerer: Ein NPC arbeitet bei jedem einzelnen
+			// Punkt, solange er unter seinem Sparziel liegt, und kommt deshalb kaum je über
+			// einen hinaus. In der Statistik stand `RENOVATE`, in der Welt verfiel das Haus.
+			const knapp = zufrieden({ repairNeeded: true, actionPoints: 3, tonicInStock: 0 });
+			const gerade = zufrieden({ repairNeeded: true, actionPoints: 4, tonicInStock: 0 });
+
+			expect(decideNpcAction(knapp)).not.toBe('RENOVATE');
+			expect(decideNpcAction(gerade)).toBe('RENOVATE');
+		});
+
+		it('besorgt Material auch ohne Kraft für die Reparatur', () => {
+			// Kaufen kostet Geld, keine Punkte. Wer erst Kraft haben müsste, um Holz zu
+			// bestellen, stünde mit vollen Punkten vor einem leeren Bauplatz.
+			const ohneKraft = zufrieden({
+				repairNeeded: true,
+				materialMissing: true,
+				actionPoints: 1,
+				tonicInStock: 0
+			});
+
+			expect(decideNpcAction(ohneKraft)).toBe('BUY_MATERIAL');
+		});
+
 		it('trinkt nicht im Müßiggang', () => {
 			// Der Trank füllt nur auf, was fehlt — ohne Arbeit wäre er verschenkt, und die
 			// Punkte wachsen ohnehin von selbst nach.
