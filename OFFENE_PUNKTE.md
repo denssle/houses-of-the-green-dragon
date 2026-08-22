@@ -1,4 +1,4 @@
-﻿# Offene Punkte
+# Offene Punkte
 
 Alles, was noch entschieden oder entworfen werden muss, mit dem Zeitpunkt, zu dem es
 spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
@@ -28,7 +28,10 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                    | —                            | erledigt     |
 | 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                              | laufend                      | Entwurf      |
 | 74  | Der Auftrag an Tagelöhner — privates Renovieren gegen Lohn                           | Punkt 66 / 33                | Entwurf      |
-| 77  | Was die Kammer noch nicht kann: Gewicht, Einzelstücke, Vererben                      | Punkte 15, 20, 51            | Entwurf      |
+| 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                    | Punkte 15, 20, 51            | Entwurf      |
+| 54  | Ein Test, der würfelt — er kann durchlaufen, ohne dass etwas geschah                 | laufend                      | Befund       |
+| 75  | Die Testläufe dauern zu lange — jede Änderung wartet darauf                          | laufend                      | Befund       |
+| 76  | Niemand kann sich einen Ausbau leisten — 86 Münzen gegen 340                         | dem nächsten Messlauf        | Befund       |
 | 78  | Werben kennt kein Alter — **behoben mit 5.41**                                       | —                            | erledigt     |
 | 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                 | —                            | erledigt     |
 | 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                   | —                            | erledigt     |
@@ -79,6 +82,18 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 #### Noch zu erfassen:
 
 _(Die Notizen vom 22.08.2026 sind als Punkte 78 bis 83 erfasst.)_
+
+**Gestrichene Nummern.** Zehn Punkte sind erledigt und samt Abschnitt aus der Liste
+gefallen — Code und Text verweisen aber weiter auf sie, denn die Kommentare stammen aus der
+Zeit davor. Damit ein „(Punkt 8)" nicht ins Leere zeigt, hier ihre Titel:
+
+| #   | war                            | #   | war                         |
+| --- | ------------------------------ | --- | --------------------------- |
+| 1   | Zeitskala                      | 10  | Amtsnachfolge               |
+| 3   | Tick-Nachholen                 | 11  | Steuerarten                 |
+| 4   | Folgen ungedeckter Bedürfnisse | 13  | Erschließung neuen Baulands |
+| 8   | Pachtvertrag im Erbfall        | 19  | Stadtwache                  |
+| 9   | Wahlalter                      | 29  | NPCs als Unternehmer        |
 
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
@@ -952,7 +967,7 @@ Person weiterzuziehen oder das Werben zu beenden, wenn die Zuneigung schon hoch 
 und es nur an der Gegenseite hängt. Zu klären, wenn die Zuneigung mehr Zustände kennt als
 heute.
 
-### 62. Geburts- und Errichtungsdatum
+### 62. Geburts- und Errichtungsdatum — erledigt mit 5.52
 
 Ein Charakter hat einen `birthTick`, ein Gebäude einen Zeitpunkt seiner Errichtung — beides
 steht in der Datenbank und nirgends auf der Seite. Sichtbar ist nur das Alter in Jahren.
@@ -1029,7 +1044,7 @@ anschließend jeden Schritt der Behebung gemessen. Der ältere Test bleibt daneb
 seine Frage ist berechtigt, sie ist nur eine andere: ob ein Unternehmungslustiger
 unternimmt, nicht ob die Welt einen hervorbringt.
 
-### 57. Der Takt der Welt steht nirgends
+### 57. Der Takt der Welt steht nirgends — erledigt mit 5.53
 
 Eine Stunde Wirklichkeit ist eine Stunde in Grünau, fünfzig davon ein Spieljahr. Diese
 Zahl entscheidet, ob man in zehn Minuten wiederkommt oder morgen — und sie steht an keiner
@@ -1040,7 +1055,7 @@ Nötig ist beides: die Regel einmal erklärt (die Seite „Über die Seite" tut 
 die konkrete Auskunft dort, wo sie fehlt — **wann der nächste Punkt kommt**, sichtbar bei
 den Aktionspunkten und in der Fehlermeldung.
 
-### 58. Wege, die nur beschrieben und nicht verlinkt sind
+### 58. Wege, die nur beschrieben und nicht verlinkt sind — erledigt mit 5.52
 
 Die Arbeit-Seite sagt: „Niemand sucht gerade Leute. Bleibt die Tagelöhnerei in der
 städtischen Schmiede." Ein Link dorthin fehlt. Der Spieler bekommt die Auskunft und muss
@@ -1051,7 +1066,7 @@ soll ihn anklicken können. Verwandt mit Punkt 53 (zwei Knöpfe „Arbeiten"), d
 Durchgang bestätigt wurde — der untere sagt bis heute nicht, was er einbringt (drei Münzen
 für einen Aktionspunkt).
 
-### 59. Aktionen, die scheitern müssen, sehen aus wie Aktionen, die gehen
+### 59. Aktionen, die scheitern müssen — erledigt mit 5.54 (Bauseite)
 
 Auf der Bauseite steht jedes Gebäude mit aktivem Knopf, auch wenn das Geld um das
 Fünffache fehlt. Erst der Klick sagt es. Die Fehlermeldungen selbst sind gut („Das Geld
@@ -1061,7 +1076,7 @@ Zu klären ist die Linie: Ein Knopf, der nie gehen kann, gehört gesperrt; einer
 nicht geht und morgen schon, gehört sichtbar gelassen, aber mit dem Grund daneben. Sonst
 lernt der Spieler, dass Knöpfe Glückssache sind.
 
-### 60. Listen ohne Ordnung, Wahlen ohne Termin
+### 60. Listen ohne Ordnung, Wahlen ohne Termin — erledigt mit 5.52
 
 Kleinigkeiten aus demselben Durchgang, die zusammen den Eindruck machen:
 
@@ -1380,7 +1395,7 @@ Für den Verfall spräche, dass Instandhaltung eine Entscheidung ist. Dagegen sp
 hier nichts zu entscheiden war: Der Hof ist mit der Pacht gekommen, ungefragt und
 kostenlos.
 
-### 71. Zuzug: neue Seelen von außerhalb
+### 71. Zuzug: neue Seelen von außerhalb — gebaut mit 5.24
 
 **Grünau ist eine geschlossene Welt.** Acht Gründer, und alles Weitere sind ihre
 Nachfahren. Das Konzept sieht Zuzug vor, aber **aus anderen Städten** (Abschnitt 2) — und
@@ -1942,6 +1957,11 @@ kann, weil ihm die Aktionspunkte oder das Können fehlen. Dann stellt er jemande
 Minuten** für 715 Tests — 428 Sekunden Wanduhr, 812 Sekunden Testzeit zusammengenommen.
 Das ist die Zahl, die jeder Änderung im Weg steht, denn vor jedem Commit läuft sie einmal.
 
+**Nachgemessen am 22.08.2026:** 777 Tests in **346 Sekunden** Wanduhr (690 Sekunden
+Testzeit). Also knapp sechs Minuten für zweiundsechzig Tests mehr — je Test ist es
+schneller geworden, in der Summe kaum. Ein Teil davon ist 5.49/5.50 zu verdanken: Weniger
+Abfragen je Tick schlagen auf jeden Test durch, der eine Welt laufen lässt.
+
 **Die reinen Logiktests sind es nicht.** `src/lib/game/` bringt 374 Tests in **fünf
 Sekunden** durch. Die Last liegt woanders:
 
@@ -1989,7 +2009,7 @@ Durchgang bringt. Es gehört zu Punkt 16.
 hinarbeiten zu lassen, ist bereits gegangen und hat 5.30 ausgelöst — er machte aus
 Unternehmern Tagelöhner. Die Rangfolge ist jetzt in Ordnung; die Kasse ist es nicht.
 
-### 77. Was die Kammer noch nicht kann
+### 77. Was das Inventar noch nicht kann
 
 **Gebaut ist die Grenze** (5.33): Zwanzig Stück am Leib, dazu, was das Dach hergibt,
 geprüft an der einen Stelle, durch die jeder Zugang führt. Drei Fragen bleiben offen —

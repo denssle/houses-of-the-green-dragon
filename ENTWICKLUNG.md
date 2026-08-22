@@ -1,4 +1,4 @@
-﻿# Entwicklung
+# Entwicklung
 
 **Warum das Spiel so gebaut ist, wie es gebaut ist.**
 
@@ -3317,6 +3317,10 @@ Raubzügen sicher". Es gibt keine Raubzüge mehr; jetzt steht dort der Brand.
 _Fertig, wenn:_ Kein „chamber" mehr im Code, kein toter Link auf die alte Adresse. —
 Erledigt, in der laufenden App nachgesehen.
 
+_Ältere Einträge dieser Datei sprechen weiter von der „Kammer". Sie beschreiben, was
+damals galt, und werden nicht rückwirkend umgeschrieben — eine Chronik, die sich selbst
+korrigiert, ist keine._
+
 **5.46 Fremde Häuser bekommen eine Adresse.** ✓ (Punkt 81) Auf der Seite eines Charakters
 stand „aus dem Haus Müller", ohne Weg dorthin — und das war kein vergessener Link:
 `/dynasty` lädt über `locals.currentUser` und zeigt deshalb immer das **eigene** Haus. Für
@@ -3797,6 +3801,14 @@ viele Stellen das wirklich sind, statt es zu schätzen.
 vorziehen und den Rest der Phase mit ein paar Spielern zusammen machen. Das ist die
 riskantere, aber lehrreichere Reihenfolge: Was ein Neuling wirklich braucht, weiß man
 erst, wenn einer da ist.
+
+_Nachtrag vom 22.08.2026:_ Die Frage hat sich anders erledigt, als sie gestellt war —
+Phase 5 ist durchgearbeitet, ohne dass jemand von außen dabei war. Was der Plan nicht
+vorhergesehen hat, ist, **woher die Arbeit dann kam**: nicht aus der Liste, sondern aus dem
+Hinsehen. Die Schritte 5.38 bis 5.54 gehen fast alle auf eine Beobachtung an der laufenden
+Welt zurück („niemand richtet öffentliche Häuser her", „Grünau bekommt keinen Zuwachs") und
+förderten dabei Fehler zutage, die keine Liste kannte. Ein Spieler hätte dieselbe Rolle
+gespielt — nur früher und lauter.
 
 ## Warum in dieser Reihenfolge gebaut wurde
 

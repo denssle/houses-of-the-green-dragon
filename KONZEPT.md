@@ -381,7 +381,7 @@ zwei Wege, und beide stehen jedem offen:
   kostet nichts; der Laden gehört einem ja bereits.
 - **Auf dem Marktplatz**, gegen Standgeld. Er ist der Ort für alle, die keinen Betrieb
   haben — und für alles, was nebenbei anfällt: die Ernte einer Pacht, der Überschuss aus
-  der Kammer, das Erbstück. Für Käufer ist er die Abkürzung, damit niemand ein Dutzend
+  dem Inventar, das Erbstück. Für Käufer ist er die Abkürzung, damit niemand ein Dutzend
   Werkstätten abklappern muss, um ein Brot zu finden.
 
 Das Standgeld ist der Preis dieser Bequemlichkeit und zugleich eine Einnahme der Stadt —
@@ -1064,6 +1064,13 @@ seinen eigenen Meister nicht mehr stellt, hat genau das verdient.
 
 ### 11. Unglücke — was einem zustoßen kann
 
+> **Stand August 2026:** Von diesem Abschnitt ist derzeit nur der **Brand** im Spiel. Die
+> Zufalls-Raubzüge sind mit 5.40 entfernt worden, weil sie die Stadtkasse unter dem Preis
+> des Wachhauses deckelten — die Stadt konnte sich die Wache nicht leisten, weil ihr das
+> Fehlen der Wache das Geld nahm. Sie kehren zurück, wenn ein Überfall einen Täter hat
+> (offener Punkt 23); bis dahin hat auch die Wache keine Aufgabe. Was hier steht, bleibt
+> das Ziel.
+
 **Die Welt nimmt auch.** Raubzüge und Brände treffen die Stadt, ohne dass jemand etwas
 falsch gemacht hätte: Ein Unglück verschiebt Münzen, räumt ein Lager oder setzt ein Haus
 in Brand. Das ist der Gegenspieler zum Aufbauen — ohne ihn wäre Wohlstand eine Einbahn,
@@ -1072,7 +1079,7 @@ und eine Mauer, eine Wache oder ein Brunnen hätten keinen Zweck.
 **Getroffen wird, wo etwas zu holen ist.** Wer viel hat, ist das lohnendere Ziel; wer
 nichts hat, lohnt den Weg nicht. Das ist nicht nur stimmig, sondern nötig — sonst würde
 ein Unglück die Armen aus dem Spiel drängen, statt die Reichen zu beschäftigen. Aus
-demselben Grund bleibt der Vorrat in der eigenen Kammer unangetastet: Er ist das, was
+demselben Grund bleibt der Vorrat im eigenen Inventar unangetastet: Er ist das, was
 zwischen einem Charakter und dem Verhungern steht.
 
 **Schutz ist eine laufende Ausgabe, kein Zustand.** Jeder Wächter senkt die Gefahr, keiner
