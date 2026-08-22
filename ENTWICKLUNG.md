@@ -3551,6 +3551,31 @@ davon abhängt.
 
 _Fertig, wenn:_ Wer keine Kraft mehr hat, weiß, wann er wiederkommen soll. — Erledigt.
 
+**5.54 Was fehlt, steht neben dem Knopf.** ✓ (Punkt 59) Auf der Bauseite stand jedes
+Gebäude mit aktivem Knopf, auch wenn das Geld um das Fünffache fehlte — erst der Klick
+sagte es. Die Meldungen selbst sind gut („Das Geld reicht nicht"), sie kamen nur zu spät.
+
+**Die Linie, nach der entschieden wurde:** Ein Knopf, der **nie** gehen kann, gehört
+gesperrt; einer, der **heute** nicht geht und morgen schon, bleibt sichtbar, mit dem Grund
+daneben. Beim Bauen ist das Zweite der Fall: Wer zwanzig Münzen zu wenig hat, verkauft
+etwas und baut. Ein toter Knopf verspräche „nie" und wäre falsch.
+
+Der erste Fall ist auf derselben Seite schon richtig gelöst und blieb, wie er war: Ohne
+freies Grundstück erscheint gar keine Liste, sondern der Weg zum Grundstückskauf.
+
+**Die Rechnung steht in `missingToBuild`**, nicht in der Route. Sie war dort zuerst — als
+Funktion in `load` —, und das war die falsche Stelle: Eine Regel, die entscheidet, was ein
+Spieler sehen soll, gehört dorthin, wo sie sich prüfen lässt. Drei Tests halten sie fest,
+darunter der Fall, an dem sich Fehlmenge und Bedarf unterscheiden: Wer drei von vier
+Brettern hat, dem fehlt eines, nicht vier.
+
+**Nicht in der laufenden App gesehen**, und das ist der Grund: Ein frischer Charakter hat
+zehn Münzen, ein Grundstück kostet vierzig — bis zur Bauliste käme ein Prüflauf erst nach
+einem Dutzend Schichten Lohnarbeit. Statt den Test aufzublähen, ist die Regel in die
+Logik gezogen und dort geprüft.
+
+_Fertig, wenn:_ Wer nicht bauen kann, erfährt es vor dem Klick. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

@@ -5,12 +5,31 @@ import * as buildingService from '$lib/server/service/buildingService';
 import * as plotService from '$lib/server/service/plotService';
 import * as needService from '$lib/server/service/needService';
 import { actionMessage } from '$lib/actionMessage';
-import { materialFor, producesBuildingMaterial } from '$lib/game/building.logic';
+import { materialFor, missingToBuild, producesBuildingMaterial } from '$lib/game/building.logic';
+import { buildPrice } from '$lib/model/buildingTemplate';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const character = locals.currentCharacter;
 	const eigene = character ? await plotService.getPlotsOfCharacter(character.id) : [];
+	const vorrat = character ? await needService.getStock(character.id) : [];
+
+	/**
+	 * Was fehlt, in Worten (Punkt 59) — die Rechnung steht in `missingToBuild`.
+	 *
+	 * Hier wird sie nur benannt: `COIN` ist keine Ware im Katalog, sondern das Geld selbst.
+	 */
+	function wasFehlt(preis: number, bedarf: { itemId: string; quantity: number }[]): string[] {
+		return missingToBuild(preis, bedarf, {
+			money: character?.money ?? 0,
+			stock: vorrat
+		}).map((posten) =>
+			posten.itemId === 'COIN'
+				? `${posten.quantity} Münzen`
+				: `${posten.quantity} ${getItemTemplate(posten.itemId)?.name ?? posten.itemId}`
+		);
+	}
+
 	return {
 		// Nur, was einem selbst gehören kann. Öffentliche Bauten errichtet der
 		// Amtsinhaber aus der Stadtkasse (Rathaus); sie hier anzubieten hieße, einen Weg
@@ -20,19 +39,26 @@ export const load: PageServerLoad = async ({ locals }) => {
 		buildingsOptions: buildingService
 			.getBuildingOptions()
 			.filter((vorlage) => vorlage.type !== 'PUBLIC' && vorlage.type !== 'EXTRACTION')
-			.map((vorlage) => ({
-				...vorlage,
-				// Seit 4.10 kostet ein Bau auch Material. Wer es erst beim Fehlschlag erfährt,
-				// hat die Hälfte des Spiels erraten müssen.
-				material: vorlage.recipes?.some((rezept) => producesBuildingMaterial(rezept.outputItemId))
+			.map((vorlage) => {
+				const bedarf = vorlage.recipes?.some((rezept) =>
+					producesBuildingMaterial(rezept.outputItemId)
+				)
 					? []
-					: materialFor(vorlage.levels[0].price, vorlage.type).map((posten) => ({
-							...posten,
-							name: getItemTemplate(posten.itemId)?.name ?? posten.itemId
-						}))
-			})),
+					: materialFor(vorlage.levels[0].price, vorlage.type);
+				return {
+					...vorlage,
+					// Seit 4.10 kostet ein Bau auch Material. Wer es erst beim Fehlschlag erfährt,
+					// hat die Hälfte des Spiels erraten müssen.
+					material: bedarf.map((posten) => ({
+						...posten,
+						name: getItemTemplate(posten.itemId)?.name ?? posten.itemId
+					})),
+					// Und was davon gerade fehlt (Punkt 59).
+					missing: wasFehlt(buildPrice(vorlage), bedarf)
+				};
+			}),
 		// Was im eigenen Inventar liegt — daneben liest sich der Bedarf von selbst.
-		stock: character ? await needService.getStock(character.id) : [],
+		stock: vorrat,
 		// Nur unbebaute eigene Grundstücke — auf ein besetztes passt kein zweites Haus.
 		freePlots: eigene.filter((plot) => !plot.hasBuilding)
 	};

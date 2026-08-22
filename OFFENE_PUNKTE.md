@@ -71,7 +71,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 62  | Geburts- und Errichtungsdatum — **erledigt mit 5.52**                                | —                            | erledigt     |
 | 57  | Der Takt der Welt steht nirgends — **erledigt mit 5.53**                             | —                            | erledigt     |
 | 58  | Wege, die nur beschrieben und nicht verlinkt sind — **erledigt mit 5.52**            | —                            | erledigt     |
-| 59  | Aktionen, die scheitern müssen, sehen aus wie Aktionen, die gehen                    | laufend                      | Aufgabe      |
+| 59  | Aktionen, die scheitern müssen — **erledigt mit 5.54** (Bauseite)                    | —                            | erledigt     |
 | 60  | Listen ohne Ordnung, Wahlen ohne Termin — **erledigt mit 5.52**                      | —                            | erledigt     |
 | 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen    | —                            | erledigt     |
 | 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                              | —                            | erledigt     |

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	CONDITION_MAX,
+	missingToBuild,
 	currentCondition,
 	isRuin,
 	outputFactor,
@@ -250,5 +251,57 @@ describe('Gebäude', () => {
 				reason: 'ALREADY_OWNED'
 			});
 		});
+	});
+});
+
+describe('was zum Bauen fehlt', () => {
+	/**
+	 * **Der Grund gehört neben den Knopf** (Punkt 59). Auf der Bauseite stand jedes Gebäude
+	 * mit aktivem Knopf, auch wenn das Geld um das Fünffache fehlte; erst der Klick sagte
+	 * es. Die Meldungen selbst sind gut, sie kamen nur zu spät.
+	 */
+	const bedarf = [
+		{ itemId: 'PLANK', quantity: 4 },
+		{ itemId: 'CLAY', quantity: 2 }
+	];
+
+	it('sagt nichts, wenn alles da ist', () => {
+		expect(
+			missingToBuild(100, bedarf, {
+				money: 100,
+				stock: [
+					{ itemId: 'PLANK', quantity: 4 },
+					{ itemId: 'CLAY', quantity: 9 }
+				]
+			})
+		).toEqual([]);
+	});
+
+	it('nennt zuerst das Geld, dann das Material', () => {
+		// In der Reihenfolge, in der man es beschafft — und das Geld ist die Bedingung für
+		// alles Weitere.
+		const fehlt = missingToBuild(100, bedarf, {
+			money: 80,
+			stock: [{ itemId: 'PLANK', quantity: 1 }]
+		});
+
+		expect(fehlt).toEqual([
+			{ itemId: 'COIN', quantity: 20 },
+			{ itemId: 'PLANK', quantity: 3 },
+			{ itemId: 'CLAY', quantity: 2 }
+		]);
+	});
+
+	it('zählt nur die Fehlmenge, nicht den ganzen Bedarf', () => {
+		// Wer drei von vier Brettern hat, dem fehlt eines — nicht vier.
+		const fehlt = missingToBuild(0, bedarf, {
+			money: 0,
+			stock: [
+				{ itemId: 'PLANK', quantity: 3 },
+				{ itemId: 'CLAY', quantity: 2 }
+			]
+		});
+
+		expect(fehlt).toEqual([{ itemId: 'PLANK', quantity: 1 }]);
 	});
 });

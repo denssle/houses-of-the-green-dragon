@@ -26,6 +26,14 @@
 			<b>{building.initialName}</b>
 			<i>{building.description}</i>
 			<p>{costLine(buildPrice(building), building.material)}</p>
+			<!--
+				**Der Grund gehört neben den Knopf, nicht hinter den Klick** (Punkt 59). Gesperrt
+				wird nichts: Wer zwanzig Münzen zu wenig hat, verkauft etwas und baut — ein
+				toter Knopf verspräche „nie" und wäre falsch.
+			-->
+			{#if building.missing.length > 0}
+				<p><small>Dafür fehlen dir noch: {building.missing.join(', ')}.</small></p>
+			{/if}
 			<form method="POST" use:enhance>
 				<input type="hidden" name="optionId" value={building.optionId} />
 				<label>

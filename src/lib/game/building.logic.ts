@@ -270,6 +270,37 @@ export function producesBuildingMaterial(outputItemId: string | undefined): bool
 	return outputItemId !== undefined && BUILDING_MATERIALS.includes(outputItemId);
 }
 
+/**
+ * Was zum Bauen noch fehlt — Münzen und Material, in Stücken (Punkt 59).
+ *
+ * **Damit der Grund neben dem Knopf stehen kann und nicht dahinter.** Auf der Bauseite
+ * stand jedes Gebäude mit aktivem Knopf, auch wenn das Geld um das Fünffache fehlte; erst
+ * der Klick sagte es. Die Meldungen selbst sind gut, sie kamen nur zu spät.
+ *
+ * **Gesperrt wird deshalb trotzdem nichts:** Was heute nicht geht, geht morgen — wer
+ * zwanzig Münzen zu wenig hat, verkauft etwas und baut. Ein toter Knopf verspräche „nie".
+ *
+ * Gibt eine leere Liste zurück, wenn alles da ist; sonst die Fehlmengen in der
+ * Reihenfolge, in der man sie beschafft: erst das Geld, dann das Material.
+ */
+export function missingToBuild(
+	price: number,
+	need: MaterialNeed[],
+	purse: { money: number; stock: { itemId: string; quantity: number }[] }
+): { itemId: string; quantity: number }[] {
+	const fehlt: { itemId: string; quantity: number }[] = [];
+	if (purse.money < price) fehlt.push({ itemId: 'COIN', quantity: price - purse.money });
+
+	for (const posten of need) {
+		const da: number =
+			purse.stock.find((eintrag) => eintrag.itemId === posten.itemId)?.quantity ?? 0;
+		if (da < posten.quantity) {
+			fehlt.push({ itemId: posten.itemId, quantity: posten.quantity - da });
+		}
+	}
+	return fehlt;
+}
+
 export function materialFor(price: number, type?: string): MaterialNeed[] {
 	if (price <= 0) return [];
 	const hundert: number = price / 100;
