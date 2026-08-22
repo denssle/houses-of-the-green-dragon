@@ -1,4 +1,4 @@
-import { type Transaction } from 'sequelize';
+import { Op, type Transaction } from 'sequelize';
 import { randomUUID } from 'node:crypto';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
@@ -234,27 +234,44 @@ export interface LeasableArea {
 
 export async function getAreas(characterId: string): Promise<LeasableArea[]> {
 	const flaechen = await Plot.findAll({ where: { type: 'RESOURCE' } });
+	if (flaechen.length === 0) return [];
 
-	const liste: LeasableArea[] = [];
-	for (const flaeche of flaechen) {
-		const pacht = await Lease.findOne({ where: { PlotId: flaeche.dataValues.id } });
-		// Der Hof entsteht mit der Pacht und fällt mit ihr; er wird trotzdem eigens
-		// gesucht und nicht aus dem Bestehen der Pacht gefolgert — eine Fläche aus der
-		// Zeit vor 5.15 hat keinen.
-		const hof = await Building.findOne({
-			where: { PlotId: flaeche.dataValues.id, optionId: buildingService.HOF_OPTION_ID }
-		});
-		liste.push({
+	// **Zwei Abfragen statt zwei je Fläche** (Punkt 67). Vorher lief je Fläche ein eigenes
+	// `findOne` für die Pacht und eines für den Hof — bei sechs Flächen zwölf Abfragen, und
+	// weil die NPC-Schleife diese Liste für **jeden** Einwohner in **jedem** Tick aufnimmt,
+	// waren das allein hier achtzig Abfragen je Tick bei acht Einwohnern.
+	//
+	// Die Zuordnung über eine `Map` ist dieselbe Rechnung wie vorher, nur einmal statt
+	// sechsmal gestellt.
+	const flaechenIds: string[] = flaechen.map((flaeche) => flaeche.dataValues.id);
+	const pachten = await Lease.findAll({ where: { PlotId: { [Op.in]: flaechenIds } } });
+	// Der Hof entsteht mit der Pacht und fällt mit ihr; er wird trotzdem eigens gesucht und
+	// nicht aus dem Bestehen der Pacht gefolgert — eine Fläche aus der Zeit vor 5.15 hat
+	// keinen.
+	const hoefe = await Building.findAll({
+		where: { PlotId: { [Op.in]: flaechenIds }, optionId: buildingService.HOF_OPTION_ID }
+	});
+
+	const pachtJeFlaeche = new Map(pachten.map((pacht) => [pacht.dataValues.PlotId, pacht]));
+	const hofJeFlaeche = new Map(
+		hoefe
+			.filter((hof) => hof.dataValues.PlotId !== null)
+			.map((hof) => [hof.dataValues.PlotId as string, hof])
+	);
+
+	return flaechen.map((flaeche) => {
+		const pacht = pachtJeFlaeche.get(flaeche.dataValues.id);
+		const hof = hofJeFlaeche.get(flaeche.dataValues.id);
+		return {
 			plotId: flaeche.dataValues.id,
 			address: flaeche.dataValues.address,
 			resourceType: flaeche.dataValues.resourceType,
 			leasedByMe: pacht?.dataValues.CharacterId === characterId,
-			leased: pacht !== null,
+			leased: pacht !== undefined,
 			buildingId: hof?.dataValues.id ?? null,
 			buildingName: hof?.dataValues.name ?? null
-		});
-	}
-	return liste;
+		};
+	});
 }
 
 // --- Ernten --------------------------------------------------------------------------

@@ -3,6 +3,7 @@ import { Op, type Transaction } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
 import { Character } from '$lib/db/model/character';
+import type { CharacterAttributes } from '$lib/db/attributes/character.attributes';
 import { Dynasty } from '$lib/db/model/dynasty';
 import { fullName } from '$lib/game/naming.logic';
 import { DynastyRelationship } from '$lib/db/model/dynastyRelationship';
@@ -55,7 +56,9 @@ export async function getAffection(fromId: string, toId: string, tick: number): 
 		return { affection: 0, kinship: 'NONE', houseStanding: 0 };
 	}
 
-	const verwandtschaft: Kinship = await kinshipBetween(fromId, toId);
+	// Die beiden Zeilen sind schon da — `kinshipOf` spart die zweite Ladung (Punkt 67).
+	const verwandtschaft: Kinship =
+		fromId === toId ? 'NONE' : await kinshipOf(von.dataValues, zu.dataValues);
 	const hausstand: number = await getStanding(
 		von.dataValues.DynastyId,
 		zu.dataValues.DynastyId,
@@ -378,8 +381,23 @@ export async function kinshipBetween(fromId: string, toId: string): Promise<Kins
 	const [von, zu] = await Promise.all([Character.findByPk(fromId), Character.findByPk(toId)]);
 	if (!von || !zu) return 'NONE';
 
-	const a = von.dataValues;
-	const b = zu.dataValues;
+	return kinshipOf(von.dataValues, zu.dataValues);
+}
+
+/**
+ * Dieselbe Frage, wenn die beiden Zeilen schon vorliegen (Punkt 67).
+ *
+ * **Sie lagen bisher zweimal vor.** `getAffection` lädt beide Personen und rief dann
+ * `kinshipBetween`, das sie noch einmal lud — zwei Abfragen je Frage nach der Zuneigung,
+ * und die NPC-Schleife stellt sie für jeden Kandidaten jedes Einwohners in jedem Tick.
+ *
+ * Die **Regel** steht deshalb hier und die **Tür** darüber: Wer nur Kennungen hat, ruft
+ * `kinshipBetween`; wer die Zeilen schon in der Hand hält, reicht sie herein. Zwei
+ * Fassungen derselben Regel wären der teurere Fehler gewesen.
+ */
+async function kinshipOf(a: CharacterAttributes, b: CharacterAttributes): Promise<Kinship> {
+	const fromId: string = a.id;
+	const toId: string = b.id;
 
 	if (a.spouseId === toId) return 'SPOUSE';
 	if (a.motherId === toId || a.fatherId === toId) return 'PARENT';

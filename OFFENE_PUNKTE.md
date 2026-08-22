@@ -1592,6 +1592,11 @@ innerhalb eines Ticks nie, wird aber von 43 Stellen in den Diensten einzeln nach
 direkt in der Datenbank stellen — der Tick gehört stattdessen durchgereicht, wie es
 `actForNpcs` schon tut.
 
+**Mit 5.49 sind es 571 Abfragen je Tick** (689 ms) — die Pachtflächen und die
+Verwandtschaft holten je Fläche und je Person einzeln, was sich in einem Zug holen lässt.
+Der Rest verteilt sich auf `characters` (118), `buildings` (115), `skills` (55) und
+`worlds` (51).
+
 **Ein erster Versuch mit 5.48 brachte zwei Prozent.** Die Häuserzeile der Stadt wird jetzt
 einmal je Lageaufnahme geholt statt dreimal (freier Arbeitsplatz, fehlende Werkstatt,
 Marktplatz). Das ist richtig und reicht nicht: Die verbleibenden 190 `buildings`-Abfragen

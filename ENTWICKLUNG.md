@@ -3402,6 +3402,35 @@ _Fertig, wenn:_ Die Zahl steht, statt geschätzt zu werden. — Erledigt. **Als 
 liegt der Tick an: durchreichen statt nachschlagen, wie es `actForNpcs` schon tut. Das
 sind mechanische 8 %, und danach ist die Stadtlage dran.
 
+**5.49 Zwei N+1-Schleifen weniger.** ✓ (Punkt 67) Die Messung aus 5.48 zeigte, wo die
+Abfragen entstehen; hier fallen die ersten beiden Nester.
+
+**Die Pachtflächen** (`getAreas`): Für **jede** Fläche lief ein eigenes `findOne` für die
+Pacht und eines für den Hof — bei sechs Flächen zwölf Abfragen, aufgenommen für jeden
+Einwohner in jedem Tick. Jetzt sind es zwei Sammelabfragen und eine Zuordnung über `Map`:
+dieselbe Rechnung, einmal statt sechsmal gestellt. `leases` fiel damit von achtzig
+Abfragen je Tick auf zwei.
+
+**Die Verwandtschaft** (`getAffection`): Sie lud beide Personen — und rief dann
+`kinshipBetween`, das **dieselben zwei Zeilen noch einmal** lud. Die Regel steht jetzt in
+`kinshipOf` und arbeitet auf Zeilen, die Tür `kinshipBetween` lädt sie für alle, die nur
+Kennungen haben. Zwei Fassungen derselben Regel wären der teurere Fehler gewesen.
+
+|                         | Abfragen je Tick | ms je Tick |
+| ----------------------- | ---------------- | ---------- |
+| vor 5.48                | 801              | 1031       |
+| nach 5.48 (Häuserzeile) | 785              | 865        |
+| nach den Pachtflächen   | 637              | 704        |
+| nach der Verwandtschaft | **571**          | **689**    |
+
+Knapp **dreißig Prozent weniger Abfragen**, und die Tickzeit folgt. Der Rest liegt weiter
+verteilt: `characters` (118), `buildings` (115), `skills` (55) und `worlds` (51) — die
+Weltzeit, die sich innerhalb eines Ticks nie ändert und trotzdem einundfünfzigmal
+nachgeschlagen wird.
+
+_Fertig, wenn:_ Die auffälligsten Nester sind weg und die Zahl ist kleiner. — Erledigt.
+**Als Nächstes** der Tick als Parameter statt als Abfrage, dann die Stadtlage.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird
