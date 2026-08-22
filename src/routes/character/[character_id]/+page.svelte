@@ -48,7 +48,19 @@
 		<dd>{data.purse.money} Münzen</dd>
 
 		<dt>Aktionspunkte</dt>
-		<dd>{data.purse.actionPoints} von {data.maxActionPoints}</dd>
+		<dd>
+			{data.purse.actionPoints} von {data.maxActionPoints}
+			<!--
+				**Der Takt der Welt, dort wo er zählt** (Punkt 57): eine Stunde Wirklichkeit
+				ist eine Stunde in Grünau. Ohne diese Zeile war „warte" die ganze Auskunft.
+			-->
+			{#if data.nextPointInMinutes !== undefined && data.purse.actionPoints < data.maxActionPoints}
+				<small>
+					— der nächste in {data.nextPointInMinutes}
+					{data.nextPointInMinutes === 1 ? 'Minute' : 'Minuten'}
+				</small>
+			{/if}
+		</dd>
 
 		<dt>Zustand</dt>
 		<dd>

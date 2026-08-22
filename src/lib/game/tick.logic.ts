@@ -1,4 +1,9 @@
-import { ACTION_POINTS_PER_TICK, MAX_ACTION_POINTS, MS_PER_TICK } from '$lib/game/time';
+import {
+	ACTION_POINTS_PER_TICK,
+	HOURS_PER_TICK,
+	MAX_ACTION_POINTS,
+	MS_PER_TICK
+} from '$lib/game/time';
 
 /**
  * Die Zeitrechnung als reine Funktionen: Wie viele Ticks fällig sind, was davon gelebt
@@ -57,6 +62,23 @@ export function planWorldAdvance(lastTickAt: Date, now: Date): WorldAdvance | nu
 		missed: ticks - 1,
 		lastTickAt: new Date(lastTickAt.getTime() + ticks * MS_PER_TICK)
 	};
+}
+
+/**
+ * Wie viele Minuten bis zum nächsten Tick — und damit bis zum nächsten Aktionspunkt.
+ *
+ * **Die Auskunft, die nirgends stand** (Punkt 57). „Warte, bis wieder Aktionspunkte da
+ * sind" nennt kein Maß: Wer das liest, weiß nicht, ob er in zehn Minuten wiederkommt oder
+ * morgen. Die Zahl ergibt sich aus dem Ankerpunkt der Weltuhr, den es ohnehin gibt.
+ *
+ * Aufgerundet, weil „in 0 Minuten" nach einem Fehler aussieht und nicht nach gleich.
+ */
+export function minutesToNextTick(lastTickAt: Date, now: Date = new Date()): number {
+	const seitdem: number = now.getTime() - lastTickAt.getTime();
+	if (!Number.isFinite(seitdem)) return HOURS_PER_TICK * 60;
+
+	const offen: number = MS_PER_TICK - (seitdem % MS_PER_TICK);
+	return Math.max(1, Math.ceil(offen / 60_000));
 }
 
 /**

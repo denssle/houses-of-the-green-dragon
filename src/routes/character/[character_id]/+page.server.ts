@@ -117,6 +117,10 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		// meisten schlicht falsch da, und der Ausbau, den man dafür bezahlt hat, wäre
 		// nirgends abzulesen.
 		maxActionPoints: await characterService.actionPointCeilingOf(gezeigt.id, jetzt),
+		// **Wann der nächste kommt** (Punkt 57). „Warte, bis wieder Aktionspunkte da sind"
+		// nennt kein Maß; wer das liest, weiß nicht, ob er in zehn Minuten wiederkommt oder
+		// morgen.
+		nextPointInMinutes: selbst ? await worldService.minutesToNextPoint() : undefined,
 		region: await regionService.getRegion(gezeigt.regionId),
 		home: zuhause,
 		plots: await plotService.getPlotsOfCharacter(gezeigt.id),

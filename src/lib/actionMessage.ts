@@ -9,7 +9,13 @@ import { MAX_NAME_LENGTH, MIN_NAME_LENGTH, type NameProblem } from '$lib/game/na
  * Umformulieren gingen die Fassungen auseinander.
  */
 const SAETZE: Record<ActionFailureReason, string> = {
-	NOT_ENOUGH_ACTION_POINTS: 'Dafür fehlt die Kraft — warte, bis wieder Aktionspunkte da sind.',
+	// **Mit Maß statt nur „warte"** (Punkt 57): Eine Stunde Wirklichkeit ist eine Stunde in
+	// Grünau, und wer das nicht weiß, kann nicht einschätzen, ob er gleich wiederkommt oder
+	// morgen. Wann genau der nächste Punkt fällt, steht auf der eigenen Seite — hier steht
+	// die Regel, denn eine Meldung kennt die Uhr nicht.
+	NOT_ENOUGH_ACTION_POINTS:
+		'Dafür fehlt die Kraft — je Stunde wächst ein Aktionspunkt nach. Wann der nächste fällt, ' +
+		'steht auf deiner Seite.',
 	NOT_ENOUGH_MONEY: 'Das Geld reicht nicht.',
 	WRONG_REGION: 'Das liegt zu weit weg — du bist nicht am selben Ort.',
 	NOT_A_WORKPLACE: 'Hier gibt es keine Arbeit.',

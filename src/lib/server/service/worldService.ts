@@ -4,7 +4,8 @@ import { World } from '$lib/db/model/world';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
-import { planWorldAdvance, type WorldAdvance } from '$lib/game/tick.logic';
+import { minutesToNextTick, planWorldAdvance, type WorldAdvance } from '$lib/game/tick.logic';
+import { HOURS_PER_TICK } from '$lib/game/time';
 
 /**
  * Die Weltzeit — und wer sie weiterstellt.
@@ -39,6 +40,21 @@ export async function currentTick(): Promise<number> {
  * Gibt zurück, was geschehen ist — oder `null`, wenn noch kein voller Tick vergangen war.
  */
 /** Was `advanceWorld()` getan hat, samt dem Stand, auf dem die Uhr nun steht. */
+/**
+ * In wie vielen Minuten der nächste Tick fällt — und damit der nächste Aktionspunkt.
+ *
+ * **Die Auskunft, die nirgends stand** (Punkt 57): Eine Stunde Wirklichkeit ist eine
+ * Stunde in Grünau, und diese Zahl entscheidet, ob man in zehn Minuten wiederkommt oder
+ * morgen. Gerechnet aus `lastTickAt`, dem Ankerpunkt der Weltuhr — es braucht dafür
+ * nichts Neues.
+ */
+export async function minutesToNextPoint(now: Date = new Date()): Promise<number> {
+	const welt = await World.findByPk(WORLD_ID);
+	if (!welt) return HOURS_PER_TICK * 60;
+
+	return minutesToNextTick(new Date(welt.dataValues.lastTickAt), now);
+}
+
 export interface WorldAdvanced extends WorldAdvance {
 	currentTick: number;
 }

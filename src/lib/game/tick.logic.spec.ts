@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { planWorldAdvance, regrownActionPoints } from '$lib/game/tick.logic';
+import { minutesToNextTick, planWorldAdvance, regrownActionPoints } from '$lib/game/tick.logic';
 import { MAX_ACTION_POINTS, MS_PER_TICK, TICKS_PER_YEAR } from '$lib/game/time';
 
 const ANKER = new Date('2026-08-12T12:00:00Z');
@@ -81,5 +81,36 @@ describe('Nachwachsende Aktionspunkte', () => {
 	it('meldet einen unlesbaren Ankerpunkt, statt NaN weiterzureichen', () => {
 		// Ohne diese Prüfung rechnete sich NaN bis in ein UPDATE auf die Weltuhr durch.
 		expect(() => planWorldAdvance(new Date('unfug'), new Date())).toThrow(/Ankerpunkt/);
+	});
+});
+
+describe('bis zum nächsten Aktionspunkt', () => {
+	/**
+	 * **Die Auskunft, die nirgends stand** (Punkt 57). „Warte, bis wieder Aktionspunkte da
+	 * sind" nennt kein Maß — wer das liest, weiß nicht, ob er in zehn Minuten wiederkommt
+	 * oder morgen.
+	 */
+	const anker = new Date('2026-08-22T10:00:00Z');
+
+	it('zählt die Minuten bis zur vollen Stunde', () => {
+		expect(minutesToNextTick(anker, new Date('2026-08-22T10:00:00Z'))).toBe(60);
+		expect(minutesToNextTick(anker, new Date('2026-08-22T10:37:00Z'))).toBe(23);
+	});
+
+	it('rundet auf, statt null zu sagen', () => {
+		// „In 0 Minuten" sieht aus wie ein Fehler und nicht wie gleich.
+		expect(minutesToNextTick(anker, new Date('2026-08-22T10:59:30Z'))).toBe(1);
+	});
+
+	it('rechnet über mehrere Ticks hinweg', () => {
+		// Nach einem Ausfall liegt der Ankerpunkt weit zurück; die Antwort bleibt dieselbe
+		// Frage: wie weit bis zur nächsten vollen Stunde.
+		expect(minutesToNextTick(anker, new Date('2026-08-22T14:15:00Z'))).toBe(45);
+	});
+
+	it('hält einem ungültigen Ankerpunkt stand', () => {
+		// Er kostet anderswo einen Absturz (siehe `planWorldAdvance`); hier reicht die
+		// ehrliche Näherung, denn diese Zahl steht nur auf einer Seite.
+		expect(minutesToNextTick(new Date('kein Datum'), anker)).toBe(60);
 	});
 });

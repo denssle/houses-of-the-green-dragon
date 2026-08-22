@@ -3526,6 +3526,31 @@ _Fertig, wenn:_ Kein Satz nennt einen Ort, ohne hinzuführen; keine Liste steht 
 — Erledigt für diese drei. **Offen bleiben** aus demselben Durchgang Punkt 57 (wann kommt
 der nächste Aktionspunkt) und Punkt 59 (Knöpfe, die scheitern müssen).
 
+**5.53 Der Takt der Welt bekommt eine Zahl.** ✓ (Punkt 57) Eine Stunde Wirklichkeit ist
+eine Stunde in Grünau, fünfzig davon ein Spieljahr. Diese Zahl entscheidet, ob man in
+zehn Minuten wiederkommt oder morgen — und sie stand an keiner Stelle, an der ein Spieler
+sie sucht. Die Meldung bei leerer Kraft lautete „warte, bis wieder Aktionspunkte da sind"
+und nannte kein Maß.
+
+Jetzt steht bei den Aktionspunkten, **wann der nächste fällt**: „der nächste in 23
+Minuten", solange nicht ohnehin alles voll ist. Gerechnet wird das aus `lastTickAt`, dem
+Ankerpunkt der Weltuhr — es brauchte dafür nichts Neues, nur eine reine Funktion
+(`minutesToNextTick`) und den Weg an die Oberfläche.
+
+**Die Fehlermeldung nennt die Regel, nicht die Uhrzeit.** Sie ist ein fester Satz je
+Grund (`actionMessage.ts`) und kennt die Weltzeit nicht; sie sagt deshalb „je Stunde
+wächst ein Aktionspunkt nach" und verweist auf die eigene Seite. Die Alternative wäre
+gewesen, jeder Meldung eine Uhr mitzugeben — für eine Zahl, die zwei Klicks entfernt
+steht.
+
+Vier Tests halten die Rechnung fest, darunter die beiden Ränder: dass aufgerundet wird
+(„in 0 Minuten" sieht aus wie ein Fehler und nicht wie gleich) und dass ein ungültiger
+Ankerpunkt eine ehrliche Näherung ergibt statt eines Absturzes — anders als in
+`planWorldAdvance`, wo derselbe Fall laut sein muss, weil dort die Weltzeit selbst
+davon abhängt.
+
+_Fertig, wenn:_ Wer keine Kraft mehr hat, weiß, wann er wiederkommen soll. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird
