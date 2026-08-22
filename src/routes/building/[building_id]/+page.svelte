@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
+	import PublicOffice from '$lib/PublicOffice.svelte';
 	import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '$lib/game/naming.logic';
 	import type { PageProps } from './$types';
 
@@ -45,6 +46,15 @@
 		{/if}
 	</small>
 </p>
+
+<!--
+	**Das Rathaus ist der Ort der Amtsgeschäfte** (5.57) — sie standen bis dahin auf einer
+	eigenen Seite, und die Übersicht führte zweimal „Rathaus", das eine Mal hierher, das
+	andere Mal dorthin. Ein Haus hat eine Adresse.
+-->
+{#if data.amt}
+	<PublicOffice amt={data.amt} hier={data.building.id} />
+{/if}
 <p><i>{data.option?.description}</i></p>
 
 <dl>
@@ -526,3 +536,9 @@
 		</p>
 	</section>
 {/if}
+
+<!--
+	Der Rückweg gehört ans Ende, und zwar auf jede Gebäudeseite: Seit 5.57 stehen hier auch
+	die Amtsgeschäfte, und deren Rückweg lag vorher mitten auf der Seite.
+-->
+<p><a href="{base}/" class="link">Zurück in die Stadt</a></p>

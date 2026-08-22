@@ -3636,6 +3636,47 @@ Verhalten lässt ihn umfallen.
 
 _Fertig, wenn:_ Eine lange Angebotsliste kostet nicht mehr als eine kurze. — Erledigt.
 
+**5.57 Ein Haus, eine Adresse.** ✓ Beim Durchsehen der Übersicht aufgefallen: „Rathaus"
+stand dort **zweimal** — einmal als Weg (`/council`) mit Amt, Wahl und Gesetzen, einmal in
+der Häuserliste (`/building/…`) mit Zustand und Belegschaft. Zwei gleich benannte Links,
+zwei verschiedene Ziele. Dasselbe Paar bildeten „Markt" und „Marktplatz", und der
+Kornspeicher wartete nur darauf, gebaut zu werden.
+
+**Zusammengelegt statt umbenannt.** Der naheliegende Ausweg wäre gewesen, den Weg anders
+zu nennen — „Amt und Gesetze" statt „Rathaus". Das hätte die Namen entzerrt und die
+eigentliche Frage offen gelassen: Warum hat ein Haus zwei Seiten? Jetzt hat es eine. Wer
+ins Rathaus geht, findet dort das Amt **und** den Zustand des Daches.
+
+Der Umbau in vier Teilen:
+
+- **`officeData`** (neues Modul `src/lib/server/pages/`) stellt zusammen, was die Stadt
+  betrifft: Amtsinhaber, Wahlzettel, Kasse, Gesetze, öffentliche Bauten, Erschließung. Es
+  steht zwischen Route und Diensten, enthält keine Regel und wird von der Gebäudeseite
+  geladen, wenn das Haus ein Rathaus ist.
+- **`PublicOffice.svelte`** zeigt sie. Ein eigener Baustein, weil es zweihundert Zeilen
+  sind, weil sie die **Stadt** betreffen und nicht dieses eine Gebäude — und weil der
+  Richter (Punkt 32) einmal seinen eigenen daneben bekommt.
+- **Acht Amtshandlungen** sind mitgezogen. Zwei mussten umbenannt werden, weil das Haus
+  dieselben Wörter für sich selbst braucht: `renovate` richtet **dieses** Gebäude her,
+  `publicRenovate` eines aus der städtischen Liste; `dismiss` entlässt hier,
+  `publicDismiss` aus dem Dienst der Stadt.
+- **`/council` leitet weiter** auf das Rathaus der eigenen Stadt — wie `/chamber` seit
+  5.45. Wer den alten Weg im Lesezeichen hat, landet dort, wo es jetzt steht.
+
+**Drei Kanten hat der Umzug hinterlassen**, alle erst in der laufenden App zu sehen: Der
+Rückweg „Zurück in die Stadt" stand mitten auf der Seite, weil er das Ende der alten Seite
+war; das Rathaus verlinkte in „Was der Stadt gehört" auf sich selbst; und ein Feld hieß
+nach dem Verschieben `lawChronicle` statt `chronicle`, was die Seite mit einem
+`Cannot read properties of undefined` quittierte. Das erste ist ans Ende gewandert, das
+zweite steht jetzt als **„Rathaus (hier)"**, das dritte war ein Tippfehler mit Ansage.
+
+Nebenbei: **Die Chronik steht jetzt in der Kopfleiste.** Sie ist das, was man liest, wenn
+man nach einer Weile wiederkommt — und das tut man von jeder Seite aus, nicht nur von der
+Übersicht.
+
+_Fertig, wenn:_ Kein Name führt an zwei Orte. — Erledigt für das Rathaus. **Offen bleiben**
+„Markt"/„Marktplatz" und der Kornspeicher: dasselbe Muster, derselbe Umbau.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

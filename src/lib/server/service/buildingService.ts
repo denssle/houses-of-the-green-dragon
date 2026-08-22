@@ -53,6 +53,15 @@ export const HOF_OPTION_ID = 13;
  * Die Vorlagen bleiben Code und wandern nicht in die Datenbank: Preise, Aktionen und
  * Grenzen sollen sich ändern lassen, ohne dass Bestandsgebäude davon unberührt bleiben.
  */
+/**
+ * Das Rathaus — der Ort, an dem die Amtsgeschäfte stattfinden (5.57).
+ *
+ * Als Konstante, weil zwei Stellen danach fragen: die Gebäudeseite, die dort die
+ * Amtsgeschäfte zeigt, und die Übersicht, die den Weg dorthin nennt. Eine Null im Code
+ * wäre an beiden Stellen dieselbe stumme Zahl.
+ */
+export const RATHAUS_OPTION_ID = 0;
+
 export function getBuildingOptions(): BuildingTemplate[] {
 	return [
 		{

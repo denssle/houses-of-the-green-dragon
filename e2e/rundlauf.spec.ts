@@ -46,7 +46,9 @@ const BASIS = '/houses';
  * Güte, und das ist eine Auskunft und kein Fehler.
  */
 async function eineSchicht(page: Page): Promise<boolean> {
-	// Über das Rathaus: Dort steht, was der Stadt gehört, mit Verweis auf jedes Haus.
+	// Über das Rathaus: Dort steht, was der Stadt gehört, mit Verweis auf jedes Haus. Die
+	// alte Adresse leitet seit 5.57 auf die Seite des Hauses weiter — dieser Weg prüft sie
+	// nebenbei mit.
 	await page.goto(BASIS + '/council');
 	const wieviele: number = await page
 		.locator('section:has(h3:text("Was der Stadt gehört")) a.link')

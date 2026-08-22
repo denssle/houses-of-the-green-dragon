@@ -2,6 +2,10 @@ import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as chronicleService from '$lib/server/service/chronicleService';
+import { officeData } from '$lib/server/pages/officeData';
+import { RATHAUS_OPTION_ID } from '$lib/server/service/buildingService';
+import * as auctionService from '$lib/server/service/auctionService';
+import { LAW_KINDS, type LawKind, LAW_RULES } from '$lib/game/law.logic';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
 import * as plotService from '$lib/server/service/plotService';
 import type { BuildingAction } from '$lib/model/buildingAction';
@@ -84,8 +88,17 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		(eintrag) => eintrag.kind === 'BUILDING_BUILT'
 	);
 
+	// **Ist dies das Rathaus, gehören die Amtsgeschäfte dazu** (5.57). Bis dahin standen sie
+	// auf einer eigenen Seite, und die Übersicht führte zweimal „Rathaus" — einmal hierher,
+	// einmal dorthin. Ein Haus hat eine Adresse.
+	const amt =
+		building.optionId === RATHAUS_OPTION_ID && locals.currentCharacter
+			? await officeData(locals.currentCharacter.regionId, locals.currentCharacter.id)
+			: undefined;
+
 	return {
 		building,
+		amt,
 		built: gebaut
 			? { season: SEASON_NAMES[seasonOf(gebaut.tick)], year: yearOf(gebaut.tick) }
 			: undefined,
@@ -260,6 +273,139 @@ function naechsteStufe(
 }
 
 export const actions = {
+	// --- Amtsgeschäfte (5.57) ----------------------------------------------------------
+	//
+	// **Sie standen auf einer eigenen Seite** und sind mit dem Rathaus hierher gezogen:
+	// Ein Haus, eine Adresse. Zwei von ihnen mussten dabei umbenannt werden, weil dieses
+	// Haus dieselben Wörter schon für sich selbst braucht — `renovate` richtet **dieses**
+	// Gebäude her, `publicRenovate` eines der städtischen aus der Liste; `dismiss`
+	// entlässt hier, `publicDismiss` aus dem Dienst der Stadt.
+	stand: async ({ locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const ergebnis = await electionService.stand(character.id, character.regionId);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: 'Du stehst auf dem Wahlzettel.' };
+	},
+
+	vote: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const candidateId = (await request.formData()).get('candidateId')?.toString();
+		if (!candidateId) return fail(400, { message: 'Für wen?' });
+
+		const ergebnis = await electionService.vote(character.id, character.regionId, candidateId);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: 'Deine Stimme ist abgegeben.' };
+	},
+
+	enact: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const daten = await request.formData();
+		const kind = daten.get('kind')?.toString() as LawKind | undefined;
+		const value = Number(daten.get('value'));
+		if (!kind || !LAW_KINDS.includes(kind)) return fail(400, { message: 'Welches Gesetz?' });
+
+		const ergebnis = await lawService.enact(
+			character.id,
+			character.regionId,
+			kind,
+			value,
+			await worldService.currentTick()
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		const regel = LAW_RULES[kind];
+		const wert: string = regel.unit === 'PERCENT' ? `${value} %` : `${value} Münzen`;
+		return { message: `${regel.name}: ${wert}, ab sofort.` };
+	},
+
+	publicRenovate: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const buildingId = (await request.formData()).get('buildingId')?.toString();
+		if (!buildingId) return fail(400, { message: 'Welches Haus?' });
+
+		const ergebnis = await buildingService.renovatePublicBuilding(character.id, buildingId);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `Hergerichtet. ${ergebnis.spent} Münzen aus der Stadtkasse.` };
+	},
+
+	buildPublic: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const daten = await request.formData();
+		const optionId = Number(daten.get('optionId'));
+		const plotId = daten.get('plotId')?.toString();
+		if (!plotId || !Number.isInteger(optionId)) return fail(400, { message: 'Was und wo?' });
+
+		const ergebnis = await buildingService.buildPublicBuilding(character.id, optionId, plotId);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `${ergebnis.building.name} steht.` };
+	},
+
+	// Der Sold der Wache ist eine Amtsentscheidung: derselbe Aushang wie bei jedem
+	// Betrieb, nur zahlt die Stadtkasse.
+	pay: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const daten = await request.formData();
+		const buildingId = daten.get('buildingId')?.toString();
+		const roh = daten.get('wage')?.toString();
+		if (!buildingId) return fail(400, { message: 'Für welches Haus?' });
+
+		const wage: number | null = roh === undefined || roh === '' ? null : Number(roh);
+		const ergebnis = await employmentService.offerJob(character.id, buildingId, wage);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return {
+			message: wage === null ? 'Der Aushang ist abgenommen.' : `Sold: ${wage} je Aktionspunkt.`
+		};
+	},
+
+	/**
+	 * Aus dem Dienst der Stadt entlassen.
+	 *
+	 * Dieselbe Handlung wie beim privaten Betrieb, dieselbe Prüfung — nur bestimmt hier
+	 * das Amt und nicht der Besitz. Deshalb steht sie auf dieser Seite: Ein städtisches
+	 * Haus gehört niemandem, also findet der Bürgermeister seine Belegschaft dort, wo er
+	 * auch den Sold aussetzt.
+	 */
+	publicDismiss: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const daten = await request.formData();
+		const buildingId = daten.get('buildingId')?.toString();
+		const employeeId = daten.get('employeeId')?.toString();
+		if (!buildingId || !employeeId) return fail(400, { message: 'Wen aus welchem Haus?' });
+
+		const ergebnis = await employmentService.dismiss(character.id, buildingId, employeeId);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: 'Aus dem Dienst entlassen.' };
+	},
+
+	develop: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Nicht angemeldet' });
+
+		const count = Number((await request.formData()).get('count'));
+		const ergebnis = await auctionService.developLand(character.id, character.regionId, count);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return {
+			message:
+				ergebnis.plots +
+				' Grundstücke ausgewiesen für ' +
+				ergebnis.spent +
+				' Münzen — sie gehen unter den Hammer.'
+		};
+	},
+
 	/**
 	 * Für Lohn herrichten.
 	 *

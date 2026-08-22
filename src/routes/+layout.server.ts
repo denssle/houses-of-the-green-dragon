@@ -32,6 +32,10 @@ export const load: LayoutServerLoad = ({ locals }) => {
 					]
 				: [{ slug: 'character/new', title: 'Neuer Charakter' }]),
 			{ slug: 'dynasty', title: 'Dynastie' },
+			// **Die Chronik gehört nach oben**, nicht nur in die Übersicht: Sie ist das, was
+			// man liest, wenn man nach einer Weile wiederkommt — und das tut man von jeder
+			// Seite aus, nicht nur von der Übersicht. Für Gäste steht sie schon länger hier.
+			{ slug: 'chronicle', title: 'Chronik' },
 			{ slug: 'logout', title: 'Abmelden' }
 		]
 	};

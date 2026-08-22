@@ -63,7 +63,10 @@
 		<h3>Die Stadt</h3>
 		<nav class="actions">
 			<a href="{base}/people">Leute</a>
-			<a href="{base}/council">Rathaus</a>
+			<!-- Zum Haus, nicht zu einer zweiten Adresse desselben Hauses (5.57). -->
+			{#if data.townHallId}
+				<a href="{base}/building/{data.townHallId}">Rathaus</a>
+			{/if}
 			<a href="{base}/chronicle">Chronik</a>
 		</nav>
 	</section>

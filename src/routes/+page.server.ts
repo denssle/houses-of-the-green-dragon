@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
 import * as buildingService from '$lib/server/service/buildingService';
+import { RATHAUS_OPTION_ID } from '$lib/server/service/buildingService';
 import * as familyService from '$lib/server/service/familyService';
 import * as nameService from '$lib/server/service/nameService';
 import * as regionService from '$lib/server/service/regionService';
@@ -28,6 +29,9 @@ async function haeuser(regionId: string) {
 
 	return {
 		publicBuildings: alle.filter((haus) => buildingService.isPublicWorks(haus)),
+		// **Der Weg ins Rathaus führt zum Rathaus** (5.57). Bis dahin zeigte er auf
+		// `/council` und die Häuserliste auf das Gebäude: zweimal derselbe Name, zwei Ziele.
+		townHallId: alle.find((haus) => haus.optionId === RATHAUS_OPTION_ID)?.id,
 		escheated: alle.filter((haus) => haus.escheatedTick !== null),
 		privateBuildings: alle
 			.filter((haus) => haus.ownerType === 'CHARACTER')
@@ -47,6 +51,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			publicBuildings: [],
 			privateBuildings: [],
 			escheated: [],
+			townHallId: undefined,
 			population: undefined,
 			world: undefined
 		};

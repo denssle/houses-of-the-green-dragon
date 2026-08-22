@@ -1,35 +1,49 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
-	import type { PageProps } from './$types';
 
-	let { data }: PageProps = $props();
+	/**
+	 * Die Amtsgeschäfte einer Stadt — auf der Seite ihres Rathauses (5.57).
+	 *
+	 * **Warum als Komponente.** Bis 5.57 war das eine eigene Seite (`/council`), und die
+	 * Übersicht führte zweimal „Rathaus": einmal dorthin, einmal auf das Gebäude. Zwei
+	 * Adressen für ein Haus sind keine Ordnung, sondern eine Falle — beide Links sahen
+	 * gleich aus und führten auseinander.
+	 *
+	 * Jetzt steht alles auf der Seite des Hauses. Die Amtsgeschäfte bleiben trotzdem ein
+	 * eigener Baustein: Sie sind zweihundert Zeilen, sie betreffen die **Stadt** und nicht
+	 * dieses eine Gebäude, und wenn der Richter dazukommt (Punkt 32), bekommt er seinen
+	 * eigenen daneben.
+	 *
+	 * Zwei Formulare heißen hier anders als auf der Gebäudeseite: `publicRenovate` und
+	 * `publicDismiss`. Das Haus braucht `renovate` und `dismiss` für sich selbst — dieselben
+	 * Wörter, andere Kasse.
+	 */
+	let { amt, hier }: { amt: Record<string, any>; hier: string } = $props();
 </script>
 
-<h2>Rathaus</h2>
-
 <section>
-	<h3>{data.office}</h3>
-	{#if data.holder}
+	<h3>{amt.office}</h3>
+	{#if amt.holder}
 		<p>
-			<a href="{base}/character/{data.holder.characterId}" class="link">{data.holder.name}</a>
-			führt die Stadt{#if data.holder.mine}<b> — das bist du.</b>{:else}.{/if}
-			{#if data.holder.yearsLeft !== null}
-				Noch {data.holder.yearsLeft}
-				{data.holder.yearsLeft === 1 ? 'Jahr' : 'Jahre'} Amtszeit.
+			<a href="{base}/character/{amt.holder.characterId}" class="link">{amt.holder.name}</a>
+			führt die Stadt{#if amt.holder.mine}<b> — das bist du.</b>{:else}.{/if}
+			{#if amt.holder.yearsLeft !== null}
+				Noch {amt.holder.yearsLeft}
+				{amt.holder.yearsLeft === 1 ? 'Jahr' : 'Jahre'} Amtszeit.
 			{/if}
 		</p>
-		{#if data.holder.movedUpBy > 0}
+		{#if amt.holder.movedUpBy > 0}
 			<p>
 				<small>
-					Nachgerückt: {data.holder.movedUpBy}
-					{data.holder.movedUpBy === 1 ? 'Kandidat' : 'Kandidaten'} vor
-					{data.holder.name} sind gestorben. Neu gewählt wird deshalb nicht — es zählt weiter das letzte
+					Nachgerückt: {amt.holder.movedUpBy}
+					{amt.holder.movedUpBy === 1 ? 'Kandidat' : 'Kandidaten'} vor
+					{amt.holder.name} sind gestorben. Neu gewählt wird deshalb nicht — es zählt weiter das letzte
 					Ergebnis.
 				</small>
 			</p>
 		{/if}
-	{:else if data.ballot}
+	{:else if amt.ballot}
 		<!--
 			**Nicht „es muss gewählt werden", während gewählt wird** (Punkt 60). Der Satz stand
 			direkt über einer laufenden Wahl und las sich wie eine Aufforderung, etwas zu tun,
@@ -39,10 +53,10 @@
 	{:else}
 		<p><i>Niemand führt die Stadt. Es muss gewählt werden.</i></p>
 	{/if}
-	<p><i>Stadtkasse: {data.treasury} Münzen</i></p>
+	<p><i>Stadtkasse: {amt.treasury} Münzen</i></p>
 </section>
 
-{#if data.ballot}
+{#if amt.ballot}
 	<section>
 		<h3>Wahl</h3>
 		<!--
@@ -51,24 +65,24 @@
 		-->
 		<p>
 			<small>
-				Ausgezählt wird in {Math.max(0, data.ballot.closesTick - data.currentTick)} Stunden — das ist
-				{Math.max(1, Math.round((data.ballot.closesTick - data.currentTick) / 24))}
-				{Math.max(1, Math.round((data.ballot.closesTick - data.currentTick) / 24)) === 1
+				Ausgezählt wird in {Math.max(0, amt.ballot.closesTick - amt.currentTick)} Stunden — das ist
+				{Math.max(1, Math.round((amt.ballot.closesTick - amt.currentTick) / 24))}
+				{Math.max(1, Math.round((amt.ballot.closesTick - amt.currentTick) / 24)) === 1
 					? 'Tag'
 					: 'Tage'} in der Wirklichkeit.
 			</small>
 		</p>
-		{#if data.ballot.candidates.length === 0}
+		{#if amt.ballot.candidates.length === 0}
 			<p><i>Noch stellt sich niemand auf.</i></p>
 		{:else}
 			<ul>
-				{#each data.ballot.candidates as kandidat (kandidat.id)}
+				{#each amt.ballot.candidates as kandidat (kandidat.id)}
 					<li>
 						<a href="{base}/character/{kandidat.id}" class="link">{kandidat.name}</a
 						>{#if kandidat.mine}
 							(du){/if} — {kandidat.votes}
 						{kandidat.votes === 1 ? 'Stimme' : 'Stimmen'}
-						{#if !data.ballot.iVoted}
+						{#if !amt.ballot.iVoted}
 							<form method="POST" action="?/vote" use:enhance>
 								<input type="hidden" name="candidateId" value={kandidat.id} />
 								<button type="submit">Wählen</button>
@@ -79,11 +93,11 @@
 			</ul>
 		{/if}
 
-		{#if data.ballot.iVoted}
+		{#if amt.ballot.iVoted}
 			<p><i>Du hast gewählt. Eine Stimme je Kopf.</i></p>
 		{/if}
 
-		{#if !data.ballot.iStand}
+		{#if !amt.ballot.iStand}
 			<form method="POST" action="?/stand" use:enhance>
 				<button type="submit">Selbst antreten</button>
 			</form>
@@ -107,12 +121,18 @@
 <section>
 	<h3>Was der Stadt gehört</h3>
 	<ul>
-		{#each data.publicBuildings as haus (haus.id)}
+		{#each amt.publicBuildings as haus (haus.id)}
 			<li>
-				<a href="{base}/building/{haus.id}" class="link">{haus.name}</a> — Zustand
+				<!-- Kein Link auf die Seite, auf der man schon steht (5.57). -->
+				{#if haus.id === hier}
+					<b>{haus.name}</b>
+					<small>(hier)</small>
+				{:else}
+					<a href="{base}/building/{haus.id}" class="link">{haus.name}</a>
+				{/if} — Zustand
 				{haus.condition} von 100.
-				{#if data.holder?.mine && haus.condition < 100}
-					<form method="POST" action="?/renovate" use:enhance>
+				{#if amt.holder?.mine && haus.condition < 100}
+					<form method="POST" action="?/publicRenovate" use:enhance>
 						<input type="hidden" name="buildingId" value={haus.id} />
 						<button type="submit">Herrichten ({haus.renovationCost} Münzen)</button>
 					</form>
@@ -135,8 +155,8 @@
 								<li>
 									<a href="{base}/character/{person.id}" class="link">{person.name}</a>
 									— {person.wage} Münzen je Aktionspunkt
-									{#if data.holder?.mine}
-										<form method="POST" action="?/dismiss" use:enhance>
+									{#if amt.holder?.mine}
+										<form method="POST" action="?/publicDismiss" use:enhance>
 											<input type="hidden" name="buildingId" value={haus.id} />
 											<input type="hidden" name="employeeId" value={person.id} />
 											<button type="submit" class="link">Entlassen</button>
@@ -146,7 +166,7 @@
 							{/each}
 						</ul>
 					{/if}
-					{#if data.holder?.mine}
+					{#if amt.holder?.mine}
 						<form method="POST" action="?/pay" use:enhance>
 							<input type="hidden" name="buildingId" value={haus.id} />
 							<input
@@ -171,15 +191,15 @@
 		</small>
 	</p>
 
-	{#if data.holder?.mine && data.buildable.length > 0 && data.freePlots.length > 0}
+	{#if amt.holder?.mine && amt.buildable.length > 0 && amt.freePlots.length > 0}
 		<h3>Bauen lassen</h3>
-		{#each data.buildable as vorlage (vorlage.optionId)}
+		{#each amt.buildable as vorlage (vorlage.optionId)}
 			<form method="POST" action="?/buildPublic" use:enhance>
 				<input type="hidden" name="optionId" value={vorlage.optionId} />
 				<label>
 					{vorlage.name} ({vorlage.price} Münzen) —
 					<select name="plotId" aria-label="Grundstück für {vorlage.name}">
-						{#each data.freePlots as flaeche (flaeche.id)}
+						{#each amt.freePlots as flaeche (flaeche.id)}
 							<option value={flaeche.id}>{flaeche.address}</option>
 						{/each}
 					</select>
@@ -191,13 +211,13 @@
 	{/if}
 </section>
 
-{#if data.holder?.mine}
+{#if amt.holder?.mine}
 	<section>
 		<h3>Bauland erschließen</h3>
 		<p>
-			Die Stadt zahlt {data.development.costPerPlot} Münzen je Grundstück; was dabei entsteht, wird versteigert.
-			{#if data.development.running > 0}
-				Zurzeit laufen {data.development.running} Versteigerungen.
+			Die Stadt zahlt {amt.development.costPerPlot} Münzen je Grundstück; was dabei entsteht, wird versteigert.
+			{#if amt.development.running > 0}
+				Zurzeit laufen {amt.development.running} Versteigerungen.
 			{/if}
 		</p>
 		<form method="POST" action="?/develop" use:enhance>
@@ -206,7 +226,7 @@
 				name="count"
 				value="1"
 				min="1"
-				max={data.development.max}
+				max={amt.development.max}
 				aria-label="Wie viele Grundstücke"
 			/>
 			<button type="submit">Ausweisen lassen</button>
@@ -229,14 +249,14 @@
 		</small>
 	</p>
 	<ul>
-		{#each data.laws as gesetz (gesetz.kind)}
+		{#each amt.laws as gesetz (gesetz.kind)}
 			<li>
 				<b>{gesetz.name}:</b>
 				<!-- „1 Münzen" stand nie da, solange kein Satz auf eins stand — die
 				     Aufwandsentschädigung tut es ab Werk. -->
 				{gesetz.value}{gesetz.unit === 'PERCENT' ? ' %' : gesetz.value === 1 ? ' Münze' : ' Münzen'}
 				— {gesetz.description}.
-				{#if data.holder?.mine}
+				{#if amt.holder?.mine}
 					<form method="POST" action="?/enact" use:enhance>
 						<input type="hidden" name="kind" value={gesetz.kind} />
 						<input
@@ -255,10 +275,10 @@
 		{/each}
 	</ul>
 
-	{#if data.chronicle.length > 0}
+	{#if amt.lawChronicle.length > 0}
 		<h3>Was bisher erlassen wurde</h3>
 		<ul>
-			{#each data.chronicle as eintrag (eintrag.kind + eintrag.enactedTick)}
+			{#each amt.lawChronicle as eintrag (eintrag.kind + eintrag.enactedTick)}
 				<li>
 					<small>
 						Jahr {eintrag.year}: {eintrag.name} auf {eintrag.value}{eintrag.unit === 'PERCENT'
@@ -270,5 +290,3 @@
 		</ul>
 	{/if}
 </section>
-
-<p><a href="{base}/" class="link">Zurück in die Stadt</a></p>
