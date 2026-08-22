@@ -60,6 +60,13 @@ async function materialGeben(characterId: string): Promise<void> {
 }
 
 /** Ein Gebäude auf eigenem Grund, mit dem angegebenen Stand. */
+/**
+ * Ein Haus — privat mit Besitzer, städtisch ohne.
+ *
+ * **Städtisch heißt nicht heimgefallen** (Punkt 79): Was der Stadt aus einem erbenlosen
+ * Nachlass zufiel, trägt seit 5.42 einen `escheatedTick`; ohne ihn gehört das Haus ihr
+ * von jeher und ist ihre Aufgabe. Wer den Nachlass braucht, gibt ihn über `extras` mit.
+ */
 async function haus(
 	besitzerId: string | null,
 	extras: Record<string, unknown> = {}
@@ -300,9 +307,10 @@ describe('Bauen und Arbeiten', () => {
 		 */
 		it('hebt den Zustand und zahlt aus der Stadtkasse', async () => {
 			const adelbert = await charakterMitGeld(50);
-			// Ein städtischer Bau, der Instandsetzung braucht — `beforeEach` räumt die Welt
-			// leer, also wird er hier gestellt.
-			const rathausId: string = await haus(null, { condition: 40 });
+			// Ein Bau, für den die Stadt einsteht — `beforeEach` räumt die Welt leer, also
+			// wird er hier gestellt. Ohne `escheatedTick` gehört er ihr von jeher, und genau
+			// das unterscheidet ihn seit Punkt 79 vom heimgefallenen Nachlass.
+			const rathausId: string = await haus(null, { optionId: RATHAUS, condition: 40 });
 			await RegionModel.update({ treasury: 500 }, { where: { id: stadtId } });
 
 			const ergebnis = await buildingActionService.doBuildingAction(
@@ -322,7 +330,7 @@ describe('Bauen und Arbeiten', () => {
 
 		it('weist ab, wo nichts zu richten ist', async () => {
 			const adelbert = await charakterMitGeld(50);
-			const rathausId: string = await haus(null, { condition: CONDITION_MAX });
+			const rathausId: string = await haus(null, { optionId: RATHAUS, condition: CONDITION_MAX });
 
 			const ergebnis = await buildingActionService.doBuildingAction(
 				'REPAIR_FOR_HIRE',
@@ -331,6 +339,37 @@ describe('Bauen und Arbeiten', () => {
 			);
 
 			expect(ergebnis).toEqual({ ok: false, reason: 'NOTHING_TO_DO' });
+		});
+
+		it('gibt an einem heimgefallenen Haus keine Arbeit auf Stadtkosten', async () => {
+			// **Punkt 79.** Wer ohne Erben stirbt, dessen Kate fällt an die Stadt — sie wird
+			// dadurch aber kein öffentlicher Bau. Bis 5.42 zahlte die Stadtkasse jedem, der
+			// daran arbeiten wollte, für ein Haus, das ihr nur bis zur nächsten Versteigerung
+			// gehört.
+			const adelbert = await charakterMitGeld(50);
+			const kate: string = await haus(null, { name: 'Kate', condition: 40, escheatedTick: JETZT });
+			await RegionModel.update({ treasury: 500 }, { where: { id: stadtId } });
+
+			const ergebnis = await buildingActionService.doBuildingAction(
+				'REPAIR_FOR_HIRE',
+				adelbert,
+				kate
+			);
+
+			expect(ergebnis).toEqual({ ok: false, reason: 'NO_JOB_OFFERED' });
+			expect(await geld(adelbert)).toBe(50);
+		});
+
+		it('zählt eine heimgefallene Kate nicht zu den öffentlichen Bauten', async () => {
+			await haus(null, { name: 'Kate', escheatedTick: JETZT });
+			const rathaus: string = await haus(null, { optionId: RATHAUS });
+
+			const oeffentlich = await buildingService.getPublicBuildings(stadtId);
+			const heimgefallen = await buildingService.getEscheatedBuildings(stadtId);
+
+			expect(oeffentlich.map((h) => h.id)).toEqual([rathaus]);
+			expect(heimgefallen).toHaveLength(1);
+			expect(heimgefallen[0].name).toBe('Kate');
 		});
 
 		it('gibt an einem privaten Haus keine Arbeit', async () => {

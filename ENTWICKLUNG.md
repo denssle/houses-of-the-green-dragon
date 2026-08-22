@@ -3183,6 +3183,61 @@ Beim Nachsehen fiel in `naechsterPartner` die Tickzahl je Spieljahr als ausgesch
 _Fertig, wenn:_ Der Werbe-Knopf steht nicht mehr unter dem Namen eines Kindes, und der
 Server weist es auch dann ab, wenn ihn jemand doch schickt. — Erledigt.
 
+**5.42 Was der Stadt zufällt, kommt unter den Hammer.** ✓ (Punkt 79) Wer ohne Erben
+stirbt, dessen Häuser und Grundstücke gehen an die Stadt — nicht ins Nichts und nicht an
+einen zufälligen Nachbarn. Nur endete der Weg dort: `ownerType` stand auf `CITY`, und
+niemand holte den Besitz je zurück.
+
+**Das war mehr als totes Kapital**, weil `CITY` an drei Stellen „öffentlicher Bau" hieß.
+Eine geerbte Kate stand im Rathaus unter „Was der Stadt gehört", der NPC-Bürgermeister
+zählte sie zu dem, was er instand zu halten hat, und `freierArbeitsplatz` gab sie als
+Lohnarbeit aus, die die **Stadtkasse** bezahlt. Die Stadt bezahlte die Instandhaltung
+eines Hauses, das niemandem nützte — in einer Kasse, die ohnehin nichts ansparen konnte
+(5.40). Dazu blieb das Grundstück bebaut und war für Neubauten blockiert: Bei knappem
+Bauland war jeder erbenlose Tod ein Bauplatz weniger, für immer.
+
+**Die Unterscheidung ist die Herkunft, nicht die Bauart.** Der erste Versuch ging über die
+Vorlage — `type === 'PUBLIC'` —, und daran zerbrach ein Test aus 5.14: Die städtische
+Schmiede aus dem Weltaufbau ist ein Betrieb wie jeder andere und trotzdem Aufgabe der
+Stadt; seit 5.14 schreibt der Bürgermeister sogar ihre Stelle aus. Ein geerbter Betrieb
+sähe genauso aus. Also zählt, **wie** ein Haus in den Stadtbesitz kam: `escheatedTick`
+(Migration `0024`) hält den Tick des Heimfalls fest, `null` heißt „von jeher städtisch".
+Für den Bestand ist das richtig, ohne dass etwas nachgetragen werden müsste — was heute im
+Stadtbesitz steht, stammt aus dem Weltaufbau.
+
+Darauf sitzt `isPublicWorks()`, und damit hören drei Dinge auf: Die Kate steht nicht mehr
+in der Rathausliste, der Bürgermeister hält sie nicht mehr instand, und niemand arbeitet
+mehr an ihr auf Kosten der Stadt.
+
+**Der Rückweg** ist `auctionEscheatedEstates()`: Was der Stadt zugefallen ist, kommt in die
+Versteigerung — dieselbe Vergabe wie beim erschlossenen Bauland, der Preis entsteht aus der
+Knappheit. Drei Regeln halten das im Rahmen:
+
+- **Nur bebaute Grundstücke.** Freier städtischer Grund bleibt, wo er ist; aus ihm baut der
+  Bürgermeister Schule und Unterkunft. Eine Stadt, die jedes freie Fleckchen ausbietet,
+  kann nie wieder etwas errichten.
+- **Ein Spieljahr Abstand** nach einer Versteigerung ohne Zuschlag (`RE_AUCTION_AFTER`).
+  Ohne die Frist stünde dasselbe Haus im nächsten Tick wieder unter dem Hammer, ein
+  Spieljahr lang fünfzig Mal.
+- **Im Takt, nicht als Amtshandlung.** „So bald wie möglich" darf nicht daran hängen, dass
+  gerade jemand im Amt ist und diese eine Handlung wählt.
+
+**Haus und Boden gehen an denselben Ersteigerer.** Der Zuschlag schrieb bisher nur das
+Grundstück um — bei erschlossenem Bauland steht keines darauf, bei einem Nachlass schon.
+Ohne diese Zeile gehörte der Grund dem Ersteigerer und die Kate weiter der Stadt; zwei
+Eigentümer für ein Anwesen sind kein Zustand, den das Spiel kennt. Und die Auktionsliste
+nennt jetzt, was mitgeht: Wer auf „Erbgasse 3" bietet, soll vorher wissen, dass eine Kate
+dabei ist.
+
+**Ein Testhelfer hat die Verwechslung mitgemacht.** In `buildingService.spec.ts` legte
+`haus(null)` ein Wohnhaus im Stadtbesitz an, und zwei Tests nannten das Ergebnis „ein
+städtischer Bau" — genau der Kurzschluss, um den es hier geht.
+
+_Fertig, wenn:_ Ein erbenloser Nachlass steht binnen eines Spieljahres zur Versteigerung
+und die Stadt zahlt nicht mehr für seine Instandhaltung. — Erledigt. **Offen bleibt**, was
+mit Bewohnern und Angestellten eines versteigerten Hauses geschieht: Sie bleiben, wo sie
+sind, wie bei jedem Hausverkauf. Ob das genügt, zeigt der erste Fall in der laufenden Welt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

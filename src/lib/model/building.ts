@@ -22,4 +22,6 @@ export interface Building {
 	offeredWage: number | null;
 	/** Der Auftrag: was der Eigentümer für die Instandsetzung zahlt (5.27). */
 	repairWage: number | null;
+	/** Wann es der Stadt zufiel — `null` heißt: von jeher städtisch (Punkt 79). */
+	escheatedTick: number | null;
 }

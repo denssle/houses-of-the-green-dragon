@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { sequelize } from '$lib/db/sequelize';
 import '$lib/db/db';
 import { Auction, Bid } from '$lib/db/model/auction';
+import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Candidacy, Election, Vote } from '$lib/db/model/election';
 import { Event } from '$lib/db/model/event';
@@ -89,6 +90,7 @@ describe('Erschließung und Versteigerung', () => {
 		await Vote.destroy({ where: {} });
 		await Candidacy.destroy({ where: {} });
 		await Election.destroy({ where: {} });
+		await Building.destroy({ where: {} });
 		await Plot.destroy({ where: {} });
 		await Character.destroy({ where: {} });
 		await Region.update({ treasury: 1000 }, { where: { id: stadtId } });
@@ -275,6 +277,118 @@ describe('Erschließung und Versteigerung', () => {
 			const eintrag = await Event.findOne({ where: { kind: 'AUCTION_WON' } });
 			expect(eintrag?.dataValues.subjectId).toBe(bieter);
 			expect(eintrag?.dataValues.value).toBe(100);
+		});
+	});
+
+	/**
+	 * Der Rückweg in private Hand (Punkt 79).
+	 *
+	 * Wer ohne Erben stirbt, dessen Häuser fallen an die Stadt — und blieben dort liegen.
+	 * Bei knappem Bauland ist das der teuerste Teil: Ein bebautes Grundstück nimmt kein
+	 * zweites Haus auf, also war jeder erbenlose Tod ein Bauplatz weniger, für immer.
+	 */
+	describe('was der Stadt zufällt', () => {
+		const WOHNHAUS = 1;
+		const RATHAUS = 0;
+		const SCHMIEDE = 2;
+
+		/**
+		 * Ein städtisches Grundstück, wahlweise mit einem Haus darauf.
+		 *
+		 * `heimgefallen` entscheidet über die Herkunft: mit `escheatedTick` ein Nachlass, den
+		 * die Stadt weitergeben soll, ohne ihn ein Haus, für das sie einsteht (Punkt 79).
+		 */
+		async function stadtgrund(
+			optionId?: number,
+			heimgefallen = true
+		): Promise<{ plotId: string; hausId?: string }> {
+			const plotId = randomUUID();
+			await Plot.create({
+				id: plotId,
+				address: `Erbgasse ${plotId.slice(0, 4)}`,
+				type: 'BUILDING_LAND',
+				RegionId: stadtId,
+				ownerType: 'CITY'
+			});
+			if (optionId === undefined) return { plotId };
+
+			const hausId = randomUUID();
+			await Building.create({
+				id: hausId,
+				name: optionId === RATHAUS ? 'Rathaus' : 'Kate',
+				optionId,
+				lastConditionTick: JETZT,
+				PlotId: plotId,
+				ownerType: 'CITY',
+				escheatedTick: heimgefallen ? JETZT : null
+			});
+			return { plotId, hausId };
+		}
+
+		it('bietet ein heimgefallenes Anwesen aus', async () => {
+			await stadtgrund(WOHNHAUS);
+
+			expect(await auctionService.auctionEscheatedEstates(stadtId, JETZT)).toBe(1);
+			expect(await auctionService.getOpenAuctions(stadtId)).toHaveLength(1);
+		});
+
+		it('lässt freien Stadtgrund in Ruhe', async () => {
+			// Aus ihm baut der Bürgermeister Schule und Unterkunft. Eine Stadt, die jedes
+			// freie Fleckchen ausbietet, kann nie wieder etwas errichten.
+			await stadtgrund();
+
+			expect(await auctionService.auctionEscheatedEstates(stadtId, JETZT)).toBe(0);
+		});
+
+		it('rührt nicht an, wofür die Stadt einsteht', async () => {
+			// Das Rathaus gehört ihr von jeher — und die städtische Schmiede genauso. Nicht
+			// die Bauart entscheidet, sondern die Herkunft: Ein geerbter Betrieb sähe aus wie
+			// die Schmiede aus dem Weltaufbau.
+			await stadtgrund(RATHAUS, false);
+			await stadtgrund(SCHMIEDE, false);
+
+			expect(await auctionService.auctionEscheatedEstates(stadtId, JETZT)).toBe(0);
+		});
+
+		it('bietet dasselbe Anwesen nicht zweimal aus', async () => {
+			await stadtgrund(WOHNHAUS);
+			await auctionService.auctionEscheatedEstates(stadtId, JETZT);
+
+			expect(await auctionService.auctionEscheatedEstates(stadtId, JETZT + 1)).toBe(0);
+		});
+
+		it('wartet ein Spieljahr, wenn sich kein Käufer fand', async () => {
+			// Ohne Frist stünde dasselbe Haus im nächsten Tick wieder unter dem Hammer, ein
+			// Spieljahr lang fünfzig Mal.
+			await stadtgrund(WOHNHAUS);
+			await auctionService.auctionEscheatedEstates(stadtId, JETZT);
+			const ohneGebot: number = JETZT + AUCTION_TICKS;
+			await auctionService.advanceAuctions(stadtId, ohneGebot);
+
+			expect(await auctionService.auctionEscheatedEstates(stadtId, ohneGebot + 1)).toBe(0);
+			expect(
+				await auctionService.auctionEscheatedEstates(
+					stadtId,
+					ohneGebot + auctionService.RE_AUCTION_AFTER
+				)
+			).toBe(1);
+		});
+
+		it('gibt Haus und Boden an denselben Ersteigerer', async () => {
+			// Zwei Eigentümer für ein Anwesen sind kein Zustand, den das Spiel kennt.
+			const { plotId, hausId } = await stadtgrund(WOHNHAUS);
+			await auctionService.auctionEscheatedEstates(stadtId, JETZT);
+			const auktion = (await auctionService.getOpenAuctions(stadtId))[0];
+			const bieter = await person('Bieterin', 500);
+			await auctionService.bid(bieter, auktion.id, 100);
+
+			await auctionService.advanceAuctions(stadtId, JETZT + AUCTION_TICKS);
+
+			const grund = await Plot.findByPk(plotId);
+			const haus = await Building.findByPk(hausId!);
+			expect(grund!.dataValues.OwnerCharacterId).toBe(bieter);
+			expect(haus!.dataValues.OwnerCharacterId).toBe(bieter);
+			expect(haus!.dataValues.ownerType).toBe('CHARACTER');
 		});
 	});
 });

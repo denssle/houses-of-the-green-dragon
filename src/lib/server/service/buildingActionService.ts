@@ -60,11 +60,16 @@ async function fuerLohnHerrichten(characterId: string, buildingId: string): Prom
 	const regionId = await buildingService.getBuildingRegionId(buildingId);
 	if (!gebäude || !regionId) return { ok: false, reason: 'NOT_A_WORKPLACE' };
 
-	// **Städtisch immer, privat nur mit Auftrag** (5.27, Punkt 74). Ohne den Auftrag richtete
-	// jeder ungefragt fremde Häuser her und schickte die Rechnung — deshalb ist er die
-	// Bedingung und nicht bloß der Preis.
-	const staedtisch: boolean = gebäude.ownerType === 'CITY';
-	if (!staedtisch && gebäude.repairWage === null) {
+	// **Öffentliche Bauten immer, alles andere nur mit Auftrag** (5.27, Punkt 74). Ohne den
+	// Auftrag richtete jeder ungefragt fremde Häuser her und schickte die Rechnung — deshalb
+	// ist er die Bedingung und nicht bloß der Preis.
+	//
+	// **Städtisch allein reicht nicht** (Punkt 79): Eine Kate, die der Stadt zugefallen ist,
+	// weil ihr Besitzer ohne Erben starb, ist kein öffentlicher Bau. Bis 5.42 war sie einer,
+	// und die Stadtkasse zahlte jedem, der daran arbeiten wollte — für ein Haus, das ihr nur
+	// bis zur nächsten Versteigerung gehört.
+	const oeffentlich: boolean = buildingService.isPublicWorks(gebäude);
+	if (!oeffentlich && gebäude.repairWage === null) {
 		return { ok: false, reason: 'NO_JOB_OFFERED' };
 	}
 	// Am eigenen Haus arbeitet man ohne Lohn — dafür gibt es `renovateBuilding`.
@@ -92,7 +97,7 @@ async function fuerLohnHerrichten(characterId: string, buildingId: string): Prom
 			},
 			{ money: kasse.money },
 			gebäude.condition,
-			staedtisch ? undefined : (gebäude.repairWage ?? undefined)
+			oeffentlich ? undefined : (gebäude.repairWage ?? undefined)
 		);
 		if (!ergebnis.ok) return ergebnis;
 

@@ -193,6 +193,32 @@ describe('Sterben und Erben', () => {
 			expect(danach.OwnerCharacterId).toBeNull();
 		});
 
+		it('merkt sich, wann das Haus der Stadt zufiel', async () => {
+			// **Punkt 79.** Ohne diesen Vermerk wäre die geerbte Kate vom Rathaus nicht zu
+			// unterscheiden: Die Stadt hielte instand, was sie weitergeben soll, und jeder NPC
+			// dürfte an ihr für Lohn aus der Stadtkasse arbeiten. Mit ihm kommt das Anwesen
+			// unter den Hammer.
+			const einsam = await person('Einsam', 80);
+			const acker = await grundstueck(einsam);
+			const kate = randomUUID();
+			await Building.create({
+				id: kate,
+				name: 'Kate',
+				optionId: 1,
+				lastConditionTick: JETZT,
+				PlotId: acker,
+				ownerType: 'CHARACTER',
+				OwnerCharacterId: einsam
+			});
+
+			await lifecycleService.die(einsam, JETZT);
+
+			const danach = (await Building.findByPk(kate))!.dataValues;
+			expect(danach.ownerType).toBe('CITY');
+			expect(danach.OwnerCharacterId).toBeNull();
+			expect(danach.escheatedTick).toBe(JETZT);
+		});
+
 		it('macht aus vergebenem Bauland kein nie vergebenes', async () => {
 			// `NONE` hieße „die Stadt hat es nie hergegeben“ und stellte das Grundstück
 			// wieder zum Erstverkauf — für 40 Münzen, obwohl darauf ein Haus steht.

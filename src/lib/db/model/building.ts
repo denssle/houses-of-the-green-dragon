@@ -39,7 +39,8 @@ export const Building: ModelStatic<Model<BuildingAttributes, BuildingCreationAtt
 			// Der Aushang. Was ein bestehendes Verhaeltnis zahlt, steht in employments.
 			offeredWage: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
 			// Der Preis, den der Eigentümer für die Instandsetzung bietet (5.27).
-			repairWage: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
+			repairWage: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
+			escheatedTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
 		},
 		{ timestamps: true }
 	);

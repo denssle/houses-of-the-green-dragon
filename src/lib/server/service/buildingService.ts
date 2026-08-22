@@ -1097,13 +1097,50 @@ export async function renovatePublicBuilding(
 }
 
 /**
- * Was die Stadt an Häusern hat und wie es darum steht — die Liste für das Rathaus.
+ * Ein Haus, für das die Stadt einsteht — oder eines, das ihr nur zugefallen ist?
+ *
+ * **Beides war bis 5.42 dasselbe**, und daran hing ein stiller Schaden (Punkt 79): Wer
+ * ohne Erben stirbt, dessen Häuser fallen an die Stadt (`anDieStadt`), und `ownerType`
+ * steht danach auf `CITY` — wie beim Rathaus. Eine geerbte Kate stand deshalb im Rathaus
+ * unter „Was der Stadt gehört", der Bürgermeister ließ sie instand halten, und jeder NPC
+ * durfte an ihr für Lohn aus der Stadtkasse arbeiten. Die Stadt bezahlte die
+ * Instandhaltung eines Hauses, das niemandem nützte.
+ *
+ * **Der Unterschied ist die Herkunft, nicht die Bauart.** Die Vorlage taugt dafür nicht:
+ * Die städtische Schmiede aus dem Weltaufbau ist ein Betrieb wie jeder andere und
+ * trotzdem Aufgabe der Stadt — sie schreibt seit 5.14 sogar ihre Stelle aus. Ein geerbter
+ * Betrieb sähe genauso aus. Also zählt, **wie** das Haus in den Stadtbesitz kam:
+ * `escheatedTick` steht auf `null`, solange es von jeher der Stadt gehört.
+ */
+export function isPublicWorks(building: {
+	ownerType: string;
+	escheatedTick: number | null;
+}): boolean {
+	return building.ownerType === 'CITY' && building.escheatedTick === null;
+}
+
+/**
+ * Was die Stadt an öffentlichen Bauten hat und wie es darum steht — die Liste fürs
+ * Rathaus.
  *
  * Ohne sie fiele der Verfall erst auf, wenn die Unterkunft niemanden mehr aufnimmt.
+ * Heimgefallener Privatbesitz steht **nicht** darin: Er gehört der Stadt, aber er ist
+ * keine ihrer Aufgaben — er gehört versteigert (Punkt 79).
  */
 export async function getPublicBuildings(regionId: string): Promise<Building[]> {
 	const alle = await getBuildingsInRegion(regionId);
-	return alle.filter((haus) => haus.ownerType === 'CITY');
+	return alle.filter((haus) => isPublicWorks(haus));
+}
+
+/**
+ * Was der Stadt zugefallen ist, ohne ihre Aufgabe zu sein — samt Grundstück darunter.
+ *
+ * Der Rückweg in private Hand (Punkt 79): Diese Häuser gehören versteigert, und bis das
+ * geschehen ist, sind sie nichts als Häuser ohne Eigentümer.
+ */
+export async function getEscheatedBuildings(regionId: string): Promise<Building[]> {
+	const alle = await getBuildingsInRegion(regionId);
+	return alle.filter((haus) => haus.ownerType === 'CITY' && haus.escheatedTick !== null);
 }
 
 /**

@@ -17,6 +17,9 @@ import {
 	npcBid,
 	ranking
 } from '$lib/game/auction.logic';
+import { Building } from '$lib/db/model/building';
+import { TICKS_PER_YEAR } from '$lib/game/time';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as chronicleService from '$lib/server/service/chronicleService';
 import * as electionService from '$lib/server/service/electionService';
 import * as nameService from '$lib/server/service/nameService';
@@ -122,6 +125,64 @@ export async function developLand(
 	});
 }
 
+/**
+ * Wie lange die Stadt wartet, ehe sie ein Haus erneut ausbietet.
+ *
+ * Findet sich kein Käufer, wird die Versteigerung ohne Zuschlag geschlossen — und ohne
+ * Frist stünde dasselbe Haus im nächsten Tick wieder unter dem Hammer, ein Spieljahr lang
+ * fünfzig Mal. Ein Jahr Abstand macht daraus, was es sein soll: ein neuer Anlauf, wenn
+ * jemand inzwischen Geld hat.
+ */
+export const RE_AUCTION_AFTER = TICKS_PER_YEAR;
+
+/**
+ * Was der Stadt zugefallen ist, kommt unter den Hammer (Punkt 79).
+ *
+ * **Warum überhaupt.** Wer ohne Erben stirbt, dessen Häuser und Grundstücke gehen an die
+ * Stadt — nicht ins Nichts und nicht an einen zufälligen Nachbarn. Nur endete der Weg
+ * dort: `ownerType` stand auf `CITY`, und niemand holte den Besitz je zurück. Bei knappem
+ * Bauland ist das der teuerste Teil, denn ein bebautes Grundstück nimmt kein zweites Haus
+ * auf; jeder erbenlose Tod war ein Bauplatz weniger, für immer.
+ *
+ * **Versteigert, nicht verkauft** — dieselbe Vergabe wie beim erschlossenen Bauland. Der
+ * Preis entsteht aus der Knappheit, und die Stadtkasse bekommt, was die Stadt für die
+ * Beerdigung ausgelegt hat, in anderer Form zurück.
+ *
+ * **Nur bebaute Grundstücke.** Freier städtischer Grund bleibt, wo er ist: Aus ihm baut
+ * der Bürgermeister Schule und Unterkunft (`getFreeCityPlots`). Eine Stadt, die jedes
+ * freie Fleckchen sofort ausbietet, kann nie wieder etwas errichten.
+ *
+ * Läuft im Takt, nicht als Amtshandlung: „So bald wie möglich" darf nicht daran hängen,
+ * dass ein Bürgermeister im Amt ist und gerade diese eine Handlung wählt.
+ */
+export async function auctionEscheatedEstates(regionId: string, tick: number): Promise<number> {
+	const heimgefallen = await buildingService.getEscheatedBuildings(regionId);
+
+	let eroeffnet = 0;
+	for (const haus of heimgefallen) {
+		if (!haus.plotId) continue;
+
+		// Läuft schon eine — oder ist gerade eine ohne Zuschlag geschlossen worden?
+		const letzte = await Auction.findOne({
+			where: { PlotId: haus.plotId },
+			order: [['openedTick', 'DESC']]
+		});
+		if (letzte && !letzte.dataValues.closed) continue;
+		if (letzte && tick - letzte.dataValues.closesTick < RE_AUCTION_AFTER) continue;
+
+		await Auction.create({
+			id: randomUUID(),
+			PlotId: haus.plotId,
+			RegionId: regionId,
+			openedTick: tick,
+			closesTick: tick + AUCTION_TICKS,
+			closed: false
+		});
+		eroeffnet++;
+	}
+	return eroeffnet;
+}
+
 // --- Bieten --------------------------------------------------------------------------
 
 async function gebote(auctionId: string, t?: Transaction): Promise<Bid[]> {
@@ -222,6 +283,14 @@ export async function advanceAuctions(regionId: string, tick: number): Promise<A
 				{ ownerType: 'CHARACTER', OwnerCharacterId: sieger.bidderId },
 				{ where: { id: auktion.dataValues.PlotId }, transaction: t }
 			);
+			// **Das Haus wechselt mit dem Boden** (Punkt 79). Bei erschlossenem Bauland steht
+			// keines darauf; bei einem heimgefallenen Nachlass schon, und ohne diese Zeile
+			// gehörte der Grund dem Ersteigerer und die Kate weiter der Stadt. Zwei
+			// Eigentümer für ein Anwesen sind kein Zustand, den das Spiel kennt.
+			await Building.update(
+				{ ownerType: 'CHARACTER', OwnerCharacterId: sieger.bidderId, forSalePrice: null },
+				{ where: { PlotId: auktion.dataValues.PlotId, ownerType: 'CITY' }, transaction: t }
+			);
 			await chronicleService.record(
 				'AUCTION_WON',
 				regionId,
@@ -284,6 +353,13 @@ export interface AuctionOnList {
 	id: string;
 	address: string;
 	closesTick: number;
+	/**
+	 * Das Haus, das mitversteigert wird — bei erschlossenem Bauland keines (Punkt 79).
+	 *
+	 * Ohne diese Angabe böte man auf „Erbgasse 3" und bekäme eine Kate dazu, von der auf
+	 * der Seite nichts stand. Was ein Anwesen wert ist, hängt daran.
+	 */
+	buildingName: string | null;
 	highest: number | null;
 	highestBidderName: string | null;
 	mine: boolean;
@@ -307,10 +383,13 @@ export async function getOpenAuctions(
 		const bestes: Bid | undefined = ranking(await gebote(auktion.dataValues.id))[0];
 		const bieter = bestes ? await Character.findByPk(bestes.bidderId) : null;
 
+		const haus = await Building.findOne({ where: { PlotId: auktion.dataValues.PlotId } });
+
 		liste.push({
 			id: auktion.dataValues.id,
 			address: flaeche.dataValues.address,
 			closesTick: auktion.dataValues.closesTick,
+			buildingName: haus?.dataValues.name ?? null,
 			highest: bestes?.amount ?? null,
 			// Mit Hausnamen (5.10): Gegen wen man bietet, ist bei einer Versteigerung unter
 			// Familien die eigentliche Auskunft.

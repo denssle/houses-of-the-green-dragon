@@ -30,7 +30,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 74  | Der Auftrag an Tagelöhner — privates Renovieren gegen Lohn                           | Punkt 66 / 33                | Entwurf      |
 | 77  | Was die Kammer noch nicht kann: Gewicht, Einzelstücke, Vererben                      | Punkte 15, 20, 51            | Entwurf      |
 | 78  | Werben kennt kein Alter — geprüft wird es erst bei der Hochzeit                      | dem nächsten Schritt         | Befund       |
-| 79  | Erbenloser Besitz bleibt bei der Stadt liegen, statt vergeben zu werden              | Punkt 13 / laufend           | Befund       |
+| 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                 | —                            | erledigt     |
 | 80  | Von der Grundstücksliste führt kein Weg zum Haus darauf                              | laufend                      | Aufgabe      |
 | 81  | Fremde Häuser haben keine Seite — „aus dem Haus" verlinkt ins Leere                  | Punkt 64                     | Entwurf      |
 | 82  | Kammer oder Inventar — wie der persönliche Besitz heißt                              | dem ersten fremden Spieler   | Entscheidung |
@@ -2000,7 +2000,7 @@ Zu klären ist dabei nur eines: **ob ein Kind auch nicht werben darf**. Für den
 prüft die NPC-Hierarchie es schon; für einen Spielercharakter prüft es niemand. Nach
 derselben Regel wie oben sollte beides gelten.
 
-### 79. Erbenloser Besitz bleibt bei der Stadt liegen
+### 79. Erbenloser Besitz bleibt bei der Stadt liegen — behoben mit 5.42
 
 **Befund vom 22.08.2026.** Wer ohne Erben stirbt, dessen Häuser und Grundstücke fallen an
 die Stadt (`anDieStadt()` in `lifecycleService.ts`) — `ownerType` wechselt auf `CITY`,
@@ -2018,11 +2018,18 @@ Das ist mehr als totes Kapital, weil `CITY` an drei Stellen „öffentlicher Bau
 - Das Grundstück gilt als bebaut und ist für Neubauten blockiert. Bei knappem Bauland ist
   das der teuerste Teil.
 
-**Die Richtung steht fest:** Die Stadt soll solchen Besitz zügig weitergeben — versteigern,
-wie sie es mit erschlossenem Bauland tut. Zu klären ist, ob `auctionService` auch **Häuser**
-versteigern kann oder bisher nur Grundstücke, und was mit dem Erlös geschieht (in die
-Stadtkasse, wie beim Bauland). Bis dahin bleibt jeder erbenlose Tod ein Haus weniger auf
-dem Markt.
+**Behoben mit 5.42.** Die Stadt gibt solchen Besitz weiter: `auctionEscheatedEstates()`
+bietet ihn im Takt aus, Haus und Boden gehen an denselben Ersteigerer, der Erlös in die
+Stadtkasse — dieselbe Vergabe wie beim erschlossenen Bauland.
+
+Der Kern war eine Unterscheidung, die es nicht gab: **Herkunft statt Bauart.** Über die
+Vorlage ließ es sich nicht trennen, weil die städtische Schmiede aus dem Weltaufbau ein
+Betrieb ist und trotzdem Aufgabe der Stadt. `escheatedTick` hält seither fest, wann ein
+Haus der Stadt zufiel; `null` heißt „von jeher städtisch".
+
+**Offen bleibt**, was mit Bewohnern und Angestellten eines versteigerten Hauses geschieht.
+Sie bleiben, wo sie sind — wie bei jedem Hausverkauf. Ob das genügt, zeigt der erste Fall
+in der laufenden Welt.
 
 ### 80. Von der Grundstücksliste führt kein Weg zum Haus darauf
 

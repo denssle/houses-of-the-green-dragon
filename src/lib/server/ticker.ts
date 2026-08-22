@@ -120,6 +120,17 @@ async function schlagen(): Promise<void> {
 			);
 		}
 
+		// Was der Stadt aus erbenlosen Nachlaessen zugefallen ist, kommt unter den Hammer
+		// (Punkt 79) — im Takt und nicht als Amtshandlung: „So bald wie moeglich" darf nicht
+		// daran haengen, dass gerade jemand im Amt ist.
+		const heimgefallen = await auctionService.auctionEscheatedEstates(
+			stadtId,
+			geschehen.currentTick
+		);
+		if (heimgefallen > 0) {
+			console.info(`${heimgefallen} heimgefallene Anwesen sind ausgeboten.`);
+		}
+
 		// Faellige Versteigerungen zuschlagen. Wie die Wahl selten und deshalb billig.
 		const auktionen = await auctionService.advanceAuctions(stadtId, geschehen.currentTick);
 		if (auktionen.closed > 0) {

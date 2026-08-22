@@ -87,7 +87,16 @@
 			<ul>
 				{#each data.auctions as auktion (auktion.id)}
 					<li>
-						<b>{auktion.address}</b> —
+						<b>{auktion.address}</b>
+						<!--
+							Was mitversteigert wird (Punkt 79): Auf einem heimgefallenen Anwesen steht
+							ein Haus, auf frisch erschlossenem Bauland nicht. Wer darauf bietet, soll
+							es vorher wissen und nicht danach.
+						-->
+						{#if auktion.buildingName}
+							<small>— mit {auktion.buildingName}</small>
+						{/if}
+						—
 						{#if auktion.highest === null}
 							noch kein Gebot
 						{:else}

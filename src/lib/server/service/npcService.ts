@@ -721,11 +721,16 @@ async function freierArbeitsplatz(
 		(haus) =>
 			haus.condition < CONDITION_MAX &&
 			haus.ownerCharacterId !== characterId &&
-			// **Städtisch immer, privat nur mit Auftrag** (5.27, Punkt 74). Damit findet ein
-			// NPC auch die Arbeit, die ein Hausbesitzer ausgeschrieben hat — sonst blieben
-			// private Aufträge liegen, und die Instandsetzung städtischer Bauten wäre die
-			// einzige Lohnarbeit der Welt. Drei Schichten je Spieljahr sind kein Einstieg.
-			(haus.ownerType === 'CITY' || haus.repairWage !== null)
+			// **Öffentliche Bauten immer, alles andere nur mit Auftrag** (5.27, Punkt 74).
+			// Damit findet ein NPC auch die Arbeit, die ein Hausbesitzer ausgeschrieben hat —
+			// sonst blieben private Aufträge liegen, und die Instandsetzung städtischer Bauten
+			// wäre die einzige Lohnarbeit der Welt. Drei Schichten je Spieljahr sind kein
+			// Einstieg.
+			//
+			// **Nicht jedes städtische Haus ist ein öffentlicher Bau** (Punkt 79): Was der
+			// Stadt aus einem erbenlosen Nachlass zugefallen ist, wartet auf die
+			// Versteigerung und nicht auf Handwerker, die die Stadtkasse bezahlt.
+			(buildingService.isPublicWorks(haus) || haus.repairWage !== null)
 	);
 
 	// **Der beste Lohn zuerst, dann der schlechteste Zustand.** Wer arbeitet, nimmt das

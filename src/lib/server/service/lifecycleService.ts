@@ -149,7 +149,7 @@ export async function die(characterId: string, tick: number): Promise<Death | nu
 			}
 			await besitzUebertragen(characterId, erbeId, t);
 		} else {
-			await anDieStadt(tot.dataValues.RegionId, geteilt.toCity, characterId, t);
+			await anDieStadt(tot.dataValues.RegionId, geteilt.toCity, characterId, t, tick);
 		}
 
 		// Die Pacht faellt an die Stadt zurueck (Punkt 8): Genau das unterscheidet sie von
@@ -359,12 +359,18 @@ async function besitzUebertragen(vonId: string, anId: string, t: Transaction): P
  * Häuser neu vergeben, und knappes Bauland bekommt damit einen Rückweg. `ownerType`
  * wechselt auf `CITY` — nicht auf `NONE`: `NONE` heißt „nie vergeben" und würde ein
  * bebautes Grundstück wieder zum Erstverkauf freigeben.
+ *
+ * **Der Tick des Heimfalls wird festgehalten** (5.42, Punkt 79). Ohne ihn wäre die Kate
+ * vom Rathaus nicht zu unterscheiden, und der „Rückweg" endete im Stadtbesitz: Die Stadt
+ * hielt instand, was sie weitergeben sollte, und das Grundstück blieb für immer bebaut.
+ * Mit ihm kommt das Anwesen in die Versteigerung (`auctionEscheatedEstates`).
  */
 async function anDieStadt(
 	regionId: string,
 	geld: number,
 	verstorbenId: string,
-	t: Transaction
+	t: Transaction,
+	tick: number
 ): Promise<void> {
 	if (geld > 0) {
 		await Region.increment('treasury', { by: geld, where: { id: regionId }, transaction: t });
@@ -374,7 +380,7 @@ async function anDieStadt(
 		{ where: { OwnerCharacterId: verstorbenId }, transaction: t }
 	);
 	await Building.update(
-		{ ownerType: 'CITY', OwnerCharacterId: null, forSalePrice: null },
+		{ ownerType: 'CITY', OwnerCharacterId: null, forSalePrice: null, escheatedTick: tick },
 		{ where: { OwnerCharacterId: verstorbenId }, transaction: t }
 	);
 }

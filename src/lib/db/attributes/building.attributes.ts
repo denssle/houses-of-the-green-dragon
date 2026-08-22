@@ -40,6 +40,15 @@ export interface BuildingAttributes {
 	 * suchen und sein Dach richten lassen.
 	 */
 	repairWage: number | null;
+	/**
+	 * Wann das Haus der Stadt zugefallen ist — `null` heißt: von jeher städtisch (5.42).
+	 *
+	 * **Die Herkunft, nicht die Bauart.** Das Rathaus und die städtische Schmiede sind
+	 * Aufgabe der Stadt; eine Kate aus einem erbenlosen Nachlass gehört ihr nur bis zur
+	 * nächsten Versteigerung. Am `ownerType` war beides dasselbe — mit der Folge, dass die
+	 * Stadt die Instandhaltung fremder Katen bezahlte (Punkt 79).
+	 */
+	escheatedTick: number | null;
 }
 
 export type BuildingCreationAttributes = Optional<
@@ -52,6 +61,7 @@ export type BuildingCreationAttributes = Optional<
 	| 'forSalePrice'
 	| 'offeredWage'
 	| 'repairWage'
+	| 'escheatedTick'
 >;
 
 export function convertToBuilding(attributes: BuildingAttributes): Building {
@@ -66,6 +76,7 @@ export function convertToBuilding(attributes: BuildingAttributes): Building {
 		ownerCharacterId: attributes.OwnerCharacterId,
 		forSalePrice: attributes.forSalePrice,
 		offeredWage: attributes.offeredWage,
-		repairWage: attributes.repairWage
+		repairWage: attributes.repairWage,
+		escheatedTick: attributes.escheatedTick
 	};
 }
