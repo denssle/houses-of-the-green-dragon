@@ -3238,6 +3238,27 @@ und die Stadt zahlt nicht mehr für seine Instandhaltung. — Erledigt. **Offen 
 mit Bewohnern und Angestellten eines versteigerten Hauses geschieht: Sie bleiben, wo sie
 sind, wie bei jedem Hausverkauf. Ob das genügt, zeigt der erste Fall in der laufenden Welt.
 
+**5.43 Von der Grundstücksliste zum Haus darauf.** ✓ (Punkt 80) Bei bebautem Land stand
+„— bebaut (verkauft wird über das Gebäude)": ein Satz, der das Ziel nennt, ohne hinzuführen.
+Wer sein Haus verkaufen wollte, musste über die Stadtübersicht gehen und es dort zwischen
+allen anderen suchen.
+
+Der Grund lag im Dienst, nicht auf der Seite. `withBuildings()` fragte die Häuser ohnehin
+ab — aber nur, **ob** eines auf der Fläche steht (`attributes: ['PlotId']`), und warf Name
+und Kennung weg. Jetzt trägt `PlotOnList` das Haus selbst, und aus dem Klammersatz wird
+ein Link.
+
+Dieselbe Sackgasse stand auf der **Charakterseite** unter „Grundstücke" — auch dort hieß es
+nur „bebaut". Beide Listen kommen aus `withBuildings()`, also war es derselbe Handgriff.
+
+Nebenbei fiel auf, dass ein Bauwerk **ohne** Grundstück existieren kann — eine Stadtmauer
+umschließt die ganze Region. Es steht damit auf keiner Fläche und fällt jetzt sauber
+heraus, statt sich mit einem `null`-Schlüssel in die Zuordnung zu legen.
+
+Der Dienst hatte bis hierher keine Tests; die beiden neuen sind seine ersten.
+
+_Fertig, wenn:_ Von jedem bebauten Grundstück führt ein Klick zum Haus. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

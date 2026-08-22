@@ -31,7 +31,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 77  | Was die Kammer noch nicht kann: Gewicht, Einzelstücke, Vererben                      | Punkte 15, 20, 51            | Entwurf      |
 | 78  | Werben kennt kein Alter — geprüft wird es erst bei der Hochzeit                      | dem nächsten Schritt         | Befund       |
 | 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                 | —                            | erledigt     |
-| 80  | Von der Grundstücksliste führt kein Weg zum Haus darauf                              | laufend                      | Aufgabe      |
+| 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                   | —                            | erledigt     |
 | 81  | Fremde Häuser haben keine Seite — „aus dem Haus" verlinkt ins Leere                  | Punkt 64                     | Entwurf      |
 | 82  | Kammer oder Inventar — wie der persönliche Besitz heißt                              | dem ersten fremden Spieler   | Entscheidung |
 | 83  | Die Stadtseite trennt nicht, was der Stadt gehört und was den Leuten                 | Punkt 79                     | Aufgabe      |
@@ -2031,15 +2031,18 @@ Haus der Stadt zufiel; `null` heißt „von jeher städtisch".
 Sie bleiben, wo sie sind — wie bei jedem Hausverkauf. Ob das genügt, zeigt der erste Fall
 in der laufenden Welt.
 
-### 80. Von der Grundstücksliste führt kein Weg zum Haus darauf
+### 80. Von der Grundstücksliste führt kein Weg zum Haus darauf — erledigt mit 5.43
 
 Auf der Grundstücksseite steht bei bebautem Land „— bebaut (verkauft wird über das
 Gebäude)" — und der Satz nennt das Ziel, ohne hinzuführen. Der Grund liegt im Dienst:
 `PlotOnList` (`plotService.ts`) trägt `hasBuilding: boolean`, nicht die Kennung des
 Hauses. Wer sein Haus verkaufen will, muss über die Stadtseite gehen und es dort suchen.
 
-Gehört zu Punkt 58 (Wege, die nur beschrieben und nicht verlinkt sind) und ist derselbe
+Gehört zu Punkt 58 (Wege, die nur beschrieben und nicht verlinkt sind) und war derselbe
 Handgriff wie dort: ein Feld mehr im Dienst, ein Link mehr auf der Seite.
+
+**Erledigt mit 5.43** — auf der Grundstücksseite und auf der Charakterseite, die dieselbe
+Liste zeigt.
 
 ### 81. Fremde Häuser haben keine Seite
 

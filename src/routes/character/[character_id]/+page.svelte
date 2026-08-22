@@ -114,7 +114,16 @@
 		<h4>Grundstücke</h4>
 		<ul>
 			{#each data.plots as plot (plot.id)}
-				<li>{plot.address}{plot.hasBuilding ? ' — bebaut' : ' — frei'}</li>
+				<!-- Auch hier führt „bebaut" jetzt hin, wo gebaut wurde (Punkt 80). -->
+				<li>
+					{plot.address}
+					{#if plot.building}
+						— bebaut mit
+						<a href="{base}/building/{plot.building.id}" class="link">{plot.building.name}</a>
+					{:else}
+						— frei
+					{/if}
+				</li>
 			{/each}
 		</ul>
 	{/if}

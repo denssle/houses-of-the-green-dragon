@@ -19,16 +19,38 @@ import * as worldService from '$lib/server/service/worldService';
 export interface PlotOnList extends Plot {
 	/** Ob dort schon etwas steht — ein bebautes Grundstück nimmt kein zweites Haus auf. */
 	hasBuilding: boolean;
+	/**
+	 * Das Haus darauf, wenn eines steht — Kennung und Name (Punkt 80).
+	 *
+	 * **Ohne das war die Liste eine Sackgasse.** Sie sagte „bebaut (verkauft wird über das
+	 * Gebäude)", nannte also das Ziel, ohne hinzuführen: Wer sein Haus verkaufen wollte,
+	 * musste über die Stadtübersicht gehen und es dort zwischen allen anderen suchen.
+	 * Dabei ist es dieselbe Abfrage — sie warf den Namen nur weg.
+	 */
+	building: { id: string; name: string } | null;
 }
 
 async function withBuildings(plots: Plot[]): Promise<PlotOnList[]> {
 	if (plots.length === 0) return [];
 	const bebaut = await BuildingModel.findAll({
 		where: { PlotId: { [Op.in]: plots.map((plot) => plot.id) } },
-		attributes: ['PlotId']
+		attributes: ['id', 'name', 'PlotId']
 	});
-	const belegt = new Set(bebaut.map((eintrag) => eintrag.dataValues.PlotId));
-	return plots.map((plot) => ({ ...plot, hasBuilding: belegt.has(plot.id) }));
+	const belegt = new Map<string, { id: string; name: string }>();
+	for (const eintrag of bebaut) {
+		// Ein Bauwerk ohne Grundstück gibt es (eine Stadtmauer umschließt die ganze Region),
+		// und auf keiner Fläche steht es damit auch.
+		if (!eintrag.dataValues.PlotId) continue;
+		belegt.set(eintrag.dataValues.PlotId, {
+			id: eintrag.dataValues.id,
+			name: eintrag.dataValues.name
+		});
+	}
+	return plots.map((plot) => ({
+		...plot,
+		hasBuilding: belegt.has(plot.id),
+		building: belegt.get(plot.id) ?? null
+	}));
 }
 
 /**

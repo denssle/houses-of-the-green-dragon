@@ -17,8 +17,13 @@
 			{#each data.ownedPlots as plot (plot.id)}
 				<li>
 					{plot.address}
-					{#if plot.hasBuilding}
-						— bebaut <small>(verkauft wird über das Gebäude)</small>
+					{#if plot.building}
+						<!--
+							Der Weg zum eigenen Haus (Punkt 80): Hier stand, dass über das Gebäude
+							verkauft wird — ohne zu sagen, wo es zu finden ist.
+						-->
+						— bebaut mit
+						<a href="{base}/building/{plot.building.id}" class="link">{plot.building.name}</a>
 					{:else}
 						— frei, <a href="{base}/building/new" class="link">hier lässt sich bauen</a>
 						{#if plot.forSalePrice !== null}
