@@ -71,6 +71,12 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen    | —                            | erledigt     |
 | 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                              | —                            | erledigt     |
 
+
+#### Noch zu erfassen: 
+- man sollte nicht um Minderjährige werben können. 
+- Von der Grundstück Liste sollte man auf die dort gebauten Gebäude gehen können
+- Wenn die Stadt an private Gebäude kommt (z.B. wenn jemand seine Gebäude an die Stadt vererbt) - dann soll die Stadt diese Gebäude asap verkaufen - versteigern. 
+
 Erledigt und deshalb aus der Liste gefallen: **Zeitskala** (1 Tick = 1 Stunde, 50 Ticks =
 1 Spieljahr — die krumme Zahl mit Absicht, siehe 4.5b), **URL-Struktur** (Unterpfad mit
 `paths.base`, wie bei Festival), mit Phase 4.5a der **Fertigkeitenkatalog** samt
@@ -240,16 +246,17 @@ bremsen können muss, ist der, der über Freiheit entscheidet.
 
 **Was in jedem Fall zu klären bleibt:**
 
-- **Die Höhe der Aufwandsentschädigung.** Entschieden ist, dass es sie gibt und dass ihre
-  Höhe ein Gesetz ist (`KONZEPT.md`, Abschnitt 5). Offen ist der Rahmen: zu niedrig, und
-  nur Wohlhabende regieren; zu hoch, und das Amt wird zum Selbstzweck — man kandidiert
-  fürs Geld, nicht fürs Gestalten. Ein Maß, das sich anbietet: ungefähr das, was dieselbe
-  Zeit in einem mittleren Betrieb einbrächte. Für jedes weitere Amt stellt sich die Frage
-  erneut, und ein Bürgermeister, der die Sätze seiner eigenen Ernannten setzt, bezahlt
-  seine Gefolgschaft aus öffentlicher Hand — was Spiel ist, aber sichtbar sein muss.
-- **Wie wird sie ausgezahlt?** Laufend wie der Sold der Wache (dieselbe Mechanik, dann
-  fällt sie bei leerer Kasse aus) oder am Ende der Amtszeit. Das Erste ist einfacher und
-  härter: Wer die Stadt ruiniert, bezahlt sich selbst nicht mehr.
+- ~~**Die Höhe der Aufwandsentschädigung.**~~ **Entschieden mit 5.39:** eine Münze je Tick,
+  Grenzen null bis fünf, als Gesetz `OFFICE_STIPEND`. Das sind rund fünfzig Münzen im
+  Spieljahr gegen gut 150 aus einem Jahr voller Arbeit — ungefähr das, was die Zeit des
+  Amtes anderswo einbrächte. Der Anlass war kein Feinschliff, sondern ein stiller Ausfall:
+  Ohne Sold entschied sich ein NPC im Amt folgerichtig gegen die Amtspflicht und für den
+  Tagelohn, und die Stadt verfiel. **Offen bleibt**, was ein eigener Satz je Amt kostet —
+  ein Bürgermeister, der die Sätze seiner Ernannten setzt, bezahlt seine Gefolgschaft aus
+  öffentlicher Hand. Das ist Spiel, muss aber sichtbar sein.
+- ~~**Wie wird sie ausgezahlt?**~~ **Entschieden mit 5.39:** laufend, je Tick, wie der Sold
+  der Wache. Bei leerer Kasse fällt sie aus, und nichts wird vorgetragen — wer die Stadt
+  ruiniert, bezahlt sich selbst nicht mehr.
 
 - **Die Amtszeit des Richters.** Länger als die des Bürgermeisters, damit nicht dieselbe
   Stimmung beide Ämter besetzt — dann überdauert ein Richter den, der ihn nicht wollte.

@@ -16,7 +16,14 @@ import type { ActionFailureReason } from '$lib/game/actionFailure';
  * verlor er darüber die nächste Wahl?
  */
 
-export const LAW_KINDS = ['TITHE', 'STALL_FEE', 'SALES_TAX', 'PROPERTY_TAX', 'SCHOOL_FEE'] as const;
+export const LAW_KINDS = [
+	'TITHE',
+	'STALL_FEE',
+	'SALES_TAX',
+	'PROPERTY_TAX',
+	'SCHOOL_FEE',
+	'OFFICE_STIPEND'
+] as const;
 export type LawKind = (typeof LAW_KINDS)[number];
 
 /** Prozent vom Wert oder Münzen je Stück — davon hängt ab, wie man es anzeigt. */
@@ -82,6 +89,32 @@ export const LAW_RULES: Record<LawKind, LawRule> = {
 		fallback: 3,
 		min: 0,
 		max: 20
+	},
+	/**
+	 * **Das einzige Gesetz, das Geld aus der Kasse nimmt statt hinein.** Alle anderen
+	 * belasten Bürger zugunsten der Stadt; dieses belastet die Stadt zugunsten dessen, der
+	 * sie führt — und ausgerechnet er setzt den Satz. Das ist kein Versehen, sondern der
+	 * Reiz: Ein Bürgermeister, der sich selbst großzügig entlohnt, muss das vor der
+	 * nächsten Wahl erklären, und die Tafel im Rathaus zeigt jedem, was er sich nimmt.
+	 *
+	 * **Warum eine Münze je Tick.** Ein Tagelohn bringt drei Münzen für einen
+	 * Aktionspunkt; ein Spieljahr voller Arbeit also gut 150. Das Amt kostet nicht den
+	 * ganzen Tag — höchstens eine Handlung je Tick, meist keine —, und der Satz trifft
+	 * ungefähr, was diese Zeit anderswo einbrächte: rund fünfzig Münzen im Spieljahr, ein
+	 * Drittel eines Arbeitsjahres. Genug, dass auch ein Armer kandidieren kann, ohne dass
+	 * das Amt zum Broterwerb wird.
+	 *
+	 * Nach oben ist bei fünf Schluss: Das wäre mehr, als ein Vollzeitarbeiter verdient,
+	 * und ab da kandidierte man fürs Geld statt fürs Gestalten. Nach unten steht wie
+	 * überall die Null — eine Stadt darf beschließen, dass das Amt eine Ehre ist.
+	 */
+	OFFICE_STIPEND: {
+		name: 'Aufwandsentschädigung',
+		description: 'Was die Stadt einem gewählten Amtsinhaber je Tick zahlt',
+		unit: 'COIN',
+		fallback: 1,
+		min: 0,
+		max: 5
 	}
 };
 

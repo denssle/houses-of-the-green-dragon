@@ -3052,6 +3052,68 @@ auch der Knopf zum Entlassen.
 _Fertig, wenn:_ Ein gewählter Bürgermeister kann die Wache seiner Stadt besetzen, ohne die
 Datenbank anzufassen. — Erledigt.
 
+**5.38 Vier Punkte, nicht einer.** ✓ Beim Nachsehen, warum die öffentlichen Bauten
+verfallen, fiel ein Fehler daneben auf: Ein NPC entschied sich zum Herrichten, sobald er
+**einen** Aktionspunkt hatte — gekostet hat es vier. Der Entschluss fiel, `renovateBuilding`
+scheiterte an `NOT_ENOUGH_ACTION_POINTS`, und in der Fehlschlagzählung stand `RENOVATE`,
+als wäre hergerichtet worden.
+
+Das ist derselbe Fehler wie einst beim Werben (`COURT` kostet zwei, geprüft wurde auf mehr
+als null), aber er wog schwerer: Ein NPC geht bei **jedem einzelnen** Punkt arbeiten,
+solange er unter seinem Sparziel liegt, und kommt deshalb kaum je über einen hinaus. In
+der laufenden Welt hatten alle acht Einwohner null oder einen Punkt. Kein NPC hat je ein
+eigenes Haus instand gesetzt.
+
+**Der Materialkauf steht jetzt vor der Schwelle statt dahinter.** Holz bestellen kostet
+Geld, keine Kraft; wer erst Punkte sammeln müsste, um es zu bestellen, stünde mit vollen
+Punkten vor einem leeren Bauplatz.
+
+_Fertig, wenn:_ Ein NPC über seinem Sparziel richtet sein Haus wieder her. — Erledigt.
+
+**5.39 Was ein Amt einbringt.** ✓ Die eigentliche Frage aus 5.38: Warum verfallen die
+**öffentlichen** Bauten? Der Entschluss stimmte — `decideMayorAction` wählt `REPAIR` an
+zweiter Stelle, gleich nach dem Aushang —, und die Ausführung scheiterte still an
+denselben vier Punkten. Beide Aufrufer, `maintainAsNpcMayor` und der Zweig im
+`mayorService`, schlucken ein `ok: false` als `undefined`: kein Log, kein
+Chronikeintrag, nur eine Stadt, die langsam verrottet, während ein Bürgermeister im Amt
+sitzt.
+
+Die Punkte wegzunehmen wäre die falsche Antwort gewesen. **Aktionspunkte gegen Geld ist
+der Handel, auf dem dieses Spiel beruht** — und das Amt war der eine Ort, an dem er nicht
+galt: Wer herrichten ließ, gab vier Punkte her, die anderswo Tagelohn gebracht hätten, und
+bekam dafür nichts. Ein NPC entschied sich folgerichtig gegen das Amt und für die Arbeit.
+
+**Also bekommt das Amt seinen Sold.** Dass es ihn gibt und dass seine Höhe ein Gesetz ist,
+stand schon im Konzept (Abschnitt 5); offen waren Rahmen und Auszahlungsweise
+(`OFFENE_PUNKTE.md`, Punkt 32). Beides ist jetzt entschieden:
+
+- **Eine Münze je Tick**, Grenzen null bis fünf. Ein Tagelohn bringt drei Münzen für einen
+  Aktionspunkt, ein Spieljahr voller Arbeit also gut 150. Das Amt kostet höchstens eine
+  Handlung je Tick, meist keine — rund fünfzig Münzen im Spieljahr treffen ungefähr, was
+  diese Zeit anderswo einbrächte. Genug, dass auch ein Armer kandidieren kann, zu wenig,
+  um davon zu leben. Über fünf verdiente ein Amtsinhaber mehr als ein Vollzeitarbeiter,
+  und man kandidierte fürs Geld statt fürs Gestalten.
+- **Laufend statt am Ende der Amtszeit** — dieselbe Mechanik wie beim Sold der Wache, und
+  dieselbe Härte: Bei leerer Kasse fällt er aus, und nichts wird vorgetragen. Wer die
+  Stadt ruiniert, bezahlt sich selbst nicht mehr. Bei Auszahlung am Ende könnte einer fünf
+  Jahre lang die Kasse leeren und am letzten Tag doch noch kassieren.
+
+Gezahlt wird über `OFFICES`, nicht für den Bürgermeister allein: Kommt der Richter dazu,
+bekommt er seinen Sold, ohne dass am Dienst etwas zu ändern wäre. Dass alle Ämter
+denselben Satz teilen, hält, solange es ein Amt gibt — eigene Sätze je Amt gehören zu
+Punkt 32.
+
+**Es ist das erste Gesetz, das Geld aus der Kasse nimmt statt hinein**, und der
+Bürgermeister setzt es selbst. Das ist kein Versehen: Wer sich großzügig entlohnt, muss
+das vor der nächsten Wahl erklären, und die Tafel im Rathaus zeigt jedem, was er sich
+nimmt.
+
+_Fertig, wenn:_ Ein NPC im Amt bekommt Sold, und die Stadtkasse zeigt ihn als Abgang. —
+Erledigt. **Offen bleibt**, wovon 5.38 und 5.39 ausgingen: Der Bürgermeister kann seine
+vier Punkte weiterhin nicht aufbringen, weil er sie verarbeitet, sobald er einen hat. Der
+Sold gibt ihm einen Grund, im Amt zu bleiben; die Reparatur selbst braucht den nächsten
+Schritt — die Stadt schreibt sie aus, und wer will, leistet sie gegen Lohn.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

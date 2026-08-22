@@ -230,4 +230,101 @@ describe('Gesetze gegen die Datenbank', () => {
 			expect(await geld(besitzer)).toBe(100);
 		});
 	});
+
+	/**
+	 * Der Sold der Ämter (5.40). Im Mittelpunkt: dass er fließt, solange die Kasse es
+	 * hergibt, dass er sonst ausfällt statt Schulden zu machen — und dass ihn nur
+	 * bekommt, wer wirklich im Amt ist.
+	 */
+	describe('die Aufwandsentschädigung', () => {
+		async function soldSetzen(wert: number): Promise<void> {
+			await Law.create({
+				id: randomUUID(),
+				RegionId: stadtId,
+				kind: 'OFFICE_STIPEND',
+				value: wert,
+				enactedTick: JETZT,
+				EnactedByCharacterId: null
+			});
+		}
+
+		async function kasse(): Promise<number> {
+			return (await Region.findByPk(stadtId))!.dataValues.treasury ?? 0;
+		}
+
+		it('zahlt dem Amtsinhaber aus der Stadtkasse', async () => {
+			await soldSetzen(2);
+			await Region.update({ treasury: 100 }, { where: { id: stadtId } });
+			const buergermeister = await person('Amtsperson');
+			await insAmt(buergermeister);
+
+			const gezahlt = await lawService.payOfficeStipends(stadtId);
+
+			expect(gezahlt).toEqual([
+				{ office: 'MAYOR', characterId: buergermeister, name: 'Amtsperson', paid: 2, shortfall: 0 }
+			]);
+			expect(await geld(buergermeister)).toBe(102);
+			expect(await kasse()).toBe(98);
+		});
+
+		it('zahlt niemandem, wenn niemand im Amt ist', async () => {
+			await soldSetzen(2);
+			await Region.update({ treasury: 100 }, { where: { id: stadtId } });
+			await person('Bürgerin');
+
+			expect(await lawService.payOfficeStipends(stadtId)).toEqual([]);
+			expect(await kasse()).toBe(100);
+		});
+
+		it('zahlt aus, was die Kasse hergibt, und bleibt den Rest schuldig', async () => {
+			// Keine Schuld, die vorgetragen wird: Wer die Stadt ruiniert, bezahlt sich
+			// selbst nicht mehr — und bekommt es später auch nicht nachgereicht.
+			await soldSetzen(5);
+			await Region.update({ treasury: 2 }, { where: { id: stadtId } });
+			const buergermeister = await person('Amtsperson');
+			await insAmt(buergermeister);
+
+			const gezahlt = await lawService.payOfficeStipends(stadtId);
+
+			expect(gezahlt[0].paid).toBe(2);
+			expect(gezahlt[0].shortfall).toBe(3);
+			expect(await geld(buergermeister)).toBe(102);
+			expect(await kasse()).toBe(0);
+
+			// Beim nächsten Herzschlag ist die Kasse leer — dann fließt gar nichts, und der
+			// alte Ausfall wächst nicht mit.
+			const nochmal = await lawService.payOfficeStipends(stadtId);
+			expect(nochmal[0]).toEqual({
+				office: 'MAYOR',
+				characterId: buergermeister,
+				name: 'Amtsperson',
+				paid: 0,
+				shortfall: 5
+			});
+			expect(await geld(buergermeister)).toBe(102);
+		});
+
+		it('bleibt aus, solange der Satz null ist', async () => {
+			await soldSetzen(0);
+			await Region.update({ treasury: 100 }, { where: { id: stadtId } });
+			const buergermeister = await person('Amtsperson');
+			await insAmt(buergermeister);
+
+			expect(await lawService.payOfficeStipends(stadtId)).toEqual([]);
+			expect(await geld(buergermeister)).toBe(100);
+			expect(await kasse()).toBe(100);
+		});
+
+		it('zahlt ohne Erlass den Rückfallsatz', async () => {
+			// Damit eine Stadt, in der nie jemand ein Gesetz erlassen hat, ihren
+			// Bürgermeister trotzdem entlohnt.
+			await Region.update({ treasury: 100 }, { where: { id: stadtId } });
+			const buergermeister = await person('Amtsperson');
+			await insAmt(buergermeister);
+
+			const gezahlt = await lawService.payOfficeStipends(stadtId);
+
+			expect(gezahlt[0].paid).toBe(LAW_RULES.OFFICE_STIPEND.fallback);
+		});
+	});
 });

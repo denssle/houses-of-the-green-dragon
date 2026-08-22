@@ -9,6 +9,7 @@ import * as lawService from '$lib/server/service/lawService';
 import * as mayorService from '$lib/server/service/mayorService';
 import * as migrationService from '$lib/server/service/migrationService';
 import * as npcService from '$lib/server/service/npcService';
+import { OFFICE_NAMES } from '$lib/game/election.logic';
 import { findStartRegionId } from '$lib/db/seed';
 
 /**
@@ -147,6 +148,22 @@ async function schlagen(): Promise<void> {
 				`Grundsteuer: ${steuer.collected} Muenzen von ${steuer.payers} Besitzern` +
 					(steuer.shortfall > 0 ? `, ${steuer.shortfall} nicht eintreibbar.` : '.')
 			);
+		}
+
+		// Und was die Stadt ihrerseits schuldet: den Sold ihrer Amtsinhaber. Nach der
+		// Steuer, weil sich die Kasse erst fuellt und dann zahlt — bei knapper Kasse faellt
+		// er aus, statt Schulden zu machen.
+		for (const sold of await lawService.payOfficeStipends(stadtId)) {
+			if (sold.paid > 0) {
+				console.info(
+					`${OFFICE_NAMES[sold.office]} ${sold.name}: ${sold.paid} Muenzen Aufwandsentschaedigung` +
+						(sold.shortfall > 0 ? ` (${sold.shortfall} blieb die Kasse schuldig).` : '.')
+				);
+			} else {
+				console.info(
+					`Die Stadtkasse konnte ${OFFICE_NAMES[sold.office]} ${sold.name} nicht bezahlen.`
+				);
+			}
 		}
 
 		// Unglueck: hoechstens eins je Herzschlag. Vor dem Sterben, damit ein Ueberfall

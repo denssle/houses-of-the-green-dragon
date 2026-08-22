@@ -15,6 +15,7 @@ import {
 	type LawKind,
 	propertyTaxFor
 } from '$lib/game/law.logic';
+import { OFFICES, type Office } from '$lib/game/election.logic';
 import { TICKS_PER_YEAR } from '$lib/game/time';
 import * as electionService from '$lib/server/service/electionService';
 import * as nameService from '$lib/server/service/nameService';
@@ -211,4 +212,72 @@ export async function collectPropertyTax(
 	}
 
 	return { collected: eingenommen, payers: zahlende, shortfall: ausgefallen };
+}
+
+// --- Die Aufwandsentschädigung -------------------------------------------------------
+
+export interface Stipend {
+	office: Office;
+	characterId: string;
+	/** Mit Haus, wie überall, wo die Stadtgeschichte jemanden nennt. */
+	name: string;
+	/** Was tatsächlich geflossen ist. Bei knapper Kasse weniger als der Satz. */
+	paid: number;
+	/** Was die Stadt schuldig geblieben ist — und schuldig bleibt. */
+	shortfall: number;
+}
+
+/**
+ * Den Amtsinhabern ihren Sold auszahlen — einmal je Herzschlag.
+ *
+ * **Warum es sie gibt.** Bis hierher war ein Amt reine Auslage: Wer herrichten ließ,
+ * gab vier Aktionspunkte her, die anderswo Tagelohn gebracht hätten, und bekam dafür
+ * nichts. Ein NPC entschied sich deshalb folgerichtig gegen das Amt und für die Arbeit —
+ * und die Stadt verfiel, obwohl ein Bürgermeister im Amt saß. Aktionspunkte gegen Geld
+ * ist der Handel, auf dem dieses Spiel beruht; das Amt war der eine Ort, an dem er nicht
+ * galt.
+ *
+ * **Warum laufend und nicht am Ende der Amtszeit.** Dieselbe Mechanik wie beim Sold der
+ * Wache, und dieselbe Härte: Bei leerer Kasse fällt er aus. Wer die Stadt ruiniert,
+ * bezahlt sich selbst nicht mehr — und ein Nachschlag wird daraus nie, weil nichts
+ * vorgetragen wird. Am Ende der Amtszeit zu zahlen wäre milder und stiller: Ein
+ * Bürgermeister könnte fünf Jahre lang die Kasse leeren und am letzten Tag doch noch
+ * kassieren.
+ *
+ * **Für jedes Amt, nicht nur für dieses eine.** Gezählt wird über `OFFICES`; kommt der
+ * Richter dazu, bekommt er seinen Sold, ohne dass hier etwas zu ändern wäre. Dass alle
+ * Ämter denselben Satz teilen, ist eine Vereinfachung, die hält, solange es ein Amt gibt —
+ * eigene Sätze je Amt sind ein eigenes Gesetz und gehören zu Punkt 32.
+ *
+ * Übersprungene Ticks nach einem Serverausfall zahlen nicht nach: Wie beim Nachwachsen
+ * und beim Sterben hat die ausgefallene Zeit nicht stattgefunden.
+ */
+export async function payOfficeStipends(regionId: string): Promise<Stipend[]> {
+	const satz: number = await rate(regionId, 'OFFICE_STIPEND');
+	if (satz <= 0) return [];
+
+	const gezahlt: Stipend[] = [];
+	for (const amt of OFFICES) {
+		const inhaber = await electionService.getHolder(regionId, amt);
+		if (!inhaber) continue;
+
+		// Die Kasse wird in jedem Durchgang neu gelesen: Bei mehreren Ämtern und knapper
+		// Kasse bekommt sonst jeder den vollen Satz aus demselben Rest.
+		const stadt = await Region.findByPk(regionId);
+		const kasse: number = stadt?.dataValues.treasury ?? 0;
+		const betrag: number = collectable(satz, kasse);
+
+		if (betrag > 0) {
+			await Region.decrement('treasury', { by: betrag, where: { id: regionId } });
+			await Character.increment('money', { by: betrag, where: { id: inhaber.characterId } });
+		}
+		gezahlt.push({
+			office: amt,
+			characterId: inhaber.characterId,
+			name: inhaber.name,
+			paid: betrag,
+			shortfall: satz - betrag
+		});
+	}
+	return gezahlt;
 }

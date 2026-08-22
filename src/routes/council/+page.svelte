@@ -219,7 +219,10 @@
 		{#each data.laws as gesetz (gesetz.kind)}
 			<li>
 				<b>{gesetz.name}:</b>
-				{gesetz.value}{gesetz.unit === 'PERCENT' ? ' %' : ' Münzen'} — {gesetz.description}.
+				<!-- „1 Münzen" stand nie da, solange kein Satz auf eins stand — die
+				     Aufwandsentschädigung tut es ab Werk. -->
+				{gesetz.value}{gesetz.unit === 'PERCENT' ? ' %' : gesetz.value === 1 ? ' Münze' : ' Münzen'}
+				— {gesetz.description}.
 				{#if data.holder?.mine}
 					<form method="POST" action="?/enact" use:enhance>
 						<input type="hidden" name="kind" value={gesetz.kind} />
