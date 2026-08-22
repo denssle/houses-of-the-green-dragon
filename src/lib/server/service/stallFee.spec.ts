@@ -53,7 +53,7 @@ async function person(geld: number): Promise<string> {
 }
 
 /** Vorrat anlegen — `changeStock` verlangt eine Transaktion. */
-async function inDieKammer(id: string, itemId: string, menge: number): Promise<void> {
+async function insInventar(id: string, itemId: string, menge: number): Promise<void> {
 	await sequelize.transaction(async (t: Transaction) => {
 		await needService.changeStock(id, itemId, menge, t);
 	});
@@ -82,7 +82,7 @@ describe('Standgeld am Marktplatz', () => {
 
 	it('kostet beim ersten Aushängen', async () => {
 		const haendlerin = await person(100);
-		await inDieKammer(haendlerin, 'WOOD', 10);
+		await insInventar(haendlerin, 'WOOD', 10);
 
 		const ergebnis = await tradeService.placeOffer(haendlerin, marktId, 'WOOD', 4, 2);
 
@@ -97,7 +97,7 @@ describe('Standgeld am Marktplatz', () => {
 	it('kostet beim Nachlegen nichts', async () => {
 		// **Der Kern.** Dreimal nachlegen heißt nicht dreimal Standgeld.
 		const haendlerin = await person(100);
-		await inDieKammer(haendlerin, 'WOOD', 10);
+		await insInventar(haendlerin, 'WOOD', 10);
 
 		await tradeService.placeOffer(haendlerin, marktId, 'WOOD', 2, 2);
 		const nachDemErsten: number = await geldVon(haendlerin);
@@ -117,7 +117,7 @@ describe('Standgeld am Marktplatz', () => {
 		// Ein anderer Preis ist eine andere Aussage und keine Nachlieferung — also ein
 		// zweites Schild, und für das zahlt man.
 		const haendlerin = await person(100);
-		await inDieKammer(haendlerin, 'WOOD', 10);
+		await insInventar(haendlerin, 'WOOD', 10);
 
 		await tradeService.placeOffer(haendlerin, marktId, 'WOOD', 2, 2);
 		const nachDemErsten: number = await geldVon(haendlerin);
@@ -130,7 +130,7 @@ describe('Standgeld am Marktplatz', () => {
 
 	it('lässt niemanden aushängen, der das Standgeld nicht hat', async () => {
 		const arm = await person(1);
-		await inDieKammer(arm, 'WOOD', 10);
+		await insInventar(arm, 'WOOD', 10);
 
 		const ergebnis = await tradeService.placeOffer(arm, marktId, 'WOOD', 2, 2);
 
@@ -143,7 +143,7 @@ describe('Standgeld am Marktplatz', () => {
 		// benutzen — auch wenn die Kasse inzwischen leer ist. Sonst wäre der Ärmste
 		// ausgerechnet von dem ausgeschlossen, was ihn aus der Armut brächte.
 		const knapp = await person(LAW_RULES.STALL_FEE.fallback);
-		await inDieKammer(knapp, 'WOOD', 10);
+		await insInventar(knapp, 'WOOD', 10);
 
 		await tradeService.placeOffer(knapp, marktId, 'WOOD', 2, 2);
 		expect(await geldVon(knapp)).toBe(0);

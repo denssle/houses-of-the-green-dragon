@@ -119,12 +119,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		stock: await tradeService.getBuildingStock(params.building_id),
 		offers: await tradeService.getOffersAt(params.building_id, locals.currentCharacter?.id),
 		myStock: locals.currentCharacter ? await needService.getStock(locals.currentCharacter.id) : [],
-		// **Wie voll die Kammer ist, dort wo umgelagert wird** (5.34). Ohne die Zahl
+		// **Wie voll das Inventar ist, dort wo umgelagert wird** (5.34). Ohne die Zahl
 		// erfährt man erst am abgewiesenen Knopf, dass kein Platz mehr ist.
-		chamber: {
-			used: locals.currentCharacter ? await needService.chamberUsed(locals.currentCharacter.id) : 0,
+		inventory: {
+			used: locals.currentCharacter
+				? await needService.inventoryUsed(locals.currentCharacter.id)
+				: 0,
 			capacity: locals.currentCharacter
-				? await needService.chamberCapacityOf(locals.currentCharacter.id)
+				? await needService.inventoryCapacityOf(locals.currentCharacter.id)
 				: 0
 		},
 		isMarket: building.optionId === tradeService.MARKET_OPTION_ID,
@@ -373,7 +375,7 @@ export const actions = {
 	},
 
 	/**
-	 * Aus dem Lager zurück in die Kammer.
+	 * Aus dem Lager zurück ins Inventar.
 	 *
 	 * **Eine eigene Handlung statt eines Vorzeichens im Formular** (5.34): `moveToStock`
 	 * versteht die Richtung an der Menge, aber ein verstecktes Minus in einem
@@ -395,7 +397,7 @@ export const actions = {
 			-menge
 		);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
-		return { message: `${menge} in die Kammer geholt.` };
+		return { message: `${menge} ins Inventar geholt.` };
 	},
 
 	sellOffer: async ({ request, params, locals }) => {

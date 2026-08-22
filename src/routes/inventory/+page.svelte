@@ -9,7 +9,7 @@
 	const frei: number = $derived(Math.max(0, data.capacity - data.used));
 </script>
 
-<h2>Deine Kammer</h2>
+<h2>Dein Inventar</h2>
 
 <p>
 	<b>{data.used} von {data.capacity} Stück.</b>
@@ -52,7 +52,7 @@
 	<h3>Was darin liegt</h3>
 	{#if data.stock.length === 0}
 		<p>
-			<i>Deine Kammer ist leer.</i>
+			<i>Dein Inventar ist leer.</i>
 			Gekauftes und Geerntetes landet hier — im
 			<a href="{base}/granary" class="link">Kornspeicher</a>
 			gibt es Brot, im <a href="{base}/market" class="link">Markt</a> alles andere.
@@ -80,7 +80,7 @@
 					{/if}
 					<!--
 						**Der Ausweg neben der Grenze:** Ein Betriebslager fasst unbegrenzt, also
-						ist Einlagern die Antwort auf eine volle Kammer. Wer kein Haus hat, sieht
+						ist Einlagern die Antwort auf ein volles Inventar. Wer kein Haus hat, sieht
 						hier nichts — für den ist die Antwort ein Haus.
 					-->
 					{#if data.buildings.length > 0}
@@ -109,8 +109,8 @@
 	<p>
 		<small>
 			Was über die Sättigung hinausginge, verfällt beim Essen — wer vorsorgen will, lässt das Brot
-			liegen. Und was hier liegt, ist vor Raubzügen sicher: Die Kammer ist das, was zwischen dir und
-			dem Verhungern steht.
+			liegen. Und was hier liegt, geht auch bei einem Brand nicht verloren: Das Inventar ist das,
+			was zwischen dir und dem Verhungern steht.
 		</small>
 	</p>
 </section>
@@ -119,9 +119,9 @@
 	<section>
 		<h3>In deinen Lagern</h3>
 		<!--
-			**Die Gegenrichtung** (5.34): Ein Lager fasst unbegrenzt, die Kammer nicht — also
+			**Die Gegenrichtung** (5.34): Ein Lager fasst unbegrenzt, das Inventar nicht — also
 			liegt dort das Meiste, und geholt wird, was man gerade braucht. Essen, Anziehen
-			und ein Stand am Marktplatz gehen nur aus der Kammer.
+			und ein Stand am Marktplatz gehen nur aus dem Inventar.
 		-->
 		{#each data.buildings as haus (haus.id)}
 			<h4>

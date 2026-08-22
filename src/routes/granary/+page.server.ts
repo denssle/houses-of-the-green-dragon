@@ -19,10 +19,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const jetzt: number = await worldService.currentTick();
 	return {
 		offers: needService.granaryOffers(),
-		// **Nur noch die beiden Zahlen** (5.33): Der Vorrat selbst wohnt unter `/chamber`.
+		// **Nur noch die beiden Zahlen** (5.33): Der Vorrat selbst wohnt unter `/inventory`.
 		// Hier steht, was man beim Einkaufen wissen muss — wie viel noch hineinpasst.
-		used: await needService.chamberUsed(character.id),
-		capacity: await needService.chamberCapacityOf(character.id),
+		used: await needService.inventoryUsed(character.id),
+		capacity: await needService.inventoryCapacityOf(character.id),
 		hunger: await needService.getHunger(character.id, jetzt),
 		money: character.money
 	};
@@ -42,7 +42,7 @@ export const actions = {
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return { message: `${menge} eingekauft.` };
 	}
-	// **Essen, Anziehen und Trinken sind mit 5.33 in die Kammer gezogen.** Sie hingen hier,
+	// **Essen, Anziehen und Trinken sind mit 5.33 ins Inventar gezogen.** Sie hingen hier,
 	// weil hier der Vorrat stand; mit ihm gehören sie dorthin, wo er jetzt wohnt. Ein Laden
 	// verkauft — was man mit dem Gekauften tut, ist nicht seine Sache.
 } satisfies Actions;

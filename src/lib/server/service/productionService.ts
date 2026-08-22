@@ -307,7 +307,7 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 		// **Die Ernte bleibt auf dem Hof** (5.25) — dort, wo sie gewachsen ist. Seit 5.15
 		// gehört zu jeder Pacht einer, und damit gibt es einen Ort dafür.
 		//
-		// Steht kein Hof (eine Pacht aus der Zeit davor), geht es in die Kammer: Ernte darf
+		// Steht kein Hof (eine Pacht aus der Zeit davor), geht es ins Inventar: Ernte darf
 		// nicht daran scheitern, dass ein Schuppen fehlt.
 		const hof = await Building.findOne({
 			where: { PlotId: plotId, optionId: buildingService.HOF_OPTION_ID },
@@ -317,10 +317,10 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 			await tradeService.changeBuildingStock(hof.dataValues.id, rezept.outputItemId, behalten, t);
 		} else if (!(await needService.changeStock(characterId, rezept.outputItemId, behalten, t))) {
 			// **Vor dem Abbuchen der Aktionspunkte** (5.33): Passt die Ernte nicht mehr in
-			// die Kammer, bleibt sie am Halm — und der Tag ist nicht verloren. Eine
+			// das Inventar, bleibt sie am Halm — und der Tag ist nicht verloren. Eine
 			// Transaktion, die mit einer Fehlermeldung zurückkehrt, wird trotzdem
 			// festgeschrieben; die Reihenfolge ist deshalb keine Kosmetik.
-			return { ok: false, reason: 'CHAMBER_FULL' } as const;
+			return { ok: false, reason: 'INVENTORY_FULL' } as const;
 		}
 
 		await baeuerin.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
@@ -381,7 +381,7 @@ export async function craft(
 		// **Alles, was ihm gehört** (5.25, Punkt 72). Seit die Ernte auf dem Hof liegt und
 		// das Erzeugnis in der Werkstatt, ist Besitz auf mehrere Häuser verteilt — und wer
 		// sein Holz im Hof hat, kann in seiner Zimmerei trotzdem sägen. Vorher zählte nur
-		// das Lager *dieses* Betriebs und die Kammer; im Messlauf lagen 512 Stämme im Hof,
+		// das Lager *dieses* Betriebs und das Inventar; im Messlauf lagen 512 Stämme im Hof,
 		// während die Zimmerei desselben Menschen stillstand.
 		const vorrat: Record<string, number> = Object.fromEntries(
 			await tradeService.getOwnedStock(characterId)
@@ -400,7 +400,7 @@ export async function craft(
 		if (!ergebnis.ok) return ergebnis;
 
 		for (const zutat of rezept.input) {
-			// Kammer zuerst, dann die Häuser — `consumeOwned` kennt die Reihenfolge.
+			// Inventar zuerst, dann die Häuser — `consumeOwned` kennt die Reihenfolge.
 			if (!(await tradeService.consumeOwned(characterId, zutat.itemId, zutat.quantity, t))) {
 				return { ok: false, reason: 'NOT_IN_STOCK' } as const;
 			}

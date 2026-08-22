@@ -1,5 +1,5 @@
 /**
- * Die Kammer: was ein Mensch bei sich behalten kann.
+ * Das Inventar: was ein Mensch bei sich behalten kann.
  *
  * Bis 5.33 war der persönliche Vorrat unbegrenzt. Das machte ihn zum bequemsten Lager der
  * Welt — er kostet nichts, verfällt nicht und wird bei Raubzügen verschont (`KONZEPT.md`,
@@ -27,8 +27,8 @@
  */
 export const CARRIED_CAPACITY = 20;
 
-/** Was in die Kammer passt: das, was man am Leib trägt, plus das, was das Dach hergibt. */
-export function chamberCapacity(fromHome: number): number {
+/** Was ins Inventar passt: das, was man am Leib trägt, plus das, was das Dach hergibt. */
+export function inventoryCapacity(fromHome: number): number {
 	return CARRIED_CAPACITY + Math.max(0, fromHome);
 }
 
@@ -40,7 +40,7 @@ export function chamberCapacity(fromHome: number): number {
  * beide Richtungen: Eine Grenze, die Bestände wegwirft, wäre eine Strafe für etwas, das
  * niemand entschieden hat.
  */
-export function fitsInChamber(used: number, capacity: number, added: number): boolean {
+export function fitsInInventory(used: number, capacity: number, added: number): boolean {
 	if (added <= 0) return true;
 	return used + added <= capacity;
 }

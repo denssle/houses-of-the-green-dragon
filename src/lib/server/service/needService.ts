@@ -9,7 +9,7 @@ import type {
 	CharacterCreationAttributes
 } from '$lib/db/attributes/character.attributes';
 import { currentSatiety, eat, satietyLabel, wouldBeWasted } from '$lib/game/need.logic';
-import { chamberCapacity, fitsInChamber } from '$lib/game/inventory.logic';
+import { inventoryCapacity, fitsInInventory } from '$lib/game/inventory.logic';
 import * as buildingService from '$lib/server/service/buildingService';
 import { getItemTemplate, type ItemTemplate } from '$lib/model/itemTemplate';
 import { canAfford } from '$lib/game/economy';
@@ -79,23 +79,23 @@ export async function getStock(characterId: string): Promise<StockItem[]> {
 }
 
 /**
- * Wie viel die Kammer dieses Menschen fasst.
+ * Wie viel das Inventar dieses Menschen fasst.
  *
  * Was er am Leib trägt, plus das, was sein Dach hergibt — die Zahl, die auf der
- * Kammerseite hinter dem Schrägstrich steht.
+ * Inventarseite hinter dem Schrägstrich steht.
  */
-export async function chamberCapacityOf(characterId: string, t?: Transaction): Promise<number> {
+export async function inventoryCapacityOf(characterId: string, t?: Transaction): Promise<number> {
 	const person = await Character.findByPk(characterId, { transaction: t });
-	if (!person) return chamberCapacity(0);
+	if (!person) return inventoryCapacity(0);
 
 	const tick: number = await worldService.currentTick();
-	return chamberCapacity(
+	return inventoryCapacity(
 		await buildingService.storageAtHome(person.dataValues.HomeBuildingId, tick, t)
 	);
 }
 
-/** Wie viele Stücke insgesamt in der Kammer liegen — jede Sorte zählt gleich. */
-export async function chamberUsed(characterId: string, t?: Transaction): Promise<number> {
+/** Wie viele Stücke insgesamt im Inventar liegen — jede Sorte zählt gleich. */
+export async function inventoryUsed(characterId: string, t?: Transaction): Promise<number> {
 	const alle = await Inventory.findAll({ where: { CharacterId: characterId }, transaction: t });
 	return alle.reduce((summe, zeile) => summe + zeile.dataValues.quantity, 0);
 }
@@ -107,7 +107,7 @@ export async function chamberUsed(characterId: string, t?: Transaction): Promise
  * Gibt `false` zurück, wenn nicht genug da ist; die Prüfung gehört hierher, weil nur hier
  * gesperrt wird.
  *
- * **Seit 5.33 auch nach oben begrenzt.** Was hereinkommt, muss in die Kammer passen —
+ * **Seit 5.33 auch nach oben begrenzt.** Was hereinkommt, muss ins Inventar passen —
  * und weil jeder Weg in den persönlichen Vorrat durch diese eine Zeile führt (Kauf,
  * Ernte ohne Hof, Auslagern, zurückgezogenes Angebot), steht die Prüfung hier und nicht
  * viermal daneben. Wer schon darüber liegt, verliert nichts; er nimmt nur nichts mehr
@@ -120,8 +120,8 @@ export async function changeStock(
 	t: Transaction
 ): Promise<boolean> {
 	if (delta > 0) {
-		const platz: number = await chamberCapacityOf(characterId, t);
-		if (!fitsInChamber(await chamberUsed(characterId, t), platz, delta)) return false;
+		const platz: number = await inventoryCapacityOf(characterId, t);
+		if (!fitsInInventory(await inventoryUsed(characterId, t), platz, delta)) return false;
 	}
 
 	const zeile = await Inventory.findOne({
@@ -221,10 +221,10 @@ export async function buyFromGranary(
 			return { ok: false, reason: 'NOT_ENOUGH_MONEY' } as const;
 		}
 
-		// **Erst hineinlegen, dann zahlen.** Passt es nicht in die Kammer, findet der Kauf
+		// **Erst hineinlegen, dann zahlen.** Passt es nicht ins Inventar, findet der Kauf
 		// nicht statt — sonst wäre das Geld weg und die Ware nirgends.
 		if (!(await changeStock(characterId, itemId, quantity, t))) {
-			return { ok: false, reason: 'CHAMBER_FULL' } as const;
+			return { ok: false, reason: 'INVENTORY_FULL' } as const;
 		}
 		await käufer.update({ money: käufer.dataValues.money - kosten }, { transaction: t });
 		await Region.increment('treasury', {

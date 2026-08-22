@@ -31,7 +31,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 							name: getItemTemplate(posten.itemId)?.name ?? posten.itemId
 						}))
 			})),
-		// Was in der eigenen Kammer liegt — daneben liest sich der Bedarf von selbst.
+		// Was im eigenen Inventar liegt — daneben liest sich der Bedarf von selbst.
 		stock: character ? await needService.getStock(character.id) : [],
 		// Nur unbebaute eigene Grundstücke — auf ein besetztes passt kein zweites Haus.
 		freePlots: eigene.filter((plot) => !plot.hasBuilding)

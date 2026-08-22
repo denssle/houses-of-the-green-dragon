@@ -95,7 +95,7 @@ export function restAt(template: BuildingTemplate, level: number, condition: num
  * Wie viel Vorrat dieses Dach zusätzlich fasst — 0, wenn es keines ist.
  *
  * Gemindert um den Zustand, wie Lohn und Kraftvorrat: Was durch ein undichtes Dach
- * regnet, verdirbt. Damit hat auch die Kammer einen Grund, renovieren zu lassen.
+ * regnet, verdirbt. Damit hat auch das Inventar einen Grund, das Dach richten zu lassen.
  */
 export function storageAt(template: BuildingTemplate, level: number, condition: number): number {
 	const grundwert: number = levelOf(template, level).storage ?? 0;

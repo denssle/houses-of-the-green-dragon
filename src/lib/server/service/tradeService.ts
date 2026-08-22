@@ -55,7 +55,7 @@ async function alsLaden(buildingId: string): Promise<
 // --- Das Lager -----------------------------------------------------------------------
 
 /**
- * Ware zwischen eigener Kammer und Betriebslager bewegen.
+ * Ware zwischen eigenem Inventar und Betriebslager bewegen.
  *
  * Nur der Eigentümer, und nur in seinem eigenen Betrieb: Ein fremdes Lager zu füllen
  * wäre ein Geschenk, es zu leeren ein Diebstahl.
@@ -76,14 +76,14 @@ export async function moveToStock(
 	}
 
 	return sequelize.transaction(async (t: Transaction) => {
-		// Einlegen: erst aus der Kammer nehmen, dann ins Lager. Auslagern andersherum.
+		// Einlegen: erst aus dem Inventar nehmen, dann ins Lager. Auslagern andersherum.
 		if (quantity > 0) {
 			if (!(await needService.changeStock(characterId, itemId, -quantity, t))) {
 				return { ok: false, reason: 'NOT_IN_STOCK' } as const;
 			}
 			await changeBuildingStock(buildingId, itemId, quantity, t);
 		} else {
-			// **Auslagern kann jetzt auch an der Kammer scheitern** (5.33) — deshalb beide
+			// **Auslagern kann jetzt auch am Inventar scheitern** (5.33) — deshalb beide
 			// Fragen vorweg und die Buchungen danach. Eine Transaktion, die mit einer
 			// Fehlermeldung zurückkehrt, wird trotzdem festgeschrieben: Wer zwischendrin
 			// abbricht, hat die Ware zweimal oder gar nicht.
@@ -92,7 +92,7 @@ export async function moveToStock(
 				return { ok: false, reason: 'NOT_IN_STOCK' } as const;
 			}
 			if (!(await needService.changeStock(characterId, itemId, menge, t))) {
-				return { ok: false, reason: 'CHAMBER_FULL' } as const;
+				return { ok: false, reason: 'INVENTORY_FULL' } as const;
 			}
 			await changeBuildingStock(buildingId, itemId, quantity, t);
 		}
@@ -158,7 +158,7 @@ export async function buildingHasStock(
 }
 
 /**
- * Was einer besitzt — in der Kammer **und** in allen seinen Häusern (5.25, Punkt 72).
+ * Was einer besitzt — im Inventar **und** in allen seinen Häusern (5.25, Punkt 72).
  *
  * **Seit Ware dort liegt, wo sie entsteht, liegt sie selten dort, wo sie gebraucht wird.**
  * Die Ernte fällt auf dem Hof an, verarbeitet wird in der Werkstatt, gebaut auf dem
@@ -190,7 +190,7 @@ export async function getOwnedStock(characterId: string): Promise<Map<string, nu
 /**
  * Etwas aus dem eigenen Besitz verbrauchen — woher auch immer.
  *
- * **Die Kammer zuerst**, dann die Häuser: Was einer bei sich trägt, ist am schnellsten zur
+ * **Das Inventar zuerst**, dann die Häuser: Was einer bei sich trägt, ist am schnellsten zur
  * Hand, und so bleibt in den Lagern liegen, was zum Verkauf gedacht ist. Gibt `false`
  * zurück, wenn es insgesamt nicht reicht — dann wurde nichts angerührt, denn der Aufrufer
  * steckt in einer Transaktion.
@@ -206,13 +206,13 @@ export async function consumeOwned(
 
 	let offen: number = quantity;
 
-	const kammer: number =
+	const inventar: number =
 		(await needService.getStock(characterId)).find((posten) => posten.itemId === itemId)
 			?.quantity ?? 0;
-	const ausDerKammer: number = Math.min(kammer, offen);
-	if (ausDerKammer > 0) {
-		await needService.changeStock(characterId, itemId, -ausDerKammer, t);
-		offen -= ausDerKammer;
+	const ausDemInventar: number = Math.min(inventar, offen);
+	if (ausDemInventar > 0) {
+		await needService.changeStock(characterId, itemId, -ausDemInventar, t);
+		offen -= ausDemInventar;
 	}
 
 	for (const haus of await buildingService.getBuildingsOfCharacter(characterId)) {
@@ -368,7 +368,7 @@ export async function withdrawOffer(sellerId: string, offerId: string): Promise<
 				t
 			);
 		} else {
-			// **Das Angebot bleibt hängen, wenn die Kammer nicht reicht** (5.33). Ware
+			// **Das Angebot bleibt hängen, wenn das Inventar nicht reicht** (5.33). Ware
 			// verschwinden zu lassen wäre schlimmer als ein Preisschild, das noch einen Tag
 			// länger hängt — und der Ausweg steht daneben: erst etwas einlagern oder essen.
 			if (
@@ -379,7 +379,7 @@ export async function withdrawOffer(sellerId: string, offerId: string): Promise<
 					t
 				))
 			) {
-				return { ok: false, reason: 'CHAMBER_FULL' } as const;
+				return { ok: false, reason: 'INVENTORY_FULL' } as const;
 			}
 		}
 
@@ -421,12 +421,12 @@ export async function buyFromOffer(
 		);
 		if (!ergebnis.ok) return ergebnis;
 
-		// **Die Ware zuerst.** Passt sie nicht in die Kammer des Käufers, findet der Kauf
+		// **Die Ware zuerst.** Passt sie nicht ins Inventar des Käufers, findet der Kauf
 		// nicht statt — und zwar bevor Geld geflossen ist. Eine Transaktion, die mit einer
 		// Fehlermeldung zurückkehrt, wird trotzdem festgeschrieben; wer hier erst zahlt
 		// und dann prüft, hat einen Käufer ohne Ware und ohne Münzen.
 		if (!(await needService.changeStock(buyerId, angebot.dataValues.itemId, wanted, t))) {
-			return { ok: false, reason: 'CHAMBER_FULL' } as const;
+			return { ok: false, reason: 'INVENTORY_FULL' } as const;
 		}
 
 		await kaeufer.update({ money: ergebnis.buyerMoney }, { transaction: t });

@@ -33,7 +33,7 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		betterJobAvailable: false,
 		matchAvailable: true,
 		foodPrice: 4,
-		// Der Zufriedene hat alles: Er trägt ein Gewand und hat einen Trank in der Kammer,
+		// Der Zufriedene hat alles: Er trägt ein Gewand und hat einen Trank im Inventar,
 		// damit die neuen Stufen aus 4.12 nicht ungewollt zuschlagen.
 		wearsGarment: true,
 		garmentInStock: 0,
@@ -82,7 +82,7 @@ describe('Was ein NPC tut', () => {
 			expect(decideNpcAction(zufrieden({ satiety: 20 }))).toBe('EAT');
 		});
 
-		it('kauft, wenn die Kammer leer ist', () => {
+		it('kauft, wenn das Inventar leer ist', () => {
 			expect(decideNpcAction(zufrieden({ satiety: 20, food: 0 }))).toBe('BUY_FOOD');
 		});
 
@@ -129,7 +129,7 @@ describe('Was ein NPC tut', () => {
 			// übrig hatte, wählte also das Werben und scheiterte daran — im ersten Messlauf
 			// mit Fehlschlagzählung 19 von 36 Versuchen. In der Statistik stand `COURT`, als
 			// wäre geworben worden; gesehen hat es deshalb nie jemand.
-			// Ohne Trank in der Kammer, sonst greift bei so wenig Punkten die Erholung aus
+			// Ohne Trank im Inventar, sonst greift bei so wenig Punkten die Erholung aus
 			// der Sicherheitsstufe — richtig so, aber hier nicht die Frage.
 			const knapp = zufrieden({ isMarried: false, actionPoints: 1, tonicInStock: 0 });
 			const gerade = zufrieden({ isMarried: false, actionPoints: 2, tonicInStock: 0 });

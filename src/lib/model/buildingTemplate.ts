@@ -38,7 +38,7 @@ export interface BuildingLevel {
 	 */
 	restActionPoints?: number;
 	/**
-	 * Um wie viele Stücke dieses Dach die **Kammer** seiner Bewohner erweitert (5.33).
+	 * Um wie viele Stücke dieses Dach das **Inventar** seiner Bewohner erweitert (5.33).
 	 *
 	 * Was ein Mensch ohne Dach bei sich trägt, steht in `inventory.logic.ts` und ist für
 	 * alle gleich; hierher gehört nur, was das Haus dazugibt. Dieselbe Bauart wie beim
@@ -113,7 +113,7 @@ export function upgradePrice(template: BuildingTemplate, currentLevel: number): 
 	return template.levels[currentLevel]?.price;
 }
 
-/** Ein Posten, wie ihn Kostenliste und Kammer führen. */
+/** Ein Posten, wie ihn Kostenliste und Inventar führen. */
 export interface Posten {
 	quantity: number;
 	name: string;

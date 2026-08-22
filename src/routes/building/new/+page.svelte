@@ -17,7 +17,7 @@
 {:else}
 	{#if data.stock.length > 0}
 		<p>
-			<small>In deiner Kammer: {itemLine(data.stock)}</small>
+			<small>In deinem Inventar: {itemLine(data.stock)}</small>
 		</p>
 	{/if}
 

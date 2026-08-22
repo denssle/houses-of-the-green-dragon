@@ -118,7 +118,7 @@ describe('Gebäude', () => {
 			expect(restAt(SCHMIEDE, 1, 100)).toBe(0);
 		});
 
-		it('mindert auch die Kammer, die das Dach hergibt', () => {
+		it('mindert auch das Inventar, das das Dach hergibt', () => {
 			// Was durch ein undichtes Dach regnet, verdirbt — derselbe Faktor wie beim
 			// Kraftvorrat und beim Lohn (5.33).
 			expect(storageAt(WOHNHAUS, 3, 100)).toBe(80);

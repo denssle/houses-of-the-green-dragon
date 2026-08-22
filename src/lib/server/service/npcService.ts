@@ -283,9 +283,9 @@ async function ausfuehren(
 			if (ware && lage.workshopId) {
 				// Erst ins Lager, dann ans Schild: Im eigenen Laden verkauft man aus dem
 				// Betrieb, nicht aus der Tasche.
-				if (ware.inChamber > 0) {
+				if (ware.inInventory > 0) {
 					// Dieselbe Tür wie beim Spieler, der auf 'Einlagern' klickt.
-					await tradeService.moveToStock(npcId, lage.workshopId, ware.itemId, ware.inChamber);
+					await tradeService.moveToStock(npcId, lage.workshopId, ware.itemId, ware.inInventory);
 				}
 				const preis: number = getItemTemplate(ware.itemId)?.basePrice ?? 1;
 				return buch(
@@ -468,7 +468,7 @@ async function lageAufnehmen(
 			freePlotId?: string;
 			leaseId?: string;
 			leasableId?: string;
-			sellable?: { itemId: string; quantity: number; inChamber: number };
+			sellable?: { itemId: string; quantity: number; inInventory: number };
 			ballot?: Awaited<ReturnType<typeof electionService.getBallot>>;
 			repairId?: string;
 			ownHomeId?: string;
@@ -567,7 +567,7 @@ async function lageAufnehmen(
 	// Was dort hängt, kostet kein Standgeld.
 	// **Erst fragen, ob es etwas zu verkaufen gibt — dann erst, wo und zu welchem Preis.**
 	// Die Reihenfolge ist eine Frage der Kosten: Der Überschuss steht in der eigenen
-	// Kammer (eine Abfrage), der Marktplatz verlangt die Häuserzeile der Stadt und das
+	// Inventar (eine Abfrage), der Marktplatz verlangt die Häuserzeile der Stadt und das
 	// Standgeld einen Blick ins Gesetzbuch. Beides je NPC und Tick abzufragen, obwohl im
 	// Regelfall nichts übrig ist, hat den Durchlauf spürbar verteuert.
 	const rohUeberschuss = zuVerkaufen
@@ -871,9 +871,9 @@ export async function fehlendeWerkstatt(
 }
 
 /**
- * Was er verkaufen könnte — aus dem Betriebslager **und aus der eigenen Kammer**.
+ * Was er verkaufen könnte — aus dem Betriebslager **und aus dem eigenen Inventar**.
  *
- * Die Kammer muss mitzählen, weil `craft` das Erzeugnis dorthin legt: Wer selbst an der
+ * Das Inventar muss mitzählen, weil `craft` das Erzeugnis dorthin legt: Wer selbst an der
  * Werkbank steht, trägt es nach Hause. Zum Verkauf im eigenen Laden muss es aber im Lager
  * liegen — deshalb wandert es beim Aushängen zuerst dorthin. Ohne diesen Umweg stellte
  * ein NPC her und her, und nichts käme je an ein Preisschild; genau das zeigte der
@@ -882,29 +882,29 @@ export async function fehlendeWerkstatt(
 async function unverkauftes(
 	characterId: string,
 	werkstatt: { id: string; optionId: number }
-): Promise<{ itemId: string; quantity: number; inChamber: number } | undefined> {
+): Promise<{ itemId: string; quantity: number; inInventory: number } | undefined> {
 	const erzeugnisse: string[] = (
 		buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? []
 	).map((rezept) => rezept.outputItemId);
 	if (erzeugnisse.length === 0) return undefined;
 
 	const lager = await tradeService.getBuildingStock(werkstatt.id);
-	const kammer = await needService.getStock(characterId);
+	const inventar = await needService.getStock(characterId);
 
 	// **Kein Blick auf bestehende Angebote mehr.** Bis 5.18 wurde übersprungen, wofür schon
 	// ein Schild hing — mit der Folge, dass ein liegengebliebenes Angebot den Nachschub für
 	// immer sperrte: Die Zimmerei des Messlaufs stellte 1233 Durchgänge lang Bretter her,
 	// von denen die Stadt nie mehr als das erste Schild zu sehen bekam.
 	//
-	// Nötig ist die Sperre auch nicht: `placeOffer` nimmt die Ware aus Lager und Kammer
+	// Nötig ist die Sperre auch nicht: `placeOffer` nimmt die Ware aus Lager und Inventar
 	// ins Angebot hinein. Wer alles ausgehängt hat, hat nichts mehr übrig und kommt von
 	// selbst nicht wieder her — bis er Neues herstellt. Und gleiche Ware zu gleichem Preis
 	// stockt das bestehende Schild auf, statt danebenzuhängen.
 	for (const itemId of erzeugnisse) {
 		const imLager: number = lager.find((posten) => posten.itemId === itemId)?.quantity ?? 0;
-		const inDerKammer: number = kammer.find((posten) => posten.itemId === itemId)?.quantity ?? 0;
-		if (imLager + inDerKammer > 0) {
-			return { itemId, quantity: imLager + inDerKammer, inChamber: inDerKammer };
+		const imInventar: number = inventar.find((posten) => posten.itemId === itemId)?.quantity ?? 0;
+		if (imLager + imInventar > 0) {
+			return { itemId, quantity: imLager + imInventar, inInventory: imInventar };
 		}
 	}
 	return undefined;
@@ -920,7 +920,7 @@ async function marktplatzIn(regionId: string): Promise<string | undefined> {
  * Was einer entbehren kann — und am Marktplatz anbietet.
  *
  * **Der zweite Verkaufsweg** (5.18). Bis dahin hängte nur aus, wer einen Betrieb hatte,
- * und nur dessen Erzeugnisse: Ein Pächter mit dreißig Getreide in der Kammer bot nichts
+ * und nur dessen Erzeugnisse: Ein Pächter mit dreißig Getreide im Inventar bot nichts
  * an, obwohl der Müller nebenan darauf wartete. Damit brach jede Kette an der Stelle ab,
  * an der die Ware den Besitzer hätte wechseln müssen.
  *
@@ -968,7 +968,7 @@ async function marktUeberschuss(
 /**
  * Reichen die Zutaten für einen Durchgang?
  *
- * Gezählt wird beides — Betriebslager und eigene Kammer —, weil `craft` seit 4.10 auch
+ * Gezählt wird beides — Betriebslager und eigenes Inventar —, weil `craft` seit 4.10 auch
  * beides verbraucht. Ein NPC, der sein Holz eingelagert hat und dann nicht sägen dürfte,
  * stünde vor demselben Rätsel wie ein Spieler vor der Umstellung.
  */
@@ -979,7 +979,7 @@ async function kannHerstellen(
 	const rezepte = buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? [];
 	if (rezepte.length === 0) return false;
 
-	// **Alles, was ihm gehört** (5.25, Punkt 72) — Kammer und alle seine Häuser. Wer sein
+	// **Alles, was ihm gehört** (5.25, Punkt 72) — Inventar und alle seine Häuser. Wer sein
 	// Holz auf dem Hof hat, kann in seiner Zimmerei trotzdem sägen.
 	const vorrat = await tradeService.getOwnedStock(characterId);
 
@@ -1007,7 +1007,7 @@ const WOHNHAUS_OPTION_ID = 1;
  *
  * **Das erste Rezept, dem am wenigsten fehlt** — nicht irgendeines. Die Alchemistenküche
  * kennt zwei, und wer sich am unerreichbaren festbeißt, kauft nie das, was ihn wirklich
- * weiterbrächte. Gezählt wird über Betriebslager und Kammer zusammen, wie in
+ * weiterbrächte. Gezählt wird über Betriebslager und Inventar zusammen, wie in
  * `kannHerstellen`: Wo die Ware liegt, ist eine Frage der Buchung und keine des Könnens.
  */
 async function fehlendeRezeptZutat(
@@ -1043,7 +1043,7 @@ async function fehlendesMaterial(
 	if (bedarf.length === 0) return undefined;
 
 	// **Auch hier alles, was ihm gehört** (5.25): Bretter, die in seiner Zimmerei liegen,
-	// sind zum Bauen genauso da wie die in seiner Kammer. Vorher zählte nur die Kammer —
+	// sind zum Bauen genauso da wie die in seinem Inventar. Vorher zählte nur das Inventar —
 	// und seit das Erzeugnis im Betrieb bleibt, wäre sie meist leer.
 	const vorrat = await tradeService.getOwnedStock(characterId);
 

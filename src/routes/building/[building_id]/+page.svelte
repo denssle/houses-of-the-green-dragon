@@ -211,8 +211,8 @@
 	{/if}
 
 	<!--
-		Im eigenen Laden kommt die Ware aus dem Betriebslager, am Marktplatz aus der
-		eigenen Kammer — deshalb stehen hier zwei verschiedene Listen zur Auswahl.
+		Im eigenen Laden kommt die Ware aus dem Betriebslager, am Marktplatz aus dem
+		eigenen Inventar — deshalb stehen hier zwei verschiedene Listen zur Auswahl.
 	-->
 	{#if data.isMarket || data.mine}
 		{@const quelle = data.isMarket ? data.myStock : data.stock}
@@ -253,7 +253,7 @@
 		{:else}
 			<!--
 				**Der Weg zurück** (5.34): Bis hierher führte er nur hinein. Das Lager fasst
-				unbegrenzt, die Kammer nicht — wer etwas essen, anziehen oder am Marktplatz
+				unbegrenzt, das Inventar nicht — wer etwas essen, anziehen oder am Marktplatz
 				anbieten will, muss es wieder bei sich haben.
 			-->
 			<ul>
@@ -280,7 +280,7 @@
 			<form method="POST" action="?/stockIn" use:enhance>
 				<input type="hidden" name="itemId" value={posten.itemId} />
 				<label>
-					{posten.name} einlagern ({posten.quantity} in der Kammer)
+					{posten.name} einlagern ({posten.quantity} im Inventar)
 					<input type="number" name="quantity" min="1" max={posten.quantity} value="1" />
 				</label>
 				<button type="submit">Einlagern</button>
@@ -288,7 +288,7 @@
 		{/each}
 		<p>
 			<small>
-				In der Kammer liegen {data.chamber.used} von {data.chamber.capacity} Stück. Was hier im Lager
+				Im Inventar liegen {data.inventory.used} von {data.inventory.capacity} Stück. Was hier im Lager
 				liegt, zählt nicht dagegen — ein Lager fasst, so viel man hineinträgt.
 			</small>
 		</p>

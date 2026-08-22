@@ -84,7 +84,7 @@ describe('Auftreten', () => {
 			expect(rest.find((posten) => posten.itemId === 'GARMENT')?.quantity).toBe(1);
 		});
 
-		it('geht nicht ohne eines in der Kammer', async () => {
+		it('geht nicht ohne eines im Inventar', async () => {
 			const ich = await person('Ich');
 
 			expect(await needService.wearGarment(ich)).toEqual({ ok: false, reason: 'NOT_IN_STOCK' });
@@ -138,7 +138,7 @@ describe('Auftreten', () => {
 			expect(await needService.getStock(ich)).toHaveLength(0);
 		});
 
-		it('bleibt in der Kammer, wenn man es nicht einsetzt', async () => {
+		it('bleibt im Inventar, wenn man es nicht einsetzt', async () => {
 			const ich = await person('Ich');
 			const umworben = await person('Umworbene');
 			await geben(ich, 'PERFUME', 1);

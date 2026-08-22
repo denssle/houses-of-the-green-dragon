@@ -33,7 +33,7 @@ const SAETZE: Record<ActionFailureReason, string> = {
 	TEACHER_TOO_TIRED: 'Der Meister hat heute keine Zeit mehr.',
 	NOT_EDIBLE: 'Das kann man nicht essen.',
 	NOT_IN_STOCK: 'Davon hast du nichts mehr.',
-	CHAMBER_FULL: 'Deine Kammer fasst nicht mehr — lagere etwas ein oder wohne besser.',
+	INVENTORY_FULL: 'Dein Inventar fasst nicht mehr — lagere etwas ein oder wohne besser.',
 	WRONG_SEASON: 'Dafür ist jetzt nicht die Jahreszeit.',
 	NOT_LEASED: 'Die Fläche ist nicht deine — pachte sie erst.',
 	NO_JOB_OFFERED: 'Hier wird niemand gesucht.',

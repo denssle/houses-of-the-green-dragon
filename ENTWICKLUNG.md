@@ -3283,6 +3283,40 @@ etwas, wenn sie leer sind.
 
 _Fertig, wenn:_ Wer das Rathaus sucht, muss nicht an Wohnhäusern vorbeilesen. — Erledigt.
 
+**5.45 Aus der Kammer wird das Inventar.** ✓ (Punkt 82) Entschieden gegen meinen
+Einwand, und der sei hier festgehalten, damit die Abwägung nachvollziehbar bleibt: Das
+Spiel spricht sonst durchweg in Orten und Handlungen — Kornspeicher, Marktplatz, Aushang,
+Handschlag —, und „Inventar" ist das erste Wort aus der Mechanik statt aus der Welt.
+Dagegen steht, was schwerer wiegt: Ein Fremder soll in fünf Sekunden verstehen, wo seine
+Sachen liegen, und „Kammer" liest sich wie ein Raum im Haus. Klarheit vor Klang.
+
+**Der Umfang war größer als der sichtbare Text.** Umbenannt wurden die Bezeichner
+(`chamberUsed` → `inventoryUsed`, `chamberCapacityOf` → `inventoryCapacityOf`,
+`CHAMBER_FULL` → `INVENTORY_FULL`, `fitsInChamber` → `fitsInInventory`), die deutschen
+Variablennamen (`inDerKammer` → `imInventar`), die Testdatei (`chamber.spec.ts` →
+`inventory.service.spec.ts`) und die Route.
+
+**Die alte Adresse bleibt erreichbar.** `/chamber` leitet mit `308` auf `/inventory` —
+ein Umzug ohne Nachsendeauftrag ist eine gebrochene Zusage, und die Adresse steht seit
+5.33 in der Welt. Die Weiterleitung kann weg, sobald niemand mehr von dort kommt.
+
+**Der Geschlechtswechsel war die eigentliche Arbeit.** „Die Kammer" ist weiblich, „das
+Inventar" sächlich, und eine maschinelle Ersetzung hinterlässt Sätze wie „aus der eigenen
+Inventar" oder „dann ist sie voll". Deshalb Regeln je Wendung — `in der Kammer` → `im
+Inventar`, `in die Kammer` → `ins Inventar` — und danach ein Durchgang durch jede
+geänderte Zeile.
+
+**An drei Stellen bleibt die Kammer stehen**, weil dort der Raum gemeint ist und nicht der
+Besitz: „eine Kate gibt eine Truhe dazu, ein Großhaus eine Kammer", „wer am Abend eine
+Kammer hat statt einer Ecke" und „ein Saal ist keine Kammer". Sie erklären, woher der
+Platz kommt — mit „Inventar" wären es Tautologien.
+
+Nebenbei fiel ein Satz auf, der seit 5.40 nicht mehr stimmte: „was hier liegt, ist vor
+Raubzügen sicher". Es gibt keine Raubzüge mehr; jetzt steht dort der Brand.
+
+_Fertig, wenn:_ Kein „chamber" mehr im Code, kein toter Link auf die alte Adresse. —
+Erledigt, in der laufenden App nachgesehen.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird

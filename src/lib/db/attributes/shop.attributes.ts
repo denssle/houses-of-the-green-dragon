@@ -5,7 +5,7 @@
  * macht aus einem Gebäude ein Ding mit eigener Bilanz: Man legt Ware ein, hängt ein
  * Preisschild dran, und was verkauft wird, geht daraus weg. Vor allem aber ist es der
  * Ort, in den ab der Anstellung fremde Hände produzieren; ohne ihn wäre ein Betrieb nur
- * ein Schaufenster für die Kammer seines Besitzers.
+ * ein Schaufenster für das Inventar seines Besitzers.
  *
  * Beide Tabellen sind **spärlich**: Kein Posten, keine Zeile.
  */

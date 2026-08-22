@@ -66,7 +66,7 @@ export type ProposalResult =
 /**
  * Werben.
  *
- * `withPerfume` verbraucht ein Fläschchen aus der eigenen Kammer und schlägt kräftig auf
+ * `withPerfume` verbraucht ein Fläschchen aus dem eigenen Inventar und schlägt kräftig auf
  * die Zuneigung — der Aufwand für einen Anlass, nicht für den Alltag. Wer eine Ehe will,
  * für die die Zuneigung noch nicht reicht, kann sie damit erkaufen: teurer als Geduld,
  * aber schneller.

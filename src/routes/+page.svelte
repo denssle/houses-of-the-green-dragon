@@ -52,8 +52,8 @@
 	<section>
 		<h3>Besitz</h3>
 		<nav class="actions">
-			<!-- Die Kammer zuerst: Sie ist der einzige Besitz, den jeder von Anfang an hat. -->
-			<a href="{base}/chamber">Kammer</a>
+			<!-- Das Inventar zuerst: Es ist der einzige Besitz, den jeder von Anfang an hat. -->
+			<a href="{base}/inventory">Inventar</a>
 			<a href="{base}/plot">Grundstücke</a>
 			<a href="{base}/building/new">Gebäude bauen</a>
 		</nav>

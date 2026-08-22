@@ -33,7 +33,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                 | —                            | erledigt     |
 | 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                   | —                            | erledigt     |
 | 81  | Fremde Häuser haben keine Seite — „aus dem Haus" verlinkt ins Leere                  | Punkt 64                     | Entwurf      |
-| 82  | Kammer oder Inventar — wie der persönliche Besitz heißt                              | dem ersten fremden Spieler   | Entscheidung |
+| 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                            | —                            | erledigt     |
 | 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**            | —                            | erledigt     |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                          | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
@@ -2059,7 +2059,7 @@ hinzusehen.
 Gehört zu Punkt 64 (jedes Gebäude und jede Fläche braucht eine eigene Seite) und folgt
 derselben Linie: Was einen Namen hat, soll eine Adresse haben.
 
-### 82. Kammer oder Inventar
+### 82. Kammer oder Inventar — entschieden mit 5.45
 
 **Zu entscheiden.** Der Vorschlag lautet, „Deine Kammer" in „Dein Inventar" umzubenennen,
 damit deutlich wird, dass es sich um den **persönlichen** Besitz handelt und nicht um einen
@@ -2073,10 +2073,14 @@ Dafür spricht, dass die Klarheit vorgeht, wenn ein Fremder in fünf Sekunden ve
 muss, wo seine Sachen liegen. Ein Mittelweg wäre die Überschrift **„Deine Kammer — was du
 bei dir trägst"**: Sie sagt dasselbe und bleibt in der Welt.
 
-Umfang, falls umbenannt wird: 104 Fundstellen, davon rund fünfzehn sichtbarer Text; der
-Rest sind Kommentare, Tests und Bezeichner (`chamberUsed`, `chamberCapacityOf`, die Route
-`/chamber`). Mitzuentscheiden wäre, ob die Adresse mit umzieht — sie steht seit 5.33 in
-Links und Lesezeichen.
+**Entschieden am 22.08.2026: Inventar.** Klarheit vor Klang — ein Fremder soll in fünf
+Sekunden verstehen, wo seine Sachen liegen. Umgesetzt mit 5.45, samt Bezeichnern, Route
+und einer `308`-Weiterleitung von `/chamber`.
+
+Stehen bleibt die Kammer dort, wo der **Raum** gemeint ist und nicht der Besitz: „ein
+Großhaus eine Kammer", „wer am Abend eine Kammer hat statt einer Ecke", „ein Saal ist keine
+Kammer". Diese Sätze erklären, woher der Platz kommt; mit „Inventar" wären sie
+Tautologien.
 
 ### 83. Die Stadtseite trennt nicht, was der Stadt gehört — erledigt mit 5.44
 

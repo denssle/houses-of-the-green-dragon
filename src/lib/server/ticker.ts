@@ -76,7 +76,7 @@ async function schlagen(): Promise<void> {
 			console.info(`${geburt.name} ist zur Welt gekommen.`);
 		}
 
-		// Handeln vor dem Sterben: Wer noch ein Brot in der Kammer hat, soll es essen
+		// Handeln vor dem Sterben: Wer noch ein Brot im Inventar hat, soll es essen
 		// duerfen, bevor der Wuerfel ueber ihn entscheidet. Andersherum verhungerten
 		// Leute mit vollem Vorrat.
 		const npcs = await npcService.actForNpcs(geschehen.currentTick);

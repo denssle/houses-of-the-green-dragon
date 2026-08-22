@@ -49,7 +49,7 @@ async function person(name: string, extras: Record<string, unknown> = {}): Promi
 /**
  * Seit 4.10 kostet Bauen auch Material.
  *
- * Die Testfiguren bekommen reichlich davon in die Kammer: Geprüft wird hier, was der Bau
+ * Die Testfiguren bekommen reichlich davon ins Inventar: Geprüft wird hier, was der Bau
  * mit Geld und Grundstück macht — dass ohne Bretter nichts geht, steht in
  * `material.spec.ts`.
  */

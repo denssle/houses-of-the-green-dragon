@@ -1287,11 +1287,11 @@ export async function maintainAsNpcMayor(
 // --- Baumaterial ---------------------------------------------------------------------
 
 /**
- * Material aus der Kammer nehmen — oder sagen, was fehlt.
+ * Material aus dem Inventar nehmen — oder sagen, was fehlt.
  *
- * **Aus allem, was dem Bauherrn gehört** (5.25, Punkt 72) — Kammer und eigene Häuser.
+ * **Aus allem, was dem Bauherrn gehört** (5.25, Punkt 72) — Inventar und eigene Häuser.
  * Bis dahin zählte nur der persönliche Vorrat, mit der Begründung, der Bauherr schleppe
- * sein Holz selbst herbei. Das stimmte, solange jedes Erzeugnis in der Kammer landete;
+ * sein Holz selbst herbei. Das stimmte, solange jedes Erzeugnis im Inventar landete;
  * seit es im Betrieb bleibt, hieße es, dass ein Zimmerer die eigenen Bretter nicht
  * verbauen darf, die in seiner eigenen Werkstatt liegen.
  *
@@ -1314,7 +1314,7 @@ async function materialAbziehen(
 	if (fehlt.length > 0) return fehlt;
 
 	for (const posten of bedarf) {
-		// Kammer zuerst, dann die Häuser — dieselbe Reihenfolge wie beim Herstellen.
+		// Inventar zuerst, dann die Häuser — dieselbe Reihenfolge wie beim Herstellen.
 		await tradeService.consumeOwned(characterId, posten.itemId, posten.quantity, t);
 	}
 	return undefined;

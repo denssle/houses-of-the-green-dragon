@@ -16,7 +16,7 @@ import { CARRIED_CAPACITY } from '$lib/game/inventory.logic';
 import { yearsToTicks } from '$lib/game/time';
 
 /**
- * Phase 5.33: **die Kammer hat einen Boden bekommen.**
+ * Phase 5.33: **das Inventar hat einen Boden bekommen.**
  *
  * Bis hierher war der persönliche Vorrat unbegrenzt — und damit das bequemste Lager der
  * Welt: kostenlos, unverderblich und bei Raubzügen verschont. Wer dreihundert Bretter mit
@@ -80,14 +80,14 @@ async function wohntIn(
 	return id;
 }
 
-async function inDerKammer(characterId: string, itemId: string): Promise<number> {
+async function imInventar(characterId: string, itemId: string): Promise<number> {
 	return (
 		(await needService.getStock(characterId)).find((posten) => posten.itemId === itemId)
 			?.quantity ?? 0
 	);
 }
 
-describe('Die Kammer', () => {
+describe('Das Inventar', () => {
 	beforeAll(async () => {
 		await sequelize.sync();
 		await seedWorld();
@@ -106,7 +106,7 @@ describe('Die Kammer', () => {
 		it('ist ohne Dach das, was man am Leib trägt', async () => {
 			const obdachlos = await person();
 
-			expect(await needService.chamberCapacityOf(obdachlos)).toBe(CARRIED_CAPACITY);
+			expect(await needService.inventoryCapacityOf(obdachlos)).toBe(CARRIED_CAPACITY);
 		});
 
 		it('wächst mit dem Haus und seinem Ausbau', async () => {
@@ -115,8 +115,8 @@ describe('Die Kammer', () => {
 			const grosshaus = await person();
 			await wohntIn(grosshaus, 3);
 
-			expect(await needService.chamberCapacityOf(kate)).toBe(CARRIED_CAPACITY + 20);
-			expect(await needService.chamberCapacityOf(grosshaus)).toBe(CARRIED_CAPACITY + 80);
+			expect(await needService.inventoryCapacityOf(kate)).toBe(CARRIED_CAPACITY + 20);
+			expect(await needService.inventoryCapacityOf(grosshaus)).toBe(CARRIED_CAPACITY + 80);
 		});
 
 		it('schrumpft mit dem Verfall', async () => {
@@ -125,7 +125,7 @@ describe('Die Kammer', () => {
 			const jemand = await person();
 			await wohntIn(jemand, 3, 50);
 
-			expect(await needService.chamberCapacityOf(jemand)).toBe(CARRIED_CAPACITY + 40);
+			expect(await needService.inventoryCapacityOf(jemand)).toBe(CARRIED_CAPACITY + 40);
 		});
 	});
 
@@ -134,23 +134,23 @@ describe('Die Kammer', () => {
 			const jemand = await person();
 
 			expect(await needService.buyFromGranary(jemand, 'BREAD', 20)).toEqual({ ok: true });
-			expect(await needService.chamberUsed(jemand)).toBe(20);
+			expect(await needService.inventoryUsed(jemand)).toBe(20);
 		});
 
-		/** Der Kern von 5.33: Irgendwann ist die Kammer voll, und dann ist sie voll. */
-		it('scheitert an der vollen Kammer — und kostet dann nichts', async () => {
+		/** Der Kern von 5.33: Irgendwann ist das Inventar voll, und dann ist es voll. */
+		it('scheitert am vollen Inventar — und kostet dann nichts', async () => {
 			const jemand = await person(1000);
 			await needService.buyFromGranary(jemand, 'BREAD', 20);
 
 			expect(await needService.buyFromGranary(jemand, 'BREAD', 1)).toEqual({
 				ok: false,
-				reason: 'CHAMBER_FULL'
+				reason: 'INVENTORY_FULL'
 			});
 			// **Kein Geld für nichts.** Die Ware kommt zuerst, das Geld danach — sonst
 			// wäre die Transaktion mit einer Fehlermeldung festgeschrieben und der Käufer
 			// um seine Münzen ärmer.
 			expect((await Character.findByPk(jemand))!.dataValues.money).toBe(1000 - 20 * 4);
-			expect(await inDerKammer(jemand, 'BREAD')).toBe(20);
+			expect(await imInventar(jemand, 'BREAD')).toBe(20);
 		});
 
 		it('geht wieder, sobald ein Dach dazukommt', async () => {
@@ -159,7 +159,7 @@ describe('Die Kammer', () => {
 			await wohntIn(jemand, 2);
 
 			expect(await needService.buyFromGranary(jemand, 'BREAD', 40)).toEqual({ ok: true });
-			expect(await needService.chamberUsed(jemand)).toBe(60);
+			expect(await needService.inventoryUsed(jemand)).toBe(60);
 		});
 	});
 
@@ -167,16 +167,16 @@ describe('Die Kammer', () => {
 		/**
 		 * Der Fall, den ein Umzug in eine kleinere Bleibe und ein verfallendes Dach
 		 * herbeiführen — und den es in jeder bestehenden Welt schon gibt, denn bis 5.33
-		 * war die Kammer unbegrenzt.
+		 * war das Inventar unbegrenzt.
 		 */
 		it('behält alles, nimmt aber nichts mehr auf', async () => {
 			const jemand = await person();
 			await Inventory.create({ CharacterId: jemand, itemId: 'PLANK', quantity: 300 });
 
-			expect(await inDerKammer(jemand, 'PLANK')).toBe(300);
+			expect(await imInventar(jemand, 'PLANK')).toBe(300);
 			expect(await needService.buyFromGranary(jemand, 'BREAD', 1)).toEqual({
 				ok: false,
-				reason: 'CHAMBER_FULL'
+				reason: 'INVENTORY_FULL'
 			});
 		});
 
@@ -189,12 +189,12 @@ describe('Die Kammer', () => {
 
 			expect(await tradeService.moveToStock(jemand, haus, 'PLANK', 290)).toEqual({ ok: true });
 
-			expect(await inDerKammer(jemand, 'PLANK')).toBe(10);
+			expect(await imInventar(jemand, 'PLANK')).toBe(10);
 			expect(await needService.buyFromGranary(jemand, 'BREAD', 5)).toEqual({ ok: true });
 		});
 
 		it('geht den ganzen Weg hin und zurück', async () => {
-			// **Der Punkt von 5.34**: Ein Lager fasst unbegrenzt, die Kammer nicht — also
+			// **Der Punkt von 5.34**: Ein Lager fasst unbegrenzt, das Inventar nicht — also
 			// liegt dort das Meiste, und geholt wird, was man gerade braucht. Ein Weg, der
 			// nur hineinführt, wäre eine Einbahn.
 			const jemand = await person();
@@ -202,10 +202,10 @@ describe('Die Kammer', () => {
 			await needService.buyFromGranary(jemand, 'BREAD', 30);
 
 			expect(await tradeService.moveToStock(jemand, haus, 'BREAD', 25)).toEqual({ ok: true });
-			expect(await inDerKammer(jemand, 'BREAD')).toBe(5);
+			expect(await imInventar(jemand, 'BREAD')).toBe(5);
 
 			expect(await tradeService.moveToStock(jemand, haus, 'BREAD', -10)).toEqual({ ok: true });
-			expect(await inDerKammer(jemand, 'BREAD')).toBe(15);
+			expect(await imInventar(jemand, 'BREAD')).toBe(15);
 			const lager = await tradeService.getBuildingStock(haus);
 			expect(lager.find((posten) => posten.itemId === 'BREAD')?.quantity).toBe(15);
 		});
@@ -222,7 +222,7 @@ describe('Die Kammer', () => {
 				ok: false,
 				reason: 'PLOT_NOT_OWNED'
 			});
-			expect(await inDerKammer(jemand, 'PLANK')).toBe(0);
+			expect(await imInventar(jemand, 'PLANK')).toBe(0);
 		});
 
 		it('lagert nicht mehr aus, als hineinpasst', async () => {
@@ -233,13 +233,13 @@ describe('Die Kammer', () => {
 			// 40 gehen (20 am Leib, 20 aus der Kate), 41 nicht.
 			expect(await tradeService.moveToStock(jemand, haus, 'PLANK', -41)).toEqual({
 				ok: false,
-				reason: 'CHAMBER_FULL'
+				reason: 'INVENTORY_FULL'
 			});
 			// Nichts angerührt: Die Ware liegt noch im Lager, nicht halb hier und halb dort.
-			expect(await inDerKammer(jemand, 'PLANK')).toBe(0);
+			expect(await imInventar(jemand, 'PLANK')).toBe(0);
 
 			expect(await tradeService.moveToStock(jemand, haus, 'PLANK', -40)).toEqual({ ok: true });
-			expect(await inDerKammer(jemand, 'PLANK')).toBe(40);
+			expect(await imInventar(jemand, 'PLANK')).toBe(40);
 		});
 	});
 });

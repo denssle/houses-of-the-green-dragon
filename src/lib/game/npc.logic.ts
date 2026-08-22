@@ -86,7 +86,7 @@ export interface NpcState {
 	// --- Was über das Nötigste hinausgeht (4.12) --------------------------------------
 	/** Trägt er ein heiles Gewand? */
 	wearsGarment: boolean;
-	/** Liegt eines in der Kammer, ungetragen? */
+	/** Liegt eines im Inventar, ungetragen? */
 	garmentInStock: number;
 	tonicInStock: number;
 	/** Was ein Gewand am Markt kostet — nichts heißt: keines zu haben. */

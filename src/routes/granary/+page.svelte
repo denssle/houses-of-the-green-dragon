@@ -34,14 +34,14 @@
 
 <!--
 	**Der Vorrat ist mit 5.33 ausgezogen.** Er hing hier, weil hier das Brot herkam — aber
-	die eigene Kammer gehört nicht in einen fremden Laden. Was bleibt, ist der Hinweis, wie
+	das eigene Inventar gehört nicht in einen fremden Laden. Was bleibt, ist der Hinweis, wie
 	viel noch hineinpasst: Das ist die Zahl, die man beim Einkaufen braucht.
 -->
 <section>
-	<h3>Deine Kammer</h3>
+	<h3>Dein Inventar</h3>
 	<p>
 		{data.used} von {data.capacity} Stück belegt.
-		<a href="{base}/chamber" class="link">Ansehen</a>
+		<a href="{base}/inventory" class="link">Ansehen</a>
 	</p>
 	<p>
 		<small>
