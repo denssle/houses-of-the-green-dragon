@@ -1654,6 +1654,12 @@ im Dienst zu ziehen, damit der Test ihn festhalten kann.
 
 ### 15. Weltinhalte: Berufe, Waren und Rezepte
 
+> **Hierher gehört auch Punkt 76** (niemand kann sich einen Ausbau leisten): Baumaterial
+> hat heute genau einen Abnehmer — den Bauwilligen —, und der baut höchstens einmal im
+> Leben. Eine Zimmerei stellt im Jahr das Zehnfache dessen her, was eine Stadt braucht.
+> Wer hier über Waren und Rezepte entscheidet, entscheidet mit, ob Zwischenprodukte
+> Endverbraucher bekommen.
+
 Ortsnamen und Karte der Startregion, Warenkatalog mit Produktionsketten,
 Gebäudekatalog mit Ausbaustufen. Überwiegend Fleißaufwand — wächst mit den Phasen 4.5
 und 4.6.
@@ -2008,6 +2014,64 @@ Durchgang bringt. Es gehört zu Punkt 16.
 **Eine Warnung dazu:** Der naheliegende Weg, ein Sparziel zu setzen und die NPCs darauf
 hinarbeiten zu lassen, ist bereits gegangen und hat 5.30 ausgelöst — er machte aus
 Unternehmern Tagelöhner. Die Rangfolge ist jetzt in Ordnung; die Kasse ist es nicht.
+
+**Nachgemessen am 22.08.2026, 600 Ticks (zwölf Spieljahre).** Der Befund besteht — und er
+ist präziser als „die Preise stimmen nicht":
+
+|                             |                                                      |
+| --------------------------- | ---------------------------------------------------- |
+| Gebäude über Stufe 1        | **keines**                                           |
+| Odilia (Zimmerin), Geld     | 89 — der Ausbau kostet 340                           |
+| Ihre Herstellung / Angebote | 231 Durchgänge, 231-mal ausgehängt                   |
+| **Unverkauft im Angebot**   | **725 Bretter zu 6 Münzen**                          |
+| Unverkauft im Betriebslager | 890 Holz                                             |
+| Häufigster Müßiggangsgrund  | `STILL_SAVING` (3603) — alle sparen, keiner kommt an |
+| Bauten in 600 Ticks         | 2                                                    |
+
+**In Grünau ist es dasselbe Bild** (Beobachtung vom 22.08.2026): „Ich biete Bretter an,
+aber niemand kauft und niemand baut." Der Befund ist damit keine Eigenart des Messlaufs,
+sondern die Lage in der laufenden Welt — und er trifft den Spieler genauso wie die NPCs.
+
+**Es fehlt nicht das Geld, es fehlt der Käufer.** Bretter haben genau einen Zweck: bauen.
+Gebaut wird zweimal in zwölf Spieljahren, also verkauft die Zimmerin so gut wie nichts,
+obwohl sie unablässig herstellt und aushängt. Daraus wird ein Kreis: kein Absatz → kein
+Geld → kein Bau → kein Absatz. Dass alle sparen, ist die Folge und nicht die Ursache.
+
+**Dahinter steckt ein Bauprinzip:** Gekauft wird in dieser Welt nur, was ein Bedürfnis
+stillt — Brot den Hunger, das Gewand das Ansehen, der Trank die Kraft. Baumaterial stillt
+keines; es ist ein Zwischenprodukt, dessen einziger Abnehmer der Bauwillige ist. Damit
+hängt die halbe Wirtschaft an einer Handlung, die ein NPC höchstens einmal im Leben tut.
+
+**Der naheliegende Hebel wäre die Instandsetzung** — und er trägt nicht. `renovate()`
+kostet heute nur Geld; ein Dach richtet man aber mit Holz, und Häuser verfallen laufend.
+Das klingt nach der Nachfrage, die nicht am Bauen hängt. Nachgerechnet ist es zu wenig:
+
+|                                                |                                    |
+| ---------------------------------------------- | ---------------------------------- |
+| Verfall der ganzen Stadt (neun Häuser)         | 45 Zustandspunkte je Spieljahr     |
+| Material für ein Wohnhaus (100 Münzen Bauwert) | 4 Bretter                          |
+| Daraus folgende Nachfrage                      | **rund zwei Bretter je Spieljahr** |
+| Ausstoß einer einzigen Zimmerei                | **58 Bretter je Spieljahr**        |
+
+**Das Verhältnis ist das Eigentliche.** Odilia stellt Jahr für Jahr das Zehnfache dessen
+her, was die Stadt braucht, und hört nicht auf: `decideNpcAction` prüft, ob Zutaten da
+sind — nicht, ob das Erzeugnis einen Abnehmer findet. Die 725 Bretter im Angebot sind
+deshalb kein Preisproblem, sondern eine **fehlende Rückkopplung**. An Preisen zu drehen
+ändert daran nichts: Bei doppeltem Brettpreis lägen dieselben 725 Bretter herum.
+
+**Zwei Arbeiten stecken darin, und sie sind verschieden groß:**
+
+- **Die Rückkopplung.** Wer viel unverkauft aushängen hat, stellt nichts mehr her, sondern
+  tut etwas anderes — Lohnarbeit, ernten, ausbauen. Eine Bedingung in `npc.logic`,
+  testbar, wirkt sofort und macht NPC-Zeit frei. Sie löst nicht, dass Baumaterial zu wenige
+  Abnehmer hat.
+- **Die Verwendungen.** Zwischenprodukte brauchen Endverbraucher: Instandsetzung, Möbel,
+  Brennholz, Werkzeug. Das ist die strukturelle Antwort und gehört zu **Punkt 15**
+  (Berufe, Waren, Rezepte), wo ohnehin über Verwendungen entschieden wird.
+
+**Entschieden am 22.08.2026: erst messen und festhalten.** Beides wartet auf Punkt 15 —
+dort fällt die Entscheidung über Verwendungen, und die Rückkopplung ist danach anders zu
+bemessen als heute. Die Zahlen oben sind der Stand, gegen den sich das dann prüfen lässt.
 
 ### 77. Was das Inventar noch nicht kann
 
