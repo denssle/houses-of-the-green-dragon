@@ -80,15 +80,63 @@
 	</nav>
 {/if}
 
+<!--
+	Getrennt, weil man sie aus verschiedenen Gründen aufsucht (Punkt 83): Das eine ist
+	Politik, das andere Nachbarschaft und Handel. Eine Reihe aus allem zwang jedes Mal
+	zum Lesen der ganzen Liste.
+-->
 <section>
-	<h3>Was hier steht</h3>
-	{#if data.buildings.length === 0}
-		<p><i>Noch steht hier nichts.</i></p>
+	<h3>Was der Stadt gehört</h3>
+	{#if data.publicBuildings.length === 0}
+		<p><i>Die Stadt besitzt kein Haus.</i></p>
 	{:else}
 		<ul>
-			{#each data.buildings as building (building.id)}
+			{#each data.publicBuildings as building (building.id)}
 				<li><a href="{base}/building/{building.id}" class="link">{building.name}</a></li>
 			{/each}
 		</ul>
 	{/if}
 </section>
+
+<section>
+	<h3>Was den Leuten gehört</h3>
+	{#if data.privateBuildings.length === 0}
+		<p><i>Noch hat sich niemand ein Dach gebaut.</i></p>
+	{:else}
+		<ul>
+			{#each data.privateBuildings as building (building.id)}
+				<li>
+					<a href="{base}/building/{building.id}" class="link">{building.name}</a>
+					<!-- Wem es gehört, ist hier die eigentliche Auskunft (5.10). -->
+					{#if building.ownerName}
+						<small>— {building.ownerName}</small>
+					{/if}
+				</li>
+			{/each}
+		</ul>
+	{/if}
+</section>
+
+{#if data.escheated.length > 0}
+	<!--
+		Nur wenn es etwas zu sehen gibt: Meistens ist die Gruppe leer, und eine Überschrift
+		über einer leeren Liste wäre eine Meldung ohne Vorgang. Wer ein Haus sucht, sieht
+		hier zuerst nach (5.42).
+	-->
+	<section>
+		<h3>Ohne Erben zurückgefallen</h3>
+		<ul>
+			{#each data.escheated as building (building.id)}
+				<li><a href="{base}/building/{building.id}" class="link">{building.name}</a></li>
+			{/each}
+		</ul>
+		<p>
+			<small>
+				Was niemand geerbt hat, gehört der Stadt — bis sie es versteigert. Die Gebote stehen bei den <a
+					href="{base}/plot"
+					class="link">Grundstücken</a
+				>.
+			</small>
+		</p>
+	</section>
+{/if}

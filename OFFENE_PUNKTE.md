@@ -34,7 +34,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                   | —                            | erledigt     |
 | 81  | Fremde Häuser haben keine Seite — „aus dem Haus" verlinkt ins Leere                  | Punkt 64                     | Entwurf      |
 | 82  | Kammer oder Inventar — wie der persönliche Besitz heißt                              | dem ersten fremden Spieler   | Entscheidung |
-| 83  | Die Stadtseite trennt nicht, was der Stadt gehört und was den Leuten                 | Punkt 79                     | Aufgabe      |
+| 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**            | —                            | erledigt     |
 | 65  | Der Zehnt erreicht die Felder nicht, auf die er gelegt wird                          | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
@@ -2078,12 +2078,16 @@ Rest sind Kommentare, Tests und Bezeichner (`chamberUsed`, `chamberCapacityOf`, 
 `/chamber`). Mitzuentscheiden wäre, ob die Adresse mit umzieht — sie steht seit 5.33 in
 Links und Lesezeichen.
 
-### 83. Die Stadtseite trennt nicht, was der Stadt gehört
+### 83. Die Stadtseite trennt nicht, was der Stadt gehört — erledigt mit 5.44
 
 Die Übersicht listet unter „Was hier steht" alle Häuser der Stadt in einer Reihe: Rathaus
 neben Zimmerei neben Wohnhaus. Getrennt gehören sie, weil man sie aus verschiedenen
 Gründen aufsucht — das eine ist Politik, das andere Nachbarschaft und Handel.
 
-**Erst nach Punkt 79 richtig zu bauen.** Solange erbenlose Katen als städtisch gelten,
+**Erst nach Punkt 79 richtig zu bauen.** Solange erbenlose Katen als städtisch galten,
 stünde in der Spalte „öffentlich" ein Haufen Privathäuser, und die Trennung machte den
 Fehler nur sichtbarer, statt ihn zu beheben.
+
+**Erledigt mit 5.44**, in drei Abschnitten: was der Stadt gehört, was den Leuten gehört
+(mit Eigentümer), und — nur wenn vorhanden — was ohne Erben zurückgefallen ist und auf die
+Versteigerung wartet.

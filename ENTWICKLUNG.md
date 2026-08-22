@@ -3259,6 +3259,30 @@ Der Dienst hatte bis hierher keine Tests; die beiden neuen sind seine ersten.
 
 _Fertig, wenn:_ Von jedem bebauten Grundstück führt ein Klick zum Haus. — Erledigt.
 
+**5.44 Die Stadt sortiert ihre Häuser.** ✓ (Punkt 83) Unter „Was hier steht" lagen alle
+Häuser in einer Reihe: Rathaus neben Zimmerei neben Wohnhaus. Getrennt gehören sie, weil
+man sie aus verschiedenen Gründen aufsucht — das eine ist Politik, das andere
+Nachbarschaft und Handel. Eine Reihe aus allem zwang jedes Mal zum Lesen der ganzen Liste.
+
+Jetzt stehen dort drei Abschnitte:
+
+- **Was der Stadt gehört** — die öffentlichen Bauten, über `isPublicWorks()` aus 5.42.
+- **Was den Leuten gehört** — mit dem Namen des Eigentümers (5.10, mit Hausnamen). Ein
+  Haus ohne Eigentümer ist eine Adresse, ein Haus mit Eigentümer ist eine Nachbarschaft.
+- **Ohne Erben zurückgefallen** — nur wenn es etwas zu sehen gibt, mit dem Hinweis, dass
+  die Gebote bei den Grundstücken stehen.
+
+**Diese dritte Gruppe war der Grund, warum der Punkt hinter 79 stand.** Vorher hätte sie
+nicht gebaut werden können: „Städtisch" und „öffentlicher Bau" waren dasselbe, und in der
+Spalte für die Stadt hätte ein Haufen Privathäuser gestanden. Die Trennung hätte den
+Fehler nur sichtbarer gemacht, statt ihn zu beheben.
+
+Nachgesehen wurde in der laufenden App: In der frischen Welt stehen vier städtische Bauten
+und darunter „Noch hat sich niemand ein Dach gebaut" — die Gruppen sagen also auch dann
+etwas, wenn sie leer sind.
+
+_Fertig, wenn:_ Wer das Rathaus sucht, muss nicht an Wohnhäusern vorbeilesen. — Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird
