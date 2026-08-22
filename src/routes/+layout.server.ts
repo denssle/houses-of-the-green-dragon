@@ -20,9 +20,17 @@ export const load: LayoutServerLoad = ({ locals }) => {
 		loggedIn: true,
 		sections: [
 			{ slug: '', title: 'Übersicht' },
-			character
-				? { slug: `character/${character.id}`, title: character.firstName }
-				: { slug: 'character/new', title: 'Neuer Charakter' },
+			...(character
+				? [
+						{ slug: `character/${character.id}`, title: character.firstName },
+						// **Neben den Charakter, nicht in die Übersicht.** Die Kammer ist der eigene
+						// Vorrat: Man sieht dort nach, während man etwas anderes tut — beim Kaufen,
+						// beim Einlagern, wenn der Hunger drückt. Ein Weg dorthin, der jedesmal über
+						// die Übersicht führt, ist ein Umweg auf einem Pfad, den man am häufigsten
+						// geht.
+						{ slug: 'chamber', title: 'Kammer' }
+					]
+				: [{ slug: 'character/new', title: 'Neuer Charakter' }]),
 			{ slug: 'dynasty', title: 'Dynastie' },
 			{ slug: 'logout', title: 'Abmelden' }
 		]
