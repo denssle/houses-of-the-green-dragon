@@ -29,7 +29,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                              | laufend                      | Entwurf      |
 | 74  | Der Auftrag an Tagelöhner — privates Renovieren gegen Lohn                           | Punkt 66 / 33                | Entwurf      |
 | 77  | Was die Kammer noch nicht kann: Gewicht, Einzelstücke, Vererben                      | Punkte 15, 20, 51            | Entwurf      |
-| 78  | Werben kennt kein Alter — geprüft wird es erst bei der Hochzeit                      | dem nächsten Schritt         | Befund       |
+| 78  | Werben kennt kein Alter — **behoben mit 5.41**                                       | —                            | erledigt     |
 | 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                 | —                            | erledigt     |
 | 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                   | —                            | erledigt     |
 | 81  | Fremde Häuser haben keine Seite — **erledigt mit 5.46**                              | —                            | erledigt     |
@@ -1976,7 +1976,7 @@ Fall von `CHAMBER_FULL` — die vollste NPC-Kammer hielt vier Laibe Brot, weil W
 hortet. Beißt sie später auch bei NPCs, ist das ein Befund und keine Panne: Dann hat einer
 mehr, als er tragen kann, und muss etwas damit anfangen.
 
-### 78. Werben kennt kein Alter
+### 78. Werben kennt kein Alter — behoben mit 5.41
 
 **Befund vom 22.08.2026.** `court()` (`family.logic.ts`) prüft, ob der Werbende genug
 Aktionspunkte hat und ob beide in derselben Stadt sind. Mehr nicht. Die Altersgrenze steht
