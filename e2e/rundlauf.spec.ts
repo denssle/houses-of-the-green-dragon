@@ -46,16 +46,19 @@ const BASIS = '/houses';
  * Güte, und das ist eine Auskunft und kein Fehler.
  */
 async function eineSchicht(page: Page): Promise<boolean> {
-	// Über das Rathaus: Dort steht, was der Stadt gehört, mit Verweis auf jedes Haus. Die
-	// alte Adresse leitet seit 5.57 auf die Seite des Hauses weiter — dieser Weg prüft sie
-	// nebenbei mit.
-	await page.goto(BASIS + '/council');
+	// **Über die Übersicht**, wo „Was der Stadt gehört" mit Verweis auf jedes Haus steht.
+	//
+	// Vorher lief der Weg über `/council`. Seit 5.57 ist das eine Weiterleitung auf die
+	// Seite des Rathauses, und bei vierzig Schichten mit je einem Aufruf je Haus summierten
+	// sich die zusätzlichen Umläufe, bis der Test in sein Zeitlimit lief. Die Übersicht
+	// führt ohne Umweg dorthin — und ist der Weg, den ein Spieler ohnehin nimmt.
+	await page.goto(BASIS + '/');
 	const wieviele: number = await page
 		.locator('section:has(h3:text("Was der Stadt gehört")) a.link')
 		.count();
 
 	for (let i = 0; i < wieviele; i++) {
-		await page.goto(BASIS + '/council');
+		await page.goto(BASIS + '/');
 		await page.locator('section:has(h3:text("Was der Stadt gehört")) a.link').nth(i).click();
 		await page.waitForURL(new RegExp('/building/'));
 
@@ -115,7 +118,9 @@ test.describe.serial('Ein Leben von vorn', () => {
 		await expect(page.getByRole('heading', { name: 'Grünau' })).toBeVisible();
 		// In den Handlungsleisten und nicht irgendwo auf der Seite: „Rathaus" steht auch
 		// im Verzeichnis der Häuser, und beides ist richtig.
-		for (const weg of ['Arbeit', 'Umland', 'Kornspeicher', 'Markt', 'Grundstücke', 'Rathaus']) {
+		// „Preise" statt „Markt" seit 5.58: Der Marktplatz ist ein Haus, diese Seite ist der
+		// Preisvergleich über alle Läden.
+		for (const weg of ['Arbeit', 'Umland', 'Kornspeicher', 'Preise', 'Grundstücke', 'Rathaus']) {
 			await expect(
 				page.locator('.actions').getByRole('link', { name: weg, exact: true })
 			).toBeVisible();

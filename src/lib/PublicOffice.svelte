@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
+	import type { officeData } from '$lib/server/pages/officeData';
 
 	/**
 	 * Die Amtsgeschäfte einer Stadt — auf der Seite ihres Rathauses (5.57).
@@ -19,7 +20,10 @@
 	 * `publicDismiss`. Das Haus braucht `renovate` und `dismiss` für sich selbst — dieselben
 	 * Wörter, andere Kasse.
 	 */
-	let { amt, hier }: { amt: Record<string, any>; hier: string } = $props();
+	// **Der Typ kommt von der Quelle** und wird nicht abgeschrieben: Was `officeData`
+	// zusammenstellt, ist genau das, was diese Komponente zeigt. Eine eigene Schnittstelle
+	// daneben liefe beim nächsten Feld auseinander.
+	let { amt, hier }: { amt: Awaited<ReturnType<typeof officeData>>; hier: string } = $props();
 </script>
 
 <section>
