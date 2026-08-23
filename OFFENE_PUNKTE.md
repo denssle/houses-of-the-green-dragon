@@ -39,6 +39,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                            | —                            | erledigt     |
 | 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**            | —                            | erledigt     |
 | 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung         | dem nächsten Schritt         | Befund       |
+| 85  | Der Kornspeicher backt aus dem Nichts — und unterbietet jeden Bäcker                 | Punkt 15 / 70                | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2258,3 +2259,36 @@ Kind, sobald es das konnte. Denkbar ist ein **Mindestalter unterhalb der Volljä
 
 Das gehört zusammen mit Punkt 24 (NPC-Eltern und die Schule) entschieden: Ob ein Kind
 lernt oder arbeitet, ist dieselbe Frage von zwei Seiten — und ein Tag ist nur einmal da.
+
+### 85. Der Kornspeicher backt aus dem Nichts
+
+**Angemerkt am 22.08.2026:** „Eigentlich sollte der Kornspeicher wie auch die städtische
+Schmiede entfernt werden. Aber dann wäre das Dorf ohne Nahrungsversorgung." Beides stimmt,
+und dazwischen liegt ein Befund, der beim Nachsehen aufgefallen ist.
+
+**Was der Kornspeicher tut.** `buyFromGranary` legt dem Käufer die Ware ins Inventar und
+bucht sein Geld in die Stadtkasse. Das Geld wechselt also den Besitzer — die Regel aus
+Punkt 66 ist gewahrt. Das **Brot** aber entsteht in diesem Augenblick: kein Feld, keine
+Mühle, kein Backhaus, kein Vorrat, der zur Neige ginge. Er ist der einzige Ort in dieser
+Welt, an dem Ware aus dem Nichts kommt.
+
+**Und er ist ein Konkurrent, der nicht wirtschaften muss.** Er verkauft zum Grundpreis
+(vier Münzen), unbegrenzt, ohne Zutaten, ohne Aktionspunkte, ohne Standgeld. Ein Bäcker
+müsste Getreide kaufen, mahlen lassen, backen und davon leben — und träte gegen einen
+Anbieter an, der nichts davon hat. Solange der Kornspeicher steht, lohnt kein Backhaus.
+
+**Damit hängen drei Befunde zusammen:**
+
+- **Punkt 70** (alle schmieden, keiner backt): Die Brotkette wird nie gebaut, also lernt
+  sie niemand.
+- **Punkt 76** (niemand kann sich einen Ausbau leisten): Wer backen wollte, bräuchte 220
+  Münzen für das Backhaus — und die verdient niemand.
+- **Dieser hier**: Selbst wer sie hätte, verkaufte gegen einen Anbieter, der zum
+  Selbstkostenpreis von null anbietet.
+
+**Zu entscheiden ist die Reihenfolge, nicht das Ziel.** Der Kornspeicher kann erst weg,
+wenn die Kette trägt — sonst verhungert die Stadt, und zwar wirklich: Im Messlauf über 600
+Ticks entstand **kein einziges Backhaus**, alles Brot kam von ihm. Denkbare Zwischenstufen:
+ein **begrenzter Vorrat**, der sich nur aus Ernten füllt (dann ist er ein Speicher und kein
+Backofen), oder ein **Preis über dem der Bäcker**, der ihn zur Notversorgung macht statt
+zur Konkurrenz. Beides gehört zu Punkt 15, wo über Waren und Ketten entschieden wird.
