@@ -381,6 +381,19 @@ async function ausfuehren(
 			);
 		}
 
+		// Derselbe Kauf, andere Ware (5.62) — siehe `BUY_WORKSHOP_MATERIAL` in `npc.logic`.
+		case 'BUY_WORKSHOP_MATERIAL': {
+			const angebot = lage.workshopMaterialOffer;
+			if (!angebot) return buch('BUY_WORKSHOP_MATERIAL', undefined);
+
+			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
+			const wieviel: number = Math.min(lage.workshopMaterialCount, angebot.quantity, bezahlbar);
+			return buch(
+				'BUY_WORKSHOP_MATERIAL',
+				wieviel > 0 ? await tradeService.buyFromOffer(npcId, angebot.id, wieviel) : undefined
+			);
+		}
+
 		case 'BUILD_HOME': {
 			const vorlage = buildingService.getBuildingOption(WOHNHAUS_OPTION_ID);
 			return buch(
@@ -475,6 +488,8 @@ async function lageAufnehmen(
 			ownHomeId?: string;
 			missingMaterialOffer?: { id: string; quantity: number; pricePerUnit: number };
 			missingMaterialCount: number;
+			workshopMaterialOffer?: { id: string; quantity: number; pricePerUnit: number };
+			workshopMaterialCount: number;
 			missingInputOffer?: { id: string; quantity: number; pricePerUnit: number };
 			missingInputCount: number;
 			marketId?: string;
@@ -571,6 +586,13 @@ async function lageAufnehmen(
 	const fehltMaterial = await fehlendesMaterial(npcId, materialBedarf);
 	const material = fehltMaterial
 		? await tradeService.cheapestOffer(werte.RegionId, fehltMaterial.itemId, npcId)
+		: undefined;
+	// Dasselbe für die Werkstatt (5.62). **Eine eigene Abfrage und keine geteilte**: Das
+	// Wohnhaus braucht Bretter, die Werkstatt Quader und Eisen dazu — wer beides über
+	// dieselbe Angabe führt, spart auf die eine Ware und kauft die andere.
+	const fehltWerkstattMaterial = await fehlendesMaterial(npcId, werkstattMaterial);
+	const werkstattBaustoff = fehltWerkstattMaterial
+		? await tradeService.cheapestOffer(werte.RegionId, fehltWerkstattMaterial.itemId, npcId)
 		: undefined;
 	const stelleFrei = werkstatt ? await employmentService.hasUnofferedPosition(werkstatt) : false;
 	const kannHerstellenJetzt = werkstatt ? await kannHerstellen(npcId, werkstatt) : false;
@@ -671,7 +693,8 @@ async function lageAufnehmen(
 			// und derselbe Grund.
 			plotPrice: freiesBauland ? PLOT_PRICE : null,
 			workshopPrice: werkstattLuecke?.price ?? null,
-			workshopMaterialMissing: (await fehlendesMaterial(npcId, werkstattMaterial)) !== undefined,
+			workshopMaterialMissing: fehltWerkstattMaterial !== undefined,
+			workshopMaterialPrice: werkstattBaustoff?.pricePerUnit ?? null,
 			leaseFee: LEASE_FEE,
 			// Ein eigenes Dach (4.14).
 			homeHasRoom: (platz ?? 0) > 0,
@@ -703,6 +726,8 @@ async function lageAufnehmen(
 		marketId: marktplatz,
 		surplus: ueberschuss,
 		missingMaterialCount: fehltMaterial?.quantity ?? 0,
+		workshopMaterialOffer: werkstattBaustoff,
+		workshopMaterialCount: fehltWerkstattMaterial?.quantity ?? 0,
 		workshopId: werkstatt?.id,
 		workshopOptionId: werkstattLuecke?.optionId,
 		freePlotId: grundstuecke.find((flaeche) => !flaeche.hasBuilding)?.id,

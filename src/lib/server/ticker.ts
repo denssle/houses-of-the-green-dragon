@@ -84,6 +84,28 @@ async function schlagen(): Promise<void> {
 			console.info(`${npcs.acted} Einwohner haben gehandelt:`, npcs.byAction);
 		}
 
+		// **Und warum die übrigen nichts getan haben** (5.62).
+		//
+		// `idleReason` beantwortet das seit 4.17 je NPC und Tick, `actForNpcs` zählt es
+		// mit — und der Ticker warf es weg. Auf dem laufenden Server stand deshalb nur
+		// eine große Zahl neben `IDLE`, und ob dahinter Zufriedenheit steckte, ein leerer
+		// Aktionsvorrat oder ein Vorhaben, das niemand je erreichen kann, war von außen
+		// nicht zu unterscheiden. Genau das musste zuletzt aus der Chronik erschlossen
+		// werden, weil die Auskunft nirgends stand, obwohl sie berechnet wurde.
+		//
+		// Der Messlauf hatte sie längst (`measure.ts`), der Betrieb nicht. Ein Werkzeug,
+		// das nur in der Werkstatt liegt, hilft nicht dort, wo die Welt wirklich läuft.
+		if (Object.keys(npcs.byIdleReason).length > 0) {
+			console.info('Warum die anderen nichts taten:', npcs.byIdleReason);
+		}
+
+		// Was ein NPC beschlossen hat und dann doch nicht konnte. Meist leer — und wenn
+		// nicht, ist es der interessanteste Teil des Protokolls: Ein Entschluss, der jeden
+		// Tick aufs Neue scheitert, ist eine Schleife, die niemand sieht.
+		if (Object.keys(npcs.byFailure).length > 0) {
+			console.warn('Woran es scheiterte:', npcs.byFailure);
+		}
+
 		const stadtId: string = await findStartRegionId();
 
 		// **Wer von auswaerts kommt** (5.24, Punkt 71). Im Mittel einer alle zwei

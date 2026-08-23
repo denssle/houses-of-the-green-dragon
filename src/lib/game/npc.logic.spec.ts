@@ -51,6 +51,7 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		plotPrice: null,
 		workshopPrice: null,
 		workshopMaterialMissing: false,
+		workshopMaterialPrice: null,
 		leaseFee: 20,
 		// Der Zufriedene wohnt im Eigenen, hat Platz und alles instand.
 		homeHasRoom: true,
@@ -370,6 +371,112 @@ describe('Was ein NPC tut', () => {
 
 			expect(decideNpcAction(baecker)).toBe('BUY_INPUT');
 			expect(savingsTarget(baecker)).toBe(6);
+		});
+
+		/**
+		 * **Was gespart wird, muss auch gekauft werden können** (5.62).
+		 *
+		 * Der Befund vom 23.08.2026, gefunden in der laufenden Welt: Zwei Einwohnerinnen
+		 * kauften im Winter 97 ein Grundstück und hatten im Herbst 100 noch immer nicht
+		 * darauf gebaut. Die Ursache stand in `eigenesDach`: Vor **jedem** der drei
+		 * Schritte lag eine Schwelle in Höhe des ganzen Hauspreises — auch vor dem
+		 * Grundstück für vierzig.
+		 *
+		 * Zusammen mit dem Sparwillen ergab das eine geschlossene Schleife: Er spart auf
+		 * vierzig, erreicht sie, hört auf zu arbeiten (das Ziel ist ja erreicht) und darf
+		 * mit den vierzig nichts anfangen. `idleReason` meldete dabei `STILL_SAVING` — es
+		 * sah von außen aus wie Fleiß.
+		 */
+		describe('die Schwelle je Schritt', () => {
+			/** Verheiratet, in der Unterkunft, Bretter sind zu haben — es fehlt der Boden. */
+			function bauwillig(werte: Partial<NpcState> = {}): NpcState {
+				return zufrieden({
+					isMarried: true,
+					ownsHome: false,
+					hasFreePlot: false,
+					homePrice: 100,
+					plotPrice: 40,
+					materialMissing: false,
+					money: 0,
+					...werte
+				});
+			}
+
+			it('kauft das Grundstück, sobald es bezahlt ist — nicht erst das ganze Haus', () => {
+				// Rücklage 36 (neun Mahlzeiten zu 4) plus die vierzig, auf die er spart.
+				const amZiel = bauwillig({ money: 36 + 40 });
+
+				expect(savingsTarget(amZiel)).toBe(40);
+				expect(decideNpcAction(amZiel)).toBe('BUY_PLOT');
+			});
+
+			it('baut erst, wenn das Haus bezahlt ist', () => {
+				const mitBoden = bauwillig({ hasFreePlot: true, money: 36 + 40 });
+
+				expect(savingsTarget(mitBoden)).toBe(100);
+				// Vierzig übrig, das Haus kostet hundert: Er arbeitet weiter.
+				expect(decideNpcAction(mitBoden)).toBe('WORK');
+				expect(decideNpcAction(bauwillig({ hasFreePlot: true, money: 36 + 100 }))).toBe(
+					'BUILD_HOME'
+				);
+			});
+
+			it('kauft das Brett, ohne den Hauspreis in der Tasche zu haben', () => {
+				const ohneBretter = bauwillig({
+					hasFreePlot: true,
+					materialMissing: true,
+					materialPrice: 12,
+					money: 36 + 12
+				});
+
+				expect(savingsTarget(ohneBretter)).toBe(12);
+				expect(decideNpcAction(ohneBretter)).toBe('BUY_MATERIAL');
+			});
+		});
+
+		/**
+		 * **Eine Sperre ohne Schlüssel** (5.62): `workshopMaterialMissing` hielt `BUILD`
+		 * auf, und keine Handlung räumte sie je aus — `BUY_MATERIAL` kauft Hausmaterial.
+		 * Gespart wurde obendrein mit `materialPrice`, dem Preis der Bretter für die Kate,
+		 * während es an Quadern für die Mühle fehlte.
+		 *
+		 * Dass überhaupt je eine Werkstatt entstand, lag an einer Ausnahme: Zimmerei,
+		 * Steinmetz und Schmiede stellen ihr Baumaterial selbst her und verlangen keines.
+		 */
+		describe('das Material für die Werkstatt', () => {
+			function bauherr(werte: Partial<NpcState> = {}): NpcState {
+				return gruender({
+					isMarried: true,
+					ownsHome: true,
+					hasFreePlot: true,
+					workshopPrice: 180,
+					workshopMaterialMissing: true,
+					workshopMaterialPrice: 15,
+					// Die Bretter fürs Wohnhaus sind eine andere Ware und ein anderer Preis.
+					materialPrice: 6,
+					...werte
+				});
+			}
+
+			it('spart auf das Werkstattmaterial, nicht auf das Hausmaterial', () => {
+				expect(savingsTarget(bauherr())).toBe(15);
+			});
+
+			it('kauft es', () => {
+				expect(decideNpcAction(bauherr({ money: 36 + 15 }))).toBe('BUY_WORKSHOP_MATERIAL');
+			});
+
+			it('baut, sobald es dasteht', () => {
+				const versorgt = bauherr({ workshopMaterialMissing: false, money: 36 + 180 });
+
+				expect(decideNpcAction(versorgt)).toBe('BUILD');
+			});
+
+			it('spart auf nichts, was niemand anbietet', () => {
+				// Dieselbe Regel wie beim Hausmaterial (Punkt 63): Ein Ziel, das man nicht
+				// kaufen kann, ist kein Ziel.
+				expect(savingsTarget(bauherr({ workshopMaterialPrice: null }))).toBeNull();
+			});
 		});
 
 		it('zieht die gekaufte Zutat der Pacht vor', () => {

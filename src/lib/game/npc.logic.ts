@@ -45,6 +45,12 @@ export const NPC_ACTIONS = [
 	'SELL',
 	// Seit 4.14: ein eigenes Dach, Instandhaltung und Leute (Punkt 30).
 	'BUY_MATERIAL',
+	// Seit 5.62 getrennt davon: das Material für die eigene Werkstatt. Zwei Handlungen
+	// und nicht eine — wie bei `UPGRADE_HOME` und `UPGRADE_WORKSHOP`, und aus demselben
+	// Grund: Sie stehen auf verschiedenen Stufen (Vorsorge gegen Unternehmen) und meinen
+	// verschiedene Waren. Ein Wohnhaus ist Fachwerk und braucht Bretter, eine Werkstatt
+	// will Quader und Eisen dazu.
+	'BUY_WORKSHOP_MATERIAL',
 	'BUY_INPUT',
 	'BUILD_HOME',
 	'RENOVATE',
@@ -121,6 +127,19 @@ export interface NpcState {
 	workshopPrice: number | null;
 	/** Fehlt für sie das Baumaterial? */
 	workshopMaterialMissing: boolean;
+	/**
+	 * Was das fehlende Werkstattmaterial je Stück kostet — nichts heißt: nicht zu kaufen.
+	 *
+	 * **Ohne diese Angabe war `workshopMaterialMissing` eine Sperre ohne Schlüssel** (5.62):
+	 * Sie hielt `BUILD` auf, und keine einzige Handlung räumte sie je aus. `BUY_MATERIAL`
+	 * kauft ausschließlich Hausmaterial, und gespart wurde für den Fall mit dessen Preis —
+	 * einer anderen Zahl als der gemeinten. Ein unternehmender NPC mit Grundstück und
+	 * hunderttausend Münzen tat nichts.
+	 *
+	 * Dass es überhaupt je eine Werkstatt gab, lag an einer Ausnahme: Zimmerei, Steinmetz
+	 * und Schmiede stellen ihr Baumaterial selbst her und verlangen deshalb keines.
+	 */
+	workshopMaterialPrice: number | null;
 	leaseFee: number;
 
 	// --- Ein eigenes Dach und was daran hängt (4.14) ----------------------------------
@@ -227,7 +246,10 @@ export function savingsTarget(state: NpcState): number | null {
 	// Werkstatt, und es gäbe niemanden mehr, der darin arbeitet.
 	if (!state.ownsWorkshop && isEnterprising(state.personality)) {
 		if (!state.hasFreePlot) return state.plotPrice;
-		if (state.workshopMaterialMissing) return state.materialPrice;
+		// **Der Preis des Werkstattmaterials, nicht der des Hausmaterials** (5.62). Bis
+		// dahin stand hier `materialPrice`: die Bretter für die Kate, während es an
+		// Quadern für die Mühle fehlte. Wer auf die falsche Zahl spart, hört zu früh auf.
+		if (state.workshopMaterialMissing) return state.workshopMaterialPrice;
 		return state.workshopPrice;
 	}
 
@@ -660,6 +682,21 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 		return 'LEASE';
 	}
 
+	// **Erst das Material, dann das Haus** (5.62) — dieselbe Folge wie beim eigenen Dach.
+	// Ohne diesen Schritt war die Prüfung darunter eine Tür, die sich nie öffnete: Sie
+	// verlangte vollständiges Material, und nichts in dieser Welt beschaffte es.
+	if (
+		!state.ownsWorkshop &&
+		state.hasFreePlot &&
+		state.workshopPrice !== null &&
+		state.workshopMaterialMissing &&
+		state.workshopMaterialPrice !== null &&
+		uebrig >= state.workshopMaterialPrice &&
+		isEnterprising(state.personality)
+	) {
+		return 'BUY_WORKSHOP_MATERIAL';
+	}
+
 	// **Bauen ist die teuerste Entscheidung und steht deshalb hinten.** Wer nichts
 	// unternimmt, verliert nichts; wer zu früh baut, hat kein Geld mehr für Brot.
 	//
@@ -769,8 +806,21 @@ function eigenesDach(state: NpcState): NpcAction | undefined {
 	if (!state.isMarried || state.ownsHome) return undefined;
 	if (state.homePrice === null) return undefined;
 
+	// **Jeder Schritt kostet, was er kostet** (5.62). Bis hierher stand vor allen dreien
+	// eine Schwelle in Höhe des ganzen Hauspreises — auch vor dem Grundstück für vierzig
+	// und vor dem einzelnen Brett.
+	//
+	// Zusammen mit `savingsTarget` ergab das eine Sackgasse, aus der niemand herausfand:
+	// Gespart wird auf den **nächsten Schritt** (vierzig für das Grundstück), gearbeitet
+	// wird, solange das Geld unter Rücklage plus Sparziel liegt — und mit den vierzig in
+	// der Hand tat er dann nichts, weil die Schwelle hundert verlangte. Er hatte sein
+	// eigenes Ziel erreicht und stand still.
+	//
+	// Auf Live war das mit bloßem Auge zu sehen: Zwei Einwohnerinnen kauften im Winter 97
+	// ein Grundstück und hatten drei Spieljahre später noch immer nicht darauf gebaut.
+	// Dieselbe Regel steht ein paar Zeilen weiter oben schon geschrieben — laufen Sparen
+	// und Handeln auseinander, spart einer auf etwas, das er nie tut.
 	const uebrig: number = state.money - desiredReserve(state.personality, state.foodPrice);
-	if (uebrig < state.homePrice) return undefined;
 
 	if (state.materialMissing) {
 		return state.materialPrice !== null && uebrig >= state.materialPrice
@@ -780,5 +830,5 @@ function eigenesDach(state: NpcState): NpcAction | undefined {
 	if (!state.hasFreePlot) {
 		return state.plotPrice !== null && uebrig >= state.plotPrice ? 'BUY_PLOT' : undefined;
 	}
-	return 'BUILD_HOME';
+	return uebrig >= state.homePrice ? 'BUILD_HOME' : undefined;
 }
