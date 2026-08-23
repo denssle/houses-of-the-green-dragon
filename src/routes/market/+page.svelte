@@ -8,6 +8,17 @@
 
 <h2>Was in der Stadt zu haben ist</h2>
 <p>
+	<small>
+		Alles nebeneinander, aus den Läden wie vom Marktplatz — der Preisvergleich ist der halbe Handel.
+		Wer selbst etwas anbieten will, tut das in seinem Laden oder
+		{#if data.marketId}
+			<a href="{base}/building/{data.marketId}" class="link">am Marktplatz</a>.
+		{:else}
+			am Marktplatz.
+		{/if}
+	</small>
+</p>
+<p>
 	<i>
 		Feste Preise, kein Feilschen — wer vorbeikommt, kauft oder lässt es. Du hast {data.money} Münzen.
 	</i>

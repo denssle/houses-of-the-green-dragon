@@ -38,6 +38,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 81  | Fremde Häuser haben keine Seite — **erledigt mit 5.46**                              | —                            | erledigt     |
 | 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                            | —                            | erledigt     |
 | 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**            | —                            | erledigt     |
+| 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung         | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2234,3 +2235,26 @@ Fehler nur sichtbarer, statt ihn zu beheben.
 **Erledigt mit 5.44**, in drei Abschnitten: was der Stadt gehört, was den Leuten gehört
 (mit Eigentümer), und — nur wenn vorhanden — was ohne Erben zurückgefallen ist und auf die
 Versteigerung wartet.
+
+### 84. Sehr junge Kinder können für Lohn arbeiten
+
+**Beobachtet am 22.08.2026 in der laufenden Welt.** Nachgesehen, wo das Alter geprüft wird:
+
+- **Die Anstellung prüft es.** `canTakeJob` weist ein Kind mit `TOO_YOUNG` ab, und
+  `employmentService` rechnet dafür eigens das Alter aus. Ein Kind kann sich also nicht
+  verdingen.
+- **Die Lohnarbeit prüft es nicht.** `REPAIR_FOR_HIRE` — seit 5.26 der eigentliche
+  Broterwerb — fragt nach Zustand, Auftrag und Aktionspunkten, nicht nach dem Alter. Ein
+  Achtjähriger kann am Rathaus herrichten und wird dafür aus der Stadtkasse bezahlt.
+- **Die eigene Arbeit prüft es auch nicht** (`harvest`, `craft`). Das fällt seltener auf,
+  weil ein Kind selten eine Pacht oder Werkstatt besitzt — unmöglich ist es nicht, denn
+  geerbt wird ohne Altersgrenze.
+- **Die Schule kennt die Grenze**: Ab `AGE_OF_MAJORITY` ist Schluss mit dem Unterricht.
+
+**Zu entscheiden ist nicht das Ob, sondern das Ab-wann.** „Kinder arbeiten gar nicht" wäre
+die einfachste Regel und die unhistorischste; in einer mittelalterlichen Stadt half ein
+Kind, sobald es das konnte. Denkbar ist ein **Mindestalter unterhalb der Volljährigkeit**
+(die Lehre beginnt früh, siehe Punkt 45) oder ein geringerer Ertrag statt eines Verbots.
+
+Das gehört zusammen mit Punkt 24 (NPC-Eltern und die Schule) entschieden: Ob ein Kind
+lernt oder arbeitet, ist dieselbe Frage von zwei Seiten — und ein Tag ist nur einmal da.

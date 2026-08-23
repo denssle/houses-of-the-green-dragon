@@ -1,5 +1,6 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as tradeService from '$lib/server/service/tradeService';
 import { actionMessage } from '$lib/actionMessage';
 import * as lawService from '$lib/server/service/lawService';
@@ -19,6 +20,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	return {
 		offers: await tradeService.getOffersInRegion(character.regionId, character.id),
+		// **Der Weg zum Marktplatz** (5.58). Diese Seite vergleicht Preise; ausgehängt wird
+		// in einem Laden oder am Marktplatz, und der ist ein Haus mit eigener Seite.
+		marketId: (await buildingService.getBuildingsInRegion(character.regionId)).find(
+			(haus) => haus.optionId === tradeService.MARKET_OPTION_ID
+		)?.id,
 		stallFee: await lawService.rate(character.regionId, 'STALL_FEE'),
 		salesTax: await lawService.rate(character.regionId, 'SALES_TAX'),
 		money: character.money

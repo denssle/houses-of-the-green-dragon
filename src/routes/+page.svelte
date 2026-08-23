@@ -45,7 +45,12 @@
 			<a href="{base}/jobs">Arbeit</a>
 			<a href="{base}/land">Umland</a>
 			<a href="{base}/granary">Kornspeicher</a>
-			<a href="{base}/market">Markt</a>
+			<!--
+				**„Preise", nicht „Markt"** (5.58): Der Marktplatz ist ein Haus mit eigener Seite,
+				diese hier ist der Preisvergleich über alle Läden der Stadt. Zwei Dinge, die
+				gleich hießen, obwohl sie Verschiedenes zeigen.
+			-->
+			<a href="{base}/market">Preise</a>
 		</nav>
 	</section>
 

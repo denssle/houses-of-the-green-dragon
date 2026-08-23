@@ -3677,6 +3677,28 @@ man nach einer Weile wiederkommt — und das tut man von jeder Seite aus, nicht 
 _Fertig, wenn:_ Kein Name führt an zwei Orte. — Erledigt für das Rathaus. **Offen bleiben**
 „Markt"/„Marktplatz" und der Kornspeicher: dasselbe Muster, derselbe Umbau.
 
+**5.58 „Markt" und „Marktplatz" sind zweierlei — und bleiben es.** ✓ Nach 5.57 lag nahe,
+auch die beiden anderen Paare zusammenzulegen. Beim Hinsehen war die Ankündigung voreilig:
+
+- **Den Kornspeicher gibt es als Haus gar nicht.** `granaryOffers()` liefert Brot aus dem
+  Nichts — „eine Krücke, bis es Bauern, Mühlen und Läden gibt", wie der Kopf der Datei seit
+  4.6b sagt. Wo kein zweites Gesicht ist, ist nichts zusammenzulegen.
+- **Der „Markt" ist keine zweite Seite des Marktplatzes.** Er zeigt **alle** Angebote der
+  Stadt, aus den Läden wie vom Marktplatz — ein Preisvergleich, kein Ort. Der Marktplatz
+  ist ein Haus und zeigt auf seiner Seite die Stände, die dort hängen.
+
+**Also nicht zusammengelegt, sondern auseinandergehalten.** Der Weg heißt jetzt „Preise"
+statt „Markt": Das sagt, was die Seite ist, und kollidiert mit keinem Haus. Und die Seite
+nennt den Marktplatz beim Namen — wer selbst etwas anbieten will, kommt von dort hin.
+
+**Die Lehre daraus ist die interessantere:** Zwei gleich aussehende Doppelungen können
+verschiedene Ursachen haben. Beim Rathaus war es wirklich ein Haus mit zwei Adressen, hier
+sind es zwei Dinge mit ähnlichen Namen. Einheitlichkeit um ihrer selbst willen hätte den
+Preisvergleich in ein Gebäude gesperrt, das die Preise der Zimmerei gar nicht kennt.
+
+_Fertig, wenn:_ Kein Name führt an zwei Orte, und keine zwei Namen an denselben. —
+Erledigt.
+
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
 mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird
