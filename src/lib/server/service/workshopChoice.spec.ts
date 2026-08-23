@@ -1,5 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
+import { Op } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 import '$lib/db/db';
 import { Building } from '$lib/db/model/building';
@@ -29,6 +30,8 @@ const JETZT = 10_000;
 const MUEHLE = 4;
 const BACKHAUS = 5;
 const ZIMMEREI = 9;
+/** Die einzige Quelle für Eisen — und im Weltaufbau städtisch (Punkt 86). */
+const SCHMIEDE = 2;
 let stadtId: string;
 
 /**
@@ -88,8 +91,11 @@ describe('Welche Werkstatt einer baut', () => {
 	beforeEach(async () => {
 		await Skill.destroy({ where: {} });
 		await Character.destroy({ where: { role: 'NPC' } });
-		// Die Startwelt trägt eine städtische Schmiede; alles andere fehlt.
+		// Die Startwelt trägt eine städtische Schmiede; alles andere fehlt. Was ein Test
+		// heimfallen ließ, muss eigens weg: Es gehört der Stadt und fällt deshalb nicht
+		// unter die Zeile davor.
 		await Building.destroy({ where: { ownerType: 'CHARACTER' } });
+		await Building.destroy({ where: { escheatedTick: { [Op.ne]: null } } });
 	});
 
 	it('nimmt ohne Können die billigste, die fehlt', async () => {
@@ -152,6 +158,59 @@ describe('Welche Werkstatt einer baut', () => {
 		);
 
 		expect(wahl?.optionId).toBe(ZIMMEREI);
+	});
+
+	it('übergeht die städtische Schmiede — sie führt niemand', async () => {
+		// **Punkt 86.** Die Schmiede ist das einzige Rezept, das Eisen erzeugt, und Eisen
+		// steht im Material jeder Werkstatt außer Zimmerei, Steinmetzhütte und Schmiede.
+		// Solange die städtische das Handwerk „besetzt" hielt, entstand in dieser Welt kein
+		// einziges Stück Eisen — und damit war keine Mühle, keine Bäckerei, keine
+		// Schneiderei und keine Alchemistenküche je zu bauen.
+		const schmiedin = await person('Schmiedin');
+		await skillService.addPractice(schmiedin, 'SMITHING', 500);
+
+		const wahl = await npcService.fehlendeWerkstatt(
+			await buildingService.getBuildingsInRegion(stadtId),
+			schmiedin
+		);
+
+		expect(wahl?.optionId).toBe(SCHMIEDE);
+	});
+
+	it('aber nicht eine private — die versorgt die Stadt', async () => {
+		// Die Gegenprobe zum Test darüber: Die Regel ist nicht abgeschafft, sie fragt nur
+		// nach dem Betreiber. Steht die Schmiede in Bürgerhand, baut niemand die zweite.
+		const schmiedin = await person('Schmiedin');
+		await skillService.addPractice(schmiedin, 'SMITHING', 500);
+		await hausMitGrund(SCHMIEDE, schmiedin);
+
+		const wahl = await npcService.fehlendeWerkstatt(
+			await buildingService.getBuildingsInRegion(stadtId),
+			schmiedin
+		);
+
+		expect(wahl?.optionId).not.toBe(SCHMIEDE);
+	});
+
+	it('gibt ein heimgefallenes Handwerk wieder frei', async () => {
+		// **Punkt 89.** Ein Betrieb, der der Stadt aus einem erbenlosen Nachlass zufiel,
+		// wird von niemandem geführt. Bliebe er als „vorhanden" stehen, wäre das Handwerk
+		// für alle Zeit besetzt — von einem Haus, in dem niemand arbeitet.
+		const baeckerin = await person('Bäckerin');
+		await skillService.addPractice(baeckerin, 'BAKING', 500);
+		await hausMitGrund(MUEHLE, baeckerin);
+
+		await Building.update(
+			{ ownerType: 'CITY', OwnerCharacterId: null, escheatedTick: JETZT },
+			{ where: { optionId: MUEHLE } }
+		);
+
+		const wahl = await npcService.fehlendeWerkstatt(
+			await buildingService.getBuildingsInRegion(stadtId),
+			baeckerin
+		);
+
+		expect(wahl?.optionId).toBe(MUEHLE);
 	});
 
 	it('schlägt nichts vor, was schon steht', async () => {

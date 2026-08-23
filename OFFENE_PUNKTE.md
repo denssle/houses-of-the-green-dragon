@@ -40,6 +40,13 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**            | —                            | erledigt     |
 | 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung         | dem nächsten Schritt         | Befund       |
 | 85  | Der Kornspeicher backt aus dem Nichts — und unterbietet jeden Bäcker                 | Punkt 15 / 70                | Befund       |
+| 86  | Die städtische Schmiede sperrte die Eisenkette — **behoben mit 5.65**                | —                            | erledigt     |
+| 87  | Ein Sparziel, das ins Leere führt — Bauland ohne Werkstatt darauf                    | dem nächsten Messlauf        | Befund       |
+| 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick            | laufend                      | Befund       |
+| 89  | Ein Betrieb je Handwerk, für immer — ihre Zahl ist eine Konstante der Vorlagen       | Punkte 15, 34                | Entwurf      |
+| 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung   | Punkte 76, 16                | Entwurf      |
+| 91  | Der Takt ist nicht atomar — ein Fehler halbiert die Stunde                           | laufend                      | Befund       |
+| 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                   | Punkte 70, 40                | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2292,3 +2299,238 @@ Ticks entstand **kein einziges Backhaus**, alles Brot kam von ihm. Denkbare Zwis
 ein **begrenzter Vorrat**, der sich nur aus Ernten füllt (dann ist er ein Speicher und kein
 Backofen), oder ein **Preis über dem der Bäcker**, der ihn zur Notversorgung macht statt
 zur Konkurrenz. Beides gehört zu Punkt 15, wo über Waren und Ketten entschieden wird.
+
+### 86. Die städtische Schmiede sperrt die Eisenkette — behoben (5.65)
+
+**Befund vom 23.08.2026, aus dem Lesen des Codes und nicht aus einem Messlauf.** Er liegt
+unter den Punkten 70, 76 und 85 und erklärt einen Teil dessen, was dort gemessen wurde.
+
+**Die Kette in fünf Gliedern:**
+
+1. `fehlendeWerkstatt` (`npcService.ts`) sucht CRAFT-Vorlagen, die in der Region **noch
+   nicht stehen**. Gefiltert wird über alle Gebäude — auch über die der Stadt.
+2. Der Weltaufbau setzt eine **Städtische Schmiede** (`seed.ts`, optionId 2). Damit ist die
+   Schmiede auf ewig aus dem Kandidatenfeld: Kein NPC baut je eine.
+3. Die Schmiede ist das **einzige Rezept dieser Welt, das `IRON` erzeugt**. Ein `grep` über
+   `src/` findet keine zweite Quelle.
+4. Die städtische stellt nichts her: NPCs verarbeiten ausschließlich in `lage.workshopId`,
+   also im eigenen Betrieb. (`craft()` selbst würde es erlauben — es weist nur fremdes
+   **Privat**eigentum ab. Ein Spieler mit Erz könnte dort schmieden, ein NPC tut es nie.)
+5. `materialFor` verlangt für alles außer Wohnhäusern `PLANK + BLOCK + IRON`. Ausgenommen
+   sind in `npcService` nur die Vorlagen, die diese Waren selbst herstellen — Zimmerei,
+   Steinmetzhütte, Schmiede.
+
+**Daraus folgt:** Für Mühle, Bäckerei, Schneiderei und Alchemistenküche bleibt
+`workshopMaterialMissing` für immer wahr und `workshopMaterialPrice` für immer `null`.
+`BUILD` ist gesperrt, `savingsTarget` fällt auf `null`. **Grünau kann aus eigener Kraft
+niemals ein Backhaus bekommen** — nicht wegen des Kornspeichers, nicht wegen fehlenden
+Geldes, nicht wegen fehlender Fertigkeit, sondern weil eine Zutat des Bauwerks in dieser
+Welt nicht existiert.
+
+Das deckt sich mit dem Gemessenen: In 600 Ticks entstanden **zwei** Bauten — und Zimmerei
+und Steinmetzhütte sind genau die beiden, die kein Material verlangen.
+
+**Die kleinste ehrliche Reparatur ist eine Zeile:** Nur Gebäude mit
+`ownerType === 'CHARACTER'` schließen die Lücke. Dann baut jemand eine private Schmiede
+neben die städtische, und Eisen kommt in Umlauf. Das ist zugleich der stimmigere Satz —
+_dass die Stadt eine Schmiede unterhält, heißt nicht, dass niemand sonst schmieden darf._
+Denkbar wären auch: die städtische Schmiede verkauft Eisen (dann ist sie eine zweite
+Krücke wie der Kornspeicher, siehe Punkt 85), oder die erste Stufe einer Werkstatt kommt
+ohne Eisen aus (dann verschiebt sich der Engpass auf die zweite).
+
+**Bevor an Punkt 85 oder 76 gearbeitet wird, gehört dieser hier entschieden.** Solange die
+Kette hier reißt, ändern ein abgeschaffter Kornspeicher und ein besserer Brettpreis nichts.
+
+**Behoben mit 5.65** — `fehlendeWerkstatt` zählt nur noch Gebäude in Bürgerhand.
+`ironChain.spec.ts` belegt den ganzen Weg an einer festen Ausgangslage: Neben der
+städtischen entsteht eine eigene Schmiede, und in ihr entsteht Eisen, das am Markt landet.
+
+**Und der Messlauf zeigt davon nichts** — das gehört dazu. Zwei Läufe über 600 Ticks mit
+derselben Saat, einer mit und einer ohne die Änderung, sind **zeichengleich**: dieselben
+Handlungen, dieselben Häuser, dieselben Leute. Der Grund steht im Bericht selbst: `BUY_PLOT`
+achtmal, alle zwölf Parzellen vergeben, Stadtkasse bei null. **Wer kein Grundstück bekommt,
+kommt nie zu der Frage, welche Werkstatt ihm fehlt.** Zwei Zugezogene mit Handwerk und über
+200 Münzen stehen ohne Bauplatz da.
+
+Die Sperre ist also aufgehoben und **wirkt noch nicht**: Sie lag hinter zwei anderen. Das
+ist kein Argument gegen die Änderung — eine dauerhafte Unmöglichkeit ist auch dann falsch,
+wenn zurzeit etwas anderes zuerst greift —, aber es verschiebt die Reihenfolge: **Punkt 87
+(Bauland, das gekauft und nie bebaut wird) und die Frage, wer Land erschließt, wenn die
+Stadtkasse leer ist, stehen jetzt vor der Wirtschaftskette.**
+
+### 87. Ein Sparziel, das ins Leere führt
+
+**Befund vom 23.08.2026.** Derselbe Fehler wie in Punkt 55 und 63, eine Ebene höher — und
+diesmal verdeckt ihn ausgerechnet die Diagnose, die dafür gebaut wurde.
+
+In `savingsTarget` (`npc.logic.ts`) steht:
+
+```ts
+if (!state.ownsWorkshop && isEnterprising(state.personality)) {
+	if (!state.hasFreePlot) return state.plotPrice; // ← kein Blick auf workshopPrice
+	if (state.workshopMaterialMissing) return state.workshopMaterialPrice;
+	return state.workshopPrice;
+}
+```
+
+**Gespart wird auf das Grundstück, ohne zu prüfen, ob die Werkstatt darauf erreichbar
+ist.** `entfaltung` kauft es dann auch: `BUY_PLOT` verlangt `plotPrice`, aber nicht
+`workshopPrice`. Ein unternehmungslustiger NPC erwirbt also Bauland, das er nie bebaut —
+und stellt danach fest, dass es nicht weitergeht.
+
+**Zweierlei macht das teuer:**
+
+- **Bauland ist endlich.** Der Weltaufbau legt zwölf Parzellen an, vier davon trägt die
+  Stadt. Jeder gestrandete Unternehmer bindet eine, dauerhaft — es gibt keinen Weg zurück.
+- **Die Diagnose meldet den gesunden Fall.** Vor dem Kauf ist `savingsTarget` ≠ `null`,
+  also steht dort `STILL_SAVING`. Erst _nach_ dem vergeblichen Kauf springt `idleReason` auf
+  `GOAL_UNREACHABLE`. Die Prüfung aus 4.17 greift beim Nachfolgefall eine Stufe zu spät —
+  und `STILL_SAVING` war der häufigste Müßiggangsgrund des letzten Messlaufs (3603).
+
+**Zu tun ist beides zusammen:** die Bedingung um das erreichbare Vorhaben ergänzen (wer
+keine Werkstatt bauen kann, spart auch nicht auf den Boden dafür) und `willBauen` in
+`idleReason` an dieselbe Bedingung hängen. Laufen die beiden auseinander, ist die Auskunft
+schlimmer als keine — genau das steht in `npc.logic` schon als Warnung.
+
+**Zusammenhang mit Punkt 86:** Heute tritt der Fall über die gesperrte Eisenkette ein. Ist
+die behoben, bleibt er für den Tag, an dem alle Werkstätten stehen (Punkt 89) — dann trifft
+er jeden neuen Unternehmungslustigen.
+
+### 88. Die Zugreihenfolge ist ein stiller Vorteil
+
+**Befund vom 23.08.2026.** `actForNpcs` holt die Einwohner ohne `order`:
+
+```ts
+const npcs = await Character.findAll({ where: { deathTick: null, role: 'NPC' } });
+
+for (const npc of npcs) {
+	buchen(await ausfuehren(npc.dataValues.id, tick));
+}
+```
+
+Die Datenbank liefert eine **stabile** Folge — SQLite nach `rowid`, MariaDB nach dem
+Primärschlüssel. Also handelt Tick für Tick derselbe NPC zuerst, über Jahrzehnte hinweg.
+
+**Was daran hängt, ist knapp und wird nur einmal vergeben:** das billigste Brot am Markt,
+der eine Reparaturauftrag, das letzte freie Grundstück, die offene Stelle. Wer vorne steht,
+bekommt es jedes Mal. Über 600 Ticks ist das keine Rundung, sondern eine Bevorzugung, die
+niemand beschlossen hat und die kein Test bemerkt.
+
+Verstärkt wird es dadurch, dass alle **dieselbe** Wahl treffen: `freierArbeitsplatz`
+sortiert für jeden gleich, `fehlendeWerkstatt` nennt jedem dieselbe Lücke,
+`naechsterPartner` nimmt global die höchste Zuneigung. Acht NPCs entscheiden sich für
+denselben Bau; sieben kommen zu spät, und ihre Fehlschläge stehen als Rauschen in
+`byFailure`, obwohl Arbeit da war.
+
+**Zu bauen ist eine Mischung je Tick** — geseedet aus der Tickzahl, damit Messläufe
+wiederholbar bleiben (Punkt 54). Das ist eine Zeile. Die zweite, größere Frage ist, ob
+gleichwertige Optionen innerhalb einer Entscheidung gestreut werden sollen; die gehört zu
+Punkt 90.
+
+### 89. Ein Betrieb je Handwerk, für immer
+
+**Befund vom 23.08.2026.** `fehlendeWerkstatt` baut, was noch nicht steht — und nur das.
+Die Begründung im Kommentar ist richtig (wer die vierte Bäckerei danebenstellt, ruiniert
+sich und den Markt), aber die Regel kennt kein Maß:
+
+- **Keine zweite, wenn die Stadt wächst.** Eine Bäckerei für zweihundert Einwohner kann nur
+  über `UPGRADE_WORKSHOP` wachsen — und das kann sich niemand leisten (Punkt 76).
+- **Kein Nachrücken, wenn einer wegfällt.** Stirbt die einzige Zimmerin ohne Erben, fällt
+  der Bau an die Stadt und kommt unter den Hammer (Punkt 79). Findet sich kein Bieter,
+  steht er weiter da, in städtischer Hand, ohne dass jemand darin arbeitet — und **belegt
+  die Lücke dauerhaft**. Der Beruf ist tot, die Stelle gilt als besetzt. (Dasselbe Muster
+  wie Punkt 86, nur nicht vom Weltaufbau, sondern von einem Erbfall ausgelöst.)
+- **Kein Ausstieg.** Ein Betrieb, der nichts absetzt, wird nicht aufgegeben, nicht verkauft
+  und geht nicht ein. Er bleibt stehen und hält den Platz.
+
+**Damit ist die Zahl der Betriebe keine Größe der Wirtschaft, sondern eine Konstante der
+Vorlagenliste** — heute sieben CRAFT-Vorlagen, davon eine durch die Stadt gesperrt. Das ist
+die Obergrenze, unabhängig davon, wie groß Grünau wird.
+
+**Zu entwerfen ist, woran sich „die Stadt braucht noch eine" bemisst.** Einwohnerzahl je
+Betrieb wäre die einfachste Zahl, unbediente Nachfrage die ehrlichere (wer wollte kaufen
+und fand nichts?) — letztere setzt aber voraus, dass irgendwo mitgeschrieben wird, was
+nicht zustande kam, und das ist Punkt 90. Gehört zusammen mit Punkt 34 (wer einen Betrieb
+führen darf) und Punkt 15 entschieden.
+
+### 90. Die NPC-Entscheidung hat kein Gedächtnis
+
+**Befund vom 23.08.2026** — eine Einordnung, kein neuer Einzelfehler: Er benennt, was die
+Punkte 73, 76 und 89 gemeinsam voraussetzen.
+
+`decideNpcAction` ist eine reine Funktion über einen Zustand, der **ausschließlich aus dem
+Jetzt** besteht. Kein NPC weiß, was er letzte Woche versucht hat, was sich verkauft hat,
+wem er etwas schuldet oder was er vorhat. Vier Folgen:
+
+- **Keine Rückkopplung von Absatz auf Produktion.** `if (state.canCraft) return 'CRAFT'`
+  fragt, ob Zutaten da sind — nie, ob das Erzeugnis je einen Käufer fand. Das ist Punkt 76,
+  und dort steht der Weg schon: „Wer viel unverkauft aushängen hat, stellt nichts mehr
+  her." Hier ist nachzutragen, **warum das keine Bedingung ist, die man ergänzt**:
+  `NpcState` hat kein Feld dafür. Verkäufe je Zeitraum sind eine neue Art von Wissen und
+  müssen irgendwo stehen — am ehesten am Betrieb.
+- **Keine Preisbildung.** `SELL` hängt immer `basePrice` aus, jeder Kauf nimmt
+  `cheapestOffer`. Damit gibt es in dieser Welt keinen Preis, sondern eine Konstante:
+  Knappheit erzeugt kein Signal, Überfluss auch nicht. Ein Lager mit 725 Brettern und ein
+  leeres kosten dasselbe. Niemand zieht je ein Angebot zurück — `withdrawOffer` hat genau
+  einen Aufrufer, die Marktseite eines Spielers. Solange das so ist, dreht jedes Balancing
+  an Zahlen, auf die niemand reagiert.
+- **Zwei der sechs Achsen sind tot.** `courage` und `agreeableness` werden gewürfelt,
+  vererbt und weitergereicht, aber in keiner Entscheidung ausgewertet (Punkt 7 nennt das
+  bereits). Der Unterschied zwischen zwei NPCs ist heute: wann sie essen, wie viel sie
+  horten, ob sie werben und Kleidung kaufen, ob sie unternehmen — vier Schwellen.
+- **Determinismus ohne Streuung.** Gleicher Zustand ergibt gleiche Handlung. In einer Stadt
+  mit acht ähnlichen Lagen ist das Herdenverhalten, und es verstärkt Punkt 88.
+
+**Zu entscheiden ist die Reihenfolge.** Das Gedächtnis für Verkäufe trägt zugleich Punkt 76
+und Punkt 89 (unbediente Nachfrage) und ist deshalb der erste Kandidat. Die Preisbildung
+ist die größere Arbeit und gehört hinter Punkt 15, weil sie ohne Verwendungen nichts zu
+bewerten hat.
+
+### 91. Der Takt ist nicht atomar
+
+**Befund vom 23.08.2026.** `schlagen()` stellt zuerst die Weltuhr (`advanceWorld` schreibt
+`currentTick` und `lastTickAt`), und **danach** handelt die Stadt. Alles Weitere ergibt sich
+aus `lastTickAt` — also kommt eine angefangene Stunde nie wieder.
+
+**Zwei Wege, auf denen eine Stunde halb stattfindet:**
+
+- **Der Prozess endet mitten in `actForNpcs`** (Absturz, Deploy zur vollen Stunde). Die
+  vordere Hälfte der Einwohner hat gehandelt, die hintere nicht. Wegen Punkt 88 trifft es
+  reproduzierbar dieselben Leute.
+- **Ein einzelner NPC wirft.** `ausfuehren` hat keinen eigenen Schutz; die Ausnahme läuft
+  bis in das `try` von `schlagen()`. Der Rest der Schleife fällt aus — und mit ihm
+  **alles, was danach steht**: Zuzug, Wahl, Amtshandlungen, Versteigerungen, Grundsteuer,
+  Sold, Unglück und das Sterben. Ein kaputter Datensatz legt also nicht einen Einwohner
+  still, sondern die ganze Stunde, und im Log steht eine Zeile.
+
+**Zu bauen sind zwei kleine Dinge:** ein `try/catch` je NPC, das den Fehlschlag als
+`byFailure`-Eintrag bucht statt die Schleife abzubrechen (die Buchführung dafür gibt es
+schon), und ein Vermerk, bis wohin ein Tick abgearbeitet ist. Das Zweite ist die
+Voraussetzung dafür, den Takt später aus einem Cron gegen einen geschützten Endpunkt zu
+rufen — was in `ticker.ts` ohnehin als der robustere Weg vermerkt ist.
+
+### 92. Der Verwalter arbeitet ohne Ende
+
+**Befund vom 23.08.2026.** `decideCaretakerAction` lässt für abwesende Spieler nur die
+erhaltenden Handlungen zu und schickt alles andere zur Arbeit:
+
+```ts
+if (state.workAvailable && state.actionPoints > 0) return 'WORK';
+```
+
+Die Begründung ist gut (Zeit, die am Deckel verfällt, ist ohnehin verloren). Zwei Folgen
+sind es nicht:
+
+- **Wer wegbleibt, kommt reicher zurück.** Ein Anwesender gibt Punkte für Werben, Bauen,
+  Herstellen und Ausbauen aus; der Verwalter darf nichts davon und verdingt sich stattdessen
+  jede Stunde. Abwesenheit ist damit die ertragreichste Spielweise — das Gegenteil dessen,
+  was 5.5 wollte.
+- **Er übt immer dasselbe.** Die Lohnarbeit ist seit 5.26 `REPAIR_FOR_HIRE`, und die übt
+  `CONSTRUCTION` — jede Schicht, ein Leben lang. Punkt 70 beschreibt dieselbe Monokultur
+  noch mit `SMITHING`; das stammt aus der Zeit der städtischen Schmiede und **gehört dort
+  richtiggestellt**: Der Befund gilt weiter, nur heißt das Handwerk inzwischen anders.
+
+**Zu entscheiden ist, wie viel ein Verwalter verdienen darf.** Denkbar: gar keine
+Lohnarbeit über das hinaus, was Essen und Instandhaltung kosten; oder ein Anteil der
+Punkte, der ungenutzt verfällt. „Erhalten ja, entscheiden nein" ist der richtige Satz — er
+sollte nur auch für den Geldbeutel gelten.

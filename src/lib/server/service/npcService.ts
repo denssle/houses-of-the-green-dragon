@@ -883,12 +883,37 @@ function menge(vorrat: { itemId: string; quantity: number }[], itemId: string): 
  * buk, und niemand konnte sagen warum.
  *
  * Bei gleichem Können bleibt der Preis der Ausschlag: Wer wenig hat, fängt klein an.
+ *
+ * **Und „es gibt schon eine" meint eine in Bürgerhand** (5.65, Punkt 86). Bis dahin zählte
+ * jedes Haus der Stadt mit — auch die **städtische Schmiede**, die der Weltaufbau setzt.
+ * Damit war optionId 2 auf ewig aus dem Kandidatenfeld, und daran hing mehr als ein Beruf:
+ *
+ * - Die Schmiede ist das **einzige Rezept dieser Welt, das `IRON` erzeugt**.
+ * - Die städtische stellt nichts her: NPCs verarbeiten nur im eigenen Betrieb.
+ * - `materialFor` verlangt für jede Werkstatt außer Zimmerei, Steinmetzhütte und Schmiede
+ *   `PLANK + BLOCK + IRON`.
+ *
+ * Also blieb `workshopMaterialMissing` für Mühle, Bäckerei, Schneiderei und
+ * Alchemistenküche für immer wahr, `workshopMaterialPrice` für immer `null`, und `BUILD`
+ * war gesperrt. Grünau konnte aus eigener Kraft **niemals** ein Backhaus bekommen — nicht
+ * aus Geldmangel und nicht mangels Können, sondern weil eine Zutat des Bauwerks nirgends
+ * entstand. Im Messlauf über 600 Ticks entstanden zwei Bauten: Zimmerei und
+ * Steinmetzhütte, genau die beiden, die kein Material verlangen.
+ *
+ * Dass die Stadt eine Schmiede unterhält, heißt nicht, dass niemand sonst schmieden darf.
+ *
+ * **Das gilt auch für Heimgefallenes** (Punkt 89): Ein Betrieb, der der Stadt aus einem
+ * erbenlosen Nachlass zufiel, wird von niemandem geführt und versorgt darum niemanden. Er
+ * gibt das Handwerk wieder frei. Zwischen Heimfall und Zuschlag kann deshalb einer neben
+ * das Versteigerte bauen — das ist der Preis dafür, dass ein unverkäuflicher Nachlass ein
+ * Handwerk nicht für alle Zeit blockiert, und die Versteigerung läuft ohnehin im selben
+ * Takt an.
  */
 export async function fehlendeWerkstatt(
 	haeuser: Haus[],
 	characterId?: string
 ): Promise<{ optionId: number; price: number } | undefined> {
-	const vorhanden = haeuser;
+	const vorhanden = haeuser.filter((haus) => haus.ownerType === 'CHARACTER');
 
 	const kandidaten = buildingService
 		.getBuildingOptions()
