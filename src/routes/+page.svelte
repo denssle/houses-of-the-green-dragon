@@ -10,7 +10,7 @@
 	hinaus, zuletzt das Verzeichnis der Häuser.
 
 	Die Wege stehen in Gruppen, weil sie in Gruppen gebraucht werden — wer hungrig ist,
-	sucht den Kornspeicher nicht zwischen Rathaus und Chronik. Eine einzige Reihe aus
+	sucht den Kornspeicher nicht zwischen Arbeit und Grundstücken. Eine einzige Reihe aus
 	neun Kästen zwingt jedesmal zum Lesen aller neun.
 -->
 
@@ -64,15 +64,15 @@
 		</nav>
 	</section>
 
+	<!--
+		Nur noch ein Weg, und das mit Absicht: Die Chronik steht in der Kopfzeile und ist
+		damit von jeder Seite aus erreichbar, das Rathaus steht unten im Verzeichnis der
+		Häuser. Beides hier zu wiederholen hieß, dieselbe Auskunft zweimal zu geben.
+	-->
 	<section>
 		<h3>Die Stadt</h3>
 		<nav class="actions">
 			<a href="{base}/people">Leute</a>
-			<!-- Zum Haus, nicht zu einer zweiten Adresse desselben Hauses (5.57). -->
-			{#if data.townHallId}
-				<a href="{base}/building/{data.townHallId}">Rathaus</a>
-			{/if}
-			<a href="{base}/chronicle">Chronik</a>
 		</nav>
 	</section>
 {:else}

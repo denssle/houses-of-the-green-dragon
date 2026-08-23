@@ -116,15 +116,17 @@ test.describe.serial('Ein Leben von vorn', () => {
 		await page.goto(BASIS + '/');
 
 		await expect(page.getByRole('heading', { name: 'Grünau' })).toBeVisible();
-		// In den Handlungsleisten und nicht irgendwo auf der Seite: „Rathaus" steht auch
-		// im Verzeichnis der Häuser, und beides ist richtig.
+		// In den Handlungsleisten und nicht irgendwo auf der Seite.
 		// „Preise" statt „Markt" seit 5.58: Der Marktplatz ist ein Haus, diese Seite ist der
 		// Preisvergleich über alle Läden.
-		for (const weg of ['Arbeit', 'Umland', 'Kornspeicher', 'Preise', 'Grundstücke', 'Rathaus']) {
+		for (const weg of ['Arbeit', 'Umland', 'Kornspeicher', 'Preise', 'Grundstücke']) {
 			await expect(
 				page.locator('.actions').getByRole('link', { name: weg, exact: true })
 			).toBeVisible();
 		}
+		// Das Rathaus steht seit 5.60 nur noch im Verzeichnis der Häuser — einmal, nicht
+		// zweimal. Erreichbar bleibt es trotzdem.
+		await expect(page.getByRole('link', { name: 'Rathaus', exact: true })).toHaveCount(1);
 	});
 
 	test('führt von einem Namen zu der Person, die er meint', async () => {
