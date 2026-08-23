@@ -8,6 +8,13 @@ import { measure } from '$lib/server/simulation/measure';
  *
  *     npm run measure                    500 Ticks
  *     MEASURE_TICKS=2000 npm run measure     (PowerShell: $env:MEASURE_TICKS=2000)
+ *     MEASURE_SEED=86 npm run measure        dieselbe Stadt wie beim letzten Mal
+ *
+ * **`MEASURE_SEED` ist der Unterschied zwischen Beschreiben und Belegen** (5.64). Ohne
+ * Saat würfelt jeder Lauf eine eigene Stadt; zwei solche Läufe zu vergleichen misst die
+ * Ausgangslage mit und nicht die Änderung. Wer eine Wirkung zeigen will, lässt denselben
+ * Startwert vor und nach dem Eingriff laufen — wer wissen will, ob die Welt überhaupt
+ * trägt, lässt ihn weg.
  *
  * **Warum als Spec und nicht als Skript:** Die Dienste hängen an den `$lib`-Aliasen, und
  * die löst hier nur Vite auf. Ein eigenständiges Skript bräuchte `vite-node` — eine
@@ -22,12 +29,14 @@ import { measure } from '$lib/server/simulation/measure';
 
 const ticks: number = Number(process.env.MEASURE_TICKS ?? 0);
 const every: number = Number(process.env.MEASURE_EVERY ?? 250);
+const saat: number | undefined =
+	process.env.MEASURE_SEED === undefined ? undefined : Number(process.env.MEASURE_SEED);
 
 describe('Messlauf', () => {
 	it.runIf(ticks > 0)(
 		`läuft ${ticks} Ticks und schreibt den Bericht`,
 		async () => {
-			const bericht = await measure({ ticks, every });
+			const bericht = await measure({ ticks, every, saat });
 			const text: string = bericht.lines.join('\n');
 
 			writeFileSync('messung.txt', text, 'utf8');

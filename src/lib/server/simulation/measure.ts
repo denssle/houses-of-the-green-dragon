@@ -7,6 +7,7 @@ import { BuildingStock, ShopOffer } from '$lib/db/model/shop';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
+import { seededRoll } from '$lib/game/testRoll';
 import type { IdleReason, NpcAction } from '$lib/game/npc.logic';
 import * as npcService from '$lib/server/service/npcService';
 import * as needService from '$lib/server/service/needService';
@@ -34,6 +35,23 @@ export interface MeasureOptions {
 	every?: number;
 	/** Eine frische Welt anlegen (Standard) oder auf der bestehenden weiterlaufen. */
 	seed?: boolean;
+	/**
+	 * Der Startwert des Würfels — ohne ihn würfelt der Lauf frei (`Math.random`).
+	 *
+	 * **Warum das nachgereicht werden musste** (5.64): Zwei Läufe ohne Saat sind zwei
+	 * verschiedene Städte. Solange das so war, ließ sich mit diesem Werkzeug ein Zustand
+	 * *beschreiben*, aber keine Änderung *belegen* — der Vergleich vorher/nachher maß die
+	 * Ausgangslage mit. Genau daran ist der erste Anlauf zu Punkt 86 gescheitert: Der Lauf
+	 * danach zeigte etwas anderes als der davor, und niemand konnte sagen, wieviel davon
+	 * die Änderung war.
+	 *
+	 * Gewürfelt wird an zwei Stellen — beim Weltaufbau und beim Zuzug. Beide bekommen
+	 * **denselben** Würfel, damit ein Lauf als Ganzes wiederholbar ist.
+	 *
+	 * Der freie Wurf bleibt der Standard: Ob die Welt auch bei anderen Ausgangslagen lebt,
+	 * beantwortet kein fester Startwert. Wer vergleichen will, setzt einen.
+	 */
+	saat?: number;
 }
 
 export interface Measurement {
@@ -53,11 +71,13 @@ function verteilung(zaehlung: Record<string, number>): string[] {
 }
 
 export async function measure(options: MeasureOptions): Promise<Measurement> {
-	const { ticks, every = 250, seed = true } = options;
+	const { ticks, every = 250, seed = true, saat } = options;
 	const zeilen: string[] = [];
 
+	const wuerfel: () => number = saat === undefined ? Math.random : seededRoll(saat);
+
 	await sequelize.sync();
-	if (seed) await seedWorld();
+	if (seed) await seedWorld(wuerfel);
 	const stadtId: string = await findStartRegionId();
 
 	const handlungen: Partial<Record<NpcAction, number>> = {};
@@ -69,7 +89,7 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 
 	for (let i = 0; i < ticks; i++) {
 		const lauf = await npcService.actForNpcs(start + i);
-		await migrationService.admitNewcomers(stadtId, start + i);
+		await migrationService.admitNewcomers(stadtId, start + i, wuerfel);
 		for (const [was, wieoft] of Object.entries(lauf.byAction)) {
 			handlungen[was as NpcAction] = (handlungen[was as NpcAction] ?? 0) + wieoft;
 		}
@@ -101,7 +121,11 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		}
 	}
 
-	zeilen.push('', `=== HANDLUNGEN (${ticks} Ticks, ${Date.now() - begonnen} ms) ===`);
+	zeilen.push(
+		'',
+		`=== HANDLUNGEN (${ticks} Ticks, ${Date.now() - begonnen} ms, ` +
+			`Saat ${saat === undefined ? 'frei gewürfelt' : saat}) ===`
+	);
 	zeilen.push(...verteilung(handlungen as Record<string, number>));
 
 	// **Das Herzstück.** `IDLE` ist die häufigste Handlung der Welt; ohne diese Aufschlüsselung
