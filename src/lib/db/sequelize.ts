@@ -70,7 +70,18 @@ export function buildOptions(mode: DatabaseMode = detectMode()): Options {
 				username: env.MARIA_DB_USER,
 				password: env.MARIA_DB_PASSWORD,
 				// Uberspace vergibt Datenbanken als <benutzer>_<name>.
-				database: env.MARIA_DB_USER + '_' + env.MARIA_DB_NAME
+				database: env.MARIA_DB_USER + '_' + env.MARIA_DB_NAME,
+				// **Still wie die anderen beiden** (5.63). Ohne diese Zeile schreibt
+				// Sequelize jede einzelne Abfrage nach `stdout` — und weil der Dienst unter
+				// dem Supervisor läuft, landet alles in derselben Datei wie das, was der
+				// Ticker meldet. `supervisorctl tail -100 houses` zeigte danach hundert
+				// Zeilen `SELECT ... FOR UPDATE` und nichts von dem, wofür das Protokoll da
+				// ist. Ausgerechnet der Betrieb war gesprächig, Test und Entwicklung
+				// schwiegen.
+				//
+				// Der Verlust ist gering: Wer eine Abfrage sehen will, sieht sie lokal. Was
+				// nur auf dem Server zu sehen ist, sind die Ereignisse der Welt.
+				logging: false
 			};
 	}
 }

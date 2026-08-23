@@ -23,6 +23,17 @@ describe('Datenbank-Weiche', () => {
 	it('verlangt in Produktion MariaDB', () => {
 		expect(buildOptions('PRODUCTION')).toMatchObject({ dialect: 'mariadb', host: 'localhost' });
 	});
+
+	it('schweigt in allen drei Betriebsarten über einzelne Abfragen', () => {
+		// **Sonst ist das Betriebsprotokoll unlesbar** (5.63): Der Dienst hängt am
+		// Supervisor, jede Abfrage landet in derselben Datei wie die Weltereignisse, und
+		// `supervisorctl tail -100 houses` zeigt hundertmal `COMMIT` statt einmal, was in
+		// der Stadt geschehen ist. Hier geprüft, weil es nur dort auffällt, wo man nicht
+		// mitliest.
+		for (const art of ['TEST', 'LOCAL', 'PRODUCTION'] as const) {
+			expect(buildOptions(art).logging).toBe(false);
+		}
+	});
 });
 
 describe('Prüfung der Zugangsdaten', () => {
