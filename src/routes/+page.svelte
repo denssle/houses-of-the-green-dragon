@@ -11,7 +11,12 @@
 
 	Die Wege stehen in Gruppen, weil sie in Gruppen gebraucht werden — wer hungrig ist,
 	sucht den Kornspeicher nicht zwischen Arbeit und Grundstücken. Eine einzige Reihe aus
-	neun Kästen zwingt jedesmal zum Lesen aller neun.
+	acht Kästen zwingt jedesmal zum Lesen aller acht.
+
+	**Geschnitten wird nach der Absicht, nicht nach der Bauart** (5.61): „Du" (was du hast
+	und tust) und „Was zu haben ist" (was du erwerben kannst). Eine Gruppe „Listen" wäre
+	keine — auf dieser Seite ist alles eine Liste, und Umland, Grundstücke und Leute sucht
+	man aus drei verschiedenen Gründen auf.
 -->
 
 <h2>{data.region?.name ?? 'Die Stadt'}</h2>
@@ -39,42 +44,51 @@
 		</small>
 	</p>
 
+	<!--
+		Was von dir selbst handelt: was du bei dir trägst, und wovon du lebst. Beides sieht
+		man nach, bevor man irgendwohin geht.
+	-->
 	<section>
-		<h3>Auskommen</h3>
+		<h3>Du</h3>
 		<nav class="actions">
+			<a href="{base}/inventory">Inventar</a>
 			<a href="{base}/jobs">Arbeit</a>
-			<a href="{base}/land">Umland</a>
-			<a href="{base}/granary">Kornspeicher</a>
+		</nav>
+	</section>
+
+	<!--
+		**„Auskommen" und „Besitz" waren dieselbe Gruppe** (5.61): Das Umland stand unter
+		Auskommen und ist Besitz, die Grundstücke standen unter Besitz und sind Auskommen.
+		Wer eines von beidem suchte, las ohnehin beide Reihen.
+
+		Was sie wirklich eint, ist die Absicht: etwas erwerben. Die Reihenfolge ist die des
+		Preises — vom Laib Brot bis zum eigenen Dach —, und damit auch die eines Lebens in
+		dieser Stadt.
+	-->
+	<section>
+		<h3>Was zu haben ist</h3>
+		<nav class="actions">
 			<!--
 				**„Preise", nicht „Markt"** (5.58): Der Marktplatz ist ein Haus mit eigener Seite,
 				diese hier ist der Preisvergleich über alle Läden der Stadt. Zwei Dinge, die
 				gleich hießen, obwohl sie Verschiedenes zeigen.
 			-->
 			<a href="{base}/market">Preise</a>
-		</nav>
-	</section>
-
-	<section>
-		<h3>Besitz</h3>
-		<nav class="actions">
-			<!-- Das Inventar zuerst: Es ist der einzige Besitz, den jeder von Anfang an hat. -->
-			<a href="{base}/inventory">Inventar</a>
+			<a href="{base}/granary">Kornspeicher</a>
+			<a href="{base}/land">Umland</a>
 			<a href="{base}/plot">Grundstücke</a>
 			<a href="{base}/building/new">Gebäude bauen</a>
 		</nav>
 	</section>
 
 	<!--
-		Nur noch ein Weg, und das mit Absicht: Die Chronik steht in der Kopfzeile und ist
-		damit von jeder Seite aus erreichbar, das Rathaus steht unten im Verzeichnis der
-		Häuser. Beides hier zu wiederholen hieß, dieselbe Auskunft zweimal zu geben.
+		Ohne Überschrift, denn eine Überschrift „Die Stadt" über einem einzigen Link namens
+		„Leute" sagte zweimal nichts. Der Weg steht hier, weil unter ihm die Häuser dieser
+		Stadt folgen: erst die Nachbarn, dann ihre Dächer.
 	-->
-	<section>
-		<h3>Die Stadt</h3>
-		<nav class="actions">
-			<a href="{base}/people">Leute</a>
-		</nav>
-	</section>
+	<nav class="actions">
+		<a href="{base}/people">Leute</a>
+	</nav>
 {:else}
 	<!--
 		Ohne Charakter führt keiner dieser Wege irgendwohin: Arbeiten, kaufen und bauen
@@ -92,9 +106,16 @@
 	Getrennt, weil man sie aus verschiedenen Gründen aufsucht (Punkt 83): Das eine ist
 	Politik, das andere Nachbarschaft und Handel. Eine Reihe aus allem zwang jedes Mal
 	zum Lesen der ganzen Liste.
+
+	**„Was die Stadt anbietet", nicht „Was der Stadt gehört"** (5.61): Der Eigentümer ist
+	hier die uninteressante Hälfte der Auskunft. Man geht dorthin, um zu schlafen
+	(Unterkunft), gegen Standgeld anzubieten (Marktplatz), zu wählen (Rathaus) oder für
+	Lohn herzurichten (Schmiede) — der Besitz der Stadt ist nur der Grund, warum das
+	jedem offensteht. Bei den Privathäusern bleibt es beim Gehören: Dort ist der
+	Eigentümer die eigentliche Auskunft.
 -->
 <section>
-	<h3>Was der Stadt gehört</h3>
+	<h3>Was die Stadt anbietet</h3>
 	{#if data.publicBuildings.length === 0}
 		<p><i>Die Stadt besitzt kein Haus.</i></p>
 	{:else}

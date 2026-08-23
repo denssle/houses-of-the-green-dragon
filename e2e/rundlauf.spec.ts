@@ -46,7 +46,7 @@ const BASIS = '/houses';
  * Güte, und das ist eine Auskunft und kein Fehler.
  */
 async function eineSchicht(page: Page): Promise<boolean> {
-	// **Über die Übersicht**, wo „Was der Stadt gehört" mit Verweis auf jedes Haus steht.
+	// **Über die Übersicht**, wo „Was die Stadt anbietet" mit Verweis auf jedes Haus steht.
 	//
 	// Vorher lief der Weg über `/council`. Seit 5.57 ist das eine Weiterleitung auf die
 	// Seite des Rathauses, und bei vierzig Schichten mit je einem Aufruf je Haus summierten
@@ -54,12 +54,12 @@ async function eineSchicht(page: Page): Promise<boolean> {
 	// führt ohne Umweg dorthin — und ist der Weg, den ein Spieler ohnehin nimmt.
 	await page.goto(BASIS + '/');
 	const wieviele: number = await page
-		.locator('section:has(h3:text("Was der Stadt gehört")) a.link')
+		.locator('section:has(h3:text("Was die Stadt anbietet")) a.link')
 		.count();
 
 	for (let i = 0; i < wieviele; i++) {
 		await page.goto(BASIS + '/');
-		await page.locator('section:has(h3:text("Was der Stadt gehört")) a.link').nth(i).click();
+		await page.locator('section:has(h3:text("Was die Stadt anbietet")) a.link').nth(i).click();
 		await page.waitForURL(new RegExp('/building/'));
 
 		const herrichten = page.getByRole('button', { name: 'Für Lohn herrichten' });
