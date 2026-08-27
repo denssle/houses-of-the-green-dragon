@@ -585,6 +585,39 @@ describe('Was ein NPC tut', () => {
 
 			expect(decideNpcAction(kind)).toBe('WORK');
 		});
+
+		it('nimmt dem Pächter ohne Werkstatt den Tagelohn nicht', () => {
+			// **Der Holzberg** (5.67): Die Pacht galt für sich allein als Arbeit, die Geld
+			// bringt. Sie bringt aber Holz, und Holz wird erst zu Geld, wenn es einer
+			// versägt oder verkauft. Wem die Werkstatt zur Ruine fiel und wer das Standgeld
+			// nicht hat, dem blieb beides — und der Tagelohn war ihm verwehrt, **weil** er
+			// eine Pacht hatte. Im Messlauf: null Münzen, 3082 Stämme, 199 von 200 Runden
+			// Ernte auf einen Haufen ohne Ausgang.
+			const ohneWerkstatt = sparsam({
+				hasLease: true,
+				ownsWorkshop: false,
+				canCraft: false,
+				ownStockToSell: 0,
+				money: 10
+			});
+
+			expect(decideNpcAction(ohneWerkstatt)).toBe('WORK');
+		});
+
+		it('lässt den Pächter mit Werkstatt bei seiner eigenen Arbeit', () => {
+			// Die Gegenprobe zu 5.30, die dieselbe Zeile schützt: Wer ernten und verarbeiten
+			// kann, verdingt sich nicht für Tagelohn — sonst ließe die Bäuerin Hof und
+			// Zimmerei liegen und richtete fremde Häuser her.
+			const mitWerkstatt = sparsam({
+				hasLease: true,
+				ownsWorkshop: true,
+				canCraft: false,
+				ownStockToSell: 0,
+				money: 10
+			});
+
+			expect(decideNpcAction(mitWerkstatt)).toBe('HARVEST');
+		});
 	});
 
 	describe('ausbauen, was steht', () => {

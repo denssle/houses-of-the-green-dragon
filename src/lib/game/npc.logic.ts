@@ -738,9 +738,29 @@ function entfaltung(state: NpcState): NpcAction | undefined {
  *
  * **Volljährig muss er sein**, denn nur dann kommt die Entfaltung überhaupt zum Zug — ein
  * Kind, dem man hier den Tagelohn nähme, stünde untätig da.
+ *
+ * **Ernten bringt nur Geld, wenn jemand die Ernte verarbeiten kann** (5.67). Die Pacht
+ * zählte hier für sich allein, und das war eine Behauptung über Einkommen, die die Ernte
+ * nicht einlöst: Sie bringt Holz, und Holz wird erst zu Geld, wenn es einer versägt oder
+ * verkauft. Wem die Werkstatt zur Ruine fiel, der hatte beides nicht — und war zugleich
+ * vom Tagelohn ausgeschlossen, **weil** er eine Pacht hatte.
+ *
+ * Im Messlauf war das ein Mann mit null Münzen, 3082 Stämmen im Hof und einem Sparziel
+ * von vierzig, das er nie erreichen konnte: Er erntete in 199 von 200 Runden auf einen
+ * Haufen, den niemand kaufen konnte. Die Diagnose meldete dazu `STILL_SAVING` — den
+ * gesunden Fall.
+ *
+ * Seit 5.67 kommt die Ernte über `ownStockToSell` auf den Markt, und damit **ist** die
+ * Pacht eines Werkstattlosen wieder Arbeit, die Geld bringt — aber erst, wenn er das
+ * Standgeld hat. Wer keines hat, muss zum Tagelohn zurückdürfen. Genau diese Lücke
+ * schließt die Bedingung hier: Sie prüft die Werkstatt, und der Verkauf steht ohnehin
+ * schon als eigener Fall daneben.
  */
 function hatEigeneArbeit(state: NpcState): boolean {
-	return state.isAdult && (state.ownStockToSell > 0 || state.canCraft || state.hasLease);
+	return (
+		state.isAdult &&
+		(state.ownStockToSell > 0 || state.canCraft || (state.hasLease && state.ownsWorkshop))
+	);
 }
 
 /**

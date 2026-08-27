@@ -30,6 +30,7 @@ import {
 	AGE_OF_MAJORITY,
 	ageInYears,
 	buildingCostFactor,
+	MAX_ACTION_POINTS,
 	type Season,
 	seasonOf,
 	yearsToTicks
@@ -999,6 +1000,20 @@ function marktplatzIn(haeuser: Haus[]): string | undefined {
  * - **Zutaten des eigenen Betriebs.** Sie sind kein Überschuss, sondern Vorprodukt; wer
  *   sie verkauft, steht morgen vor der leeren Werkbank.
  * - **Baumaterial**, solange ein Bau ansteht. Dasselbe Argument, nur für den Hausbau.
+ *
+ * **Und gezählt wird alles, was ihm gehört** (5.67) — Inventar wie Gebäudelager. Bis
+ * hierher las diese Stelle nur das Inventar, und damit war die Ernte unverkäuflich: Sie
+ * liegt seit 5.25 auf dem Hof. Was daraus wurde, stand im Messlauf als Zahl da — 3082
+ * Stämme in einem Hof, deren Besitzer keine Werkstatt mehr hatte und deshalb keinen
+ * einzigen davon zu Geld machen konnte.
+ *
+ * **Wie viel Zutat einer behält, sagt sein Kraftvorrat.** Eine Portion je Rezept wäre zu
+ * wenig — dann verkaufte ein Zimmermann sein Holz bis auf zwei Stämme und stünde nach
+ * einem Durchgang wieder ohne da. Der Deckel des Aktionsbudgets ist das ehrliche Maß:
+ * Mehr als `MAX_ACTION_POINTS` Durchgänge kann niemand hintereinander schaffen, ehe er
+ * warten muss. Was darüber hinaus im Lager liegt, kann er in absehbarer Zeit nicht
+ * verarbeiten — und Rohstoff, den man nicht verarbeitet, gehört auf den Markt, wo ihn
+ * einer braucht.
  */
 async function marktUeberschuss(
 	characterId: string,
@@ -1012,20 +1027,27 @@ async function marktUeberschuss(
 	}
 	if (werkstatt) {
 		for (const rezept of buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? []) {
+			// So viele Durchgänge, wie ein voller Kraftvorrat trägt — siehe oben.
+			const durchgaenge: number = Math.max(
+				1,
+				Math.floor(MAX_ACTION_POINTS / Math.max(1, rezept.actionPointCost))
+			);
 			for (const zutat of rezept.input) {
-				behalten.set(zutat.itemId, Math.max(behalten.get(zutat.itemId) ?? 0, zutat.quantity));
+				behalten.set(
+					zutat.itemId,
+					Math.max(behalten.get(zutat.itemId) ?? 0, zutat.quantity * durchgaenge)
+				);
 			}
 		}
 	}
 
-	for (const posten of await needService.getStock(characterId)) {
-		const vorlage = getItemTemplate(posten.itemId);
+	for (const [itemId, menge] of await tradeService.getOwnedStock(characterId)) {
+		const vorlage = getItemTemplate(itemId);
 		if (!vorlage) continue;
 
-		const noetig: number =
-			(behalten.get(posten.itemId) ?? 0) + (vorlage.nourishment ? EIGENER_VORRAT : 0);
-		const uebrig: number = posten.quantity - noetig;
-		if (uebrig > 0) return { itemId: posten.itemId, quantity: uebrig };
+		const noetig: number = (behalten.get(itemId) ?? 0) + (vorlage.nourishment ? EIGENER_VORRAT : 0);
+		const uebrig: number = menge - noetig;
+		if (uebrig > 0) return { itemId, quantity: uebrig };
 	}
 	return undefined;
 }

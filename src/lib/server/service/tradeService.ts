@@ -274,9 +274,22 @@ export async function placeOffer(
 		const verkaeufer = await characterService.loadForAction(sellerId, tick, t);
 		if (!verkaeufer) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
+		// **Am Markt verkauft einer aus allem, was ihm gehört** (5.67) — im eigenen Laden
+		// nur aus dessen Lager.
+		//
+		// Der Unterschied ist keine Willkür: Ein Laden verkauft, was in ihm liegt; ein
+		// Marktstand verkauft, was sein Betreiber herbeischafft. Bis hierher stand für den
+		// Stand das **Inventar**, und das war die halbe Regel von 5.25: Besitz zählt aus
+		// Inventar und allen Häusern, wenn er verbraucht (`consumeOwned`) oder verarbeitet
+		// (`getOwnedStock`) wird — nur beim Verkaufen zählte er nicht.
+		//
+		// Was daraus wurde, stand im Messlauf: 3082 Stämme im Hof eines Mannes ohne
+		// Werkstatt, für den Markt unsichtbar, ohne jeden Ausgang. Rohstoff, der nur noch
+		// als Zutat der eigenen Werkstatt aus dem Lager kam — und wessen Werkstatt zur
+		// Ruine fiel, dessen Ernte war für immer tot.
 		const vorrat: number =
 			art === 'MARKET'
-				? ((await needService.getStock(sellerId)).find((p) => p.itemId === itemId)?.quantity ?? 0)
+				? ((await getOwnedStock(sellerId)).get(itemId) ?? 0)
 				: ((await getBuildingStock(buildingId)).find((p) => p.itemId === itemId)?.quantity ?? 0);
 
 		// **Gleiche Ware, gleicher Preis, gleicher Ort: aufstocken statt danebenhängen.**
@@ -313,7 +326,18 @@ export async function placeOffer(
 		if (!geplant.ok) return geplant;
 
 		if (art === 'MARKET') {
-			await needService.changeStock(sellerId, itemId, -quantity, t);
+			// `consumeOwned` nimmt das Inventar zuerst und die Häuser danach — so bleibt am
+			// Ende in den Lagern liegen, was ohnehin dort hingehört.
+			//
+			// **Der Rückweg ist enger als der Hinweg**, und das sei benannt: `withdrawOffer`
+			// legt ein zurückgezogenes Marktangebot ins Inventar, nicht dorthin, wo die Ware
+			// herkam. Wer zweitausend Stämme aus dem Hof anbietet, bekommt sie nicht in die
+			// Kammer zurück — das Schild bleibt dann hängen (`INVENTORY_FULL`, 5.33). Das
+			// ist die mildere Hälfte des Tauschs: Vorher war die Ware gar nicht erst
+			// verkäuflich.
+			if (!(await consumeOwned(sellerId, itemId, quantity, t))) {
+				return { ok: false, reason: 'NOT_IN_STOCK' } as const;
+			}
 		} else {
 			await changeBuildingStock(buildingId, itemId, -quantity, t);
 		}
