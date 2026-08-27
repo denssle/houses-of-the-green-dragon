@@ -1,4 +1,5 @@
 import type { Handle } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
 import { base } from '$app/paths';
 import * as userService from '$lib/server/service/userService';
 import type { User } from '$lib/model/user';
@@ -35,7 +36,25 @@ const noAuthURLs: string[] = [
 	'/regeln'
 ];
 
-export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
+/**
+ * „A man is not dead while his name is still spoken.“ — Terry Pratchett († 2015).
+ *
+ * In der Scheibenwelt hält der Signalcode GNU einen Namen in den Klackertürmen im Umlauf,
+ * statt ihn zuzustellen; im Netz macht das dieser Kopf. Er wird von niemandem ausgewertet
+ * und ändert an keiner Antwort etwas — er fährt einfach mit.
+ * Siehe https://gnuterrypratchett.com/
+ *
+ * Steht als eigener Haken **vor** der Anmeldeprüfung: So trägt ihn jede Antwort, auch die
+ * selbst gebaute 303 auf die Anmeldeseite, an der `event.setHeaders()` vorbeiginge.
+ * Statische Dateien bedient adapter-node an den Haken vorbei — die bleiben ohne.
+ */
+const clacks: Handle = async ({ event, resolve }): Promise<Response> => {
+	const response: Response = await resolve(event);
+	response.headers.set('X-Clacks-Overhead', 'GNU Terry Pratchett');
+	return response;
+};
+
+const anmeldung: Handle = async ({ event, resolve }): Promise<Response> => {
 	// Die App läuft unter einem Base-Pfad (siehe svelte.config.js), und der Uberspace
 	// reicht ihn unverändert durch — `event.url.pathname` enthält ihn also. Einmal
 	// abschneiden, damit alle Vergleiche unten mit den route-eigenen Pfaden arbeiten
@@ -78,3 +97,5 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	// die Request-URL aufgelöst.
 	return new Response('Redirect', { status: 303, headers: { Location: `${base}/login` } });
 };
+
+export const handle: Handle = sequence(clacks, anmeldung);
