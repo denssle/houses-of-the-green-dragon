@@ -47,6 +47,8 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung   | Punkte 76, 16                | Entwurf      |
 | 91  | Der Takt ist nicht atomar — ein Fehler halbiert die Stunde                           | laufend                      | Befund       |
 | 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                   | Punkte 70, 40                | Befund       |
+| 93  | `GOAL_UNREACHABLE` deckt 85 % des Müßiggangs — Preisproblem oder zu grobe Diagnose   | dem nächsten Messlauf        | Befund       |
+| 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                       | Punkt 31                     | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -1855,11 +1857,24 @@ oberster Stufe.
 **Erledigt (4.14):** Wohnhäuser bauen (samt Grundstück und Material), renovieren, Lohn
 aushängen.
 
+**Erledigt (5.66):** Eine Stelle _annehmen_. Aushängen konnten sie es seit 4.14, aber
+`isWorthTaking` verlangte mit `>` einen Lohn über der Tagelöhnerei — und `TAGELOHN` ist der
+einzige Lohn, den je ein Aushang dieser Welt nennt. `TAKE_JOB` war damit toter Code, und
+kein NPC hatte je eine Anstellung.
+
 Offen bleibt:
 
-- **Ausbauen.** Die zweite Stufe eines Betriebs bringt mehr Ertrag und eine Stelle mehr —
-  ein NPC nimmt sie nie. Dasselbe beim Wohnhaus: Aus der Kate wird nie ein Haus, obwohl
-  genau das mehr Platz für Kinder schüfe.
+- ~~**Ausbauen.**~~ **Erledigt (5.29), nachgemessen am 27.08.2026:** Die Handlungen gibt
+  es, und der Betriebsausbau wird auch genommen — im Lauf über 1500 Ticks (Saat 86) hebt
+  Konrad seine Zimmerei zwischen Tick 900 und 1200 auf Stufe 2. Dass er in 600 Ticks nicht
+  vorkam, war eine Frage der Dauer und des Geldes, nicht der Erreichbarkeit: Der Ausbau
+  kostet 340 plus Rücklage, und so viel hat in dieser Stadt lange niemand. Das ist Punkt
+  76 und nicht dieser hier.
+
+  **Der Wohnhausausbau ist weiterhin nie vorgekommen.** Anderer Grund als vermutet: Er
+  verlangt `!homeHasRoom`, und eine Kate für vier füllt sich langsam. Ein Sackgassenverdacht
+  besteht nicht, geprüft ist es aber auch nicht.
+
 - **Kinder zur Schule schicken** (das ist Punkt 24 und gehört hierher).
 - ~~Sich um Ämter kümmern~~ **(4.15 erledigt):** Ein NPC-Bürgermeister bezahlt seine
   Wache, erhält die Bauten, errichtet was fehlt, weist Land aus und setzt den Zehnt.
@@ -2534,3 +2549,71 @@ sind es nicht:
 Lohnarbeit über das hinaus, was Essen und Instandhaltung kosten; oder ein Anteil der
 Punkte, der ungenutzt verfällt. „Erhalten ja, entscheiden nein" ist der richtige Satz — er
 sollte nur auch für den Geldbeutel gelten.
+
+### 93. `GOAL_UNREACHABLE` deckt 85 Prozent des Müßiggangs
+
+**Befund vom 27.08.2026.** In drei Messläufen über 1500 Ticks mit derselben Saat 86 steht
+die Diagnose fast unverändert hoch:
+
+| Stand                        | `GOAL_UNREACHABLE` | `NO_WORK` | `CONTENT` |
+| ---------------------------- | -----------------: | --------: | --------: |
+| 0.5.65                       |             15 279 |     1 702 |     1 242 |
+| 0.5.66 (Anstellungen)        |             15 466 |     1 400 |     1 257 |
+| 0.5.67 (Ernte auf den Markt) |             15 560 |     1 382 |     1 180 |
+
+Von rund 18 100 Müßiggangsrunden sind das durchweg **85 Prozent**, und keiner der beiden
+Eingriffe hat daran etwas geändert. Die Diagnose stammt aus 5.16 (Punkt 63) und sollte den
+seltenen, schweren Fall benennen: einer hat etwas vor, dessen Preis niemand nennt. Dass
+sie der Normalzustand ist, heißt eines von zweien — und beides wäre wichtig zu wissen.
+
+**Entweder die Stadt liefert wirklich nicht, was ihre Einwohner vorhaben.** Dann ist es
+der größte Balancing-Befund der Phase und gehört zu den Punkten 16 und 76.
+
+**Oder die Diagnose ist zu grob.** `idleReason` erkennt ein Vorhaben an
+
+```ts
+const willBauen: boolean =
+	(state.isMarried && !state.ownsHome && state.homePrice !== null) ||
+	(!state.ownsWorkshop && isEnterprising(state.personality));
+```
+
+und meldet `GOAL_UNREACHABLE`, sobald `savingsTarget` dazu `null` ergibt. Für den
+Unternehmenden ohne Werkstatt wird es aber schon dann `null`, wenn die Stadt **keine
+Werkstattlücke mehr hat** (`workshopPrice === null` — ein Betrieb je Handwerk, Punkt 89)
+oder **kein Bauland mehr frei ist** (`plotPrice === null`). Beides ist in einer gewachsenen
+Stadt der Normalfall. Ein Mann, der schlicht keinen Grund mehr hat, etwas anzufangen,
+steht damit in derselben Zeile wie einer, dem das Baumaterial fehlt — und die zweite Lage
+ist ein Notstand, die erste ein zufriedenes Leben.
+
+Der Kommentar an `IDLE_REASONS` warnt selbst davor: „Eine Diagnose, die von der
+Entscheidung abweicht, ist schlimmer als keine, weil man ihr glaubt."
+
+**Zu bauen ist zuerst eine Aufschlüsselung**, kein Eingriff: _welches_ Ziel unerreichbar
+ist — Haus, Grundstück, Material oder Werkstatt — und wie viele Köpfe hinter jedem stehen.
+Heute ist es eine einzige Zahl über alle. Erst danach lässt sich sagen, ob hier die Preise
+klemmen oder nur die Auskunft.
+
+### 94. Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück
+
+**Befund vom 27.08.2026, entstanden mit 5.67.** Seit die Ernte am Markt verkäuflich ist,
+kann ein Angebot aus einem **Gebäudelager** stammen — `placeOffer` nimmt die Ware über
+`consumeOwned` aus Inventar und Häusern. `withdrawOffer` legt sie aber immer ins
+**Inventar** zurück:
+
+```ts
+if (!(await needService.changeStock(sellerId, itemId, quantity, t))) {
+	return { ok: false, reason: 'INVENTORY_FULL' } as const;
+}
+```
+
+Wer zweitausend Stämme aus dem Hof anbietet, bekommt sie nicht in die Kammer zurück — das
+Schild bleibt hängen. Das Verhalten selbst ist richtig und seit 5.33 bewusst so (Ware
+verschwinden zu lassen wäre schlimmer), nur ist der Rückweg jetzt enger als der Hinweg.
+
+**Für NPCs belanglos** — sie ziehen nichts zurück. Für einen Spieler ist es eine
+Einschränkung, die er nicht kommen sieht.
+
+**Zu bauen wäre**, sich zu merken, woher die Ware kam, und sie dorthin zurückzulegen. Das
+ist eine Spalte am `ShopOffer` und ein Zweig in `withdrawOffer`. Solange Entfernungen
+nichts kosten, ist der Lagerort ohnehin eine Frage der Buchung; mit Punkt 31 (der Karte)
+wird daraus eine mit Gewicht, und dann gehört diese Stelle ohnehin angefasst.
