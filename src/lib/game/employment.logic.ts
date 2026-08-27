@@ -110,10 +110,40 @@ export function workShift(
 /**
  * Lohnt sich die Stelle gegenüber dem, was man ohne sie verdient?
  *
- * Die Frage, nach der ein NPC eine Anstellung sucht: Er nimmt sie, wenn sie mehr bringt
- * als die Tagelöhnerei in der städtischen Schmiede. Kein Verhandeln, kein Warten auf ein
- * besseres Angebot — ein Blick auf den Aushang.
+ * Die Frage, nach der ein NPC eine Anstellung sucht: Er nimmt sie, wenn sie mindestens so
+ * viel bringt wie die Tagelöhnerei in der städtischen Schmiede. Kein Verhandeln, kein
+ * Warten auf ein besseres Angebot — ein Blick auf den Aushang.
+ *
+ * **Bei gleichem Lohn zählt der Aushang, nicht das Mehr** (5.66). Bis hierher stand hier
+ * ein `>`, und das machte die ganze Handlung zu totem Code: `TAGELOHN` ist der einzige
+ * Lohn, den in dieser Welt je ein Aushang nennt — der Handwerker, der Leute sucht, bietet
+ * ihn, und der Bürgermeister zahlt ihn seiner Wache. Drei ist nicht größer als drei, also
+ * war `betterJobAvailable` immer falsch, `TAKE_JOB` fiel nie, und kein NPC hatte je eine
+ * Stelle. In einem Messlauf über 1500 Ticks: ein ausgehängtes Angebot, null Bewerbungen.
+ *
+ * Die Absicht stand daneben schon geschrieben — `TAGELOHN` ist als die Zahl beschrieben,
+ * unter der niemand jemanden fände, und der Handwerker bietet sie, weil mehr „großzügig
+ * auf Kosten des eigenen Ertrags" wäre. Beides setzt voraus, dass gleicher Lohn genügt.
+ * Die Prüfung verlangte mehr; sie war der Fehler, nicht die Höhe des Aushangs.
+ *
+ * **Der Gleichstand ist kein Gleichstand.** Wer angestellt ist, arbeitet im Betrieb: Sein
+ * Lohn kommt aus dessen Kasse, sein Ertrag bleibt dort — und deshalb stellt jemand
+ * überhaupt jemanden ein. Der Tagelöhner richtet dafür fremde Häuser her. Bei derselben
+ * Zahl auf dem Zettel ist die Stelle die Arbeit, die etwas aufbaut.
+ *
+ * **Womit sie erkauft ist:** Der Angestellte hängt an der Kasse seines Chefs. Ist die
+ * leer, geht er leer aus (`EMPLOYER_BROKE`), während die Stadtkasse noch gezahlt hätte —
+ * und hier steht keine Prüfung auf die Zahlungskraft des Betriebs. Gemessen wurde das
+ * Gegenteil des Befürchteten: Vorher scheiterten 228 Schichten an `EMPLOYER_BROKE`,
+ * nachher keine einzige. Die leere Kasse war nie die eines Meisters, sondern die der
+ * Stadt — weil jeder ohne Stelle in die öffentliche Instandsetzung ging und sie leer
+ * arbeitete. Die Stadtkasse steht am Ende bei 574 statt bei 309.
+ *
+ * Die Prüfung gehört trotzdem hierher, sobald ein Betrieb einen Angestellten wirklich
+ * über längere Zeit trägt. Denn genau das ist der neue Befund: Am Hof häuften sich 3082
+ * Stämme, die niemand mehr versägte (`HARVEST` 208 → 647, `CRAFT` 608 → 512). Wer Leute
+ * hat, erntet — verarbeiten muss er weiterhin selbst.
  */
 export function isWorthTaking(offeredWage: number, fallbackWage: number): boolean {
-	return offeredWage > fallbackWage;
+	return offeredWage >= fallbackWage;
 }

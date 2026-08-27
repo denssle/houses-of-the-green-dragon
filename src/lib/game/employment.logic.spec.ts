@@ -157,7 +157,14 @@ describe('Anstellung', () => {
 	describe('ob sich die Stelle lohnt', () => {
 		it('vergleicht mit der Tagelöhnerei', () => {
 			expect(isWorthTaking(5, 3)).toBe(true);
-			expect(isWorthTaking(3, 3)).toBe(false);
+			expect(isWorthTaking(2, 3)).toBe(false);
+		});
+
+		it('nimmt die Stelle auch bei gleichem Lohn', () => {
+			// **Der Fall, an dem alles hing** (5.66): `TAGELOHN` ist der einzige Lohn, den
+			// je ein Aushang dieser Welt nennt. Verlangte die Prüfung mehr, gäbe es keine
+			// Anstellung — und die Zeile darunter wäre die einzige, die je zuträfe.
+			expect(isWorthTaking(3, 3)).toBe(true);
 		});
 	});
 });
