@@ -47,9 +47,12 @@ Gleichgewicht: Ein Betrieb entsteht nur dort, wo jemand alles Darunterliegende g
 hat und obendrein die Neigung dazu mitbringt. Innerhalb einer Stufe entscheidet die
 Persönlichkeit, ob und wie früh — nicht, was zuerst kommt.
 
-Was noch fehlt: NPCs stellen niemanden ein, bauen ihre Betriebe nicht aus und errichten
-keine Wohnhäuser für ihre Familien — obwohl gerade Wohnraum der Engpass der Bevölkerung
-ist.
+Errichtet, eingestellt und ausgebaut wird inzwischen auch: `BUILD_HOME`, `OFFER_JOB` und
+`UPGRADE_WORKSHOP` sind seit 4.14 und 5.29 gebaut und fallen in den Messläufen. Nur fallen
+sie **selten** — zwölf Wohnhäuser, zwei Anstellungen und zwei Ausbauten in vierzig
+Spieljahren. Was fehlt, ist damit nicht mehr die Handlung, sondern das Geld und der Platz
+dafür: die Stadtkasse, aus der kein Bauland mehr erschlossen wird (Punkt 96), und ein
+Kapitalstock, der schneller verfällt, als er nachwächst (Punkt 98).
 
 **Wer lange nicht hereinschaut, dessen Charakter lebt weiter — von selbst.** Bleibt ein
 Spieler über eine gewisse Zeit weg, übernimmt dieselbe Bedürfnishierarchie, die die NPCs

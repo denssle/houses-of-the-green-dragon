@@ -9,10 +9,9 @@ import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import { seededRoll } from '$lib/game/testRoll';
 import type { IdleReason, NpcAction } from '$lib/game/npc.logic';
-import * as npcService from '$lib/server/service/npcService';
 import * as needService from '$lib/server/service/needService';
-import * as migrationService from '$lib/server/service/migrationService';
 import * as buildingService from '$lib/server/service/buildingService';
+import { tickWorld } from '$lib/server/worldTick';
 
 /**
  * Eine Welt laufen lassen und aufschreiben, was passiert.
@@ -45,8 +44,8 @@ export interface MeasureOptions {
 	 * danach zeigte etwas anderes als der davor, und niemand konnte sagen, wieviel davon
 	 * die Änderung war.
 	 *
-	 * Gewürfelt wird an zwei Stellen — beim Weltaufbau und beim Zuzug. Beide bekommen
-	 * **denselben** Würfel, damit ein Lauf als Ganzes wiederholbar ist.
+	 * Gewürfelt wird beim Weltaufbau und überall im Takt — Geburt, Tod, Zuzug, Unglück.
+	 * Alle bekommen **denselben** Würfel, damit ein Lauf als Ganzes wiederholbar ist.
 	 *
 	 * Der freie Wurf bleibt der Standard: Ob die Welt auch bei anderen Ausgangslagen lebt,
 	 * beantwortet kein fester Startwert. Wer vergleichen will, setzt einen.
@@ -83,22 +82,36 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	const handlungen: Partial<Record<NpcAction, number>> = {};
 	const fehlschlaege: Record<string, number> = {};
 	const muessiggang: Partial<Record<IdleReason, number>> = {};
+	const chronik = { geburten: 0, tode: 0, zuzug: 0, braende: 0, steuer: 0, ausgefallen: 0 };
 
 	const start: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
 	const begonnen: number = Date.now();
 
 	for (let i = 0; i < ticks; i++) {
-		const lauf = await npcService.actForNpcs(start + i);
-		await migrationService.admitNewcomers(stadtId, start + i, wuerfel);
-		for (const [was, wieoft] of Object.entries(lauf.byAction)) {
+		// **Der volle Takt, nicht der halbe** (5.69). Bis hierher rief diese Schleife
+		// `actForNpcs` und `admitNewcomers` und sonst nichts — kein Geborenwerden, kein
+		// Sterben, keine Wahl, kein Bürgermeister, keine Grundsteuer, kein Unglück. Der
+		// Bericht beschrieb damit eine Stadt, die es nirgends gibt: ohne Nachwuchs und mit
+		// einer Kasse, die nur ausgab. Siehe Punkt 95.
+		const stunde = await tickWorld(start + i, { roll: wuerfel, regionId: stadtId });
+
+		for (const [was, wieoft] of Object.entries(stunde.npcs.byAction)) {
 			handlungen[was as NpcAction] = (handlungen[was as NpcAction] ?? 0) + wieoft;
 		}
-		for (const [was, wieoft] of Object.entries(lauf.byFailure)) {
+		for (const [was, wieoft] of Object.entries(stunde.npcs.byFailure)) {
 			fehlschlaege[was] = (fehlschlaege[was] ?? 0) + wieoft;
 		}
-		for (const [was, wieoft] of Object.entries(lauf.byIdleReason)) {
+		for (const [was, wieoft] of Object.entries(stunde.npcs.byIdleReason)) {
 			muessiggang[was as IdleReason] = (muessiggang[was as IdleReason] ?? 0) + wieoft;
 		}
+
+		chronik.geburten += stunde.family.births.length;
+		chronik.tode += stunde.deaths.length;
+		if (stunde.arrival) chronik.zuzug++;
+		if (stunde.hazard) chronik.braende++;
+		chronik.steuer += stunde.tax?.collected ?? 0;
+		chronik.ausgefallen += stunde.tax?.shortfall ?? 0;
+
 		await World.update({ currentTick: start + i + 1 }, { where: { id: WORLD_ID } });
 
 		if ((i + 1) % every === 0) {
@@ -107,7 +120,8 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 			zeilen.push(
 				`--- Tick ${i + 1}: ${haeuser.length} Häuser, ${await ShopOffer.count()} Angebote, ` +
 					`Geld bei Leuten ${await geldmenge()}, Stadtkasse ${kasse}, ` +
-					`${await Character.count({ where: { deathTick: null } })} Lebende`
+					`${await Character.count({ where: { deathTick: null } })} Lebende ` +
+					`(${chronik.geburten} geboren, ${chronik.tode} gestorben, ${chronik.zuzug} zugezogen)`
 			);
 			zeilen.push(
 				`    ${haeuser
@@ -123,8 +137,13 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 
 	zeilen.push(
 		'',
-		`=== HANDLUNGEN (${ticks} Ticks, ${Date.now() - begonnen} ms, ` +
-			`Saat ${saat === undefined ? 'frei gewürfelt' : saat}) ===`
+		`=== DIE STADT (${ticks} Ticks, ${Date.now() - begonnen} ms, ` +
+			`Saat ${saat === undefined ? 'frei gewürfelt' : saat}) ===`,
+		`  Geburten ${chronik.geburten}, Tode ${chronik.tode}, Zuzug ${chronik.zuzug}, ` +
+			`Brände ${chronik.braende}`,
+		`  Grundsteuer eingenommen ${chronik.steuer}, nicht eintreibbar ${chronik.ausgefallen}`,
+		'',
+		'=== HANDLUNGEN ==='
 	);
 	zeilen.push(...verteilung(handlungen as Record<string, number>));
 

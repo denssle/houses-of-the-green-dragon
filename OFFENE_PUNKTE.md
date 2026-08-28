@@ -49,6 +49,10 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                   | Punkte 70, 40                | Befund       |
 | 93  | `GOAL_UNREACHABLE` deckt 85 % des Müßiggangs — Preisproblem oder zu grobe Diagnose   | dem nächsten Messlauf        | Befund       |
 | 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                       | Punkt 31                     | Befund       |
+| 95  | Die Werkzeuge maßen einen anderen Takt als den, der läuft — **behoben mit 5.69**     | —                            | erledigt     |
+| 96  | Die Stadtkasse hat keine Einnahme, die ein NPC-Bürgermeister erhöhen kann            | Punkten 85, 86, 87           | Befund       |
+| 97  | `VOTE` scheitert zu 84 % an `NOT_A_CITIZEN` — Entschluss ohne Voraussetzung          | Punkt 49                     | Befund       |
+| 98  | Es verfällt mehr, als aufgebaut wird — 18 Brände gegen 5 Renovierungen               | dem nächsten Messlauf        | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2617,3 +2621,124 @@ Einschränkung, die er nicht kommen sieht.
 ist eine Spalte am `ShopOffer` und ein Zweig in `withdrawOffer`. Solange Entfernungen
 nichts kosten, ist der Lagerort ohnehin eine Frage der Buchung; mit Punkt 31 (der Karte)
 wird daraus eine mit Gewicht, und dann gehört diese Stelle ohnehin angefasst.
+
+### 95. Die Werkzeuge maßen einen anderen Takt als den, der läuft — behoben (5.69)
+
+**Befund vom 28.08.2026.** Die Frage „trägt sich die Welt selbst" wurde bis hierher mit
+vier Werkzeugen beantwortet, und keines davon kannte den Takt, den der Server schlägt.
+`schlagen()` rief zwölf Dinge; nachgebaut waren:
+
+| Werkzeug                        | rief                            |
+| ------------------------------- | ------------------------------- |
+| `measure.ts` (der Messlauf)     | `actForNpcs`, `admitNewcomers`  |
+| `worldComesAlive.spec.ts`       | `actForNpcs`                    |
+| `selfSustainingEconomy.spec.ts` | `actForNpcs`                    |
+| `selfSustaining.spec.ts`        | Geburt, `actForNpcs`, Wahl, Tod |
+
+Es fehlten je nach Werkzeug: Geburt, Tod, Zuzug, Wahl, Amtsführung, Instandhaltung,
+Versteigerung, Grundsteuer, Sold und Unglück. **Keines kannte die Stadtkasse.**
+
+**Was das kostet, ist gemessen.** Derselbe Lauf, dieselbe Saat 86, 2000 Ticks (vierzig
+Spieljahre), einmal mit dem NPC-Teil allein und einmal mit dem vollen Takt:
+
+|                        |   nur `actForNpcs` |                 voller Takt |
+| ---------------------- | -----------------: | --------------------------: |
+| Lebende am Ende        |                 25 |                          36 |
+| Geburten / Tode        |          **0 / 0** |                     22 / 15 |
+| Stadtkasse             |                778 |     **15**, fast durchweg 0 |
+| `WORK` gewählt         |               1016 |                        5637 |
+| davon `EMPLOYER_BROKE` |      **kein Fall** |           **4199 (74,5 %)** |
+| Brände                 |    nicht gewürfelt |                          18 |
+| Häuser am Ende         | 12, Zimmerei steht | 11, **Zimmerei abgebrannt** |
+
+Die Spalte „Woran es scheiterte" war im Messlauf **leer**. Im vollen Takt stehen dort
+4871 Fehlschläge. Der Bericht beschrieb also eine Stadt ohne Nachwuchs, ohne Alter und
+mit einer Kasse, die nur ausgab — und meldete sie als gesund.
+
+Damit sind die Befunde aus 76, 87 und 93 nicht falsch, aber **zu günstig**: Sie stammen
+aus der freundlicheren der beiden Welten. `GOAL_UNREACHABLE` etwa steht im vollen Takt bei
+91 Prozent des erwachsenen Müßiggangs statt bei 85.
+
+**Behoben mit 5.69.** Der Rumpf von `schlagen()` ist als `tickWorld(tick, { roll })` nach
+`src/lib/server/worldTick.ts` herausgezogen und gibt zurück, was geschehen ist; das
+Protokollieren bleibt im Ticker. Messlauf, `selfSustaining` und `worldComesAlive` laufen
+darauf. `selfSustainingEconomy` bewusst nicht — der Grund steht in seinem Kopf.
+
+**Was daran noch offen ist:** Punkt 91 (der Takt ist nicht atomar) hat jetzt die Stelle,
+an der ein `try/catch` je NPC hingehört — eine Datei, nicht fünf.
+
+### 96. Die Stadtkasse hat keine Einnahme, die ein NPC-Bürgermeister erhöhen kann
+
+**Befund vom 28.08.2026, aus dem ersten Lauf mit vollem Takt.** In vierzig Spieljahren
+wurde **keine einzige Münze Grundsteuer** eingezogen, und die Kasse stand die ganze Zeit
+auf null. Zwei Zeilen erklären es:
+
+```ts
+PROPERTY_TAX: { … fallback: 0, min: 0, max: 20 }   // law.logic.ts
+export const NPC_MAYOR_LAW: LawKind = 'TITHE';      // governance.logic.ts
+```
+
+Der Satz steht bei null, und das **einzige** Gesetz, das ein NPC im Amt je anfasst, ist
+der Zehnt. In einer Stadt ohne Spieler kann die Grundsteuer damit nie erhoben werden —
+nicht weil jemand sie abgeschafft hätte, sondern weil niemand da ist, der sie beschließen
+könnte. Dem gegenüber stehen der Sold von einer Münze **je Tick** und die
+Instandsetzungslöhne.
+
+**Daran hängt die halbe Welt**, und zwar in dieser Reihenfolge:
+
+- **Die Tagelöhnerei zahlt aus derselben leeren Kasse.** 4199 von 5637 gewählten Schichten
+  scheiterten an `EMPLOYER_BROKE` — die einzige verlässliche Einnahme der Einwohner fällt
+  zu drei Vierteln aus. Der Kommentar in `employment.logic.ts` hat die Ursache schon
+  richtig benannt („die leere Kasse war nie die eines Meisters, sondern die der Stadt");
+  gemessen wurde sie nie, weil das Werkzeug sie nicht kannte (Punkt 95).
+- **`DEVELOP_LAND` kostet Geld.** Eine leere Kasse weist kein Bauland aus, also bleibt es
+  bei den zwölf Parzellen des Weltaufbaus, also bleibt `BUY_PLOT` bei acht Käufen in
+  vierzig Jahren. **Das ist die Sperre, hinter der Punkt 86 zuletzt stand.**
+- **Und dahinter wartet die Brotkette.** Im Messlauf sitzen inzwischen drei zugezogene
+  Bäcker mit 187, 189 und 266 Münzen in der Stadt; das Backhaus kostet 220. Sie bauen
+  nicht, weil kein Grundstück frei ist. **Punkt 85 ist damit nicht mehr die bindende
+  Sperre** — der Kornspeicher unterbietet einen Bäcker, den es aus einem anderen Grund
+  nicht gibt.
+
+**Zu entscheiden ist, woher eine Stadt ohne Spieler ihr Geld nimmt.** Drei Wege, die sich
+nicht ausschließen: die Grundsteuer auf einen Satz über null stellen (dann trägt der
+Grundbesitz die Stadt, und der `fallback` ist eine Entscheidung statt einer Vorgabe); den
+NPC-Bürgermeister auch über sie beschließen lassen (dann ist es Politik, und ein Haushalt
+wird zum Wahlkampfthema); oder den Sold an die Kassenlage binden. Das erste ist eine Zahl,
+das zweite eine Erweiterung von `decideMayorAction`, das dritte eine Zeile in
+`payOfficeStipends`. Gehört zu den Punkten 16 und 32.
+
+### 97. `VOTE` scheitert zu 84 Prozent an `NOT_A_CITIZEN`
+
+**Befund vom 28.08.2026, aus demselben Lauf.** 796-mal entschied sich ein Einwohner zu
+wählen, 672-mal durfte er dann nicht: `VOTE/NOT_A_CITIZEN`. Im Messlauf war das nie zu
+sehen, weil dort keine Wahl stattfand (Punkt 95).
+
+Das ist derselbe Fehlertyp wie in den Punkten 59, 63 und 87: **Die Entscheidung prüft
+etwas anderes als die Ausführung.** Wer noch kein Bürgerrecht hat, soll die Wahl gar nicht
+erst als Vorhaben fassen — sonst verbrennt er den Tick und die Buchführung meldet eine
+Handlung, die keine war.
+
+**Zu bauen ist die Voraussetzung in `lageAufnehmen`** und ein Zweig in der Entscheidung,
+genau wie bei den übrigen Handlungen. Solange das offen ist, sind die
+`byAction`-Zahlen für `VOTE` unbrauchbar. Hängt an Punkt 49 (Bürgerrecht und Stand): Ob
+ein Zugezogener nach einiger Zeit von selbst Bürger wird, ist dort zu entscheiden — und
+solange er es nie wird, wählt in dieser Stadt auf Dauer nur, wer in ihr geboren ist.
+
+### 98. Es verfällt mehr, als aufgebaut wird
+
+**Befund vom 28.08.2026, aus demselben Lauf.** Über vierzig Spieljahre: 18 Brände, 12
+gebaute Wohnhäuser, 2 Bauten, **5 Renovierungen**. Die Zahl der Häuser schwankt zwischen
+elf und vierzehn und steht am Ende niedriger als in der Welt ohne Unglück — und die
+**einzige private Werkstatt der Stadt**, Alheids Zimmerei, ist als Ruine verschwunden und
+nicht ersetzt worden. `CRAFT` fällt dadurch von 595 auf 432, `HARVEST` von 607 auf 315.
+
+Ein Haus verfällt von selbst, ein Brand beschleunigt es, und beides trifft auf einen
+Einwohner, der von seinen Münzen zuerst Brot kauft. Renoviert wird deshalb fast nie.
+Damit ist der Kapitalstock dieser Welt **nicht stabil, sondern schrumpfend** — die Stadt
+lebt, aber sie zehrt.
+
+**Zu prüfen ist, welche der drei Zahlen es ist:** die Verfallsgeschwindigkeit, der
+Preis einer Renovierung, oder die Stelle der Instandhaltung in der Bedürfnishierarchie.
+Ein Wiederaufbau nach der Ruine fehlt ganz: Wer sein Haus verliert, hat kein Vorhaben, es
+neu zu errichten. Gehört zu Punkt 16 und, was die Werkstatt angeht, zu Punkt 89.

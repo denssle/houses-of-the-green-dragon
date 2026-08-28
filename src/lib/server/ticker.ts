@@ -1,16 +1,6 @@
 import * as worldService from '$lib/server/service/worldService';
-import * as familyService from '$lib/server/service/familyService';
-import * as lifecycleService from '$lib/server/service/lifecycleService';
-import * as auctionService from '$lib/server/service/auctionService';
-import * as buildingService from '$lib/server/service/buildingService';
-import * as electionService from '$lib/server/service/electionService';
-import * as hazardService from '$lib/server/service/hazardService';
-import * as lawService from '$lib/server/service/lawService';
-import * as mayorService from '$lib/server/service/mayorService';
-import * as migrationService from '$lib/server/service/migrationService';
-import * as npcService from '$lib/server/service/npcService';
+import { tickWorld, type WorldTick } from '$lib/server/worldTick';
 import { OFFICE_NAMES } from '$lib/game/election.logic';
-import { findStartRegionId } from '$lib/db/seed';
 
 /**
  * Der Herzschlag der Welt.
@@ -63,172 +53,126 @@ async function schlagen(): Promise<void> {
 			);
 		}
 
-		// Genau **ein** Wurf je Herzschlag, auch wenn die Uhr gerade über eine Ausfallzeit
+		// **Genau ein Wurf je Herzschlag**, auch wenn die Uhr gerade über eine Ausfallzeit
 		// gesprungen ist: Die übersprungenen Ticks haben für alles Handelnde nicht
 		// stattgefunden, und dazu gehört das Sterben. Sonst raffte ein Wochenendausfall
 		// beim Neustart eine halbe Generation dahin — für Spieler, die nicht zusehen
-		// konnten.
-		// Erst geboren werden, dann sterben. Andersherum käme ein Kind zur Welt, dessen
-		// Mutter im selben Herzschlag schon tot ist — möglich in der Wirklichkeit, aber
-		// hier nur verwirrend, weil beides im selben Log stünde.
-		const familie = await familyService.advanceFamilies(geschehen.currentTick);
-		for (const geburt of familie.births) {
-			console.info(`${geburt.name} ist zur Welt gekommen.`);
-		}
+		// konnten. Nur der Zuzug zählt die verstrichene Zeit mit (5.47), und deshalb
+		// bekommt der Takt sie mitgegeben.
+		const stunde = await tickWorld(geschehen.currentTick, { elapsedTicks: geschehen.ticks });
 
-		// Handeln vor dem Sterben: Wer noch ein Brot im Inventar hat, soll es essen
-		// duerfen, bevor der Wuerfel ueber ihn entscheidet. Andersherum verhungerten
-		// Leute mit vollem Vorrat.
-		const npcs = await npcService.actForNpcs(geschehen.currentTick);
-		if (npcs.acted > 0) {
-			console.info(`${npcs.acted} Einwohner haben gehandelt:`, npcs.byAction);
-		}
-
-		// **Und warum die übrigen nichts getan haben** (5.62).
-		//
-		// `idleReason` beantwortet das seit 4.17 je NPC und Tick, `actForNpcs` zählt es
-		// mit — und der Ticker warf es weg. Auf dem laufenden Server stand deshalb nur
-		// eine große Zahl neben `IDLE`, und ob dahinter Zufriedenheit steckte, ein leerer
-		// Aktionsvorrat oder ein Vorhaben, das niemand je erreichen kann, war von außen
-		// nicht zu unterscheiden. Genau das musste zuletzt aus der Chronik erschlossen
-		// werden, weil die Auskunft nirgends stand, obwohl sie berechnet wurde.
-		//
-		// Der Messlauf hatte sie längst (`measure.ts`), der Betrieb nicht. Ein Werkzeug,
-		// das nur in der Werkstatt liegt, hilft nicht dort, wo die Welt wirklich läuft.
-		if (Object.keys(npcs.byIdleReason).length > 0) {
-			console.info('Warum die anderen nichts taten:', npcs.byIdleReason);
-		}
-
-		// Was ein NPC beschlossen hat und dann doch nicht konnte. Meist leer — und wenn
-		// nicht, ist es der interessanteste Teil des Protokolls: Ein Entschluss, der jeden
-		// Tick aufs Neue scheitert, ist eine Schleife, die niemand sieht.
-		if (Object.keys(npcs.byFailure).length > 0) {
-			console.warn('Woran es scheiterte:', npcs.byFailure);
-		}
-
-		const stadtId: string = await findStartRegionId();
-
-		// **Wer von auswaerts kommt** (5.24, Punkt 71). Im Mittel einer alle zwei
-		// Spieljahre, und nur solange ein Bett frei ist — wer ankommt und nichts findet,
-		// zieht weiter. Er bringt ein Handwerk mit, das der Stadt fehlt, und das Geld, das
-		// er anderswo verdient hat.
-		// **Mit der Zeit, die dieser Schlag vorgerueckt ist** (5.47). Nach einem Neustart sind
-		// das mehrere Stunden; ohne sie fiele der Zuzug fuer die uebersprungene Zeit aus, und
-		// jeder Deploy kostete die Stadt Ankuenfte.
-		const zugezogen = await migrationService.admitNewcomers(
-			stadtId,
-			geschehen.currentTick,
-			Math.random,
-			geschehen.ticks
-		);
-		if (zugezogen) {
-			console.info(
-				`${zugezogen.name} ${zugezogen.house} ist angekommen — ` +
-					`${zugezogen.skill}, ${zugezogen.money} Muenzen.`
-			);
-		}
-
-		// Politik: eine Wahl ausrufen oder auszaehlen. Passiert alle fuenf Spieljahre und
-		// ist deshalb billig, auch wenn es hier in der Schleife steht.
-		const wahl = await electionService.advanceElections(stadtId, geschehen.currentTick);
-		if (wahl.opened) {
-			console.info('Eine Wahl ist ausgerufen.');
-			await electionService.npcsStandForElection(stadtId, geschehen.currentTick);
-		}
-		if (wahl.closed) {
-			console.info(
-				`Wahl ausgezaehlt: ${wahl.closed.votes} Stimmen auf ${wahl.closed.candidates} Kandidaten.`
-			);
-		}
-
-		// Ein NPC im Amt laesst herrichten, was verfaellt. Ohne das verrottete jede Stadt,
-		// in der gerade kein Spieler regiert — und das ist der Normalfall.
-		const gepflegt = await buildingService.maintainAsNpcMayor(stadtId);
-		if (gepflegt) {
-			console.info(
-				`Der Buergermeister liess ${gepflegt.building} herrichten (${gepflegt.spent} Muenzen).`
-			);
-		}
-
-		// Was der Stadt aus erbenlosen Nachlaessen zugefallen ist, kommt unter den Hammer
-		// (Punkt 79) — im Takt und nicht als Amtshandlung: „So bald wie moeglich" darf nicht
-		// daran haengen, dass gerade jemand im Amt ist.
-		const heimgefallen = await auctionService.auctionEscheatedEstates(
-			stadtId,
-			geschehen.currentTick
-		);
-		if (heimgefallen > 0) {
-			console.info(`${heimgefallen} heimgefallene Anwesen sind ausgeboten.`);
-		}
-
-		// Faellige Versteigerungen zuschlagen. Wie die Wahl selten und deshalb billig.
-		const auktionen = await auctionService.advanceAuctions(stadtId, geschehen.currentTick);
-		if (auktionen.closed > 0) {
-			console.info(
-				`${auktionen.closed} Versteigerungen beendet, ${auktionen.awarded} mit Zuschlag.`
-			);
-		}
-
-		// Und er fuehrt sein Amt: Wache bezahlen, bauen, Land ausweisen, Steuern setzen.
-		// Hoechstens eine Handlung je Tick — ein Buergermeister, der in derselben Stunde
-		// alles taete, waere kein Amtsinhaber, sondern ein Automat.
-		const regiert = await mayorService.governAsNpcMayor(stadtId, geschehen.currentTick);
-		if (regiert) {
-			console.info(
-				`Amtshandlung: ${regiert.action}` +
-					(regiert.detail ? ` (${regiert.detail})` : '') +
-					(regiert.value !== undefined ? ` — ${regiert.value}` : '')
-			);
-		}
-
-		// Die Grundsteuer ist die einzige Abgabe, die an der Zeit haengt statt an einer
-		// Handlung — deshalb braucht sie als einzige einen Durchlauf. Einmal im Spieljahr.
-		const steuer = await lawService.collectPropertyTax(stadtId, geschehen.currentTick);
-		if (steuer) {
-			console.info(
-				`Grundsteuer: ${steuer.collected} Muenzen von ${steuer.payers} Besitzern` +
-					(steuer.shortfall > 0 ? `, ${steuer.shortfall} nicht eintreibbar.` : '.')
-			);
-		}
-
-		// Und was die Stadt ihrerseits schuldet: den Sold ihrer Amtsinhaber. Nach der
-		// Steuer, weil sich die Kasse erst fuellt und dann zahlt — bei knapper Kasse faellt
-		// er aus, statt Schulden zu machen.
-		for (const sold of await lawService.payOfficeStipends(stadtId)) {
-			if (sold.paid > 0) {
-				console.info(
-					`${OFFICE_NAMES[sold.office]} ${sold.name}: ${sold.paid} Muenzen Aufwandsentschaedigung` +
-						(sold.shortfall > 0 ? ` (${sold.shortfall} blieb die Kasse schuldig).` : '.')
-				);
-			} else {
-				console.info(
-					`Die Stadtkasse konnte ${OFFICE_NAMES[sold.office]} ${sold.name} nicht bezahlen.`
-				);
-			}
-		}
-
-		// Unglueck: hoechstens eins je Herzschlag. Vor dem Sterben, damit ein Brand noch in
-		// die Chronik kommt, ehe sein Opfer stirbt — und nach dem Handeln, damit niemandem
-		// die Werkstatt abbrennt, in der er in derselben Stunde noch arbeiten wollte.
-		const unglueck = await hazardService.strike(stadtId, geschehen.currentTick);
-		if (unglueck) {
-			console.info(`Brand in ${unglueck.what} — Zustand um ${unglueck.value} gefallen.`);
-		}
-
-		for (const fall of await lifecycleService.reapTheDead(geschehen.currentTick)) {
-			console.info(
-				`${fall.name} ist mit ${fall.age} Jahren gestorben` +
-					(fall.extinctDynastyId
-						? ' — ohne Erben. Das Haus ist erloschen.'
-						: fall.heirId
-							? `. Erbe: ${fall.heirId}.`
-							: '.')
-			);
-		}
+		// **Und was in dieser Stunde geschehen ist, kommt ins Log.** Das Erzählen gehört
+		// hierher und nicht in den Takt (5.69): Derselbe Takt läuft im Messlauf und in den
+		// Tests, und dort wäre jede dieser Zeilen Lärm.
+		berichten(stunde);
 	} catch (error) {
 		// Ein gescheiterter Takt darf den Server nicht mitnehmen: Der nächste Durchlauf
 		// holt dieselbe Zeit nach, weil sich alles aus `lastTickAt` ergibt und nicht aus
 		// der Zahl der Versuche.
 		console.error('Die Weltzeit ließ sich nicht weiterstellen:', error);
+	}
+}
+
+/** Eine Stunde Grünau, in Zeilen. */
+function berichten(stunde: WorldTick): void {
+	for (const geburt of stunde.family.births) {
+		console.info(`${geburt.name} ist zur Welt gekommen.`);
+	}
+
+	if (stunde.npcs.acted > 0) {
+		console.info(`${stunde.npcs.acted} Einwohner haben gehandelt:`, stunde.npcs.byAction);
+	}
+
+	// **Und warum die übrigen nichts getan haben** (5.62).
+	//
+	// `idleReason` beantwortet das seit 4.17 je NPC und Tick, `actForNpcs` zählt es mit —
+	// und der Ticker warf es weg. Auf dem laufenden Server stand deshalb nur eine große
+	// Zahl neben `IDLE`, und ob dahinter Zufriedenheit steckte, ein leerer Aktionsvorrat
+	// oder ein Vorhaben, das niemand je erreichen kann, war von außen nicht zu
+	// unterscheiden.
+	if (Object.keys(stunde.npcs.byIdleReason).length > 0) {
+		console.info('Warum die anderen nichts taten:', stunde.npcs.byIdleReason);
+	}
+
+	// Was ein NPC beschlossen hat und dann doch nicht konnte. Meist leer — und wenn nicht,
+	// ist es der interessanteste Teil des Protokolls: Ein Entschluss, der jeden Tick aufs
+	// Neue scheitert, ist eine Schleife, die niemand sieht.
+	if (Object.keys(stunde.npcs.byFailure).length > 0) {
+		console.warn('Woran es scheiterte:', stunde.npcs.byFailure);
+	}
+
+	if (stunde.arrival) {
+		console.info(
+			`${stunde.arrival.name} ${stunde.arrival.house} ist angekommen — ` +
+				`${stunde.arrival.skill}, ${stunde.arrival.money} Muenzen.`
+		);
+	}
+
+	if (stunde.election.opened) console.info('Eine Wahl ist ausgerufen.');
+	if (stunde.election.closed) {
+		console.info(
+			`Wahl ausgezaehlt: ${stunde.election.closed.votes} Stimmen auf ` +
+				`${stunde.election.closed.candidates} Kandidaten.`
+		);
+	}
+
+	if (stunde.maintained) {
+		console.info(
+			`Der Buergermeister liess ${stunde.maintained.building} herrichten ` +
+				`(${stunde.maintained.spent} Muenzen).`
+		);
+	}
+
+	if (stunde.escheated > 0) {
+		console.info(`${stunde.escheated} heimgefallene Anwesen sind ausgeboten.`);
+	}
+
+	if (stunde.auctions.closed > 0) {
+		console.info(
+			`${stunde.auctions.closed} Versteigerungen beendet, ${stunde.auctions.awarded} mit Zuschlag.`
+		);
+	}
+
+	if (stunde.governed) {
+		console.info(
+			`Amtshandlung: ${stunde.governed.action}` +
+				(stunde.governed.detail ? ` (${stunde.governed.detail})` : '') +
+				(stunde.governed.value !== undefined ? ` — ${stunde.governed.value}` : '')
+		);
+	}
+
+	if (stunde.tax) {
+		console.info(
+			`Grundsteuer: ${stunde.tax.collected} Muenzen von ${stunde.tax.payers} Besitzern` +
+				(stunde.tax.shortfall > 0 ? `, ${stunde.tax.shortfall} nicht eintreibbar.` : '.')
+		);
+	}
+
+	for (const sold of stunde.stipends) {
+		if (sold.paid > 0) {
+			console.info(
+				`${OFFICE_NAMES[sold.office]} ${sold.name}: ${sold.paid} Muenzen Aufwandsentschaedigung` +
+					(sold.shortfall > 0 ? ` (${sold.shortfall} blieb die Kasse schuldig).` : '.')
+			);
+		} else {
+			console.info(
+				`Die Stadtkasse konnte ${OFFICE_NAMES[sold.office]} ${sold.name} nicht bezahlen.`
+			);
+		}
+	}
+
+	if (stunde.hazard) {
+		console.info(`Brand in ${stunde.hazard.what} — Zustand um ${stunde.hazard.value} gefallen.`);
+	}
+
+	for (const fall of stunde.deaths) {
+		console.info(
+			`${fall.name} ist mit ${fall.age} Jahren gestorben` +
+				(fall.extinctDynastyId
+					? ' — ohne Erben. Das Haus ist erloschen.'
+					: fall.heirId
+						? `. Erbe: ${fall.heirId}.`
+						: '.')
+		);
 	}
 }

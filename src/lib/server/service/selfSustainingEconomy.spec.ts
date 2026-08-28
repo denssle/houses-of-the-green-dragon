@@ -20,6 +20,13 @@ import * as npcService from '$lib/server/service/npcService';
  * können sie selbst unternehmen — Grundstück kaufen, Werkstatt bauen, pachten, ernten,
  * herstellen, verkaufen.
  *
+ * **Warum hier kein `tickWorld` steht** (5.69). Die übrigen Selbsterhaltungs-Werkzeuge
+ * laufen seit 5.69 im vollen Takt; diese beiden Blöcke bewusst nicht. Sie bauen eine
+ * Ausgangslage von Hand — Geld, Ehrgeiz, Ehen, eine volle Unterkunft — und fragen über
+ * zwanzig Ticks eine einzelne Entscheidung ab. Geburt, Tod und Unglück brächten dieser
+ * Frage nichts und ihrem Ergebnis einen Würfel mehr. Was die Welt aus eigener Kraft tut,
+ * beantworten `worldComesAlive.spec.ts` und der Messlauf.
+ *
  * **Eine eigene Datei, keine zweite Beschreibung in `selfSustaining.spec.ts`.** Beide
  * teilten sich sonst dieselbe Datenbank: Der zweite Block erbte eine Welt, die schon fünf
  * Jahre gelaufen war — mit alten, verheirateten, mittellosen Einwohnern. Der Test schlug

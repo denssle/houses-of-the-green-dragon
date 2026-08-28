@@ -14,12 +14,18 @@ import { measure } from '$lib/server/simulation/measure';
  */
 
 describe('Das Messwerkzeug', () => {
-	it('berichtet Handlungen, Müßiggangsgründe und Fehlschläge', async () => {
+	it('berichtet Stadt, Handlungen, Müßiggangsgründe und Fehlschläge', async () => {
 		const bericht = await measure({ ticks: 5, every: 5 });
 		const text: string = bericht.lines.join('\n');
 
 		// Ohne Abschluss geprüft: Die Überschrift trägt Tickzahl und Dauer im Titel.
-		expect(text).toContain('=== HANDLUNGEN (');
+		expect(text).toContain('=== DIE STADT (');
+		expect(text).toContain('=== HANDLUNGEN ===');
+		// **Was der volle Takt mitbringt** (5.69): Geburt, Tod, Zuzug, Unglück und die
+		// Grundsteuer. Solange der Messlauf nur `actForNpcs` rief, stand keine dieser Zahlen
+		// im Bericht — und die Kasse, an der die halbe Stadt hängt, kam darin nicht vor.
+		expect(text).toContain('Geburten ');
+		expect(text).toContain('Grundsteuer eingenommen ');
 		// Der eigentliche Grund für das Werkzeug: `IDLE` ohne Aufschlüsselung sagt nichts.
 		expect(text).toContain('=== WARUM MÜSSIGGANG ===');
 		expect(text).toContain('=== WORAN ES SCHEITERTE ===');

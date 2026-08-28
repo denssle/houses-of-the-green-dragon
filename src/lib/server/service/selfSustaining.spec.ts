@@ -9,9 +9,7 @@ import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import { seededRoll } from '$lib/game/testRoll';
 import * as electionService from '$lib/server/service/electionService';
 import * as buildingService from '$lib/server/service/buildingService';
-import * as familyService from '$lib/server/service/familyService';
-import * as lifecycleService from '$lib/server/service/lifecycleService';
-import * as npcService from '$lib/server/service/npcService';
+import { tickWorld } from '$lib/server/worldTick';
 import { satietyOf } from '$lib/server/service/needService';
 import { AGE_OF_MAJORITY, ageInYears, TICKS_PER_YEAR } from '$lib/game/time';
 import { FERTILE_TO_AGE } from '$lib/game/family.logic';
@@ -40,21 +38,22 @@ function gesteuerterZufall(saat: number): () => number {
 	};
 }
 
-/** Lässt die Welt so viele Ticks laufen, wie der Takt es täte. */
+/**
+ * Lässt die Welt so viele Ticks laufen, wie der Takt es täte.
+ *
+ * **Und zwar wirklich derselbe Takt** (5.69). Bis hierher stand hier ein Nachbau —
+ * Geburt, Handeln, Wahl, Tod —, dem Zuzug, Bürgermeister, Grundsteuer, Sold, Unglück und
+ * Versteigerung fehlten. Ein Test auf die Selbsterhaltung, der die Stadtkasse nicht kennt,
+ * prüft die Welt nicht: Genau dort reißt sie (Punkt 96).
+ */
 async function weltLaufenLassen(ticks: number, wuerfel: () => number): Promise<void> {
 	let jetzt: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
+	const stadtId: string = await findStartRegionId();
 
 	for (let i = 0; i < ticks; i++) {
 		jetzt += 1;
 		await World.update({ currentTick: jetzt }, { where: { id: WORLD_ID } });
-
-		// Dieselbe Reihenfolge wie im Takt: geboren werden, handeln, sterben.
-		await familyService.advanceFamilies(jetzt, wuerfel);
-		await npcService.actForNpcs(jetzt);
-		const stadtId: string = await findStartRegionId();
-		const wahl = await electionService.advanceElections(stadtId, jetzt);
-		if (wahl.opened) await electionService.npcsStandForElection(stadtId, jetzt);
-		await lifecycleService.reapTheDead(jetzt, wuerfel);
+		await tickWorld(jetzt, { roll: wuerfel, regionId: stadtId });
 	}
 }
 

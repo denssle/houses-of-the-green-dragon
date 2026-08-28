@@ -6,9 +6,10 @@ import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
-import { seedWorld } from '$lib/db/seed';
+import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import { seededRoll } from '$lib/game/testRoll';
-import * as npcService from '$lib/server/service/npcService';
+import { tickWorld } from '$lib/server/worldTick';
+import { satietyOf } from '$lib/server/service/needService';
 import type { NpcAction } from '$lib/game/npc.logic';
 
 /**
@@ -51,10 +52,15 @@ describe('Die Welt aus eigener Kraft', () => {
 		// ein Messlauf (`measure`), der weiter frei würfelt.
 		await seedWorld(seededRoll(96));
 
+		// **Der volle Takt** (5.69): derselbe Würfel wie oben, damit der Lauf wiederholbar
+		// bleibt. Vorher lief hier `actForNpcs` allein — eine Stadt ohne Geburt, ohne Tod
+		// und ohne Stadtkasse, und damit nicht die, die „auf dem Server 96 Jahre lang lief".
+		const wuerfel: () => number = seededRoll(96);
+		const stadtId: string = await findStartRegionId();
 		const start: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
 		for (let i = 0; i < TICKS; i++) {
-			const lauf = await npcService.actForNpcs(start + i);
-			for (const [handlung, anzahl] of Object.entries(lauf.byAction)) {
+			const stunde = await tickWorld(start + i, { roll: wuerfel, regionId: stadtId });
+			for (const [handlung, anzahl] of Object.entries(stunde.npcs.byAction)) {
 				handlungen[handlung as NpcAction] = (handlungen[handlung as NpcAction] ?? 0) + anzahl;
 			}
 			await World.update({ currentTick: start + i + 1 }, { where: { id: WORLD_ID } });
@@ -87,9 +93,22 @@ describe('Die Welt aus eigener Kraft', () => {
 		expect(handlungen.WORK ?? 0).toBeGreaterThan(0);
 	});
 
+	/**
+	 * **Nicht mehr „genau acht"** (5.69). Solange hier `actForNpcs` allein lief, war die
+	 * Bevölkerung geschlossen, und die Zahl der Gründer war die Probe. Mit dem vollen Takt
+	 * kommen Kinder zur Welt, ziehen Leute zu und sterben Alte — eine feste Zahl prüfte
+	 * dann nicht mehr den Hunger, sondern den Würfel.
+	 *
+	 * Geprüft wird deshalb, was gemeint war: **niemand geht mit leerem Magen ins Bett.**
+	 */
 	it('bringt niemanden um vor Hunger', async () => {
-		const lebende: number = await Character.count({ where: { role: 'NPC', deathTick: null } });
-		expect(lebende).toBe(8);
+		const jetzt: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
+		const lebende = await Character.findAll({ where: { role: 'NPC', deathTick: null } });
+
+		expect(lebende.length).toBeGreaterThan(0);
+		for (const person of lebende) {
+			expect(satietyOf(person.dataValues, jetzt)).toBeGreaterThan(0);
+		}
 	});
 
 	/**
