@@ -52,7 +52,8 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 95  | Die Werkzeuge maßen einen anderen Takt als den, der läuft — **behoben mit 5.69**     | —                            | erledigt     |
 | 96  | Die Stadtkasse hat keine Einnahme, die ein NPC-Bürgermeister erhöhen kann            | Punkten 85, 86, 87           | Befund       |
 | 97  | `VOTE` scheitert zu 84 % an `NOT_A_CITIZEN` — Entschluss ohne Voraussetzung          | Punkt 49                     | Befund       |
-| 98  | Es verfällt mehr, als aufgebaut wird — 18 Brände gegen 5 Renovierungen               | dem nächsten Messlauf        | Befund       |
+| 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten  | Punkte 89, 16                | Befund       |
+| 99  | Zwei Höfe auf derselben Pachtfläche, einer ohne lebenden Besitzer                    | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2700,6 +2701,12 @@ Instandsetzungslöhne.
   Sperre** — der Kornspeicher unterbietet einen Bäcker, den es aus einem anderen Grund
   nicht gibt.
 
+**Nachgemessen mit Saat 7** (28.08.2026, 2000 Ticks, voller Takt): derselbe Befund in
+einer ganz anderen Stadt. Wieder **null Münzen Grundsteuer** in vierzig Spieljahren, die
+Kasse durchweg unter 220, und 3667 von 5129 Schichten (71,5 %) an `EMPLOYER_BROKE`
+gescheitert — gegen 4199 von 5637 (74,5 %) bei Saat 86. Das ist keine Eigenart einer
+gewürfelten Ausgangslage, sondern die Bauart.
+
 **Zu entscheiden ist, woher eine Stadt ohne Spieler ihr Geld nimmt.** Drei Wege, die sich
 nicht ausschließen: die Grundsteuer auf einen Satz über null stellen (dann trägt der
 Grundbesitz die Stadt, und der `fallback` ist eine Entscheidung statt einer Vorgabe); den
@@ -2719,26 +2726,61 @@ etwas anderes als die Ausführung.** Wer noch kein Bürgerrecht hat, soll die Wa
 erst als Vorhaben fassen — sonst verbrennt er den Tick und die Buchführung meldet eine
 Handlung, die keine war.
 
+**Auch das wiederholt sich:** Bei Saat 7 sind es 430 von 539 Entschlüssen (79,8 %).
+
 **Zu bauen ist die Voraussetzung in `lageAufnehmen`** und ein Zweig in der Entscheidung,
 genau wie bei den übrigen Handlungen. Solange das offen ist, sind die
 `byAction`-Zahlen für `VOTE` unbrauchbar. Hängt an Punkt 49 (Bürgerrecht und Stand): Ob
 ein Zugezogener nach einiger Zeit von selbst Bürger wird, ist dort zu entscheiden — und
 solange er es nie wird, wählt in dieser Stadt auf Dauer nur, wer in ihr geboren ist.
 
-### 98. Es verfällt mehr, als aufgebaut wird
+### 98. Renoviert wird fast nie, und ein Brand kann eine Stadt um ihr Handwerk bringen
 
-**Befund vom 28.08.2026, aus demselben Lauf.** Über vierzig Spieljahre: 18 Brände, 12
-gebaute Wohnhäuser, 2 Bauten, **5 Renovierungen**. Die Zahl der Häuser schwankt zwischen
-elf und vierzehn und steht am Ende niedriger als in der Welt ohne Unglück — und die
-**einzige private Werkstatt der Stadt**, Alheids Zimmerei, ist als Ruine verschwunden und
-nicht ersetzt worden. `CRAFT` fällt dadurch von 595 auf 432, `HARVEST` von 607 auf 315.
+**Befund vom 28.08.2026, aus den ersten beiden Läufen mit vollem Takt.** Über vierzig
+Spieljahre stehen 18 beziehungsweise 19 Brände gegen **5 beziehungsweise 7
+Renovierungen**. Ein Haus verfällt von selbst, ein Brand beschleunigt es, und beides
+trifft auf einen Einwohner, der von seinen Münzen zuerst Brot kauft.
 
-Ein Haus verfällt von selbst, ein Brand beschleunigt es, und beides trifft auf einen
-Einwohner, der von seinen Münzen zuerst Brot kauft. Renoviert wird deshalb fast nie.
-Damit ist der Kapitalstock dieser Welt **nicht stabil, sondern schrumpfend** — die Stadt
-lebt, aber sie zehrt.
+**Was daraus folgt, hängt am Würfel — und das ist der eigentliche Befund.** Die beiden
+Läufe gehen hier vollständig auseinander:
 
-**Zu prüfen ist, welche der drei Zahlen es ist:** die Verfallsgeschwindigkeit, der
-Preis einer Renovierung, oder die Stelle der Instandhaltung in der Bedürfnishierarchie.
-Ein Wiederaufbau nach der Ruine fehlt ganz: Wer sein Haus verliert, hat kein Vorhaben, es
-neu zu errichten. Gehört zu Punkt 16 und, was die Werkstatt angeht, zu Punkt 89.
+|                    |                                   Saat 86 |                    Saat 7 |
+| ------------------ | ----------------------------------------: | ------------------------: |
+| Häuser am Ende     |                                        11 |                        20 |
+| Verlauf            |                  11 → 14 → 11, schwankend |   5 → 20, stetig steigend |
+| `BUILD_HOME`       |                                        12 |                        18 |
+| Die Zimmerei       | **als Ruine verschwunden**, nicht ersetzt | **auf Stufe 2 ausgebaut** |
+| `UPGRADE_WORKSHOP` |                                         0 |                         1 |
+
+Bei Saat 86 verlor die Stadt ihre einzige private Werkstatt und bekam keine zweite —
+`CRAFT` fiel von 595 auf 432, `HARVEST` von 607 auf 315. Bei Saat 7 stand dieselbe
+Zimmerei am Ende ausgebaut da. **Die erste Fassung dieses Punktes las den Einzelfall als
+Regel** („es verfällt mehr, als aufgebaut wird"); der zweite Lauf widerlegt das. Der
+Kapitalstock schrumpft nicht — er hängt an einem einzigen Gebäude.
+
+**Und genau das ist das Problem.** Solange es je Handwerk einen Betrieb gibt (Punkt 89)
+und ein abgebranntes Haus niemanden auf den Gedanken bringt, es wieder aufzubauen, kostet
+**ein** unglücklicher Wurf die Stadt ein ganzes Gewerbe — auf Dauer, denn nachrücken kann
+niemand. Ein Wiederaufbau nach der Ruine fehlt ganz: Wer sein Haus verliert, hat kein
+Vorhaben, es neu zu errichten.
+
+**Zu prüfen ist deshalb weniger die Verfallsgeschwindigkeit als die Ersetzbarkeit.**
+Gehört zu Punkt 89 und, was den Preis einer Renovierung gegen den eines Brotes angeht,
+zu Punkt 16.
+
+### 99. Zwei Höfe auf derselben Fläche
+
+**Beobachtet am 28.08.2026 im Lauf mit Saat 7.** Am Ende stehen zwei Gebäude namens „Hof
+am Eichwald 1" — derselbe Name, weil er von der Adresse der Pachtfläche kommt. `LEASE`
+fiel in diesem Lauf zweimal, und in der Liste der Einwohner führt nur einer einen Hof
+(`13@1`). Der zweite hat keinen lebenden Besitzer.
+
+`releaseLeases` soll genau das verhindern: Beim Tod des Pächters fällt die Pacht an die
+Stadt zurück, **und der Hof fällt mit ihr** — er stand auf fremdem Grund. Entweder hat
+dieser Weg den zweiten Hof nicht erwischt, oder ein neuer Pächter hat auf einer Fläche
+gebaut, auf der noch das Haus des Vorgängers stand.
+
+**Nachzusehen ist zuerst, welches von beiden es ist**, und dann, ob `LEASE` überhaupt
+prüft, ob die Fläche schon bebaut ist. Ein Gebäude ohne lebenden Besitzer ist außerdem
+genau das, was Punkt 79 aufräumen sollte — es müsste unter den Hammer kommen und tut es
+offenbar nicht.
