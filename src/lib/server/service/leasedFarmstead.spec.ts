@@ -14,6 +14,7 @@ import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as employmentService from '$lib/server/service/employmentService';
+import * as lifecycleService from '$lib/server/service/lifecycleService';
 import * as productionService from '$lib/server/service/productionService';
 import * as tradeService from '$lib/server/service/tradeService';
 import { yearsToTicks } from '$lib/game/time';
@@ -311,5 +312,52 @@ describe('Der Hof einer Pacht', () => {
 		await productionService.releaseLeases(paechterin);
 
 		expect(await hofAuf(flaeche)).toBeNull();
+	});
+
+	/**
+	 * **Und zwar auf dem Weg, den die Welt wirklich geht** (Punkt 99).
+	 *
+	 * Der Test darüber rief `releaseLeases` selbst — und war grün, während niemand die
+	 * Funktion aufrief. `die()` löschte die Pacht mit einer eigenen Zeile aus 4.6c, aus der
+	 * Zeit vor dem Hof, und ließ das Gebäude stehen. Sichtbar wurde das erst im Messlauf
+	 * mit Saat 7: zwei Höfe auf derselben Fläche, einer ohne lebenden Besitzer.
+	 *
+	 * Geprüft wird deshalb der Todesfall, nicht die Funktion — und beide Fälle, denn der
+	 * Erbfall und der Heimfall nehmen verschiedene Wege durch `die()`.
+	 */
+	it('fällt auch, wenn sein Pächter stirbt — mit Erben wie ohne', async () => {
+		for (const mitErbe of [false, true]) {
+			const paechterin = await person('Pächterin');
+			const flaeche = await freieFlaeche();
+			await productionService.leasePlot(paechterin, flaeche);
+			expect(await hofAuf(flaeche)).not.toBeNull();
+
+			if (mitErbe) {
+				const kind = await person('Erbin');
+				await Character.update(
+					{ motherId: paechterin, birthTick: JETZT - yearsToTicks(20) },
+					{ where: { id: kind } }
+				);
+			}
+
+			await lifecycleService.die(paechterin, JETZT);
+
+			// Kein Hof, keine Pacht — und damit eine Fläche, die der Nächste ohne Erbstück
+			// darauf pachten kann.
+			expect(await hofAuf(flaeche)).toBeNull();
+			expect(await Lease.findOne({ where: { PlotId: flaeche } })).toBeNull();
+
+			// Die Probe darauf, was im Messlauf schiefging: Der nächste Pächter bekommt
+			// genau **einen** Hof, nicht einen zweiten neben dem alten.
+			const naechste = await person('Nachfolgerin');
+			await productionService.leasePlot(naechste, flaeche);
+			expect(
+				await Building.count({
+					where: { PlotId: flaeche, optionId: buildingService.HOF_OPTION_ID }
+				})
+			).toBe(1);
+
+			await productionService.releaseLeases(naechste);
+		}
 	});
 });

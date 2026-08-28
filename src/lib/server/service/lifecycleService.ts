@@ -1,10 +1,10 @@
 import * as chronicleService from '$lib/server/service/chronicleService';
+import * as productionService from '$lib/server/service/productionService';
 import { Op, type Transaction } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Dynasty } from '$lib/db/model/dynasty';
-import { Lease } from '$lib/db/model/lease';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
 import { chooseHeir, type Child, splitEstate } from '$lib/game/inheritance.logic';
@@ -123,6 +123,15 @@ export async function die(characterId: string, tick: number): Promise<Death | nu
 		// Erst der Tote: Sein Vermögen ist ab hier verteilt, nicht mehr seines.
 		await tot.update({ deathTick: tick, money: 0 }, { transaction: t });
 
+		// **Die Pacht fällt an die Stadt zurück, und der Hof fällt mit ihr** (Punkt 8).
+		// Genau das unterscheidet Pacht von Eigentum — sonst sicherte sich die erste
+		// Generation die guten Flächen auf Dauer.
+		//
+		// **Vor dem Erbfall, nicht danach** (Punkt 99): Was mit der Pacht fällt, darf
+		// vorher weder vererbt noch der Stadt zugeschlagen werden. Stünde es weiter unten,
+		// ginge der Hof erst an den Erben und verschwände ihm dann unter den Händen.
+		await productionService.releaseLeases(characterId, t);
+
 		if (hinterbliebener) {
 			// **Die Ehe endet mit dem Tod.** Bis hierher blieb `spouseId` auf einen Toten
 			// stehen — mit zwei Folgen, die beide falsch waren: Die Witwe konnte nicht wieder
@@ -151,10 +160,6 @@ export async function die(characterId: string, tick: number): Promise<Death | nu
 		} else {
 			await anDieStadt(tot.dataValues.RegionId, geteilt.toCity, characterId, t, tick);
 		}
-
-		// Die Pacht faellt an die Stadt zurueck (Punkt 8): Genau das unterscheidet sie von
-		// Eigentum — sonst sicherte sich die erste Generation die guten Flaechen auf Dauer.
-		await Lease.destroy({ where: { CharacterId: characterId }, transaction: t });
 
 		const erloschen: string | null = await hausFortfuehren(
 			tot.dataValues.DynastyId,

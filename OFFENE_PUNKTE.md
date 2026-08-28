@@ -53,7 +53,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 96  | Die Stadtkasse hat keine Einnahme, die ein NPC-Bürgermeister erhöhen kann            | Punkten 85, 86, 87           | Befund       |
 | 97  | `VOTE` scheitert zu 84 % an `NOT_A_CITIZEN` — Entschluss ohne Voraussetzung          | Punkt 49                     | Befund       |
 | 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten  | Punkte 89, 16                | Befund       |
-| 99  | Zwei Höfe auf derselben Pachtfläche, einer ohne lebenden Besitzer                    | dem nächsten Schritt         | Befund       |
+| 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen         | —                            | erledigt     |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2768,19 +2768,45 @@ Vorhaben, es neu zu errichten.
 Gehört zu Punkt 89 und, was den Preis einer Renovierung gegen den eines Brotes angeht,
 zu Punkt 16.
 
-### 99. Zwei Höfe auf derselben Fläche
+### 99. Zwei Höfe auf derselben Pachtfläche — behoben (5.70)
 
 **Beobachtet am 28.08.2026 im Lauf mit Saat 7.** Am Ende stehen zwei Gebäude namens „Hof
 am Eichwald 1" — derselbe Name, weil er von der Adresse der Pachtfläche kommt. `LEASE`
 fiel in diesem Lauf zweimal, und in der Liste der Einwohner führt nur einer einen Hof
 (`13@1`). Der zweite hat keinen lebenden Besitzer.
 
-`releaseLeases` soll genau das verhindern: Beim Tod des Pächters fällt die Pacht an die
-Stadt zurück, **und der Hof fällt mit ihr** — er stand auf fremdem Grund. Entweder hat
-dieser Weg den zweiten Hof nicht erwischt, oder ein neuer Pächter hat auf einer Fläche
-gebaut, auf der noch das Haus des Vorgängers stand.
+**Die Ursache stand seit 4.6c da und wurde durch den Hof erst zu einem Fehler.**
+`lifecycleService.die()` löste die Pacht mit einer eigenen Zeile:
 
-**Nachzusehen ist zuerst, welches von beiden es ist**, und dann, ob `LEASE` überhaupt
-prüft, ob die Fläche schon bebaut ist. Ein Gebäude ohne lebenden Besitzer ist außerdem
-genau das, was Punkt 79 aufräumen sollte — es müsste unter den Hammer kommen und tut es
-offenbar nicht.
+```ts
+await Lease.destroy({ where: { CharacterId: characterId }, transaction: t });
+```
+
+Die stammt aus der Zeit, als eine Pacht nichts als ein Eintrag war. Mit 5.15 bekam sie ein
+Gebäude, und `productionService.releaseLeases` wurde geschrieben, um beides zusammen
+aufzulösen — sein Kopf sagt es ausdrücklich: „Der Hof fällt mit der Pacht … Wird aus
+`lifecycleService` gerufen, damit der Erbfall an einer Stelle bleibt." **Gerufen wurde er
+dort nie.** Der Kommentar beschrieb eine Absicht, die niemand verdrahtet hat; die alte
+Zeile blieb stehen und ließ das Gebäude zurück. `leasePlot` prüft nur, ob eine **Pacht**
+auf der Fläche liegt — nicht, ob ein Haus darauf steht. Also stellte der nächste Pächter
+seinen Hof daneben.
+
+**Und ein Test war darüber grün.** `leasedFarmstead.spec.ts` prüfte „fällt mit der Pacht",
+indem er `releaseLeases` selbst aufrief — eine Funktion, die außerhalb dieses Tests
+niemand aufrief. Das ist die allgemeinere Lehre, und sie ist dieselbe wie in Punkt 95: Ein
+Test, der eine Funktion aufruft, statt den Weg zu gehen, den die Welt geht, hält eine tote
+Leitung für eine lebende.
+
+**Behoben mit 5.70.** `die()` ruft `releaseLeases(characterId, t)` — und zwar **vor** dem
+Erbfall, nicht danach: Was mit der Pacht fällt, darf vorher weder vererbt noch der Stadt
+zugeschlagen werden. Der neue Test geht über `die()` statt über die Funktion und prüft
+beide Wege durch den Erbfall (mit Erben und ohne) sowie das, woran es im Messlauf lag:
+dass der nächste Pächter genau **einen** Hof bekommt. Ohne die Änderung ist er rot.
+
+**Was offen bleibt: die Höfe, die schon herrenlos herumstehen.** Grünau läuft seit 5.15,
+und jeder Pächter, der seither gestorben ist, hat seinen Hof stehen lassen. Die Behebung
+verhindert neue, räumt die alten aber nicht weg. Zu entscheiden ist, ob das ein
+Aufräumskript wert ist oder ob die Höfe stehen bleiben, bis sie von selbst verfallen — sie
+gehören einem Toten, also renoviert sie niemand, und `YEARS_TO_RUIN` erledigt sie.
+Dagegen spricht, dass bis dahin jeder neue Pächter derselben Fläche einen zweiten Hof
+danebenstellt.
