@@ -2896,6 +2896,79 @@ einem einzigen Lauf. Gesucht ist dasselbe für das Geld: Ein- und Ausgang je Tic
 Quelle getrennt. Danach ist zu entscheiden, ob der Satz zu hoch ist, die Löhne zu niedrig
 oder der Kornspeicher zu teuer — heute lässt sich das nicht unterscheiden.
 
+#### Die Bilanz, überschlagen — woher das Geld kommt und wohin es geht
+
+**Gerechnet und nicht gemessen** (29.08.2026): aus den Konstanten und den Handlungszahlen
+desselben Laufs über 2000 Ticks, Saat 86. Sie ersetzt die Aufschlüsselung nicht, aber sie
+sagt, wonach diese suchen soll.
+
+| Abfluss aus Bürgerhand  |    Münzen | wohin                                                                                                                 |
+| ----------------------- | --------: | --------------------------------------------------------------------------------------------------------------------- |
+| Brot                    | **~4090** | 1022 Laibe à 4 — in dieser Stadt steht **kein Backhaus**, also fast alles an den Kornspeicher, also in die Stadtkasse |
+| Grundsteuer             |  **3468** | Stadtkasse (gemessen)                                                                                                 |
+| Grundstücke             |      ~880 | 22 Käufe à 40, Stadtland                                                                                              |
+| Standgeld, Zehnt, Pacht |     wenig | Stadtkasse                                                                                                            |
+| Eigene Renovierung      |         ? | **vernichtet** — `renovateBuilding` zieht ab, niemand bekommt es (Punkt 74)                                           |
+
+| Zufluss in Bürgerhand |      Münzen | woher                                                                    |
+| --------------------- | ----------: | ------------------------------------------------------------------------ |
+| **Zuzug**             |   **~7200** | 29 Ankünfte à 150–400 abzüglich Einzugsgeld — **von außerhalb der Welt** |
+| Tagelohn              |    ~500–600 | Stadtkasse, und gedeckelt (siehe unten)                                  |
+| Anstellungen          | fast nichts | `OFFER_JOB` 3, `TAKE_JOB` 5 im ganzen Lauf                               |
+| Verkauf untereinander |     0 netto | verschiebt, schafft nicht                                                |
+
+**Der Tagelohn ist gedeckelt, und zwar als Rechnung.** `REPAIR_FOR_HIRE` gibt es nur unter
+voller Güte. Ein Gebäude verfällt um `CONDITION_LOSS_PER_TICK` = 0,1 Punkte je Tick, eine
+Schicht hebt es um `REPAIR_PER_SHIFT` = 5 und kostet die Stadt `TAGELOHN` = 3 — also 0,6
+Münzen je Zustandspunkt. Bei vier bis fünf öffentlichen Bauten verfallen 0,4 bis 0,5 Punkte
+je Tick, und mehr Arbeit **kann es nicht geben**: rund **0,25 Münzen je Tick für die ganze
+Stadt**, ob dort acht oder achtzig Menschen leben. Der Rückweg wächst nicht mit der
+Bevölkerung.
+
+**Und wenn der Bürgermeister selbst herrichtet, kostet derselbe Punkt 2 statt 0,6 Münzen**
+(`RENOVATION_COST_PER_POINT`). Er war also nicht nur der Konkurrent seiner Tagelöhner,
+sondern der dreimal teurere Weg — Geld verließ die Kasse, ohne bei jemandem anzukommen.
+Das rechtfertigt die Schwelle 25 nachträglich, aus einem anderen Grund als dem, aus dem
+sie gesetzt wurde.
+
+**Die Antwort auf „woher kommt das Geld": vom Zuzug.** Die Stadt lebt von Ersparnissen,
+die Fremde von draußen mitbringen. Nichts in dieser Welt schafft Geld — Arbeit schafft
+Waren —, und der Kreislauf ist keine Schleife, sondern eine Einbahnstraße: Bürger →
+Stadtkasse breit, Stadtkasse → Bürger ein Strohhalm. Die Grundsteuer hat das nicht
+verursacht, sie hat es sichtbar gemacht. Die 4199 gescheiterten Schichten davor waren
+dasselbe Problem von der anderen Seite.
+
+#### Warum die Rohstoffkette den Kreislauf nicht schließt
+
+Der Einwand liegt nahe: Rohstoffe sind unbegrenzt, sie werden veredelt und verkauft — das
+müsste doch ein Kreislauf sein. **Er wäre einer, wenn das Erzeugte gegessen würde.**
+
+Diese Welt hat eine **Produktionskette, aber keine Verbrauchskette.** Alles, was sie
+herstellt, ist dauerhaft: Holz, Bretter, Quader, Eisen. Verbraucht wird davon nur beim
+**Bauen**, und gebaut wird in zwanzig Spieljahren ein gutes Dutzend Mal. Deshalb liegen am
+Ende der Läufe 3817 Stämme und 2165 Bretter unverkauft am Markt — die Kette produziert
+gegen eine Nachfrage, die es nicht gibt (Punkt 76). Unbegrenzte Rohstoffe machen das nicht
+besser, sondern schlimmer: unbegrenztes Angebot bei fast null Nachfrage. Der Preis von
+sechs Münzen je Brett ist eine Behauptung, kein Marktpreis.
+
+**Das Einzige, was in dieser Welt laufend verbraucht wird, ist Brot** — 1022 Laibe im
+Lauf, gegen ein knappes Dutzend Bauten. Brot ist die eigentliche Wirtschaft, und genau
+dieser Posten kommt **nicht aus der Wirtschaft**, sondern aus dem Kornspeicher, der ihn
+aus dem Nichts schöpft und dafür Münzen einzieht (Punkt 85).
+
+Damit steht es scharf: **Die einzige wiederkehrende Nachfrage der Welt wird von einem
+staatlichen Monopol bedient, das seine Ware nicht herstellen muss.** Gäbe es statt seiner
+einen Bäcker, blieben dieselben 4000 Münzen im Kreis — Bauer → Müller → Bäcker → Lohn →
+Brot —, und die Kette hätte zum ersten Mal einen Abnehmer, der jeden Tag wiederkommt. Der
+Kornspeicher ist in dieser Bilanz keine Krücke mehr, sondern eine Pumpe.
+
+**Daraus folgt eine Reihenfolge**, und sie widerspricht der bisherigen Einschätzung in
+Punkt 85 („der Kornspeicher kann erst weg, wenn die Kette trägt"): Die Kette kann gar nicht
+tragen, solange er steht — er ist die einzige Nachfrage, die es zu bedienen gäbe. Zu prüfen
+ist deshalb die Zwischenstufe, die dort schon vorgeschlagen ist: **ein Preis über dem der
+Bäcker**, der ihn zur Notversorgung macht statt zur Konkurrenz. Das ist eine Zahl, kein
+Umbau — und mit der Bilanz oben lässt sich vorher ausrechnen, was sie bewirkt.
+
 **Bis dahin ist die Steuer eine offene Wunde in der laufenden Welt.** Wer Grünau vor dem
 nächsten Schritt schützen will, kann den Bürgermeister die Grundsteuer nicht beschließen
 lassen — es ist eine Zeile in `NPC_MAYOR_LAWS`.
