@@ -1,5 +1,5 @@
 ﻿import { garmentIntact } from '$lib/game/attire.logic';
-import { CAMPAIGN_TICKS, npcChoice } from '$lib/game/election.logic';
+import { CAMPAIGN_TICKS, isSettled, npcChoice } from '$lib/game/election.logic';
 import { Op } from 'sequelize';
 import { levelOf, upgradePrice } from '$lib/model/buildingTemplate';
 import { Building } from '$lib/db/model/building';
@@ -624,8 +624,21 @@ async function lageAufnehmen(
 
 	// Läuft eine Wahl, bei der er noch nicht abgestimmt hat? (4.16)
 	const wahlzettel = await electionService.getBallot(werte.RegionId, npcId);
+	// **Und ob er überhaupt wählen darf** (5.72, Punkt 97). Bis hierher fragte die Lage nur,
+	// ob eine Wahl läuft und ob er schon abgestimmt hat — nicht, ob er Bürger ist. Ein
+	// Zugezogener wählt aber erst nach einer Wahlperiode mit (5.24), und `electionService`
+	// weist ihn dann mit `NOT_A_CITIZEN` ab. Der Entschluss fiel trotzdem: In einem Lauf
+	// über 2000 Ticks 900 Wahlgänge, davon **850 vergeblich** — die höchste Fehlschlagquote
+	// der Welt nach der leeren Stadtkasse.
+	//
+	// Dieselbe Lücke wie in den Punkten 59, 63 und 87: Die Entscheidung prüfte etwas
+	// anderes als die Ausführung. Wer nicht wählen darf, soll es gar nicht erst vorhaben —
+	// sonst ist der Tick verbrannt und die Buchführung meldet eine Handlung, die keine war.
 	const wahlLaeuft: boolean =
-		wahlzettel !== undefined && !wahlzettel.iVoted && wahlzettel.candidates.length > 0;
+		wahlzettel !== undefined &&
+		!wahlzettel.iVoted &&
+		wahlzettel.candidates.length > 0 &&
+		isSettled(werte.arrivedTick ?? null, tick);
 
 	const arbeitsplatz = await freierArbeitsplatz(haeuserDerStadt, npcId);
 	const stelle = await employmentService.getJobOf(npcId);

@@ -57,10 +57,44 @@ export interface Measurement {
 	lines: string[];
 }
 
+/** Was die Stadt in der Kasse hat. */
+async function stadtkasse(stadtId: string): Promise<number> {
+	return (await Region.findByPk(stadtId))!.dataValues.treasury ?? 0;
+}
+
 /** Alles Geld in Bürgerhand — zeigt, ob die Wirtschaft wächst oder ausblutet. */
 async function geldmenge(): Promise<number> {
 	const leute = await Character.findAll({ where: { deathTick: null } });
 	return leute.reduce((summe, person) => summe + person.dataValues.money, 0);
+}
+
+/**
+ * Woher das Geld kam und wohin es ging — soweit sich das ohne Kassenbuch sagen lässt.
+ *
+ * **Die Identität, auf der alles beruht:** Der Geldbestand der Welt ist alles in
+ * Bürgerhand plus die Stadtkasse. Er wächst nur durch Zuzug — jeder Ankömmling bringt
+ * seine Ersparnisse von außerhalb mit. Wächst er um **weniger** als das, ist der Rest
+ * unterwegs vernichtet worden.
+ */
+async function bilanzzeilen(
+	stadtId: string,
+	vorher: number,
+	bilanz: { zuzug: number; steuer: number; sold: number; amtsausgaben: number }
+): Promise<string[]> {
+	const buerger: number = await geldmenge();
+	const kasse: number = await stadtkasse(stadtId);
+	const nachher: number = buerger + kasse;
+	const vernichtet: number = bilanz.zuzug - (nachher - vorher);
+
+	return [
+		`  Bestand am Anfang ${vorher}, am Ende ${nachher} (Bürger ${buerger}, Kasse ${kasse})`,
+		`  Von außen zugeflossen (Zuzug) ${bilanz.zuzug}`,
+		`  **Vernichtet ${vernichtet}** — Geld, das die Kasse verließ, ohne dass jemand es bekam`,
+		`  An Bürger zurück: Sold ${bilanz.sold} (an je einen), Tagelohn im Rest enthalten`,
+		`  Der Stadt zugeflossen: Grundsteuer ${bilanz.steuer}, dazu Kornspeicher, Standgeld,`,
+		`    Zehnt, Pacht, Einzugsgeld und Grundstücksverkauf — nicht getrennt (siehe Punkt 100)`,
+		`  Vom Amt selbst verbaut (Untergrenze) ${bilanz.amtsausgaben}`
+	];
 }
 
 /** „(Alter 19, Not 12)" — leer, solange niemand gestorben ist. */
@@ -96,9 +130,26 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	// zwei Dinge zusammenwarf: eine Stadt, die altert, und eine, die verhungert. Bei der
 	// Grundsteuer aus Punkt 96 war genau das die offene Frage.
 	const todesursachen: Record<string, number> = {};
+	/**
+	 * **Die Kassenbilanz** (Punkt 100, 5.72).
+	 *
+	 * Sie kommt ohne Umbau der Dienste aus: Was der Takt ohnehin zurückgibt, genügt für
+	 * eine Bilanz über die ganze Welt. Alles Geld der Lebenden plus die Stadtkasse ist der
+	 * Bestand; von außen kommt nur der Zuzug. Was übrig bleibt, wenn man den Zuwachs des
+	 * Bestands vom Zuzug abzieht, ist **vernichtetes Geld** — und dass es das gibt, sieht
+	 * man dem Code an: `renovatePublicBuilding`, `buildPublicBuilding` und `developLand`
+	 * senken die Kasse, ohne dass jemand etwas bekommt.
+	 *
+	 * Was die Bilanz **nicht** trennt: Kornspeicher, Standgeld und Grundstücksverkauf
+	 * fließen alle in dieselbe Kasse, und der Tagelohn kommt aus derselben heraus. Dafür
+	 * bräuchte es das Kassenbuch an den siebzehn Stellen, die die Kasse bewegen. Die
+	 * Größenordnungen entscheidet schon diese hier.
+	 */
+	const bilanz = { zuzug: 0, steuer: 0, sold: 0, amtsausgaben: 0 };
 
 	const start: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
 	const begonnen: number = Date.now();
+	const bestandVorher: number = (await geldmenge()) + (await stadtkasse(stadtId));
 
 	for (let i = 0; i < ticks; i++) {
 		// **Der volle Takt, nicht der halbe** (5.69). Bis hierher rief diese Schleife
@@ -123,7 +174,16 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		for (const fall of stunde.deaths) {
 			todesursachen[fall.cause] = (todesursachen[fall.cause] ?? 0) + 1;
 		}
-		if (stunde.arrival) chronik.zuzug++;
+		if (stunde.arrival) {
+			chronik.zuzug++;
+			bilanz.zuzug += stunde.arrival.money;
+		}
+		bilanz.steuer += stunde.tax?.collected ?? 0;
+		for (const sold of stunde.stipends) bilanz.sold += sold.paid;
+		// Was der Amtsinhaber selbst verbaut hat — Geld, das die Kasse verlässt, ohne dass
+		// jemand es bekommt. Das Herrichten kennt seinen Betrag; Bauen und Erschließen
+		// melden ihn nicht, deshalb steht hier nur die Untergrenze.
+		bilanz.amtsausgaben += stunde.maintained?.spent ?? 0;
 		if (stunde.hazard) chronik.braende++;
 		chronik.steuer += stunde.tax?.collected ?? 0;
 		chronik.ausgefallen += stunde.tax?.shortfall ?? 0;
@@ -158,6 +218,9 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		`  Geburten ${chronik.geburten}, Tode ${chronik.tode}` +
 			`${todeNach(todesursachen)}, Zuzug ${chronik.zuzug}, Brände ${chronik.braende}`,
 		`  Grundsteuer eingenommen ${chronik.steuer}, nicht eintreibbar ${chronik.ausgefallen}`,
+		'',
+		'=== DIE KASSE ===',
+		...(await bilanzzeilen(stadtId, bestandVorher, bilanz)),
 		'',
 		'=== HANDLUNGEN ==='
 	);

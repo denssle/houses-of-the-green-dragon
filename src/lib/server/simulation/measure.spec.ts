@@ -25,6 +25,10 @@ describe('Das Messwerkzeug', () => {
 		// Grundsteuer. Solange der Messlauf nur `actForNpcs` rief, stand keine dieser Zahlen
 		// im Bericht — und die Kasse, an der die halbe Stadt hängt, kam darin nicht vor.
 		expect(text).toContain('Geburten ');
+		// **Die Kassenbilanz** (5.72, Punkt 100): Ohne sie stand im Bericht, was die Stadt
+		// einnimmt, aber nirgends, was bei den Bürgern ankommt und was unterwegs verschwindet.
+		expect(text).toContain('=== DIE KASSE ===');
+		expect(text).toContain('Von außen zugeflossen');
 		expect(text).toContain('Grundsteuer eingenommen ');
 		// Der eigentliche Grund für das Werkzeug: `IDLE` ohne Aufschlüsselung sagt nichts.
 		expect(text).toContain('=== WARUM MÜSSIGGANG ===');

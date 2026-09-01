@@ -51,10 +51,11 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                       | Punkt 31                     | Befund       |
 | 95  | Die Werkzeuge maßen einen anderen Takt als den, der läuft — **behoben mit 5.69**     | —                            | erledigt     |
 | 96  | Die Stadtkasse ohne Einnahme — **gebaut mit 5.71**, fiskalisch wirksam; siehe 100    | Punkt 100                    | teilweise    |
-| 97  | `VOTE` scheitert zu 84 % an `NOT_A_CITIZEN` — Entschluss ohne Voraussetzung          | Punkt 49                     | Befund       |
+| 97  | `VOTE` ohne Bürgerrecht — **behoben mit 5.72**; das Bürgerrecht selbst ist Punkt 49  | —                            | erledigt     |
 | 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten  | Punkte 89, 16                | Befund       |
 | 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen         | —                            | erledigt     |
 | 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote         | dem nächsten Schritt         | Befund       |
+| 101 | Das Kassenbuch — jede Bewegung der Stadtkasse mit einem Grund                        | Punkt 100                    | Entwurf      |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2759,24 +2760,35 @@ wird zum Wahlkampfthema); oder den Sold an die Kassenlage binden. Das erste ist 
 das zweite eine Erweiterung von `decideMayorAction`, das dritte eine Zeile in
 `payOfficeStipends`. Gehört zu den Punkten 16 und 32.
 
-### 97. `VOTE` scheitert zu 84 Prozent an `NOT_A_CITIZEN`
+### 97. `VOTE` scheitert zu 84 Prozent an `NOT_A_CITIZEN` — behoben (5.72)
 
-**Befund vom 28.08.2026, aus demselben Lauf.** 796-mal entschied sich ein Einwohner zu
-wählen, 672-mal durfte er dann nicht: `VOTE/NOT_A_CITIZEN`. Im Messlauf war das nie zu
-sehen, weil dort keine Wahl stattfand (Punkt 95).
+**Befund vom 28.08.2026.** 796-mal entschied sich ein Einwohner zu wählen, 672-mal durfte
+er dann nicht. Im Messlauf war das nie zu sehen, weil dort keine Wahl stattfand (Punkt 95);
+im vollen Takt ist es nach der leeren Stadtkasse die zweithäufigste Ursache für einen
+verbrannten Tick. **Auch das wiederholt sich:** bei Saat 7 sind es 430 von 539 Entschlüssen
+(79,8 %), im letzten Lauf 850 von 900.
 
-Das ist derselbe Fehlertyp wie in den Punkten 59, 63 und 87: **Die Entscheidung prüft
-etwas anderes als die Ausführung.** Wer noch kein Bürgerrecht hat, soll die Wahl gar nicht
-erst als Vorhaben fassen — sonst verbrennt er den Tick und die Buchführung meldet eine
-Handlung, die keine war.
+Derselbe Fehlertyp wie in den Punkten 59, 63 und 87: **Die Entscheidung prüft etwas anderes
+als die Ausführung.** `canVote` in `election.logic` fragt nach Alter, Wahlgang, schon
+abgestimmt **und** Bürgerrecht — die Lage in `npcService` kannte nur die ersten drei:
 
-**Auch das wiederholt sich:** Bei Saat 7 sind es 430 von 539 Entschlüssen (79,8 %).
+```ts
+const wahlLaeuft: boolean =
+	wahlzettel !== undefined && !wahlzettel.iVoted && wahlzettel.candidates.length > 0;
+```
 
-**Zu bauen ist die Voraussetzung in `lageAufnehmen`** und ein Zweig in der Entscheidung,
-genau wie bei den übrigen Handlungen. Solange das offen ist, sind die
-`byAction`-Zahlen für `VOTE` unbrauchbar. Hängt an Punkt 49 (Bürgerrecht und Stand): Ob
-ein Zugezogener nach einiger Zeit von selbst Bürger wird, ist dort zu entscheiden — und
-solange er es nie wird, wählt in dieser Stadt auf Dauer nur, wer in ihr geboren ist.
+Wer zugezogen ist, wählt aber erst nach einer Wahlperiode mit (5.24, Punkt 71) — und in
+einer Stadt, die zu zwei Dritteln aus Zugezogenen besteht, ist das der Normalfall.
+
+**Behoben mit 5.72:** `isSettled(werte.arrivedTick, tick)` steht jetzt in derselben Zeile.
+Der Test in `electionService.spec.ts` prüft beides — dass der Neue nicht abstimmt (das tat
+er auch vorher nicht) und dass **kein `VOTE/NOT_A_CITIZEN` mehr gebucht wird**. Nur die
+zweite Erwartung fängt den Fehler; ohne die Änderung ist sie rot.
+
+**Was offen bleibt, ist die größere Frage dahinter:** Ob ein Zugezogener nach einiger Zeit
+von selbst Bürger wird, entscheidet Punkt 49. Heute wird er es — `isSettled` läuft nach
+einer Wahlperiode ab —, aber das ist die kleinste Form des Bürgerrechts und nicht die,
+die das Konzept meint.
 
 ### 98. Renoviert wird fast nie, und ein Brand kann eine Stadt um ihr Handwerk bringen
 
@@ -2972,3 +2984,73 @@ Umbau — und mit der Bilanz oben lässt sich vorher ausrechnen, was sie bewirkt
 **Bis dahin ist die Steuer eine offene Wunde in der laufenden Welt.** Wer Grünau vor dem
 nächsten Schritt schützen will, kann den Bürgermeister die Grundsteuer nicht beschließen
 lassen — es ist eine Zeile in `NPC_MAYOR_LAWS`.
+
+### 101. Das Kassenbuch — jede Bewegung mit einem Grund
+
+**Aufgenommen am 29.08.2026, aus der Arbeit an Punkt 100.** Der Messbericht kennt seit
+5.72 eine Bilanz über die ganze Welt: Bestand am Anfang, Bestand am Ende, Zufluss von
+außen, und als Rest das, was unterwegs vernichtet wurde. Sie kommt ohne Umbau aus, weil
+sie auf einer Identität beruht — alles Geld der Lebenden plus die Stadtkasse, und wachsen
+kann das nur durch Zuzug.
+
+**Was sie nicht kann, ist die Frage, die zählt: _wobei_.** Kornspeicher, Standgeld, Zehnt,
+Pacht, Einzugsgeld, Grundstücksverkauf und Versteigerungserlös fließen in dieselbe Kasse;
+Tagelohn, Sold und der eigene Werkzeugkasten des Bürgermeisters fließen aus derselben
+heraus. Der Bericht sieht davon eine einzige Zahl. Solange das so ist, lässt sich nicht
+sagen, ob der größte Posten das Brot ist, die Steuer oder ein Amtsinhaber, der zum
+dreifachen Preis selbst renoviert — und genau daran hängt jede Entscheidung in Punkt 100.
+
+**Zu bauen ist ein Kassenbuch:** jede Bewegung der Stadtkasse mit einem Grund. Heute
+geschieht das an **siebzehn Stellen** in zehn Diensten, alle nach einem von zwei Mustern:
+
+```ts
+await Region.increment('treasury', { by: betrag, where: { id: regionId }, transaction: t });
+await stadt.update({ treasury: kasse - kosten }, { transaction: t });
+```
+
+Sie gehören durch einen Aufruf ersetzt, der beides tut — buchen und begründen:
+
+| Zufluss          | woher                                    |
+| ---------------- | ---------------------------------------- |
+| `GRANARY`        | `needService.buyFromGranary`             |
+| `PROPERTY_TAX`   | `lawService.collectPropertyTax`          |
+| `TITHE`          | `productionService.harvest`              |
+| `STALL_FEE`      | `tradeService`, `employmentService`      |
+| `PLOT_SALE`      | `plotService`                            |
+| `LEASE_FEE`      | `productionService.leasePlot`            |
+| `SETTLEMENT_FEE` | `migrationService`                       |
+| `SCHOOL_FEE`     | `schoolService`                          |
+| `AUCTION`        | `auctionService`                         |
+| `ESCHEAT`        | `lifecycleService` (erbenloser Nachlass) |
+
+| Abfluss         | wohin — und ob jemand es bekommt            |
+| --------------- | ------------------------------------------- |
+| `WAGE`          | an einen Bürger (`REPAIR_FOR_HIRE`, Wache)  |
+| `STIPEND`       | an den Amtsinhaber                          |
+| `PUBLIC_REPAIR` | **an niemanden** — `renovatePublicBuilding` |
+| `PUBLIC_BUILD`  | **an niemanden** — `buildPublicBuilding`    |
+| `DEVELOPMENT`   | **an niemanden** — `developLand`            |
+
+**Die letzte Spalte ist der eigentliche Grund für diesen Punkt.** Drei der fünf Ausgaben
+haben keinen Empfänger; das Geld verschwindet aus der Welt. Ob das ein Randposten ist oder
+der Hauptposten, weiß heute niemand — und es sind genau die drei Handlungen, die ein
+Bürgermeister mit voller Kasse als Erstes tut.
+
+**Wo es hingehört:** ein eigenes Modul, das die Bewegung ausführt und mitschreibt, damit
+die Buchung nicht neben der Zahlung stehen kann. Ob mitgeschrieben wird, ist eine Frage des
+Betriebs: Im Messlauf im Speicher, auf dem Server entweder gar nicht oder als Zeile im Log
+— eine Tabelle je Münzbewegung wäre die teuerste Schreiblast des Spiels und für eine
+Auskunft, die man alle paar Wochen braucht, nicht zu rechtfertigen.
+
+**Und dasselbe gilt für die Bürger.** Was ein Einwohner einnimmt und ausgibt, ist ebenso
+unbekannt — der Bericht zeigt nur den Stand am Ende. Ein zweites Buch je Charakter wäre
+teuer; billiger und für die Balancing-Fragen ausreichend wäre, im Messlauf die **Summen je
+Handlungsart** mitzuführen: was `BUY_FOOD` gekostet und was `WORK` eingebracht hat. Die
+Handlungen werden ohnehin schon gezählt (`byAction`) — es fehlen nur die Münzen daneben.
+
+**Warum es sich lohnt, obwohl es nichts am Spiel ändert:** In dieser Phase kam jeder
+belastbare Befund aus einer Aufschlüsselung und keiner aus einer Vermutung. `idleReason`
+hat den stillstehenden Kreis gezeigt (Punkt 63), die Todesursache hat aus „die Bevölkerung
+sinkt" in einem einzigen Lauf „sie verhungert" gemacht (5.71), und drei Vermutungen über
+den Arbeitsmarkt haben in derselben Zeit nichts getroffen. Wer nicht misst, rät — und rät
+im Zweifel dreimal.

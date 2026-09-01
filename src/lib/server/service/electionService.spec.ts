@@ -235,6 +235,38 @@ describe('Wahlen gegen die Datenbank', () => {
 			expect(stimmen.map((s) => s.dataValues.VoterCharacterId)).not.toContain(arm);
 		});
 
+		/**
+		 * **Ein Entschluss, der scheitern muss, ist kein Entschluss** (5.72, Punkt 97).
+		 *
+		 * Wer zugezogen ist, wählt erst nach einer Wahlperiode mit (5.24) — `vote` weist ihn
+		 * bis dahin mit `NOT_A_CITIZEN` ab. Die Entscheidung wusste davon nichts: In einem
+		 * Messlauf über 2000 Ticks fielen 900 Wahlgänge, 850 davon vergeblich. Der Tick war
+		 * verbrannt, und in der Statistik stand `VOTE`, als wäre gewählt worden.
+		 */
+		it('schickt den Neuen nicht zu einer Wahl, an der er nicht teilnehmen darf', async () => {
+			await wahlAusrufen();
+			const anna = await person('Anna', { diligence: 100, ambition: 100, money: 100 });
+			await electionService.stand(anna, stadtId);
+			// Gestern angekommen: volljährig, wohlhabend, tatkräftig — und kein Bürger.
+			const neu = await person('Zugezogen', {
+				diligence: 100,
+				ambition: 100,
+				money: 100,
+				arrivedTick: JETZT - 1
+			});
+
+			await npcService.actForNpcs(JETZT);
+			await npcService.actForNpcs(JETZT);
+
+			const stimmen = await Vote.findAll();
+			expect(stimmen.map((s) => s.dataValues.VoterCharacterId)).not.toContain(neu);
+
+			// **Und er steht nicht untätig herum, sondern tut etwas anderes.** Das ist der
+			// Unterschied zwischen „darf nicht" und „hat nichts vor".
+			const lauf = await npcService.actForNpcs(JETZT);
+			expect(lauf.byFailure['VOTE/NOT_A_CITIZEN']).toBeUndefined();
+		});
+
 		it('lässt den Trägen erst spät wählen', async () => {
 			// Wer träge und gleichgültig ist, wartet bis kurz vor Schluss — und wenn er
 			// vorher stirbt, hat er eben nicht gewählt. Trägheit soll etwas kosten.
