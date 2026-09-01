@@ -31,6 +31,16 @@ const RATHAUS = 0;
 const JETZT = 10_000;
 /** So weit verfallen, dass ein NPC-Buergermeister eingreift — unter der halben Guete. */
 const VERFALLEN: number = yearsToTicks(YEARS_TO_RUIN * 0.75);
+
+/**
+ * So weit herunter, dass das Amt selbst eingreift.
+ *
+ * **Seit 5.71 ist der Bürgermeister der Notfall und nicht der Hausmeister** (Punkt 96):
+ * Er richtet erst im letzten Viertel her und lässt alles darüber als bezahlte Arbeit für
+ * Tagelöhner stehen. `VERFALLEN` trifft mit einem Zustand von genau 25 die Schwelle nicht
+ * mehr.
+ */
+const STARK_VERFALLEN: number = yearsToTicks(YEARS_TO_RUIN * 0.9);
 let stadtId: string;
 
 async function person(name: string, extras: Record<string, unknown> = {}): Promise<string> {
@@ -204,7 +214,7 @@ describe('Öffentliche Bauten', () => {
 			const id = await stadtgrund(3);
 			const npc = await person('Amtsperson', { role: 'NPC' });
 			await insAmt(npc);
-			await weltzeit(JETZT + VERFALLEN);
+			await weltzeit(JETZT + STARK_VERFALLEN);
 
 			const getan = await buildingService.maintainAsNpcMayor(stadtId);
 

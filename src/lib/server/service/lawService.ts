@@ -11,6 +11,7 @@ import {
 	collectable,
 	currentValue,
 	type Enactment,
+	enactedSince,
 	LAW_KINDS,
 	type LawKind,
 	propertyTaxFor
@@ -52,6 +53,17 @@ async function erlasse(regionId: string, t?: Transaction): Promise<Enactment[]> 
  */
 export async function rate(regionId: string, kind: LawKind, t?: Transaction): Promise<number> {
 	return currentValue(await erlasse(regionId, t), kind);
+}
+
+/**
+ * Seit wie vielen Ticks der geltende Satz in Kraft ist.
+ *
+ * `Infinity`, wenn nie etwas erlassen wurde: Der Rückfallwert gilt seit Anbeginn, und
+ * damit ist jede Frist abgelaufen.
+ */
+export async function rateAge(regionId: string, kind: LawKind, tick: number): Promise<number> {
+	const seit: number | null = enactedSince(await erlasse(regionId), kind);
+	return seit === null ? Infinity : tick - seit;
 }
 
 /** Alle geltenden Sätze auf einmal — für die Gesetzestafel. */

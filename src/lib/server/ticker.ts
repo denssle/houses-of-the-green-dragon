@@ -167,7 +167,8 @@ function berichten(stunde: WorldTick): void {
 
 	for (const fall of stunde.deaths) {
 		console.info(
-			`${fall.name} ist mit ${fall.age} Jahren gestorben` +
+			`${fall.name} ist mit ${fall.age} Jahren ` +
+				`${fall.cause === 'HUNGER' ? 'an Entkräftung gestorben' : 'gestorben'}` +
 				(fall.extinctDynastyId
 					? ' — ohne Erben. Das Haus ist erloschen.'
 					: fall.heirId

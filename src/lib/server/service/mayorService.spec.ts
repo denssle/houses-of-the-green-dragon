@@ -83,6 +83,19 @@ async function stadtgrund(optionId?: number): Promise<string> {
 	return id;
 }
 
+/** Ein Grundstück in Bürgerhand — die Bemessungsgrundlage der Grundsteuer. */
+async function buergergrund(besitzerId: string): Promise<void> {
+	const plotId = randomUUID();
+	await Plot.create({
+		id: plotId,
+		address: `Bürgergasse ${plotId.slice(0, 4)}`,
+		type: 'BUILDING_LAND',
+		RegionId: stadtId,
+		ownerType: 'CHARACTER',
+		OwnerCharacterId: besitzerId
+	});
+}
+
 describe('Der Bürgermeister im Amt', () => {
 	beforeAll(async () => {
 		await sequelize.sync();
@@ -169,15 +182,40 @@ describe('Der Bürgermeister im Amt', () => {
 		expect(await kasse()).toBeLessThan(1000);
 	});
 
+	/**
+	 * **Und zwar die, die etwas einbringt** (5.71, Punkt 96). Bis dahin war der Zehnt das
+	 * einzige Gesetz, das ein NPC anfassen konnte — er greift auf die Ernte einer Pacht,
+	 * und eine Stadt ohne Pächter konnte ihre Kasse mit nichts füllen, was ihr zur
+	 * Verfügung stand.
+	 */
 	it('erhöht die Steuer, wenn die Kasse leer ist', async () => {
+		const npc = await person('Amtsperson');
+		await insAmt(npc);
+		await Region.update({ treasury: 0 }, { where: { id: stadtId } });
+		// Ein Grundstück in Bürgerhand — sonst erreichte die Grundsteuer niemanden.
+		await buergergrund(npc);
+
+		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
+
+		expect(getan?.action).toBe('SET_TAX');
+		expect(getan?.detail).toBe(LAW_RULES.PROPERTY_TAX.name);
+		expect(await lawService.rate(stadtId, 'PROPERTY_TAX')).toBeGreaterThan(
+			LAW_RULES.PROPERTY_TAX.fallback
+		);
+	});
+
+	it('lässt die Steuern in Ruhe, wenn sie niemanden erreichen', async () => {
+		// Kein Grundbesitz, keine Pacht: Eine Erhöhung brächte nichts ein und stünde
+		// trotzdem an der Tafel im Rathaus. Genau daran drehte das Amt vor 5.71 in fast
+		// jedem Tick.
 		const npc = await person('Amtsperson');
 		await insAmt(npc);
 		await Region.update({ treasury: 0 }, { where: { id: stadtId } });
 
 		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
 
-		expect(getan?.action).toBe('SET_TAX');
-		expect(await lawService.rate(stadtId, 'TITHE')).toBeGreaterThan(LAW_RULES.TITHE.fallback);
+		expect(getan?.action).not.toBe('SET_TAX');
+		expect(await lawService.rate(stadtId, 'PROPERTY_TAX')).toBe(LAW_RULES.PROPERTY_TAX.fallback);
 	});
 
 	it('tut höchstens eines je Tick', async () => {

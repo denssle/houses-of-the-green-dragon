@@ -72,3 +72,23 @@ export function diesThisTick(age: number, roll: number, extraRiskPerYear = 0): b
 
 	return roll < 1 - Math.pow(1 - proJahr, 1 / TICKS_PER_YEAR);
 }
+
+/**
+ * **Woran jemand gestorben ist — soweit sich das sagen lässt.**
+ *
+ * Der Wurf in `diesThisTick` kennt nur eine Summe: Alter und Not sind addiert, und
+ * welcher der beiden Anteile den Ausschlag gab, steht nirgends. Diese Funktion nennt
+ * deshalb **das Risiko, das überwog**, und nicht die Ursache im strengen Sinn. Ein
+ * Sechzigjähriger, der hungert, stirbt an beidem; hier zählt, was die größere Zahl war.
+ *
+ * Das genügt für die Frage, für die es gebaut wurde (Punkt 96, 5.71): Ob eine Stadt an
+ * ihrer Steuer zugrunde geht oder schlicht altert, entscheidet sich an Dutzenden von
+ * Todesfällen und nicht an einem. Für einen einzelnen Nachruf wäre es zu grob — die
+ * Chronik nennt deshalb weiterhin nur das Alter.
+ */
+export const DEATH_CAUSES = ['AGE', 'HUNGER'] as const;
+export type DeathCause = (typeof DEATH_CAUSES)[number];
+
+export function dominantRisk(age: number, extraRiskPerYear = 0): DeathCause {
+	return Math.max(0, extraRiskPerYear) > deathProbabilityPerYear(age) ? 'HUNGER' : 'AGE';
+}

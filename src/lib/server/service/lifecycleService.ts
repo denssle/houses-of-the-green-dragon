@@ -8,7 +8,12 @@ import { Dynasty } from '$lib/db/model/dynasty';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
 import { chooseHeir, type Child, splitEstate } from '$lib/game/inheritance.logic';
-import { diesThisTick, MORTALITY_ONSET_AGE } from '$lib/game/mortality.logic';
+import {
+	type DeathCause,
+	diesThisTick,
+	dominantRisk,
+	MORTALITY_ONSET_AGE
+} from '$lib/game/mortality.logic';
 import {
 	currentSatiety,
 	starvationRiskPerYear,
@@ -41,6 +46,11 @@ export interface Death {
 	heirId: string | null;
 	/** Gesetzt, wenn mit ihm ein Haus erloschen ist. */
 	extinctDynastyId: string | null;
+	/**
+	 * Das Risiko, das überwog — `dominantRisk`. Eine Zuschreibung und kein Befund: Der
+	 * Wurf kennt nur die Summe aus Alter und Not.
+	 */
+	cause: DeathCause;
 }
 
 /**
@@ -81,7 +91,7 @@ export async function reapTheDead(
 
 		// Jeder Todesfall in eigener Transaktion: Ein Fehler beim Nachlass des einen darf
 		// die übrigen nicht mitreißen.
-		const fall = await die(kandidat.dataValues.id, tick);
+		const fall = await die(kandidat.dataValues.id, tick, dominantRisk(alter, not));
 		if (fall) gestorben.push(fall);
 	}
 	return gestorben;
@@ -96,7 +106,11 @@ export async function reapTheDead(
  * Gibt `null` zurück, wenn der Charakter schon tot war. Das ist kein Fehler, sondern der
  * Normalfall bei zwei Durchläufen, die sich überholen.
  */
-export async function die(characterId: string, tick: number): Promise<Death | null> {
+export async function die(
+	characterId: string,
+	tick: number,
+	cause: DeathCause = 'AGE'
+): Promise<Death | null> {
 	return sequelize.transaction(async (t: Transaction) => {
 		const tot = await Character.findByPk(characterId, { transaction: t, lock: t.LOCK.UPDATE });
 		if (!tot || tot.dataValues.deathTick !== null) return null;
@@ -201,7 +215,8 @@ export async function die(characterId: string, tick: number): Promise<Death | nu
 			name: tot.dataValues.firstName,
 			age: alter,
 			heirId: erbeId,
-			extinctDynastyId: erloschen
+			extinctDynastyId: erloschen,
+			cause
 		};
 	});
 }

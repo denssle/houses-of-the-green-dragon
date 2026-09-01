@@ -141,6 +141,23 @@ export function currentValue(enactments: Enactment[], kind: LawKind): number {
 	).value;
 }
 
+/**
+ * Seit wann er gilt.
+ *
+ * `null`, solange niemand etwas erlassen hat — dann gilt der Rückfallwert, und der gilt
+ * seit Anbeginn. Gebraucht wird das, um eine Änderung **wirken zu lassen, ehe man sie
+ * beurteilt** (5.71): Wer stündlich an einer Steuer dreht, die einmal im Spieljahr
+ * eingezogen wird, sieht nie, was die letzte Drehung gebracht hat.
+ */
+export function enactedSince(enactments: Enactment[], kind: LawKind): number | null {
+	const passende = enactments.filter((erlass) => erlass.kind === kind);
+	if (passende.length === 0) return null;
+
+	return passende.reduce((juengster, erlass) =>
+		erlass.enactedTick > juengster.enactedTick ? erlass : juengster
+	).enactedTick;
+}
+
 export type EnactmentOutcome = { ok: true } | { ok: false; reason: ActionFailureReason };
 
 /**

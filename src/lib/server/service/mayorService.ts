@@ -1,13 +1,17 @@
 import { Character } from '$lib/db/model/character';
+import { Lease } from '$lib/db/model/lease';
+import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
 import {
 	type CityState,
 	decideMayorAction,
 	type MayorAction,
-	NPC_MAYOR_LAW,
-	nextTithe
+	NPC_MAYOR_LAWS,
+	nextTaxChange,
+	type NpcMayorLaw
 } from '$lib/game/governance.logic';
 import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
+import { LAW_RULES } from '$lib/game/law.logic';
 import { DEVELOPMENT_COST_PER_PLOT } from '$lib/game/auction.logic';
 import { levelOf } from '$lib/model/buildingTemplate';
 import * as auctionService from '$lib/server/service/auctionService';
@@ -140,7 +144,9 @@ export async function governAsNpcMayor(
 		missingBuildingPrice: fehlt?.price ?? null,
 		landExhausted: freiesLand.length === 0,
 		developmentCost: DEVELOPMENT_COST_PER_PLOT,
-		tithe: await lawService.rate(regionId, 'TITHE')
+		rates: await saetze(regionId),
+		taxBase: await bemessungsgrundlage(regionId),
+		rateAgeInTicks: await satzalter(regionId, tick)
 	};
 
 	const entschluss: MayorAction = decideMayorAction(lage);
@@ -187,20 +193,63 @@ export async function governAsNpcMayor(
 		}
 
 		case 'SET_TAX': {
-			const neu: number | undefined = nextTithe(lage);
-			if (neu === undefined) return undefined;
+			const aenderung = nextTaxChange(lage);
+			if (!aenderung) return undefined;
 
 			const ergebnis = await lawService.enact(
 				inhaber.characterId,
 				regionId,
-				NPC_MAYOR_LAW,
-				neu,
+				aenderung.kind,
+				aenderung.value,
 				tick
 			);
-			return ergebnis.ok ? { action: entschluss, value: neu } : undefined;
+			// **Welche Steuer**, nicht nur welche Zahl: „Steuer auf 3" sagt im Log nichts,
+			// solange es zwei gibt, an denen gedreht werden kann.
+			return ergebnis.ok
+				? { action: entschluss, detail: LAW_RULES[aenderung.kind].name, value: aenderung.value }
+				: undefined;
 		}
 
 		case 'NOTHING':
 			return undefined;
 	}
+}
+
+/** Was gerade gilt — nur die Steuern, an denen ein Amtsinhaber drehen darf. */
+async function saetze(regionId: string): Promise<Record<NpcMayorLaw, number>> {
+	const alle = await lawService.rates(regionId);
+	return Object.fromEntries(NPC_MAYOR_LAWS.map((kind) => [kind, alle[kind]])) as Record<
+		NpcMayorLaw,
+		number
+	>;
+}
+
+/**
+ * Seit wann der geltende Satz gilt — je Steuer, in Ticks.
+ *
+ * Damit eine Erhöhung wirken darf, ehe die nächste kommt (`TAX_EFFECT_DELAY`).
+ */
+async function satzalter(regionId: string, tick: number): Promise<Record<NpcMayorLaw, number>> {
+	const alter = await Promise.all(
+		NPC_MAYOR_LAWS.map(async (kind) => [kind, await lawService.rateAge(regionId, kind, tick)])
+	);
+	return Object.fromEntries(alter) as Record<NpcMayorLaw, number>;
+}
+
+/**
+ * Wen eine Steuer überhaupt erreichte.
+ *
+ * Die Grundsteuer zählt Grundstücke in Bürgerhand — dieselbe Menge, die
+ * `collectPropertyTax` einzieht. Der Zehnt zählt laufende Pachten; er greift auf die
+ * Ernte, und wo niemand pachtet, bringt er nichts.
+ *
+ * **Pachten werden weltweit gezählt**, nicht je Stadt: Die Abbauflächen im Umland hängen
+ * heute an keiner Stadt (`getAreas` nimmt sie ebenso alle), und solange es eine gibt, ist
+ * das dieselbe Zahl. Mit der zweiten Stadt (Punkt 31) gehört beides zusammen angefasst.
+ */
+async function bemessungsgrundlage(regionId: string): Promise<Record<NpcMayorLaw, number>> {
+	return {
+		PROPERTY_TAX: await Plot.count({ where: { RegionId: regionId, ownerType: 'CHARACTER' } }),
+		TITHE: await Lease.count()
+	};
 }

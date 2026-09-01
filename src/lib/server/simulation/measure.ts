@@ -63,6 +63,15 @@ async function geldmenge(): Promise<number> {
 	return leute.reduce((summe, person) => summe + person.dataValues.money, 0);
 }
 
+/** „(Alter 19, Not 12)" — leer, solange niemand gestorben ist. */
+function todeNach(ursachen: Record<string, number>): string {
+	const namen: Record<string, string> = { AGE: 'Alter', HUNGER: 'Not' };
+	const teile = Object.entries(ursachen)
+		.sort((a, b) => b[1] - a[1])
+		.map(([ursache, wieoft]) => `${namen[ursache] ?? ursache} ${wieoft}`);
+	return teile.length === 0 ? '' : ` (${teile.join(', ')})`;
+}
+
 function verteilung(zaehlung: Record<string, number>): string[] {
 	return Object.entries(zaehlung)
 		.sort((a, b) => b[1] - a[1])
@@ -83,6 +92,10 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	const fehlschlaege: Record<string, number> = {};
 	const muessiggang: Partial<Record<IdleReason, number>> = {};
 	const chronik = { geburten: 0, tode: 0, zuzug: 0, braende: 0, steuer: 0, ausgefallen: 0 };
+	// **Woran gestorben wird** (5.71). Ohne diese Trennung stand im Bericht eine Zahl, die
+	// zwei Dinge zusammenwarf: eine Stadt, die altert, und eine, die verhungert. Bei der
+	// Grundsteuer aus Punkt 96 war genau das die offene Frage.
+	const todesursachen: Record<string, number> = {};
 
 	const start: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
 	const begonnen: number = Date.now();
@@ -107,6 +120,9 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 
 		chronik.geburten += stunde.family.births.length;
 		chronik.tode += stunde.deaths.length;
+		for (const fall of stunde.deaths) {
+			todesursachen[fall.cause] = (todesursachen[fall.cause] ?? 0) + 1;
+		}
 		if (stunde.arrival) chronik.zuzug++;
 		if (stunde.hazard) chronik.braende++;
 		chronik.steuer += stunde.tax?.collected ?? 0;
@@ -139,8 +155,8 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		'',
 		`=== DIE STADT (${ticks} Ticks, ${Date.now() - begonnen} ms, ` +
 			`Saat ${saat === undefined ? 'frei gewürfelt' : saat}) ===`,
-		`  Geburten ${chronik.geburten}, Tode ${chronik.tode}, Zuzug ${chronik.zuzug}, ` +
-			`Brände ${chronik.braende}`,
+		`  Geburten ${chronik.geburten}, Tode ${chronik.tode}` +
+			`${todeNach(todesursachen)}, Zuzug ${chronik.zuzug}, Brände ${chronik.braende}`,
 		`  Grundsteuer eingenommen ${chronik.steuer}, nicht eintreibbar ${chronik.ausgefallen}`,
 		'',
 		'=== HANDLUNGEN ==='

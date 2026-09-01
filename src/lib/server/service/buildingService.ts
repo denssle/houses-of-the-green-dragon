@@ -1265,10 +1265,23 @@ export async function getFreeCityPlots(
 /**
  * Ab welchem Zustand ein NPC-Bürgermeister von sich aus herrichten lässt.
  *
- * Bei der Hälfte: früh genug, dass die Stadt nie wirklich verwahrlost, spät genug, dass
- * die Kasse nicht für ein paar Kratzer geplündert wird.
+ * **Er ist der Notfall, nicht der Hausmeister** (5.71, Punkt 96). Bis hierher stand hier
+ * die Hälfte, und solange die Stadtkasse ohnehin leer war, fiel das nicht auf: Er kam nie
+ * dazu. Mit der Grundsteuer kam er dazu — und richtete jedes öffentliche Haus wieder auf
+ * den vollen Zustand.
+ *
+ * Damit nahm er seinen Bürgern den Broterwerb. Die Tagelöhnerei ist seit 5.26
+ * `REPAIR_FOR_HIRE` an genau diesen Bauten, und wer alles instand hält, hat nichts mehr
+ * zu vergeben: Im Messlauf stieg `NO_WORK` von 1632 auf 5439, und **30 von 37 Toten waren
+ * verhungert**. Eine zahlungsfähige Stadt, die sich selbst repariert, schafft die Arbeit
+ * ab, von der ihre Einwohner leben, und zieht ihnen zugleich Steuern ab.
+ *
+ * Deshalb das letzte Viertel: Was darüber verfällt, ist Arbeit und wird bezahlt; erst
+ * darunter greift das Amt ein, damit kein öffentlicher Bau zur Ruine wird. Der
+ * Bürgermeister war Auftraggeber **und** Handwerker in einer Person — bis der Auftrag als
+ * eigenes Ding gebaut ist (Punkt 74), ist diese Schwelle die Trennung zwischen beidem.
  */
-export const MAYOR_MAINTAINS_BELOW = 50;
+export const MAYOR_MAINTAINS_BELOW = 25;
 
 /**
  * Der Amtsinhaber kümmert sich — sofern er ein NPC ist.

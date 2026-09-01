@@ -3,6 +3,7 @@ import {
 	deathProbabilityPerTick,
 	deathProbabilityPerYear,
 	diesThisTick,
+	dominantRisk,
 	MORTALITY_DOUBLING_YEARS,
 	MORTALITY_ONSET_AGE
 } from '$lib/game/mortality.logic';
@@ -58,6 +59,31 @@ describe('Sterberisiko', () => {
 
 		it('verschont jeden beim besten Wurf', () => {
 			expect(diesThisTick(90, 0.999999)).toBe(false);
+		});
+	});
+
+	/**
+	 * **Das überwiegende Risiko, nicht die Ursache** (5.71, Punkt 96).
+	 *
+	 * Der Wurf kennt nur die Summe aus Alter und Not; welcher Anteil den Ausschlag gab,
+	 * steht nirgends. Für die Frage, ob eine Stadt altert oder verhungert, genügt die
+	 * Zuschreibung — sie entscheidet sich an Dutzenden von Fällen, nicht an einem.
+	 */
+	describe('woran gestorben wurde', () => {
+		it('nennt das Alter, wo keine Not ist', () => {
+			expect(dominantRisk(80)).toBe('AGE');
+		});
+
+		it('nennt die Not, wo ein Junger hungert', () => {
+			// Vor vierzig ist das Altersrisiko null — hier kann es nur die Not gewesen sein.
+			expect(dominantRisk(20, 0.045)).toBe('HUNGER');
+		});
+
+		it('nennt beim Greis das Alter, solange es überwiegt', () => {
+			// Ein Hundertjähriger stirbt am Alter, auch wenn er dabei nicht satt war.
+			const alterUeberwiegt: number = deathProbabilityPerYear(100) / 2;
+
+			expect(dominantRisk(100, alterUeberwiegt)).toBe('AGE');
 		});
 	});
 

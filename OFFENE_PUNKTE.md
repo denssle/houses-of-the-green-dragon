@@ -50,10 +50,11 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 93  | `GOAL_UNREACHABLE` deckt 85 % des Müßiggangs — Preisproblem oder zu grobe Diagnose   | dem nächsten Messlauf        | Befund       |
 | 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                       | Punkt 31                     | Befund       |
 | 95  | Die Werkzeuge maßen einen anderen Takt als den, der läuft — **behoben mit 5.69**     | —                            | erledigt     |
-| 96  | Die Stadtkasse hat keine Einnahme, die ein NPC-Bürgermeister erhöhen kann            | Punkten 85, 86, 87           | Befund       |
+| 96  | Die Stadtkasse ohne Einnahme — **gebaut mit 5.71**, fiskalisch wirksam; siehe 100    | Punkt 100                    | teilweise    |
 | 97  | `VOTE` scheitert zu 84 % an `NOT_A_CITIZEN` — Entschluss ohne Voraussetzung          | Punkt 49                     | Befund       |
 | 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten  | Punkte 89, 16                | Befund       |
 | 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen         | —                            | erledigt     |
+| 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote         | dem nächsten Schritt         | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2668,6 +2669,14 @@ darauf. `selfSustainingEconomy` bewusst nicht — der Grund steht in seinem Kopf
 **Was daran noch offen ist:** Punkt 91 (der Takt ist nicht atomar) hat jetzt die Stelle,
 an der ein `try/catch` je NPC hingehört — eine Datei, nicht fünf.
 
+**Nachgeprüft am 29.08.2026:** Zwei Läufe über 300 Ticks mit derselben Saat und demselben
+Stand sind **zeichengleich** — der Bericht unterscheidet sich in einer einzigen Zeile, der
+Dauer in Millisekunden. Die Saat pinnt die Welt also auch mit dem vollen Takt, in dem jetzt
+Geburt, Tod, Zuzug und Unglück würfeln. Was sie **nicht** aushält: ein Vergleich über einen
+Umbau hinweg. Zwei 2000-Tick-Läufe mit derselben Saat, zwischen denen nur die
+Instrumentierung dazukam, wichen voneinander ab. Ein Vorher-Nachher muss beide Seiten mit
+**demselben** Stand messen, sonst misst es die Änderung und den Umbau zugleich.
+
 ### 96. Die Stadtkasse hat keine Einnahme, die ein NPC-Bürgermeister erhöhen kann
 
 **Befund vom 28.08.2026, aus dem ersten Lauf mit vollem Takt.** In vierzig Spieljahren
@@ -2707,7 +2716,42 @@ Kasse durchweg unter 220, und 3667 von 5129 Schichten (71,5 %) an `EMPLOYER_BROK
 gescheitert — gegen 4199 von 5637 (74,5 %) bei Saat 86. Das ist keine Eigenart einer
 gewürfelten Ausgangslage, sondern die Bauart.
 
-**Zu entscheiden ist, woher eine Stadt ohne Spieler ihr Geld nimmt.** Drei Wege, die sich
+**Gebaut mit 5.71 — und fiskalisch wirksam.** Entschieden wurde die dritte der unten
+genannten Möglichkeiten: `NPC_MAYOR_LAW` ist weg, `nextTaxChange` wählt den Hebel nach der
+**Bemessungsgrundlage** (Grundstücke in Bürgerhand für die Grundsteuer, laufende Pachten
+für den Zehnt) und rührt keine Steuer an, die niemanden erreicht. Der Startsatz bleibt
+null: Eine Welt beginnt ohne Grundsteuer, und wer sie einführt, verantwortet das.
+
+Zwei Dinge mussten dabei nachgezogen werden, und beide sind Befunde für sich:
+
+- **Ein Anteil springt in Fünfern, eine Münze nicht** (`TAX_RAISE_STEP_COIN = 1`). Fünf
+  Münzen mehr Grundsteuer sind ein Vermögen — ein Grundstück kostet vierzig.
+- **Man dreht nicht wieder, ehe die letzte Drehung gewirkt hat** (`TAX_EFFECT_DELAY`). Der
+  Bürgermeister entscheidet **stündlich**, die Grundsteuer wird **jährlich** eingezogen:
+  Ohne Frist erhöhte er sie zwanzigmal, ehe die erste Münze ankam, und stand binnen
+  zwanzig Ticks am Höchstsatz. In `worldComesAlive` ist daran jemand verhungert — der Test
+  hat den Fehler gefangen, ehe ein Messlauf ihn zeigen konnte.
+
+**Gemessen, 2000 Ticks, Saat 86, gegen denselben Lauf davor:**
+
+|                         |                 vorher |             nachher |
+| ----------------------- | ---------------------: | ------------------: |
+| Grundsteuer eingenommen |                  **0** |            **3468** |
+| Stadtkasse              |           durchweg ≤29 |         236 bis 782 |
+| `EMPLOYER_BROKE`        | 4199 von 5637 (74,5 %) | 872 von 2727 (32 %) |
+| `BUY_PLOT`              |                      8 |              **22** |
+| Häuser am Ende          |                     11 |                  19 |
+
+Die Kasse kommt aus dem Nullpunkt, Land wird wieder erschlossen, und die Arbeit gelingt
+öfter. **Punkt 86 und 87 sind damit von ihrer Sperre befreit.**
+
+**Und es hat einen Preis, der schwerer wiegt als der Gewinn — siehe Punkt 100.** Die
+Bevölkerung fällt von 36 auf 28, und vier von fünf Toten verhungern. Dieser Punkt ist
+deshalb **nicht** erledigt, sondern verschoben: Die Stadt kann sich jetzt finanzieren, und
+was sie ihren Bürgern dafür abnimmt, können die nicht aufbringen.
+
+**Die ursprüngliche Frage, zur Erinnerung — woher eine Stadt ohne Spieler ihr Geld
+nimmt.** Drei Wege, die sich
 nicht ausschließen: die Grundsteuer auf einen Satz über null stellen (dann trägt der
 Grundbesitz die Stadt, und der `fallback` ist eine Entscheidung statt einer Vorgabe); den
 NPC-Bürgermeister auch über sie beschließen lassen (dann ist es Politik, und ein Haushalt
@@ -2810,3 +2854,48 @@ Aufräumskript wert ist oder ob die Höfe stehen bleiben, bis sie von selbst ver
 gehören einem Toten, also renoviert sie niemand, und `YEARS_TO_RUIN` erledigt sie.
 Dagegen spricht, dass bis dahin jeder neue Pächter derselben Fläche einen zweiten Hof
 danebenstellt.
+
+### 100. Die Stadt verhungert an ihrer eigenen Steuer
+
+**Befund vom 29.08.2026, aus drei Läufen über 2000 Ticks mit Saat 86.** Mit der
+Grundsteuer aus Punkt 96 kommt die Stadtkasse aus dem Nullpunkt — und die Bevölkerung
+bricht ein:
+
+|                      | vor der Steuer | mit Steuer | + Schwelle 25 |
+| -------------------- | -------------: | ---------: | ------------: |
+| Lebende am Ende      |             36 |         25 |            28 |
+| Tode                 |             15 |         37 |            28 |
+| **davon an der Not** | nicht gemessen |     **30** |        **23** |
+| Geld bei Leuten      |           2559 |       1720 |          2998 |
+| `NO_WORK`            |           1632 |       5439 |          5607 |
+
+**Vier von fünf Toten verhungern.** Das ist keine alternde Stadt, sondern eine verarmende:
+In der Einwohnerliste stehen am Ende Leute mit **null** Münzen und leerer Kammer, während
+ein Laib Brot vier kostet. Der reichste Mann der Stadt hatte vorher 594 Münzen, nachher 108.
+
+**Eine Vermutung ist bereits widerlegt.** Naheliegend war: Der Bürgermeister hält seit der
+gefüllten Kasse alle öffentlichen Bauten instand und nimmt damit den Tagelöhnern ihren
+Broterwerb — `REPAIR_FOR_HIRE` ist seit 5.26 die einzige verlässliche Einnahme, und
+`NO_WORK` war von 1632 auf 5439 gestiegen. Daraufhin wurde `MAYOR_MAINTAINS_BELOW` von 50
+auf 25 gesenkt: Das Amt richtet nur noch im letzten Viertel her, alles darüber bleibt
+bezahlte Arbeit. **Es half, aber nicht deshalb** — die Toten gingen von 37 auf 28 zurück
+und den Leuten blieb deutlich mehr Geld, doch `NO_WORK` fiel nicht, sondern stieg leicht.
+Wäre die Vermutung richtig gewesen, hätte genau diese Zahl sinken müssen. Die Schwelle
+bleibt trotzdem: Ein Amtsinhaber, der Auftraggeber **und** Handwerker in einer Person ist,
+war ohnehin nicht gemeint (Punkt 74).
+
+**Was fehlt, ist eine Bilanz.** Der Messbericht zählt Handlungen, keine Münzen. Wir wissen,
+was die Stadt einnimmt (3468), aber nicht, was sie als Lohn auszahlt, was der Kornspeicher
+einzieht, was zwischen Bürgern fließt. Ohne das ist jeder weitere Eingriff die dritte
+Vermutung in Folge — und die erste war schon falsch.
+
+**Zu bauen ist deshalb zuerst eine Aufschlüsselung, kein Eingriff** — derselbe Satz wie in
+Punkt 93, und er hat sich hier zum zweiten Mal bewährt: Erst die Todesursache im Bericht
+(5.71) hat aus „die Bevölkerung sinkt" die Diagnose „sie verhungert" gemacht, und das in
+einem einzigen Lauf. Gesucht ist dasselbe für das Geld: Ein- und Ausgang je Tick, nach
+Quelle getrennt. Danach ist zu entscheiden, ob der Satz zu hoch ist, die Löhne zu niedrig
+oder der Kornspeicher zu teuer — heute lässt sich das nicht unterscheiden.
+
+**Bis dahin ist die Steuer eine offene Wunde in der laufenden Welt.** Wer Grünau vor dem
+nächsten Schritt schützen will, kann den Bürgermeister die Grundsteuer nicht beschließen
+lassen — es ist eine Zeile in `NPC_MAYOR_LAWS`.
