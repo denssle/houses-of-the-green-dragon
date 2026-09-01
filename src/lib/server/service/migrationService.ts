@@ -188,6 +188,17 @@ async function freierWohnraum(regionId: string): Promise<boolean> {
 async function handwerkeInDerStadt(regionId: string): Promise<SkillType[]> {
 	const vorhanden: SkillType[] = [];
 	for (const haus of await buildingService.getBuildingsInRegion(regionId)) {
+		// **Nur, was in Bürgerhand ist** (5.75, Punkt 104). Dies ist derselbe Fehler wie in
+		// Punkt 86, an einer zweiten Stelle: Die Städtische Schmiede trägt `SMITHING`, also
+		// galt das Schmiedehandwerk als versorgt — und `skillToBring` bringt bevorzugt, was
+		// **fehlt**. In zwei Messläufen über 2000 Ticks mit 51 Charakteren kam deshalb
+		// `SMITHING` **kein einziges Mal** vor; es war das einzige Handwerk, das ein
+		// städtisches Gebäude belegt, und damit das einzige, das nie zuzog.
+		//
+		// Ohne Schmied kein Eisen, ohne Eisen keine Mühle, keine Bäckerei, keine
+		// Schneiderei und keine Alchemistenküche (Punkt 103). Eine Krücke der Stadt darf
+		// einen Beruf nicht besetzen — sie soll ihn überbrücken, bis ihn jemand ergreift.
+		if (haus.ownerType !== 'CHARACTER') continue;
 		const koennen = buildingService.getBuildingOption(haus.optionId)?.skill;
 		if (koennen && !vorhanden.includes(koennen)) vorhanden.push(koennen);
 	}

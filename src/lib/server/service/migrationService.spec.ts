@@ -1,9 +1,11 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { randomUUID } from 'node:crypto';
 import { Op } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 import '$lib/db/db';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
+import { Plot } from '$lib/db/model/plot';
 import { Skill } from '$lib/db/model/skill';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
@@ -24,6 +26,7 @@ import { yearsToTicks } from '$lib/game/time';
 const JETZT = 10_000;
 /** Ein Wurf, bei dem sicher jemand kommt: unter der Ankunftswahrscheinlichkeit. */
 const KOMMT = () => 0;
+const SCHMIEDE = 2;
 let stadtId: string;
 
 describe('Zuzug', () => {
@@ -58,8 +61,42 @@ describe('Zuzug', () => {
 		expect(koennen[0].dataValues.level).toBeGreaterThan(0);
 	});
 
-	it('bringt ein Handwerk mit, das in der Stadt fehlt', async () => {
-		// Die Startwelt hat eine Schmiede — also kommt kein Schmied.
+	/**
+	 * **Was der Stadt fehlt, geht vor — aber ein städtischer Betrieb besetzt kein Handwerk**
+	 * (5.75, Punkt 104).
+	 *
+	 * Bis dahin zählte `handwerkeInDerStadt` **alle** Häuser der Region. Die Städtische
+	 * Schmiede trägt `SMITHING`, also galt das Schmiedehandwerk als versorgt, und es zog nie
+	 * ein Schmied zu: In zwei Messläufen mit 51 Charakteren kam `SMITHING` kein einziges Mal
+	 * vor. Ohne Schmied kein Eisen, und ohne Eisen keine Mühle, Bäckerei, Schneiderei und
+	 * Alchemistenküche (Punkt 103) — die städtische Krücke sperrte die halbe Wirtschaft.
+	 *
+	 * Dieselbe Verwechslung wie in Punkt 86, nur eine Tür weiter: Eine Krücke soll einen
+	 * Beruf überbrücken, bis ihn jemand ergreift, und ihn nicht besetzen.
+	 */
+	it('lässt sich von einem städtischen Betrieb nicht abhalten', async () => {
+		// `KOMMT` würfelt null, `skillToBring` nimmt also das erste fehlende Handwerk der
+		// Liste — und das ist `SMITHING`, obwohl die Stadt eine Schmiede hat.
+		const angekommen = await migrationService.admitNewcomers(stadtId, JETZT, KOMMT);
+
+		expect(angekommen?.skill).toBe('SMITHING');
+	});
+
+	it('bringt aber kein Handwerk mit, das ein Bürger schon ausübt', async () => {
+		// Ein Betrieb in Bürgerhand versorgt die Stadt wirklich — dann lohnt ein zweiter
+		// desselben Gewerks nicht, und der Nächste bringt etwas anderes mit.
+		const grundstueck = (await Plot.findOne({ where: { RegionId: stadtId } }))!;
+		const buerger = (await Character.findOne({ where: { role: 'NPC' } }))!;
+		await Building.create({
+			id: randomUUID(),
+			name: 'Schmiede eines Bürgers',
+			optionId: SCHMIEDE,
+			lastConditionTick: JETZT,
+			PlotId: grundstueck.dataValues.id,
+			ownerType: 'CHARACTER',
+			OwnerCharacterId: buerger.dataValues.id
+		});
+
 		const angekommen = await migrationService.admitNewcomers(stadtId, JETZT, KOMMT);
 
 		expect(angekommen?.skill).not.toBe('SMITHING');

@@ -58,6 +58,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 101 | Das Kassenbuch — jede Bewegung der Stadtkasse mit einem Grund                        | Punkt 100                    | Entwurf      |
 | 102 | Jeder Bau verbrennt seinen Preis — 91 % des Geldes verschwindet wieder               | Punkte 100, 66, 74           | Befund       |
 | 103 | Die Wirtschaft hat eine Startreihenfolge, die niemand einhält — Quader und Eisen     | Punkte 85, 70, 15            | Befund       |
+| 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu | —                            | erledigt     |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -3209,3 +3210,46 @@ billigste:
 
 Der Test bleibt stehen, wie `ironChain.spec.ts`: Er beschreibt die Sperre und wird rot,
 sobald sie fällt.
+
+### 104. Die städtische Krücke besetzte den Beruf, statt ihn zu überbrücken — behoben (5.75)
+
+**Befund vom 29.08.2026, beim Prüfen von Punkt 103.** Die Startstadt trägt seit jeher eine
+Städtische Schmiede. `handwerkeInDerStadt` zählte für den Zuzug **alle** Häuser der Region:
+
+```ts
+for (const haus of await buildingService.getBuildingsInRegion(regionId)) {
+	const koennen = buildingService.getBuildingOption(haus.optionId)?.skill;
+```
+
+Die Schmiede trägt `skill: 'SMITHING'`, das Handwerk galt also als versorgt — und
+`skillToBring` bringt bevorzugt, was **fehlt**. Folge: **Es zog nie ein Schmied zu.** In
+zwei Messläufen über 2000 Ticks mit zusammen 51 Charakteren kommen `CONSTRUCTION`,
+`FARMING`, `FORESTRY`, `MINING`, `ALCHEMY`, `BAKING` und `TAILORING` vor — `SMITHING` kein
+einziges Mal. Es war das einzige Handwerk, das ein städtisches Gebäude belegt, und damit
+das einzige, das nie ankam.
+
+**Und daran hing die halbe Wirtschaft.** Ohne Schmied kein privates Eisen; ohne Eisen sind
+Mühle, Bäckerei, Schneiderei und Alchemistenküche unbaubar (Punkt 103). Die Krücke, die
+1.6 als Übergangshilfe gedacht war, sperrte genau den Beruf, den die Kette am nötigsten
+braucht.
+
+**Das ist Punkt 86, eine Tür weiter.** Dort wurde mit 5.65 derselbe Fehler in
+`fehlendeWerkstatt` behoben — ein städtischer Betrieb ließ das Handwerk als vorhanden
+gelten und sperrte den privaten. Dass dieselbe Verwechslung ein zweites Mal im Zuzug stand,
+hat niemand gesucht: Der Messlauf zeigt Handwerke der Zugezogenen, aber keine Liste dessen,
+was **nicht** kam. Ein Fehlen fällt nicht auf.
+
+**Behoben mit 5.75:** Gezählt wird nur noch, was in Bürgerhand ist. Der Test in
+`migrationService.spec.ts` dreht die alte Erwartung um — er hieß „Die Startwelt hat eine
+Schmiede, also kommt kein Schmied" und kodierte damit den Fehler als Absicht. Jetzt prüft
+er beides: dass ein **städtischer** Betrieb den Zuzug nicht abhält und ein **bürgerlicher**
+sehr wohl.
+
+**Was das lösen dürfte, und was nicht.** Ein zugezogener Schmied wählt seine Werkstatt nach
+Können, nicht nach Preis (`fehlendeWerkstatt` sortiert `koennen` vor `price`) — er baut
+also die Schmiede, obwohl die Mühle billiger ist. Damit ist der Preis-Deadlock für ihn
+aufgehoben: Sägeschuppen 180 → Steinmetzhütte 200 → **Mühle 200** → und die braucht Eisen,
+das es ohne Schmiede nicht gibt. Für einen NPC **ohne** einschlägiges Können bleibt der
+Deadlock bestehen; er spart weiter auf die billigste fehlende Werkstatt und kommt nie an.
+Ob die Kette damit wirklich anspringt, muss ein Messlauf zeigen — dies ist die erste
+Änderung dieser Sitzung, von der ich das nicht vorher behaupten will.
