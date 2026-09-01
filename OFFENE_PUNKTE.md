@@ -59,6 +59,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 102 | Jeder Bau verbrennt seinen Preis — 91 % des Geldes verschwindet wieder               | Punkte 100, 66, 74           | Befund       |
 | 103 | Die Wirtschaft hat eine Startreihenfolge, die niemand einhält — Quader und Eisen     | Punkte 85, 70, 15            | Befund       |
 | 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu | —                            | erledigt     |
+| 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                  | Punkt 16                     | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -3253,6 +3254,58 @@ das es ohne Schmiede nicht gibt. Für einen NPC **ohne** einschlägiges Können 
 Deadlock bestehen; er spart weiter auf die billigste fehlende Werkstatt und kommt nie an.
 Ob die Kette damit wirklich anspringt, muss ein Messlauf zeigen — dies ist die erste
 Änderung dieser Sitzung, von der ich das nicht vorher behaupten will.
+
+### 105. Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält
+
+**Angemerkt am 29.08.2026**, aus der Frage, ob eine ausgestorbene Stadt sich wieder füllt.
+Die Antwort ist ja — mit einer Ecke, die erst auffällt, wenn sie eintritt.
+
+**Der Zuzug prüft ausdrücklich nur städtischen Wohnraum:**
+
+```ts
+if (haus.ownerType === 'CITY' && platz !== null && platz > 0) return true;
+```
+
+Das ist richtig so — ein Ankömmling soll nicht in fremdes Erbe einziehen —, bedeutet aber:
+In Grünau hängt der ganze Zuzug an **einem** Gebäude, der Städtischen Unterkunft mit
+zwanzig Plätzen. (Was der Stadt aus erbenlosem Nachlass zufällt, zählt vorübergehend mit,
+solange es nicht versteigert ist — Punkt 79. Verlassen sollte man sich darauf nicht.)
+
+**Und dieses Gebäude verfällt wie jedes andere**, um 0,1 Zustandspunkte je Tick. Instand
+hält es entweder der Bürgermeister — den es nur gibt, wenn jemand lebt und gewählt wurde —
+oder ein Tagelöhner für Lohn, der ebenfalls leben muss. **Stirbt die Stadt vollständig aus,
+repariert sie niemand mehr.**
+
+Von voller Güte bis zur Ruine sind es `YEARS_TO_RUIN` = 20 Spieljahre, also tausend Ticks —
+**rund sechs Wochen Echtzeit**. Fällt die Unterkunft, gibt `freierWohnraum` dauerhaft
+`false` zurück, und es kommt nie wieder jemand an. Die Welt wäre dann nicht leer, sondern
+**endgültig** leer: kein Weg zurück außer von Hand in der Datenbank.
+
+**Das Zeitfenster ist großzügig, und genau das ist das Unbehagen.** Bei einer
+Ankunftswahrscheinlichkeit von einem Prozent je Tick kommt im Schnitt alle hundert Ticks
+jemand an, also etwa alle vier Realtage; er findet Arbeit, richtet die Unterkunft her, und
+die Stadt erholt sich. Praktisch ist sie damit kaum kaputtzukriegen — aber nicht durch
+Konstruktion, sondern durch das Verhältnis zweier Zahlen, die niemand aufeinander abgestimmt
+hat. Wer `YEARS_TO_RUIN` senkt oder `ARRIVAL_CHANCE_PER_TICK` (beides sind Kandidaten fürs
+Balancing, Punkt 16), kann die Welt unbeabsichtigt unwiederbringlich machen.
+
+**Denkbare Antworten**, von der kleinsten zur größten:
+
+- **Die Unterkunft verfällt nicht.** Sie ist die Krücke aus 3.3 und kein Bauwerk mit
+  Schicksal; ein Obdach, das die Stadt jedem stellt, sollte nicht am Fleiß ihrer Einwohner
+  hängen. Eine Ausnahme in `zustandVon` oder ein Feld an der Vorlage.
+- **Die Stadt baut sie nach.** `fehlenderBau` kennt schon den Begriff „was der Stadt
+  fehlt"; eine Stadt ohne Obdach hätte damit die dringlichste Baustelle überhaupt. Setzt
+  aber einen Bürgermeister voraus — hilft also gerade im Ernstfall nicht.
+- **Ankommen ohne Dach erlauben.** Am ehrlichsten zur Welt (wer ankommt und nichts findet,
+  schläft im Freien) und am härtesten: Obdachlosigkeit heißt keine Erholung und keine
+  Kinder. Als alleinige Rettung zu wenig, als Ergänzung stimmig.
+
+**Was daran kein Fehler ist:** Dass mit den Einwohnern auch ihre Häuser erlöschen, ist
+gewollt — eine Dynastie, die ausstirbt, ist ein Ereignis mit Chronikeintrag und kein
+Zurücksetzen. Verloren ginge nicht die Einwohnerzahl, sondern die Geschichte der
+Gründerfamilien seit 1.6. Das ist ein Grund, die Stadt nicht leichtfertig sterben zu
+lassen, aber kein Grund, den Tod zu verhindern.
 
 ## Der Weg durch die Wirtschaft — Stand 29.08.2026
 
