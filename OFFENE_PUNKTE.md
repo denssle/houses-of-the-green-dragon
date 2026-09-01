@@ -45,7 +45,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick            | laufend                      | Befund       |
 | 89  | Ein Betrieb je Handwerk, für immer — ihre Zahl ist eine Konstante der Vorlagen       | Punkte 15, 34                | Entwurf      |
 | 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung   | Punkte 76, 16                | Entwurf      |
-| 91  | Der Takt ist nicht atomar — ein Fehler halbiert die Stunde                           | laufend                      | Befund       |
+| 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen     | laufend                      | teilweise    |
 | 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                   | Punkte 70, 40                | Befund       |
 | 93  | `GOAL_UNREACHABLE` deckt 85 % des Müßiggangs — Preisproblem oder zu grobe Diagnose   | dem nächsten Messlauf        | Befund       |
 | 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                       | Punkt 31                     | Befund       |
@@ -2508,7 +2508,7 @@ und Punkt 89 (unbediente Nachfrage) und ist deshalb der erste Kandidat. Die Prei
 ist die größere Arbeit und gehört hinter Punkt 15, weil sie ohne Verwendungen nichts zu
 bewerten hat.
 
-### 91. Der Takt ist nicht atomar
+### 91. Der Takt ist nicht atomar — erste Hälfte behoben (5.73)
 
 **Befund vom 23.08.2026.** `schlagen()` stellt zuerst die Weltuhr (`advanceWorld` schreibt
 `currentTick` und `lastTickAt`), und **danach** handelt die Stadt. Alles Weitere ergibt sich
@@ -2519,17 +2519,33 @@ aus `lastTickAt` — also kommt eine angefangene Stunde nie wieder.
 - **Der Prozess endet mitten in `actForNpcs`** (Absturz, Deploy zur vollen Stunde). Die
   vordere Hälfte der Einwohner hat gehandelt, die hintere nicht. Wegen Punkt 88 trifft es
   reproduzierbar dieselben Leute.
-- **Ein einzelner NPC wirft.** `ausfuehren` hat keinen eigenen Schutz; die Ausnahme läuft
-  bis in das `try` von `schlagen()`. Der Rest der Schleife fällt aus — und mit ihm
+- **Ein einzelner NPC wirft.** `ausfuehren` hatte keinen eigenen Schutz; die Ausnahme lief
+  bis in das `try` von `schlagen()`. Der Rest der Schleife fiel aus — und mit ihm
   **alles, was danach steht**: Zuzug, Wahl, Amtshandlungen, Versteigerungen, Grundsteuer,
-  Sold, Unglück und das Sterben. Ein kaputter Datensatz legt also nicht einen Einwohner
-  still, sondern die ganze Stunde, und im Log steht eine Zeile.
+  Sold, Unglück und das Sterben. Ein kaputter Datensatz legte also nicht einen Einwohner
+  still, sondern die ganze Stunde, und im Log stand eine Zeile.
 
-**Zu bauen sind zwei kleine Dinge:** ein `try/catch` je NPC, das den Fehlschlag als
-`byFailure`-Eintrag bucht statt die Schleife abzubrechen (die Buchführung dafür gibt es
-schon), und ein Vermerk, bis wohin ein Tick abgearbeitet ist. Das Zweite ist die
-Voraussetzung dafür, den Takt später aus einem Cron gegen einen geschützten Endpunkt zu
-rufen — was in `ticker.ts` ohnehin als der robustere Weg vermerkt ist.
+**Der zweite ist behoben (5.73).** `actForNpcs` fängt je Einwohner: Der Fehlschlag wird
+unter `UNKNOWN/EXCEPTION` gebucht — dort, wo der Ticker ohnehin warnt — und mit der Kennung
+des Betroffenen protokolliert. Ein stillschweigend gefangener Fehler wäre schlimmer als der
+Absturz, weil ihn niemand fände.
+
+**Nicht als `IDLE` gebucht**, und das ist die Überlegung dahinter: Das läge nahe, verletzte
+aber die Zusicherung, dass zu jedem Müßiggang ein Grund gehört — und die Gründe in
+`IDLE_REASONS` sind Entscheidungen über ein Leben, kein Unfall im Code. Wer abstürzt, hat
+nichts gewählt und steht deshalb in keiner Handlungszählung.
+
+**Wie das geprüft wird, ist der interessante Teil.** Ein kaputter Charakter lässt sich
+nicht herstellen: `RegionId` darf nicht `null` sein, und ein Verweis ins Leere bricht am
+Fremdschlüssel — die Datenbank ist strenger als der Code. Gemockt wird in diesem Projekt
+nirgends. Also nimmt `actForNpcs` den Schritt als Parameter, wie `reapTheDead` den Würfel,
+und der Test lässt genau einen Einwohner werfen. Belegt ist beides: Mit der Naht, aber ohne
+den `catch` fliegt die Ausnahme aus `actForNpcs` heraus und reißt den Lauf mit; mit ihm
+handeln alle übrigen weiter.
+
+**Offen bleibt die erste Hälfte:** ein Vermerk, bis wohin ein Tick abgearbeitet ist. Das
+ist die Voraussetzung dafür, den Takt später aus einem Cron gegen einen geschützten
+Endpunkt zu rufen — was in `ticker.ts` ohnehin als der robustere Weg vermerkt ist.
 
 ### 92. Der Verwalter arbeitet ohne Ende
 

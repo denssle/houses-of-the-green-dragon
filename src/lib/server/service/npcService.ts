@@ -96,7 +96,22 @@ export interface NpcTick {
 	byIdleReason: Partial<Record<IdleReason, number>>;
 }
 
-export async function actForNpcs(tick: number): Promise<NpcTick> {
+export async function actForNpcs(
+	tick: number,
+	/**
+	 * Was für einen Einzelnen geschieht.
+	 *
+	 * **Kommt als Parameter herein, damit ein Test einen Stolpernden erzwingen kann** —
+	 * dieselbe Bauart wie beim Würfel in `reapTheDead`. Über die Datenbank geht es nicht:
+	 * `NOT NULL` und die Fremdschlüssel lassen einen kaputten Charakter gar nicht erst
+	 * entstehen. Im Betrieb steht hier immer `ausfuehren`.
+	 */
+	schritt: (
+		characterId: string,
+		tick: number,
+		unattended?: boolean
+	) => Promise<Ausgang> = ausfuehren
+): Promise<NpcTick> {
 	const npcs = await Character.findAll({
 		where: { deathTick: null, role: 'NPC' }
 	});
@@ -119,7 +134,9 @@ export async function actForNpcs(tick: number): Promise<NpcTick> {
 	};
 
 	for (const npc of npcs) {
-		buchen(await ausfuehren(npc.dataValues.id, tick));
+		const ergebnis = await einzeln(schritt, npc.dataValues.id, tick);
+		if (ergebnis) buchen(ergebnis);
+		else gescheitert[AUSNAHME] = (gescheitert[AUSNAHME] ?? 0) + 1;
 	}
 
 	// **Und die Charaktere, die gerade niemand spielt** (5.5). Sie laufen durch dieselbe
@@ -131,7 +148,9 @@ export async function actForNpcs(tick: number): Promise<NpcTick> {
 
 	for (const charakter of verwaist) {
 		if (!isUnattended(charakter.dataValues.lastSeenTick, tick)) continue;
-		buchen(await ausfuehren(charakter.dataValues.id, tick, true));
+		const ergebnis = await einzeln(schritt, charakter.dataValues.id, tick, true);
+		if (ergebnis) buchen(ergebnis);
+		else gescheitert[AUSNAHME] = (gescheitert[AUSNAHME] ?? 0) + 1;
 	}
 
 	return {
@@ -142,8 +161,47 @@ export async function actForNpcs(tick: number): Promise<NpcTick> {
 	};
 }
 
+/**
+ * **Ein Stolpernder reißt nicht die Stunde mit** (5.73, Punkt 91).
+ *
+ * Bis hierher lief die Schleife ungeschützt, und die Ausnahme eines einzelnen Einwohners
+ * lief bis in das `try` von `schlagen()`. Damit fiel nicht ein Einwohner aus, sondern
+ * **alles, was danach steht**: die übrigen Einwohner, der Zuzug, die Wahl, die
+ * Amtshandlungen, die Versteigerungen, die Grundsteuer, der Sold, das Unglück und das
+ * Sterben. Im Log stand eine Zeile.
+ *
+ * Und es wäre nicht ein verlorener Tick geblieben: Die Zugreihenfolge ist in jedem Tick
+ * dieselbe (Punkt 88), also trifft es reproduzierbar dieselben Leute — dieselbe Stunde
+ * ginge Stunde um Stunde verloren, bis jemand die Daten repariert.
+ *
+ * **Verschluckt wird nichts.** Der Fehlschlag wird gebucht, damit er in der Statistik
+ * auftaucht, *und* mit der Kennung des Betroffenen protokolliert: Ein stillschweigend
+ * gefangener Fehler wäre schlimmer als der Absturz, weil ihn niemand fände.
+ *
+ * **Und er wird nicht als `IDLE` gebucht.** Das läge nahe, verletzte aber die Zusicherung,
+ * dass zu jedem Müßiggang ein Grund gehört (`byIdleReason`, geprüft in `measure.spec.ts`)
+ * — und die Gründe dort sind Entscheidungen über ein Leben, kein Unfall im Code. Ein
+ * Abgestürzter hat nichts gewählt, also steht er in keiner Handlungszählung; er steht
+ * allein unter `byFailure`, wo der Ticker ohnehin warnt.
+ */
+export const AUSNAHME = 'UNKNOWN/EXCEPTION';
+
+async function einzeln(
+	schritt: (characterId: string, tick: number, unattended?: boolean) => Promise<Ausgang>,
+	characterId: string,
+	tick: number,
+	unattended = false
+): Promise<Ausgang | undefined> {
+	try {
+		return await schritt(characterId, tick, unattended);
+	} catch (fehler) {
+		console.error(`Einwohner ${characterId} ist im Tick ${tick} gescheitert:`, fehler);
+		return undefined;
+	}
+}
+
 /** Was eine einzelne Entscheidung ergeben hat. */
-interface Ausgang {
+export interface Ausgang {
 	action: NpcAction;
 	/** Der Grund, an dem die Handlung scheiterte — nichts heißt: sie ging durch. */
 	failure?: string;
@@ -155,8 +213,12 @@ interface Ausgang {
  *
  * `verwaltet` schaltet auf die engeren Befugnisse um: Ein Spielercharakter, den gerade
  * niemand führt, wird erhalten und nicht gelenkt.
+ *
+ * **Ausgeführt wird sie über `actForNpcs`**, das den Schritt als Parameter nimmt; nach
+ * außen sichtbar ist sie nur, damit ein Test einen einzelnen Einwohner stolpern lassen
+ * kann, ohne den übrigen ihr Verhalten zu nehmen (Punkt 91).
  */
-async function ausfuehren(
+export async function ausfuehren(
 	npcId: string,
 	tick: number,
 	verwaltet: boolean = false
