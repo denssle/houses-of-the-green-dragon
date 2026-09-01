@@ -56,6 +56,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen         | —                            | erledigt     |
 | 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote         | dem nächsten Schritt         | Befund       |
 | 101 | Das Kassenbuch — jede Bewegung der Stadtkasse mit einem Grund                        | Punkt 100                    | Entwurf      |
+| 102 | Jeder Bau verbrennt seinen Preis — 91 % des Geldes verschwindet wieder               | Punkte 100, 66, 74           | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2926,6 +2927,29 @@ oder der Kornspeicher zu teuer — heute lässt sich das nicht unterscheiden.
 
 #### Die Bilanz, überschlagen — woher das Geld kommt und wohin es geht
 
+**Nachgemessen am 29.08.2026** (2000 Ticks, Saat 86, mit der Bilanz aus 5.72). Die
+Schätzung darunter hat die Richtung getroffen und die Größenordnung verfehlt:
+
+```
+Bestand am Anfang 686, am Ende 1233 (Bürger 1016, Kasse 217)
+Von außen zugeflossen (Zuzug) 6035
+**Vernichtet 5488**
+An Bürger zurück: Sold 1836
+Vom Amt selbst verbaut (Untergrenze) 0
+```
+
+**Von 6035 Münzen, die in vierzig Spieljahren in die Welt kamen, sind 5488 wieder
+verschwunden — 91 Prozent.** Netto ist die Welt um 547 Münzen reicher geworden, bei 22
+Zuwanderern mit im Schnitt 274 Münzen. Der größte Rückweg zu den Bürgern ist nicht der
+Tagelohn, sondern der **Sold mit 1836** — und der geht an je eine Person.
+
+Und die Zeile „Vom Amt selbst verbaut: 0" schließt den Verdächtigen aus, dem die Schwelle
+25 galt: Der Bürgermeister hat in 2000 Ticks kein einziges Mal selbst renoviert. Es ist
+nicht das Amt. **Es ist das Bauen — siehe Punkt 102.**
+
+Die überschlagene Rechnung darunter bleibt stehen, weil sie die Posten benennt, die die
+Bilanz noch nicht trennt.
+
 **Gerechnet und nicht gemessen** (29.08.2026): aus den Konstanten und den Handlungszahlen
 desselben Laufs über 2000 Ticks, Saat 86. Sie ersetzt die Aufschlüsselung nicht, aber sie
 sagt, wonach diese suchen soll.
@@ -3070,3 +3094,58 @@ hat den stillstehenden Kreis gezeigt (Punkt 63), die Todesursache hat aus „die
 sinkt" in einem einzigen Lauf „sie verhungert" gemacht (5.71), und drei Vermutungen über
 den Arbeitsmarkt haben in derselben Zeit nichts getroffen. Wer nicht misst, rät — und rät
 im Zweifel dreimal.
+
+### 102. Jeder Bau verbrennt seinen Preis
+
+**Befund vom 29.08.2026, aus der ersten gemessenen Bilanz (Punkt 100).** 91 Prozent des
+Geldes, das in die Welt kommt, verschwindet wieder. Die größte Stelle ist eine einzige
+Zeile in `buildingService`:
+
+```ts
+await bauherr.update({ money: ergebnis.money }, { transaction: t });
+```
+
+**Der Bauherr zahlt, und niemand bekommt es.** Hundert Münzen für eine Kate, zweihundert
+für eine Mühle, zweihundertzwanzig für ein Backhaus — abgezogen und aus der Welt. Dabei
+ist das **Baumaterial schon separat bezahlt**: `materialAbziehen` nimmt Bretter, Quader und
+Eisen aus dem Bestand, und die hat der Bauherr beim Zimmerer gekauft. Dieses Geld
+zirkuliert richtig. Der Münzpreis kommt obendrauf und fällt aus der Welt.
+
+**Dieselbe Zeile steht an drei weiteren Stellen:** `renovateBuilding` (schon in Punkt 74
+benannt), das Ausbauen und die Landerschließung. Im Lauf über 2000 Ticks:
+
+| Handlung         | wie oft | Preis je Stück |  grob |
+| ---------------- | ------: | -------------: | ----: |
+| `BUILD_HOME`     |      17 |            100 | ~1700 |
+| `BUILD`          |       2 |        200–220 |  ~420 |
+| `RENOVATE`       |      12 |    Zustand × 2 |  ~200 |
+| `UPGRADE_HOME`   |       2 |            150 |  ~300 |
+| Landerschließung |       — | 60 je Parzelle |  ~540 |
+
+Das ist die Hälfte der 5488, und den Rest deckt die öffentliche Seite (`BUILD_PUBLIC`)
+zusammen mit dem, was die Bilanz noch nicht trennt.
+
+**Das ist Punkt 66 mit umgekehrtem Vorzeichen.** Dort wurde 2026 das Geld gesucht, das aus
+dem Nichts kam, und die Regel aufgestellt: Geld wechselt den Besitzer, es entsteht nicht.
+Die Gegenrichtung stand nie dabei — **es darf auch nicht verschwinden.** Eine Welt, in der
+das Bauen Münzen vernichtet, kann keinen Kreislauf haben, egal wie gut ihre Ketten sind:
+Was die Bauwilligen bezahlen, fehlt allen anderen, und das ist genau die Gruppe, die in
+Punkt 100 verhungert.
+
+**Zu entscheiden ist, wer den Preis bekommt.** Drei Möglichkeiten, und sie schließen sich
+nicht aus:
+
+- **Die Handwerker, die bauen.** Das Naheliegende und das Teuerste: Es ist der private
+  Auftrag aus Punkt 74, für den Bau statt für die Reparatur. Ein Haus entstünde dann durch
+  Arbeit statt durch Bezahlen, und der Baupreis wäre ein Lohn. Damit hätte die Bauwirtschaft
+  zum ersten Mal einen Abnehmer, der Geld weiterreicht.
+- **Die Stadt**, als Bauabgabe. Eine Zeile, sofort machbar, und die Kasse hat sie nötig —
+  aber es verschiebt das Problem nur: Aus vernichtetem Geld wird Geld in einer Kasse, deren
+  Rückweg zu den Bürgern ein Strohhalm ist (Punkt 100).
+- **Gar kein Münzpreis mehr**, sondern nur noch Material und Arbeit. Das wäre die
+  radikalste und vielleicht sauberste Lösung: Ein Haus kostet, was es an Brettern und
+  Schweiß kostet — und beides hat schon einen Empfänger.
+
+Die dritte verdient eine ernsthafte Prüfung, denn sie löst nebenbei Punkt 76: Wenn ein Bau
+kein Bargeld mehr verlangt, sondern Material, wird aus 2165 unverkauften Brettern eine
+Nachfrage.
