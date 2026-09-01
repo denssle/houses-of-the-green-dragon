@@ -3253,3 +3253,51 @@ das es ohne Schmiede nicht gibt. Für einen NPC **ohne** einschlägiges Können 
 Deadlock bestehen; er spart weiter auf die billigste fehlende Werkstatt und kommt nie an.
 Ob die Kette damit wirklich anspringt, muss ein Messlauf zeigen — dies ist die erste
 Änderung dieser Sitzung, von der ich das nicht vorher behaupten will.
+
+## Der Weg durch die Wirtschaft — Stand 29.08.2026
+
+**Warum dieser Abschnitt existiert.** Die Wirtschaftsbefunde liegen als zehn Punkte
+verstreut, und ihre **Reihenfolge** war dreimal falsch angenommen: Punkt 85 hielt den
+Kornspeicher für die Sperre vor der Brotkette, Punkt 86 stand hinter Punkt 87, und beide
+standen in Wahrheit hinter Punkt 104. Wer hier anfängt, soll nicht wieder von vorn
+erschließen müssen, was worauf wartet.
+
+**Der Stand in vier Sätzen.** Geld entsteht in dieser Welt nur durch Zuzug (~6000 Münzen
+in vierzig Spieljahren); 91 Prozent davon verschwinden wieder, das meiste beim Bauen. Was
+bleibt, fließt über Brot, Steuer und Grundstücke in die Stadtkasse, deren Rückweg zu den
+Bürgern rund 1,25 Münzen je Tick beträgt. Die einzige laufend verbrauchte Ware ist Brot,
+und die kommt nicht aus der Wirtschaft, sondern aus dem Kornspeicher. Deshalb verhungern
+im Messlauf vier von fünf Toten.
+
+**Die Reihenfolge, wie sie sich aus den Befunden ergibt:**
+
+1. **Springt die Kette überhaupt an?** (Punkt 104 ist behoben, 103 offen.) Der erste
+   Messlauf nach 5.75 beantwortet, ob zum ersten Mal ein Schmied zuzieht und eine zweite
+   Werkstatt entsteht. Alles Weitere hängt daran — solange nur eine Zimmerei existiert,
+   sind alle folgenden Fragen theoretisch.
+2. **Hört das Geld auf zu verschwinden?** (Punkt 102.) Solange jeder Bau seinen Preis
+   verbrennt, kann kein Kreislauf entstehen, egal wie gut die Ketten laufen. Von den drei
+   Wegen dort ist der dritte zu prüfen — kein Münzpreis mehr, nur Material und Arbeit —,
+   weil er nebenbei Punkt 76 löst: Aus unverkauften Brettern würde Nachfrage.
+3. **Erst dann der Kornspeicher** (Punkt 85). Nicht abschaffen, sondern verteuern: Er ist
+   die Notversorgung, nicht die Konkurrenz. Und erst, wenn Schritt 1 einen Bäcker
+   hervorbringen **kann** — vorher verhungert die Stadt wirklich.
+4. **Und erst dann wieder die Steuer** (Punkt 100). Sie funktioniert fiskalisch und tötet
+   heute Menschen; ob sie es nach 2 und 3 noch tut, ist eine andere Frage. Vorher daran zu
+   drehen hieße, eine Zahl gegen ein Strukturproblem zu setzen.
+
+**Was dabei nicht vergessen werden darf:** Bis Schritt 2 und 4 entschieden sind, macht die
+Grundsteuer die laufende Welt ärmer. Die Notbremse ist eine Zeile — `NPC_MAYOR_LAWS` auf
+`['TITHE']` —, und sie gehört gezogen, bevor deployt wird.
+
+**Und das Werkzeug, das bei jedem Schritt fehlt**, ist Punkt 101: Solange die Kasse nur
+eine Zahl je Richtung kennt, lässt sich nicht sagen, ob der größte Posten das Brot ist, die
+Steuer oder ein Bau. Die Bilanz aus 5.72 nennt die Summe, nicht die Posten.
+
+**Eine methodische Lehre dieser Sitzung, weil sie teuer war:** Vier Vermutungen über
+Ursachen wurden geprüft und drei davon fielen — der Bürgermeister nehme den Tagelöhnern die
+Arbeit weg (falsch), er müsse sie ausschreiben (die Arbeit ist ohnehin offen), das Geld
+oder der Bauplatz halte die Bäcker ab (beides falsch). Getroffen hat jedes Mal erst die
+Messung: die Todesursache, die Kassenbilanz, der Test mit der Bäckerin. **Zuerst die
+Aufschlüsselung, dann der Eingriff** — der Satz stand schon in Punkt 93 und hat sich an
+einem Abend dreimal bewährt.
