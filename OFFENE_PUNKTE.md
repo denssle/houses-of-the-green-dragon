@@ -57,6 +57,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote         | dem nächsten Schritt         | Befund       |
 | 101 | Das Kassenbuch — jede Bewegung der Stadtkasse mit einem Grund                        | Punkt 100                    | Entwurf      |
 | 102 | Jeder Bau verbrennt seinen Preis — 91 % des Geldes verschwindet wieder               | Punkte 100, 66, 74           | Befund       |
+| 103 | Die Wirtschaft hat eine Startreihenfolge, die niemand einhält — Quader und Eisen     | Punkte 85, 70, 15            | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -3149,3 +3150,62 @@ nicht aus:
 Die dritte verdient eine ernsthafte Prüfung, denn sie löst nebenbei Punkt 76: Wenn ein Bau
 kein Bargeld mehr verlangt, sondern Material, wird aus 2165 unverkauften Brettern eine
 Nachfrage.
+
+### 103. Die Wirtschaft hat eine Startreihenfolge, die niemand einhält
+
+**Befund vom 29.08.2026, belegt in `brotkette.spec.ts`.** Die Frage stammt aus den
+Messläufen: In der Stadt saßen drei zugezogene Bäcker mit 187, 189 und 266 Münzen — ein
+Backhaus kostet 220 —, und keiner baute je eines. Die Vermutungen dazu waren das Geld
+(Punkt 76), der Bauplatz (Punkt 87) und der Kornspeicher, der jeden Bäcker unterbiete
+(Punkt 85).
+
+**Alle drei sind widerlegt.** Der Test stellt eine Bäckerin hin, der nichts fehlt:
+achthundert Münzen, ein eigenes Grundstück, beide Handwerke gelernt, niemand sonst in der
+Stadt. Sie zieht in die Unterkunft ein und **steht dann dreißig Ticks lang still**, ohne
+eine einzige Münze auszugeben — `GOAL_UNREACHABLE`, 29 von 30 Runden.
+
+**Die Gegenprobe nennt die Ursache.** Dieselbe Lage, nur mit zwölf Brettern, sechs Quadern
+und vier Eisen in der Kammer: Sie baut sofort. Es waren nicht die Münzen, sondern das
+Material.
+
+**Und dahinter steht eine Regel, die niemand als Reihenfolge gelesen hat.** `materialFor`
+verlangt für jede Werkstatt (`CRAFT`) Bretter **und Quader und Eisen**; nur ein Wohnhaus
+kommt mit Brettern aus. Ausgenommen sind allein die Vorlagen, die selbst Baumaterial
+herstellen (`producesBuildingMaterial`, `BUILDING_MATERIALS = ['PLANK', 'BLOCK', 'IRON']`)
+— und das sind genau drei:
+
+| Werkstatt                                      | erzeugt                   | braucht zum Bau |
+| ---------------------------------------------- | ------------------------- | --------------- |
+| **Zimmerei**                                   | `PLANK`                   | nichts          |
+| **Steinmetzhütte**                             | `BLOCK`                   | nichts          |
+| **Schmiede**                                   | `IRON`                    | nichts          |
+| Mühle, Bäckerei, Schneiderei, Alchemistenküche | Mehl, Brot, Gewand, Trank | **alle drei**   |
+
+Diese Welt hat also eine **Bootstrap-Reihenfolge**: Erst müssen drei bestimmte Werkstätten
+stehen _und ihre Ware aushängen_, ehe irgendein anderes Handwerk überhaupt möglich ist.
+Und in keinem Messlauf ist mehr als **eine** davon entstanden — die Zimmerei, bei Saat 86
+wie bei Saat 7. Mühle, Bäckerei, Schneiderei und Alchemistenküche waren in vierzig
+Spieljahren nie baubar, ganz gleich, wer zuzog und wie viel er mitbrachte.
+
+**Damit erklärt sich Punkt 100 von der anderen Seite.** Die Welt hat eine Produktionskette
+ohne Verbrauchskette, weil die einzige Kette, die etwas Verbrauchbares herstellt — Getreide,
+Mehl, Brot —, hinter einer Sperre liegt, die nie aufgeht. Es fehlt keine Nachfrage; es
+fehlt die Erlaubnis anzufangen.
+
+**Zu entscheiden ist, wie eine Stadt in Gang kommt.** Drei Wege, und der erste ist der
+billigste:
+
+- **Die Startstadt trägt eine Steinmetzhütte und eine Schmiede**, wie sie heute schon eine
+  Schmiede trägt. Das ist eine Zeile im Weltaufbau — birgt aber genau den Fehler, der als
+  Punkt 86 behoben wurde: Ein städtischer Betrieb ließ das Handwerk als „vorhanden" gelten
+  und sperrte den privaten. Seit 5.65 zählt `fehlendeWerkstatt` nur noch Bürgerhand, der
+  Weg ist also frei.
+- **Der Materialbedarf richtet sich nach dem Handwerk**, nicht nach dem Typ. Ein Backhaus
+  ist ein Ofen und ein Dach; dass es Eisen wie eine Schmiede braucht, ist eine Vereinfachung
+  aus 4.10 und keine Absicht.
+- **Zugezogene bringen Material mit**, nicht nur Geld und Können. Das passt zu Punkt 71 —
+  wer die Reise auf sich nimmt, kommt mit einem Vorhaben — und macht den Zuzug zu dem, was
+  er in dieser Wirtschaft ohnehin ist: der einzigen Quelle von außen.
+
+Der Test bleibt stehen, wie `ironChain.spec.ts`: Er beschreibt die Sperre und wird rot,
+sobald sie fällt.
