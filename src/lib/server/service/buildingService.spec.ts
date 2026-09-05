@@ -608,6 +608,26 @@ describe('Gebäude über die Zeit', () => {
 			expect(await PlotModel.count({ where: { OwnerCharacterId: besitzer } })).toBe(1);
 		});
 
+		it('nennt die Ruine in der Chronik beim Namen', async () => {
+			// **Ein Haus, das spurlos verschwindet, ist keine Geschichte** — der Kommentar
+			// an `zurRuineWerden` warnt seit jeher davor, und trotzdem war es so: Die Zeile
+			// trug die Kennung des Gebäudes, das im selben Atemzug gelöscht wurde, und die
+			// Chronik schlägt den Namen **im Gebäude** nach. Herausgekommen ist „jemand ist
+			// zur Ruine verfallen". Seit 5.85 steht der Name in der Zeile selbst — und
+			// damit weiß auch der Messbericht, ob ein Wohnhaus verfiel oder das einzige
+			// Handwerk der Stadt (Punkt 98).
+			const besitzer = await person('Besitzer');
+			await haus(besitzer, { name: 'Zimmerei' });
+			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN));
+			await buildingService.getBuildingsOfCharacter(besitzer);
+
+			const seins = await chronicleService.getChronicle({ characterId: besitzer });
+			const verfall = seins.find((eintrag) => eintrag.kind === 'BUILDING_RUINED');
+
+			expect(verfall).toBeDefined();
+			expect(verfall!.detail).toBe('Zimmerei');
+		});
+
 		it('greift auch, wenn nur die Liste geladen wird', async () => {
 			// Sonst hinge es vom Zufall ab, wann ein Haus zusammenfällt.
 			const besitzer = await person('Besitzer');

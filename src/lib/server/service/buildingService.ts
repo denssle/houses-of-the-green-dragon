@@ -592,11 +592,20 @@ async function zurRuineWerden(
 		const grundstueck = instanz.dataValues.PlotId
 			? await PlotModel.findByPk(instanz.dataValues.PlotId, { transaction: t })
 			: null;
+		// **Der Name muss mit in die Zeile** (5.85). „Vor dem Löschen eintragen" stand hier
+		// immer — nur reichte die Kennung nicht: Die Chronik schlägt den Namen im Gebäude
+		// nach, und das ist im selben Atemzug weg. Herausgekommen ist „**jemand** ist zur
+		// Ruine verfallen", und im Messbericht ließ sich nicht sagen, **was** verfiel: ein
+		// Wohnhaus oder das einzige Handwerk der Stadt (Punkt 98).
 		await chronicleService.record(
 			'BUILDING_RUINED',
 			grundstueck?.dataValues.RegionId ?? null,
 			instanz.dataValues.lastConditionTick,
-			{ buildingId: instanz.dataValues.id, subjectId: instanz.dataValues.OwnerCharacterId },
+			{
+				buildingId: instanz.dataValues.id,
+				subjectId: instanz.dataValues.OwnerCharacterId,
+				detail: instanz.dataValues.name
+			},
 			t
 		);
 		await instanz.destroy({ transaction: t });

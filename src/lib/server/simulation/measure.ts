@@ -5,6 +5,7 @@ import { Region } from '$lib/db/model/region';
 import { Skill } from '$lib/db/model/skill';
 import { BuildingStock, ShopOffer } from '$lib/db/model/shop';
 import { World } from '$lib/db/model/world';
+import { Event } from '$lib/db/model/event';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import { seededRoll } from '$lib/game/testRoll';
@@ -170,6 +171,8 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	// zwei Dinge zusammenwarf: eine Stadt, die altert, und eine, die verhungert. Bei der
 	// Grundsteuer aus Punkt 96 war genau das die offene Frage.
 	const todesursachen: Record<string, number> = {};
+	/** Welches Haus wie oft gebrannt hat — und welches am Ende zur Ruine wurde (5.85). */
+	const braendeNach: Record<string, number> = {};
 	/**
 	 * **Die Kassenbilanz** (Punkt 100, 5.72).
 	 *
@@ -234,7 +237,13 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		// Untergrenze, weil diese beiden ihren Betrag nicht melden. Zwei Zählungen
 		// derselben Sache laufen früher oder später auseinander, und dann glaubt man der
 		// falschen.
-		if (stunde.hazard) chronik.braende++;
+		if (stunde.hazard) {
+			chronik.braende++;
+			// **Was brennt, nicht nur wie oft** (5.85, Punkte 98 und 103). Zwei Läufe zeigten
+			// eine Schmiede bei Tick 1750 und keine bei Tick 2000; ob sie abbrannte oder nie
+			// gebaut wurde, war aus dem Bericht nicht zu sagen.
+			braendeNach[stunde.hazard.what] = (braendeNach[stunde.hazard.what] ?? 0) + 1;
+		}
 		chronik.steuer += stunde.tax?.collected ?? 0;
 		chronik.ausgefallen += stunde.tax?.shortfall ?? 0;
 
@@ -281,6 +290,20 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 
 	// **Das Herzstück.** `IDLE` ist die häufigste Handlung der Welt; ohne diese Aufschlüsselung
 	// steht dort eine große Zahl, die nichts sagt.
+	// **Was die Stadt an Bauten verloren hat** (5.85, Punkt 98). Ein Wohnhaus weniger ist
+	// ein Schicksal; die einzige Werkstatt weniger ist eine Wirtschaft, die stehenbleibt —
+	// und ohne diese beiden Zeilen war der Unterschied im Bericht nicht zu sehen.
+	zeilen.push('', '=== WAS BRANNTE UND WAS VERFIEL ===');
+	zeilen.push(`  Brände ${chronik.braende}, davon:`);
+	zeilen.push(...verteilung(braendeNach).map((zeile) => `  ${zeile}`));
+	const ruinen: Record<string, number> = {};
+	for (const zeile of await Event.findAll({ where: { kind: 'BUILDING_RUINED' } })) {
+		const was: string = zeile.dataValues.detail ?? 'unbekannt';
+		ruinen[was] = (ruinen[was] ?? 0) + 1;
+	}
+	zeilen.push(`  Zur Ruine verfallen ${Object.values(ruinen).reduce((a, b) => a + b, 0)}, davon:`);
+	zeilen.push(...verteilung(ruinen).map((zeile) => `  ${zeile}`));
+
 	zeilen.push('', '=== WARUM MÜSSIGGANG ===');
 	zeilen.push(...verteilung(muessiggang as Record<string, number>));
 

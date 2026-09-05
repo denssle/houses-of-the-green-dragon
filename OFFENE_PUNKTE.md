@@ -2963,6 +2963,28 @@ tote Grund ist mit 5.79 gestrichen.
 oder den Zustand der öffentlichen Bauten über die Zeit, nicht ihre Kosten. Ein Vorgang,
 der nichts kostet, hinterlässt in einem Kassenbuch keine Spur.
 
+**Messbar gemacht mit 5.85.** Der Bericht sagte bis dahin nur, **wie oft** es brannte — 23
+Brände im Lauf nach 5.84 —, aber nicht, **was**. Zwei Läufe zeigten eine Schmiede bei Tick
+1750 und keine bei Tick 2000; ob sie abbrannte oder nie gebaut wurde, war daraus nicht zu
+sagen. Seither steht im Bericht:
+
+```
+=== WAS BRANNTE UND WAS VERFIEL ===
+  Brände 23, davon: Wohnhaus 14, Zimmerei 3, …
+  Zur Ruine verfallen 6, davon: Wohnhaus 5, Schmiede 1
+```
+
+**Dabei kam ein Fehler heraus, der die Chronik betraf.** Eine Ruine ließ sich gar nicht
+benennen: `zurRuineWerden` trug die Kennung des Gebäudes ein, löschte es im selben Atemzug,
+und die Chronik schlägt den Namen im Gebäude nach — herausgekommen ist **„jemand ist zur
+Ruine verfallen"**. Der Kommentar an der Stelle warnte seit jeher davor („ein Haus, das
+spurlos verschwindet, ist keine Geschichte"), nur reichte die Kennung dafür nicht. Jetzt
+steht der Name in der Zeile selbst.
+
+**Was die Zahlen dann sagen, ist noch offen** — dieser Eintrag hält nur fest, dass sie ab
+jetzt da sind. Die Frage dahinter (brennt das Handwerk ab, oder entsteht es nie?) gehört zu
+Punkt 103 und wird am nächsten vollen Lauf entschieden, nicht hier.
+
 ### 99. Zwei Höfe auf derselben Pachtfläche — behoben (5.70)
 
 **Beobachtet am 28.08.2026 im Lauf mit Saat 7.** Am Ende stehen zwei Gebäude namens „Hof

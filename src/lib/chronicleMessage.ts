@@ -128,7 +128,9 @@ function satz(entry: ChronicleLine): string {
 		case 'BUILDING_RENOVATED':
 			return `${wer} hat ${haus} herrichten lassen (${entry.value ?? 0} Münzen).`;
 		case 'BUILDING_RUINED':
-			return `${haus} ist zur Ruine verfallen.`;
+			// **Der Name aus der Zeile, nicht aus dem Gebäude** (5.85): Das ist zu diesem
+			// Zeitpunkt gelöscht, und die Auflösung ergab „jemand".
+			return `${entry.detail ?? haus} ist zur Ruine verfallen.`;
 		case 'JOB_TAKEN':
 			return `${wer} hat eine Stelle in ${haus} angetreten.`;
 		case 'JOB_ENDED':
