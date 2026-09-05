@@ -2846,6 +2846,12 @@ Vorhaben, es neu zu errichten.
 Gehört zu Punkt 89 und, was den Preis einer Renovierung gegen den eines Brotes angeht,
 zu Punkt 16.
 
+**Belegt am 05.09.2026 mit dem Kassenbuch** (5.77, 2000 Ticks, Saat 86): `PUBLIC_REPAIR`
+taucht im Buch **überhaupt nicht auf**. In vierzig Spieljahren hat kein Bürgermeister ein
+öffentliches Gebäude instand gesetzt — aus „fast nie" ist damit „kein einziges Mal"
+geworden. Gebaut hat er dagegen (`PUBLIC_BUILD` 350) und erschlossen (`DEVELOPMENT` 1080):
+Er gibt Geld aus, nur nicht dafür.
+
 ### 99. Zwei Höfe auf derselben Pachtfläche — behoben (5.70)
 
 **Beobachtet am 28.08.2026 im Lauf mit Saat 7.** Am Ende stehen zwei Gebäude namens „Hof
@@ -3030,6 +3036,21 @@ Umbau — und mit der Bilanz oben lässt sich vorher ausrechnen, was sie bewirkt
 nächsten Schritt schützen will, kann den Bürgermeister die Grundsteuer nicht beschließen
 lassen — es ist eine Zeile in `NPC_MAYOR_LAWS`.
 
+**Zwei Annahmen dieses Punktes sind am 05.09.2026 gefallen** (Kassenbuch aus 5.77, 2000
+Ticks, Saat 86):
+
+- **Nicht die Steuer nimmt den Bürgern das Geld, sondern das Brot.** `PROPERTY_TAX` bringt
+  1098, `GRANARY` dagegen 4768 — über die Hälfte aller Stadteinnahmen. Was die Ärmsten
+  arm macht, ist die Notversorgung, für die sie bezahlen.
+- **Und der Rückweg ist kein Strohhalm.** Hier stand „rund 1,25 Münzen je Tick"; gemessen
+  sind es 3,9 (`WAGE` 5813 und `STIPEND` 1948 über 2000 Ticks). Die Stadt gibt fast genau
+  aus, was sie einnimmt (9191 gegen 9170) — sie ist eine Umverteilungsmaschine, deren
+  Quelle eine Krücke ist.
+
+Was das für den Hunger heißt, ist damit **nicht** beantwortet: Es starben weiterhin 20 von
+26 an Not. Die Ursache dafür ist nach diesen Zahlen aber woanders zu suchen als bei der
+Grundsteuer.
+
 ### 101. Das Kassenbuch — jede Bewegung mit einem Grund — gebaut mit 5.77
 
 **Aufgenommen am 29.08.2026, aus der Arbeit an Punkt 100.** Der Messbericht kennt seit
@@ -3135,6 +3156,38 @@ Punkt 102 noch offen hat.
 **alles** `DEVELOPMENT` — die Erschließung. Weder `PUBLIC_BUILD` noch `PUBLIC_REPAIR`
 tauchen auf. Die Vermutung in Punkt 102, der öffentliche Bau sei der nächste große Posten,
 war also falsch: Es ist das Erschließen von Bauland.
+
+**Was das Buch im ersten vollen Lauf gezeigt hat** (05.09.2026, 2000 Ticks, Saat 86 —
+Handlung für Handlung identisch mit dem Lauf davor, das Werkzeug verändert also nichts):
+
+| Eingenommen 9170 |      | Ausgegeben 9191, davon **1430 an niemanden** |      |
+| ---------------- | ---: | -------------------------------------------- | ---: |
+| `GRANARY`        | 4768 | `WAGE` → an Bürger                           | 5813 |
+| `PROPERTY_TAX`   | 1098 | `STIPEND` → an Bürger                        | 1948 |
+| `TITHE`          | 1060 | `DEVELOPMENT` → aus der Welt                 | 1080 |
+| `PLOT_SALE`      |  960 | `PUBLIC_BUILD` → aus der Welt                |  350 |
+| `SETTLEMENT_FEE` |  517 |                                              |      |
+| `ESCHEAT`        |  440 |                                              |      |
+| `AUCTION`        |  245 |                                              |      |
+| `LEASE_FEE`      |   60 |                                              |      |
+| `STALL_FEE`      |   22 |                                              |      |
+
+Drei Befunde daraus, und alle drei widersprechen einer bisherigen Annahme:
+
+- **Die Stadt lebt vom Kornspeicher**, nicht von der Steuer: `GRANARY` ist über die Hälfte
+  aller Einnahmen, mehr als Grundsteuer, Zehnt und Grundstücksverkauf zusammen. Damit ist
+  die Krücke aus 4.6b nicht nur die Konkurrenz jedes Bäckers (Punkt 85), sondern die halbe
+  Stadtkasse — wer sie verteuert oder abschafft, entzieht der Stadt ihr Einkommen.
+- **Der Rückweg zu den Bürgern ist viel breiter als gedacht.** Punkt 100 schätzte ihn auf
+  1,25 Münzen je Tick; `WAGE` und `STIPEND` zusammen sind 7761 über 2000 Ticks, also 3,9.
+- **`PUBLIC_REPAIR` kommt gar nicht vor.** In vierzig Spieljahren hat kein Bürgermeister
+  ein öffentliches Gebäude instand gesetzt — Punkt 98 mit einer harten Zahl.
+
+**Und die Differenz zur Bilanz ist selbst ein Befund.** Vernichtet wurden 3782 Münzen,
+davon 1430 durch die Stadt; die restlichen **2352 haben Bürger verbrannt** — beim
+Renovieren und Ausbauen auf eigene Rechnung. Das war bis hierher unsichtbar und ist jetzt
+beziffert: Es ist **mehr, als die ganze Stadt vernichtet**, und damit der größte
+verbliebene Posten von Punkt 102.
 
 **Was offen bleibt: die Bürgerseite.** Was ein Einwohner einnimmt und ausgibt, ist
 weiterhin unbekannt — der Bericht zeigt nur den Stand am Ende. Der Vorschlag von oben gilt
@@ -3334,11 +3387,23 @@ der Bau:
 | Landerschließung |        ~540 | offen                                                |
 | `BUILD_PUBLIC`   |           — | offen; wäre zugleich der Rückweg aus Punkt 100       |
 
-Der öffentliche Bau ist die interessanteste davon: Ein städtischer Rohbau hieße, dass die
-Stadtkasse **Löhne** zahlt statt Preise, und genau dieser Rückweg zu den Bürgern fehlt ihr
-(Punkt 100). Er hängt aber an einer zweiten Frage — was ein Bürgermeister beschließt, wenn
-der Bau nichts mehr kostet —, und deshalb ist er nicht mitgemacht worden. Ein Schritt, eine
-Frage.
+**Beziffert am 05.09.2026, mit dem Kassenbuch aus 5.77** (2000 Ticks, Saat 86): Von den
+3782 vernichteten Münzen entfallen **2352 auf Bürger** (Renovieren und Ausbauen auf eigene
+Rechnung) und **1430 auf die Stadt** — davon 1080 `DEVELOPMENT` und 350 `PUBLIC_BUILD`.
+
+Damit ist die Reihenfolge des Restes klar, und sie ist nicht die, die oben vermutet wurde:
+
+1. **Der private Auftrag** (Punkt 74) ist mit rund 2350 Münzen der größte verbliebene
+   Posten — mehr als alles, was die Stadt verbrennt. Der Weg dahin ist entworfen, und der
+   Rohbau hat die halbe Maschinerie schon gebaut: Ein Renovierauftrag ist mechanisch
+   dasselbe wie ein Bauauftrag.
+2. **Die Erschließung** (1080) ist der größte Posten der Stadt — nicht der öffentliche
+   Bau, wie hier zuerst angenommen.
+3. **Der öffentliche Bau** (350) ist der kleinste. Er bleibt trotzdem interessant: Ein städtischer Rohbau hieße, dass die
+   Stadtkasse **Löhne** zahlt statt Preise, und genau dieser Rückweg zu den Bürgern fehlt ihr
+   (Punkt 100). Er hängt aber an einer zweiten Frage — was ein Bürgermeister beschließt, wenn
+   der Bau nichts mehr kostet —, und deshalb ist er nicht mitgemacht worden. Ein Schritt, eine
+   Frage.
 
 ### 103. Die Wirtschaft hat eine Startreihenfolge, die niemand einhält
 
@@ -3545,13 +3610,26 @@ kennt, lässt sich der größte Posten einer Veränderung nicht benennen, und je
 wäre geraten. Das Kassenbuch ist kein Komfort, sondern die Bedingung dafür, dass die
 nächsten Schritte messbar sind.
 
-**Das Werkzeug steht seit 5.77**, die Antwort noch nicht: Sie fällt beim nächsten vollen
-Messlauf, wenn `PROPERTY_TAX` als eigener Posten neben den übrigen zehn Zuflüssen steht.
-Ein erster Hinweis liegt schon vor — in einem Lauf über 300 Ticks taucht die Grundsteuer
-**gar nicht** auf, obwohl sechs Spieljahre vergangen sind. Das deutet nicht auf zu niedrige
-Sätze, sondern darauf, dass das Gesetz in dieser Zeit noch nicht galt; wer es beschließt,
-ist ein Bürgermeister, und den muss die Stadt erst wählen. Zu prüfen ist das am langen
-Lauf, nicht an dieser Vermutung.
+**Das Kassenbuch aus 5.77 hat die Frage nicht beantwortet — es hat sie verengt.**
+Gemessen am 05.09.2026 über 2000 Ticks, Saat 86, steht `PROPERTY_TAX` mit **1098** als
+eigener Posten im Buch und bestätigt damit nur, was die Chronikzeile schon sagte. Wovon
+die Stadt in dieser Zeit lebte, war etwas anderes: `GRANARY` mit 4768, also mehr als die
+Hälfte aller Einnahmen.
+
+**Zwei Erklärungen sind damit gefallen:**
+
+- **Andere Einnahmen haben sie nicht ersetzt** — die Steuer ist wirklich kleiner geworden
+  und nicht bloß anders verbucht.
+- **Und das Gesetz galt sehr wohl.** Die naheliegende Vermutung nach dem kurzen Lauf war,
+  es sei mangels Bürgermeister nie beschlossen worden. Über 2000 Ticks wurde jedoch
+  `STIPEND` in Höhe von 1948 gezahlt — es gab also durchgehend einen Amtsinhaber, und
+  erhoben wurde vierzig Spieljahre lang, nur mit rund 27 statt 120 Münzen im Jahr. Bei
+  **mehr** Einwohnern (32 statt 18) und mehr Grundstückskäufen.
+
+**Was jetzt fehlt, ist kein Kassenbuch, sondern die Gesetzeslage über die Zeit:** welcher
+Satz wann galt und wer ihn beschlossen hat. Solange ein Gesetz nur seinen aktuellen Wert
+kennt, ist jede Aussage über seine Wirkung eine Aussage über den letzten Stand — und
+genau das ist bei einem Satz, der sich mit jeder Amtszeit ändern kann, keine Aussage.
 
 ## Der Weg durch die Wirtschaft — Stand 29.08.2026
 
@@ -3586,6 +3664,17 @@ im Messlauf vier von fünf Toten.
 3. **Erst dann der Kornspeicher** (Punkt 85). Nicht abschaffen, sondern verteuern: Er ist
    die Notversorgung, nicht die Konkurrenz. Und erst, wenn Schritt 1 einen Bäcker
    hervorbringen **kann** — vorher verhungert die Stadt wirklich.
+
+   **Und seit dem Kassenbuch (5.77) mit einer Einsicht mehr:** Der Kornspeicher ist über
+   die Hälfte der Stadteinnahmen (`GRANARY` 4768 von 9170). Wer ihn verteuert, verteuert
+   das Brot der Ärmsten **und** vergrößert die Stadtkasse; wer ihn abschafft, nimmt der
+   Stadt ihr Einkommen. Beides gehört zusammen entschieden, und beides trifft Punkt 100.
+
+   **Davor gehört jetzt Punkt 74** — der private Auftrag. Er stand nicht in dieser
+   Reihenfolge, weil niemand wusste, wie groß er ist: Mit rund 2350 vernichteten Münzen
+   ist er der größte verbliebene Posten von Punkt 102, größer als alles, was die Stadt
+   verbrennt, und die Maschinerie dafür steht seit dem Rohbau.
+
 4. **Und erst dann wieder die Steuer** (Punkt 100). Sie funktioniert fiskalisch und tötet
    heute Menschen; ob sie es nach 2 und 3 noch tut, ist eine andere Frage. Vorher daran zu
    drehen hieße, eine Zahl gegen ein Strukturproblem zu setzen.
