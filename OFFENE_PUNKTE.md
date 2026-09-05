@@ -63,6 +63,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 106 | Ein Bauauftrag, den niemand bezahlen kann — **behoben mit 5.81**                      | —                            | erledigt     |
 | 107 | Die Grundsteuer brachte ein Viertel — **hinfällig**: Streuung, kein Fehler            | —                            | hinfällig    |
 | 108 | Bilanz und Kassenbuch gehen auseinander — **erledigt mit 5.83**, die Bilanz geht auf  | —                            | erledigt     |
+| 109 | Der Zehnt trifft nur die erste Stufe jeder Kette — Verarbeitung ist steuerfrei        | Punkte 15, 46                | Entscheidung |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                   | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                           | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -3907,6 +3908,46 @@ war vorher **nicht sichtbar**, weil Bürger selbst so viel Geld vernichteten, da
 darin unterging. Erst nachdem 5.78 und 5.80 diese Quelle geschlossen haben, tritt die
 Differenz hervor. Das Kassenbuch aus 5.77 und die alte Bilanz aus 5.72 messen dasselbe auf
 zwei Wegen — und genau dafür hält man zwei Wege.
+
+### 109. Der Zehnt trifft nur die erste Stufe jeder Kette
+
+**Aufgefallen am 05.09.2026**, beim Nachsehen, wer den Zehnt eigentlich wann zahlt (nach
+5.83). Die Antwort ist eindeutig und wirft eine Frage auf, die noch niemand gestellt hat.
+
+**Erhoben wird ausschließlich auf die Ernte.** `harvest` verzehntet, `craft` nicht — und
+beim Knecht fällt nur etwas an, wenn sein Arbeitsplatz auf einer **Pachtfläche** steht
+(`boden`); in einer gewöhnlichen Werkstatt nie. Das ist keine Nachlässigkeit, sondern
+entspricht dem, was das Gesetz verspricht: „Anteil jeder **Ernte**, der an die Stadt geht"
+(`LAW_RULES.TITHE`), und der Begründung im Code — er trifft die Ernte, nicht den
+Erntenden.
+
+**Die Folge ist trotzdem bemerkenswert:** Ein Zimmerer, der eigenes Holz schlägt, zahlt
+einmal auf den Stamm und danach nie wieder. Die gesamte Wertschöpfung — sägen, mahlen,
+backen, schmieden — ist **steuerfrei**, und je länger eine Kette wird, desto kleiner wird
+der besteuerte Anteil an ihrem Wert. Die Stadt verdient an den Bauern und den
+Rohstoffbrechern; an einer Stadt voller Handwerker verdient sie am Zehnt nichts.
+
+**Wo Herstellung heute überhaupt vorkommt**, ist keine Steuer: Das Standgeld ist eine
+Miete für den Marktstand, die Handelssteuer trifft den Kauf. Zwischen Rohstoff und Verkauf
+liegt eine steuerfreie Strecke.
+
+**Zu entscheiden ist, ob das so sein soll**, und es ist eine Frage an das Konzept und nicht
+an den Code. Drei Lesarten, die alle vertretbar sind:
+
+- **So ist es gewollt.** Ein Zehnt ist historisch eine Abgabe auf die Feldfrucht und keine
+  Umsatzsteuer. Handwerk wird über Zünfte belastet (Punkt 46), nicht über den Zehnt. Dann
+  gehört diese Beobachtung nur dokumentiert — und dieser Punkt ist damit erledigt.
+- **Es fehlt eine Abgabe auf das Handwerk.** Dann ist sie ein eigenes Gesetz mit eigenem
+  Satz, kein zweiter Zehnt — und sie gehört zu den Steuerarten aus 4.7b, die dort
+  ausdrücklich als erweiterbar angelegt sind.
+- **Der Zehnt soll die Wertschöpfung treffen.** Dann müsste `craft` mit verzehntet werden,
+  und die Frage nach der Doppelbesteuerung entsteht: Wer Holz erntet **und** sägt, zahlt
+  zweimal auf dasselbe Stück.
+
+**Warum es jetzt zählt:** Nach 5.83 ist der Zehnt von rund 1000 auf 246 Münzen gefallen —
+er ist der kleinste Posten der Stadtkasse geworden. Wovon die Stadt lebt, sind der
+Kornspeicher (Punkt 85) und die Grundsteuer. Ob der Zehnt überhaupt noch ein Hebel ist,
+hängt daran, worauf er greift.
 
 ## Der Weg durch die Wirtschaft — Stand 29.08.2026
 
