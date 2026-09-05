@@ -107,10 +107,12 @@ async function bilanzzeilen(
  * **Die Zeile, die hier bis 5.76 stand**, hieß „dazu Kornspeicher, Standgeld, Zehnt, Pacht,
  * Einzugsgeld und Grundstücksverkauf — nicht getrennt". Sie war ehrlich und nutzlos: Als
  * die Grundsteuer im Lauf nach 5.76 auf ein Viertel fiel, ließ sich nicht sagen, ob der
- * Rest der Kasse das aufgefangen hat oder mitgefallen ist (Punkt 107).
+ * Rest der Kasse das aufgefangen hat oder mitgefallen ist (Punkt 107 — der sich später als
+ * Streuung herausstellte, was ohne diese Aufschlüsselung ebenso wenig zu sagen gewesen
+ * wäre).
  *
- * **Bei jeder Ausgabe steht, ob jemand das Geld bekommt.** Das ist keine Verzierung: Drei
- * der fünf Ausgabearten haben keinen Empfänger, und ihre Summe ist der Teil des
+ * **Bei jeder Ausgabe steht, ob jemand das Geld bekommt.** Das ist keine Verzierung: Zwei
+ * der vier Ausgabearten haben keinen Empfänger, und ihre Summe ist der Teil des
  * vernichteten Geldes, den die Stadt selbst verbrennt — die Zahl, um die es in Punkt 102
  * und 100 geht.
  */

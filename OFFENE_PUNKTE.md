@@ -61,7 +61,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu  | —                            | erledigt     |
 | 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                   | Punkt 16                     | Befund       |
 | 106 | Ein Bauauftrag, den niemand bezahlen kann — **behoben mit 5.81**                      | —                            | erledigt     |
-| 107 | Die Grundsteuer brachte auf einmal ein Viertel — Ursache unbekannt                    | Punkt 101                    | Befund       |
+| 107 | Die Grundsteuer brachte ein Viertel — **hinfällig**: Streuung, kein Fehler            | —                            | hinfällig    |
 | 108 | Bilanz und Kassenbuch gehen auseinander — **erledigt mit 5.83**, die Bilanz geht auf  | —                            | erledigt     |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                   | laufend                      | Entwurf      |
@@ -3763,49 +3763,46 @@ der Zustand also ohnehin stieg. Sie prüft jetzt, ob die **Tagelöhnerin verdien
 beide Bauherren bleiben ohne Aktionspunkte. Eine Gegenprobe gegen den alten Stand gehört
 zu jedem Test, der einen Befund abschließt — sonst behauptet er nur etwas.
 
-### 107. Die Grundsteuer brachte auf einmal ein Viertel
+### 107. Die Grundsteuer brachte auf einmal ein Viertel — hinfällig
 
-**Befund vom 04.09.2026, aus demselben Lauf.** Die Grundsteuer nahm **1098** ein, im Lauf
-davor **4780** — bei mehr Einwohnern (32 statt 18) und ähnlich vielen Grundstückskäufen
-(24 statt 20). „Nicht eintreibbar" fiel dabei von 748 auf 78, es lag also **nicht** an
-zahlungsunfähigen Bürgern.
+**Der Punkt beruhte auf einem Vergleich, den er nicht tragen konnte.** Aufgenommen am
+04.09.2026, weil die Grundsteuer von **4780** auf **1098** gefallen war — bei mehr
+Einwohnern und ähnlich vielen Grundstückskäufen, und ohne dass es an zahlungsunfähigen
+Bürgern lag („nicht eintreibbar" war von 748 auf 78 gefallen). Das sah nach einem stillen
+Fehler aus.
 
-**Eine Erklärung steht hier bewusst nicht.** Die Steuer ist ein Gesetz, das ein
-NPC-Bürgermeister beschließt (`NPC_MAYOR_LAWS`); ob er es diesmal später, niedriger oder
-gar nicht beschloss, ob eine Amtszeit anders verlief oder ob die veränderte Bevölkerung
-dahintersteckt, **sagt die Bilanz nicht** — sie nennt eine Summe je Richtung und keine
-Posten.
+**Fünf Messläufe später sieht es nach Streuung aus.** Dieselbe Saat, dieselbe Stadt, und
+die Reihe lautet:
 
-**Damit ist dies vor allem ein Beleg für Punkt 101.** Solange die Kasse nur eine Zahl
-kennt, lässt sich der größte Posten einer Veränderung nicht benennen, und jede Deutung
-wäre geraten. Das Kassenbuch ist kein Komfort, sondern die Bedingung dafür, dass die
-nächsten Schritte messbar sind.
+| nach Schritt   | 5.75 | 5.76 | 5.78 | 5.81 | 5.83 |
+| -------------- | ---: | ---: | ---: | ---: | ---: |
+| `PROPERTY_TAX` | 4780 | 1098 |  511 | 1808 | 3759 |
 
-**Das Kassenbuch aus 5.77 hat die Frage nicht beantwortet — es hat sie verengt.**
-Gemessen am 05.09.2026 über 2000 Ticks, Saat 86, steht `PROPERTY_TAX` mit **1098** als
-eigener Posten im Buch und bestätigt damit nur, was die Chronikzeile schon sagte. Wovon
-die Stadt in dieser Zeit lebte, war etwas anderes: `GRANARY` mit 4768, also mehr als die
-Hälfte aller Einnahmen.
+Der Betrag fällt und steigt um den Faktor sieben, ohne dass je jemand an der Steuer gedreht
+hätte. Was ihn bestimmt, sind zwei Größen, die aus dem Spiel hervorgehen und nicht aus dem
+Code: **wie viele Grundstücke in Bürgerhand sind** und **welchen Satz der jeweilige
+Bürgermeister beschlossen hat**. Beide hängen an einer Wahl, einer Amtszeit und einem
+Wesen — und schwanken von Lauf zu Lauf mehr als jeder Eingriff dieser Sitzung.
 
-**Zwei Erklärungen sind damit gefallen:**
+**Die eigentliche Lehre ist methodisch, und sie ist teurer als der Punkt selbst:** Nach
+einer **Verhaltensänderung** ist dieselbe Saat keine Garantie mehr für denselben Verlauf.
+Sobald eine Entscheidung anders ausfällt, verschiebt sich jeder folgende Würfel — die Welt
+läuft auseinander. Für die **gezielt beeinflusste** Zahl bleibt der Vorher-Nachher-Vergleich
+aussagekräftig (`WORK/EMPLOYER_BROKE` fiel von 5602 auf 1689, weil genau daran gearbeitet
+wurde). Für alles **Emergente** — Tode, Zuzug, Erschließung, Steueraufkommen — ist ein
+einzelner Lauf schwaches Material, und zwei Läufe sind es auch. Das schränkt ein, was 5.64
+versprochen hat: **Die Saat macht einen Lauf wiederholbar, nicht zwei Läufe vergleichbar.**
 
-- **Andere Einnahmen haben sie nicht ersetzt** — die Steuer ist wirklich kleiner geworden
-  und nicht bloß anders verbucht.
-- **Und das Gesetz galt sehr wohl.** Die naheliegende Vermutung nach dem kurzen Lauf war,
-  es sei mangels Bürgermeister nie beschlossen worden. Über 2000 Ticks wurde jedoch
-  `STIPEND` in Höhe von 1948 gezahlt — es gab also durchgehend einen Amtsinhaber, und
-  erhoben wurde vierzig Spieljahre lang, nur mit rund 27 statt 120 Münzen im Jahr. Bei
-  **mehr** Einwohnern (32 statt 18) und mehr Grundstückskäufen.
+**Was bleibt.** Nichts zu beheben, aber zwei Dinge zum Mitnehmen:
 
-**Und im Lauf nach 5.78 fällt sie weiter: 511.** Die Reihe lautet damit **4780 → 1098 →
-511**, bei wachsendem Wohlstand (Geld bei Bürgern 1061 → 1983 → 3281) und mehr
-Grundstückskäufen. „Nicht eintreibbar" ist mit 26 Münzen praktisch null — an der
-Zahlungsfähigkeit liegt es also nicht, sondern am Satz.
-
-**Was jetzt fehlt, ist kein Kassenbuch, sondern die Gesetzeslage über die Zeit:** welcher
-Satz wann galt und wer ihn beschlossen hat. Solange ein Gesetz nur seinen aktuellen Wert
-kennt, ist jede Aussage über seine Wirkung eine Aussage über den letzten Stand — und
-genau das ist bei einem Satz, der sich mit jeder Amtszeit ändern kann, keine Aussage.
+- **Wer eine Größe wie diese wirklich beurteilen will, braucht mehrere Läufe mit
+  verschiedenen Saaten** — oder eine Größe, die nicht am Würfel hängt. Beides ist bisher
+  nicht vorgesehen und wäre ein eigener Schritt am Messwerkzeug.
+- **Und ein Gesetz kennt nur seinen aktuellen Satz.** Wollte man je beantworten, warum ein
+  Steueraufkommen sich so bewegt, bräuchte es die **Gesetzeslage über die Zeit**: welcher
+  Satz wann galt und wer ihn beschlossen hat. Die Erlasse stehen einzeln in der Datenbank
+  (`Law`), ausgewertet wird aber nur der jüngste. Das ist kein Fehler, sondern eine
+  Auskunft, die noch niemand gebraucht hat — festgehalten für den Tag, an dem doch.
 
 ### 108. Die Bilanz und das Kassenbuch gehen auseinander — erledigt mit 5.83
 
@@ -3940,7 +3937,8 @@ im Messlauf vier von fünf Toten.
    Münzen weniger verbrannt, das Geld bei den Bürgern fast verdoppelt und die Bevölkerung
    mit ihm (32 statt 18 Lebende). Offen bleiben Renovieren, Ausbauen, Erschließung und der
    öffentliche Bau. Neu dazugekommen sind zwei Befunde aus demselben Lauf: Punkt 106 (ein
-   Bauauftrag, den niemand bezahlen kann) und Punkt 107 (die eingebrochene Grundsteuer).
+   Bauauftrag, den niemand bezahlen kann — behoben mit 5.81/5.82) und Punkt 107 (die
+   eingebrochene Grundsteuer — inzwischen hinfällig, es war Streuung).
 3. **Erst dann der Kornspeicher** (Punkt 85). Nicht abschaffen, sondern verteuern: Er ist
    die Notversorgung, nicht die Konkurrenz. Und erst, wenn Schritt 1 einen Bäcker
    hervorbringen **kann** — vorher verhungert die Stadt wirklich.

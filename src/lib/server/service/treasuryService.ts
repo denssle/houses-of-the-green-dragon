@@ -10,8 +10,10 @@ import { Region } from '$lib/db/model/region';
  * Richtung**. Woher das Geld kam und wohin es ging, stand nirgends.
  *
  * Was das kostet, hat der Messlauf nach 5.76 vorgeführt: Die Grundsteuer brachte auf
- * einmal 1098 statt 4780, und niemand konnte sagen, warum (Punkt 107). Eine Vermutung
- * hätte sich leicht gefunden; belastbar war sie nicht. In dieser Phase kam **jeder**
+ * einmal 1098 statt 4780, und niemand konnte sagen, warum. Eine Vermutung hätte sich
+ * leicht gefunden; belastbar war sie nicht. (Sie **war** am Ende keine Ursache, sondern
+ * Streuung — Punkt 107 ist hinfällig. Das ändert nichts am Grund für dieses Buch: Erst
+ * die Aufschlüsselung hat gezeigt, dass nichts zu erklären war.) In dieser Phase kam **jeder**
  * tragfähige Befund aus einer Aufschlüsselung und keiner aus einer Vermutung — der
  * stillstehende Kreis aus `idleReason` (Punkt 63), die Todesursache (5.71), die drei
  * Vermutungen über den Arbeitsmarkt, die allesamt danebenlagen.
