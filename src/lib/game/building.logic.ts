@@ -59,8 +59,18 @@ export const CONDITION_PER_ACTION_POINT = 5;
 export const RENOVATION_PER_ACTION: number =
 	RENOVATION_ACTION_POINT_COST * CONDITION_PER_ACTION_POINT;
 
-/** Was ein Ausbau an Kraft kostet — das Geld steht in der Vorlage. */
-export const UPGRADE_ACTION_POINT_COST = 8;
+/**
+ * **Ein Ausbau kostet weder Kraft noch Geld, sondern Material und eine Baustelle** (5.80).
+ *
+ * Bis dahin stand hier „was ein Ausbau an Kraft kostet — das Geld steht in der Vorlage":
+ * acht Aktionspunkte und ein Preis, den niemand bekam. Er war damit genau umgekehrt gebaut
+ * wie alles andere in dieser Welt — der einzige Bau ohne Material und der letzte Posten,
+ * an dem ein Bürger Geld ins Nichts zahlte (Punkt 102, im Messlauf rund 1270 Münzen).
+ *
+ * Seither ist er, was `build()` seit 5.76 ist: Das Material geht hinein, und die Arbeit
+ * kommt danach. Deshalb steht hier keine Konstante mehr — der Preis eines Ausbaus sind die
+ * zwanzig Schichten, die den Rohbau hochziehen.
+ */
 
 /**
  * Der Zustand, wie er jetzt ist.
@@ -248,7 +258,7 @@ export function renovate(
 // --- Ausbauen ------------------------------------------------------------------------
 
 export type UpgradeOutcome =
-	| { ok: true; actionPoints: number; money: number; spent: number; level: number }
+	| { ok: true; level: number }
 	| { ok: false; reason: ActionFailureReason };
 
 /**
@@ -262,35 +272,27 @@ export type UpgradeOutcome =
  * Der Zustand wird dabei **nicht** zurückgesetzt: Ein Anbau macht das alte Gemäuer nicht
  * neu. Wer ein verfallenes Haus ausbaut, hat ein größeres verfallenes Haus.
  */
-export function upgrade(
-	owner: { actionPoints: number; money: number },
-	template: BuildingTemplate,
-	currentLevel: number,
-	season: Season
-): UpgradeOutcome {
+export function upgrade(template: BuildingTemplate, currentLevel: number): UpgradeOutcome {
 	if (currentLevel >= maxLevel(template)) {
 		return { ok: false, reason: 'MAX_LEVEL' };
 	}
-	const grundpreis: number | undefined = upgradePrice(template, currentLevel);
-	if (grundpreis === undefined) {
+	if (upgradePrice(template, currentLevel) === undefined) {
 		return { ok: false, reason: 'MAX_LEVEL' };
 	}
-	// Frost verzoegert den Bau und verteuert ihn — Renovierung wie Ausbau.
-	const preis: number = Math.ceil(grundpreis * buildingCostFactor(season));
-	if (owner.actionPoints < UPGRADE_ACTION_POINT_COST) {
-		return { ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' };
-	}
-	if (!canAfford(owner.money, preis)) {
-		return { ok: false, reason: 'NOT_ENOUGH_MONEY' };
-	}
 
-	return {
-		ok: true,
-		actionPoints: owner.actionPoints - UPGRADE_ACTION_POINT_COST,
-		money: owner.money - preis,
-		spent: preis,
-		level: currentLevel + 1
-	};
+	return { ok: true, level: currentLevel + 1 };
+}
+
+/**
+ * Was ein Ausbau an Material verlangt.
+ *
+ * Aus dem Preis der Vorlage gerechnet, wie beim Neubau: Was ein Ausbau früher an Münzen
+ * kostete, kostet er jetzt an Brettern, Quadern und Eisen. Damit hat auch er einen
+ * Empfänger — den Zimmerer, den Steinmetz und den Schmied.
+ */
+export function upgradeMaterial(template: BuildingTemplate, currentLevel: number): MaterialNeed[] {
+	const preis: number | undefined = upgradePrice(template, currentLevel);
+	return preis === undefined ? [] : materialFor(preis, template.type);
 }
 
 // --- Handel --------------------------------------------------------------------------

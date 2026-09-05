@@ -47,6 +47,8 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		leaseAvailable: false,
 		ownStockToSell: 0,
 		ownConstruction: false,
+		upgradeMaterialMissing: false,
+		upgradeMaterialPrice: null,
 		canCraft: false,
 		inputPrice: null,
 		plotPrice: null,
@@ -659,29 +661,39 @@ describe('Was ein NPC tut', () => {
 			);
 		});
 
-		it('spart auf den Anbau, statt bei der Rücklage aufzuhören', () => {
+		it('spart auf das Material des Anbaus, statt bei der Rücklage aufzuhören', () => {
 			// Ohne das käme es zur Handlung nie: Wer sein Haus hat, hat sein Ziel erreicht
-			// — dieselbe Falle, an der vor Punkt 55 die ganze Stadt hing.
-			const eng = zufrieden({ homeHasRoom: false, homeUpgradePrice: 150, money: 50 });
-
-			expect(savingsTarget(eng)).toBe(150);
-			expect(decideNpcAction(eng)).toBe('WORK');
-		});
-
-		it('baut nicht an, wem die Kraft dafür fehlt', () => {
-			// Acht Aktionspunkte kostet ein Ausbau. Ohne diese Prüfung versuchte er es
-			// Tick für Tick vergeblich — die Art Fehlschlag, die in der Statistik als
-			// Handlung dasteht.
-			const müde = zufrieden({
+			// — dieselbe Falle, an der vor Punkt 55 die ganze Stadt hing. **Seit 5.80 ist
+			// das Ziel das Material**, denn einen Ausbaupreis gibt es nicht mehr.
+			const eng = zufrieden({
 				homeHasRoom: false,
 				homeUpgradePrice: 150,
-				actionPoints: 4,
+				upgradeMaterialMissing: true,
+				upgradeMaterialPrice: 24,
+				money: 50
+			});
+
+			expect(savingsTarget(eng)).toBe(24);
+			// Fünfzig in der Tasche, Rücklage sechsunddreißig: Für die Bretter reicht es
+			// noch nicht, also arbeitet er darauf hin.
+			expect(decideNpcAction(eng)).toBe('WORK');
+			expect(decideNpcAction({ ...eng, money: 100 })).toBe('BUY_UPGRADE_MATERIAL');
+		});
+
+		it('baut an, sobald das Material im Lager liegt', () => {
+			// **Kraft kostet seit 5.80 nicht mehr der Entschluss, sondern die Baustelle**:
+			// Der Ausbau macht das Haus zum Rohbau, und der will zwanzig Schichten. Hier
+			// steht deshalb keine Aktionspunkt-Schwelle mehr.
+			const bereit = zufrieden({
+				homeHasRoom: false,
+				homeUpgradePrice: 150,
+				actionPoints: 1,
 				workAvailable: false,
 				hasJob: false,
 				tonicInStock: 0
 			});
 
-			expect(decideNpcAction(müde)).not.toBe('UPGRADE_HOME');
+			expect(decideNpcAction(bereit)).toBe('UPGRADE_HOME');
 		});
 
 		/** Ein Unternehmer mit laufender Werkstatt und Geld darüber. */
@@ -714,8 +726,21 @@ describe('Was ein NPC tut', () => {
 			expect(decideNpcAction(gemuetlich)).toBe('CRAFT');
 		});
 
-		it('arbeitet auf die größere Werkstatt hin', () => {
-			expect(savingsTarget(meister({ money: 50 }))).toBe(340);
+		it('legt die Werkstatt still, sobald der Baustoff da ist', () => {
+			// **Die Kehrseite von 5.80, und sie soll sichtbar sein:** Ein Ausbau macht die
+			// Werkstatt zur Baustelle, und die steht, bis zwanzig Schichten getan sind. Wer
+			// das Material hat, tut es trotzdem — die Entscheidung liegt beim Wesen, nicht
+			// beim Vorrat.
+			expect(decideNpcAction(meister())).toBe('UPGRADE_WORKSHOP');
+		});
+
+		it('arbeitet auf das Material der größeren Werkstatt hin', () => {
+			// Wie beim Wohnhaus: Seit 5.80 ist das Sparziel der Baustoff, nicht der Preis.
+			expect(
+				savingsTarget(
+					meister({ money: 50, upgradeMaterialMissing: true, upgradeMaterialPrice: 30 })
+				)
+			).toBe(30);
 		});
 
 		it('geht dafür aber nicht zum Tagelohn', () => {
@@ -723,10 +748,11 @@ describe('Was ein NPC tut', () => {
 			// Mensch `WORK` — er lag unter seinem Sparziel, und Tagelohn steht eine Stufe
 			// darüber. Zwei Läufe zeigten es: HARVEST um dreiundneunzig Prozent
 			// eingebrochen, während die Werkstatt voller Zutaten stand.
-			// Er kann sich den Ausbau (noch) nicht leisten und arbeitet weiter — aber in
+			// Ihm fehlt (noch) das Material für den Ausbau, und er arbeitet weiter — aber in
 			// seiner eigenen Werkstatt, nicht an fremden Häusern.
-			expect(decideNpcAction(meister({ money: 50 }))).toBe('CRAFT');
-			expect(decideNpcAction(meister({ money: 50, hasLease: true, canCraft: false }))).toBe(
+			const knapp = { money: 5, upgradeMaterialMissing: true, upgradeMaterialPrice: 30 };
+			expect(decideNpcAction(meister(knapp))).toBe('CRAFT');
+			expect(decideNpcAction(meister({ ...knapp, hasLease: true, canCraft: false }))).toBe(
 				'HARVEST'
 			);
 		});

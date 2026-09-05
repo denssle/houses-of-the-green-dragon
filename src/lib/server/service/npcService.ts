@@ -23,6 +23,7 @@ import {
 	materialFor,
 	renovationMaterial,
 	RENOVATION_PER_ACTION,
+	upgradeMaterial,
 	residentsAt
 } from '$lib/game/building.logic';
 import { PLOT_PRICE, TAGELOHN } from '$lib/game/economy';
@@ -458,6 +459,20 @@ export async function ausfuehren(
 			);
 		}
 
+		// Dasselbe noch einmal für den Ausbau (5.80) — er kostet seit dem Rohbau für
+		// Anbauten Material statt Münzen.
+		case 'BUY_UPGRADE_MATERIAL': {
+			const angebot = lage.upgradeMaterialOffer;
+			if (!angebot) return buch('BUY_UPGRADE_MATERIAL', undefined);
+
+			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
+			const wieviel: number = Math.min(lage.upgradeMaterialCount, angebot.quantity, bezahlbar);
+			return buch(
+				'BUY_UPGRADE_MATERIAL',
+				wieviel > 0 ? await tradeService.buyFromOffer(npcId, angebot.id, wieviel) : undefined
+			);
+		}
+
 		case 'BUILD_HOME': {
 			const vorlage = buildingService.getBuildingOption(WOHNHAUS_OPTION_ID);
 			return buch(
@@ -554,6 +569,8 @@ async function lageAufnehmen(
 			missingMaterialCount: number;
 			workshopMaterialOffer?: { id: string; quantity: number; pricePerUnit: number };
 			workshopMaterialCount: number;
+			upgradeMaterialOffer?: { id: string; quantity: number; pricePerUnit: number };
+			upgradeMaterialCount: number;
 			missingInputOffer?: { id: string; quantity: number; pricePerUnit: number };
 			missingInputCount: number;
 			marketId?: string;
@@ -673,6 +690,21 @@ async function lageAufnehmen(
 	// Dasselbe für die Werkstatt (5.62). **Eine eigene Abfrage und keine geteilte**: Das
 	// Wohnhaus braucht Bretter, die Werkstatt Quader und Eisen dazu — wer beides über
 	// dieselbe Angabe führt, spart auf die eine Ware und kauft die andere.
+	// **Welcher Ausbau steht an, und was fehlt dafür** (5.80)? Höchstens einer kommt in
+	// Frage — das Haus, wenn es voll ist, sonst die Werkstatt —, und welcher es wird,
+	// entscheidet die Bedürfnishierarchie in `npc.logic`. Hier wird nur beschafft, was der
+	// dort mögliche Ausbau verlangt.
+	const auszubauen = fertig(wohnhaus) ?? fertig(werkstatt);
+	const ausbauVorlage = auszubauen
+		? buildingService.getBuildingOption(auszubauen.optionId)
+		: undefined;
+	const ausbauMaterial =
+		ausbauVorlage && auszubauen ? upgradeMaterial(ausbauVorlage, auszubauen.level) : [];
+	const fehltAusbauMaterial = await fehlendesMaterial(npcId, ausbauMaterial);
+	const ausbauBaustoff = fehltAusbauMaterial
+		? await tradeService.cheapestOffer(werte.RegionId, fehltAusbauMaterial.itemId, npcId)
+		: undefined;
+
 	const fehltWerkstattMaterial = await fehlendesMaterial(npcId, werkstattMaterial);
 	const werkstattBaustoff = fehltWerkstattMaterial
 		? await tradeService.cheapestOffer(werte.RegionId, fehltWerkstattMaterial.itemId, npcId)
@@ -815,6 +847,8 @@ async function lageAufnehmen(
 			// verbrannter Tick in jeder Stunde, in der die Unterkunft voll ist.
 			homeUpgradePrice: ausbaupreis(fertig(wohnhaus)),
 			workshopUpgradePrice: ausbaupreis(fertig(werkstatt)),
+			upgradeMaterialMissing: fehltAusbauMaterial !== undefined,
+			upgradeMaterialPrice: ausbauBaustoff?.pricePerUnit ?? null,
 			canOfferJob: stelleFrei,
 			// Teilhabe (4.16). Der Fortschritt ist ein Anteil, damit `votingDelay` ihn
 			// unabhängig von der Wahlkampfdauer vergleichen kann.
@@ -834,6 +868,8 @@ async function lageAufnehmen(
 		missingMaterialCount: fehltMaterial?.quantity ?? 0,
 		workshopMaterialOffer: werkstattBaustoff,
 		workshopMaterialCount: fehltWerkstattMaterial?.quantity ?? 0,
+		upgradeMaterialOffer: ausbauBaustoff,
+		upgradeMaterialCount: fehltAusbauMaterial?.quantity ?? 0,
 		workshopId: werkstatt?.id,
 		workshopOptionId: werkstattLuecke?.optionId,
 		freePlotId: grundstuecke.find((flaeche) => !flaeche.hasBuilding)?.id,

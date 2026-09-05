@@ -688,7 +688,7 @@ describe('Gebäude über die Zeit', () => {
 	});
 
 	describe('ausbauen', () => {
-		it('hebt die Stufe und damit den Wohnraum', async () => {
+		it('hebt die Stufe und damit den Wohnraum — wenn der Anbau steht', async () => {
 			const besitzer = await person('Besitzer');
 			const id = await haus(besitzer);
 
@@ -696,18 +696,51 @@ describe('Gebäude über die Zeit', () => {
 
 			expect(await buildingService.upgradeBuilding(besitzer, id)).toMatchObject({ ok: true });
 
+			// **Erst die Arbeit, dann der Platz** (5.80): Der Ausbau macht das Haus zur
+			// Baustelle, und in einer wohnt niemand.
+			expect(await buildingService.freierWohnraum(id)).toBe(0);
+
+			await fertigBauen(besitzer, id);
+
 			// Genau hier hängt die Bevölkerungsgrenze aus 4.4: Wer wachsen will, baut aus.
-			expect(await buildingService.freierWohnraum(id)).toBe(6);
+			// Sechs Plätze, einer davon belegt — mit der letzten Schicht zieht der Bauherr
+			// ein, wie in jedes fertige Wohnhaus, das ihm gehört (`fertigstellen`).
+			expect(await buildingService.freierWohnraum(id)).toBe(5);
 		});
 
-		it('macht das alte Gemäuer nicht neu', async () => {
+		it('kostet Material statt Münzen', async () => {
+			// **Der letzte Posten, an dem ein Bürger Geld ins Nichts zahlte** (Punkt 102):
+			// rund 1270 Münzen im Messlauf, mehr als die Stadt beim öffentlichen Bau.
+			const besitzer = await person('Besitzer');
+			const id = await haus(besitzer);
+			const vorher = await geld(besitzer);
+			const bretterVorher = await Inventory.findOne({
+				where: { CharacterId: besitzer, itemId: 'PLANK' }
+			});
+
+			expect(await buildingService.upgradeBuilding(besitzer, id)).toEqual({ ok: true, spent: 0 });
+
+			expect(await geld(besitzer)).toBe(vorher);
+			const bretterNachher = await Inventory.findOne({
+				where: { CharacterId: besitzer, itemId: 'PLANK' }
+			});
+			expect(bretterNachher!.dataValues.quantity).toBeLessThan(bretterVorher!.dataValues.quantity);
+		});
+
+		it('macht aus dem Haus eine Baustelle', async () => {
+			// **Der alte Satz „ein Anbau macht das alte Gemäuer nicht neu" gilt nicht mehr**
+			// — das ist die Kehrseite von 5.80. Wer ausbaut, zieht das Haus wieder hoch: Der
+			// Zustand fällt auf null, und zwanzig Schichten später steht ein neues.
 			const besitzer = await person('Besitzer');
 			const id = await haus(besitzer);
 			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN / 2));
 
 			await buildingService.upgradeBuilding(besitzer, id);
 
-			expect((await buildingService.getBuilding(id))?.condition).toBe(50);
+			const baustelle = await buildingService.getBuilding(id);
+			expect(baustelle).toMatchObject({ condition: 0, underConstruction: true, level: 2 });
+			// Und der Bauauftrag hängt aus, damit auch andere daran verdienen können.
+			expect(baustelle!.repairWage).toBe(TAGELOHN);
 		});
 	});
 

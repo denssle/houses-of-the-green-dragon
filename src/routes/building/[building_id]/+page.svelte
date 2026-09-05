@@ -112,13 +112,14 @@
 			</p>
 			<p>
 				<small>
-					Kostet {data.upgrade.price} Münzen und {data.upgrade.actionPoints} Aktionspunkte.
-					{#if data.upgrade.surcharge}
-						<i>
-							Im {data.upgrade.surcharge} liegt der Bau schwerer — sonst wären es
-							{data.upgrade.basePrice}.
-						</i>
-					{/if}
+					Kostet {#each data.upgrade.material as posten, i (posten.itemId)}{i > 0
+							? ', '
+							: ''}{posten.quantity}
+						{posten.name}{/each} — und die Arbeit, den Anbau hochzuziehen.
+					<i>
+						Solange gebaut wird, ruht das Haus: kein Platz, keine Erholung, kein Ertrag. Wer nicht
+						selbst anpacken will, lässt den Bauauftrag hängen und zahlt Lohn.
+					</i>
 				</small>
 			</p>
 			{#if data.mine}

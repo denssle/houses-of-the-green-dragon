@@ -24,10 +24,10 @@ import type { SkillType } from '$lib/game/skill.logic';
 import {
 	CONDITION_MAX,
 	renovationMaterial,
+	upgradeMaterial,
 	RENOVATION_PER_ACTION,
 	residentsAt,
 	restAt,
-	UPGRADE_ACTION_POINT_COST,
 	wageAt
 } from '$lib/game/building.logic';
 import { levelFactor } from '$lib/game/production.logic';
@@ -37,14 +37,7 @@ import {
 	maxLevel,
 	upgradePrice
 } from '$lib/model/buildingTemplate';
-import {
-	AGE_OF_MAJORITY,
-	buildingCostFactor,
-	type Season,
-	seasonOf,
-	SEASON_NAMES,
-	yearOf
-} from '$lib/game/time';
+import { AGE_OF_MAJORITY, seasonOf, SEASON_NAMES, yearOf } from '$lib/game/time';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const building = await buildingService.getBuilding(params.building_id);
@@ -55,7 +48,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	const option = buildingService.getBuildingOption(building.optionId);
-	const jahreszeit: Season = seasonOf(await worldService.currentTick());
 	const gehoertMir: boolean =
 		locals.currentCharacter !== undefined &&
 		building.ownerCharacterId === locals.currentCharacter.id;
@@ -125,7 +117,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		// Frost einen Preis, den das Spiel nicht hielt — und verschwieg vor allem, wofür
 		// man zahlt. Ein Ausbau ist die größte Ausgabe des Spiels; wer sie blind tätigt,
 		// entscheidet nicht, sondern probiert.
-		upgrade: naechsteStufe(option, building.level, building.condition, jahreszeit),
+		upgrade: naechsteStufe(option, building.level, building.condition),
 		// Was eine Renovierung jetzt kostete — sichtbar, damit man abwägen kann, ob man
 		// sie noch aufschiebt.
 		// Ein Betrieb kann mehreres herstellen (die Alchemistenküche etwa), deshalb eine
@@ -236,12 +228,7 @@ async function kasse(
  * zahlt auf jeder Stufe weniger (`wageAt`). Eine Zahl, die den Verfall wegließe,
  * verspräche mehr, als der Ausbau einbrächte.
  */
-function naechsteStufe(
-	option: BuildingTemplate | undefined,
-	level: number,
-	condition: number,
-	season: Season
-) {
+function naechsteStufe(option: BuildingTemplate | undefined, level: number, condition: number) {
 	if (!option) return undefined;
 	const grundpreis: number | undefined = upgradePrice(option, level);
 	if (grundpreis === undefined) return undefined;
@@ -249,12 +236,12 @@ function naechsteStufe(
 	const naechste = levelOf(option, level + 1);
 	return {
 		name: naechste.name,
-		// Der Frost verteuert den Bau — derselbe Faktor, mit dem `upgrade()` rechnet.
-		// Stünde hier der Grundpreis, wäre die Anzeige im Winter schlicht falsch.
-		price: Math.ceil(grundpreis * buildingCostFactor(season)),
-		basePrice: grundpreis,
-		surcharge: buildingCostFactor(season) > 1 ? SEASON_NAMES[season] : undefined,
-		actionPoints: UPGRADE_ACTION_POINT_COST,
+		// **Der Ausbau kostet seit 5.80 kein Geld mehr, sondern Material und Arbeit.**
+		// Deshalb steht hier, was er an Baustoff verlangt, und nicht mehr, was er kostet.
+		material: upgradeMaterial(option, level).map((posten) => ({
+			...posten,
+			name: getItemTemplate(posten.itemId)?.name ?? posten.itemId
+		})),
 		// Nur nennen, was sich ändert: Ein Betrieb ohne Wohnraum braucht keine Zeile
 		// „0 Plätze", und ein Wohnhaus keine über den Lohn.
 		residents: naechste.residents ?? 0,

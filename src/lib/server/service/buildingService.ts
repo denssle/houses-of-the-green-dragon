@@ -28,7 +28,7 @@ import {
 	RENOVATION_ACTION_POINT_COST,
 	renovationMaterial,
 	upgrade,
-	UPGRADE_ACTION_POINT_COST
+	upgradeMaterial
 } from '$lib/game/building.logic';
 import { Character as CharacterModel } from '$lib/db/model/character';
 import type {
@@ -949,29 +949,37 @@ export async function upgradeBuilding(
 			return { ok: false, reason: 'UNDER_CONSTRUCTION' } as const;
 		}
 
-		const eigentümer = await characterService.loadForAction(characterId, tick, t);
-		if (!eigentümer) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
-
-		const ergebnis = upgrade(
-			{
-				actionPoints: eigentümer.dataValues.actionPoints,
-				money: eigentümer.dataValues.money
-			},
-			vorlage,
-			gebäude.dataValues.level,
-			seasonOf(tick)
-		);
+		const ergebnis = upgrade(vorlage, gebäude.dataValues.level);
 		if (!ergebnis.ok) return ergebnis;
 
-		await eigentümer.update(
-			{ actionPoints: ergebnis.actionPoints, money: ergebnis.money },
+		// **Was der Ausbau früher an Münzen kostete, kostet er jetzt an Material** (5.80).
+		const fehlt = await materialAbziehen(
+			characterId,
+			upgradeMaterial(vorlage, gebäude.dataValues.level),
+			t
+		);
+		if (fehlt) return { ok: false, reason: 'NOT_IN_STOCK', missing: fehlt } as const;
+
+		// **Aus dem Haus wird eine Baustelle** (5.80). Die Stufe steht sofort, nutzbar ist
+		// sie erst nach zwanzig Schichten — dieselbe Arbeit wie bei einem Neubau, und
+		// derselbe Weg: Der Eigentümer kann selbst anpacken oder den Bauauftrag hängen
+		// lassen, den `build()` seit 5.76 aushängt.
+		//
+		// **Der alte Satz „ein Anbau macht das alte Gemäuer nicht neu" gilt nicht mehr**,
+		// und das ist die Kehrseite dieser Entscheidung: Wer ausbaut, zieht das ganze Haus
+		// wieder hoch und hat danach ein neues. Wer knapp vor dem Verfall ausbaut, spart
+		// sich damit die Renovierung — dafür ruht sein Haus, solange gebaut wird.
+		await gebäude.update(
+			{
+				level: ergebnis.level,
+				condition: 0,
+				underConstruction: true,
+				repairWage: TAGELOHN,
+				lastConditionTick: tick
+			},
 			{ transaction: t }
 		);
-		// Der Zustand bleibt, wie er war — ein Anbau macht das alte Gemäuer nicht neu.
-		// Deshalb wird hier auch `lastConditionTick` nicht angefasst.
-		await gebäude.update({ level: ergebnis.level }, { transaction: t });
-		await skillService.addPractice(characterId, 'CONSTRUCTION', UPGRADE_ACTION_POINT_COST, t);
-		return { ok: true, spent: ergebnis.spent } as const;
+		return { ok: true, spent: 0 } as const;
 	});
 }
 

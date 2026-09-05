@@ -3468,7 +3468,7 @@ der Bau:
 | `BUILD_HOME`     |       ~1700 | behoben                                        |
 | `BUILD`          |        ~420 | behoben                                        |
 | `RENOVATE`       |        ~200 | behoben mit 5.78 (Punkt 74)                    |
-| `UPGRADE_HOME`   |        ~300 | offen                                          |
+| `UPGRADE_HOME`   |        ~300 | behoben mit 5.80                               |
 | Landerschließung |        ~540 | offen                                          |
 | `BUILD_PUBLIC`   |           — | offen; wäre zugleich der Rückweg aus Punkt 100 |
 
@@ -3479,9 +3479,23 @@ Rechnung) und **1430 auf die Stadt** — davon 1080 `DEVELOPMENT` und 350 `PUBLI
 Damit ist die Reihenfolge des Restes klar, und sie ist nicht die, die oben vermutet wurde:
 
 1. **Der private Auftrag** (Punkt 74) war mit rund 2350 Münzen der größte verbliebene
-   Posten — mehr als alles, was die Stadt verbrennt. **Behoben mit 5.78**: Renovieren
-   kostet Material und Arbeit statt Münzen. Übrig bleibt davon der **Ausbau** (~750), der
-   weiter einen Preis zahlt und kein Material verlangt.
+   Posten — mehr als alles, was die Stadt verbrennt. **Behoben mit 5.78** (Renovieren) und
+   **5.80** (Ausbauen): Beides kostet Material und Arbeit statt Münzen. Damit vernichtet
+   **kein Bürger mehr Geld**; was bleibt, verbrennt die Stadt.
+
+   **Der Ausbau ist dabei zur Baustelle geworden** — bewusst und mit einer Kehrseite: Die
+   Stufe steht sofort, nutzbar ist sie erst nach zwanzig Schichten. Solange ruht das Haus:
+   kein Platz, keine Erholung, kein Ertrag, keine Anstellung. Dafür hängt ein Bauauftrag
+   aus, und Tagelöhner verdienen daran. Die Alternative wäre gewesen, ihn wie einen
+   Materialkauf zu behandeln (sofort fertig, Geld an den Zimmerer) — das hätte das Haus in
+   Betrieb gelassen, aber keine Arbeit für andere geschaffen. **Entschieden für die
+   Baustelle**, weil ein Ausbau ein Bau ist.
+
+   **Und eine Regel fällt damit:** „Ein Anbau macht das alte Gemäuer nicht neu" galt seit
+   4.6 und gilt nicht mehr — wer ausbaut, zieht das Haus wieder hoch und hat danach ein
+   neues. Wer knapp vor dem Verfall ausbaut, spart sich die Renovierung; dafür ruht sein
+   Haus, solange gebaut wird.
+
 2. **Die Erschließung** (1080) ist der größte Posten der Stadt — nicht der öffentliche
    Bau, wie hier zuerst angenommen.
 3. **Der öffentliche Bau** (350) ist der kleinste. Er bleibt trotzdem interessant: Ein städtischer Rohbau hieße, dass die

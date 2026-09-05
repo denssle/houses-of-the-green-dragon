@@ -2,7 +2,7 @@ import { votingDelay } from '$lib/game/election.logic';
 import { COURT_ACTION_POINT_COST } from '$lib/game/family.logic';
 import type { Personality } from '$lib/game/personality.logic';
 import { SATIETY_COMFORTABLE, SATIETY_WEAKENED } from '$lib/game/need.logic';
-import { RENOVATION_ACTION_POINT_COST, UPGRADE_ACTION_POINT_COST } from '$lib/game/building.logic';
+import { RENOVATION_ACTION_POINT_COST } from '$lib/game/building.logic';
 
 /**
  * Was ein NPC als Nächstes tut.
@@ -51,6 +51,9 @@ export const NPC_ACTIONS = [
 	// verschiedene Waren. Ein Wohnhaus ist Fachwerk und braucht Bretter, eine Werkstatt
 	// will Quader und Eisen dazu.
 	'BUY_WORKSHOP_MATERIAL',
+	// Seit 5.80 auch für den Ausbau: Er kostet keine Münzen mehr, sondern Material —
+	// und wer es nicht hat, muss es kaufen, bevor er anfängt.
+	'BUY_UPGRADE_MATERIAL',
 	'BUY_INPUT',
 	'BUILD_HOME',
 	'RENOVATE',
@@ -172,6 +175,16 @@ export interface NpcState {
 	homeUpgradePrice: number | null;
 	/** Dasselbe für den eigenen Betrieb. */
 	workshopUpgradePrice: number | null;
+	/**
+	 * Fehlt das Material für den anstehenden Ausbau, und was kostet das billigste Angebot
+	 * (5.80)?
+	 *
+	 * **Eine Angabe für beide Ausbauten**, anders als beim Bauen (5.62): Es steht immer
+	 * höchstens einer an — das Haus, wenn es voll ist, sonst die Werkstatt —, und welcher
+	 * es ist, entscheidet die Bedürfnishierarchie eine Ebene höher.
+	 */
+	upgradeMaterialMissing: boolean;
+	upgradeMaterialPrice: number | null;
 	/** Hat sein Betrieb eine freie Stelle, für die noch kein Lohn aushängt? */
 	canOfferJob: boolean;
 
@@ -251,7 +264,12 @@ export function savingsTarget(state: NpcState): number | null {
 	// `eigenesDach`: Laufen Sparen und Handeln auseinander, spart einer auf etwas, das er
 	// nie tut.
 	if (state.isMarried && state.ownsHome && !state.homeHasRoom) {
-		if (state.homeUpgradePrice !== null) return state.homeUpgradePrice;
+		// **Auf das Material, nicht auf den Preis** (5.80): Den gibt es nicht mehr. Stünde
+		// hier weiter der Ausbaupreis, spränge einer mit vollem Holzlager weiter arbeiten
+		// für Münzen, die er nie ausgibt — derselbe Fehler wie beim Bauen (5.76).
+		if (state.homeUpgradePrice !== null) {
+			return state.upgradeMaterialMissing ? state.upgradeMaterialPrice : null;
+		}
 	}
 
 	// Etwas Eigenes — nur, wen sein Wesen dazu drängt. Sonst spart die halbe Stadt auf eine
@@ -291,7 +309,9 @@ export function savingsTarget(state: NpcState): number | null {
 	// weiter, du hast noch etwas vor. Die Reihenfolge der beiden Änderungen ist deshalb
 	// keine Laune — die zweite ohne die erste ist ein Rückschritt, und ein gemessener.
 	if (state.ownsWorkshop && state.canCraft && isEnterprising(state.personality)) {
-		if (state.workshopUpgradePrice !== null) return state.workshopUpgradePrice;
+		if (state.workshopUpgradePrice !== null) {
+			return state.upgradeMaterialMissing ? state.upgradeMaterialPrice : null;
+		}
 	}
 
 	return null;
@@ -689,12 +709,17 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 	if (state.ownsWorkshop && state.canCraft && isEnterprising(state.personality)) {
 		const uebrigFuerAusbau: number =
 			state.money - desiredReserve(state.personality, state.foodPrice);
-		if (
-			state.workshopUpgradePrice !== null &&
-			uebrigFuerAusbau >= state.workshopUpgradePrice &&
-			state.actionPoints >= UPGRADE_ACTION_POINT_COST
-		) {
-			return 'UPGRADE_WORKSHOP';
+		if (state.workshopUpgradePrice !== null) {
+			// **Erst das Material, dann der Anbau** (5.80) — dieselbe Folge wie beim Bauen.
+			// Der Ausbau selbst kostet seither keine Münze und keine Kraft mehr, sondern
+			// Bretter und eine Baustelle.
+			if (state.upgradeMaterialMissing) {
+				if (state.upgradeMaterialPrice !== null && uebrigFuerAusbau >= state.upgradeMaterialPrice) {
+					return 'BUY_UPGRADE_MATERIAL';
+				}
+			} else {
+				return 'UPGRADE_WORKSHOP';
+			}
 		}
 	}
 
@@ -848,12 +873,14 @@ function eigenesDach(state: NpcState): NpcAction | undefined {
 	// diese Welt entscheidet aus Bedürfnissen.
 	if (state.isMarried && state.ownsHome && !state.homeHasRoom) {
 		const uebrig: number = state.money - desiredReserve(state.personality, state.foodPrice);
-		if (
-			state.homeUpgradePrice !== null &&
-			uebrig >= state.homeUpgradePrice &&
-			state.actionPoints >= UPGRADE_ACTION_POINT_COST
-		) {
-			return 'UPGRADE_HOME';
+		if (state.homeUpgradePrice !== null) {
+			if (state.upgradeMaterialMissing) {
+				if (state.upgradeMaterialPrice !== null && uebrig >= state.upgradeMaterialPrice) {
+					return 'BUY_UPGRADE_MATERIAL';
+				}
+			} else {
+				return 'UPGRADE_HOME';
+			}
 		}
 	}
 

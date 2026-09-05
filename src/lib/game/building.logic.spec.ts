@@ -14,7 +14,7 @@ import {
 	restAt,
 	storageAt,
 	upgrade,
-	UPGRADE_ACTION_POINT_COST,
+	upgradeMaterial,
 	wageAt,
 	YEARS_TO_RUIN
 } from '$lib/game/building.logic';
@@ -46,8 +46,6 @@ const SCHMIEDE: BuildingTemplate = {
 		{ price: 400, name: 'Werkstatt', wagePerActionPoint: 5 }
 	]
 };
-
-const REICH = { actionPoints: 48, money: 10_000, buildingSkill: 0 };
 
 describe('Gebäude', () => {
 	describe('der Verfall', () => {
@@ -203,27 +201,27 @@ describe('Gebäude', () => {
 	});
 
 	describe('ausbauen', () => {
-		it('hebt die Stufe und kostet den Preis der neuen', () => {
-			const ergebnis = upgrade(REICH, WOHNHAUS, 1, 'SPRING');
+		it('hebt die Stufe und verlangt dafür keine Münze', () => {
+			// **Der Kern von 5.80** (Punkt 102): Bis dahin kostete der Ausbau 150 Münzen,
+			// die niemand bekam — der letzte Posten, an dem ein Bürger Geld ins Nichts
+			// zahlte. Und er war der einzige Bau ohne Material.
+			expect(upgrade(WOHNHAUS, 1)).toEqual({ ok: true, level: 2 });
+		});
 
-			expect(ergebnis).toMatchObject({
-				ok: true,
-				level: 2,
-				spent: 150,
-				actionPoints: 48 - UPGRADE_ACTION_POINT_COST
-			});
+		it('verlangt stattdessen Material, wie jeder andere Bau', () => {
+			const bedarf = upgradeMaterial(WOHNHAUS, 1);
+
+			expect(bedarf.length).toBeGreaterThan(0);
+			// Ein Wohnhaus ist Fachwerk: Bretter, keine Quader (siehe `materialFor`).
+			expect(bedarf.every((posten) => posten.itemId === 'PLANK')).toBe(true);
+			expect(bedarf[0].quantity).toBeGreaterThan(0);
 		});
 
 		it('endet bei der höchsten Stufe', () => {
-			expect(upgrade(REICH, WOHNHAUS, 3, 'SPRING')).toEqual({ ok: false, reason: 'MAX_LEVEL' });
-			expect(upgrade(REICH, SCHMIEDE, 2, 'SPRING')).toEqual({ ok: false, reason: 'MAX_LEVEL' });
-		});
-
-		it('scheitert am Geld', () => {
-			expect(upgrade({ actionPoints: 48, money: 10 }, WOHNHAUS, 1, 'SPRING')).toEqual({
-				ok: false,
-				reason: 'NOT_ENOUGH_MONEY'
-			});
+			expect(upgrade(WOHNHAUS, 3)).toEqual({ ok: false, reason: 'MAX_LEVEL' });
+			expect(upgrade(SCHMIEDE, 2)).toEqual({ ok: false, reason: 'MAX_LEVEL' });
+			// Und dann gibt es auch nichts zu beschaffen.
+			expect(upgradeMaterial(WOHNHAUS, 3)).toEqual([]);
 		});
 	});
 
