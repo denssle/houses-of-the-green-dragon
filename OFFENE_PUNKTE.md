@@ -2043,6 +2043,27 @@ es am nötigsten ist: Eine verarmte Stadt sah ihre Bauten verfallen und konnte n
 Das trifft auch die Sorge aus Punkt 105, die städtische Unterkunft könne unwiederbringlich
 zur Ruine werden.
 
+**Gemessen am 05.09.2026** (2000 Ticks, Saat 86, gegen den Lauf davor):
+
+|                              |         nach 5.77 |             nach 5.78 |
+| ---------------------------- | ----------------: | --------------------: |
+| Vernichtet insgesamt         |              3782 |              **2822** |
+| davon **durch Bürger**       |              2352 |              **1272** |
+| Geld bei Bürgern am Ende     |              1983 |              **3281** |
+| Tode (davon Hunger)          |           26 (20) |           **17 (11)** |
+| `HARVEST` / `SELL` / `CRAFT` | 1061 / 1088 / 584 | **1627 / 1527 / 795** |
+| `NO_WORK`                    |              2781 |              **1225** |
+
+**Die Rechnung geht auf.** Was Bürger noch vernichten, ist genau der Ausbau: neun
+Ausbauten (acht Wohnhäuser, eine Werkstatt) zu je rund 150 Münzen ergeben die 1272. Das
+Renovieren vernichtet **null**.
+
+**Und die Sorge war unbegründet.** Renovieren kostet jetzt Aktionspunkte, die vorher in
+Arbeit gingen — es lag nahe, dass die Leute darüber ärmer und hungriger würden. Das
+Gegenteil ist eingetreten: Die Hungertoten haben sich fast halbiert, das Geld bei den
+Bürgern ist um zwei Drittel gestiegen, und die Wirtschaft ist merklich betriebsamer.
+Erstmals steht ein Wohnhaus auf **Stufe 3** und die Zimmerei auf Stufe 2.
+
 **Was bleibt:** der **Ausbau** (`upgrade`). Er kostet weiter Münzen und kein Material —
 rund 750 der 2350 —, und er ist der letzte Posten, an dem ein Bürger Geld vernichtet. Er
 gehört in einen eigenen Schritt, weil er mehr ist als eine gestrichene Zeile: Ein Ausbau
@@ -2893,10 +2914,21 @@ Gehört zu Punkt 89 und, was den Preis einer Renovierung gegen den eines Brotes 
 zu Punkt 16.
 
 **Belegt am 05.09.2026 mit dem Kassenbuch** (5.77, 2000 Ticks, Saat 86): `PUBLIC_REPAIR`
-taucht im Buch **überhaupt nicht auf**. In vierzig Spieljahren hat kein Bürgermeister ein
-öffentliches Gebäude instand gesetzt — aus „fast nie" ist damit „kein einziges Mal"
+tauchte im Buch **überhaupt nicht auf**. In vierzig Spieljahren hatte kein Bürgermeister
+ein öffentliches Gebäude instand gesetzt — aus „fast nie" war „kein einziges Mal"
 geworden. Gebaut hat er dagegen (`PUBLIC_BUILD` 350) und erschlossen (`DEVELOPMENT` 1080):
-Er gibt Geld aus, nur nicht dafür.
+Er gab Geld aus, nur nicht dafür.
+
+**Für Läufe ab 5.78 gilt dieser Beleg nicht mehr**, und zwar aus einem Grund, der nichts
+mit dem Bürgermeister zu tun hat: Seither kostet Instandsetzen keine Münze, sondern
+Aktionspunkte — es gibt also **keine Buchung mehr**, die das Kassenbuch zeigen könnte.
+Die Zeile fehlte im Bericht nach 5.78 nicht, weil nicht repariert wurde, sondern weil das
+Buch an dieser Stelle blind geworden war; einmal ist genau das fehlgedeutet worden. Der
+tote Grund ist mit 5.79 gestrichen.
+
+**Wer das künftig messen will, braucht ein anderes Maß** — die Zahl der Instandsetzungen
+oder den Zustand der öffentlichen Bauten über die Zeit, nicht ihre Kosten. Ein Vorgang,
+der nichts kostet, hinterlässt in einem Kassenbuch keine Spur.
 
 ### 99. Zwei Höfe auf derselben Pachtfläche — behoben (5.70)
 
@@ -3234,6 +3266,13 @@ davon 1430 durch die Stadt; die restlichen **2352 haben Bürger verbrannt** — 
 Renovieren und Ausbauen auf eigene Rechnung. Das war bis hierher unsichtbar und ist jetzt
 beziffert: Es ist **mehr, als die ganze Stadt vernichtet**, und damit der größte
 verbliebene Posten von Punkt 102.
+
+**Eine Lehre aus 5.79, weil sie beinahe zu einem falschen Befund geführt hätte:** Als das
+Instandsetzen mit 5.78 aufhörte, Geld zu kosten, fiel die Buchung weg — der **Grund**
+`PUBLIC_REPAIR` blieb aber in der Liste stehen. Ein Posten, den nichts mehr bucht, ist im
+Bericht nicht als Lücke zu erkennen: Er erscheint einfach nicht, und das liest sich wie
+„ist nie vorgekommen". Genau so wurde es einmal gelesen. **Buchung und Zahlung fallen
+zusammen — auch beim Abschaffen.**
 
 **Was offen bleibt: die Bürgerseite.** Was ein Einwohner einnimmt und ausgibt, ist
 weiterhin unbekannt — der Bericht zeigt nur den Stand am Ende. Der Vorschlag von oben gilt
@@ -3678,6 +3717,11 @@ Hälfte aller Einnahmen.
   `STIPEND` in Höhe von 1948 gezahlt — es gab also durchgehend einen Amtsinhaber, und
   erhoben wurde vierzig Spieljahre lang, nur mit rund 27 statt 120 Münzen im Jahr. Bei
   **mehr** Einwohnern (32 statt 18) und mehr Grundstückskäufen.
+
+**Und im Lauf nach 5.78 fällt sie weiter: 511.** Die Reihe lautet damit **4780 → 1098 →
+511**, bei wachsendem Wohlstand (Geld bei Bürgern 1061 → 1983 → 3281) und mehr
+Grundstückskäufen. „Nicht eintreibbar" ist mit 26 Münzen praktisch null — an der
+Zahlungsfähigkeit liegt es also nicht, sondern am Satz.
 
 **Was jetzt fehlt, ist kein Kassenbuch, sondern die Gesetzeslage über die Zeit:** welcher
 Satz wann galt und wer ihn beschlossen hat. Solange ein Gesetz nur seinen aktuellen Wert

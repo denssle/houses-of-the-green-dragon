@@ -83,6 +83,19 @@ describe('Das Kassenbuch', () => {
 		expect(treasuryService.kassenbuch().zufluss.TITHE).toBe(12);
 	});
 
+	it('kennt keinen Grund, den nichts mehr bucht', async () => {
+		// **`PUBLIC_REPAIR` ist mit 5.79 gestrichen worden**, weil die Instandsetzung seit
+		// 5.78 keine Münze mehr kostet. Die Buchung entfiel mit der Zahlung, der Grund blieb
+		// als Karteileiche zurück — und im Messbericht sieht eine Zeile, die nie erscheint,
+		// aus wie „ist nie vorgekommen". Genau so ist es einmal fehlgedeutet worden.
+		expect(treasuryService.KASSENABFLUESSE).toEqual([
+			'WAGE',
+			'STIPEND',
+			'PUBLIC_BUILD',
+			'DEVELOPMENT'
+		]);
+	});
+
 	it('bucht nichts, wo nichts fließt', async () => {
 		// Ein Zehnt von null Münzen ist keine Buchung. Mehrere Aufrufer prüften das früher
 		// selbst; die Prüfung steht jetzt an einer Stelle.
@@ -94,12 +107,11 @@ describe('Das Kassenbuch', () => {
 	});
 
 	it('weiß, welche Ausgabe bei einem Menschen ankommt', async () => {
-		// **Die eigentliche Frage des Punktes.** Drei der fünf Ausgabearten haben keinen
+		// **Die eigentliche Frage des Punktes.** Zwei der vier Ausgabearten haben keinen
 		// Empfänger; ihre Summe ist der Teil des vernichteten Geldes, den die Stadt selbst
 		// verbrennt.
 		expect(treasuryService.hatEmpfaenger('WAGE')).toBe(true);
 		expect(treasuryService.hatEmpfaenger('STIPEND')).toBe(true);
-		expect(treasuryService.hatEmpfaenger('PUBLIC_REPAIR')).toBe(false);
 		expect(treasuryService.hatEmpfaenger('PUBLIC_BUILD')).toBe(false);
 		expect(treasuryService.hatEmpfaenger('DEVELOPMENT')).toBe(false);
 	});

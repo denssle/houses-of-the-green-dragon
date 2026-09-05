@@ -1106,9 +1106,9 @@ export async function renovatePublicBuilding(
 		// Dieselbe Rechnung wie bei einem privaten Haus — nur zahlt eine andere Kasse.
 		// **Dieselbe Rechnung wie am eigenen Haus** — und seit 5.78 zahlt auch hier keine
 		// Kasse mehr, sondern es arbeitet ein Mensch: Der Amtsinhaber setzt seine eigenen
-		// Aktionspunkte ein. `PUBLIC_REPAIR` bleibt als Grund im Kassenbuch stehen, weil die
-		// Stadt sehr wohl für Instandsetzung zahlen kann — nur tut sie es dann über den
-		// Tagelohn (`WAGE`), und das ist eine Ausgabe mit Empfänger.
+		// Aktionspunkte ein. Deshalb wird hier nichts mehr gebucht, und deshalb ist der
+		// Grund `PUBLIC_REPAIR` mit 5.79 aus dem Kassenbuch verschwunden: Zahlt die Stadt
+		// für Instandsetzung, tut sie es über den Tagelohn, und der ist `WAGE`.
 		const ergebnis = renovate(
 			{ actionPoints: amtsperson.dataValues.actionPoints },
 			zustandVon(gebäude, tick),

@@ -22,9 +22,14 @@ import { Region } from '$lib/db/model/region';
  * jemand vergisst — und dann wäre das Buch nicht falsch, sondern unbemerkt unvollständig,
  * was schlimmer ist. Hier führt nur ein Weg an die Kasse, und wer ihn geht, bucht.
  *
+ * **Dasselbe gilt beim Abschaffen**, und das war die Lehre aus 5.79: Wer eine Zahlung
+ * entfernt, muss ihren Grund mitnehmen. `PUBLIC_REPAIR` blieb einmal als Karteileiche
+ * stehen, nachdem die Instandsetzung aufgehört hatte, Geld zu kosten — und eine Zeile,
+ * die im Bericht nie erscheint, liest sich wie „ist nie vorgekommen".
+ *
  * **Warum im Speicher und nicht in einer Tabelle.** Eine Zeile je Münzbewegung wäre die
  * teuerste Schreiblast des Spiels, für eine Auskunft, die man alle paar Wochen braucht.
- * Gezählt werden deshalb nur Summen je Grund — sechzehn Zahlen, die nichts kosten und
+ * Gezählt werden deshalb nur Summen je Grund — fünfzehn Zahlen, die nichts kosten und
  * beim Neustart verschwinden. Wer eine Geschichte der Kasse will, braucht die Chronik,
  * nicht dieses Buch.
  */
@@ -64,18 +69,24 @@ export const KASSENZUFLUESSE = [
 /**
  * Wohin es ging — und ob jemand es bekommt.
  *
- * **Die zweite Frage ist die wichtigere.** Drei dieser fünf Ausgaben haben keinen
- * Empfänger: Das Geld verlässt die Kasse und ist aus der Welt. Es sind ausgerechnet die
- * drei Handlungen, die ein Bürgermeister mit voller Kasse als Erstes tut — siehe
- * `hatEmpfaenger`.
+ * **Die zweite Frage ist die wichtigere.** Zwei dieser vier Ausgaben haben keinen
+ * Empfänger: Das Geld verlässt die Kasse und ist aus der Welt — siehe `hatEmpfaenger`.
+ *
+ * **`PUBLIC_REPAIR` stand hier bis 5.79 und ist ersatzlos gestrichen.** Seit 5.78 kostet
+ * Instandsetzen keine Münze mehr, sondern Aktionspunkte; die Buchung entfiel mit der
+ * Zahlung, und der Grund blieb als Karteileiche zurück. Ein Kassenbuch mit einem Posten,
+ * den nichts je bucht, ist genau der Fehler, vor dem der Kopf dieser Datei warnt: nicht
+ * falsch, sondern unbemerkt unvollständig — und im Messbericht sieht eine fehlende Zeile
+ * aus wie „ist nie vorgekommen". Genau das ist einmal passiert: Der Bericht nach 5.78
+ * schwieg zur Instandsetzung, und das wurde als „kein Bürgermeister hat je repariert"
+ * gelesen. Wenn die Stadt für Instandsetzung zahlt, tut sie es über den Tagelohn, und der
+ * ist `WAGE`.
  */
 export const KASSENABFLUESSE = [
 	/** Lohn an einen Bürger — Tagelohn an städtischen Bauten, Sold der Wache. */
 	'WAGE',
 	/** Die Aufwandsentschädigung an einen Amtsinhaber (4.7b). */
 	'STIPEND',
-	/** Instandsetzung eines öffentlichen Baus durch das Amt selbst. */
-	'PUBLIC_REPAIR',
 	/** Ein öffentlicher Neubau aus der Kasse. */
 	'PUBLIC_BUILD',
 	/** Die Erschließung neuen Baulands (4.9a). */
