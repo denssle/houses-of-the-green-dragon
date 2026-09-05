@@ -59,6 +59,20 @@ export type RepairForHireOutcome =
  * und bekommt mehr. Anders als beim Renovieren auf eigene Rechnung senkt Können hier
  * nicht die Kosten — es hebt den Verdienst, denn den Preis bestimmt der, der zahlt.
  */
+/**
+ * Was eine Schicht wirklich einbringt — Aushang mal Können (5.82, Punkt 106).
+ *
+ * **Steht hier, damit niemand sie nachbaut.** Genau das ist mit 5.81 passiert: Die
+ * Arbeitsplatzsuche prüfte, ob der Bauherr den **ausgehängten** Lohn aufbringt, gezahlt
+ * wurde aber der könnensgewichtete — und weil seit dem Rohbau fast jeder bauen kann, war
+ * das kein Randfall, sondern 1689 vergebliche Schichten je Messlauf. Wer die Deckung
+ * prüfen will, muss dieselbe Zahl ausrechnen wie der, der zahlt; also gibt es sie nur
+ * einmal.
+ */
+export function repairWage(offeredWage: number, buildingSkill: number): number {
+	return Math.max(1, Math.round(offeredWage * skillFactor(buildingSkill)));
+}
+
 export function repairForHire(
 	worker: { actionPoints: number; money: number; buildingSkill: number },
 	employer: { money: number },
@@ -75,7 +89,7 @@ export function repairForHire(
 		return { ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' };
 	}
 
-	const lohn: number = Math.max(1, Math.round(offeredWage * skillFactor(worker.buildingSkill)));
+	const lohn: number = repairWage(offeredWage, worker.buildingSkill);
 	if (!canAfford(employer.money, lohn)) return { ok: false, reason: 'EMPLOYER_BROKE' };
 
 	return {

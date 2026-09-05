@@ -6,6 +6,7 @@ import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
+import { Skill } from '$lib/db/model/skill';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
@@ -88,6 +89,7 @@ describe('Wer Lohn bietet, muss ihn haben', () => {
 		// Allein in der Stadt: Die Gründer würfen sonst mit — sie nähmen dieselbe Arbeit
 		// und verschöben die Entscheidung, um die es hier geht.
 		await Character.destroy({ where: { role: 'NPC' } });
+		await Skill.destroy({ where: {} });
 		await Building.destroy({ where: { ownerType: 'CHARACTER' } });
 		await World.update({ currentTick: JETZT }, { where: { id: WORLD_ID } });
 		// Eine leere Stadtkasse, damit auch die öffentlichen Bauten keine Arbeit bieten:
@@ -118,6 +120,23 @@ describe('Wer Lohn bietet, muss ihn haben', () => {
 		expect(stunde.byAction.WORK).toBeGreaterThan(0);
 		expect(stunde.byFailure['WORK/EMPLOYER_BROKE']).toBeUndefined();
 		expect((await Character.findByPk(arbeiterin))!.dataValues.money).toBeGreaterThan(20);
+	});
+
+	it('rechnet das Können des Suchenden mit, nicht nur den Aushang', async () => {
+		// **Der Rest, den 5.81 übrig ließ** (Punkt 106): Gezahlt wird Aushang mal Können.
+		// Bei Können 5 werden aus drei ausgehängten Münzen fünf — ein Bauherr mit vier
+		// besteht die Prüfung auf den Aushang und scheitert an der Zahlung. Im Messlauf
+		// nach 5.81 blieben so 1689 vergebliche Schichten stehen, weil seit dem Rohbau
+		// fast jeder bauen kann.
+		const knapp = await person('Knapp', 4);
+		await Character.update({ actionPoints: 0 }, { where: { id: knapp } });
+		await baustelle(knapp, 3);
+		const meisterin = await person('Meisterin', 20);
+		await Skill.create({ CharacterId: meisterin, type: 'CONSTRUCTION', level: 5, progress: 0 });
+
+		const stunde = await npcService.actForNpcs(JETZT);
+
+		expect(stunde.byFailure['WORK/EMPLOYER_BROKE']).toBeUndefined();
 	});
 
 	it('nimmt den zahlbaren Auftrag, nicht den bestbezahlten', async () => {

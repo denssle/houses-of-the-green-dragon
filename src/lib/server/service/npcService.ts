@@ -51,6 +51,7 @@ import * as electionService from '$lib/server/service/electionService';
 import * as employmentService from '$lib/server/service/employmentService';
 import * as lawService from '$lib/server/service/lawService';
 import * as skillService from '$lib/server/service/skillService';
+import { repairWage } from '$lib/game/buildingAction.logic';
 import { isWorthTaking } from '$lib/game/employment.logic';
 
 /**
@@ -924,7 +925,12 @@ async function freierArbeitsplatz(
 		(a, b) => (b.repairWage ?? TAGELOHN) - (a.repairWage ?? TAGELOHN) || a.condition - b.condition
 	);
 
-	return (await zahlbare(nachLohn, regionId))[0]?.id;
+	// **Das eigene Können gehört in die Rechnung** (5.82): Bezahlt wird der Aushang mal
+	// Können, und wer nur den Aushang prüft, schickt Meister zu Bauherren, die den Meister
+	// nicht bezahlen können. Eine Abfrage je Aufnahme — dieselbe Größenordnung wie die
+	// Beutel, und aus demselben Grund gerechtfertigt.
+	const koennen: number = await skillService.getLevel(characterId, 'CONSTRUCTION');
+	return (await zahlbare(nachLohn, regionId, koennen))[0]?.id;
 }
 
 /**
@@ -945,13 +951,14 @@ async function freierArbeitsplatz(
  * **Transaktion**, und fünftausend davon je Messlauf wiegen schwerer als eine gebündelte
  * Lesung je Aufnahme. Gelesen wird nur, was nach der Sortierung überhaupt in Frage kommt.
  *
- * **Der geprüfte Betrag ist der ausgehängte, nicht der ausgezahlte.** Wer bauen kann,
- * verdient mehr als den Aushang (`skillFactor` in `repairForHire`) — ein Meister kann also
- * weiterhin an einen knappen Beutel geraten. Das ist Absicht: Die Alternative wäre, das
- * Können jedes Suchenden mitzuladen, und der seltene Fehlschlag ist billiger als die
- * Abfrage.
+ * **Geprüft wird der Betrag, der wirklich fließt** — Aushang mal Können (`repairWage`).
+ * Mit 5.81 stand hier nur der Aushang, und die Begründung war, ein Meister gerate dann
+ * eben „selten" an einen knappen Beutel. **Das war falsch**, und der Messlauf hat es
+ * widerlegt: 1689 vergebliche Schichten blieben übrig, weil seit dem Rohbau fast jeder
+ * bauen kann und aus drei ausgehängten Münzen bei Können 5 schon fünf werden. Die Abkürzung
+ * sparte eine Abfrage und kostete ein Drittel des Erfolgs.
  */
-async function zahlbare(haeuser: Haus[], regionId: string): Promise<Haus[]> {
+async function zahlbare(haeuser: Haus[], regionId: string, koennen: number): Promise<Haus[]> {
 	if (haeuser.length === 0) return [];
 
 	const inhaber: string[] = [
@@ -975,7 +982,7 @@ async function zahlbare(haeuser: Haus[], regionId: string): Promise<Haus[]> {
 		: 0;
 
 	return haeuser.filter((haus) => {
-		const lohn: number = haus.repairWage ?? TAGELOHN;
+		const lohn: number = repairWage(haus.repairWage ?? TAGELOHN, koennen);
 		const vorhanden: number =
 			haus.ownerCharacterId === null ? kasse : (beutel.get(haus.ownerCharacterId) ?? 0);
 		return vorhanden >= lohn;

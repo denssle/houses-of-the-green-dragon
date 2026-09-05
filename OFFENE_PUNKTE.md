@@ -3728,10 +3728,21 @@ nur, wenn ein städtischer Bau überhaupt dabei ist.
 Nacken — hier ist die Rechnung eindeutig: Ein Fehlschlag ist eine **Transaktion**, und
 fünftausend davon je Messlauf wiegen schwerer als eine gebündelte Lesung je Aufnahme.
 
-**Geprüft wird der ausgehängte Betrag, nicht der ausgezahlte.** Wer bauen kann, verdient
-mehr als den Aushang (`skillFactor` in `repairForHire`), ein Meister kann also weiterhin an
-einen knappen Beutel geraten. Das ist Absicht: Die Alternative wäre, das Können jedes
-Suchenden mitzuladen, und der seltene Fehlschlag ist billiger als die Abfrage.
+**Gemessen und nachgebessert (5.82).** Der Lauf nach 5.81 zeigte **5602 → 1689** — ein
+Rückgang um siebzig Prozent, aber eben kein Verschwinden. Der Rest war eine Abkürzung, die
+in 5.81 ausdrücklich als „seltener Fehlschlag" begründet worden war: Geprüft wurde der
+**ausgehängte** Lohn, gezahlt wird der **könnensgewichtete**. Bei Können 5 werden aus drei
+Münzen fünf, und seit dem Rohbau kann in dieser Welt fast jeder bauen — also war es kein
+Randfall, sondern ein Drittel des Problems.
+
+Seit 5.82 rechnet die Prüfung das Können des Suchenden mit, und die Lohnformel steht nur
+noch **einmal** (`repairWage` in `buildingAction.logic`): Wer die Deckung prüft, rechnet
+dieselbe Zahl aus wie der, der zahlt. Genau daran ist 5.81 gescheitert — die Formel war
+zweimal da, einmal ungefähr.
+
+**Die Lehre daraus** ist nicht die Zahl, sondern die Begründung: „selten" war eine
+Vermutung, die als Entscheidung im Code stand. Sie hätte sich vorher prüfen lassen — die
+Verteilung der Baufertigkeiten steht im Messbericht.
 
 **Und der Test hat sich beim ersten Anlauf selbst überführt.** Von drei Prüfungen bissen
 nur zwei; die dritte — „nimmt den zahlbaren Auftrag, nicht den bestbezahlten" — bestand
