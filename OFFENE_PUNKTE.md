@@ -62,7 +62,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                  | Punkt 16                     | Befund       |
 | 106 | Ein Bauauftrag, den niemand bezahlen kann — **behoben mit 5.81**                     | —                            | erledigt     |
 | 107 | Die Grundsteuer brachte auf einmal ein Viertel — Ursache unbekannt                   | Punkt 101                    | Befund       |
-| 108 | Bilanz und Kassenbuch gehen auseinander — der Zehnt schafft Geld aus dem Nichts      | Punkt 66                     | Befund       |
+| 108 | Bilanz und Kassenbuch gehen auseinander — **zwei Lecks behoben mit 5.83**            | Punkt 66                     | teilweise    |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -1331,7 +1331,7 @@ Die Reihenfolge ist keine Frage des Aufwands, sondern der Wirkung: **Punkt 1 zue
 schließen, ohne 63 gelöst zu haben, legt die Wirtschaft still.** Zuerst muss es einen
 zweiten Weg geben, an Geld zu kommen — nämlich Waren zu verkaufen, die jemand herstellt.
 
-**Der offene Rest ist am 05.09.2026 beziffert worden** (Punkt 108): Der Zehnt schafft
+**Der offene Rest ist am 05.09.2026 beziffert und mit 5.83 geschlossen worden** (Punkt 108): Der Zehnt schafft
 Münzen aus dem Nichts — der Bauer verliert Ware, die Stadtkasse gewinnt Geld, das niemand
 gezahlt hat. Im Messlauf über 2000 Ticks sind das **1032 Münzen**. Sichtbar wurde es erst,
 nachdem 5.78 und 5.80 die Vernichtung auf der Bürgerseite geschlossen hatten: Vorher ging
@@ -3795,7 +3795,7 @@ Satz wann galt und wer ihn beschlossen hat. Solange ein Gesetz nur seinen aktuel
 kennt, ist jede Aussage über seine Wirkung eine Aussage über den letzten Stand — und
 genau das ist bei einem Satz, der sich mit jeder Amtszeit ändern kann, keine Aussage.
 
-### 108. Die Bilanz und das Kassenbuch gehen auseinander
+### 108. Die Bilanz und das Kassenbuch gehen auseinander — zwei Lecks behoben mit 5.83
 
 **Befund vom 05.09.2026, aus dem Messlauf nach 5.80.** Seit Bürger kein Geld mehr
 vernichten (5.78 und 5.80) **müssten** zwei unabhängige Rechnungen dieselbe Zahl nennen.
@@ -3840,7 +3840,33 @@ Kornspeicher.
   die Buchführung noch nicht vollständig ist — und dieselbe Regel wie immer: zuerst die
   Aufschlüsselung, dann der Eingriff.
 
-**Warum das ein guter Befund ist, obwohl er nach einem Fehler aussieht:** Diese Abweichung
+**Behoben mit 5.83 — zwei Lecks, die in entgegengesetzte Richtungen zeigten** und sich
+deshalb im Bericht teilweise aufhoben. Das erklärt auch, warum das Vorzeichen der
+Abweichung zwischen zwei Läufen wechselte:
+
+- **Der Zehnt schuf Geld.** Jetzt behält der Bauer die ganze Ernte und zahlt den Gegenwert
+  aus dem Beutel — so, wie es im Code seit jeher beschrieben stand („in Münzen an die
+  Stadt: Die Stadtkasse ist ein Betrag, kein Kornspeicher"). **Wer nicht kann, zahlt, was
+  er hat**; dieselbe Regel wendet die Grundsteuer seit 4.7b an, und sie erspart die Frage
+  nach Schulden, die es noch nicht gibt (Punkt 43). Beim Knecht zahlt der **Arbeitgeber**:
+  In sein Lager fällt der Ertrag, ihm gehört die Pacht, und der Lohn bleibt ungeschmälert.
+- **Käufe bei Verstorbenen vernichteten Geld.** `lifecycleService` räumte beim Tod
+  Grundstücke, Gebäude, Pachten und Bargeld ab — **Marktangebote nicht**. Sie blieben
+  stehen, `buyFromOffer` schrieb den Erlös per `increment` einer Leiche gut, und
+  `geldmenge()` zählt nur Lebende. Geliefert wurde dabei ordentlich, die Ware lag ja im
+  Haus des Erben; nur kam das Geld nie an. Jetzt gehen die Preisschilder mit dem Erbe an
+  den Erben, und wo keiner ist, kommen sie herunter.
+
+**Eine methodische Lehre, weil sie an einem Abend dreimal zugeschlagen hat:** Alle drei
+Tests zu diesem Punkt und zu Punkt 106 waren im **ersten Anlauf wirkungslos** — grün, ohne
+etwas zu prüfen. Der eine maß den Bauherrn, der seine eigene Baustelle voranbringt; der
+zweite erntete zu wenig, um überhaupt einen Zehnt auszulösen; der dritte legte das Gesetz
+in der falschen Region ab, sodass still der Rückfallwert galt. Keiner davon fiel beim
+Nachdenken auf, alle drei erst bei der **Gegenprobe gegen den alten Stand**. Ein Test, der
+einen Befund abschließt, gehört einmal ohne die Behebung laufen gelassen — sonst behauptet
+er nur etwas.
+
+**Warum das ein guter Befund war, obwohl er nach einem Fehler aussieht:** Diese Abweichung
 war vorher **nicht sichtbar**, weil Bürger selbst so viel Geld vernichteten, dass alles
 darin unterging. Erst nachdem 5.78 und 5.80 diese Quelle geschlossen haben, tritt die
 Differenz hervor. Das Kassenbuch aus 5.77 und die alte Bilanz aus 5.72 messen dasselbe auf

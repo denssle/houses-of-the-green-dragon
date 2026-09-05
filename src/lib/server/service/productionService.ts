@@ -327,7 +327,17 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 		const stadtId: string = await regionService.cityOf(flaeche.dataValues.RegionId);
 		const zehntsatz: number = await lawService.rate(stadtId, 'TITHE', t);
 		const zehnt: number = titheOn(ergebnis.produced, zehntsatz);
-		const behalten: number = ergebnis.produced - zehnt;
+		// **Der Zehnt ist eine Steuer in Münzen, kein Korb voll Korn** (5.83, Punkt 108).
+		// So stand es hier immer geschrieben — nur zahlte ihn niemand: Dem Bauern wurde die
+		// Ware abgezogen **und** der Stadt der Gegenwert gutgeschrieben. Das schuf Geld aus
+		// dem Nichts, rund tausend Münzen je Messlauf, und war der Rest von Punkt 66.
+		//
+		// Seither behält der Bauer die ganze Ernte und zahlt aus dem Beutel. **Wer nicht
+		// kann, zahlt, was er hat** — dieselbe Regel wie bei der Grundsteuer, die
+		// Uneintreibbares seit 4.7b nicht erzwingt, sondern festhält.
+		const behalten: number = ergebnis.produced;
+		const schuld: number = zehnt * (getItemTemplate(rezept.outputItemId)?.basePrice ?? 0);
+		const gezahlt: number = Math.max(0, Math.min(schuld, baeuerin.dataValues.money));
 
 		// **Die Ernte bleibt auf dem Hof** (5.25) — dort, wo sie gewachsen ist. Seit 5.15
 		// gehört zu jeder Pacht einer, und damit gibt es einen Ort dafür.
@@ -348,15 +358,12 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 			return { ok: false, reason: 'INVENTORY_FULL' } as const;
 		}
 
-		await baeuerin.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
+		await baeuerin.update(
+			{ actionPoints: ergebnis.actionPoints, money: baeuerin.dataValues.money - gezahlt },
+			{ transaction: t }
+		);
 		await skillService.addPractice(characterId, rezept.skill, rezept.actionPointCost, t);
-
-		if (zehnt > 0) {
-			const wert: number = zehnt * (getItemTemplate(rezept.outputItemId)?.basePrice ?? 0);
-			if (wert > 0) {
-				await treasuryService.einnehmen(stadtId, wert, 'TITHE', t);
-			}
-		}
+		await treasuryService.einnehmen(stadtId, gezahlt, 'TITHE', t);
 
 		return { ok: true, produced: behalten, itemId: rezept.outputItemId, tithe: zehnt } as const;
 	});

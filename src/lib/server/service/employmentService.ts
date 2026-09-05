@@ -404,6 +404,9 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 		);
 		if (!ergebnis.ok) return ergebnis;
 
+		/** Was der Betrieb an Zehnt aufbringt — wird unten von seiner Kasse abgezogen. */
+		let zehntZahlung = 0;
+
 		// Der Ertrag braucht Zutaten aus dem Betriebslager — sonst mahlt niemand. Beim
 		// Leerlauf bleibt dieser ganze Absatz aus: Es wird nichts verbraucht, nichts
 		// hergestellt, nichts gelernt und nichts verzehntet. Nur der Lohn läuft.
@@ -420,14 +423,19 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 				? titheOn(menge, await lawService.rate(boden.regionId, 'TITHE', t))
 				: 0;
 
-			await tradeService.changeBuildingStock(gebaeude.id, rezept.outputItemId, menge - zehnt, t);
+			// **Die ganze Ernte geht ins Lager, und der Betrieb zahlt den Zehnt in Münzen**
+			// (5.83, Punkt 108). Bis hierher wurde die Ware abgezogen **und** der Stadt der
+			// Gegenwert gutgeschrieben — Geld aus dem Nichts. Zahlen muss der **Arbeitgeber**:
+			// In sein Lager fällt der Ertrag, ihm gehört die Pacht, und der Knecht bekommt
+			// seinen Lohn ungeschmälert. Wer nicht kann, zahlt, was nach dem Lohn übrig ist
+			// — dieselbe Regel wie bei der Grundsteuer.
+			await tradeService.changeBuildingStock(gebaeude.id, rezept.outputItemId, menge, t);
 			await skillService.addPractice(employeeId, rezept.skill, kosten, t);
 
 			if (zehnt > 0 && boden) {
-				const wert: number = zehnt * (getItemTemplate(rezept.outputItemId)?.basePrice ?? 0);
-				if (wert > 0) {
-					await treasuryService.einnehmen(boden.regionId, wert, 'TITHE', t);
-				}
+				const schuld: number = zehnt * (getItemTemplate(rezept.outputItemId)?.basePrice ?? 0);
+				zehntZahlung = Math.max(0, Math.min(schuld, ergebnis.employerMoney));
+				await treasuryService.einnehmen(boden.regionId, zehntZahlung, 'TITHE', t);
 			}
 		}
 
@@ -438,7 +446,8 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 			},
 			{ transaction: t }
 		);
-		await kasse.zahle(ergebnis.employerMoney, t);
+		// Lohn und Zehnt in einem Zug: `zahle` setzt den Rest, nicht die Differenz.
+		await kasse.zahle(ergebnis.employerMoney - zehntZahlung, t);
 
 		return {
 			ok: true,

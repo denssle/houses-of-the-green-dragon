@@ -3,6 +3,7 @@ import * as productionService from '$lib/server/service/productionService';
 import { Op, type Transaction } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 import { Building } from '$lib/db/model/building';
+import { ShopOffer } from '$lib/db/model/shop';
 import { Character } from '$lib/db/model/character';
 import { Dynasty } from '$lib/db/model/dynasty';
 import { Plot } from '$lib/db/model/plot';
@@ -370,6 +371,15 @@ async function besitzUebertragen(vonId: string, anId: string, t: Transaction): P
 		{ OwnerCharacterId: anId },
 		{ where: { OwnerCharacterId: vonId }, transaction: t }
 	);
+	// **Und die Preisschilder wechseln mit** (5.83, Punkt 108). Bis hierher blieben sie am
+	// Toten hängen: Ein Käufer zahlte weiter an ihn, `buyFromOffer` schrieb den Erlös per
+	// `increment` einer Leiche gut, und weil die Geldmenge nur Lebende zählt, war das Geld
+	// aus der Welt. Ein stiller Verlust, den keine Buchung zeigte — die Ware lag ja
+	// weiterhin im Haus des Erben und wurde ordentlich geliefert.
+	await ShopOffer.update(
+		{ SellerCharacterId: anId },
+		{ where: { SellerCharacterId: vonId }, transaction: t }
+	);
 }
 
 /**
@@ -401,6 +411,11 @@ async function anDieStadt(
 		{ ownerType: 'CITY', OwnerCharacterId: null, forSalePrice: null, escheatedTick: tick },
 		{ where: { OwnerCharacterId: verstorbenId }, transaction: t }
 	);
+	// **Und die Preisschilder kommen herunter** (5.83, Punkt 108). Es gibt niemanden mehr,
+	// dem der Erlös zustünde — bliebe das Angebot hängen, zahlte der nächste Käufer an
+	// einen Toten, und das Geld wäre aus der Welt. Die **Ware** bleibt, wo sie liegt: Sie
+	// gehört zum Haus und fällt mit ihm an die Stadt.
+	await ShopOffer.destroy({ where: { SellerCharacterId: verstorbenId }, transaction: t });
 }
 
 /**
