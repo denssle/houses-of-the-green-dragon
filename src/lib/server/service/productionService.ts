@@ -7,6 +7,7 @@ import { Lease } from '$lib/db/model/lease';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
 import { produce, type Recipe, titheOn } from '$lib/game/production.logic';
+import { isUnderConstruction } from '$lib/game/building.logic';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import { seasonOf } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
@@ -396,6 +397,12 @@ export async function craft(
 	const fremd: boolean =
 		gebaeude.ownerType === 'CHARACTER' && gebaeude.ownerCharacterId !== characterId;
 	if (fremd) return { ok: false, reason: 'PLOT_NOT_OWNED' };
+	// **In einem Rohbau steht keine Werkbank** (5.76). Der Zustand allein finge das
+	// beinahe ab — `outputFactor(0)` ist null, es käme nichts heraus —, aber genau das
+	// wäre der verbrannte Tick, den diese Welt an mehreren Stellen teuer gelernt hat
+	// (Punkte 59, 63, 87, 97): Wer nichts herstellen kann, soll es gar nicht erst
+	// versuchen.
+	if (isUnderConstruction(gebaeude)) return { ok: false, reason: 'UNDER_CONSTRUCTION' };
 
 	return sequelize.transaction(async (t: Transaction) => {
 		const handwerker = await characterService.loadForAction(characterId, tick, t);

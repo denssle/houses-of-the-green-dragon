@@ -156,6 +156,15 @@ export interface NpcState {
 	repairNeeded: boolean;
 	repairCost: number;
 	/**
+	 * Steht auf einem seiner Grundstücke ein **Rohbau** (5.76)?
+	 *
+	 * Er geht dem Tagelohn vor: Wer eine Baustelle hat, richtet nicht fremde Häuser her,
+	 * während sein eigenes halbfertig im Regen steht. **Aber nur, solange die Rücklage
+	 * steht** — eine Baustelle bringt keine Münze, und wer an ihr verhungert, hat nichts
+	 * gewonnen.
+	 */
+	ownConstruction: boolean;
+	/**
 	 * Was die nächste Stufe des eigenen Wohnhauses kostet — nichts heißt: keines, oder
 	 * schon das Großhaus. Der Winteraufschlag steckt darin, sonst nennte die Rechnung
 	 * einen Preis, den die Handlung nicht hält.
@@ -217,9 +226,12 @@ export function savingsTarget(state: NpcState): number | null {
 
 	// Ein Dach für die Familie — dieselbe Bedingung wie in `eigenesDach`.
 	if (state.isMarried && !state.ownsHome && state.homePrice !== null) {
+		// **Ist das Material da, ist nur noch der Boden zu bezahlen** (5.76, Punkt 102):
+		// Der Bau selbst verlangt keine Münze mehr, sondern Arbeit. Stünde hier weiter der
+		// Hauspreis, verdingte sich ein Bauherr mit vollem Lager um hundert Münzen, die er
+		// nie ausgeben wird — und seine eigene Baustelle bliebe liegen.
 		if (!state.materialMissing) {
-			if (!state.hasFreePlot) return state.plotPrice;
-			return state.homePrice;
+			return state.hasFreePlot ? null : state.plotPrice;
 		}
 		// **Ein Ziel, das man nicht kaufen kann, ist kein Ziel.** Fehlt das Baumaterial und
 		// bietet es niemand an, war das Sparen hier zu Ende: `materialPrice` ist `null`,
@@ -249,8 +261,10 @@ export function savingsTarget(state: NpcState): number | null {
 		// **Der Preis des Werkstattmaterials, nicht der des Hausmaterials** (5.62). Bis
 		// dahin stand hier `materialPrice`: die Bretter für die Kate, während es an
 		// Quadern für die Mühle fehlte. Wer auf die falsche Zahl spart, hört zu früh auf.
-		if (state.workshopMaterialMissing) return state.workshopMaterialPrice;
-		return state.workshopPrice;
+		//
+		// Und ist es beisammen, wird **gebaut statt gespart** (5.76): Die Werkstatt selbst
+		// kostet keine Münze mehr.
+		return state.workshopMaterialMissing ? state.workshopMaterialPrice : null;
 	}
 
 	// **Und der Betrieb braucht Nachschub.** Wer eine Werkstatt hat, aber keine Fläche,
@@ -365,7 +379,14 @@ export function idleReason(state: NpcState): IdleReason {
 	const willBauen: boolean =
 		(state.isMarried && !state.ownsHome && state.homePrice !== null) ||
 		(!state.ownsWorkshop && isEnterprising(state.personality));
-	if (willBauen && savingsTarget(state) === null) return 'GOAL_UNREACHABLE';
+	// **Und es muss wirklich unbezifferbar sein** (5.76). Seit der Bau selbst keine Münze
+	// mehr kostet, ist „kein Sparziel" auch der Zustand dessen, der alles beisammen hat —
+	// der baut im selben Tick und ist gar nicht müßig. Diagnostiziert wird deshalb nur der
+	// Fall, um den es ging: Es fehlt Material, und niemand bietet es an.
+	const nichtsZuHaben: boolean =
+		(state.materialMissing && state.materialPrice === null) ||
+		(state.workshopMaterialMissing && state.workshopMaterialPrice === null);
+	if (willBauen && nichtsZuHaben && savingsTarget(state) === null) return 'GOAL_UNREACHABLE';
 
 	if (savingsTarget(state) !== null) {
 		return state.workAvailable && !state.hasJob ? 'STILL_SAVING' : 'NO_WORK';
@@ -496,6 +517,22 @@ function sicherheit(state: NpcState): NpcAction | undefined {
 	// Geprüft wird auf **jetzt** verfügbare eigene Arbeit, nicht auf Besitz: Wem die
 	// Zutaten ausgegangen sind und wer keine Fläche hat, für den ist der Tagelohn wieder
 	// der richtige Weg — und genau so kommt er an das Geld für Nachschub.
+	// **Die eigene Baustelle geht dem Tagelohn vor — solange das Brot gesichert ist**
+	// (5.76). Wer einen Rohbau hat, soll nicht fremde Häuser herrichten, während sein
+	// eigenes halbfertig im Regen steht; das ist dieselbe Überlegung wie in 5.30 für
+	// Werkstatt und Pacht.
+	//
+	// **Aber nicht um jeden Preis, und das ist der Unterschied zu jenen beiden.** Eine
+	// Werkstatt und eine Pacht *ernähren* ihren Mann — eine Baustelle nicht: Sie kostet
+	// Kraft und bringt keine Münze, bis sie fertig ist. Stünde sie deshalb in
+	// `hatEigeneArbeit`, hörte ein Bauherr auf zu verdienen, sobald er den ersten Stein
+	// gesetzt hat, und verhungerte an seinem eigenen Haus. Die Rücklage entscheidet: Wer
+	// sie hat, baut; wer sie nicht hat, geht arbeiten und baut morgen weiter.
+	const ruecklage: number = desiredReserve(state.personality, state.foodPrice);
+	if (state.ownConstruction && state.money >= ruecklage && state.actionPoints > 0) {
+		return 'RENOVATE';
+	}
+
 	if (
 		state.workAvailable &&
 		state.actionPoints > 0 &&
@@ -709,7 +746,6 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 		state.hasFreePlot &&
 		state.workshopPrice !== null &&
 		!state.workshopMaterialMissing &&
-		uebrig >= state.workshopPrice &&
 		isEnterprising(state.personality)
 	) {
 		return 'BUILD';
@@ -850,5 +886,11 @@ function eigenesDach(state: NpcState): NpcAction | undefined {
 	if (!state.hasFreePlot) {
 		return state.plotPrice !== null && uebrig >= state.plotPrice ? 'BUY_PLOT' : undefined;
 	}
-	return uebrig >= state.homePrice ? 'BUILD_HOME' : undefined;
+	// **Material und Grundstück genügen** (5.76, Punkt 102). Bis dahin stand hier noch
+	// eine Schwelle in Höhe des Hauspreises — den es seither nicht mehr gibt: Ein Bau
+	// kostet Material und Arbeit, und beides ist an dieser Stelle beisammen. Bliebe die
+	// Schwelle stehen, spielte sich der alte Fehler ein zweites Mal ab (5.62): Gespart
+	// wird auf den nächsten Schritt, gehandelt erst bei einer höheren Zahl — und
+	// dazwischen steht einer mit vollem Bauplatz und tut nichts.
+	return 'BUILD_HOME';
 }

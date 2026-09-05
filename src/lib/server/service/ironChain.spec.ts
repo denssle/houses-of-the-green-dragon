@@ -114,7 +114,12 @@ describe('Die Eisenkette', () => {
 		// mit leerer Esse da (festgehalten als Punkt 93).
 		await ticken(4);
 		await Inventory.create({ CharacterId: schmiedId, itemId: 'ORE', quantity: 6 });
-		await ticken(4);
+		// **Seit 5.76 braucht die Schmiede Zeit, bevor sie schmiedet.** Sie entsteht als
+		// Rohbau und wird durch Schichten fertig — zwanzig davon, und der Schmied legt sie
+		// allein, weil sonst niemand in dieser Stadt ist. Vier Ticks reichten, solange ein
+		// Haus für Münzen fertig aus dem Boden kam; jetzt ist Bauen Arbeit, und die
+		// Eisenkette fängt entsprechend später an.
+		await ticken(30);
 	}, 120_000);
 
 	it('lässt neben der städtischen eine eigene Schmiede entstehen', async () => {

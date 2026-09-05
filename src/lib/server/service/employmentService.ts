@@ -10,6 +10,7 @@ import { type Recipe, titheOn, yieldOf } from '$lib/game/production.logic';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import { AGE_OF_MAJORITY, ageInYears, seasonOf } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
+import { isUnderConstruction } from '$lib/game/building.logic';
 import { Region } from '$lib/db/model/region';
 import { Plot } from '$lib/db/model/plot';
 import * as characterService from '$lib/server/service/characterService';
@@ -112,6 +113,11 @@ export async function offerJob(
 
 	const erlaubt = await darfBestimmen(gebaeude.dataValues, ownerId);
 	if (!erlaubt.ok) return erlaubt;
+	// **Ein Rohbau sucht keine Gesellen** (5.76). Er sucht Bauleute, und dafür gibt es den
+	// Bauauftrag (`repairWage`), der beim Anlegen schon aushängt.
+	if (isUnderConstruction(gebaeude.dataValues)) {
+		return { ok: false, reason: 'UNDER_CONSTRUCTION' };
+	}
 
 	if (wage !== null && (!Number.isInteger(wage) || wage < 1)) {
 		return { ok: false, reason: 'NOTHING_TO_DO' };
@@ -169,6 +175,9 @@ export async function takeJob(characterId: string, buildingId: string): Promise<
 			? buildingService.getBuildingOption(gebaeude.dataValues.optionId)
 			: undefined;
 		if (!gebaeude || !vorlage) return { ok: false, reason: 'NO_JOB_OFFERED' } as const;
+		if (isUnderConstruction(gebaeude.dataValues)) {
+			return { ok: false, reason: 'UNDER_CONSTRUCTION' } as const;
+		}
 
 		const bewerber = await Character.findByPk(characterId, { transaction: t });
 		if (!bewerber) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;

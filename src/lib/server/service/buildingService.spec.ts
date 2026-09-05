@@ -12,7 +12,8 @@ import * as buildingService from '$lib/server/service/buildingService';
 import * as buildingActionService from '$lib/server/service/buildingActionService';
 import * as chronicleService from '$lib/server/service/chronicleService';
 import * as plotService from '$lib/server/service/plotService';
-import { PLOT_PRICE } from '$lib/game/economy';
+import { PLOT_PRICE, TAGELOHN } from '$lib/game/economy';
+import { REPAIR_PER_SHIFT } from '$lib/game/buildingAction.logic';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { CONDITION_MAX, YEARS_TO_RUIN } from '$lib/game/building.logic';
@@ -93,6 +94,19 @@ async function haus(
 		...extras
 	});
 	return id;
+}
+
+/**
+ * Einen Rohbau fertig machen — so, wie es die Welt tut: Schicht für Schicht (5.76).
+ *
+ * Der Eigentümer legt selbst Hand an; der Aktionsvorrat reicht für zwanzig Schichten.
+ * Bequemer wäre ein direktes `update` auf den Zustand, aber dann liefe der Test an genau
+ * der Stelle vorbei, die den Bau beendet — dem Einzug und der Abnahme des Auftrags.
+ */
+async function fertigBauen(besitzerId: string, buildingId: string): Promise<void> {
+	for (let schicht = 0; schicht < CONDITION_MAX / REPAIR_PER_SHIFT; schicht++) {
+		await buildingService.renovateBuilding(besitzerId, buildingId);
+	}
 }
 
 async function weltzeit(tick: number): Promise<void> {
@@ -210,7 +224,9 @@ describe('Bauen und Arbeiten', () => {
 	});
 
 	describe('Bauen', () => {
-		it('zieht das Geld ab und stellt das Haus aufs Grundstück', async () => {
+		it('stellt einen Rohbau aufs Grundstück, ohne eine Münze zu nehmen', async () => {
+			// **Der Kern von 5.76** (Punkt 102): Bis dahin standen hier 250 Münzen weniger
+			// im Beutel, und niemand hatte sie bekommen.
 			const adelbert = await charakterMitGeld(300);
 			const grundstück = await eigenesGrundstueck(adelbert);
 			const option = buildingService.getBuildingOption(SCHMIEDE)!;
@@ -218,20 +234,45 @@ describe('Bauen und Arbeiten', () => {
 			const ergebnis = await buildingService.build(option, adelbert, grundstück);
 
 			expect(ergebnis.ok).toBe(true);
-			expect(await geld(adelbert)).toBe(50);
+			expect(await geld(adelbert)).toBe(300);
 			const gebaut = ergebnis.ok ? await buildingService.getBuilding(ergebnis.building.id) : null;
-			expect(gebaut).toMatchObject({ plotId: grundstück, ownerCharacterId: adelbert });
+			expect(gebaut).toMatchObject({
+				plotId: grundstück,
+				ownerCharacterId: adelbert,
+				condition: 0,
+				underConstruction: true
+			});
 		});
 
-		it('lässt den Bauherrn in sein erstes Wohnhaus einziehen', async () => {
+		it('hängt am Rohbau sofort einen Bauauftrag aus', async () => {
+			// Ohne ihn wäre die Baustelle für jeden anderen unsichtbar — `freierArbeitsplatz`
+			// sucht nach genau diesem Feld, und der Baumeister käme in der Welt nicht vor.
+			const adelbert = await charakterMitGeld(300);
+			const grundstück = await eigenesGrundstueck(adelbert);
+			const option = buildingService.getBuildingOption(SCHMIEDE)!;
+
+			const ergebnis = await buildingService.build(option, adelbert, grundstück);
+
+			const gebaut = ergebnis.ok ? await buildingService.getBuilding(ergebnis.building.id) : null;
+			expect(gebaut!.repairWage).toBe(TAGELOHN);
+		});
+
+		it('lässt den Bauherrn erst einziehen, wenn das Haus fertig ist', async () => {
+			// **Bis 5.76 zog er mit dem Bau ein** — das ging, solange ein Haus fertig
+			// entstand. In einen Rohbau zieht niemand.
 			const adelbert = await charakterMitGeld(300);
 			const grundstück = await eigenesGrundstueck(adelbert);
 			const wohnhaus = buildingService.getBuildingOption(WOHNHAUS)!;
 
 			const ergebnis = await buildingService.build(wohnhaus, adelbert, grundstück);
 
-			const bewohner = await CharacterModel.findByPk(adelbert);
-			expect(bewohner!.dataValues.HomeBuildingId).toBe(ergebnis.ok && ergebnis.building.id);
+			const roh = await CharacterModel.findByPk(adelbert);
+			expect(roh!.dataValues.HomeBuildingId).toBeNull();
+
+			await fertigBauen(adelbert, ergebnis.ok ? ergebnis.building.id : '');
+
+			const eingezogen = await CharacterModel.findByPk(adelbert);
+			expect(eingezogen!.dataValues.HomeBuildingId).toBe(ergebnis.ok && ergebnis.building.id);
 		});
 
 		it('lässt eine Schmiede kein Zuhause werden', async () => {
@@ -239,22 +280,109 @@ describe('Bauen und Arbeiten', () => {
 			const grundstück = await eigenesGrundstueck(adelbert);
 			const schmiede = buildingService.getBuildingOption(SCHMIEDE)!;
 
-			await buildingService.build(schmiede, adelbert, grundstück);
+			const ergebnis = await buildingService.build(schmiede, adelbert, grundstück);
+			await fertigBauen(adelbert, ergebnis.ok ? ergebnis.building.id : '');
 
 			const bewohner = await CharacterModel.findByPk(adelbert);
 			expect(bewohner!.dataValues.HomeBuildingId).toBeNull();
 		});
 
-		it('nimmt bei zu wenig Geld weder Münze noch Grundstück', async () => {
-			const adelbert = await charakterMitGeld(249);
-			const grundstück = await eigenesGrundstueck(adelbert);
+		it('lässt auch den Mittellosen bauen — er baut dann eben selbst', async () => {
+			// **Der Ausweg, ohne den der Rohbau eine Falle wäre** (die Lehre aus 5.75): Wer
+			// keinen Baumeister bezahlen kann, kommt über Eigenleistung trotzdem an sein
+			// Haus. Vorher scheiterte er hier an `NOT_ENOUGH_MONEY`.
+			const arm = await charakterMitGeld(0);
+			const grundstück = await eigenesGrundstueck(arm);
 			const option = buildingService.getBuildingOption(SCHMIEDE)!;
 
-			const ergebnis = await buildingService.build(option, adelbert, grundstück);
+			const ergebnis = await buildingService.build(option, arm, grundstück);
 
-			expect(ergebnis).toEqual({ ok: false, reason: 'NOT_ENOUGH_MONEY' });
-			expect(await geld(adelbert)).toBe(249);
-			expect(await BuildingModel.count()).toBe(0);
+			expect(ergebnis.ok).toBe(true);
+			expect(await geld(arm)).toBe(0);
+		});
+
+		it('macht den Rohbau Schicht für Schicht fertig, ohne Geld zu nehmen', async () => {
+			const adelbert = await charakterMitGeld(300);
+			const grundstück = await eigenesGrundstueck(adelbert);
+			const option = buildingService.getBuildingOption(SCHMIEDE)!;
+			const ergebnis = await buildingService.build(option, adelbert, grundstück);
+			const bauId: string = ergebnis.ok ? ergebnis.building.id : '';
+
+			const erste = await buildingService.renovateBuilding(adelbert, bauId);
+
+			expect(erste).toEqual({ ok: true, spent: 0 });
+			expect((await buildingService.getBuilding(bauId))!.condition).toBe(REPAIR_PER_SHIFT);
+			expect(await geld(adelbert)).toBe(300);
+			// Ein Aktionspunkt je Schicht — nicht die vier einer Renovierung.
+			const nachher = await CharacterModel.findByPk(adelbert);
+			expect(nachher!.dataValues.actionPoints).toBe(47);
+		});
+
+		it('nimmt den Bauauftrag ab, wenn der Bau fertig ist', async () => {
+			// Bliebe er hängen, suchten Tagelöhner weiter Arbeit an einem Haus, an dem
+			// nichts mehr zu tun ist — und ein Haus verfällt vom ersten Tick an wieder.
+			const adelbert = await charakterMitGeld(300);
+			const grundstück = await eigenesGrundstueck(adelbert);
+			const option = buildingService.getBuildingOption(SCHMIEDE)!;
+			const ergebnis = await buildingService.build(option, adelbert, grundstück);
+			const bauId: string = ergebnis.ok ? ergebnis.building.id : '';
+
+			await fertigBauen(adelbert, bauId);
+
+			const fertig = await buildingService.getBuilding(bauId);
+			expect(fertig).toMatchObject({
+				condition: CONDITION_MAX,
+				repairWage: null,
+				underConstruction: false
+			});
+		});
+
+		it('lässt einen Rohbau nicht ausbauen', async () => {
+			const adelbert = await charakterMitGeld(1000);
+			const grundstück = await eigenesGrundstueck(adelbert);
+			const wohnhaus = buildingService.getBuildingOption(WOHNHAUS)!;
+			const ergebnis = await buildingService.build(wohnhaus, adelbert, grundstück);
+
+			const ausbau = await buildingService.upgradeBuilding(
+				adelbert,
+				ergebnis.ok ? ergebnis.building.id : ''
+			);
+
+			expect(ausbau).toEqual({ ok: false, reason: 'UNDER_CONSTRUCTION' });
+		});
+
+		it('reißt einen Rohbau nicht als Ruine ab', async () => {
+			// **Der gefährlichste Zusammenfall dieses Schritts**: Ein Rohbau steht bei null,
+			// und null war bis dahin die Ruine. Ohne diese Unterscheidung wäre jeder frisch
+			// angelegte Bau beim nächsten Blick verschwunden — samt Material.
+			const adelbert = await charakterMitGeld(300);
+			const grundstück = await eigenesGrundstueck(adelbert);
+			const wohnhaus = buildingService.getBuildingOption(WOHNHAUS)!;
+			const ergebnis = await buildingService.build(wohnhaus, adelbert, grundstück);
+			const bauId: string = ergebnis.ok ? ergebnis.building.id : '';
+
+			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN + 5));
+			const nachher = await buildingService.getBuilding(bauId);
+			await weltzeit(JETZT);
+
+			expect(nachher).toBeDefined();
+			expect(nachher!.condition).toBe(0);
+		});
+
+		it('lässt in einen Rohbau niemanden einziehen', async () => {
+			const adelbert = await charakterMitGeld(300);
+			const bertram = await charakterMitGeld(300);
+			const grundstück = await eigenesGrundstueck(adelbert);
+			const wohnhaus = buildingService.getBuildingOption(WOHNHAUS)!;
+			const ergebnis = await buildingService.build(wohnhaus, adelbert, grundstück);
+			const bauId: string = ergebnis.ok ? ergebnis.building.id : '';
+
+			expect(await buildingService.moveInto(bertram, bauId)).toEqual({
+				ok: false,
+				reason: 'UNDER_CONSTRUCTION'
+			});
+			// Und er zählt auch nicht als freier Wohnraum — daran hängt der Zuzug.
+			expect(await buildingService.freierWohnraum(bauId)).toBe(0);
 		});
 
 		it('baut nicht auf fremdem Grund', async () => {
@@ -266,7 +394,7 @@ describe('Bauen und Arbeiten', () => {
 			const ergebnis = await buildingService.build(option, adelbert, grundstück);
 
 			expect(ergebnis).toEqual({ ok: false, reason: 'PLOT_NOT_OWNED' });
-			expect(await geld(adelbert)).toBe(300);
+			expect(await BuildingModel.count()).toBe(0);
 		});
 
 		it('stellt kein zweites Haus auf dasselbe Grundstück', async () => {
@@ -377,18 +505,17 @@ describe('Bauen und Arbeiten', () => {
 			// fremde Häuser her und schickte die Rechnung. Der Grund ist seither präzise —
 			// nicht 'kein Arbeitsplatz', sondern 'kein Angebot': Es liegt am fehlenden
 			// Auftrag und nicht an der Art des Hauses.
-			const adelbert = await charakterMitGeld(300);
-			const grundstueck = await eigenesGrundstueck(adelbert);
-			const gebaut = await buildingService.build(
-				buildingService.getBuildingOption(SCHMIEDE)!,
-				adelbert,
-				grundstueck
-			);
-			const werkstatt: string = gebaut.ok ? gebaut.building.id : '';
+			//
+			// **Geprüft wird das seit 5.76 an einem fertigen Haus.** Vorher stand hier ein
+			// frisch gebautes — das hat seither immer einen Auftrag aushängen, denn ein
+			// Rohbau sucht von sich aus Hände.
+			const eigentuemer = await charakterMitGeld(300);
+			const arbeiter = await charakterMitGeld(10);
+			const werkstatt: string = await haus(eigentuemer, { optionId: SCHMIEDE, condition: 50 });
 
 			const ergebnis = await buildingActionService.doBuildingAction(
 				'REPAIR_FOR_HIRE',
-				adelbert,
+				arbeiter,
 				werkstatt
 			);
 

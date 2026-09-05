@@ -30,30 +30,24 @@ const RATHAUS: BuildingTemplate = {
 };
 
 describe('Bauen', () => {
-	const BAUHERR = { id: 'adelbert', money: 300 };
+	const BAUHERR = { id: 'adelbert' };
 	const EIGENES_FREIES = {
 		ownerCharacterId: 'adelbert',
 		regionId: 'gruenau',
 		hasBuilding: false
 	};
 
-	it('zieht den Preis ab', () => {
-		const ergebnis = build(BAUHERR, EIGENES_FREIES, SCHMIEDE, false);
-
-		expect(ergebnis).toEqual({ ok: true, money: 50, spent: 250 });
+	it('lässt bauen, ohne eine Münze zu verlangen', () => {
+		// **Seit 5.76 kostet der Bau kein Bargeld mehr** (Punkt 102). Vorher wurden hier
+		// 250 Münzen abgezogen, die niemand bekam — die größte Stelle, an der Geld aus
+		// dieser Welt verschwand. Was ein Haus kostet, sind Material und Arbeit.
+		expect(build(BAUHERR, EIGENES_FREIES, SCHMIEDE, false)).toEqual({ ok: true });
 	});
 
-	it('lässt bauen, wenn das Geld genau reicht', () => {
-		// Der Prototyp verbot den Kauf, sobald man genug hatte — die Prüfung war verdreht.
-		const ergebnis = build({ id: 'adelbert', money: 250 }, EIGENES_FREIES, SCHMIEDE, false);
-
-		expect(ergebnis).toEqual({ ok: true, money: 0, spent: 250 });
-	});
-
-	it('weist ab, wenn eine Münze fehlt', () => {
-		const ergebnis = build({ id: 'adelbert', money: 249 }, EIGENES_FREIES, SCHMIEDE, false);
-
-		expect(ergebnis).toEqual({ ok: false, reason: 'NOT_ENOUGH_MONEY' });
+	it('lässt auch den Mittellosen bauen — er baut dann eben selbst', () => {
+		// Der Ausweg, ohne den dieser Schritt eine Falle wäre: Wer keinen Baumeister
+		// bezahlen kann, kommt über Eigenleistung trotzdem an sein Haus.
+		expect(build({ id: 'adelbert' }, EIGENES_FREIES, SCHMIEDE, false)).toEqual({ ok: true });
 	});
 
 	it('weist fremdes und nie vergebenes Land ab', () => {
@@ -87,10 +81,10 @@ describe('Bauen', () => {
 	});
 
 	it('nennt den ersten wirklichen Grund, nicht den letzten', () => {
-		// Fremdes Grundstück und zu wenig Geld zugleich: Am Besitz liegt es zuerst.
+		// Fremdes und bebautes Grundstück zugleich: Am Besitz liegt es zuerst.
 		const ergebnis = build(
-			{ id: 'adelbert', money: 0 },
-			{ ...EIGENES_FREIES, ownerCharacterId: 'bertram' },
+			{ id: 'adelbert' },
+			{ ...EIGENES_FREIES, ownerCharacterId: 'bertram', hasBuilding: true },
 			SCHMIEDE,
 			false
 		);

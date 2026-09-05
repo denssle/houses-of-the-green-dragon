@@ -56,10 +56,12 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen         | —                            | erledigt     |
 | 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote         | dem nächsten Schritt         | Befund       |
 | 101 | Das Kassenbuch — jede Bewegung der Stadtkasse mit einem Grund                        | Punkt 100                    | Entwurf      |
-| 102 | Jeder Bau verbrennt seinen Preis — 91 % des Geldes verschwindet wieder               | Punkte 100, 66, 74           | Befund       |
+| 102 | Jeder Bau verbrennt seinen Preis — **der Bau behoben mit 5.76** (der Rohbau)         | Punkte 100, 66, 74           | teilweise    |
 | 103 | Die Wirtschaft hat eine Startreihenfolge, die niemand einhält — Quader und Eisen     | Punkte 85, 70, 15            | Befund       |
 | 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu | —                            | erledigt     |
 | 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                  | Punkt 16                     | Befund       |
+| 106 | Ein Bauauftrag, den niemand bezahlen kann — 1741 vergebliche Schichten               | dem nächsten Messlauf        | Befund       |
+| 107 | Die Grundsteuer brachte auf einmal ein Viertel — Ursache unbekannt                   | Punkt 101                    | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -3098,7 +3100,7 @@ sinkt" in einem einzigen Lauf „sie verhungert" gemacht (5.71), und drei Vermut
 den Arbeitsmarkt haben in derselben Zeit nichts getroffen. Wer nicht misst, rät — und rät
 im Zweifel dreimal.
 
-### 102. Jeder Bau verbrennt seinen Preis
+### 102. Jeder Bau verbrennt seinen Preis — der Bau behoben mit 5.76 (der Rohbau)
 
 **Befund vom 29.08.2026, aus der ersten gemessenen Bilanz (Punkt 100).** 91 Prozent des
 Geldes, das in die Welt kommt, verschwindet wieder. Die größte Stelle ist eine einzige
@@ -3152,6 +3154,149 @@ nicht aus:
 Die dritte verdient eine ernsthafte Prüfung, denn sie löst nebenbei Punkt 76: Wenn ein Bau
 kein Bargeld mehr verlangt, sondern Material, wird aus 2165 unverkauften Brettern eine
 Nachfrage.
+
+**Nachgemessen am 04.09.2026, nach 5.75.** Derselbe Lauf, dieselbe Saat 86: **6034 von
+6491 zugeflossenen Münzen vernichtet — 93 Prozent.** Der Anteil ist gegenüber dem ersten
+Befund _gestiegen_, und zwar aus dem erfreulichen Grund: Seit die Krücke den Schmied nicht
+mehr besetzt, entstehen zum ersten Mal andere Werkstätten (zweite Zimmerei, Schmiede,
+Steinmetzhütte), es wird mehr gebaut — und jeder Bau verbrennt seinen Preis. Der Erfolg von
+5.75 hat das Leck vergrößert. Daneben stand `WORK/EMPLOYER_BROKE` mit 781 als häufigster
+Fehlschlag der Welt und 568 unverkaufte Bretter am Markt: Arbeitgeber ohne Geld neben
+Material im Überfluss.
+
+**Behoben mit 5.76 — der Rohbau.** Gewählt wurde nicht eine der drei Möglichkeiten,
+sondern die erste und die dritte zusammen, weil sie sich als dasselbe erwiesen: **Ein Bau
+ist ein Vorhaben, kein Kauf.**
+
+- `build()` verlangt keine Münze mehr. Das Material geht hinein wie bisher, der Zustand
+  beginnt bei **null**, `underConstruction` steht — das Gebäude entsteht als **Rohbau**.
+- Fertig wird er durch **Schichten**: entweder Eigenleistung des Bauherrn (ein
+  Aktionspunkt, kein Geld) oder bezahlte Arbeit anderer über `REPAIR_FOR_HIRE`. Zwanzig
+  Schichten liegen zwischen dem leeren Bauplatz und dem Einzug.
+- Der **Bauauftrag hängt sofort aus** (`repairWage` = Tagelohn). Damit findet die
+  vorhandene NPC-Schleife die Baustelle ohne eine einzige neue Zeile: `freierArbeitsplatz`
+  sucht seit 5.27 nach genau diesem Feld.
+- Wer den Rohbau fertigstellt, löst den **Einzug** aus (samt Ehepartner) — das stand bis
+  dahin in `build()`, wo es nach diesem Schritt nicht mehr hingehört.
+- In einem Rohbau wird nicht gewohnt, nicht hergestellt, nicht angestellt und nicht
+  ausgebaut. Alle vier Wege sagen `UNDER_CONSTRUCTION`, statt den Tick verbrennen zu
+  lassen — dieselbe Lehre wie in den Punkten 59, 63, 87 und 97.
+
+**Zwei Stellen, an denen es beim Bauen fast schiefgegangen wäre**, und beide handeln von
+derselben Zweideutigkeit — die Null ist der Anfang eines Baus und das Ende eines Hauses:
+
+- **Ein Rohbau ist keine Ruine.** `mitZustand` reißt jedes private Gebäude bei Zustand
+  null ab. Ohne eine Ausnahme wäre jeder frisch angelegte Bau beim nächsten Blick auf ihn
+  verschwunden — samt Material und mit einem Chronikeintrag „zerfallen".
+- **Und das Feld zeigt in die richtige Richtung.** Zuerst stand dort ein `completedTick`,
+  das `null` „im Bau" hieß. Das ist die erzählendere Fassung, aber die falsche: Achtzehn
+  Testdateien, der Seed, der Pachthof und der öffentliche Bau legen Gebäude an, und jede
+  Stelle, die das Feld vergisst, erzeugt stillschweigend einen unbenutzbaren Rohbau. Der
+  Testlauf hat es mit elf Fehlschlägen gezeigt. `underConstruction` mit Standardwert
+  `false` dreht das um: Wer es vergisst, bekommt das alte Verhalten — und das ist die
+  Richtung, in die ein Fehler fallen soll.
+
+**Was daran der eigentliche Gewinn ist:** Der Baupreis hat zum ersten Mal einen Empfänger.
+Eine Kate kostete hundert Münzen, die aus der Welt fielen; jetzt kostet sie zwanzig
+Schichten, und zum Tagelohn sind das sechzig Münzen **in der Hand von Bauleuten**. Das ist
+zugleich der private Bauauftrag aus Punkt 74 — nur für den Bau statt für die Reparatur —
+und der Anfang des Bauherrn aus Punkt 35.
+
+**Und der Ausweg gehört dazu** (die Lehre aus 5.75): Wer niemanden findet, der für ihn
+baut, baut selbst. Langsamer, aber nie gesperrt. Hätte der Rohbau einen Baumeister
+_verlangt_, wäre er dieselbe Falle gewesen wie die städtische Schmiede, die den Beruf
+besetzte.
+
+**Vier Stellen mussten mitwandern, und drei davon sind der eigentliche Aufwand dieses
+Schritts gewesen.** Der Bau selbst ist eine Handvoll Zeilen; dass die Welt ihn versteht,
+war die Arbeit:
+
+- **Die Entscheidung sparte auf einen Preis, den es nicht mehr gibt.** `savingsTarget` gab
+  weiter den Hauspreis als Ziel aus, und `eigenesDach` verlangte ihn vor dem Bau. Das
+  hätte den ganzen Schritt entwertet — der Bauherr hätte hundert Münzen zusammengearbeitet,
+  die er nie ausgibt, statt seine Baustelle voranzubringen. Gespart wird jetzt auf das, was
+  noch zu **kaufen** ist: Boden und Material. Ist beides da, wird gebaut.
+- **Wer eine eigene Baustelle hat, verdingt sich nicht.** Dieselbe Regel wie 5.30 für
+  Werkstatt und Pacht (`hatEigeneArbeit`), um den Rohbau erweitert. Ohne sie ginge ein
+  Bauherr unter seinem Sparziel fremde Häuser herrichten, während sein eigenes halbfertig
+  im Regen steht.
+- **`GOAL_UNREACHABLE` hätte gelogen.** Die Diagnose meldete „unerreichbares Ziel", sobald
+  es kein Sparziel gab — und das ist seither auch der Zustand dessen, der alles beisammen
+  hat. Sie prüft jetzt, ob wirklich etwas fehlt, das niemand anbietet. Genau die Mahnung
+  aus Punkt 93: Eine Diagnose, die von der Entscheidung abweicht, ist schlimmer als keine.
+- **Und der Einzug wäre fast auf die Obdachlosen zusammengeschrumpft.** Beim Verschieben
+  in `fertigstellen()` stand dort zuerst „nur, wer noch kein Dach hat" — das klingt
+  vernünftig und ist genau der Fehler, den 4.14 behoben hat: NPCs wohnen alle erst in der
+  städtischen Unterkunft, und zöge nur der Obdachlose ein, entstünden Häuser, in denen
+  niemand wohnt. Die Bevölkerung wüchse trotzdem nicht, weil Kinder am Wohnraum der
+  Mutter hängen (4.4). Im Selbsterhaltungstest waren es sieben fertige Häuser und null
+  Bewohner.
+
+**Nachgemessen am 04.09.2026, Saat 86, 2000 Ticks — derselbe Lauf wie davor:**
+
+|                         |        vor 5.76 |       nach 5.76 |
+| ----------------------- | --------------: | --------------: |
+| Von außen zugeflossen   |            6491 |            5258 |
+| **Vernichtet**          | **6034** (93 %) | **3782** (72 %) |
+| Geld bei Leuten am Ende |            1061 |            1983 |
+| Lebende bei Tick 2000   |              18 |              32 |
+| Geburten                |              16 |              32 |
+| Tode                    |              30 |              26 |
+| `GOAL_UNREACHABLE`      |           16035 |            9384 |
+| `CONTENT`               |            1616 |           17089 |
+
+**Rund 2250 Münzen weniger verbrannt** — fast genau der Betrag, den die Tabelle oben dem
+Bauen und dem Wohnungsbau zuschreibt. Das Geld ist nicht verschwunden, sondern bei
+Bauleuten gelandet: Der Bestand bei den Bürgern hat sich fast verdoppelt, und mit ihm die
+Bevölkerung. Zum ersten Mal stehen drei Wohnhäuser auf Stufe 2 statt eines einzigen.
+
+**Der Müßiggang hat dabei seinen Charakter geändert**, und das ist der schönere Teil des
+Befunds: Nicht mehr „Ziel unerreichbar" ist der häufigste Grund, sondern **Zufriedenheit**
+— und ein weiteres Drittel sind Kinder (`TOO_YOUNG` 11837), weil so viele geboren wurden.
+
+**Ein Vorbehalt zur Fairness:** Der Zufluss war diesmal geringer (5258 statt 6491, weil 18
+statt 24 zuzogen — die Unterkunft war voller, weil mehr Leute leben). Der **Anteil**, 72
+gegen 93 Prozent, ist deshalb die belastbarere Zahl als die Differenz.
+
+**Zwei Nebenwirkungen, die dieser Schritt hinterlässt:**
+
+- **`WORK/EMPLOYER_BROKE` hat sich auf 1741 mehr als verdoppelt** (vorher 781) und bleibt
+  der häufigste Fehlschlag der Welt. Die Ursache ist neu: **Jeder Rohbau hängt einen
+  Bauauftrag aus, auch wenn sein Bauherr keine Münze hat.** In der Einwohnerliste stehen
+  reihenweise Leute mit `geld=0` bis `geld=3` und `CONSTRUCTION`-Können — Bauleute, die zu
+  einer Baustelle gehen, deren Herr sie nicht bezahlen kann. `freierArbeitsplatz` fragt
+  nach dem Aushang, nicht nach dem Beutel dahinter. Dieselbe Lücke wie in den Punkten 59,
+  63 und 97: Die Entscheidung prüft etwas anderes als die Ausführung.
+- **Die Grundsteuer brachte 1098 statt 4780.** Wofür es hier keine Erklärung gibt und
+  keine erfunden wird: Sie ist ein Gesetz, das ein NPC-Bürgermeister beschließt, und ob er
+  es später oder gar nicht tat, sagt die Bilanz nicht. Genau diese Trennung fehlt — Punkt 101.
+
+**Was das an Zeit kostet, ist die ehrlichste Folge:** Ein Haus braucht jetzt zwanzig
+Schichten, und die Welt braucht dafür Ticks. Der Selbsterhaltungstest lief mit zwanzig
+Ticks; er braucht hundertzwanzig, und die Eisenkette (`ironChain.spec.ts`) statt vier
+Ticks dreißig. Das ist keine Trägheit der Simulation, sondern die Aussage des Schritts:
+Bauen ist Arbeit. Wer die Zahl ändern will, ändert sie in `REPAIR_PER_SHIFT` — zwanzig
+Schichten zum Tagelohn sind sechzig Münzen, und damit liegt der Bau ungefähr da, wo sein
+Münzpreis lag. Das war Absicht: Der Messlauf soll zeigen, wohin dasselbe Geld fließt, und
+nicht, dass Bauen billiger wurde.
+
+**Was offen bleibt** — der Münzpreis steht noch an vier Stellen, und alle sind kleiner als
+der Bau:
+
+| Handlung         | im Messlauf | Stand nach 5.76                                      |
+| ---------------- | ----------: | ---------------------------------------------------- |
+| `BUILD_HOME`     |       ~1700 | behoben                                              |
+| `BUILD`          |        ~420 | behoben                                              |
+| `RENOVATE`       |        ~200 | offen — Punkt 74 nennt den Weg (Auftrag statt Preis) |
+| `UPGRADE_HOME`   |        ~300 | offen                                                |
+| Landerschließung |        ~540 | offen                                                |
+| `BUILD_PUBLIC`   |           — | offen; wäre zugleich der Rückweg aus Punkt 100       |
+
+Der öffentliche Bau ist die interessanteste davon: Ein städtischer Rohbau hieße, dass die
+Stadtkasse **Löhne** zahlt statt Preise, und genau dieser Rückweg zu den Bürgern fehlt ihr
+(Punkt 100). Er hängt aber an einer zweiten Frage — was ein Bürgermeister beschließt, wenn
+der Bau nichts mehr kostet —, und deshalb ist er nicht mitgemacht worden. Ein Schritt, eine
+Frage.
 
 ### 103. Die Wirtschaft hat eine Startreihenfolge, die niemand einhält
 
@@ -3307,6 +3452,57 @@ Zurücksetzen. Verloren ginge nicht die Einwohnerzahl, sondern die Geschichte de
 Gründerfamilien seit 1.6. Das ist ein Grund, die Stadt nicht leichtfertig sterben zu
 lassen, aber kein Grund, den Tod zu verhindern.
 
+### 106. Ein Bauauftrag, den niemand bezahlen kann
+
+**Befund vom 04.09.2026, aus dem Messlauf nach 5.76.** `WORK/EMPLOYER_BROKE` ist mit
+**1741 Fehlschlägen** der häufigste Fehlschlag der Welt und hat sich gegenüber dem Lauf
+davor mehr als verdoppelt (781). Die Ursache ist der Rohbau: Er hängt beim Anlegen einen
+Bauauftrag aus, damit ihn überhaupt jemand findet — **auch dann, wenn sein Bauherr keine
+Münze besitzt.**
+
+In der Einwohnerliste desselben Laufs stehen reihenweise Leute mit `geld=0` bis `geld=3`
+und `CONSTRUCTION`-Können. Sie gehen zu einer Baustelle, `repairForHire` rechnet den Lohn
+aus, die Kasse des Bauherrn gibt ihn nicht her, der Tick ist verbrannt — und im nächsten
+gehen sie wieder hin, denn `freierArbeitsplatz` sortiert nach dem **besten Lohn** und
+findet dasselbe Angebot erneut.
+
+**Das ist die Lücke aus den Punkten 59, 63, 87 und 97 in neuer Gestalt:** Die Entscheidung
+prüft etwas anderes als die Ausführung. Sie fragt nach dem Aushang, nicht nach dem Beutel
+dahinter.
+
+**Denkbare Antworten**, von der kleinsten zur größten:
+
+- **Die Lage fragt mit.** `freierArbeitsplatz` prüft, ob der Eigentümer den gebotenen Lohn
+  überhaupt aufbringt. Eine Abfrage mehr je Haus — und Punkt 67 sitzt im Nacken.
+- **Der Auftrag zieht sich selbst zurück.** Wer nicht zahlen kann, dessen Aushang
+  verschwindet, bis er wieder kann. Ehrlicher zur Welt (ein Aushang ist ein Versprechen)
+  und ohne Kosten in der Schleife.
+- **Der Bauherr hängt erst aus, wenn er etwas zu bieten hat.** Dann fände ein mittelloser
+  Bauherr allerdings nie Hilfe — er baut allein weiter, und das ist genau der Ausweg, der
+  bleiben soll.
+
+**Kein Rückschritt, sondern ein Nebeneffekt des Fortschritts:** Vorher gab es kaum bezahlte
+Bauarbeit, weil es kaum Aufträge gab. Jetzt gibt es sie — nur sind einige davon leere
+Versprechen.
+
+### 107. Die Grundsteuer brachte auf einmal ein Viertel
+
+**Befund vom 04.09.2026, aus demselben Lauf.** Die Grundsteuer nahm **1098** ein, im Lauf
+davor **4780** — bei mehr Einwohnern (32 statt 18) und ähnlich vielen Grundstückskäufen
+(24 statt 20). „Nicht eintreibbar" fiel dabei von 748 auf 78, es lag also **nicht** an
+zahlungsunfähigen Bürgern.
+
+**Eine Erklärung steht hier bewusst nicht.** Die Steuer ist ein Gesetz, das ein
+NPC-Bürgermeister beschließt (`NPC_MAYOR_LAWS`); ob er es diesmal später, niedriger oder
+gar nicht beschloss, ob eine Amtszeit anders verlief oder ob die veränderte Bevölkerung
+dahintersteckt, **sagt die Bilanz nicht** — sie nennt eine Summe je Richtung und keine
+Posten.
+
+**Damit ist dies vor allem ein Beleg für Punkt 101.** Solange die Kasse nur eine Zahl
+kennt, lässt sich der größte Posten einer Veränderung nicht benennen, und jede Deutung
+wäre geraten. Das Kassenbuch ist kein Komfort, sondern die Bedingung dafür, dass die
+nächsten Schritte messbar sind.
+
 ## Der Weg durch die Wirtschaft — Stand 29.08.2026
 
 **Warum dieser Abschnitt existiert.** Die Wirtschaftsbefunde liegen als zehn Punkte
@@ -3315,7 +3511,8 @@ Kornspeicher für die Sperre vor der Brotkette, Punkt 86 stand hinter Punkt 87, 
 standen in Wahrheit hinter Punkt 104. Wer hier anfängt, soll nicht wieder von vorn
 erschließen müssen, was worauf wartet.
 
-**Der Stand in vier Sätzen.** Geld entsteht in dieser Welt nur durch Zuzug (~6000 Münzen
+**Der Stand in vier Sätzen** (Stand des Befunds; Schritt 1 und 2 sind seither
+beantwortet — siehe unten). Geld entsteht in dieser Welt nur durch Zuzug (~6000 Münzen
 in vierzig Spieljahren); 91 Prozent davon verschwinden wieder, das meiste beim Bauen. Was
 bleibt, fließt über Brot, Steuer und Grundstücke in die Stadtkasse, deren Rückweg zu den
 Bürgern rund 1,25 Münzen je Tick beträgt. Die einzige laufend verbrauchte Ware ist Brot,
@@ -3324,14 +3521,18 @@ im Messlauf vier von fünf Toten.
 
 **Die Reihenfolge, wie sie sich aus den Befunden ergibt:**
 
-1. **Springt die Kette überhaupt an?** (Punkt 104 ist behoben, 103 offen.) Der erste
-   Messlauf nach 5.75 beantwortet, ob zum ersten Mal ein Schmied zuzieht und eine zweite
-   Werkstatt entsteht. Alles Weitere hängt daran — solange nur eine Zimmerei existiert,
-   sind alle folgenden Fragen theoretisch.
-2. **Hört das Geld auf zu verschwinden?** (Punkt 102.) Solange jeder Bau seinen Preis
-   verbrennt, kann kein Kreislauf entstehen, egal wie gut die Ketten laufen. Von den drei
-   Wegen dort ist der dritte zu prüfen — kein Münzpreis mehr, nur Material und Arbeit —,
-   weil er nebenbei Punkt 76 löst: Aus unverkauften Brettern würde Nachfrage.
+1. **Springt die Kette überhaupt an?** (Punkt 104 ist behoben, 103 offen.) — **Ja,
+   gemessen am 04.09.2026.** Im Lauf mit Saat 86 stehen bei Tick 2000 eine zweite
+   Zimmerei, eine private Schmiede und eine Steinmetzhütte; vorher war es eine einzige
+   Zimmerei. `CRAFT` stieg von 435 auf 579, `IDLE` fiel von 29788 auf 25410. Damit sind
+   die folgenden Fragen keine theoretischen mehr. Ein Backhaus steht weiterhin nicht —
+   das bleibt Schritt 3.
+2. **Hört das Geld auf zu verschwinden?** (Punkt 102.) — **Der Bau: ja, mit 5.76** (der
+   Rohbau), und **gemessen am 04.09.2026**: 72 statt 93 Prozent vernichtet, rund 2250
+   Münzen weniger verbrannt, das Geld bei den Bürgern fast verdoppelt und die Bevölkerung
+   mit ihm (32 statt 18 Lebende). Offen bleiben Renovieren, Ausbauen, Erschließung und der
+   öffentliche Bau. Neu dazugekommen sind zwei Befunde aus demselben Lauf: Punkt 106 (ein
+   Bauauftrag, den niemand bezahlen kann) und Punkt 107 (die eingebrochene Grundsteuer).
 3. **Erst dann der Kornspeicher** (Punkt 85). Nicht abschaffen, sondern verteuern: Er ist
    die Notversorgung, nicht die Konkurrenz. Und erst, wenn Schritt 1 einen Bäcker
    hervorbringen **kann** — vorher verhungert die Stadt wirklich.

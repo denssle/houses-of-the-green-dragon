@@ -40,7 +40,11 @@ export const Building: ModelStatic<Model<BuildingAttributes, BuildingCreationAtt
 			offeredWage: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
 			// Der Preis, den der Eigentümer für die Instandsetzung bietet (5.27).
 			repairWage: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
-			escheatedTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
+			escheatedTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
+			// Ein Rohbau entsteht mit Zustand null und wird durch Arbeit fertig (5.76).
+			// **Fertig ist der Standard**: Nur `build()` setzt dieses Feld — jede andere
+			// Stelle, die ein Gebäude anlegt, meint ein fertiges.
+			underConstruction: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
 		},
 		{ timestamps: true }
 	);

@@ -46,6 +46,7 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		hasLease: false,
 		leaseAvailable: false,
 		ownStockToSell: 0,
+		ownConstruction: false,
 		canCraft: false,
 		inputPrice: null,
 		plotPrice: null,
@@ -276,9 +277,11 @@ describe('Was ein NPC tut', () => {
 		});
 
 		it('spart auf den nächsten Schritt, nicht auf das ganze Vorhaben', () => {
-			// Mit Grundstück steht die Werkstatt an — vorher nicht.
+			// Das Grundstück ist das Ziel, solange keines da ist. **Steht es, gibt es nichts
+			// mehr zu sparen** (5.76): Der Bau selbst kostet keine Münze mehr, sondern
+			// Material und Arbeit — und das Material steht in diesem Zustand als vorhanden.
 			expect(savingsTarget(gruender())).toBe(40);
-			expect(savingsTarget(gruender({ hasFreePlot: true }))).toBe(180);
+			expect(savingsTarget(gruender({ hasFreePlot: true }))).toBeNull();
 		});
 
 		it('lässt den Genügsamen in Ruhe', () => {
@@ -291,10 +294,13 @@ describe('Was ein NPC tut', () => {
 		});
 
 		it('stellt das Dach der Familie vor das eigene Unternehmen', () => {
+			// **Seit 5.76 zeigt sich der Vorrang an der Handlung statt am Sparziel.** Beide
+			// Bauten kosten kein Bargeld mehr; wer Grundstück und Material hat, baut — und
+			// er baut das Wohnhaus, nicht die Werkstatt.
 			const verheiratet = gruender({ isMarried: true, hasFreePlot: true });
 
-			// Nicht 180 für die Werkstatt, sondern 100 fürs Wohnhaus.
-			expect(savingsTarget(verheiratet)).toBe(100);
+			expect(savingsTarget(verheiratet)).toBeNull();
+			expect(decideNpcAction(verheiratet)).toBe('BUILD_HOME');
 		});
 
 		it('gibt das Dach nicht auf, sondern baut die Werkstatt, die es möglich macht', () => {
@@ -314,7 +320,16 @@ describe('Was ein NPC tut', () => {
 				materialPrice: null
 			});
 
-			expect(savingsTarget(ohneBretter)).toBe(180);
+			// Bis 5.76 stand hier die 180 des Werkstattpreises; seither kostet auch die
+			// Werkstatt kein Bargeld, und das Ziel ist ihr **Material**. Der Befund
+			// dahinter ist derselbe geblieben: Er gibt das Dach nicht auf, sondern wendet
+			// sich dem zu, was er selbst in der Hand hat.
+			// Bis 5.76 stand hier die 180 des Werkstattpreises; seither kostet auch die
+			// Werkstatt kein Bargeld, sondern Material — und das hat er. Also spart er auf
+			// nichts mehr, sondern **baut sie**, und das ist genau die Antwort, die der Name
+			// dieses Tests seit jeher gibt.
+			expect(savingsTarget(ohneBretter)).toBeNull();
+			expect(decideNpcAction(ohneBretter)).toBe('BUILD');
 		});
 
 		it('spart weiter aufs Material, solange es welches zu kaufen gibt', () => {
@@ -410,15 +425,20 @@ describe('Was ein NPC tut', () => {
 				expect(decideNpcAction(amZiel)).toBe('BUY_PLOT');
 			});
 
-			it('baut erst, wenn das Haus bezahlt ist', () => {
+			it('baut, sobald Boden und Material da sind — nicht erst, wenn das Haus bezahlt wäre', () => {
+				// **Bis 5.76 hieß dieser Test „baut erst, wenn das Haus bezahlt ist".** Er
+				// prüfte, dass ein Bauwilliger mit vierzig übrigen Münzen weiterarbeitet,
+				// weil die Kate hundert kostet. Diesen Preis gibt es nicht mehr (Punkt 102):
+				// Ein Haus kostet Material und Arbeit, und wer beides hat, fängt an.
 				const mitBoden = bauwillig({ hasFreePlot: true, money: 36 + 40 });
 
-				expect(savingsTarget(mitBoden)).toBe(100);
-				// Vierzig übrig, das Haus kostet hundert: Er arbeitet weiter.
-				expect(decideNpcAction(mitBoden)).toBe('WORK');
-				expect(decideNpcAction(bauwillig({ hasFreePlot: true, money: 36 + 100 }))).toBe(
-					'BUILD_HOME'
-				);
+				expect(savingsTarget(mitBoden)).toBeNull();
+				// Sechsundsiebzig in der Tasche, das Haus kostete einmal hundert: Er baut.
+				expect(decideNpcAction(mitBoden)).toBe('BUILD_HOME');
+				// **Die Rücklage bleibt trotzdem**, und das ist kein Widerspruch: Wer nichts
+				// zu essen hat, geht erst arbeiten. Der Bau verlangt kein Geld — das Leben
+				// daneben schon.
+				expect(decideNpcAction(bauwillig({ hasFreePlot: true, money: 0 }))).toBe('WORK');
 			});
 
 			it('kauft das Brett, ohne den Hauspreis in der Tasche zu haben', () => {
@@ -737,12 +757,16 @@ describe('Was ein NPC tut', () => {
 		});
 
 		it('nennt es Sparen, wo gespart wird', () => {
+			// **Ohne Grundstück** — seit 5.76 hat einer, der Boden und Material hat, kein
+			// Sparziel mehr: Der Bau kostet keine Münze. Gespart wird auf das, was noch zu
+			// kaufen ist, und das ist hier der Boden.
 			const sparend = zufrieden({
 				personality: anlagen({ ambition: 40, diligence: 40 }),
 				ownsHome: false,
 				isMarried: true,
 				materialMissing: false,
-				hasFreePlot: true,
+				hasFreePlot: false,
+				plotPrice: 40,
 				homePrice: 100,
 				workAvailable: true
 			});
@@ -758,7 +782,8 @@ describe('Was ein NPC tut', () => {
 				ownsHome: false,
 				isMarried: true,
 				materialMissing: false,
-				hasFreePlot: true,
+				hasFreePlot: false,
+				plotPrice: 40,
 				homePrice: 100,
 				workAvailable: false
 			});

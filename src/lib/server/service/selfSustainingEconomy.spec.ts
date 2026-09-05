@@ -53,10 +53,14 @@ describe('Die Wirtschaft trägt sich selbst', () => {
 
 		vorher = await Building.count({ where: { ownerType: 'CHARACTER' } });
 
-		// Zwanzig Ticks genügen: Jede Handlung ist einer, und die ersten gehen fürs
-		// Einziehen und Werben drauf.
+		// **Hundertzwanzig Ticks, seit Bauen Arbeit ist** (5.76). Zwanzig genügten, solange eine
+		// Werkstatt in dem Moment stand, in dem jemand sie bezahlte; seither entsteht sie
+		// als Rohbau, und zwanzig Schichten liegen zwischen dem Bauplatz und der ersten
+		// Ware. Die Frage ist dieselbe geblieben — bringt die Stadt aus eigener Kraft einen
+		// Betrieb hervor, in dem gearbeitet wird —, nur braucht ihre Antwort jetzt die
+		// Zeit, die ein Haus eben braucht.
 		const start: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
-		for (let i = 0; i < 20; i++) {
+		for (let i = 0; i < 120; i++) {
 			await npcService.actForNpcs(start + i);
 			await World.update({ currentTick: start + i + 1 }, { where: { id: WORLD_ID } });
 		}
@@ -111,8 +115,10 @@ describe('Die Bevölkerung baut sich ihr Dach', () => {
 			);
 		}
 
+		// Hundertzwanzig Ticks, aus demselben Grund wie oben (5.76): Das Haus entsteht als Rohbau,
+		// und erst die letzte Schicht macht daraus ein Dach, unter das jemand zieht.
 		const start: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
-		for (let i = 0; i < 20; i++) {
+		for (let i = 0; i < 120; i++) {
 			await npcService.actForNpcs(start + i);
 			await World.update({ currentTick: start + i + 1 }, { where: { id: WORLD_ID } });
 		}

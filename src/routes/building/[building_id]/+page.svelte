@@ -22,6 +22,13 @@
 	 * Wesensart ist sie hier keine Verlockung, sondern die Grundlage der Entscheidung:
 	 * Renovieren kostet nach dem, was fehlt.
 	 */
+	/**
+	 * **Ein Rohbau ist kein verfallenes Haus** (5.76). Beide stehen bei vierzig Punkten,
+	 * und beide brauchen Arbeit — aber „baufällig" wäre für eine Baustelle das falsche
+	 * Wort, und die Seite soll sagen, was der Fall ist: Hier wird noch gebaut.
+	 */
+	const imBau: boolean = $derived(data.building.underConstruction);
+
 	function zustandswort(condition: number): string {
 		if (condition >= 90) return 'wie neu';
 		if (condition >= 70) return 'gut in Schuss';
@@ -64,7 +71,13 @@
 	{/if}
 
 	<dt>Zustand</dt>
-	<dd>{data.building.condition} von 100 — {zustandswort(data.building.condition)}</dd>
+	<dd>
+		{#if imBau}
+			{data.building.condition} von 100 — <b>im Bau</b>
+		{:else}
+			{data.building.condition} von 100 — {zustandswort(data.building.condition)}
+		{/if}
+	</dd>
 
 	<dt>Ausbaustufe</dt>
 	<dd>
@@ -200,12 +213,17 @@
 {#if data.repairForHire}
 	<form method="POST" action="?/act" use:enhance>
 		<input type="hidden" name="action" value="REPAIR_FOR_HIRE" />
-		<button type="submit">Für Lohn herrichten</button>
+		<button type="submit">{imBau ? 'Für Lohn mitbauen' : 'Für Lohn herrichten'}</button>
 	</form>
 	<p>
 		<small>
-			Die Stadt zahlt für jeden Handschlag an ihren Bauten — solange etwas zu richten ist und die
-			Kasse es hergibt.
+			{#if imBau}
+				Ein Rohbau sucht Hände. Wer hier arbeitet, bekommt den ausgeschriebenen Lohn vom Bauherrn —
+				und lernt dabei das Bauen.
+			{:else}
+				Die Stadt zahlt für jeden Handschlag an ihren Bauten — solange etwas zu richten ist und die
+				Kasse es hergibt.
+			{/if}
 		</small>
 	</p>
 {/if}
@@ -319,17 +337,34 @@
 	</section>
 
 	<section>
-		<h3>Instandhaltung</h3>
+		<h3>{imBau ? 'Bau' : 'Instandhaltung'}</h3>
 		{#if data.building.condition < 100}
+			<!--
+				**Derselbe Knopf, eine andere Arbeit** (5.76). Am Rohbau ist die Handlung des
+				Eigentümers die Bauschicht: ein Aktionspunkt, keine Münze, ein Stück weiter.
+				Zwei getrennte Knöpfe wären zwei Namen für „bring dein Haus voran" — genau der
+				Fehler, den Punkt 53 einmal gekostet hat.
+			-->
 			<form method="POST" action="?/renovate" use:enhance>
 				<button type="submit">
-					Renovieren ({data.renovationCost} Münzen{#each data.renovationMaterial as posten (posten.itemId)}
-						und {posten.quantity}
-						{posten.name}{/each})
+					{#if imBau}
+						Selbst weiterbauen (1 Aktionspunkt)
+					{:else}
+						Renovieren ({data.renovationCost} Münzen{#each data.renovationMaterial as posten (posten.itemId)}
+							und {posten.quantity}
+							{posten.name}{/each})
+					{/if}
 				</button>
 			</form>
 			<p>
-				<small>Wer früh renoviert, zahlt wenig — gezahlt wird nach dem, was fehlt.</small>
+				<small>
+					{#if imBau}
+						Das Material steckt schon im Bau — was noch fehlt, ist Arbeit. Wer selbst anpackt, zahlt
+						nichts; wer Lohn bietet, wird schneller fertig.
+					{:else}
+						Wer früh renoviert, zahlt wenig — gezahlt wird nach dem, was fehlt.
+					{/if}
+				</small>
 			</p>
 
 			<!--
@@ -339,7 +374,7 @@
 			-->
 			<form method="POST" action="?/offerRepair" use:enhance>
 				<label>
-					Auftrag: Lohn je Handschlag
+					{imBau ? 'Bauauftrag' : 'Auftrag'}: Lohn je Handschlag
 					<input type="number" name="wage" min="1" step="1" value={data.building.repairWage} />
 				</label>
 				<button type="submit">

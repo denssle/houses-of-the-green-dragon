@@ -51,7 +51,8 @@ const SAETZE: Record<ActionFailureReason, string> = {
 	NOT_IN_OFFICE: 'Dazu müsstest du das Amt innehaben.',
 	NOT_A_CITIZEN: 'Du bist noch nicht lange genug hier, um mitzuwählen.',
 	OUT_OF_BOUNDS: 'So weit reicht die Macht des Amtes nicht.',
-	BID_TOO_LOW: 'Damit ist niemand zu überbieten.'
+	BID_TOO_LOW: 'Damit ist niemand zu überbieten.',
+	UNDER_CONSTRUCTION: 'Das ist noch ein Rohbau — erst muss er fertig werden.'
 };
 
 export function actionMessage(reason: ActionFailureReason): string {

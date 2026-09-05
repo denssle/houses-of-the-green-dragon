@@ -47,4 +47,6 @@ export type ActionFailureReason =
 	// Wer zugezogen ist, wählt erst nach einer Wahlperiode mit (5.24, Punkt 71).
 	| 'NOT_A_CITIZEN'
 	| 'OUT_OF_BOUNDS'
+	// Was noch im Bau ist, wird nicht bewohnt, bewirtschaftet oder ausgebaut (5.76).
+	| 'UNDER_CONSTRUCTION'
 	| 'BID_TOO_LOW';

@@ -110,6 +110,69 @@ export function wageAt(template: BuildingTemplate, level: number, condition: num
 	return grundlohn === 0 ? 0 : Math.max(1, Math.floor(grundlohn * outputFactor(condition)));
 }
 
+// --- Der Rohbau ----------------------------------------------------------------------
+
+/**
+ * Ein Bau ist ein Vorhaben, kein Kauf (5.76, Punkt 102).
+ *
+ * **Bis hierher entstand ein Haus aus Münzen.** Hundert für eine Kate, abgezogen und aus
+ * der Welt — im Messlauf über 2000 Ticks die größte einzelne Stelle, an der Geld
+ * verschwand. Dabei war das Material längst gesondert bezahlt und beim Zimmerer gekauft;
+ * der Münzpreis kam obendrauf und hatte keinen Empfänger.
+ *
+ * Seither entsteht ein Gebäude als **Rohbau**: Das Material geht hinein, der Zustand
+ * beginnt bei null, und fertig wird es durch Schichten — eigene oder bezahlte. Damit hat
+ * der Preis zum ersten Mal jemanden, der ihn bekommt, und das Bauen ist das, was es sein
+ * sollte: Arbeit.
+ *
+ * **Ein Rohbau erkennt man nicht am Zustand.** Vierzig Punkte können ein halbfertiges
+ * Haus sein oder ein verfallenes, und die Null ist gar zweideutig: Anfang eines Baus und
+ * Ende eines Hauses. Deshalb steht die Unterscheidung in einem eigenen Feld und nicht in
+ * einer Schwelle.
+ */
+export function isUnderConstruction(building: { underConstruction: boolean }): boolean {
+	return building.underConstruction;
+}
+
+/**
+ * Wie viele Zustandspunkte eine eigene Bauschicht einbringt.
+ *
+ * Derselbe Satz wie bei der Instandsetzung gegen Lohn (`REPAIR_PER_SHIFT`), und das mit
+ * Absicht: Am Rohbau arbeitet der Eigentümer neben dem Tagelöhner her, und beide sollten
+ * gleich viel schaffen. Zwanzig Schichten stehen damit zwischen dem leeren Bauplatz und
+ * dem Einzug — beim Tagelohn von drei Münzen sechzig Münzen für eine Kate, die vorher
+ * hundert kostete und niemandem zugutekam.
+ */
+export const BUILD_ACTION_POINT_COST = 1;
+
+export type BuildShiftOutcome =
+	| { ok: true; actionPoints: number; condition: number }
+	| { ok: false; reason: ActionFailureReason };
+
+/**
+ * Eine Schicht am eigenen Rohbau — Eigenleistung (5.76).
+ *
+ * **Kostet Kraft und kein Geld.** Das Material ist beim Anlegen bezahlt, und wer selbst
+ * die Kelle führt, zahlt sich keinen Lohn. Das ist zugleich der Ausweg, ohne den dieser
+ * Schritt eine Falle wäre: Wer keinen findet, der für ihn baut, kommt trotzdem an sein
+ * Haus — langsamer, aber nie gesperrt. Dieselbe Lehre wie aus 5.75.
+ */
+export function buildShift(
+	owner: { actionPoints: number },
+	condition: number,
+	perShift: number
+): BuildShiftOutcome {
+	if (condition >= CONDITION_MAX) return { ok: false, reason: 'NOTHING_TO_DO' };
+	if (owner.actionPoints < BUILD_ACTION_POINT_COST) {
+		return { ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' };
+	}
+	return {
+		ok: true,
+		actionPoints: owner.actionPoints - BUILD_ACTION_POINT_COST,
+		condition: Math.min(CONDITION_MAX, condition + perShift)
+	};
+}
+
 // --- Renovieren ----------------------------------------------------------------------
 
 export type RenovationOutcome =

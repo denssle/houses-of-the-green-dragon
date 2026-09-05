@@ -8,10 +8,13 @@ import { sequelize } from '$lib/db/sequelize';
 import { Building as BuildingModel } from '$lib/db/model/building';
 import { Plot as PlotModel } from '$lib/db/model/plot';
 import { convertToBuilding } from '$lib/db/attributes/building.attributes';
-import { build as buildLogic } from '$lib/game/buildingAction.logic';
+import { build as buildLogic, REPAIR_PER_SHIFT } from '$lib/game/buildingAction.logic';
 import {
+	BUILD_ACTION_POINT_COST,
+	buildShift,
 	CONDITION_MAX,
 	currentCondition,
+	isUnderConstruction,
 	isRuin,
 	type MaterialNeed,
 	materialFor,
@@ -39,6 +42,7 @@ import * as skillService from '$lib/server/service/skillService';
 import * as tradeService from '$lib/server/service/tradeService';
 import * as worldService from '$lib/server/service/worldService';
 import { checkName, type NameCheck } from '$lib/game/naming.logic';
+import { TAGELOHN } from '$lib/game/economy';
 import { seasonOf } from '$lib/game/time';
 
 /**
@@ -425,7 +429,7 @@ export async function build(
 		const grenzeErreicht = await limitReached(option, grundstück.dataValues.RegionId, t);
 
 		const ergebnis = buildLogic(
-			{ id: characterId, money: bauherr.dataValues.money },
+			{ id: characterId },
 			{
 				ownerCharacterId: grundstück.dataValues.OwnerCharacterId,
 				regionId: grundstück.dataValues.RegionId,
@@ -455,6 +459,22 @@ export async function build(
 				id: randomUUID(),
 				name: option.initialName,
 				optionId: option.optionId,
+				// **Ein Rohbau, kein Haus** (5.76, Punkt 102). Der Zustand beginnt bei null
+				// und steigt mit jeder Schicht; solange wohnt und arbeitet hier niemand.
+				//
+				// **Öffentliche Bauten bleiben vorerst ausgenommen** (`buildPublicBuilding`
+				// legt weiter fertig an). Der Rohbau gehörte auch dorthin — die Stadtkasse
+				// zahlte dann Löhne statt Preise, und genau der Rückweg fehlt ihr (Punkt
+				// 100). Er hinge aber an einer zweiten Frage: was ein Bürgermeister
+				// beschließt, wenn der Bau nichts mehr kostet. Ein Schritt, eine Frage.
+				condition: 0,
+				underConstruction: true,
+				// **Der Auftrag hängt sofort aus.** Ohne ihn wäre die Baustelle für jeden
+				// anderen unsichtbar (`freierArbeitsplatz` sucht nach genau diesem Feld),
+				// und der Bauherr müsste jeden Bau allein stemmen — der Baumeister käme in
+				// der Welt nicht vor. Der Tagelohn ist der Satz, den auch die Stadt zahlt;
+				// wer schneller fertig werden will, bietet mehr (`offerRepair`).
+				repairWage: TAGELOHN,
 				lastConditionTick: tick,
 				PlotId: plotId,
 				ownerType: 'CHARACTER',
@@ -471,37 +491,10 @@ export async function build(
 			t
 		);
 
-		// **Wer sein Wohnhaus baut, zieht ein — mit Frau oder Mann.**
-		//
-		// Bis 4.14 galt das nur für Obdachlose: Wer in der städtischen Unterkunft wohnte,
-		// blieb dort und ließ sein neues Haus leer stehen. Für NPCs war das fatal, denn sie
-		// wohnen alle erst einmal in der Unterkunft — die Häuser entstanden, und die
-		// Bevölkerung wuchs trotzdem nicht, weil Kinder am Wohnraum der **Mutter** hängen
-		// (4.4). Deshalb zieht der Ehepartner mit: Man baut kein Haus, um allein darin zu
-		// wohnen.
-		const ziehtEin: boolean = option.type === 'RESIDENCE';
-		await bauherr.update(
-			{
-				money: ergebnis.money,
-				...(ziehtEin ? { HomeBuildingId: angelegt.dataValues.id } : {})
-			},
-			{ transaction: t }
-		);
-		if (ziehtEin && bauherr.dataValues.spouseId) {
-			await CharacterModel.update(
-				{ HomeBuildingId: angelegt.dataValues.id },
-				{ where: { id: bauherr.dataValues.spouseId }, transaction: t }
-			);
-			// Für den Bauherrn sagt `BUILDING_BUILT` schon alles — wer ein Haus baut, wohnt
-			// darin. Für den Ehepartner hielte das niemand fest, und für ihn ist es der
-			// Umzug seines Lebens.
-			await chronicleService.recordMoveIn(
-				bauherr.dataValues.spouseId,
-				angelegt.dataValues.id,
-				tick,
-				t
-			);
-		}
+		// **Eingezogen wird erst, wenn das Dach dicht ist** (5.76). Bis hierher zog der
+		// Bauherr mit dem Bau ein — das ging, solange ein Haus fertig entstand. In einen
+		// Rohbau zieht niemand; den Einzug erledigt `fertigstellen()`, wenn die letzte
+		// Schicht getan ist.
 
 		return { ok: true, building: convertToBuilding(angelegt.dataValues) } as const;
 	});
@@ -529,7 +522,16 @@ async function mitZustand(
 	// Unterkunft setzte alle Obdachlosen auf die Straße, und beides wäre nicht
 	// wiedergutzumachen, weil neu bauen niemand kann. Verwahrlost und herrichtbar ist die
 	// Strafe für ein schlechtes Amt; unwiederbringlich zerstört wäre das Ende der Stadt.
-	if (isRuin(zustand) && instanz.dataValues.ownerType !== 'CITY') {
+	// **Ein Rohbau ist keine Ruine** (5.76). Beide stehen bei null, und das ist der
+	// gefährlichste Zusammenfall dieses Schritts gewesen: Ein frisch angelegter Bau wäre
+	// beim nächsten Blick auf ihn abgerissen worden, samt Material und Chronikeintrag
+	// „zerfallen". Der Unterschied ist die Richtung — das eine war nie fertig, das andere
+	// ist es einmal gewesen.
+	if (
+		isRuin(zustand) &&
+		!isUnderConstruction(instanz.dataValues) &&
+		instanz.dataValues.ownerType !== 'CITY'
+	) {
 		await zurRuineWerden(instanz);
 		return null;
 	}
@@ -734,6 +736,10 @@ export async function freierWohnraum(homeBuildingId: string | null): Promise<num
 	if (!vorlage) return null;
 	const plaetze: number = residentsAt(vorlage, gebaeude.dataValues.level);
 	if (plaetze === 0) return null;
+	// **In einem Rohbau wohnt niemand** (5.76). Wichtig für den Zuzug, der ausdrücklich
+	// nach städtischem Wohnraum sucht (Punkt 105): Ein halbfertiges Haus, das schon Platz
+	// böte, hieße, dass Ankömmlinge in etwas einziehen, das noch keine Wände hat.
+	if (isUnderConstruction(gebaeude.dataValues)) return 0;
 
 	const bewohner: number = await CharacterModel.count({
 		where: { HomeBuildingId: homeBuildingId, deathTick: null }
@@ -769,6 +775,9 @@ export async function moveInto(characterId: string, buildingId: string): Promise
 	const vorlage = getBuildingOption(gebäude.dataValues.optionId);
 	if (!vorlage || residentsAt(vorlage, gebäude.dataValues.level) === 0) {
 		return { ok: false, reason: 'NOT_A_WORKPLACE' };
+	}
+	if (isUnderConstruction(gebäude.dataValues)) {
+		return { ok: false, reason: 'UNDER_CONSTRUCTION' };
 	}
 
 	const städtisch: boolean = gebäude.dataValues.ownerType === 'CITY';
@@ -878,6 +887,17 @@ export async function renovateBuilding(
 		if (!eigentümer) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
 		const zustand: number = zustandVon(gebäude, tick);
+
+		// **Am Rohbau wird gebaut, nicht renoviert** (5.76). Beides ist dieselbe Handlung
+		// des Eigentümers — „bring dein Haus voran" —, und deshalb dieselbe Tür: Ein
+		// zweiter Knopf hieße, dass Spieler und NPC-Schleife raten müssten, welcher gerade
+		// gilt (Punkt 53). Was dahinter geschieht, ist verschieden: Die Renovierung kostet
+		// vier Punkte und Geld und bringt das Haus auf einen Schlag in Ordnung, die
+		// Bauschicht kostet einen Punkt und keine Münze und bringt es ein Stück voran.
+		if (isUnderConstruction(gebäude.dataValues)) {
+			return eigeneBauschicht(gebäude, characterId, zustand, tick, t);
+		}
+
 		const ergebnis = renovate(
 			{
 				actionPoints: eigentümer.dataValues.actionPoints,
@@ -930,6 +950,11 @@ export async function upgradeBuilding(
 		}
 		const vorlage = getBuildingOption(gebäude.dataValues.optionId);
 		if (!vorlage) return { ok: false, reason: 'NOTHING_TO_DO' } as const;
+		// **Erst fertig, dann größer** (5.76): Ein Rohbau, den man ausbaut, wäre ein
+		// Anbau an etwas, das noch nicht steht.
+		if (isUnderConstruction(gebäude.dataValues)) {
+			return { ok: false, reason: 'UNDER_CONSTRUCTION' } as const;
+		}
 
 		const eigentümer = await characterService.loadForAction(characterId, tick, t);
 		if (!eigentümer) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
@@ -1366,6 +1391,11 @@ export function materialForRenovation(missingCondition: number): MaterialNeed[] 
  *
  * `lastConditionTick` wandert mit: Ohne ihn liefe der Verfall ab dem alten Stichtag
  * weiter, und die Arbeit wäre im selben Moment wieder verbraucht.
+ *
+ * **Und seit 5.76 endet hier auch ein Bau.** Es ist dieselbe Handlung: Wer für Lohn an
+ * einem Rohbau arbeitet, tut, was der Tagelöhner am verfallenen Dach tut — nur ist am
+ * Ende ein Haus da, das es vorher nicht gab. Deshalb steht die Fertigstellung an dieser
+ * einen Stelle und nicht in jedem Aufrufer.
  */
 export async function setCondition(
 	buildingId: string,
@@ -1377,6 +1407,91 @@ export async function setCondition(
 		{ condition, lastConditionTick: tick },
 		{ where: { id: buildingId }, transaction: t }
 	);
+	if (condition >= CONDITION_MAX) await fertigstellen(buildingId, tick, t);
+}
+
+/**
+ * Die letzte Schicht ist getan — aus dem Rohbau wird ein Haus (5.76).
+ *
+ * **Drei Dinge geschehen zugleich**, und sie gehören zusammen, weil sie alle davon
+ * handeln, dass dieses Gebäude ab jetzt zählt:
+ *
+ * 1. `underConstruction` fällt. Ab hier ist es kein Rohbau mehr, und alles, was daran
+ *    hing — wohnen, herstellen, ausbauen —, steht offen.
+ * 2. Der Bauauftrag wird abgenommen. Bliebe er hängen, suchten Tagelöhner weiter Arbeit
+ *    an einem Haus, an dem nichts mehr zu tun ist; `freierArbeitsplatz` fragt nur nach
+ *    dem Aushang und dem Zustand, und ein Haus verfällt vom ersten Tick an wieder.
+ * 3. **Wer sein Wohnhaus gebaut hat, zieht ein — mit Frau oder Mann.** Das stand bis 5.76
+ *    in `build()`, wo es nicht mehr hingehört: Damals entstand das Haus fertig. Der Grund
+ *    ist derselbe geblieben (4.14): NPCs wohnen alle erst in der städtischen Unterkunft,
+ *    und Kinder hängen am Wohnraum der **Mutter** — zöge der Ehepartner nicht mit, wüchse
+ *    die Bevölkerung nicht, obwohl Häuser entstehen.
+ *
+ * Nur wer noch kein Dach hat, zieht um: Ein Zimmerer, der sein zweites Haus errichtet,
+ * verlässt deswegen nicht sein erstes.
+ */
+async function fertigstellen(buildingId: string, tick: number, t: Transaction): Promise<void> {
+	const gebäude = await BuildingModel.findByPk(buildingId, { transaction: t });
+	if (!gebäude || !isUnderConstruction(gebäude.dataValues)) return;
+
+	await gebäude.update({ underConstruction: false, repairWage: null }, { transaction: t });
+
+	const vorlage = getBuildingOption(gebäude.dataValues.optionId);
+	const bauherrId: string | null = gebäude.dataValues.OwnerCharacterId;
+	if (vorlage?.type !== 'RESIDENCE' || !bauherrId) return;
+
+	const bauherr = await CharacterModel.findByPk(bauherrId, { transaction: t });
+	if (!bauherr || bauherr.dataValues.HomeBuildingId === buildingId) return;
+
+	// **Er zieht ein, auch wenn er schon irgendwo wohnt** — und das ist der Kern von 4.14:
+	// NPCs wohnen alle erst in der städtischen Unterkunft. Zöge nur der Obdachlose ein,
+	// entstünden Häuser, in denen niemand wohnt, und die Bevölkerung wüchse trotzdem nicht,
+	// weil Kinder am Wohnraum der **Mutter** hängen (4.4). Genau das war der Fehler, den
+	// dieser Schritt beim Verschieben des Einzugs beinahe wieder eingebaut hätte.
+	await bauherr.update({ HomeBuildingId: buildingId }, { transaction: t });
+	await chronicleService.recordMoveIn(bauherrId, buildingId, tick, t);
+
+	const partnerId: string | null = bauherr.dataValues.spouseId;
+	if (!partnerId) return;
+	const partner = await CharacterModel.findByPk(partnerId, { transaction: t });
+	if (!partner || partner.dataValues.HomeBuildingId === buildingId) return;
+	await partner.update({ HomeBuildingId: buildingId }, { transaction: t });
+	await chronicleService.recordMoveIn(partnerId, buildingId, tick, t);
+}
+
+/**
+ * Eine Schicht am eigenen Rohbau (5.76, Punkt 102).
+ *
+ * **Kraft statt Geld.** Das Material liegt seit dem Anlegen im Bau, und wer selbst die
+ * Kelle führt, zahlt sich keinen Lohn — deshalb rührt diese Handlung den Beutel nicht an.
+ * Sie ist der Ausweg, ohne den der Rohbau eine Falle wäre: Wer niemanden findet, der für
+ * ihn baut, kommt trotzdem an sein Haus.
+ *
+ * Gelernt wird dabei wie überall am Bau, und aus demselben Grund wie beim Tagelohn: Wer
+ * zwanzig Schichten an einem Haus steht, kann danach mehr als vorher.
+ */
+async function eigeneBauschicht(
+	gebäude: Model<BuildingAttributes, BuildingCreationAttributes>,
+	characterId: string,
+	zustand: number,
+	tick: number,
+	t: Transaction
+): Promise<MaintenanceResult> {
+	const bauherr = await characterService.loadForAction(characterId, tick, t);
+	if (!bauherr) return { ok: false, reason: 'NO_SUCH_PERSON' };
+
+	const ergebnis = buildShift(
+		{ actionPoints: bauherr.dataValues.actionPoints },
+		zustand,
+		REPAIR_PER_SHIFT
+	);
+	if (!ergebnis.ok) return ergebnis;
+
+	await bauherr.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
+	await setCondition(gebäude.dataValues.id, ergebnis.condition, tick, t);
+	await skillService.addPractice(characterId, 'CONSTRUCTION', BUILD_ACTION_POINT_COST, t);
+	// Nichts ausgegeben — die Rückmeldung soll keine Münze behaupten, die niemand zahlte.
+	return { ok: true, spent: 0 };
 }
 
 /**

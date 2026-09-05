@@ -24,4 +24,6 @@ export interface Building {
 	repairWage: number | null;
 	/** Wann es der Stadt zufiel — `null` heißt: von jeher städtisch (Punkt 79). */
 	escheatedTick: number | null;
+	/** Ob hier noch gebaut wird — ein Rohbau ist noch kein Haus (5.76). */
+	underConstruction: boolean;
 }

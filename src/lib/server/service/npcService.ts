@@ -19,6 +19,7 @@ import {
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import {
 	CONDITION_MAX,
+	isUnderConstruction,
 	materialFor,
 	RENOVATION_COST_PER_POINT,
 	renovationMaterial,
@@ -615,23 +616,37 @@ async function lageAufnehmen(
 	);
 	const platz: number | null = await buildingService.freierWohnraum(werte.HomeBuildingId);
 	const hausVorlage = buildingService.getBuildingOption(WOHNHAUS_OPTION_ID);
-	const baufaellig = eigene.filter((haus) => haus.condition < REPAIR_BELOW)[0];
+	// **Der eigene Rohbau zuerst** (5.76). Er steht hier neben den baufälligen Häusern,
+	// weil es für den Entschluss dasselbe ist — „bring dein Haus voran" —, und er kommt
+	// vor ihnen, weil ein halbfertiges Haus dringender ist als ein angeschlagenes: In dem
+	// einen wohnt niemand, das andere steht.
+	const eigenerRohbau = eigene.filter(isUnderConstruction)[0];
+	const baufaellig = eigenerRohbau ?? eigene.filter((haus) => haus.condition < REPAIR_BELOW)[0];
 
 	// Was ein Ausbau jetzt kostete — **mit dem Winteraufschlag**, mit dem auch `upgrade()`
 	// rechnet. Ohne ihn nennte die Entscheidung im Frost einen Preis, den die Handlung
 	// nicht hält, und der NPC versuchte es Tick für Tick vergeblich.
 	const jahreszeit: Season = seasonOf(tick);
+	/** Nur, was fertig ist — ein Rohbau kennt weder Ausbau noch Ertrag (5.76). */
+	const fertig = <T extends { underConstruction: boolean }>(haus: T | undefined): T | undefined =>
+		haus && !isUnderConstruction(haus) ? haus : undefined;
 	const ausbaupreis = (haus: { optionId: number; level: number } | undefined): number | null => {
 		if (!haus) return null;
 		const vorlage = buildingService.getBuildingOption(haus.optionId);
 		const grundpreis: number | undefined = vorlage ? upgradePrice(vorlage, haus.level) : undefined;
 		return grundpreis === undefined ? null : Math.ceil(grundpreis * buildingCostFactor(jahreszeit));
 	};
-	const materialBedarf = baufaellig
-		? renovationMaterial(Math.ceil(CONDITION_MAX - baufaellig.condition))
-		: hausVorlage
-			? materialFor(levelOf(hausVorlage, 1).price, hausVorlage.type)
-			: [];
+	// **Ein Rohbau verlangt kein Material mehr** (5.76): Es steckt seit dem Anlegen darin,
+	// und was noch fehlt, ist Arbeit. Verlangte die Entscheidung hier trotzdem Bretter,
+	// schickte sie den Bauherrn erst einkaufen und dann an eine Baustelle, die nichts
+	// davon braucht.
+	const materialBedarf = eigenerRohbau
+		? []
+		: baufaellig
+			? renovationMaterial(Math.ceil(CONDITION_MAX - baufaellig.condition))
+			: hausVorlage
+				? materialFor(levelOf(hausVorlage, 1).price, hausVorlage.type)
+				: [];
 
 	// Was die nächste Werkstatt an Material verlangt — sonst versucht er es in jedem Tick
 	// aufs Neue.
@@ -658,7 +673,10 @@ async function lageAufnehmen(
 		? await tradeService.cheapestOffer(werte.RegionId, fehltWerkstattMaterial.itemId, npcId)
 		: undefined;
 	const stelleFrei = werkstatt ? await employmentService.hasUnofferedPosition(werkstatt) : false;
-	const kannHerstellenJetzt = werkstatt ? await kannHerstellen(npcId, werkstatt) : false;
+	// In einem Rohbau steht keine Werkbank — er zählt als eigene Werkstatt (sonst baute
+	// sein Besitzer eine zweite), aber herstellen lässt sich darin nichts.
+	const kannHerstellenJetzt =
+		werkstatt && !isUnderConstruction(werkstatt) ? await kannHerstellen(npcId, werkstatt) : false;
 	const fehlendeZutat =
 		werkstatt && !kannHerstellenJetzt ? await fehlendeRezeptZutat(npcId, werkstatt) : undefined;
 	const zutatAngebot = fehlendeZutat
@@ -779,12 +797,22 @@ async function lageAufnehmen(
 			materialMissing: fehltMaterial !== undefined,
 			materialPrice: material?.pricePerUnit ?? null,
 			repairNeeded: baufaellig !== undefined,
-			repairCost:
-				Math.ceil(CONDITION_MAX - (baufaellig?.condition ?? CONDITION_MAX)) *
-				RENOVATION_COST_PER_POINT,
-			// Ausbauen, was steht (5.29).
-			homeUpgradePrice: ausbaupreis(wohnhaus),
-			workshopUpgradePrice: ausbaupreis(werkstatt),
+			// Eine eigene Baustelle ist eigene Arbeit (5.76) — wer eine hat, verdingt sich
+			// nicht anderswo, solange sie halbfertig dasteht.
+			ownConstruction: eigenerRohbau !== undefined,
+			// **Die Bauschicht kostet keine Münze** (5.76). Stünde hier der
+			// Renovierungspreis, verlangte die Entscheidung zweihundert Münzen für eine
+			// Arbeit, die keine kostet — und ein Bauherr ohne Geld bliebe für immer vor
+			// seinem eigenen Rohbau stehen.
+			repairCost: eigenerRohbau
+				? 0
+				: Math.ceil(CONDITION_MAX - (baufaellig?.condition ?? CONDITION_MAX)) *
+					RENOVATION_COST_PER_POINT,
+			// Ausbauen, was steht (5.29) — und was **steht**, nicht was gerade entsteht
+			// (5.76): Ein Rohbau lässt sich nicht ausbauen, und ein Entschluss dazu wäre ein
+			// verbrannter Tick in jeder Stunde, in der die Unterkunft voll ist.
+			homeUpgradePrice: ausbaupreis(fertig(wohnhaus)),
+			workshopUpgradePrice: ausbaupreis(fertig(werkstatt)),
 			canOfferJob: stelleFrei,
 			// Teilhabe (4.16). Der Fortschritt ist ein Anteil, damit `votingDelay` ihn
 			// unabhängig von der Wahlkampfdauer vergleichen kann.

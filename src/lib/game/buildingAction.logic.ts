@@ -1,4 +1,4 @@
-import { type BuildingTemplate, buildPrice } from '$lib/model/buildingTemplate';
+import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 import { CONDITION_MAX } from '$lib/game/building.logic';
 import { skillFactor } from '$lib/game/skill.logic';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
@@ -98,20 +98,23 @@ export interface BuildSite {
 	hasBuilding: boolean;
 }
 
-export type BuildOutcome =
-	| { ok: true; money: number; spent: number }
-	| { ok: false; reason: ActionFailureReason };
+export type BuildOutcome = { ok: true } | { ok: false; reason: ActionFailureReason };
 
 /**
- * Ob gebaut werden darf und was danach in der Kasse ist.
+ * Ob gebaut werden darf.
  *
  * Die Reihenfolge der Prüfungen ist die der Ursachen: Erst muss der Platz einem gehören,
- * dann frei sein, dann darf das Gebäude überhaupt noch einmal gebaut werden, und zuletzt
- * zählt das Geld. So nennt die Rückmeldung immer den ersten wirklichen Grund und nicht
- * „zu wenig Geld“ für ein Grundstück, das gar nicht bebaubar ist.
+ * dann frei sein, dann darf das Gebäude überhaupt noch einmal gebaut werden. So nennt die
+ * Rückmeldung immer den ersten wirklichen Grund.
+ *
+ * **Vom Geld ist hier seit 5.76 nicht mehr die Rede** (Punkt 102). Ein Bau kostet, was er
+ * an Material und Arbeit kostet — und beides hat einen Empfänger. Der Münzpreis hatte
+ * keinen: Er wurde abgezogen und war aus der Welt, im Messlauf über 2000 Ticks rund 2100
+ * von 6034 vernichteten Münzen. Was hier entsteht, ist deshalb ein Rohbau; fertig macht
+ * ihn `buildShift` oder ein bezahlter Handwerker.
  */
 export function build(
-	builder: { id: string; money: number },
+	builder: { id: string },
 	site: BuildSite,
 	template: BuildingTemplate,
 	limitReached: boolean
@@ -125,11 +128,7 @@ export function build(
 	if (limitReached) {
 		return { ok: false, reason: 'LIMIT_REACHED' };
 	}
-	if (!canAfford(builder.money, buildPrice(template))) {
-		return { ok: false, reason: 'NOT_ENOUGH_MONEY' };
-	}
-	const preis: number = buildPrice(template);
-	return { ok: true, money: builder.money - preis, spent: preis };
+	return { ok: true };
 }
 
 // --- Grundstück kaufen ---------------------------------------------------------------

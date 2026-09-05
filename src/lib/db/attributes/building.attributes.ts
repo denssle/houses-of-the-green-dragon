@@ -49,6 +49,16 @@ export interface BuildingAttributes {
 	 * Stadt die Instandhaltung fremder Katen bezahlte (Punkt 79).
 	 */
 	escheatedTick: number | null;
+	/**
+	 * Ob hier noch gebaut wird (5.76, Punkt 102).
+	 *
+	 * Seit diesem Schritt entsteht ein Gebäude als **Rohbau** und wird durch Arbeit
+	 * vollendet. Der Zustand allein taugt nicht als Unterscheidung: Ein Rohbau bei vierzig
+	 * Punkten und ein verfallenes Haus bei vierzig sehen daran gleich aus, sind aber
+	 * Gegenteile — das eine war nie bewohnbar, das andere ist es einmal gewesen. Vor allem
+	 * ist die Null zweideutig: Sie ist der Anfang eines Baus und das Ende eines Hauses.
+	 */
+	underConstruction: boolean;
 }
 
 export type BuildingCreationAttributes = Optional<
@@ -62,6 +72,7 @@ export type BuildingCreationAttributes = Optional<
 	| 'offeredWage'
 	| 'repairWage'
 	| 'escheatedTick'
+	| 'underConstruction'
 >;
 
 export function convertToBuilding(attributes: BuildingAttributes): Building {
@@ -77,6 +88,7 @@ export function convertToBuilding(attributes: BuildingAttributes): Building {
 		forSalePrice: attributes.forSalePrice,
 		offeredWage: attributes.offeredWage,
 		repairWage: attributes.repairWage,
-		escheatedTick: attributes.escheatedTick
+		escheatedTick: attributes.escheatedTick,
+		underConstruction: attributes.underConstruction
 	};
 }
