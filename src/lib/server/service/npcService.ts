@@ -21,8 +21,8 @@ import {
 	CONDITION_MAX,
 	isUnderConstruction,
 	materialFor,
-	RENOVATION_COST_PER_POINT,
 	renovationMaterial,
+	RENOVATION_PER_ACTION,
 	residentsAt
 } from '$lib/game/building.logic';
 import { PLOT_PRICE, TAGELOHN } from '$lib/game/economy';
@@ -643,7 +643,12 @@ async function lageAufnehmen(
 	const materialBedarf = eigenerRohbau
 		? []
 		: baufaellig
-			? renovationMaterial(Math.ceil(CONDITION_MAX - baufaellig.condition))
+			? // **Das Holz für einen Anlauf, nicht für das ganze Haus** (5.78): Eine
+				// Renovierung bringt zwanzig Zustandspunkte. Die alte Rechnung ließ einen NPC
+				// das Material von fünf Anläufen zusammenkaufen, ehe er den ersten begann.
+				renovationMaterial(
+					Math.min(RENOVATION_PER_ACTION, Math.ceil(CONDITION_MAX - baufaellig.condition))
+				)
 			: hausVorlage
 				? materialFor(levelOf(hausVorlage, 1).price, hausVorlage.type)
 				: [];
@@ -800,14 +805,11 @@ async function lageAufnehmen(
 			// Eine eigene Baustelle ist eigene Arbeit (5.76) — wer eine hat, verdingt sich
 			// nicht anderswo, solange sie halbfertig dasteht.
 			ownConstruction: eigenerRohbau !== undefined,
-			// **Die Bauschicht kostet keine Münze** (5.76). Stünde hier der
-			// Renovierungspreis, verlangte die Entscheidung zweihundert Münzen für eine
-			// Arbeit, die keine kostet — und ein Bauherr ohne Geld bliebe für immer vor
-			// seinem eigenen Rohbau stehen.
-			repairCost: eigenerRohbau
-				? 0
-				: Math.ceil(CONDITION_MAX - (baufaellig?.condition ?? CONDITION_MAX)) *
-					RENOVATION_COST_PER_POINT,
+			// **Bauen und Herrichten kosten keine Münze mehr** (5.76 und 5.78) — sie kosten
+			// Material und Kraft. Stünde hier ein Preis, verlangte die Entscheidung Geld für
+			// eine Arbeit, die keines kostet, und wer keines hat, bliebe für immer vor
+			// seinem eigenen Haus stehen.
+			repairCost: 0,
 			// Ausbauen, was steht (5.29) — und was **steht**, nicht was gerade entsteht
 			// (5.76): Ein Rohbau lässt sich nicht ausbauen, und ein Entschluss dazu wäre ein
 			// verbrannter Tick in jeder Stunde, in der die Unterkunft voll ist.

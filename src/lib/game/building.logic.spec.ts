@@ -8,7 +8,8 @@ import {
 	purchase,
 	renovate,
 	RENOVATION_ACTION_POINT_COST,
-	RENOVATION_COST_PER_POINT,
+	RENOVATION_PER_ACTION,
+	CONDITION_PER_ACTION_POINT,
 	residentsAt,
 	restAt,
 	storageAt,
@@ -146,61 +147,58 @@ describe('Gebäude', () => {
 	});
 
 	describe('renovieren', () => {
-		it('bringt auf Anfang und kostet nach dem, was fehlt', () => {
-			const ergebnis = renovate(REICH, 60, 'SPRING');
+		it('bringt ein Stück voran und kostet keine Münze', () => {
+			// **Der Kern von 5.78** (Punkte 74 und 102): Bis dahin standen hier achtzig
+			// Münzen weniger im Beutel, die niemand bekam — und das Haus war mit einer
+			// einzigen Handlung wieder wie neu.
+			const ergebnis = renovate({ actionPoints: 48 }, 60, 'SPRING');
 
-			expect(ergebnis).toMatchObject({
+			expect(ergebnis).toEqual({
 				ok: true,
-				condition: CONDITION_MAX,
-				spent: 40 * RENOVATION_COST_PER_POINT,
+				condition: 60 + RENOVATION_PER_ACTION,
+				repaired: RENOVATION_PER_ACTION,
 				actionPoints: 48 - RENOVATION_ACTION_POINT_COST
 			});
 		});
 
-		it('lohnt sich früh: wer wartet, zahlt mehr', () => {
-			const frueh = renovate(REICH, 90, 'SPRING');
-			const spaet = renovate(REICH, 20, 'SPRING');
-
-			expect(frueh.ok && spaet.ok && frueh.spent < spaet.spent).toBe(true);
+		it('hält den Satz aller Bauarbeit ein: fünf Punkte je Aktionspunkt', () => {
+			// Dieselbe Zahl wie beim Rohbau und beim Tagelöhner. Wäre eine der drei Arten
+			// zu bauen günstiger, käme von den anderen keine mehr vor — und der Auftrag
+			// aus 5.27 wäre erfüllt und tot zugleich.
+			expect(RENOVATION_PER_ACTION).toBe(RENOVATION_ACTION_POINT_COST * CONDITION_PER_ACTION_POINT);
 		});
 
-		it('wird billiger, wer bauen kann', () => {
-			const ungelernt = renovate(REICH, 50, 'SPRING');
-			const meister = renovate({ ...REICH, buildingSkill: 10 }, 50, 'SPRING');
+		it('richtet nie über die volle Güte hinaus', () => {
+			const fast = renovate({ actionPoints: 48 }, 95, 'SPRING');
 
-			// Halber Preis bei voller Meisterschaft — mehr nicht, sonst wäre es umsonst.
-			expect(ungelernt.ok && meister.ok && meister.spent).toBe(
-				ungelernt.ok ? ungelernt.spent / 2 : 0
-			);
+			expect(fast).toMatchObject({ ok: true, condition: CONDITION_MAX, repaired: 5 });
 		});
 
-		it('kostet im Winter mehr', () => {
-			const sommer = renovate(REICH, 50, 'SUMMER');
-			const winter = renovate(REICH, 50, 'WINTER');
+		it('kommt im Winter langsamer voran', () => {
+			const sommer = renovate({ actionPoints: 48 }, 20, 'SUMMER');
+			const winter = renovate({ actionPoints: 48 }, 20, 'WINTER');
 
-			// Ein Viertel Aufschlag — spuerbar genug, um Renovierungen in den Herbst zu
-			// legen, klein genug, dass niemand ein Vierteljahr warten muss.
-			expect(sommer.ok && winter.ok && winter.spent).toBe(
-				sommer.ok ? Math.ceil(sommer.spent * 1.25) : 0
-			);
+			// **Der Frost ist geblieben, nur die Währung hat gewechselt** (5.78): Er
+			// verteuerte den Bau, jetzt verzögert er ihn. Ohne diese Prüfung hätte der
+			// Wegfall des Münzpreises eine Regel der Welt stillschweigend abgeschafft.
+			expect(sommer.ok && winter.ok && winter.repaired < sommer.repaired).toBe(true);
 		});
 
 		it('weist ein Haus in bestem Zustand ab', () => {
-			expect(renovate(REICH, CONDITION_MAX, 'SPRING')).toEqual({
+			expect(renovate({ actionPoints: 48 }, CONDITION_MAX, 'SPRING')).toEqual({
 				ok: false,
 				reason: 'NOTHING_TO_DO'
 			});
 		});
 
-		it('scheitert an Kraft und Geld', () => {
-			expect(renovate({ actionPoints: 1, money: 10_000, buildingSkill: 0 }, 50, 'SPRING')).toEqual({
+		it('scheitert an der Kraft — und nur noch daran', () => {
+			// Der Mittellose renoviert seit 5.78; er zahlt in Arbeit. Vorher scheiterte er
+			// hier an `NOT_ENOUGH_MONEY`.
+			expect(renovate({ actionPoints: 1 }, 50, 'SPRING')).toEqual({
 				ok: false,
 				reason: 'NOT_ENOUGH_ACTION_POINTS'
 			});
-			expect(renovate({ actionPoints: 48, money: 5, buildingSkill: 0 }, 50, 'SPRING')).toEqual({
-				ok: false,
-				reason: 'NOT_ENOUGH_MONEY'
-			});
+			expect(renovate({ actionPoints: RENOVATION_ACTION_POINT_COST }, 50, 'SPRING').ok).toBe(true);
 		});
 	});
 

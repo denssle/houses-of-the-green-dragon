@@ -6,7 +6,6 @@ import {
 	upgradePrice
 } from '$lib/model/buildingTemplate';
 import { canAfford } from '$lib/game/economy';
-import { costFactor } from '$lib/game/skill.logic';
 import { buildingCostFactor, type Season, TICKS_PER_YEAR } from '$lib/game/time';
 
 /**
@@ -37,9 +36,28 @@ export const YEARS_TO_RUIN = 20;
 
 export const CONDITION_LOSS_PER_TICK: number = CONDITION_MAX / (YEARS_TO_RUIN * TICKS_PER_YEAR);
 
-/** Was eine Renovierung an Kraft und Geld kostet. */
+/** Was eine Renovierung an Kraft kostet. */
 export const RENOVATION_ACTION_POINT_COST = 4;
-export const RENOVATION_COST_PER_POINT = 2;
+
+/**
+ * **Ein Satz für alle Bauarbeit dieser Welt** (5.78): fünf Zustandspunkte je
+ * Aktionspunkt.
+ *
+ * Damit kostet ein Haus von null auf voll immer zwanzig Aktionspunkte — ob es neu
+ * entsteht (5.76), ob der Eigentümer es herrichtet oder ob ein Tagelöhner es für Lohn
+ * tut. **Dass alle drei denselben Satz haben, ist der Kern:** Sonst wäre eine der Arten zu
+ * bauen strikt besser als die anderen, und die übrigen kämen in der Welt nicht mehr vor.
+ *
+ * Genau das drohte hier. Bis 5.78 brachte eine Renovierung das Haus mit **einer**
+ * Handlung auf volle Güte; teuer war daran nur das Geld. Hätte man ihr bloß den Münzpreis
+ * genommen — der Sinn von Punkt 74 —, wäre Selbermachen ausnahmslos billiger gewesen als
+ * jemanden zu bezahlen, und der Auftrag aus 5.27 wäre erfüllt und tot zugleich gewesen.
+ */
+export const CONDITION_PER_ACTION_POINT = 5;
+
+/** Wie weit eine Renovierung ein Haus voranbringt. */
+export const RENOVATION_PER_ACTION: number =
+	RENOVATION_ACTION_POINT_COST * CONDITION_PER_ACTION_POINT;
 
 /** Was ein Ausbau an Kraft kostet — das Geld steht in der Vorlage. */
 export const UPGRADE_ACTION_POINT_COST = 8;
@@ -176,20 +194,31 @@ export function buildShift(
 // --- Renovieren ----------------------------------------------------------------------
 
 export type RenovationOutcome =
-	| { ok: true; actionPoints: number; money: number; spent: number; condition: number }
+	| { ok: true; actionPoints: number; repaired: number; condition: number }
 	| { ok: false; reason: ActionFailureReason };
 
 /**
- * Renovieren bringt ein Gebäude auf Anfang zurück.
+ * Renovieren — ein Stück Arbeit am eigenen Haus (5.78, Punkte 74 und 102).
  *
- * Gezahlt wird nach dem, was fehlt — wer früh renoviert, zahlt wenig. Das ist die
- * Fixkostenseite des Besitzes: Ein Haus kostet laufend, auch wenn niemand es anfasst.
+ * **Kostet Kraft und Material, keine Münze.** Bis hierher zog es dem Eigentümer Geld ab,
+ * das **niemand** bekam: im Messlauf über 2000 Ticks zusammen mit dem Ausbau rund 2350
+ * Münzen, mehr als die ganze Stadt in derselben Zeit vernichtet hat. Ein Haus
+ * herzurichten kostet Bretter und Schweiß, und beide haben einen Empfänger.
  *
- * Baumaterial kommt mit 4.6 dazu. Bis dahin nur Geld, sonst hinge dieser Schritt an
- * einer Produktionskette, die es noch nicht gibt.
+ * **Und es bringt nicht mehr alles auf einmal.** Vier Aktionspunkte sind zwanzig
+ * Zustandspunkte — derselbe Satz wie beim Rohbau und beim Tagelöhner
+ * (`CONDITION_PER_ACTION_POINT`). Wer sein Haus verfallen ließ, braucht mehrere Anläufe
+ * oder jemanden, der sie für ihn nimmt; wer früh renoviert, ist mit einem fertig. Die
+ * Fixkostenseite des Besitzes bleibt damit erhalten, sie wird nur in Arbeit gezahlt statt
+ * in Münzen.
+ *
+ * **Das Können wirkt seither auf der anderen Seite.** Es senkte hier die Kosten; da es
+ * keine mehr gibt, hebt es nur noch den Verdienst dessen, der für Lohn arbeitet
+ * (`repairForHire`). Ein Meister baut nicht schneller als ein Geselle — er verdient mehr
+ * dabei.
  */
 export function renovate(
-	owner: { actionPoints: number; money: number; buildingSkill: number },
+	owner: { actionPoints: number },
 	condition: number,
 	season: Season
 ): RenovationOutcome {
@@ -200,22 +229,19 @@ export function renovate(
 		return { ok: false, reason: 'NOT_ENOUGH_ACTION_POINTS' };
 	}
 
-	const fehlt: number = Math.ceil(CONDITION_MAX - condition);
-	// Wer bauen kann, renoviert billiger — bis zur Hälfte. Das ist die zweite Art, wie
-	// Können wirkt: nicht nur mehr verdienen, sondern weniger ausgeben.
-	const kosten: number = Math.ceil(
-		fehlt * RENOVATION_COST_PER_POINT * costFactor(owner.buildingSkill) * buildingCostFactor(season)
-	);
-	if (!canAfford(owner.money, kosten)) {
-		return { ok: false, reason: 'NOT_ENOUGH_MONEY' };
-	}
-
+	// **Im Frost geht es langsamer** — dieselbe Regel wie bisher, nur in der Währung, die
+	// der Bau seit 5.78 kennt. Sie stand hier immer (`buildingCostFactor`: „Frost
+	// verzoegert den Bau und verteuert ihn"), hing aber am Münzpreis; ohne diese Zeile
+	// hätte 5.78 sie stillschweigend abgeschafft. Ein Viertel Aufschlag auf den Preis wird
+	// zu einem Fünftel weniger Fortschritt — spürbar genug, um Arbeit in den Herbst zu
+	// legen, klein genug, dass niemand ein Vierteljahr wartet.
+	const schaffbar: number = Math.round(RENOVATION_PER_ACTION / buildingCostFactor(season));
+	const nachher: number = Math.min(CONDITION_MAX, condition + schaffbar);
 	return {
 		ok: true,
 		actionPoints: owner.actionPoints - RENOVATION_ACTION_POINT_COST,
-		money: owner.money - kosten,
-		spent: kosten,
-		condition: CONDITION_MAX
+		repaired: Math.ceil(nachher - condition),
+		condition: nachher
 	};
 }
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { RENOVATION_ACTION_POINT_COST } from '$lib/game/building.logic';
 	import { enhance } from '$app/forms';
 	import PublicOffice from '$lib/PublicOffice.svelte';
 	import { MAX_NAME_LENGTH, MIN_NAME_LENGTH } from '$lib/game/naming.logic';
@@ -350,7 +351,7 @@
 					{#if imBau}
 						Selbst weiterbauen (1 Aktionspunkt)
 					{:else}
-						Renovieren ({data.renovationCost} Münzen{#each data.renovationMaterial as posten (posten.itemId)}
+						Renovieren ({RENOVATION_ACTION_POINT_COST} Aktionspunkte{#each data.renovationMaterial as posten (posten.itemId)}
 							und {posten.quantity}
 							{posten.name}{/each})
 					{/if}

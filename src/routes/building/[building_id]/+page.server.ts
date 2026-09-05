@@ -23,8 +23,8 @@ import * as schoolService from '$lib/server/service/schoolService';
 import type { SkillType } from '$lib/game/skill.logic';
 import {
 	CONDITION_MAX,
-	RENOVATION_COST_PER_POINT,
 	renovationMaterial,
+	RENOVATION_PER_ACTION,
 	residentsAt,
 	restAt,
 	UPGRADE_ACTION_POINT_COST,
@@ -199,11 +199,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 						).filter((kind) => kind.age < AGE_OF_MAJORITY)
 					}
 				: undefined,
-		renovationCost: Math.ceil(CONDITION_MAX - building.condition) * RENOVATION_COST_PER_POINT,
 		// Was das Herrichten an Holz kostet — sichtbar, bevor man es versucht.
-		renovationMaterial: renovationMaterial(Math.ceil(CONDITION_MAX - building.condition)).map(
-			(posten) => ({ ...posten, name: getItemTemplate(posten.itemId)?.name ?? posten.itemId })
-		)
+		// **Das Material für einen Anlauf, nicht für das ganze Haus** (5.78): Eine
+		// Renovierung bringt zwanzig Zustandspunkte, nicht mehr alle fehlenden.
+		renovationMaterial: renovationMaterial(
+			Math.min(RENOVATION_PER_ACTION, Math.ceil(CONDITION_MAX - building.condition))
+		).map((posten) => ({ ...posten, name: getItemTemplate(posten.itemId)?.name ?? posten.itemId }))
 	};
 };
 

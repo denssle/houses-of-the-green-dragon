@@ -155,12 +155,17 @@ describe('Öffentliche Bauten', () => {
 				reason: 'NOT_IN_OFFICE'
 			});
 
+			const vorher = (await buildingService.getBuilding(id))!.condition;
 			const ergebnis = await buildingService.renovatePublicBuilding(buergermeister, id);
 			expect(ergebnis.ok).toBe(true);
-			expect((await buildingService.getBuilding(id))?.condition).toBe(CONDITION_MAX);
+			expect((await buildingService.getBuilding(id))!.condition).toBeGreaterThan(vorher);
 
-			// Die Zeit ist seine, das Geld ist das der Stadt.
-			expect(await kasse()).toBeLessThan(1000);
+			// **Die Zeit ist seine, und seit 5.78 ist es auch die Arbeit.** Bis dahin stand
+			// hier „das Geld ist das der Stadt": Die Kasse zahlte einen Preis, den niemand
+			// bekam (Punkt 101). Jetzt legt der Amtsinhaber Aktionspunkte hinein — wer für
+			// Lohn arbeiten lassen will, schreibt die Arbeit aus, und dann hat die Ausgabe
+			// einen Empfänger.
+			expect(await kasse()).toBe(1000);
 			expect((await Character.findByPk(buergermeister))!.dataValues.money).toBe(100);
 			expect((await Character.findByPk(buergermeister))!.dataValues.actionPoints).toBeLessThan(48);
 		});
@@ -195,17 +200,22 @@ describe('Öffentliche Bauten', () => {
 			});
 		});
 
-		it('scheitert an einer leeren Stadtkasse', async () => {
+		it('gelingt auch einer Stadt ohne eine Münze', async () => {
+			// **Umgekehrt seit 5.78**, und das ist kein Nebeneffekt, sondern der Sinn: Bis
+			// dahin scheiterte das Herrichten an einer leeren Kasse — ausgerechnet dann,
+			// wenn es am nötigsten ist. Eine verarmte Stadt sah ihre öffentlichen Bauten
+			// verfallen und konnte nichts dagegen tun. Jetzt kann ihr Bürgermeister die
+			// Ärmel hochkrempeln; das trifft auch die Sorge aus Punkt 105.
 			const id = await stadtgrund(3);
 			const buergermeister = await person('Amtsperson');
 			await insAmt(buergermeister);
 			await Region.update({ treasury: 0 }, { where: { id: stadtId } });
 			await weltzeit(JETZT + VERFALLEN);
 
-			expect(await buildingService.renovatePublicBuilding(buergermeister, id)).toEqual({
-				ok: false,
-				reason: 'NOT_ENOUGH_MONEY'
-			});
+			const vorher = (await buildingService.getBuilding(id))!.condition;
+			expect((await buildingService.renovatePublicBuilding(buergermeister, id)).ok).toBe(true);
+			expect((await buildingService.getBuilding(id))!.condition).toBeGreaterThan(vorher);
+			expect(await kasse()).toBe(0);
 		});
 
 		it('lässt ein NPC im Amt von selbst herrichten', async () => {
@@ -216,10 +226,13 @@ describe('Öffentliche Bauten', () => {
 			await insAmt(npc);
 			await weltzeit(JETZT + STARK_VERFALLEN);
 
+			const vorher = (await buildingService.getBuilding(id))!.condition;
 			const getan = await buildingService.maintainAsNpcMayor(stadtId);
 
 			expect(getan).toBeDefined();
-			expect((await buildingService.getBuilding(id))?.condition).toBe(CONDITION_MAX);
+			// Ein Stück, nicht alles: Seit 5.78 kostet Herrichten Arbeit, und die geht in
+			// Portionen von zwanzig Zustandspunkten.
+			expect((await buildingService.getBuilding(id))!.condition).toBeGreaterThan(vorher);
 		});
 
 		it('lässt einen Spieler im Amt selbst entscheiden', async () => {

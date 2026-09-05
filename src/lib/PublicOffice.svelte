@@ -2,6 +2,7 @@
 	import { base } from '$app/paths';
 	import { enhance } from '$app/forms';
 	import type { officeData } from '$lib/server/pages/officeData';
+	import { RENOVATION_ACTION_POINT_COST } from '$lib/game/building.logic';
 
 	/**
 	 * Die Amtsgeschäfte einer Stadt — auf der Seite ihres Rathauses (5.57).
@@ -138,7 +139,7 @@
 				{#if amt.holder?.mine && haus.condition < 100}
 					<form method="POST" action="?/publicRenovate" use:enhance>
 						<input type="hidden" name="buildingId" value={haus.id} />
-						<button type="submit">Herrichten ({haus.renovationCost} Münzen)</button>
+						<button type="submit">Herrichten ({RENOVATION_ACTION_POINT_COST} Aktionspunkte)</button>
 					</form>
 				{/if}
 				{#if haus.employer}

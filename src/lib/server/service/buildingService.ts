@@ -892,36 +892,28 @@ export async function renovateBuilding(
 		// **Am Rohbau wird gebaut, nicht renoviert** (5.76). Beides ist dieselbe Handlung
 		// des Eigentümers — „bring dein Haus voran" —, und deshalb dieselbe Tür: Ein
 		// zweiter Knopf hieße, dass Spieler und NPC-Schleife raten müssten, welcher gerade
-		// gilt (Punkt 53). Was dahinter geschieht, ist verschieden: Die Renovierung kostet
-		// vier Punkte und Geld und bringt das Haus auf einen Schlag in Ordnung, die
-		// Bauschicht kostet einen Punkt und keine Münze und bringt es ein Stück voran.
+		// gilt (Punkt 53). Was dahinter geschieht, ist verwandt, aber nicht dasselbe: Die
+		// Renovierung kostet vier Punkte und bringt zwanzig, die Bauschicht kostet einen und
+		// bringt fünf — derselbe Satz, andere Portion.
 		if (isUnderConstruction(gebäude.dataValues)) {
 			return eigeneBauschicht(gebäude, characterId, zustand, tick, t);
 		}
 
 		const ergebnis = renovate(
-			{
-				actionPoints: eigentümer.dataValues.actionPoints,
-				money: eigentümer.dataValues.money,
-				buildingSkill: await skillService.getLevel(characterId, 'CONSTRUCTION', t)
-			},
+			{ actionPoints: eigentümer.dataValues.actionPoints },
 			zustand,
 			seasonOf(tick)
 		);
 		if (!ergebnis.ok) return ergebnis;
 
-		// Auch das Herrichten braucht Holz — weniger als ein Neubau, aber nicht nichts.
-		const fehlt = await materialAbziehen(
-			characterId,
-			renovationMaterial(Math.ceil(CONDITION_MAX - zustand)),
-			t
-		);
+		// **Holz für das Stück, das hergerichtet wird** — nicht für das ganze Haus (5.78).
+		// Solange eine Renovierung alles auf einmal richtete, war das dasselbe; seit sie in
+		// Portionen geht, verlangte die alte Rechnung das Material von fünf Anläufen für
+		// einen.
+		const fehlt = await materialAbziehen(characterId, renovationMaterial(ergebnis.repaired), t);
 		if (fehlt) return { ok: false, reason: 'NOT_IN_STOCK', missing: fehlt } as const;
 
-		await eigentümer.update(
-			{ actionPoints: ergebnis.actionPoints, money: ergebnis.money },
-			{ transaction: t }
-		);
+		await eigentümer.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
 		// `lastConditionTick` mitschreiben: Ohne ihn liefe der Verfall ab dem alten
 		// Stichtag weiter und die Renovierung wäre im selben Moment wieder verbraucht.
 		await gebäude.update(
@@ -930,7 +922,7 @@ export async function renovateBuilding(
 		);
 		// Renovieren schult das Bauen — vier Aktionspunkte, vier Uebungen.
 		await skillService.addPractice(characterId, 'CONSTRUCTION', RENOVATION_ACTION_POINT_COST, t);
-		return { ok: true, spent: ergebnis.spent } as const;
+		return { ok: true, spent: 0 } as const;
 	});
 }
 
@@ -1112,22 +1104,19 @@ export async function renovatePublicBuilding(
 		if (!amtsperson) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
 		// Dieselbe Rechnung wie bei einem privaten Haus — nur zahlt eine andere Kasse.
+		// **Dieselbe Rechnung wie am eigenen Haus** — und seit 5.78 zahlt auch hier keine
+		// Kasse mehr, sondern es arbeitet ein Mensch: Der Amtsinhaber setzt seine eigenen
+		// Aktionspunkte ein. `PUBLIC_REPAIR` bleibt als Grund im Kassenbuch stehen, weil die
+		// Stadt sehr wohl für Instandsetzung zahlen kann — nur tut sie es dann über den
+		// Tagelohn (`WAGE`), und das ist eine Ausgabe mit Empfänger.
 		const ergebnis = renovate(
-			{
-				actionPoints: amtsperson.dataValues.actionPoints,
-				money: stadt.dataValues.treasury ?? 0,
-				buildingSkill: await skillService.getLevel(characterId, 'CONSTRUCTION', t)
-			},
+			{ actionPoints: amtsperson.dataValues.actionPoints },
 			zustandVon(gebäude, tick),
 			seasonOf(tick)
 		);
 		if (!ergebnis.ok) return ergebnis;
 
 		await amtsperson.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
-		// **Ein Abfluss ohne Empfänger** (Punkt 101): Der Amtsinhaber renoviert selbst, und
-		// die Kasse zahlt an niemanden. Dass das Buch es jetzt so ausweist, ist der halbe
-		// Zweck des Buches.
-		await treasuryService.ausgeben(regionId, ergebnis.spent, 'PUBLIC_REPAIR', t);
 		await gebäude.update(
 			{ condition: ergebnis.condition, lastConditionTick: tick },
 			{ transaction: t }
@@ -1137,10 +1126,10 @@ export async function renovatePublicBuilding(
 			'BUILDING_RENOVATED',
 			regionId,
 			tick,
-			{ subjectId: characterId, buildingId, value: ergebnis.spent },
+			{ subjectId: characterId, buildingId, value: ergebnis.repaired },
 			t
 		);
-		return { ok: true, spent: ergebnis.spent } as const;
+		return { ok: true, spent: 0 } as const;
 	});
 }
 

@@ -4,7 +4,6 @@ import * as electionService from '$lib/server/service/electionService';
 import * as employmentService from '$lib/server/service/employmentService';
 import * as lawService from '$lib/server/service/lawService';
 import * as worldService from '$lib/server/service/worldService';
-import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
 import { OFFICE_NAMES } from '$lib/game/election.logic';
 import { DEVELOPMENT_COST_PER_PLOT, MAX_PLOTS_PER_DEVELOPMENT } from '$lib/game/auction.logic';
 import { LAW_KINDS, LAW_RULES } from '$lib/game/law.logic';
@@ -70,8 +69,7 @@ export async function officeData(regionId: string, characterId: string) {
 					// **Nur bei den Häusern, die überhaupt zahlen.** Ein Rathaus stellt niemanden
 					// ein; für alle vier öffentlichen Bauten nachzuschlagen kostete vier Abfragen
 					// je Aufruf, und diese Seite wird oft geladen.
-					staff: zahlt ? await employmentService.getStaff(haus.id) : [],
-					renovationCost: Math.ceil(CONDITION_MAX - haus.condition) * RENOVATION_COST_PER_POINT
+					staff: zahlt ? await employmentService.getStaff(haus.id) : []
 				};
 			})
 		),

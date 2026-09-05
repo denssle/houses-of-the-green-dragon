@@ -16,7 +16,7 @@ import { PLOT_PRICE, TAGELOHN } from '$lib/game/economy';
 import { REPAIR_PER_SHIFT } from '$lib/game/buildingAction.logic';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
-import { CONDITION_MAX, YEARS_TO_RUIN } from '$lib/game/building.logic';
+import { CONDITION_MAX, RENOVATION_PER_ACTION, YEARS_TO_RUIN } from '$lib/game/building.logic';
 import { yearsToTicks } from '$lib/game/time';
 
 /**
@@ -638,11 +638,40 @@ describe('Gebäude über die Zeit', () => {
 			const spaeter: number = JETZT + yearsToTicks(10);
 			await weltzeit(spaeter);
 
+			const vorher = (await buildingService.getBuilding(id))!.condition;
 			expect(await buildingService.renovateBuilding(besitzer, id)).toMatchObject({ ok: true });
 
 			// Ohne den Stichtag liefe der Verfall ab dem alten Datum weiter — die
-			// Renovierung wäre im selben Moment wieder verbraucht.
-			expect((await buildingService.getBuilding(id))?.condition).toBe(CONDITION_MAX);
+			// Renovierung wäre im selben Moment wieder verbraucht. **Seit 5.78 bringt sie
+			// zwanzig Punkte statt alles**, deshalb steht hier kein fester Wert mehr,
+			// sondern der Fortschritt.
+			expect((await buildingService.getBuilding(id))!.condition).toBe(
+				vorher + RENOVATION_PER_ACTION
+			);
+		});
+
+		it('kostet den Eigentümer keine Münze mehr', async () => {
+			// **Punkt 74 und der Rest von Punkt 102.** Im Messlauf über 2000 Ticks haben
+			// Bürger beim Renovieren und Ausbauen rund 2350 Münzen vernichtet — mehr, als
+			// die ganze Stadt in derselben Zeit verbrannt hat.
+			const besitzer = await person('Besitzer');
+			const id = await haus(besitzer);
+			await weltzeit(JETZT + yearsToTicks(10));
+			const vorher = await geld(besitzer);
+
+			expect(await buildingService.renovateBuilding(besitzer, id)).toEqual({ ok: true, spent: 0 });
+
+			expect(await geld(besitzer)).toBe(vorher);
+		});
+
+		it('gelingt auch dem, der keine Münze hat', async () => {
+			// Der Erbe aus Punkt 74: ein verfallenes Haus und ein leerer Beutel. Vorher
+			// scheiterte er an `NOT_ENOUGH_MONEY` und konnte nichts tun.
+			const arm = await person('Arme', { money: 0 });
+			const id = await haus(arm);
+			await weltzeit(JETZT + yearsToTicks(10));
+
+			expect(await buildingService.renovateBuilding(arm, id)).toMatchObject({ ok: true });
 		});
 
 		it('gehört dem Eigentümer', async () => {

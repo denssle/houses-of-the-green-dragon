@@ -27,7 +27,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                               | —                            | erledigt     |
 | 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                    | —                            | erledigt     |
 | 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                              | laufend                      | Entwurf      |
-| 74  | Der Auftrag an Tagelöhner — privates Renovieren gegen Lohn                           | Punkt 66 / 33                | Entwurf      |
+| 74  | Der Auftrag an Tagelöhner — **erledigt mit 5.27 und 5.78**; offen bleibt der Ausbau  | —                            | erledigt     |
 | 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                    | Punkte 15, 20, 51            | Entwurf      |
 | 54  | Ein Test, der würfelt — **erledigt mit 5.55**                                        | —                            | erledigt     |
 | 75  | Die Testläufe dauern zu lange — jede Änderung wartet darauf                          | laufend                      | Befund       |
@@ -1982,7 +1982,7 @@ Das berührt die Chronik aus 4.7d unmittelbar: Sie hält Namen fest, und zwar da
 Weil dort Kennungen und keine Namen gespeichert sind, genügt es, den Charakternamen zu
 ändern — die Chronik zeigt dann „jemand", ohne dass ein Eintrag verschwindet.
 
-### 74. Der Auftrag an Tagelöhner
+### 74. Der Auftrag an Tagelöhner — erledigt mit 5.27 und 5.78
 
 **Die Gegenseite zu 5.26.** Öffentliche Bauten lassen sich seither für Lohn instand setzen —
 der Bürgermeister ist der Auftraggeber, und `PAY_WAGE` schreibt die Arbeit aus. Für private
@@ -2002,6 +2002,52 @@ will, sind dieselbe Bauart.
 **Was es löst:** die letzte Stelle, an der Geld beim Renovieren verschwindet (Punkt 66) —
 und den Fall, dass ein Erbe ein verfallenes Haus übernimmt, das er selbst nicht herrichten
 kann, weil ihm die Aktionspunkte oder das Können fehlen. Dann stellt er jemanden dafür an.
+
+**Die erste Hälfte kam mit 5.27:** `offerRepair` hängt einen Auftrag ans Gebäude
+(`repairWage`), `REPAIR_FOR_HIRE` nimmt ihn an, und `freierArbeitsplatz` führt NPCs
+hin. Der Satz oben, ein Hausbesitzer könne nicht ausschreiben, stimmt seither nicht mehr.
+
+**Die zweite kam mit 5.78:** Renovieren kostet keine Münze mehr, sondern **Material und
+Arbeit** — fünf Zustandspunkte je Aktionspunkt, vier Punkte je Anlauf, also zwanzig. Damit
+ist die letzte Stelle geschlossen, an der ein Bürger Geld ins Nichts zahlte: Im Messlauf
+vom 05.09.2026 waren das zusammen mit dem Ausbau rund **2350 Münzen**, mehr als die ganze
+Stadt in derselben Zeit vernichtet hat.
+
+**Warum beides zusammengehört — und warum die Hälfte allein schädlich gewesen wäre.** Bis
+5.78 brachte eine Renovierung das Haus mit **einer** Handlung auf volle Güte; teuer war
+daran nur das Geld. Hätte man ihr bloß den Münzpreis genommen, wäre Selbermachen
+ausnahmslos billiger gewesen als jemanden zu bezahlen — der Auftrag aus 5.27 wäre erfüllt
+und tot zugleich gewesen, und das Geld flösse zwar nicht mehr ins Nichts, aber auch nicht
+zu Bauleuten. Deshalb gilt jetzt **ein Satz für alle Bauarbeit dieser Welt**
+(`CONDITION_PER_ACTION_POINT` = 5): Ein Haus von null auf voll sind immer zwanzig
+Aktionspunkte, ob es neu entsteht, ob der Eigentümer es herrichtet oder ob ein Tagelöhner
+es für Lohn tut. Erst damit ist die Wahl des Eigentümers eine echte — die eigene Kraft
+oder fremder Lohn.
+
+**Zwei Regeln hingen am Münzpreis, und sie sind verschieden behandelt worden:**
+
+- **Der Frost bleibt.** `buildingCostFactor` verteuerte den Bau im Winter; jetzt
+  **verzögert** er ihn — ein Viertel Aufschlag auf den Preis wird zu einem Fünftel weniger
+  Fortschritt. Ohne diese Übersetzung hätte 5.78 eine Regel der Welt stillschweigend
+  abgeschafft.
+- **Der Meisterrabatt fällt.** Können senkte die Renovierungskosten bis zur Hälfte; da es
+  keine mehr gibt, wirkt es nur noch auf der anderen Seite — es hebt den **Verdienst**
+  dessen, der für Lohn arbeitet (`repairForHire`). Ein Meister baut nicht schneller als
+  ein Geselle, er verdient mehr dabei. Das ist eine Entscheidung und kein Versehen: Ließe
+  man Können auch die Arbeit beschleunigen, wirkte dieselbe Eigenschaft zweimal.
+
+**Und eine Nebenwirkung, die eigentlich eine Behebung ist:** Der Bürgermeister setzt
+öffentliche Bauten seither mit seinen **eigenen** Aktionspunkten instand, nicht aus der
+Kasse. Bis 5.78 scheiterte das Herrichten an einer leeren Kasse — ausgerechnet dann, wenn
+es am nötigsten ist: Eine verarmte Stadt sah ihre Bauten verfallen und konnte nichts tun.
+Das trifft auch die Sorge aus Punkt 105, die städtische Unterkunft könne unwiederbringlich
+zur Ruine werden.
+
+**Was bleibt:** der **Ausbau** (`upgrade`). Er kostet weiter Münzen und kein Material —
+rund 750 der 2350 —, und er ist der letzte Posten, an dem ein Bürger Geld vernichtet. Er
+gehört in einen eigenen Schritt, weil er mehr ist als eine gestrichene Zeile: Ein Ausbau
+ohne Preis bräuchte eine Materialmenge, die es für ihn noch nicht gibt, und vermutlich
+denselben Weg wie der Rohbau — eine Baustelle, die Arbeit verlangt.
 
 ### 75. Die Testläufe dauern zu lange
 
@@ -3378,14 +3424,14 @@ nicht, dass Bauen billiger wurde.
 **Was offen bleibt** — der Münzpreis steht noch an vier Stellen, und alle sind kleiner als
 der Bau:
 
-| Handlung         | im Messlauf | Stand nach 5.76                                      |
-| ---------------- | ----------: | ---------------------------------------------------- |
-| `BUILD_HOME`     |       ~1700 | behoben                                              |
-| `BUILD`          |        ~420 | behoben                                              |
-| `RENOVATE`       |        ~200 | offen — Punkt 74 nennt den Weg (Auftrag statt Preis) |
-| `UPGRADE_HOME`   |        ~300 | offen                                                |
-| Landerschließung |        ~540 | offen                                                |
-| `BUILD_PUBLIC`   |           — | offen; wäre zugleich der Rückweg aus Punkt 100       |
+| Handlung         | im Messlauf | Stand nach 5.76                                |
+| ---------------- | ----------: | ---------------------------------------------- |
+| `BUILD_HOME`     |       ~1700 | behoben                                        |
+| `BUILD`          |        ~420 | behoben                                        |
+| `RENOVATE`       |        ~200 | behoben mit 5.78 (Punkt 74)                    |
+| `UPGRADE_HOME`   |        ~300 | offen                                          |
+| Landerschließung |        ~540 | offen                                          |
+| `BUILD_PUBLIC`   |           — | offen; wäre zugleich der Rückweg aus Punkt 100 |
 
 **Beziffert am 05.09.2026, mit dem Kassenbuch aus 5.77** (2000 Ticks, Saat 86): Von den
 3782 vernichteten Münzen entfallen **2352 auf Bürger** (Renovieren und Ausbauen auf eigene
@@ -3393,10 +3439,10 @@ Rechnung) und **1430 auf die Stadt** — davon 1080 `DEVELOPMENT` und 350 `PUBLI
 
 Damit ist die Reihenfolge des Restes klar, und sie ist nicht die, die oben vermutet wurde:
 
-1. **Der private Auftrag** (Punkt 74) ist mit rund 2350 Münzen der größte verbliebene
-   Posten — mehr als alles, was die Stadt verbrennt. Der Weg dahin ist entworfen, und der
-   Rohbau hat die halbe Maschinerie schon gebaut: Ein Renovierauftrag ist mechanisch
-   dasselbe wie ein Bauauftrag.
+1. **Der private Auftrag** (Punkt 74) war mit rund 2350 Münzen der größte verbliebene
+   Posten — mehr als alles, was die Stadt verbrennt. **Behoben mit 5.78**: Renovieren
+   kostet Material und Arbeit statt Münzen. Übrig bleibt davon der **Ausbau** (~750), der
+   weiter einen Preis zahlt und kein Material verlangt.
 2. **Die Erschließung** (1080) ist der größte Posten der Stadt — nicht der öffentliche
    Bau, wie hier zuerst angenommen.
 3. **Der öffentliche Bau** (350) ist der kleinste. Er bleibt trotzdem interessant: Ein städtischer Rohbau hieße, dass die
@@ -3559,6 +3605,13 @@ Zurücksetzen. Verloren ginge nicht die Einwohnerzahl, sondern die Geschichte de
 Gründerfamilien seit 1.6. Das ist ein Grund, die Stadt nicht leichtfertig sterben zu
 lassen, aber kein Grund, den Tod zu verhindern.
 
+**Entschärft mit 5.78, wenn auch nicht aufgehoben.** Instandsetzen kostet seither keine
+Münze mehr, sondern Aktionspunkte — und damit fällt die schlimmste Verkettung weg: Bis
+dahin scheiterte das Herrichten an einer leeren Stadtkasse, also ausgerechnet in der Lage,
+in der die Stadt es am nötigsten hat. Ein Bürgermeister ohne eine Münze kann die Unterkunft
+jetzt selbst herrichten. **Was bleibt, ist der Fall ohne Menschen:** Stirbt die Stadt
+vollständig aus, gibt es auch niemanden mehr, der Aktionspunkte hat.
+
 ### 106. Ein Bauauftrag, den niemand bezahlen kann
 
 **Befund vom 04.09.2026, aus dem Messlauf nach 5.76.** `WORK/EMPLOYER_BROKE` ist mit
@@ -3670,10 +3723,11 @@ im Messlauf vier von fünf Toten.
    das Brot der Ärmsten **und** vergrößert die Stadtkasse; wer ihn abschafft, nimmt der
    Stadt ihr Einkommen. Beides gehört zusammen entschieden, und beides trifft Punkt 100.
 
-   **Davor gehört jetzt Punkt 74** — der private Auftrag. Er stand nicht in dieser
-   Reihenfolge, weil niemand wusste, wie groß er ist: Mit rund 2350 vernichteten Münzen
-   ist er der größte verbliebene Posten von Punkt 102, größer als alles, was die Stadt
-   verbrennt, und die Maschinerie dafür steht seit dem Rohbau.
+   **Davor stand Punkt 74** — der private Auftrag, mit rund 2350 vernichteten Münzen der
+   größte verbliebene Posten von Punkt 102. **Erledigt mit 5.78**; was davon bleibt, ist
+   der Ausbau (~750). Ob der vor dem Kornspeicher drankommt, entscheidet der nächste
+   Messlauf: Er ist der kleinste der drei offenen Posten, aber der letzte, an dem ein
+   Bürger Geld ins Nichts zahlt.
 
 4. **Und erst dann wieder die Steuer** (Punkt 100). Sie funktioniert fiskalisch und tötet
    heute Menschen; ob sie es nach 2 und 3 noch tut, ist eine andere Frage. Vorher daran zu

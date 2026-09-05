@@ -10,7 +10,6 @@ import {
 	nextTaxChange,
 	type NpcMayorLaw
 } from '$lib/game/governance.logic';
-import { CONDITION_MAX, RENOVATION_COST_PER_POINT } from '$lib/game/building.logic';
 import { LAW_RULES } from '$lib/game/law.logic';
 import { DEVELOPMENT_COST_PER_PLOT } from '$lib/game/auction.logic';
 import { levelOf } from '$lib/model/buildingTemplate';
@@ -138,9 +137,11 @@ export async function governAsNpcMayor(
 		treasury: kasse,
 		unstaffedWorkplace: unbesetzt !== undefined,
 		repairNeeded: baufaellig !== undefined,
-		repairCost:
-			Math.ceil(CONDITION_MAX - (baufaellig?.condition ?? CONDITION_MAX)) *
-			RENOVATION_COST_PER_POINT,
+		// **Instandsetzen kostet die Kasse nichts mehr** (5.78): Der Amtsinhaber legt seine
+		// eigenen Aktionspunkte hinein. Die Null steht hier, damit `chooseMayorAction` das
+		// Herrichten auch bei leerer Kasse wählt — vorher war es die erste Amtshandlung,
+		// die ausfiel, wenn kein Geld da war, und ausgerechnet dann ist sie am nötigsten.
+		repairCost: 0,
 		missingBuildingPrice: fehlt?.price ?? null,
 		landExhausted: freiesLand.length === 0,
 		developmentCost: DEVELOPMENT_COST_PER_PLOT,
