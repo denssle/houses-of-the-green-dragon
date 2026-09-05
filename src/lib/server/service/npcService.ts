@@ -1,6 +1,7 @@
 ﻿import { garmentIntact } from '$lib/game/attire.logic';
 import { CAMPAIGN_TICKS, isSettled, npcChoice } from '$lib/game/election.logic';
 import { Op } from 'sequelize';
+import { Region } from '$lib/db/model/region';
 import { levelOf, upgradePrice } from '$lib/model/buildingTemplate';
 import { Building } from '$lib/db/model/building';
 import type { Building as Haus } from '$lib/model/building';
@@ -757,7 +758,7 @@ async function lageAufnehmen(
 		wahlzettel.candidates.length > 0 &&
 		isSettled(werte.arrivedTick ?? null, tick);
 
-	const arbeitsplatz = await freierArbeitsplatz(haeuserDerStadt, npcId);
+	const arbeitsplatz = await freierArbeitsplatz(haeuserDerStadt, npcId, werte.RegionId);
 	const stelle = await employmentService.getJobOf(npcId);
 	// Wer schon eine Stelle hat, sieht sich nicht um — ein NPC, der jede Stunde den
 	// Arbeitgeber wechselt, wäre kein Handwerker, sondern ein Flattermann.
@@ -898,7 +899,8 @@ async function lageAufnehmen(
  */
 async function freierArbeitsplatz(
 	haeuser: Haus[],
-	characterId: string
+	characterId: string,
+	regionId: string
 ): Promise<string | undefined> {
 	const zuHaben = haeuser.filter(
 		(haus) =>
@@ -918,9 +920,66 @@ async function freierArbeitsplatz(
 
 	// **Der beste Lohn zuerst, dann der schlechteste Zustand.** Wer arbeitet, nimmt das
 	// bessere Angebot — und unter gleichen Angeboten das, wo es am nötigsten ist.
-	return zuHaben.sort(
+	const nachLohn = zuHaben.sort(
 		(a, b) => (b.repairWage ?? TAGELOHN) - (a.repairWage ?? TAGELOHN) || a.condition - b.condition
-	)[0]?.id;
+	);
+
+	return (await zahlbare(nachLohn, regionId))[0]?.id;
+}
+
+/**
+ * Wer den Lohn, den er bietet, auch aufbringt (5.81, Punkt 106).
+ *
+ * **Der teuerste Fehlschlag der Welt saß genau hier.** `WORK/EMPLOYER_BROKE` wuchs über
+ * drei Schritte von 781 auf 5602 und war zuletzt mit Abstand die häufigste vergebliche
+ * Handlung: Diese Suche fragte nach dem **Aushang**, nie nach dem Beutel dahinter. Seit
+ * jeder Rohbau beim Anlegen einen Bauauftrag aushängt (5.76), auch der eines mittellosen
+ * Bauherrn, lief ein Tagelöhner Tick für Tick zu derselben Baustelle, ließ eine
+ * Transaktion scheitern und stand am nächsten Tag wieder davor — sortiert wird ja nach dem
+ * **besten** Lohn, und der teuerste Aushang stammt gern von dem, der ihn nicht zahlen
+ * kann. Dieselbe Lücke wie in den Punkten 59, 63, 87 und 97: Die Entscheidung prüfte etwas
+ * anderes als die Ausführung.
+ *
+ * **Zwei Abfragen, und sie sparen mehr, als sie kosten.** Punkt 67 sitzt bei jeder neuen
+ * Abfrage im Nacken — hier ist die Rechnung aber eindeutig: Ein Fehlschlag ist eine
+ * **Transaktion**, und fünftausend davon je Messlauf wiegen schwerer als eine gebündelte
+ * Lesung je Aufnahme. Gelesen wird nur, was nach der Sortierung überhaupt in Frage kommt.
+ *
+ * **Der geprüfte Betrag ist der ausgehängte, nicht der ausgezahlte.** Wer bauen kann,
+ * verdient mehr als den Aushang (`skillFactor` in `repairForHire`) — ein Meister kann also
+ * weiterhin an einen knappen Beutel geraten. Das ist Absicht: Die Alternative wäre, das
+ * Können jedes Suchenden mitzuladen, und der seltene Fehlschlag ist billiger als die
+ * Abfrage.
+ */
+async function zahlbare(haeuser: Haus[], regionId: string): Promise<Haus[]> {
+	if (haeuser.length === 0) return [];
+
+	const inhaber: string[] = [
+		...new Set(haeuser.map((haus) => haus.ownerCharacterId).filter((id) => id !== null))
+	];
+	const beutel = new Map<string, number>(
+		inhaber.length === 0
+			? []
+			: (
+					await Character.findAll({
+						where: { id: { [Op.in]: inhaber } },
+						attributes: ['id', 'money']
+					})
+				).map((person) => [person.dataValues.id, person.dataValues.money])
+	);
+
+	// Die Stadtkasse nur nachschlagen, wenn ein städtischer Bau überhaupt dabei ist.
+	const städtisch: boolean = haeuser.some((haus) => haus.ownerCharacterId === null);
+	const kasse: number = städtisch
+		? ((await Region.findByPk(regionId))?.dataValues.treasury ?? 0)
+		: 0;
+
+	return haeuser.filter((haus) => {
+		const lohn: number = haus.repairWage ?? TAGELOHN;
+		const vorhanden: number =
+			haus.ownerCharacterId === null ? kasse : (beutel.get(haus.ownerCharacterId) ?? 0);
+		return vorhanden >= lohn;
+	});
 }
 
 /**

@@ -60,7 +60,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 103 | Die Wirtschaft hat eine Startreihenfolge, die niemand einhält — Quader und Eisen     | Punkte 85, 70, 15            | Befund       |
 | 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu | —                            | erledigt     |
 | 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                  | Punkt 16                     | Befund       |
-| 106 | Ein Bauauftrag, den niemand bezahlen kann — 1741 vergebliche Schichten               | dem nächsten Messlauf        | Befund       |
+| 106 | Ein Bauauftrag, den niemand bezahlen kann — **behoben mit 5.81**                     | —                            | erledigt     |
 | 107 | Die Grundsteuer brachte auf einmal ein Viertel — Ursache unbekannt                   | Punkt 101                    | Befund       |
 | 108 | Bilanz und Kassenbuch gehen auseinander — der Zehnt schafft Geld aus dem Nichts      | Punkt 66                     | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
@@ -3679,7 +3679,7 @@ in der die Stadt es am nötigsten hat. Ein Bürgermeister ohne eine Münze kann 
 jetzt selbst herrichten. **Was bleibt, ist der Fall ohne Menschen:** Stirbt die Stadt
 vollständig aus, gibt es auch niemanden mehr, der Aktionspunkte hat.
 
-### 106. Ein Bauauftrag, den niemand bezahlen kann
+### 106. Ein Bauauftrag, den niemand bezahlen kann — behoben mit 5.81
 
 **Befund vom 04.09.2026, aus dem Messlauf nach 5.76.** `WORK/EMPLOYER_BROKE` ist mit
 **1741 Fehlschlägen** der häufigste Fehlschlag der Welt und hat sich gegenüber dem Lauf
@@ -3719,10 +3719,26 @@ Rohbau hängt einen Auftrag aus, und seit dem Ausbau (5.80) gibt es mehr Baustel
 selben Lauf sind die Hungertoten von 11 auf 17 gestiegen — die Leute laufen zu Baustellen,
 an denen sie nichts verdienen, statt zu Arbeit, die zahlt.
 
-**Damit ist dies der nächste Schritt** und nicht der Kornspeicher: Es ist die größte
-Fehlerquelle der Welt, sie ist durch die letzten drei Schritte dreimal gewachsen, und die
-Behebung ist klein — die Lage muss fragen, ob der Bauherr den gebotenen Lohn überhaupt
-aufbringt.
+**Behoben mit 5.81** — die erste der drei Möglichkeiten oben: `freierArbeitsplatz` fragt
+seither mit, ob der Aushang gedeckt ist. Gelesen wird gebündelt und erst **nach** der
+Sortierung: die Beutel aller in Frage kommenden Eigentümer in einer Abfrage, die Stadtkasse
+nur, wenn ein städtischer Bau überhaupt dabei ist.
+
+**Die Abfrage kostet weniger, als sie spart.** Punkt 67 sitzt bei jeder neuen Abfrage im
+Nacken — hier ist die Rechnung eindeutig: Ein Fehlschlag ist eine **Transaktion**, und
+fünftausend davon je Messlauf wiegen schwerer als eine gebündelte Lesung je Aufnahme.
+
+**Geprüft wird der ausgehängte Betrag, nicht der ausgezahlte.** Wer bauen kann, verdient
+mehr als den Aushang (`skillFactor` in `repairForHire`), ein Meister kann also weiterhin an
+einen knappen Beutel geraten. Das ist Absicht: Die Alternative wäre, das Können jedes
+Suchenden mitzuladen, und der seltene Fehlschlag ist billiger als die Abfrage.
+
+**Und der Test hat sich beim ersten Anlauf selbst überführt.** Von drei Prüfungen bissen
+nur zwei; die dritte — „nimmt den zahlbaren Auftrag, nicht den bestbezahlten" — bestand
+auch **ohne** die Behebung, weil der Bauherr seine eigene Baustelle selbst voranbringt und
+der Zustand also ohnehin stieg. Sie prüft jetzt, ob die **Tagelöhnerin verdient hat**, und
+beide Bauherren bleiben ohne Aktionspunkte. Eine Gegenprobe gegen den alten Stand gehört
+zu jedem Test, der einen Befund abschließt — sonst behauptet er nur etwas.
 
 ### 107. Die Grundsteuer brachte auf einmal ein Viertel
 
@@ -3867,9 +3883,9 @@ im Messlauf vier von fünf Toten.
 4. **Vor alledem aber zwei Befunde aus den Messläufen vom 05.09.2026**, die keinen Umbau
    der Wirtschaft brauchen und beide dringender sind als der Kornspeicher:
 
-   - **Punkt 106** — der Bauauftrag, den niemand bezahlen kann. `WORK/EMPLOYER_BROKE` ist
+   - **Punkt 106** — der Bauauftrag, den niemand bezahlen kann. `WORK/EMPLOYER_BROKE` war
      über drei Schritte von 781 auf **5602** gewachsen und die größte Fehlerquelle der
-     Welt; im selben Lauf steigen die Hungertoten wieder. Die Behebung ist klein.
+     Welt. **Behoben mit 5.81**; was es gebracht hat, sagt der nächste Messlauf.
    - **Punkt 108** — Bilanz und Kassenbuch gehen auseinander. Solange Geld an einer
      unbekannten Stelle entsteht und an einer zweiten verschwindet, misst jeder folgende
      Schritt auf wackligem Grund.
