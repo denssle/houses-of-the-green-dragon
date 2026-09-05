@@ -5,7 +5,7 @@ import { sequelize } from '$lib/db/sequelize';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
-import { Region } from '$lib/db/model/region';
+import * as treasuryService from '$lib/server/service/treasuryService';
 import { BuildingStock, ShopOffer } from '$lib/db/model/shop';
 import { buy, offer as offerLogic, type ShopKind, shopKindFor } from '$lib/game/trade.logic';
 import { getItemTemplate } from '$lib/model/itemTemplate';
@@ -345,11 +345,7 @@ export async function placeOffer(
 		if (geplant.fee > 0) {
 			await verkaeufer.update({ money: geplant.sellerMoney }, { transaction: t });
 			if (laden.regionId) {
-				await Region.increment('treasury', {
-					by: geplant.fee,
-					where: { id: laden.regionId },
-					transaction: t
-				});
+				await treasuryService.einnehmen(laden.regionId, geplant.fee, 'STALL_FEE', t);
 			}
 		}
 
@@ -461,11 +457,7 @@ export async function buyFromOffer(
 		});
 		// Der Verkäufer bekommt, was am Schild steht; die Steuer zahlt der Käufer obendrauf.
 		if (ergebnis.tax > 0 && laden?.regionId) {
-			await Region.increment('treasury', {
-				by: ergebnis.tax,
-				where: { id: laden.regionId },
-				transaction: t
-			});
+			await treasuryService.einnehmen(laden.regionId, ergebnis.tax, 'SALES_TAX', t);
 		}
 
 		// Ein leeres Angebot verschwindet — wie Beziehungen und Vorräte, die auf null

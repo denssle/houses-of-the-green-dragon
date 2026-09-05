@@ -11,6 +11,14 @@ import { seededRoll } from '$lib/game/testRoll';
 import type { IdleReason, NpcAction } from '$lib/game/npc.logic';
 import * as needService from '$lib/server/service/needService';
 import * as buildingService from '$lib/server/service/buildingService';
+import {
+	hatEmpfaenger,
+	type Kassenabfluss,
+	type Kassenbuch,
+	type Kassenzufluss,
+	kassenbuch,
+	kassenbuchLeeren
+} from '$lib/server/service/treasuryService';
 import { tickWorld } from '$lib/server/worldTick';
 
 /**
@@ -79,7 +87,7 @@ async function geldmenge(): Promise<number> {
 async function bilanzzeilen(
 	stadtId: string,
 	vorher: number,
-	bilanz: { zuzug: number; steuer: number; sold: number; amtsausgaben: number }
+	bilanz: { zuzug: number }
 ): Promise<string[]> {
 	const buerger: number = await geldmenge();
 	const kasse: number = await stadtkasse(stadtId);
@@ -89,11 +97,41 @@ async function bilanzzeilen(
 	return [
 		`  Bestand am Anfang ${vorher}, am Ende ${nachher} (Bürger ${buerger}, Kasse ${kasse})`,
 		`  Von außen zugeflossen (Zuzug) ${bilanz.zuzug}`,
-		`  **Vernichtet ${vernichtet}** — Geld, das die Kasse verließ, ohne dass jemand es bekam`,
-		`  An Bürger zurück: Sold ${bilanz.sold} (an je einen), Tagelohn im Rest enthalten`,
-		`  Der Stadt zugeflossen: Grundsteuer ${bilanz.steuer}, dazu Kornspeicher, Standgeld,`,
-		`    Zehnt, Pacht, Einzugsgeld und Grundstücksverkauf — nicht getrennt (siehe Punkt 100)`,
-		`  Vom Amt selbst verbaut (Untergrenze) ${bilanz.amtsausgaben}`
+		`  **Vernichtet ${vernichtet}** — Geld, das die Kasse verließ, ohne dass jemand es bekam`
+	];
+}
+
+/**
+ * Das Kassenbuch, ausgeschrieben (5.77, Punkt 101).
+ *
+ * **Die Zeile, die hier bis 5.76 stand**, hieß „dazu Kornspeicher, Standgeld, Zehnt, Pacht,
+ * Einzugsgeld und Grundstücksverkauf — nicht getrennt". Sie war ehrlich und nutzlos: Als
+ * die Grundsteuer im Lauf nach 5.76 auf ein Viertel fiel, ließ sich nicht sagen, ob der
+ * Rest der Kasse das aufgefangen hat oder mitgefallen ist (Punkt 107).
+ *
+ * **Bei jeder Ausgabe steht, ob jemand das Geld bekommt.** Das ist keine Verzierung: Drei
+ * der fünf Ausgabearten haben keinen Empfänger, und ihre Summe ist der Teil des
+ * vernichteten Geldes, den die Stadt selbst verbrennt — die Zahl, um die es in Punkt 102
+ * und 100 geht.
+ */
+function kassenbuchzeilen(buch: Kassenbuch): string[] {
+	const sortiert = <T extends string>(posten: Partial<Record<T, number>>): [T, number][] =>
+		(Object.entries(posten) as [T, number][]).sort((a, b) => b[1] - a[1]);
+
+	const zufluesse = sortiert<Kassenzufluss>(buch.zufluss);
+	const abfluesse = sortiert<Kassenabfluss>(buch.abfluss);
+	const summe = (posten: [string, number][]): number =>
+		posten.reduce((zahl, [, betrag]) => zahl + betrag, 0);
+	const ohneEmpfaenger: number = summe(abfluesse.filter(([grund]) => !hatEmpfaenger(grund)));
+
+	return [
+		`  Eingenommen ${summe(zufluesse)}:`,
+		...zufluesse.map(([grund, betrag]) => `    ${grund} ${betrag}`),
+		`  Ausgegeben ${summe(abfluesse)}, davon **${ohneEmpfaenger} an niemanden**:`,
+		...abfluesse.map(
+			([grund, betrag]) =>
+				`    ${grund} ${betrag}${hatEmpfaenger(grund) ? ' → an Bürger' : ' → aus der Welt'}`
+		)
 	];
 }
 
@@ -140,12 +178,23 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	 * man dem Code an: `renovatePublicBuilding`, `buildPublicBuilding` und `developLand`
 	 * senken die Kasse, ohne dass jemand etwas bekommt.
 	 *
-	 * Was die Bilanz **nicht** trennt: Kornspeicher, Standgeld und Grundstücksverkauf
-	 * fließen alle in dieselbe Kasse, und der Tagelohn kommt aus derselben heraus. Dafür
-	 * bräuchte es das Kassenbuch an den siebzehn Stellen, die die Kasse bewegen. Die
-	 * Größenordnungen entscheidet schon diese hier.
+	 * **Was sie nicht trennt, trennt seit 5.77 das Kassenbuch** (Punkt 101): Kornspeicher,
+	 * Standgeld und Grundstücksverkauf fließen in dieselbe Kasse, und der Tagelohn kommt
+	 * aus derselben heraus.
+	 *
+	 * **Die beiden decken sich nicht, und das ist kein Fehler.** Diese Bilanz misst die
+	 * ganze Welt, das Buch nur die Stadtkasse: Was ein Bürger beim Renovieren oder
+	 * Ausbauen ins Nichts zahlt, steht hier im vernichteten Geld und dort nirgends. Der
+	 * Teil, den die Stadt selbst verbrennt, ist die Zeile „an niemanden" im Buch — und
+	 * die Differenz zwischen beiden ist genau das, was Punkt 102 noch offen hat.
 	 */
-	const bilanz = { zuzug: 0, steuer: 0, sold: 0, amtsausgaben: 0 };
+	const bilanz = { zuzug: 0 };
+
+	// **Das Kassenbuch fängt bei null an** (5.77). Es zählt im Speicher mit, seit der
+	// Prozess läuft — und der hat vor diesem Lauf schon die Welt aufgebaut, in der die
+	// Gründer ihre Grundstücke bekommen haben. Ohne das Leeren stünde deren Kaufpreis im
+	// Buch, und der Bericht spräche über eine andere Zeitspanne als die gemessene.
+	kassenbuchLeeren();
 
 	const start: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
 	const begonnen: number = Date.now();
@@ -178,12 +227,11 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 			chronik.zuzug++;
 			bilanz.zuzug += stunde.arrival.money;
 		}
-		bilanz.steuer += stunde.tax?.collected ?? 0;
-		for (const sold of stunde.stipends) bilanz.sold += sold.paid;
-		// Was der Amtsinhaber selbst verbaut hat — Geld, das die Kasse verlässt, ohne dass
-		// jemand es bekommt. Das Herrichten kennt seinen Betrag; Bauen und Erschließen
-		// melden ihn nicht, deshalb steht hier nur die Untergrenze.
-		bilanz.amtsausgaben += stunde.maintained?.spent ?? 0;
+		// **Sold, Steuer und Amtsausgaben zählt seit 5.77 das Kassenbuch** — und zwar
+		// vollständig: Was hier stand, war beim Bauen und Erschließen ausdrücklich nur eine
+		// Untergrenze, weil diese beiden ihren Betrag nicht melden. Zwei Zählungen
+		// derselben Sache laufen früher oder später auseinander, und dann glaubt man der
+		// falschen.
 		if (stunde.hazard) chronik.braende++;
 		chronik.steuer += stunde.tax?.collected ?? 0;
 		chronik.ausgefallen += stunde.tax?.shortfall ?? 0;
@@ -221,6 +269,9 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		'',
 		'=== DIE KASSE ===',
 		...(await bilanzzeilen(stadtId, bestandVorher, bilanz)),
+		'',
+		'=== DAS KASSENBUCH ===',
+		...kassenbuchzeilen(kassenbuch()),
 		'',
 		'=== HANDLUNGEN ==='
 	);

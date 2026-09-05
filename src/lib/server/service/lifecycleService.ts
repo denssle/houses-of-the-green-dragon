@@ -6,7 +6,7 @@ import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Dynasty } from '$lib/db/model/dynasty';
 import { Plot } from '$lib/db/model/plot';
-import { Region } from '$lib/db/model/region';
+import * as treasuryService from '$lib/server/service/treasuryService';
 import { chooseHeir, type Child, splitEstate } from '$lib/game/inheritance.logic';
 import {
 	type DeathCause,
@@ -392,9 +392,7 @@ async function anDieStadt(
 	t: Transaction,
 	tick: number
 ): Promise<void> {
-	if (geld > 0) {
-		await Region.increment('treasury', { by: geld, where: { id: regionId }, transaction: t });
-	}
+	await treasuryService.einnehmen(regionId, geld, 'ESCHEAT', t);
 	await Plot.update(
 		{ ownerType: 'CITY', OwnerCharacterId: null, forSalePrice: null },
 		{ where: { OwnerCharacterId: verstorbenId }, transaction: t }

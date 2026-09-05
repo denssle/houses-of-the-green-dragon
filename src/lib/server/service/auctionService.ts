@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { Op, type Transaction } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
+import * as treasuryService from '$lib/server/service/treasuryService';
 import { Auction, Bid as BidRow } from '$lib/db/model/auction';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
@@ -80,7 +81,7 @@ export async function developLand(
 		const kosten: number = count * DEVELOPMENT_COST_PER_PLOT;
 		if (!stadt || kasse < kosten) return { ok: false, reason: 'NOT_ENOUGH_MONEY' } as const;
 
-		await stadt.update({ treasury: kasse - kosten }, { transaction: t });
+		await treasuryService.ausgeben(regionId, kosten, 'DEVELOPMENT', t);
 
 		// Die Adresse ergibt sich aus dem, was schon steht: erst die Gasse auffüllen, dann
 		// die nächste anfangen. Sonst hieße jedes neue Grundstück „Neustadt 1".
@@ -274,11 +275,7 @@ export async function advanceAuctions(regionId: string, tick: number): Promise<A
 				where: { id: sieger.bidderId },
 				transaction: t
 			});
-			await Region.increment('treasury', {
-				by: sieger.amount,
-				where: { id: regionId },
-				transaction: t
-			});
+			await treasuryService.einnehmen(regionId, sieger.amount, 'AUCTION', t);
 			await Plot.update(
 				{ ownerType: 'CHARACTER', OwnerCharacterId: sieger.bidderId },
 				{ where: { id: auktion.dataValues.PlotId }, transaction: t }

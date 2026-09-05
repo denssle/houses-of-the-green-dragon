@@ -2,10 +2,10 @@ import { Auction } from '$lib/db/model/auction';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { Op, type Transaction } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
+import * as treasuryService from '$lib/server/service/treasuryService';
 import { Building as BuildingModel } from '$lib/db/model/building';
 import { Character as CharacterModel } from '$lib/db/model/character';
 import { Plot as PlotModel } from '$lib/db/model/plot';
-import { Region as RegionModel } from '$lib/db/model/region';
 import type { Plot } from '$lib/model/plot';
 import { convertToPlot } from '$lib/db/attributes/plot.attributes';
 import { buyPlot as buyPlotLogic } from '$lib/game/buildingAction.logic';
@@ -142,11 +142,7 @@ export async function buyPlot(plotId: string, characterId: string): Promise<BuyR
 		);
 		// Der Boden gehörte der Stadt, also bekommt sie das Geld. Ab 4.7 ist diese Kasse
 		// der Hebel, an dem die Politik hängt.
-		await RegionModel.increment('treasury', {
-			by: ergebnis.spent,
-			where: { id: grundstück.dataValues.RegionId },
-			transaction: t
-		});
+		await treasuryService.einnehmen(grundstück.dataValues.RegionId, ergebnis.spent, 'PLOT_SALE', t);
 
 		// Ein Grundstück ist der Anfang von allem, was ein Haus je baut — das gehört in den
 		// Lebenslauf. Beim Zuschlag einer Versteigerung stand es längst (`AUCTION_WON`), beim

@@ -1,11 +1,11 @@
 import { type Transaction } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
+import * as treasuryService from '$lib/server/service/treasuryService';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Employment } from '$lib/db/model/employment';
 import { Plot } from '$lib/db/model/plot';
-import { Region } from '$lib/db/model/region';
 import {
 	SKILL_NAMES,
 	type SkillType,
@@ -167,11 +167,7 @@ export async function attend(
 
 		if (schulgeld > 0) {
 			await zahler.update({ money: zahler.dataValues.money - schulgeld }, { transaction: t });
-			await Region.increment('treasury', {
-				by: schulgeld,
-				where: { id: regionId },
-				transaction: t
-			});
+			await treasuryService.einnehmen(regionId, schulgeld, 'SCHOOL_FEE', t);
 		}
 
 		await skillService.addPractice(childId, skill, TEACHING_PRACTICE, t);

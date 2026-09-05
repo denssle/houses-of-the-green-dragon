@@ -10,6 +10,7 @@ import { type Recipe, titheOn, yieldOf } from '$lib/game/production.logic';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import { AGE_OF_MAJORITY, ageInYears, seasonOf } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
+import * as treasuryService from '$lib/server/service/treasuryService';
 import { isUnderConstruction } from '$lib/game/building.logic';
 import { Region } from '$lib/db/model/region';
 import { Plot } from '$lib/db/model/plot';
@@ -425,11 +426,7 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 			if (zehnt > 0 && boden) {
 				const wert: number = zehnt * (getItemTemplate(rezept.outputItemId)?.basePrice ?? 0);
 				if (wert > 0) {
-					await Region.increment('treasury', {
-						by: wert,
-						where: { id: boden.regionId },
-						transaction: t
-					});
+					await treasuryService.einnehmen(boden.regionId, wert, 'TITHE', t);
 				}
 			}
 		}
@@ -597,10 +594,15 @@ export async function kasseVon(
 	const stadt = await Region.findByPk(regionId, { transaction: t, lock: t.LOCK.UPDATE });
 	if (!stadt || stadt.dataValues.treasury === null) return undefined;
 
+	const bestand: number = stadt.dataValues.treasury;
 	return {
-		money: stadt.dataValues.treasury,
+		money: bestand,
+		// **Was hier abfließt, ist Lohn** — und zwar an einen Menschen: Tagelohn an einem
+		// städtischen Bau, Sold der Wache, Schicht in der städtischen Schmiede. Der Betrag
+		// ergibt sich aus dem Rest, weil die Lohnrechnung ihn so zurückgibt; gebucht wird
+		// er als das, was er ist (Punkt 101).
 		zahle: async (rest, transaction) => {
-			await stadt.update({ treasury: rest }, { transaction });
+			await treasuryService.ausgeben(regionId, bestand - rest, 'WAGE', transaction);
 		}
 	};
 }

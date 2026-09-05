@@ -5,7 +5,6 @@ import { sequelize } from '$lib/db/sequelize';
 import { Building } from '$lib/db/model/building';
 import { Lease } from '$lib/db/model/lease';
 import { Plot } from '$lib/db/model/plot';
-import { Region } from '$lib/db/model/region';
 import { produce, type Recipe, titheOn } from '$lib/game/production.logic';
 import { isUnderConstruction } from '$lib/game/building.logic';
 import { getItemTemplate } from '$lib/model/itemTemplate';
@@ -16,6 +15,7 @@ import * as needService from '$lib/server/service/needService';
 import * as regionService from '$lib/server/service/regionService';
 import * as lawService from '$lib/server/service/lawService';
 import * as tradeService from '$lib/server/service/tradeService';
+import * as treasuryService from '$lib/server/service/treasuryService';
 import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
 
@@ -145,11 +145,12 @@ export async function leasePlot(characterId: string, plotId: string): Promise<Le
 		await paechter.update({ money: paechter.dataValues.money - LEASE_FEE }, { transaction: t });
 		// **An die Stadt, nicht an den Acker** (5.24, Punkt 65): Die Umlandregionen haben
 		// eine Kasse, aber weder Amt noch Ausgaben — was dort einging, war aus dem Spiel.
-		await Region.increment('treasury', {
-			by: LEASE_FEE,
-			where: { id: await regionService.cityOf(flaeche.dataValues.RegionId) },
-			transaction: t
-		});
+		await treasuryService.einnehmen(
+			await regionService.cityOf(flaeche.dataValues.RegionId),
+			LEASE_FEE,
+			'LEASE_FEE',
+			t
+		);
 		await Lease.create(
 			{ PlotId: plotId, CharacterId: characterId, sinceTick: tick },
 			{ transaction: t }
@@ -353,11 +354,7 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 		if (zehnt > 0) {
 			const wert: number = zehnt * (getItemTemplate(rezept.outputItemId)?.basePrice ?? 0);
 			if (wert > 0) {
-				await Region.increment('treasury', {
-					by: wert,
-					where: { id: stadtId },
-					transaction: t
-				});
+				await treasuryService.einnehmen(stadtId, wert, 'TITHE', t);
 			}
 		}
 

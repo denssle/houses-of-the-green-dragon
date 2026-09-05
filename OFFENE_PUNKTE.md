@@ -55,7 +55,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten  | Punkte 89, 16                | Befund       |
 | 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen         | —                            | erledigt     |
 | 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote         | dem nächsten Schritt         | Befund       |
-| 101 | Das Kassenbuch — jede Bewegung der Stadtkasse mit einem Grund                        | Punkt 100                    | Entwurf      |
+| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                   | Punkt 100                    | teilweise    |
 | 102 | Jeder Bau verbrennt seinen Preis — **der Bau behoben mit 5.76** (der Rohbau)         | Punkte 100, 66, 74           | teilweise    |
 | 103 | Die Wirtschaft hat eine Startreihenfolge, die niemand einhält — Quader und Eisen     | Punkte 85, 70, 15            | Befund       |
 | 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu | —                            | erledigt     |
@@ -3030,7 +3030,7 @@ Umbau — und mit der Bilanz oben lässt sich vorher ausrechnen, was sie bewirkt
 nächsten Schritt schützen will, kann den Bürgermeister die Grundsteuer nicht beschließen
 lassen — es ist eine Zeile in `NPC_MAYOR_LAWS`.
 
-### 101. Das Kassenbuch — jede Bewegung mit einem Grund
+### 101. Das Kassenbuch — jede Bewegung mit einem Grund — gebaut mit 5.77
 
 **Aufgenommen am 29.08.2026, aus der Arbeit an Punkt 100.** Der Messbericht kennt seit
 5.72 eine Bilanz über die ganze Welt: Bestand am Anfang, Bestand am Ende, Zufluss von
@@ -3099,6 +3099,48 @@ hat den stillstehenden Kreis gezeigt (Punkt 63), die Todesursache hat aus „die
 sinkt" in einem einzigen Lauf „sie verhungert" gemacht (5.71), und drei Vermutungen über
 den Arbeitsmarkt haben in derselben Zeit nichts getroffen. Wer nicht misst, rät — und rät
 im Zweifel dreimal.
+
+**Gebaut mit 5.77.** `treasuryService` ist die einzige Tür zur Stadtkasse: `einnehmen` und
+`ausgeben` führen die Bewegung aus **und** schreiben sie mit, je Grund als Summe im
+Speicher. Die siebzehn Stellen in zehn Diensten sind darauf umgestellt, und keine rührt
+`treasury` mehr selbst an.
+
+- **Elf Zuflüsse** (`GRANARY`, `PROPERTY_TAX`, `TITHE`, `STALL_FEE`, `SALES_TAX`,
+  `PLOT_SALE`, `LEASE_FEE`, `SETTLEMENT_FEE`, `SCHOOL_FEE`, `AUCTION`, `ESCHEAT`) und
+  **fünf Abflüsse** (`WAGE`, `STIPEND`, `PUBLIC_REPAIR`, `PUBLIC_BUILD`, `DEVELOPMENT`).
+- **Bei jeder Ausgabe steht, ob jemand das Geld bekommt** (`hatEmpfaenger`). Die Summe der
+  empfängerlosen ist der Teil des vernichteten Geldes, den die **Stadt** verbrennt.
+- **Der Grund ist der des Spiels, nicht der des Dienstes:** `TITHE` kommt aus zwei
+  Diensten — der eigenen Ernte und der des Knechts —, und für die Frage „wovon lebt die
+  Stadt" ist das derselbe Posten.
+- **`increment` statt gelesenem `update`:** Mehrere der abgelösten Stellen lasen die
+  Kasse, rechneten und schrieben zurück; das ist nur unter einer Sperre richtig, und ob
+  eine gehalten wurde, musste man je Stelle nachsehen. Ein Schritt um einen Betrag ist es
+  immer.
+
+**Warum ein Modul und keine Konvention:** Eine Regel „bitte auch mitschreiben" hält, bis
+sie das erste Mal jemand vergisst — und dann ist das Buch nicht falsch, sondern unbemerkt
+unvollständig, was schlimmer ist, weil man ihm trotzdem glaubt. Deshalb prüft
+`treasuryService.spec.ts` nicht nur die Buchung, sondern ruft einen **echten Dienst** auf
+und vergleicht danach Kasse und Buch.
+
+**Die Probe ist eingebaut.** Die Bilanz aus 5.72 beruht auf einer Identität über die ganze
+Welt, das Buch auf siebzehn einzelnen Buchungen — zwei unabhängige Wege. Im ersten Lauf
+(300 Ticks, Saat 86) sagten beide dieselbe Zahl: „Vernichtet 480" und „480 an niemanden".
+Sie müssen sich **nicht** immer decken: Was ein Bürger beim Renovieren oder Ausbauen ins
+Nichts zahlt, steht in der Bilanz und nicht im Buch. Die Differenz ist genau das, was
+Punkt 102 noch offen hat.
+
+**Und der erste Befund kam sofort:** Von den 480 vernichteten Münzen jenes Laufs ist
+**alles** `DEVELOPMENT` — die Erschließung. Weder `PUBLIC_BUILD` noch `PUBLIC_REPAIR`
+tauchen auf. Die Vermutung in Punkt 102, der öffentliche Bau sei der nächste große Posten,
+war also falsch: Es ist das Erschließen von Bauland.
+
+**Was offen bleibt: die Bürgerseite.** Was ein Einwohner einnimmt und ausgibt, ist
+weiterhin unbekannt — der Bericht zeigt nur den Stand am Ende. Der Vorschlag von oben gilt
+unverändert: im Messlauf die Summen je Handlungsart mitführen, was `BUY_FOOD` gekostet und
+was `WORK` eingebracht hat. Das ist ein eigener Schritt, weil es die NPC-Schleife berührt
+und die schon einmal an ihrer Abfragezahl gelitten hat (Punkt 67).
 
 ### 102. Jeder Bau verbrennt seinen Preis — der Bau behoben mit 5.76 (der Rohbau)
 
@@ -3502,6 +3544,14 @@ Posten.
 kennt, lässt sich der größte Posten einer Veränderung nicht benennen, und jede Deutung
 wäre geraten. Das Kassenbuch ist kein Komfort, sondern die Bedingung dafür, dass die
 nächsten Schritte messbar sind.
+
+**Das Werkzeug steht seit 5.77**, die Antwort noch nicht: Sie fällt beim nächsten vollen
+Messlauf, wenn `PROPERTY_TAX` als eigener Posten neben den übrigen zehn Zuflüssen steht.
+Ein erster Hinweis liegt schon vor — in einem Lauf über 300 Ticks taucht die Grundsteuer
+**gar nicht** auf, obwohl sechs Spieljahre vergangen sind. Das deutet nicht auf zu niedrige
+Sätze, sondern darauf, dass das Gesetz in dieser Zeit noch nicht galt; wer es beschließt,
+ist ein Bürgermeister, und den muss die Stadt erst wählen. Zu prüfen ist das am langen
+Lauf, nicht an dieser Vermutung.
 
 ## Der Weg durch die Wirtschaft — Stand 29.08.2026
 

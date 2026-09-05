@@ -3,7 +3,7 @@ import { type Transaction } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 import { Character } from '$lib/db/model/character';
 import { Dynasty } from '$lib/db/model/dynasty';
-import { Region } from '$lib/db/model/region';
+import * as treasuryService from '$lib/server/service/treasuryService';
 import { Skill } from '$lib/db/model/skill';
 import { NEUGEBORENE } from '$lib/db/names';
 import { HERKUNFT } from '$lib/db/names';
@@ -141,11 +141,7 @@ export async function admitNewcomers(
 
 		// Das Einzugsgeld in die Stadtkasse — Geld wechselt den Besitzer, es entsteht nicht.
 		if (einzugsgeld > 0) {
-			await Region.increment('treasury', {
-				by: einzugsgeld,
-				where: { id: regionId },
-				transaction: t
-			});
+			await treasuryService.einnehmen(regionId, einzugsgeld, 'SETTLEMENT_FEE', t);
 		}
 
 		// **Der Zuzug gehört in die Chronik.** Ein Fremder, der ankommt, ist ein Ereignis —

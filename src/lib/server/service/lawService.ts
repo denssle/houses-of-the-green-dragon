@@ -6,6 +6,7 @@ import { Character } from '$lib/db/model/character';
 import { Law } from '$lib/db/model/law';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
+import * as treasuryService from '$lib/server/service/treasuryService';
 import {
 	canEnact,
 	collectable,
@@ -219,9 +220,7 @@ export async function collectPropertyTax(
 		zahlende++;
 	}
 
-	if (eingenommen > 0) {
-		await Region.increment('treasury', { by: eingenommen, where: { id: regionId } });
-	}
+	await treasuryService.einnehmen(regionId, eingenommen, 'PROPERTY_TAX');
 
 	return { collected: eingenommen, payers: zahlende, shortfall: ausgefallen };
 }
@@ -280,7 +279,7 @@ export async function payOfficeStipends(regionId: string): Promise<Stipend[]> {
 		const betrag: number = collectable(satz, kasse);
 
 		if (betrag > 0) {
-			await Region.decrement('treasury', { by: betrag, where: { id: regionId } });
+			await treasuryService.ausgeben(regionId, betrag, 'STIPEND');
 			await Character.increment('money', { by: betrag, where: { id: inhaber.characterId } });
 		}
 		gezahlt.push({

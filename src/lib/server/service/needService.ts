@@ -3,7 +3,7 @@ import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
 import { Character } from '$lib/db/model/character';
 import { Inventory } from '$lib/db/model/inventory';
-import { Region } from '$lib/db/model/region';
+import * as treasuryService from '$lib/server/service/treasuryService';
 import type {
 	CharacterAttributes,
 	CharacterCreationAttributes
@@ -227,11 +227,7 @@ export async function buyFromGranary(
 			return { ok: false, reason: 'INVENTORY_FULL' } as const;
 		}
 		await käufer.update({ money: käufer.dataValues.money - kosten }, { transaction: t });
-		await Region.increment('treasury', {
-			by: kosten,
-			where: { id: käufer.dataValues.RegionId },
-			transaction: t
-		});
+		await treasuryService.einnehmen(käufer.dataValues.RegionId, kosten, 'GRANARY', t);
 		return { ok: true } as const;
 	});
 }

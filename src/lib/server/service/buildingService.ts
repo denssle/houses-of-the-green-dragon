@@ -44,6 +44,7 @@ import * as worldService from '$lib/server/service/worldService';
 import { checkName, type NameCheck } from '$lib/game/naming.logic';
 import { TAGELOHN } from '$lib/game/economy';
 import { seasonOf } from '$lib/game/time';
+import * as treasuryService from '$lib/server/service/treasuryService';
 
 /**
  * Der Hof, der zu jeder Pacht gehört.
@@ -1123,7 +1124,10 @@ export async function renovatePublicBuilding(
 		if (!ergebnis.ok) return ergebnis;
 
 		await amtsperson.update({ actionPoints: ergebnis.actionPoints }, { transaction: t });
-		await stadt.update({ treasury: ergebnis.money }, { transaction: t });
+		// **Ein Abfluss ohne Empfänger** (Punkt 101): Der Amtsinhaber renoviert selbst, und
+		// die Kasse zahlt an niemanden. Dass das Buch es jetzt so ausweist, ist der halbe
+		// Zweck des Buches.
+		await treasuryService.ausgeben(regionId, ergebnis.spent, 'PUBLIC_REPAIR', t);
 		await gebäude.update(
 			{ condition: ergebnis.condition, lastConditionTick: tick },
 			{ transaction: t }
@@ -1231,7 +1235,7 @@ export async function buildPublicBuilding(
 		const preis: number = levelOf(vorlage, 1).price;
 		if (kasse < preis) return { ok: false, reason: 'NOT_ENOUGH_MONEY' } as const;
 
-		await stadt!.update({ treasury: kasse - preis }, { transaction: t });
+		await treasuryService.ausgeben(regionId, preis, 'PUBLIC_BUILD', t);
 		// Herrenloser Grund wird mit dem Bau zu staedtischem: Er ist vergeben, nur eben an
 		// die Allgemeinheit — dieselbe Regel wie beim Seed.
 		if (grundstueck.dataValues.ownerType !== 'CITY') {
