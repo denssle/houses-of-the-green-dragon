@@ -62,6 +62,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                  | Punkt 16                     | Befund       |
 | 106 | Ein Bauauftrag, den niemand bezahlen kann — 1741 vergebliche Schichten               | dem nächsten Messlauf        | Befund       |
 | 107 | Die Grundsteuer brachte auf einmal ein Viertel — Ursache unbekannt                   | Punkt 101                    | Befund       |
+| 108 | Bilanz und Kassenbuch gehen auseinander — der Zehnt schafft Geld aus dem Nichts      | Punkt 66                     | Befund       |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung               | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                  | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                          | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -1329,6 +1330,12 @@ dem Kreislauf ist es damit ebenso heraus, als wäre es gelöscht.
 Die Reihenfolge ist keine Frage des Aufwands, sondern der Wirkung: **Punkt 1 zuerst zu
 schließen, ohne 63 gelöst zu haben, legt die Wirtschaft still.** Zuerst muss es einen
 zweiten Weg geben, an Geld zu kommen — nämlich Waren zu verkaufen, die jemand herstellt.
+
+**Der offene Rest ist am 05.09.2026 beziffert worden** (Punkt 108): Der Zehnt schafft
+Münzen aus dem Nichts — der Bauer verliert Ware, die Stadtkasse gewinnt Geld, das niemand
+gezahlt hat. Im Messlauf über 2000 Ticks sind das **1032 Münzen**. Sichtbar wurde es erst,
+nachdem 5.78 und 5.80 die Vernichtung auf der Bürgerseite geschlossen hatten: Vorher ging
+die Schöpfung in ihr unter.
 
 ### 68. Das Standgeld frisst den, der nichts verkauft — behoben (5.20)
 
@@ -3496,6 +3503,13 @@ Damit ist die Reihenfolge des Restes klar, und sie ist nicht die, die oben vermu
    neues. Wer knapp vor dem Verfall ausbaut, spart sich die Renovierung; dafür ruht sein
    Haus, solange gebaut wird.
 
+   **Gemessen am 05.09.2026** (2000 Ticks, Saat 86): Vernichtet **2822 → 1336**, und davon
+   nichts mehr durch Bürger. Die Sorge, ruhende Häuser könnten den Bevölkerungsgewinn
+   kosten, war unbegründet — es wird genauso viel ausgebaut wie vorher (neun Ausbauten),
+   die Stadt wächst weiter (35 statt 32 Lebende), und das Geld bei den Bürgern steigt
+   erneut (3281 → 3996). Zwanzig Ticks Bauzeit fallen gegenüber vierzig Spieljahren nicht
+   ins Gewicht.
+
 2. **Die Erschließung** (1080) ist der größte Posten der Stadt — nicht der öffentliche
    Bau, wie hier zuerst angenommen.
 3. **Der öffentliche Bau** (350) ist der kleinste. Er bleibt trotzdem interessant: Ein städtischer Rohbau hieße, dass die
@@ -3698,6 +3712,18 @@ dahinter.
 Bauarbeit, weil es kaum Aufträge gab. Jetzt gibt es sie — nur sind einige davon leere
 Versprechen.
 
+**Dreimal schlimmer geworden, gemessen am 05.09.2026:** `WORK/EMPLOYER_BROKE` steht nach
+5.80 bei **5602** (nach 5.76: 1741, nach 5.78: 2025) und ist mit Abstand der häufigste
+Fehlschlag der Welt. Der Grund ist derselbe geblieben und hat sich nur vervielfacht: Jeder
+Rohbau hängt einen Auftrag aus, und seit dem Ausbau (5.80) gibt es mehr Baustellen. Im
+selben Lauf sind die Hungertoten von 11 auf 17 gestiegen — die Leute laufen zu Baustellen,
+an denen sie nichts verdienen, statt zu Arbeit, die zahlt.
+
+**Damit ist dies der nächste Schritt** und nicht der Kornspeicher: Es ist die größte
+Fehlerquelle der Welt, sie ist durch die letzten drei Schritte dreimal gewachsen, und die
+Behebung ist klein — die Lage muss fragen, ob der Bauherr den gebotenen Lohn überhaupt
+aufbringt.
+
 ### 107. Die Grundsteuer brachte auf einmal ein Viertel
 
 **Befund vom 04.09.2026, aus demselben Lauf.** Die Grundsteuer nahm **1098** ein, im Lauf
@@ -3741,6 +3767,57 @@ Zahlungsfähigkeit liegt es also nicht, sondern am Satz.
 Satz wann galt und wer ihn beschlossen hat. Solange ein Gesetz nur seinen aktuellen Wert
 kennt, ist jede Aussage über seine Wirkung eine Aussage über den letzten Stand — und
 genau das ist bei einem Satz, der sich mit jeder Amtszeit ändern kann, keine Aussage.
+
+### 108. Die Bilanz und das Kassenbuch gehen auseinander
+
+**Befund vom 05.09.2026, aus dem Messlauf nach 5.80.** Seit Bürger kein Geld mehr
+vernichten (5.78 und 5.80) **müssten** zwei unabhängige Rechnungen dieselbe Zahl nennen.
+Sie tun es nicht:
+
+|                            |      |
+| -------------------------- | ---: |
+| Weltbilanz: vernichtet     | 1336 |
+| Kassenbuch: „an niemanden" | 1790 |
+
+**Das Buch weist mehr Vernichtung aus, als die Bilanz findet — also entsteht irgendwo
+Geld.** Die Bilanz beruht auf einer Identität (alles in Bürgerhand plus Stadtkasse wächst
+nur durch Zuzug); wo sie hinter dem Buch zurückbleibt, ist Geld aus dem Nichts gekommen.
+
+**Eine Quelle ist im Code bestätigt: der Zehnt.** Bei der Ernte behält der Bauer seine Ware
+minus Zehnt, und die Stadt bekommt dafür **Münzen, die niemand gezahlt hat**:
+
+```ts
+// productionService.harvest — der Bauer verliert Ware, die Kasse gewinnt Geld
+const wert: number = zehnt * (getItemTemplate(rezept.outputItemId)?.basePrice ?? 0);
+await treasuryService.einnehmen(stadtId, wert, 'TITHE', t);
+```
+
+Dasselbe steht in `employmentService` für den Zehnt des Knechts. Das ist genau der Rest,
+den **Punkt 66** seit jeher offen führt („im Kern behoben, Zehnt und Raubgut offen") — nur
+war er bis heute unbeziffert. Im Lauf sind es **1032 Münzen**.
+
+**Und damit ist es noch nicht erklärt.** 1790 vernichtet minus 1032 geschaffen wären 758;
+gemessen sind 1336. **Rund 580 Münzen verschwinden an einer Stelle, die das Buch nicht
+sieht** — und da Bürger nichts mehr verbrennen dürften, ist unbekannt, wo. Kandidaten, die
+zu prüfen wären, ohne dass einer davon behauptet wird: der Erbfall (Rundung bei der
+Teilung), Charaktere, deren Geld beim Tod weder vererbt noch der Stadt zufällt, und der
+Kornspeicher.
+
+**Was daraus zu bauen ist**, ist zweierlei und gehört getrennt:
+
+- **Der Zehnt braucht einen Zahler.** Entweder nimmt die Stadt die **Ware** statt Münzen
+  (dann ist sie ein Kornspeicher und muss verkaufen), oder der Bauer zahlt den Gegenwert
+  aus seinem Beutel und behält die ganze Ernte. Das Zweite ist die kleinere Änderung und
+  passt zu 4.7b: Ein Zehnt ist eine Steuer, keine Naturalabgabe.
+- **Die Lücke von 580 gehört gesucht, bevor daran gedreht wird.** Sie ist der Beweis, dass
+  die Buchführung noch nicht vollständig ist — und dieselbe Regel wie immer: zuerst die
+  Aufschlüsselung, dann der Eingriff.
+
+**Warum das ein guter Befund ist, obwohl er nach einem Fehler aussieht:** Diese Abweichung
+war vorher **nicht sichtbar**, weil Bürger selbst so viel Geld vernichteten, dass alles
+darin unterging. Erst nachdem 5.78 und 5.80 diese Quelle geschlossen haben, tritt die
+Differenz hervor. Das Kassenbuch aus 5.77 und die alte Bilanz aus 5.72 messen dasselbe auf
+zwei Wegen — und genau dafür hält man zwei Wege.
 
 ## Der Weg durch die Wirtschaft — Stand 29.08.2026
 
@@ -3787,7 +3864,17 @@ im Messlauf vier von fünf Toten.
    Messlauf: Er ist der kleinste der drei offenen Posten, aber der letzte, an dem ein
    Bürger Geld ins Nichts zahlt.
 
-4. **Und erst dann wieder die Steuer** (Punkt 100). Sie funktioniert fiskalisch und tötet
+4. **Vor alledem aber zwei Befunde aus den Messläufen vom 05.09.2026**, die keinen Umbau
+   der Wirtschaft brauchen und beide dringender sind als der Kornspeicher:
+
+   - **Punkt 106** — der Bauauftrag, den niemand bezahlen kann. `WORK/EMPLOYER_BROKE` ist
+     über drei Schritte von 781 auf **5602** gewachsen und die größte Fehlerquelle der
+     Welt; im selben Lauf steigen die Hungertoten wieder. Die Behebung ist klein.
+   - **Punkt 108** — Bilanz und Kassenbuch gehen auseinander. Solange Geld an einer
+     unbekannten Stelle entsteht und an einer zweiten verschwindet, misst jeder folgende
+     Schritt auf wackligem Grund.
+
+5. **Und erst dann wieder die Steuer** (Punkt 100). Sie funktioniert fiskalisch und tötet
    heute Menschen; ob sie es nach 2 und 3 noch tut, ist eine andere Frage. Vorher daran zu
    drehen hieße, eine Zahl gegen ein Strukturproblem zu setzen.
 
