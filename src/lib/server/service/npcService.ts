@@ -625,7 +625,28 @@ async function lageAufnehmen(
 	const freiesBauland: boolean = (await plotService.getFreeBuildingLand(werte.RegionId)).length > 0;
 	const flaechen = await productionService.getAreas(npcId);
 	const eigenePacht = flaechen.find((flaeche) => flaeche.leasedByMe);
-	const freieFlaeche = flaechen.find((flaeche) => !flaeche.leased && flaeche.resourceType);
+	// **Die Fläche, die zum Betrieb passt — nicht die erste beste** (5.84, Punkt 103).
+	//
+	// Bis hierher nahm ein Pachtwilliger die **erste** freie Fläche mit einem Rohstoff, und
+	// das war die Sperre der ganzen Wirtschaft: Im Messlauf lagen dreimal Eichwald und
+	// Erzgrube unter Pacht, während das Mühlenfeld mit drei freien Flächen und der
+	// Steinbruch unberührt blieben. Ohne Stein keine Quader, ohne Quader **keine Werkstatt
+	// überhaupt** — `materialFor` verlangt für jeden Betrieb Bretter, Quader und Eisen. Ein
+	// Steinmetz pachtete einen Acker und stand weiter ohne Stein da; vier Bauern und zwei
+	// Bäcker warteten auf ein Feld, das frei danebenlag.
+	//
+	// Gesucht wird deshalb zuerst die Fläche, deren Ernte der eigene Betrieb **verarbeiten
+	// kann**; erst wenn es keine gibt, tut es die nächstbeste. Für einen ohne Werkstatt
+	// ändert sich nichts.
+	const gebraucht: string[] =
+		werkstatt !== undefined
+			? (buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? []).flatMap((rezept) =>
+					rezept.input.map((zutat) => zutat.itemId)
+				)
+			: [];
+	const freieFlaechen = flaechen.filter((flaeche) => !flaeche.leased && flaeche.resourceType);
+	const freieFlaeche =
+		freieFlaechen.find((flaeche) => gebraucht.includes(flaeche.resourceType!)) ?? freieFlaechen[0];
 	const zuVerkaufen = werkstatt ? await unverkauftes(npcId, werkstatt) : undefined;
 	const werkstattLuecke = werkstatt ? undefined : await fehlendeWerkstatt(haeuserDerStadt, npcId);
 

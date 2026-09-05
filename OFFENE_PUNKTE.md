@@ -57,7 +57,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote          | dem nächsten Schritt         | Befund       |
 | 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                    | Punkt 100                    | teilweise    |
 | 102 | Jeder Bau verbrennt seinen Preis — **der Bau behoben mit 5.76** (der Rohbau)          | Punkte 100, 66, 74           | teilweise    |
-| 103 | Die Wirtschaft hat eine Startreihenfolge, die niemand einhält — Quader und Eisen      | Punkte 85, 70, 15            | Befund       |
+| 103 | Startreihenfolge — **Mechanismus gefunden, behoben mit 5.84** (die Pachtwahl)         | Punkte 85, 70, 15            | teilweise    |
 | 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu  | —                            | erledigt     |
 | 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                   | Punkt 16                     | Befund       |
 | 106 | Ein Bauauftrag, den niemand bezahlen kann — **behoben mit 5.81**                      | —                            | erledigt     |
@@ -2411,6 +2411,23 @@ ein **begrenzter Vorrat**, der sich nur aus Ernten füllt (dann ist er ein Speic
 Backofen), oder ein **Preis über dem der Bäcker**, der ihn zur Notversorgung macht statt
 zur Konkurrenz. Beides gehört zu Punkt 15, wo über Waren und Ketten entschieden wird.
 
+**Nachgesehen am 05.09.2026, ehe daran gedreht wurde — und gut, dass vorher nachgesehen
+wurde:** Der Kornspeicher ist **nicht** die Sperre. Der Bäcker scheitert zwei Stufen
+davor, am Baumaterial: Ohne Quader und Eisen lässt sich **keine** Werkstatt errichten, und
+beides kam nie auf den Markt, weil niemand Stein oder Erz pachtete (Punkt 103, behoben mit
+5.84). In der Stadt konnten zwei Menschen backen; ein Backhaus hätte keiner von ihnen
+bauen können, ganz gleich, was Brot kostet.
+
+**Für diesen Punkt heißt das:** Die Reihenfolge, die er selbst vorgibt („erst, wenn Schritt
+1 einen Bäcker hervorbringen **kann** — vorher verhungert die Stadt wirklich"), war
+richtig, und die Vorbedingung war noch nicht erfüllt. Ob sie es nach 5.84 ist, sagt der
+nächste Messlauf: Entstehen Mühle und Backhaus, ist der Kornspeicher dran.
+
+**Und eine Zahl, die es vorher nicht gab:** Er ist mit 4920 von 11882 Münzen **über vierzig
+Prozent der Stadteinnahmen** (Kassenbuch, 5.83). Wer ihn verteuert, füllt nebenbei die
+Kasse; wer ihn abschafft, nimmt der Stadt ihr Einkommen. Das ist keine Balancing-Zahl mehr,
+sondern eine Entscheidung mit zwei Seiten.
+
 ### 86. Die städtische Schmiede sperrt die Eisenkette — behoben (5.65)
 
 **Befund vom 23.08.2026, aus dem Lesen des Codes und nicht aus einem Messlauf.** Er liegt
@@ -3589,6 +3606,36 @@ billigste:
 
 Der Test bleibt stehen, wie `ironChain.spec.ts`: Er beschreibt die Sperre und wird rot,
 sobald sie fällt.
+
+**Der Mechanismus ist am 05.09.2026 gefunden — und behoben mit 5.84.** Gesucht wurde er
+beim Kornspeicher (Punkt 85), der eigentlich der nächste Schritt sein sollte; die Sperre
+saß zwei Stufen davor.
+
+**Was der Messlauf zeigte:** Verpachtet waren Eichwald 1, Eichwald 2 und die Erzgrube.
+**Nie verpachtet: das Mühlenfeld mit drei freien Flächen und der Steinbruch.** Am Markt
+lagen Holz, Bretter und Erz — kein Getreide, kein Stein, kein Quader, kein Eisen. In der
+Stadt konnten vier Menschen ackern und zwei backen, und eine Steinmetzhütte stand.
+
+**Die Ursache war eine Zeile:**
+
+```ts
+const freieFlaeche = flaechen.find((f) => !f.leased && f.resourceType);
+```
+
+Die **erste** freie Fläche mit einem Rohstoff — gleich welchem. Ein Steinmetz pachtete
+einen Acker und stand weiter ohne Stein da. Und weil `materialFor` für **jeden** Betrieb
+Bretter, Quader **und** Eisen verlangt, hing daran die ganze Kette: ohne Stein keine
+Quader, ohne Quader keine Mühle und keine Bäckerei, ganz gleich wie viele backen können.
+
+**Warum die Welt trotzdem nicht ganz stillstand:** Wer die Kette selbst in Gang setzt,
+braucht kein Material (`producesBuildingMaterial` in `build()`) — Zimmerei, Steinmetzhütte
+und Schmiede lassen sich ohne Vorleistung errichten. Genau deshalb sind sie die einzigen
+Werkstätten, die je entstanden. Sie waren nicht das Ende der Kette, sondern ihr
+Bootstrap — und der Bootstrap lief leer, weil niemand den Rohstoff dafür pachtete.
+
+**Seit 5.84 sucht der Pachtwillige die Fläche, deren Ernte sein Betrieb verarbeiten kann**,
+und nimmt erst danach die nächstbeste. Wer keine Werkstatt hat, wählt wie bisher — für ihn
+ist jede Ernte gleich viel wert.
 
 ### 104. Die städtische Krücke besetzte den Beruf, statt ihn zu überbrücken — behoben (5.75)
 
