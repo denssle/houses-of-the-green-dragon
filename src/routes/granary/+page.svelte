@@ -20,7 +20,8 @@
 	<ul>
 		{#each data.offers as ware (ware.itemId)}
 			<li>
-				{ware.name} — {ware.basePrice} Münzen das Stück
+				{ware.name} — {ware.price} Münzen das Stück
+				<small>(Notpreis der Stadt; bei einem Bäcker kostet er {ware.basePrice})</small>
 				<small>({ware.description})</small>
 				<form method="POST" action="?/buy" use:enhance>
 					<input type="hidden" name="itemId" value={ware.itemId} />

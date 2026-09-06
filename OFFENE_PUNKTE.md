@@ -39,7 +39,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                             | —                            | erledigt     |
 | 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**             | —                            | erledigt     |
 | 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung          | dem nächsten Schritt         | Befund       |
-| 85  | Der Kornspeicher backt aus dem Nichts — und unterbietet jeden Bäcker                  | Punkt 15 / 70                | Befund       |
+| 85  | Der Kornspeicher backt aus dem Nichts — **verteuert mit 5.86**, Wirkung ungemessen    | dem nächsten Messlauf        | teilweise    |
 | 86  | Die städtische Schmiede sperrte die Eisenkette — **behoben mit 5.65**                 | —                            | erledigt     |
 | 87  | Ein Sparziel, das ins Leere führt — Bauland ohne Werkstatt darauf                     | dem nächsten Messlauf        | Befund       |
 | 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick             | laufend                      | Befund       |
@@ -2378,7 +2378,7 @@ Kind, sobald es das konnte. Denkbar ist ein **Mindestalter unterhalb der Volljä
 Das gehört zusammen mit Punkt 24 (NPC-Eltern und die Schule) entschieden: Ob ein Kind
 lernt oder arbeitet, ist dieselbe Frage von zwei Seiten — und ein Tag ist nur einmal da.
 
-### 85. Der Kornspeicher backt aus dem Nichts
+### 85. Der Kornspeicher backt aus dem Nichts — verteuert mit 5.86
 
 **Angemerkt am 22.08.2026:** „Eigentlich sollte der Kornspeicher wie auch die städtische
 Schmiede entfernt werden. Aber dann wäre das Dorf ohne Nahrungsversorgung." Beides stimmt,
@@ -2427,6 +2427,30 @@ nächste Messlauf: Entstehen Mühle und Backhaus, ist der Kornspeicher dran.
 Prozent der Stadteinnahmen** (Kassenbuch, 5.83). Wer ihn verteuert, füllt nebenbei die
 Kasse; wer ihn abschafft, nimmt der Stadt ihr Einkommen. Das ist keine Balancing-Zahl mehr,
 sondern eine Entscheidung mit zwei Seiten.
+
+**Gebaut mit 5.86 — der Aufschlag, nicht die Abschaffung.** Von den beiden Zwischenstufen
+oben ist die zweite gewählt: `GRANARY_MARKUP` = 1,5 in `economy.ts`, Brot kostet beim Amt
+6 statt 4 Münzen. Der Katalogpreis bleibt unangetastet, weil an ihm auch der Zehnt und der
+Verkaufspreis der NPCs hängen — der Aufschlag lebt allein im Kornspeicher.
+
+**Warum das reicht, um die Reihenfolge umzudrehen:** Ein NPC sucht bei `BUY_FOOD` ohnehin
+zuerst das billigste Angebot der Stadt und geht erst danach zum Amt (5.18), und er verkauft
+zum Grundpreis. Damit liegt jeder Bäcker ab jetzt sicher unter der Krücke, statt gegen
+einen Anbieter ohne Zutaten, Aktionspunkte und Standgeld anzutreten. Mitgezogen ist die
+Menge, die ein NPC sich leisten kann (`leisten`): Sie rechnete am Grundpreis und hätte
+sonst fünf Laibe bestellt, die das Geld nicht deckt.
+
+**Was der Messlauf zeigen muss**, sind drei Zahlen: ob überhaupt ein Backhaus entsteht
+(dann trug der Aufschlag), ob `GRANARY` in der Stadtkasse steigt (er sollte — dieselbe
+Menge zum anderthalbfachen Preis) und ob die Hungertoten zunehmen (Punkt 100 — dann ist
+1,5 zu viel). Die Hälfte obendrauf ist bewusst maßvoll gewählt: groß genug, dass ein Bäcker
+unterbietet, klein genug, dass sie einen Tagelöhner mit drei Münzen je Tick nicht vom Brot
+trennt.
+
+**Die Reihenfolge ist damit übersprungen, und das ist vermerkt:** Der Punkt sah den
+Aufschlag erst _nach_ dem Messlauf vor, der zeigt, ob 5.84 einen Bäcker hervorbringen kann.
+Gemacht wurde er davor, auf Wunsch — der folgende Lauf misst beides in einem und muss
+deshalb, wenn kein Backhaus entsteht, zwei Erklärungen auseinanderhalten statt einer.
 
 ### 86. Die städtische Schmiede sperrt die Eisenkette — behoben (5.65)
 

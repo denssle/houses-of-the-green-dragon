@@ -12,7 +12,7 @@ import { currentSatiety, eat, satietyLabel, wouldBeWasted } from '$lib/game/need
 import { inventoryCapacity, fitsInInventory } from '$lib/game/inventory.logic';
 import * as buildingService from '$lib/server/service/buildingService';
 import { getItemTemplate, type ItemTemplate } from '$lib/model/itemTemplate';
-import { canAfford } from '$lib/game/economy';
+import { canAfford, granaryPrice } from '$lib/game/economy';
 import { tonicRestores } from '$lib/game/attire.logic';
 import * as characterService from '$lib/server/service/characterService';
 import * as worldService from '$lib/server/service/worldService';
@@ -198,6 +198,11 @@ export async function eatItem(characterId: string, itemId: string): Promise<Need
  * Das Geld geht an die **Stadtkasse**, wie beim Erstverkauf von Bauland. Mit 4.6c
  * verkaufen Betriebe ihr eigenes Brot, und dann gehört diese Funktion überprüft —
  * vermerkt bei Punkt 14 der offenen Punkte.
+ *
+ * **Er nimmt seit Punkt 85 einen Aufschlag** (`granaryPrice`) und ist damit die teuerste
+ * Quelle der Stadt statt der billigsten. Eine Krücke, die unterbietet, wird nie
+ * überflüssig: Solange er zum Grundpreis verkaufte, lohnte kein Backhaus, und der Grund,
+ * ihn abzuschaffen, konnte gar nicht erst entstehen.
  */
 export async function buyFromGranary(
 	characterId: string,
@@ -216,7 +221,7 @@ export async function buyFromGranary(
 		const käufer = await characterService.loadForAction(characterId, tick, t);
 		if (!käufer) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
-		const kosten: number = vorlage.basePrice * quantity;
+		const kosten: number = granaryPrice(vorlage.basePrice) * quantity;
 		if (!canAfford(käufer.dataValues.money, kosten)) {
 			return { ok: false, reason: 'NOT_ENOUGH_MONEY' } as const;
 		}
@@ -232,9 +237,16 @@ export async function buyFromGranary(
 	});
 }
 
-/** Was der Kornspeicher führt — heute genau eine Ware. */
-export function granaryOffers(): ItemTemplate[] {
-	return [getItemTemplate('BREAD')!];
+/**
+ * Was der Kornspeicher führt — heute genau eine Ware.
+ *
+ * **Mit dem Preis, den er nimmt**, und nicht mit dem aus der Vorlage: Seit dem Aufschlag
+ * (Punkt 85) sind das zwei verschiedene Zahlen, und die Seite muss die nennen, die beim
+ * Klick auf „Kaufen" abgebucht wird.
+ */
+export function granaryOffers(): Array<ItemTemplate & { price: number }> {
+	const brot: ItemTemplate = getItemTemplate('BREAD')!;
+	return [{ ...brot, price: granaryPrice(brot.basePrice) }];
 }
 
 /** Der Ausschnitt eines Charakters, den die Sättigung braucht. */

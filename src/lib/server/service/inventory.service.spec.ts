@@ -13,6 +13,8 @@ import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as needService from '$lib/server/service/needService';
 import * as tradeService from '$lib/server/service/tradeService';
 import { CARRIED_CAPACITY } from '$lib/game/inventory.logic';
+import { granaryPrice } from '$lib/game/economy';
+import { getItemTemplate } from '$lib/model/itemTemplate';
 import { yearsToTicks } from '$lib/game/time';
 
 /**
@@ -149,8 +151,27 @@ describe('Das Inventar', () => {
 			// **Kein Geld für nichts.** Die Ware kommt zuerst, das Geld danach — sonst
 			// wäre die Transaktion mit einer Fehlermeldung festgeschrieben und der Käufer
 			// um seine Münzen ärmer.
-			expect((await Character.findByPk(jemand))!.dataValues.money).toBe(1000 - 20 * 4);
+			expect((await Character.findByPk(jemand))!.dataValues.money).toBe(
+				1000 - 20 * granaryPrice(getItemTemplate('BREAD')!.basePrice)
+			);
 			expect(await imInventar(jemand, 'BREAD')).toBe(20);
+		});
+
+		/**
+		 * **Punkt 85**: Der Kornspeicher ist die Notversorgung, nicht die Konkurrenz. Der
+		 * Aufschlag ist das Einzige, was einen Bäcker davor bewahrt, gegen einen Anbieter
+		 * ohne Zutaten, ohne Aktionspunkte und ohne Standgeld antreten zu müssen — deshalb
+		 * steht hier die Richtung des Vergleichs und nicht die Zahl.
+		 */
+		it('nimmt mehr als der Grundpreis, den ein Bäcker verlangt', async () => {
+			const grundpreis: number = getItemTemplate('BREAD')!.basePrice;
+			const jemand = await person(1000);
+
+			await needService.buyFromGranary(jemand, 'BREAD', 10);
+
+			const gezahlt: number = 1000 - (await Character.findByPk(jemand))!.dataValues.money;
+			expect(gezahlt).toBeGreaterThan(10 * grundpreis);
+			expect(needService.granaryOffers()[0].price).toBe(gezahlt / 10);
 		});
 
 		it('geht wieder, sobald ein Dach dazukommt', async () => {

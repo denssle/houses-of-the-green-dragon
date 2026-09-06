@@ -27,7 +27,7 @@ import {
 	upgradeMaterial,
 	residentsAt
 } from '$lib/game/building.logic';
-import { PLOT_PRICE, TAGELOHN } from '$lib/game/economy';
+import { PLOT_PRICE, TAGELOHN, granaryPrice } from '$lib/game/economy';
 import { LEASE_FEE } from '$lib/server/service/productionService';
 import {
 	AGE_OF_MAJORITY,
@@ -792,7 +792,10 @@ async function lageAufnehmen(
 	const partner = werte.spouseId ? undefined : await naechsterPartner(npc.dataValues, tick);
 
 	return {
-		leisten: Math.floor(werte.money / brot.basePrice),
+		// **Am Kornspeicherpreis gerechnet, nicht am Grundpreis** — denn dorthin führt
+		// diese Zahl. Seit dem Aufschlag (Punkt 85) sind das zwei verschiedene, und wer
+		// mit der kleineren rechnet, bestellt fünf Laibe und bekommt `NOT_ENOUGH_MONEY`.
+		leisten: Math.floor(werte.money / granaryPrice(brot.basePrice)),
 		money: werte.money,
 		regionId: werte.RegionId,
 		cheapestBread: await tradeService.cheapestOffer(werte.RegionId, 'BREAD', npcId),
