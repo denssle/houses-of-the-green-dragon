@@ -9,7 +9,9 @@ import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
 import {
 	decideCaretakerAction,
-	decideNpcAction,
+	decideNpcActionWithStage,
+	stateFlags,
+	type Stufe,
 	type IdleReason,
 	idleReason,
 	isUnattended,
@@ -233,10 +235,78 @@ export async function ausfuehren(
 	// Kein Charakter mehr da (tot, gelöscht) — kein Grund, das als Müßiggang zu deuten.
 	if (!lage) return { action: 'IDLE' };
 
-	const handlung: NpcAction = verwaltet
-		? decideCaretakerAction(lage.state)
-		: decideNpcAction(lage.state);
+	const { action: handlung, stage } = verwaltet
+		? { action: decideCaretakerAction(lage.state), stage: 'verwaltet' as const }
+		: decideNpcActionWithStage(lage.state);
 
+	const ergebnis: Ausgang = await handelnd(handlung, npcId, tick, lage, verwaltet);
+
+	// **Der Protokollant** (5.88, Punkt 111). Er steht hier und nicht in `actForNpcs`,
+	// weil hier alles beisammen ist: der Zustand, aus dem entschieden wurde, die Stufe,
+	// die geliefert hat, und was daraus geworden ist. Im Betrieb ist er nicht gesetzt und
+	// kostet dann einen `undefined`-Vergleich je NPC und Tick.
+	protokollant?.({
+		npcId,
+		tick,
+		name: lage.name,
+		action: ergebnis.action,
+		stage,
+		failure: ergebnis.failure,
+		idleReason: ergebnis.idleReason,
+		flags: stateFlags(lage.state),
+		money: lage.money
+	});
+
+	return ergebnis;
+}
+
+/**
+ * Wer bei jeder Entscheidung zusieht — und warum das keine Debug-Ausgabe ist.
+ *
+ * **Der Messlauf konnte bis 5.88 sagen, was geschah, aber nicht, warum es nicht geschah.**
+ * `byAction` zählt, was getan wurde, `byFailure`, woran ein Versuch scheiterte — aber die
+ * häufigste Handlung der Welt ist `IDLE`, und über sie sagte nur `idleReason` etwas, eine
+ * Diagnose, die die Hierarchie nachbildet und deshalb von ihr abweichen kann. Beim Mann,
+ * der mit vollen Aktionspunkten verhungerte, hat das drei Erklärungsversuche gekostet und
+ * keine Antwort gebracht.
+ *
+ * Deshalb meldet der Protokollant **Tatsachen statt Deutungen**: die Stufe, die
+ * entschieden hat, und die rohen Schalter des Zustands. Wer ihn setzt, ist der Messlauf;
+ * im Betrieb bleibt er leer, denn ein Protokoll über jeden NPC und jeden Tick wäre dort
+ * eine Datei, die niemand liest, und eine Zeile Arbeit, die niemand braucht.
+ */
+export interface Protokolleintrag {
+	npcId: string;
+	tick: number;
+	name: string;
+	action: NpcAction;
+	stage: Stufe | 'verwaltet';
+	failure?: string;
+	idleReason?: IdleReason;
+	flags: string[];
+	money: number;
+}
+
+let protokollant: ((eintrag: Protokolleintrag) => void) | undefined;
+
+/** Zusehen lassen — ohne Argument aufgerufen, hört das Zusehen wieder auf. */
+export function protokollieren(beobachter?: (eintrag: Protokolleintrag) => void): void {
+	protokollant = beobachter;
+}
+
+/**
+ * Die gewählte Handlung ausführen.
+ *
+ * **Aus `ausfuehren` herausgelöst** (5.88), damit der Protokollant ein Ergebnis vor sich
+ * hat statt zwanzig `return`s. Der Inhalt ist unverändert.
+ */
+async function handelnd(
+	handlung: NpcAction,
+	npcId: string,
+	tick: number,
+	lage: NonNullable<Awaited<ReturnType<typeof lageAufnehmen>>>,
+	verwaltet: boolean
+): Promise<Ausgang> {
 	/**
 	 * Was ein Dienst zurückgab, als Fehlschlag gebucht.
 	 *
@@ -556,6 +626,8 @@ async function lageAufnehmen(
 			jobId?: string;
 			leisten: number;
 			money: number;
+			/** Nur fürs Protokoll (5.88) — die Entscheidung kennt keine Namen. */
+			name: string;
 			regionId: string;
 			cheapestBread?: { id: string; quantity: number; pricePerUnit: number };
 			cheapestGarment?: { id: string; quantity: number; pricePerUnit: number };
@@ -800,6 +872,9 @@ async function lageAufnehmen(
 		// diese Zahl. Seit dem Aufschlag (Punkt 85) sind das zwei verschiedene, und wer
 		// mit der kleineren rechnet, bestellt fünf Laibe und bekommt `NOT_ENOUGH_MONEY`.
 		leisten: Math.floor(werte.money / granaryPrice(brot.basePrice)),
+		// **Nur fürs Protokoll** (5.88): Eine Kennung sagt beim Lesen nichts, ein Name
+		// schon — und die Entscheidung selbst rührt ihn nicht an.
+		name: werte.firstName,
 		money: werte.money,
 		regionId: werte.RegionId,
 		cheapestBread: await tradeService.cheapestOffer(werte.RegionId, 'BREAD', npcId),

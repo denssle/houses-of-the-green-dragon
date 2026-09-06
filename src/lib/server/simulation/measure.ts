@@ -21,6 +21,7 @@ import {
 	kassenbuchLeeren
 } from '$lib/server/service/treasuryService';
 import { tickWorld } from '$lib/server/worldTick';
+import { protokollieren } from '$lib/server/service/npcService';
 
 /**
  * Eine Welt laufen lassen und aufschreiben, was passiert.
@@ -60,6 +61,28 @@ export interface MeasureOptions {
 	 * beantwortet kein fester Startwert. Wer vergleichen will, setzt einen.
 	 */
 	saat?: number;
+	/**
+	 * Wessen Leben Tick für Tick mitgeschrieben wird — ein Vorname.
+	 *
+	 * **Für die Frage, die ein Aggregat nie beantwortet** (5.88): warum *dieser* Mensch
+	 * nichts tut. Sie kam am 06.09.2026 auf, als einer mit vollen Aktionspunkten und fünf
+	 * Münzen verhungerte; drei Anläufe, sie aus dem Code zu beantworten, brachten drei
+	 * Vermutungen und eine falsche darunter.
+	 *
+	 * Ohne Namen wird nichts mitgeschrieben. Der erste Lebende, der so heißt, wird
+	 * verfolgt; stirbt er, endet das Protokoll mit ihm.
+	 */
+	verfolge?: string;
+	/**
+	 * Was jeder beim Start in die Hand bekommt — testweise, um eine Sperre auszuschließen.
+	 *
+	 * **Kein Weltinhalt, sondern ein Werkzeug:** Wenn niemand pachtet und niemand baut,
+	 * ist die erste Frage, ob es am Geld liegt. Sie lässt sich beantworten, indem man
+	 * genug davon verteilt und nachsieht, ob es dann läuft — ohne die Startbedingungen der
+	 * Welt (Punkt 14) anzurühren. Zuzügler bekommen denselben Betrag, sonst misst der Lauf
+	 * ab dem zwanzigsten Tick wieder die alte Welt.
+	 */
+	startgeld?: number;
 }
 
 export interface Measurement {
@@ -88,16 +111,22 @@ async function geldmenge(): Promise<number> {
 async function bilanzzeilen(
 	stadtId: string,
 	vorher: number,
-	bilanz: { zuzug: number }
+	bilanz: { zuzug: number; geschenkt: number }
 ): Promise<string[]> {
 	const buerger: number = await geldmenge();
 	const kasse: number = await stadtkasse(stadtId);
 	const nachher: number = buerger + kasse;
-	const vernichtet: number = bilanz.zuzug - (nachher - vorher);
+	// **Auch geschenktes Geld kommt von außen** (5.88). Das Startgeld eines Messlaufs ist
+	// kein Fund in der Welt; stünde es nicht hier, meldete die Bilanz jedes Mal, es sei
+	// Geld aus dem Nichts entstanden — und die eine Zahl, für die es diesen Abschnitt
+	// gibt, wäre falsch.
+	const vonAussen: number = bilanz.zuzug + bilanz.geschenkt;
+	const vernichtet: number = vonAussen - (nachher - vorher);
 
 	return [
 		`  Bestand am Anfang ${vorher}, am Ende ${nachher} (Bürger ${buerger}, Kasse ${kasse})`,
-		`  Von außen zugeflossen (Zuzug) ${bilanz.zuzug}`,
+		`  Von außen zugeflossen (Zuzug) ${bilanz.zuzug}` +
+			(bilanz.geschenkt > 0 ? `, dazu Startgeld an Zugezogene ${bilanz.geschenkt}` : ''),
 		`  **Vernichtet ${vernichtet}** — Geld, das die Kasse verließ, ohne dass jemand es bekam`
 	];
 }
@@ -154,7 +183,7 @@ function verteilung(zaehlung: Record<string, number>): string[] {
 }
 
 export async function measure(options: MeasureOptions): Promise<Measurement> {
-	const { ticks, every = 250, seed = true, saat } = options;
+	const { ticks, every = 250, seed = true, saat, verfolge, startgeld } = options;
 	const zeilen: string[] = [];
 
 	const wuerfel: () => number = saat === undefined ? Math.random : seededRoll(saat);
@@ -193,13 +222,65 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	 * Teil, den die Stadt selbst verbrennt, ist die Zeile „an niemanden" im Buch — und
 	 * die Differenz zwischen beiden ist genau das, was Punkt 102 noch offen hat.
 	 */
-	const bilanz = { zuzug: 0 };
+	const bilanz = { zuzug: 0, geschenkt: 0 };
+
+	/**
+	 * **Aus welcher Stufe die Handlungen kamen** (5.88, Punkt 111). Nicht gedeutet,
+	 * sondern von der Entscheidung selbst gemeldet: `decideNpcActionWithStage` ruft
+	 * dieselben fünf Funktionen wie `decideNpcAction`.
+	 */
+	const stufen: Record<string, number> = {};
+	/**
+	 * **Was der Müßiggang für Leute betrifft.** Die rohen Schalter, zu Mustern gezählt —
+	 * die Aufschlüsselung, nach der Punkt 93 verlangt: `CONTENT: 30206` sagt nichts,
+	 * `werkstatt ohne kann_herstellen ohne pacht: 4000` sagt alles.
+	 */
+	const muessiggangNach: Record<string, number> = {};
+	/** Das Leben eines Einzelnen, Tick für Tick — nur, wenn ein Name genannt wurde. */
+	const verfolgt: string[] = [];
+	let verfolgterId: string | undefined;
+
+	protokollieren((eintrag) => {
+		stufen[`${eintrag.stage} → ${eintrag.action}`] =
+			(stufen[`${eintrag.stage} → ${eintrag.action}`] ?? 0) + 1;
+
+		if (eintrag.action === 'IDLE' && !eintrag.flags.includes('kind')) {
+			const muster: string = eintrag.flags.join(' ') || '(nichts)';
+			muessiggangNach[muster] = (muessiggangNach[muster] ?? 0) + 1;
+		}
+
+		if (verfolge === undefined) return;
+		// **Der erste, der so heißt, und dann nur noch der.** Namen sind in dieser Welt
+		// nicht eindeutig (im Messlauf standen zwei Odilias nebeneinander); wer verfolgt
+		// wird, entscheidet sich beim ersten Treffer und bleibt dabei.
+		if (verfolgterId === undefined && eintrag.name === verfolge) verfolgterId = eintrag.npcId;
+		if (eintrag.npcId !== verfolgterId) return;
+		verfolgt.push(
+			`  ${eintrag.tick}: ${eintrag.action}` +
+				`${eintrag.failure ? ` ✗ ${eintrag.failure}` : ''}` +
+				`${eintrag.idleReason ? ` (${eintrag.idleReason})` : ''}` +
+				` [${eintrag.stage}] ${eintrag.money} Münzen — ${eintrag.flags.join(' ')}`
+		);
+	});
 
 	// **Das Kassenbuch fängt bei null an** (5.77). Es zählt im Speicher mit, seit der
 	// Prozess läuft — und der hat vor diesem Lauf schon die Welt aufgebaut, in der die
 	// Gründer ihre Grundstücke bekommen haben. Ohne das Leeren stünde deren Kaufpreis im
 	// Buch, und der Bericht spräche über eine andere Zeitspanne als die gemessene.
 	kassenbuchLeeren();
+
+	// **Das Startgeld, wenn eines verlangt ist** (5.88). Es geht an die Lebenden und
+	// später an jeden Ankömmling; die Bilanz bekommt es als Zufluss von außen zu sehen,
+	// sonst behauptete der Bericht, in dieser Welt entstehe Geld aus dem Nichts.
+	let ausgestattet = 0;
+	if (startgeld !== undefined) {
+		const lebende = await Character.findAll({ where: { deathTick: null } });
+		for (const person of lebende) {
+			const dazu: number = Math.max(0, startgeld - person.dataValues.money);
+			ausgestattet += dazu;
+			await person.update({ money: person.dataValues.money + dazu });
+		}
+	}
 
 	const start: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
 	const begonnen: number = Date.now();
@@ -231,6 +312,16 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		if (stunde.arrival) {
 			chronik.zuzug++;
 			bilanz.zuzug += stunde.arrival.money;
+			if (startgeld !== undefined) {
+				// Derselbe Betrag für den Zugezogenen — sonst wäre die Frage nach zwanzig
+				// Ticks wieder die alte, nur mit einer reicheren Gründergeneration.
+				const angekommen = await Character.findByPk(stunde.arrival.characterId);
+				if (angekommen) {
+					const dazu: number = Math.max(0, startgeld - angekommen.dataValues.money);
+					bilanz.geschenkt += dazu;
+					await angekommen.update({ money: angekommen.dataValues.money + dazu });
+				}
+			}
 		}
 		// **Sold, Steuer und Amtsausgaben zählt seit 5.77 das Kassenbuch** — und zwar
 		// vollständig: Was hier stand, war beim Bauen und Erschließen ausdrücklich nur eine
@@ -270,6 +361,10 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		}
 	}
 
+	// **Zusehen beenden.** Der Haken ist ein Modulzustand; bliebe er stehen, schriebe der
+	// nächste Lauf in dieselben Behälter — und im Test wäre er ein Leck.
+	protokollieren();
+
 	zeilen.push(
 		'',
 		`=== DIE STADT (${ticks} Ticks, ${Date.now() - begonnen} ms, ` +
@@ -277,6 +372,13 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		`  Geburten ${chronik.geburten}, Tode ${chronik.tode}` +
 			`${todeNach(todesursachen)}, Zuzug ${chronik.zuzug}, Brände ${chronik.braende}`,
 		`  Grundsteuer eingenommen ${chronik.steuer}, nicht eintreibbar ${chronik.ausgefallen}`,
+		'',
+		...(startgeld === undefined
+			? []
+			: [
+					`  Startgeld ${startgeld} je Kopf — ${ausgestattet} an die Anwesenden, ` +
+						`${bilanz.geschenkt} an Zugezogene (ein Werkzeug, kein Weltinhalt)`
+				]),
 		'',
 		'=== DIE KASSE ===',
 		...(await bilanzzeilen(stadtId, bestandVorher, bilanz)),
@@ -304,8 +406,21 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	zeilen.push(`  Zur Ruine verfallen ${Object.values(ruinen).reduce((a, b) => a + b, 0)}, davon:`);
 	zeilen.push(...verteilung(ruinen).map((zeile) => `  ${zeile}`));
 
+	zeilen.push('', '=== AUS WELCHER STUFE ===');
+	// **Die Bedürfnishierarchie in Zahlen** (5.88): Wo eine Handlung herkam, sagt mehr
+	// über die Lage der Stadt als die Handlung selbst. `ueberleben → WORK` ist eine Stadt,
+	// die um ihr Brot arbeitet; `entfaltung → WORK` eine, die spart.
+	zeilen.push(...verteilung(stufen));
+
 	zeilen.push('', '=== WARUM MÜSSIGGANG ===');
 	zeilen.push(...verteilung(muessiggang as Record<string, number>));
+
+	zeilen.push('', '=== UND WEN ES BETRIFFT ===');
+	// **Die Aufschlüsselung, nicht die Diagnose** (Punkt 93). Rohe Schalter, gezählt: Wer
+	// hier `werkstatt` ohne `kann_herstellen` und ohne `pacht` liest, weiß, dass Betriebe
+	// ohne Rohstoff dastehen — und braucht dafür niemandes Deutung. Die zwölf häufigsten
+	// Muster; der Schwanz ist lang und sagt wenig.
+	zeilen.push(...verteilung(muessiggangNach).slice(0, 12));
 
 	// Gewählt heißt nicht gelungen: Hier steht, was in Wahrheit scheiterte.
 	zeilen.push('', '=== WORAN ES SCHEITERTE ===');
@@ -328,6 +443,13 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		zeilen.push(
 			`  ${haus?.dataValues.name}: ${zeile.dataValues.itemId} x${zeile.dataValues.quantity}`
 		);
+	}
+
+	if (verfolgt.length > 0) {
+		zeilen.push('', `=== ${verfolge?.toUpperCase()}, TICK FÜR TICK ===`);
+		zeilen.push(...verfolgt);
+	} else if (verfolge !== undefined) {
+		zeilen.push('', `=== ${verfolge.toUpperCase()} ===`, '  Niemand dieses Namens hat gelebt.');
 	}
 
 	zeilen.push('', '=== LEUTE ===');

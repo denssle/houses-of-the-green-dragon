@@ -343,14 +343,71 @@ export function eatingThreshold(personality: Personality): number {
  * nur später darum.
  */
 export function decideNpcAction(state: NpcState): NpcAction {
-	return (
-		ueberleben(state) ??
-		sicherheit(state) ??
-		zugehoerigkeit(state) ??
-		ansehen(state) ??
-		entfaltung(state) ??
-		'IDLE'
-	);
+	return decideNpcActionWithStage(state).action;
+}
+
+/** Die fünf Stufen in ihrer Reihenfolge — die Hierarchie als Liste, nicht als Kette. */
+const STUFEN = [
+	['ueberleben', ueberleben],
+	['sicherheit', sicherheit],
+	['zugehoerigkeit', zugehoerigkeit],
+	['ansehen', ansehen],
+	['entfaltung', entfaltung]
+] as const;
+
+export type Stufe = (typeof STUFEN)[number][0] | 'keine';
+
+/**
+ * Dieselbe Entscheidung, und dazu **aus welcher Stufe sie kam**.
+ *
+ * **Warum das nicht die Diagnose aus `idleReason` ist** (5.88): Die bildet die Hierarchie
+ * nach und kann von ihr abweichen — der Kommentar dort warnt ausdrücklich davor, und
+ * genau das ist auch passiert. Hier wird nichts nachgebildet: Es sind dieselben fünf
+ * Funktionen in derselben Reihenfolge, nur mit einem Namen daneben. Eine Auskunft, die
+ * falsch sein kann, ist keine.
+ *
+ * `keine` heißt: Keine Stufe wollte etwas — das ist `IDLE`, und **erst dann** lohnt die
+ * Frage nach dem Warum.
+ */
+export function decideNpcActionWithStage(state: NpcState): { action: NpcAction; stage: Stufe } {
+	for (const [name, stufe] of STUFEN) {
+		const handlung: NpcAction | undefined = stufe(state);
+		if (handlung) return { action: handlung, stage: name };
+	}
+	return { action: 'IDLE', stage: 'keine' };
+}
+
+/**
+ * Die Schalter, an denen eine Entscheidung hängt — roh gezählt, nicht gedeutet.
+ *
+ * **Das Gegenstück zu `idleReason`** (5.88): Sie nennt einen Grund und kann sich irren;
+ * das hier sind Tatsachen aus dem Zustand, aus denen der Leser selbst schließt. Wenn im
+ * Bericht steht, dass 4000 Müßiggangsrunden auf Leute entfielen, die eine Werkstatt
+ * ohne Zutat und ohne Pacht haben, ist das keine Diagnose — es ist die Aufschlüsselung,
+ * nach der Punkt 93 verlangt.
+ *
+ * Kurze Namen mit Absicht: Sie stehen zu Dutzenden nebeneinander in einer Textzeile.
+ */
+export function stateFlags(state: NpcState): string[] {
+	const flags: string[] = [];
+	if (!state.isAdult) flags.push('kind');
+	if (state.actionPoints <= 0) flags.push('erschöpft');
+	if (state.satiety < eatingThreshold(state.personality)) flags.push('hungrig');
+	if (state.food > 0) flags.push('hat_brot');
+	if (state.money < state.foodPrice) flags.push('kein_brotgeld');
+	if (state.hasJob) flags.push('angestellt');
+	if (state.workAvailable) flags.push('arbeit_da');
+	if (state.ownsWorkshop) flags.push('werkstatt');
+	if (state.canCraft) flags.push('kann_herstellen');
+	if (state.hasLease) flags.push('pacht');
+	if (state.leaseAvailable) flags.push('pacht_frei');
+	if (state.ownStockToSell > 0) flags.push('ware_da');
+	if (state.hasFreePlot) flags.push('bauplatz');
+	if (state.ownsHome) flags.push('eigenes_dach');
+	if (isEnterprising(state.personality)) flags.push('unternehmend');
+	if (state.money >= desiredReserve(state.personality, state.foodPrice))
+		flags.push('über_rücklage');
+	return flags;
 }
 
 /**

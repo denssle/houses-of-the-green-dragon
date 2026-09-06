@@ -31,12 +31,24 @@ const ticks: number = Number(process.env.MEASURE_TICKS ?? 0);
 const every: number = Number(process.env.MEASURE_EVERY ?? 250);
 const saat: number | undefined =
 	process.env.MEASURE_SEED === undefined ? undefined : Number(process.env.MEASURE_SEED);
+/**
+ * **`MEASURE_TRACE=Reimar`** schreibt das Leben eines Einzelnen Tick für Tick mit (5.88):
+ * gewählte Handlung, Stufe, Fehlschlag und die rohen Schalter seines Zustands. Für die
+ * Frage, die kein Aggregat beantwortet — warum tut *der* nichts.
+ *
+ * **`MEASURE_MONEY=400`** gibt jedem so viel in die Hand, auch jedem Zugezogenen. Ein
+ * Werkzeug, um eine Sperre auszuschließen: Wenn niemand pachtet und niemand baut, ist die
+ * erste Frage, ob es am Geld liegt.
+ */
+const verfolge: string | undefined = process.env.MEASURE_TRACE;
+const startgeld: number | undefined =
+	process.env.MEASURE_MONEY === undefined ? undefined : Number(process.env.MEASURE_MONEY);
 
 describe('Messlauf', () => {
 	it.runIf(ticks > 0)(
 		`läuft ${ticks} Ticks und schreibt den Bericht`,
 		async () => {
-			const bericht = await measure({ ticks, every, saat });
+			const bericht = await measure({ ticks, every, saat, verfolge, startgeld });
 			const text: string = bericht.lines.join('\n');
 
 			writeFileSync('messung.txt', text, 'utf8');

@@ -65,6 +65,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 108 | Bilanz und Kassenbuch gehen auseinander — **erledigt mit 5.83**, die Bilanz geht auf  | —                            | erledigt     |
 | 109 | Der Zehnt trifft nur die erste Stufe jeder Kette — Verarbeitung ist steuerfrei        | Punkte 15, 46                | Entscheidung |
 | 110 | Die Werkstattwahl schickt jeden in dieselbe Sackgasse — **behoben mit 5.87**          | —                            | erledigt     |
+| 111 | Warum einer nichts tut, stand nirgends — **Werkzeug gebaut mit 5.88**                 | —                            | erledigt     |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                   | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                           | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -4157,6 +4158,52 @@ Bäckerin, die dreißig Ticks lang stillstand, baut — nicht ihre Mühle, sonde
 **Zimmerei**, die es in ihrer leeren Stadt noch nicht gab. `GOAL_UNREACHABLE` ist bei ihr
 auf null gefallen. Ob daraus in einer bewohnten Stadt eine Steinmetzhütte, Quader und
 irgendwann ein Backhaus werden, sagt der nächste Messlauf.
+
+### 111. Warum einer nichts tut, stand nirgends — Werkzeug gebaut (5.88)
+
+**Der Anlass, am 06.09.2026:** Ein Mann verhungerte im Selbsterhaltungstest mit fünf
+Münzen in der Tasche und **48 von 48 Aktionspunkten**. Die Frage, warum er weder erntete
+noch arbeitete, wurde dreimal aus dem Code beantwortet, und die erste Antwort war falsch
+(`hatEigeneArbeit` sperrt den Tagelohn — im Hungerfall aber gerade nicht, `ueberleben`
+fragt nicht danach). Das ist kein Zufall, sondern eine Lücke im Werkzeug.
+
+**Was der Bericht bis dahin konnte:** `byAction` sagt, was getan wurde. `byFailure` sagt,
+woran ein Versuch scheiterte. Für die häufigste Handlung der Welt — `IDLE`, in einem Lauf
+über 2000 Ticks 42586 von 64000 Runden — gab es nur `idleReason`, und die **bildet die
+Hierarchie nach**. Der Kommentar dort warnt seit jeher: „Eine Diagnose, die von der
+Entscheidung abweicht, ist schlimmer als keine, weil man ihr glaubt." Genau das ist
+eingetreten: `CONTENT: 30206` beschrieb eine zufriedene Stadt, in der Leute verhungerten.
+
+**Gebaut mit 5.88 — drei Auskünfte, und keine davon eine Deutung:**
+
+- **Aus welcher Stufe.** `decideNpcActionWithStage` ruft dieselben fünf Stufenfunktionen
+  in derselben Reihenfolge wie `decideNpcAction` und gibt den Namen der Stufe mit zurück,
+  die geliefert hat. Nichts wird nachgebildet, also kann nichts abweichen. Im Bericht
+  steht dann `ueberleben → WORK` neben `entfaltung → WORK`: eine Stadt, die um ihr Brot
+  arbeitet, neben einer, die spart.
+- **Und wen es betrifft.** Für jede Müßiggangsrunde die **rohen Schalter** des Zustands —
+  `hungrig`, `arbeit_da`, `werkstatt`, `kann_herstellen`, `pacht`, `über_rücklage` und ein
+  Dutzend mehr —, zu Mustern gezählt. Keine Diagnose, sondern die Aufschlüsselung, nach
+  der Punkt 93 seit jeher verlangt.
+- **Ein Leben Tick für Tick.** `MEASURE_TRACE=Reimar` schreibt für einen Einzelnen jede
+  Entscheidung mit: Handlung, Stufe, Fehlschlag, Schalter, Geld. Das ist die Auskunft, die
+  kein Aggregat gibt — warum tut _der_ nichts.
+
+Dazu `MEASURE_MONEY=400`: jedem Lebenden und jedem Zugezogenen so viel in die Hand, um
+die Frage „liegt es am Geld" durch Ausschluss zu beantworten. Ein Werkzeug, kein
+Weltinhalt — die Startbedingungen sind Punkt 14, und das geschenkte Geld steht in der
+Bilanz als Zufluss von außen, sonst behauptete sie, in dieser Welt entstehe Geld aus dem
+Nichts.
+
+**Der Protokollant sitzt in `ausfuehren`**, wo Zustand, Stufe und Ergebnis beisammen
+liegen, und ist im Betrieb nicht gesetzt: Ein Protokoll über jeden NPC und jeden Tick wäre
+dort eine Datei, die niemand liest.
+
+**Was damit offen bleibt und jetzt beantwortbar ist:** Warum Reimar nicht erntete. Drei
+Kandidaten stehen im Raum — keine laufende Pacht (ein Hof im Besitz ist kein Vertrag),
+keine Zutat für seine Alchemistenküche, und kein Geld über der Rücklage, um das eine oder
+andere zu beschaffen; der Notausgang Tagelohn steht nur offen, wenn die Stadt gerade
+Arbeit hat (`workAvailable`). Welcher es war, sagt jetzt ein Lauf mit seinem Namen.
 
 ## Der Weg durch die Wirtschaft — Stand 29.08.2026
 
