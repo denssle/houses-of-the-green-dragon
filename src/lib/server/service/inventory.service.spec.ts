@@ -158,20 +158,23 @@ describe('Das Inventar', () => {
 		});
 
 		/**
-		 * **Punkt 85**: Der Kornspeicher ist die Notversorgung, nicht die Konkurrenz. Der
-		 * Aufschlag ist das Einzige, was einen Bäcker davor bewahrt, gegen einen Anbieter
-		 * ohne Zutaten, ohne Aktionspunkte und ohne Standgeld antreten zu müssen — deshalb
-		 * steht hier die Richtung des Vergleichs und nicht die Zahl.
+		 * **Punkt 85**: Der Kornspeicher soll die Notversorgung sein und nicht die
+		 * Konkurrenz — dafür gibt es `GRANARY_MARKUP`. Er steht seit 5.87 auf 1, weil der
+		 * Aufschlag verfrüht war; was hier geprüft wird, ist deshalb nicht seine Höhe,
+		 * sondern **dass abgerechnet wird, was auf dem Schild steht**. Genau daran hing
+		 * beim ersten Anlauf ein Fehler: Die Seite nannte den Katalogpreis und das Amt
+		 * buchte einen anderen.
 		 */
-		it('nimmt mehr als der Grundpreis, den ein Bäcker verlangt', async () => {
-			const grundpreis: number = getItemTemplate('BREAD')!.basePrice;
+		it('verlangt genau den Preis, den er aushängt', async () => {
 			const jemand = await person(1000);
 
 			await needService.buyFromGranary(jemand, 'BREAD', 10);
 
 			const gezahlt: number = 1000 - (await Character.findByPk(jemand))!.dataValues.money;
-			expect(gezahlt).toBeGreaterThan(10 * grundpreis);
-			expect(needService.granaryOffers()[0].price).toBe(gezahlt / 10);
+			expect(gezahlt).toBe(10 * needService.granaryOffers()[0].price);
+			expect(needService.granaryOffers()[0].price).toBe(
+				granaryPrice(getItemTemplate('BREAD')!.basePrice)
+			);
 		});
 
 		it('geht wieder, sobald ein Dach dazukommt', async () => {

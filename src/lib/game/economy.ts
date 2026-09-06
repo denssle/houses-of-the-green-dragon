@@ -50,11 +50,21 @@ export function canAfford(money: number, price: number): boolean {
  * **Die Zahl hat zwei Seiten**, und das ist der Grund, dass sie hier steht und nicht in
  * der Vorlage: Der Kornspeicher ist über vierzig Prozent der Stadteinnahmen. Wer ihn
  * verteuert, füllt nebenbei die Kasse — und verteuert das Brot der Ärmsten, also genau
- * derer, die in Punkt 100 verhungern. Die Hälfte obendrauf ist deshalb bewusst maßvoll:
- * Brot kostet 6 statt 4, ein voller Magen also anderthalb statt einer Münze je zweieinhalb
- * Laibe.
+ * derer, die in Punkt 100 verhungern.
+ *
+ * **Sie steht auf 1, und das ist eine Messung und keine Vorsicht** (5.87). Mit 1,5 —
+ * Brot zu 6 statt 4 — brachte er der Kasse 54 Prozent mehr für dieselbe Menge Brot
+ * (`GRANARY` 7254 gegen 4712 über 2000 Ticks), und er kostete 338 Käufe, die am Geld
+ * scheiterten, gegen vorher keinen einzigen. Ein Backhaus entstand trotzdem nicht: Die
+ * Sperre lag woanders (Punkt 110). Im Selbsterhaltungstest verhungerte daraufhin ein
+ * Mann mit fünf Münzen an einem Brot zu sechs.
+ *
+ * **Der Aufschlag ist damit richtig und verfrüht.** Er gehört gezogen, sobald die
+ * Brotkette trägt — dann schützt er einen Bäcker vor einer Krücke, die zum
+ * Selbstkostenpreis von null anbietet. Solange es keinen gibt, verteuert er nur das Brot
+ * der Ärmsten. Was er bewirkt, ist gemessen; wann er wiederkommt, sagt Punkt 85.
  */
-export const GRANARY_MARKUP = 1.5;
+export const GRANARY_MARKUP = 1;
 
 /**
  * Was ein Stück beim Kornspeicher kostet.

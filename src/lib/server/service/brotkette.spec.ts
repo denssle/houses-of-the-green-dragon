@@ -6,6 +6,7 @@ import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Inventory } from '$lib/db/model/inventory';
 import { Plot } from '$lib/db/model/plot';
+import { ShopOffer } from '$lib/db/model/shop';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
@@ -36,6 +37,8 @@ import * as skillService from '$lib/server/service/skillService';
  */
 
 const JETZT = 10_000;
+const MARKTPLATZ = 6;
+const ZIMMEREI = 9;
 const MUEHLE = 4;
 const BAECKEREI = 5;
 
@@ -110,26 +113,38 @@ describe('Die Brotkette', () => {
 			gruende = await ticken(30);
 		}, 300_000);
 
-		it('baut sie trotzdem nichts', async () => {
-			// Dreißig Ticks, achthundert Münzen, ein leeres Grundstück — und kein Stein wird
-			// aufeinandergesetzt.
-			expect(await Building.count({ where: { ownerType: 'CHARACTER' } })).toBe(0);
+		/**
+		 * **Bis 5.87 stand hier `toBe(0)`**: Dreißig Ticks, achthundert Münzen, ein leeres
+		 * Grundstück — und kein Stein wurde aufeinandergesetzt. Seit die Wahl das
+		 * Unbeschaffbare hintanstellt (Punkt 110), baut sie.
+		 */
+		it('baut sie die Zimmerei — die Grundlage, nicht ihr Handwerk', async () => {
+			const werkstatt = await Building.findOne({
+				where: { ownerType: 'CHARACTER', OwnerCharacterId: baeckerinId, optionId: ZIMMEREI }
+			});
+
+			// **Nicht die Mühle**, obwohl sie mahlen kann und beides bezahlen könnte: Die
+			// Mühle braucht Quader, die es nirgends gibt. Also nimmt sie, was ohne
+			// auskommt — und die Zimmerei ist davon die billigste. Bretter sind die erste
+			// Stufe jeder Kette; wer sie sägt, wird gebraucht.
+			expect(werkstatt).not.toBeNull();
 		});
 
-		it('und gibt keine einzige Münze aus', async () => {
-			expect((await Character.findByPk(baeckerinId))!.dataValues.money).toBe(800);
+		it('und gibt dafür Geld aus', async () => {
+			expect((await Character.findByPk(baeckerinId))!.dataValues.money).toBeLessThan(800);
 		});
 
-		it('sondern steht still, mit einem Vorhaben, das keinen Preis hat', async () => {
-			// **`GOAL_UNREACHABLE` — und hier ist zu sehen, was das wirklich heißt.** Sie hat
-			// etwas vor (Werkstatt, sie ist unternehmend, sie hat keine), aber
-			// `savingsTarget` ergibt `null`: Es fehlt ihr das Werkstattmaterial, und
-			// `workshopMaterialPrice` ist `null`, weil es in dieser Welt niemand anbietet.
+		it('und steht nicht mehr vor einem Vorhaben ohne Preis', async () => {
+			// **Hier stand `toBeGreaterThan(25)`, und das war der Befund.** Sie hatte etwas
+			// vor (Werkstatt, sie ist unternehmend, sie hat keine), aber `savingsTarget`
+			// ergab `null`: Es fehlte das Werkstattmaterial, und `workshopMaterialPrice`
+			// war `null`, weil es in dieser Welt niemand anbot. Dreißig Ticks lang.
 			//
-			// Das ist die Zahl aus Punkt 93 an einem einzigen Fall, und sie belegt dort die
-			// erste der beiden Lesarten: Die Stadt liefert wirklich nicht, was ihre Einwohner
-			// vorhaben.
-			expect(gruende.GOAL_UNREACHABLE).toBeGreaterThan(25);
+			// Das war die Zahl aus Punkt 93 an einem einzigen Fall, und sie belegte dort
+			// die erste der beiden Lesarten: Die Stadt liefert wirklich nicht, was ihre
+			// Einwohner vorhaben. Sie tut es immer noch nicht — aber die Wahl verlangt es
+			// jetzt auch nicht mehr von ihr.
+			expect(gruende.GOAL_UNREACHABLE ?? 0).toBe(0);
 		});
 	});
 
@@ -179,11 +194,17 @@ describe('Die Brotkette', () => {
 	 * Sperre für die ganze Stadt: ohne Quader keine Mühle, kein Backhaus, keine
 	 * Schneiderei, keine Alchemistenküche.
 	 *
-	 * Gebaut wird aber, was `fehlendeWerkstatt` vorschlägt, und die sortiert nach Können
-	 * und bei gleichem Können nach Preis. Die Steinmetzhütte verlangt `MINING` und kostet
-	 * 200; die Schneiderei verlangt `TAILORING` und kostet 190. Wer beides nicht gelernt
-	 * hat — und das sind fast alle —, bekommt die zehn Münzen billigere vorgeschlagen,
-	 * und die braucht Quader.
+	 * **Der Befund von Punkt 110 war, dass sie fast nie vorgeschlagen wurde.**
+	 * `fehlendeWerkstatt` sortierte nach Können und bei gleichem Können nach Preis: Die
+	 * Steinmetzhütte verlangt `MINING` und kostet 200, die Schneiderei `TAILORING` und
+	 * 190. Wer beides nicht gelernt hatte — und das sind fast alle, sobald die Zimmerei
+	 * vergeben ist —, bekam die zehn Münzen billigere und stand damit vor Quadern, die es
+	 * nirgends gab.
+	 *
+	 * **Seit 5.87 rückt vor, was ohne Material auskommt**, sobald das Material des
+	 * Erstplatzierten nirgends zu haben ist. Die Tests zeigen beide Richtungen: die
+	 * Sackgasse ohne Quader am Markt, und dass die Regel sich von selbst zurückzieht,
+	 * sobald welche ausliegen.
 	 */
 	describe('welche Werkstatt einem vorgeschlagen wird', () => {
 		let stadtId: string;
@@ -193,11 +214,52 @@ describe('Die Brotkette', () => {
 			stadtId = await stadtOhneLeute();
 			// Die Lage jedes Messlaufs: Die Zimmerei steht schon in Bürgerhand — sie ist
 			// die billigste und wird deshalb überall zuerst gebaut.
+			// **Nur die Häuser der Stadt** — was Charaktere früherer Blöcke gebaut haben,
+			// bleibt in derselben Datenbank stehen und würde hier ein Handwerk belegen,
+			// das für diese Frage frei sein soll.
 			haeuser = [
-				...(await buildingService.getBuildingsInRegion(stadtId, JETZT)),
-				{ id: 'zimmerei', ownerType: 'CHARACTER', optionId: 9, level: 1, condition: 100 }
+				...(await buildingService.getBuildingsInRegion(stadtId, JETZT)).filter(
+					(haus) => haus.ownerType !== 'CHARACTER'
+				),
+				{ id: 'zimmerei', ownerType: 'CHARACTER', optionId: ZIMMEREI, level: 1, condition: 100 }
 			] as typeof haeuser;
 		}, 300_000);
+
+		/**
+		 * Baustoff ans Schild — von einem Fremden, damit es nicht das eigene Angebot ist.
+		 *
+		 * Die Angebote werden hier von Hand gesetzt statt über `placeOffer`: Gefragt ist,
+		 * ob die **Wahl** den Markt sieht, nicht ob ein Verkäufer Standgeld zahlen kann.
+		 */
+		async function marktMit(waren: Array<[string, number]>): Promise<void> {
+			const haendlerId = randomUUID();
+			await Character.create({
+				id: haendlerId,
+				firstName: 'Fahrende',
+				role: 'NPC',
+				gender: 'FEMALE',
+				birthTick: JETZT - yearsToTicks(40),
+				lastTickProcessed: JETZT,
+				satiety: 100,
+				lastNeedTick: JETZT,
+				actionPoints: 48,
+				money: 10,
+				RegionId: stadtId
+			});
+			const marktplatz = (await buildingService.getBuildingsInRegion(stadtId, JETZT)).find(
+				(haus) => haus.optionId === MARKTPLATZ
+			)!;
+			for (const [itemId, quantity] of waren) {
+				await ShopOffer.create({
+					id: randomUUID(),
+					BuildingId: marktplatz.id,
+					SellerCharacterId: haendlerId,
+					itemId,
+					quantity,
+					pricePerUnit: 3
+				});
+			}
+		}
 
 		async function vorschlagFuer(skill?: SkillType): Promise<string | undefined> {
 			const id = randomUUID();
@@ -219,31 +281,47 @@ describe('Die Brotkette', () => {
 				greed: 0
 			});
 			if (skill) await skillService.addPractice(id, skill, 500);
-			const wahl = await npcService.fehlendeWerkstatt(haeuser, id);
+			const wahl = await npcService.fehlendeWerkstatt(haeuser, id, stadtId);
 			return wahl && buildingService.getBuildingOption(wahl.optionId)?.initialName;
 		}
 
-		it('ist für den, der nichts Einschlägiges kann, die Schneiderei', async () => {
-			// **Der Befund.** Sie ist zehn Münzen billiger als die Steinmetzhütte und
-			// braucht drei Quader, die es in dieser Welt nirgends zu kaufen gibt. Ergebnis
-			// ist `GOAL_UNREACHABLE`, Tick für Tick, bis er stirbt.
-			expect(await vorschlagFuer()).toBe('Schneiderei');
+		it('ist für den, der nichts Einschlägiges kann, die Steinmetzhütte', async () => {
+			// Vor 5.87 stand hier `Schneiderei` — zehn Münzen billiger und in dieser Welt
+			// nicht zu bauen. Jetzt bekommt er das, was ohne Quader auskommt und sie
+			// obendrein herstellt.
+			expect(await vorschlagFuer()).toBe('Steinmetzhütte');
 		});
 
 		it('und auch für den Zimmerer, dessen Handwerk schon vergeben ist', async () => {
 			// Der häufigste Fall der Messläufe: In den Listen steht bei fast jedem
 			// `CONSTRUCTION`, weil daran jeder Bau übt. Die Zimmerei ist besetzt, also
-			// zählt sein Können nicht mehr — und der Preis schickt ihn zur Schneiderei.
-			expect(await vorschlagFuer('CONSTRUCTION')).toBe('Schneiderei');
+			// zählt sein Können nicht mehr — und vor 5.87 schickte ihn der Preis in die
+			// Sackgasse.
+			expect(await vorschlagFuer('CONSTRUCTION')).toBe('Steinmetzhütte');
 		});
 
-		it('nur wer Bergbau gelernt hat, bekommt die Steinmetzhütte', async () => {
-			// **Damit hängt die ganze Wirtschaft an einem Zufall des Zuzugs:** Kommt
-			// niemand mit `MINING` in die Stadt, entsteht nie eine Steinmetzhütte, nie ein
-			// Quader und nie eine Werkstatt jenseits der drei, die ohne auskommen. In den
-			// beiden Messläufen zu 5.86 hatte keiner der Lebenden `MINING`, und in keinem
-			// lag je ein Quader am Markt.
+		it('für den Bergmann ohnehin', async () => {
+			// Er bekam sie immer schon, und daran ändert sich nichts: Sein Können steht
+			// vor dem Preis. Vor 5.87 hing die ganze Wirtschaft daran, dass so einer
+			// zuzieht.
 			expect(await vorschlagFuer('MINING')).toBe('Steinmetzhütte');
+		});
+
+		it('und die Bäckerin bekommt weiter die Mühle — sobald es Quader gibt', async () => {
+			// **Die Gegenprobe, und die wichtigere Hälfte der Regel** (5.87): Sie greift
+			// nur, solange das Material fehlt. Liegen Quader und Eisen am Markt, zählt
+			// wieder das Können — sonst hätte die Stadt eine Steinmetzhütte und sonst nie
+			// etwas anderes.
+			expect(await vorschlagFuer('BAKING')).toBe('Steinmetzhütte');
+
+			await marktMit([
+				['BLOCK', 40],
+				['IRON', 40],
+				['PLANK', 40]
+			]);
+
+			expect(await vorschlagFuer('BAKING')).toBe('Mühle');
+			expect(await vorschlagFuer()).toBe('Schneiderei');
 		});
 	});
 });

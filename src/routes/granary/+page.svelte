@@ -21,7 +21,14 @@
 		{#each data.offers as ware (ware.itemId)}
 			<li>
 				{ware.name} — {ware.price} Münzen das Stück
-				<small>(Notpreis der Stadt; bei einem Bäcker kostet er {ware.basePrice})</small>
+				<!--
+					**Der Vergleich steht nur da, wenn es einen gibt** (5.87): `GRANARY_MARKUP`
+					ist auf 1 zurückgenommen, und zwei gleiche Zahlen nebeneinander erklären
+					nichts, sie verwirren.
+				-->
+				{#if ware.price !== ware.basePrice}
+					<small>(Notpreis der Stadt; bei einem Bäcker kostet er {ware.basePrice})</small>
+				{/if}
 				<small>({ware.description})</small>
 				<form method="POST" action="?/buy" use:enhance>
 					<input type="hidden" name="itemId" value={ware.itemId} />

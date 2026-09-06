@@ -21,7 +21,9 @@ import { getItemTemplate } from '$lib/model/itemTemplate';
 import {
 	CONDITION_MAX,
 	isUnderConstruction,
+	type MaterialNeed,
 	materialFor,
+	producesBuildingMaterial,
 	renovationMaterial,
 	RENOVATION_PER_ACTION,
 	upgradeMaterial,
@@ -648,7 +650,9 @@ async function lageAufnehmen(
 	const freieFlaeche =
 		freieFlaechen.find((flaeche) => gebraucht.includes(flaeche.resourceType!)) ?? freieFlaechen[0];
 	const zuVerkaufen = werkstatt ? await unverkauftes(npcId, werkstatt) : undefined;
-	const werkstattLuecke = werkstatt ? undefined : await fehlendeWerkstatt(haeuserDerStadt, npcId);
+	const werkstattLuecke = werkstatt
+		? undefined
+		: await fehlendeWerkstatt(haeuserDerStadt, npcId, werte.RegionId);
 
 	// Ein eigenes Dach und was daran hängt (4.14).
 	const wohnhaus = eigene.find(
@@ -1143,7 +1147,8 @@ function menge(vorrat: { itemId: string; quantity: number }[], itemId: string): 
  */
 export async function fehlendeWerkstatt(
 	haeuser: Haus[],
-	characterId?: string
+	characterId?: string,
+	regionId?: string
 ): Promise<{ optionId: number; price: number } | undefined> {
 	const vorhanden = haeuser.filter((haus) => haus.ownerType === 'CHARACTER');
 
@@ -1152,7 +1157,8 @@ export async function fehlendeWerkstatt(
 		.filter((vorlage) => vorlage.type === 'CRAFT')
 		.filter((vorlage) => !vorhanden.some((haus) => haus.optionId === vorlage.optionId));
 
-	const bewertet: { optionId: number; price: number; koennen: number }[] = [];
+	const bewertet: { optionId: number; price: number; koennen: number; bedarf: MaterialNeed[] }[] =
+		[];
 	for (const vorlage of kandidaten) {
 		bewertet.push({
 			optionId: vorlage.optionId,
@@ -1160,12 +1166,60 @@ export async function fehlendeWerkstatt(
 			// Ohne Person oder ohne Fertigkeit in der Vorlage zählt nur der Preis — dann
 			// verhält sich die Wahl wie vor 5.19.
 			koennen:
-				characterId && vorlage.skill ? await skillService.getLevel(characterId, vorlage.skill) : 0
+				characterId && vorlage.skill ? await skillService.getLevel(characterId, vorlage.skill) : 0,
+			// Was der Bau verlangt — leer bei denen, die ihr Material selbst herstellen.
+			// Dieselbe Ausnahme wie in `build`, aus derselben Quelle.
+			bedarf: vorlage.recipes?.some((rezept) => producesBuildingMaterial(rezept.outputItemId))
+				? []
+				: materialFor(levelOf(vorlage, 1).price, vorlage.type)
 		});
 	}
 
 	bewertet.sort((a, b) => b.koennen - a.koennen || a.price - b.price);
-	return bewertet[0];
+	const beste = bewertet[0];
+
+	// **Ein Vorschlag, den niemand bauen kann, ist keiner** (5.87, Punkt 110).
+	//
+	// Bis hierher endete die Wahl hier, und das war die Sperre der ganzen Wirtschaft: Die
+	// Steinmetzhütte verlangt `MINING` und kostet 200, die Schneiderei `TAILORING` und
+	// 190. Wer beides nicht gelernt hat — und das ist fast jeder, sobald die Zimmerei
+	// vergeben ist —, bekam die zehn Münzen billigere vorgeschlagen. Die braucht Quader,
+	// Quader gibt es nur aus einer Steinmetzhütte, und so baute niemand die eine
+	// Werkstatt, an der jede andere hängt. Ob eine Stadt je ein Handwerk lernte, entschied
+	// der Zufall des Zuzugs.
+	//
+	// **Gefragt wird erst, wenn es nötig ist** (Punkt 67): Steht ohnehin eine der drei
+	// Werkstätten vorn, die kein Material verlangen, kostet das hier keine einzige
+	// Abfrage.
+	if (!beste || beste.bedarf.length === 0 || !characterId || !regionId) return beste;
+	if (await beschaffbar(characterId, regionId, beste.bedarf)) return beste;
+
+	// Was ohne Material auskommt, rückt vor — in derselben Ordnung wie oben. Gibt es
+	// nichts dergleichen, bleibt es beim ersten Vorschlag: Ein unerreichbares Ziel ist
+	// immer noch ehrlicher als gar keines, und `GOAL_UNREACHABLE` sagt es beim Namen.
+	return bewertet.find((kandidat) => kandidat.bedarf.length === 0) ?? beste;
+}
+
+/**
+ * Ist das Baumaterial zu haben — aus eigenem Besitz oder vom Markt?
+ *
+ * Dieselbe Frage, die der NPC beim Bauen wirklich stellt: Er nimmt, was ihm gehört
+ * (`getOwnedStock`, 5.25), und kauft den Rest beim billigsten Anbieter. Deshalb zählt
+ * beides zusammen und nicht nur das eine.
+ */
+async function beschaffbar(
+	characterId: string,
+	regionId: string,
+	bedarf: MaterialNeed[]
+): Promise<boolean> {
+	const vorrat = await tradeService.getOwnedStock(characterId);
+	for (const posten of bedarf) {
+		const fehlt: number = posten.quantity - (vorrat.get(posten.itemId) ?? 0);
+		if (fehlt <= 0) continue;
+		const angebot = await tradeService.cheapestOffer(regionId, posten.itemId, characterId);
+		if (!angebot || angebot.quantity < fehlt) return false;
+	}
+	return true;
 }
 
 /**

@@ -39,7 +39,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                             | —                            | erledigt     |
 | 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**             | —                            | erledigt     |
 | 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung          | dem nächsten Schritt         | Befund       |
-| 85  | Der Kornspeicher backt aus dem Nichts — **verteuert mit 5.86**, Wirkung ungemessen    | dem nächsten Messlauf        | teilweise    |
+| 85  | Der Kornspeicher backt aus dem Nichts — **gemessen, mit 5.87 zurückgenommen**         | Punkt 110 / dem Backhaus     | teilweise    |
 | 86  | Die städtische Schmiede sperrte die Eisenkette — **behoben mit 5.65**                 | —                            | erledigt     |
 | 87  | Ein Sparziel, das ins Leere führt — Bauland ohne Werkstatt darauf                     | dem nächsten Messlauf        | Befund       |
 | 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick             | laufend                      | Befund       |
@@ -64,7 +64,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 107 | Die Grundsteuer brachte ein Viertel — **hinfällig**: Streuung, kein Fehler            | —                            | hinfällig    |
 | 108 | Bilanz und Kassenbuch gehen auseinander — **erledigt mit 5.83**, die Bilanz geht auf  | —                            | erledigt     |
 | 109 | Der Zehnt trifft nur die erste Stufe jeder Kette — Verarbeitung ist steuerfrei        | Punkte 15, 46                | Entscheidung |
-| 110 | Die Werkstattwahl schickt fast jeden in dieselbe Sackgasse — Schneiderei statt Stein  | dem nächsten Schritt         | Entscheidung |
+| 110 | Die Werkstattwahl schickt jeden in dieselbe Sackgasse — **behoben mit 5.87**          | —                            | erledigt     |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                   | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                           | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2476,9 +2476,21 @@ Das ist Punkt 100 in Reinform, und es ist der Preis, den dieser Schritt kostet.
 **Ein Backhaus entstand in keinem der beiden Läufe** — und auch keine Mühle, keine
 Steinmetzhütte, keine zweite Zimmerei. Der Aufschlag hat den Preis gehoben, ohne dass
 jemand die Lücke füllen konnte; die Vorbedingung ist nach 5.84 weiterhin nicht erfüllt.
-**Warum sie es nicht ist, ist seither bekannt und steht als Punkt 110.** Der Aufschlag
-bleibt bis dahin stehen: Er nimmt dem Backhaus nichts, solange keines gebaut werden kann,
-und was er der Kasse bringt, ist gemessen.
+**Warum sie es nicht ist, war noch am selben Tag bekannt und steht als Punkt 110.**
+
+**Zurückgenommen mit 5.87 — `GRANARY_MARKUP` steht wieder auf 1.** Den Ausschlag gab der
+Selbsterhaltungstest: Mit der neuen Werkstattwahl aus 5.87 verhungerte darin ein Mann mit
+**fünf Münzen an einem Brot zu sechs**, und dieselbe Welt mit dem Grundpreis kam ohne
+einen Hungertoten durch. Was in den Messläufen 338 gescheiterte Käufe waren, ist damit ein
+Toter in einem Test, der genau eine Frage stellt: Trägt sich die Welt selbst?
+
+**Der Aufschlag ist richtig und verfrüht** — dieselbe Diagnose wie beim ersten Anlauf, nur
+jetzt mit Zahlen auf beiden Seiten. Er gehört gezogen, sobald ein Backhaus steht; dann
+schützt er einen Bäcker vor einer Krücke, die zum Selbstkostenpreis von null anbietet.
+Vorher verteuert er nur das Brot der Ärmsten. Die Zahl bleibt als Konstante stehen, damit
+sie ein Handgriff ist und kein Umbau.
+
+**Und der Weg dorthin führt über Punkt 110**, nicht über den Preis.
 
 ### 86. Die städtische Schmiede sperrt die Eisenkette — behoben (5.65)
 
@@ -4070,7 +4082,7 @@ er ist der kleinste Posten der Stadtkasse geworden. Wovon die Stadt lebt, sind d
 Kornspeicher (Punkt 85) und die Grundsteuer. Ob der Zehnt überhaupt noch ein Hebel ist,
 hängt daran, worauf er greift.
 
-### 110. Die Werkstattwahl schickt fast jeden in dieselbe Sackgasse
+### 110. Die Werkstattwahl schickt fast jeden in dieselbe Sackgasse — behoben (5.87)
 
 **Gefunden am 06.09.2026**, auf die Frage, warum nach zwei Läufen über 2000 Ticks weder
 Mühle noch Backhaus noch Steinmetzhütte steht. Die Antwort ist eine Sortierung, und der
@@ -4125,6 +4137,27 @@ gewinnen, sobald irgendwer einmal Quader anbietet und sie dann ausgehen. Und ein
 Weg wäre, den Preisunterschied zu drehen (Steinmetzhütte billiger als Schneiderei) — eine
 Zahl gegen ein Strukturproblem, also das, wovor Punkt 100 warnt.
 
+**Gebaut mit 5.87 — der erste Weg.** `fehlendeWerkstatt` sortiert weiter nach Können und
+Preis; steht danach ein Kandidat vorn, dessen Material weder im eigenen Besitz noch am
+Markt zu haben ist, rückt der erste vor, der **ohne Material auskommt**. Gibt es auch den
+nicht, bleibt es beim alten Vorschlag: Ein unerreichbares Ziel ist immer noch ehrlicher als
+gar keines, und `GOAL_UNREACHABLE` nennt es beim Namen.
+
+**Gefragt wird erst, wenn es nötig ist** (Punkt 67): Steht ohnehin eine der drei
+materialfreien Werkstätten vorn, kostet die Regel keine einzige Abfrage. Erst wenn nicht,
+werden eigener Bestand und billigstes Angebot geprüft — dieselben beiden Quellen, aus denen
+der Bau sein Material wirklich nimmt (`getOwnedStock` und `cheapestOffer`).
+
+**Die Regel zieht sich von selbst zurück.** Liegen Quader und Eisen am Markt, entscheidet
+wieder das Können — sonst hätte eine Stadt eine Steinmetzhütte und sonst nie etwas anderes.
+Beide Richtungen stehen als Test in `brotkette.spec.ts`.
+
+**Was der erste Block derselben Datei jetzt zeigt**, ist die Probe aufs Ganze: Die
+Bäckerin, die dreißig Ticks lang stillstand, baut — nicht ihre Mühle, sondern die
+**Zimmerei**, die es in ihrer leeren Stadt noch nicht gab. `GOAL_UNREACHABLE` ist bei ihr
+auf null gefallen. Ob daraus in einer bewohnten Stadt eine Steinmetzhütte, Quader und
+irgendwann ein Backhaus werden, sagt der nächste Messlauf.
+
 ## Der Weg durch die Wirtschaft — Stand 29.08.2026
 
 **Warum dieser Abschnitt existiert.** Die Wirtschaftsbefunde liegen als zehn Punkte
@@ -4156,11 +4189,12 @@ im Messlauf vier von fünf Toten.
    öffentliche Bau. Neu dazugekommen sind zwei Befunde aus demselben Lauf: Punkt 106 (ein
    Bauauftrag, den niemand bezahlen kann — behoben mit 5.81/5.82) und Punkt 107 (die
    eingebrochene Grundsteuer — inzwischen hinfällig, es war Streuung).
-3. **Erst dann der Kornspeicher** (Punkt 85). **Verteuert mit 5.86 und gemessen** — er
-   bringt der Kasse 54 Prozent mehr für dieselbe Menge Brot und kostet 338 gescheiterte
-   Käufe. Ein Backhaus entstand trotzdem nicht, und seit dem 06.09.2026 ist bekannt,
-   warum: **Punkt 110**, die Werkstattwahl. Sie ist damit der nächste Schritt und steht
-   vor allem, was hier noch folgt.
+3. **Erst dann der Kornspeicher** (Punkt 85). **Verteuert mit 5.86, gemessen und mit 5.87
+   zurückgenommen** — er brachte der Kasse 54 Prozent mehr für dieselbe Menge Brot, kostete
+   338 gescheiterte Käufe und einen Hungertoten im Selbsterhaltungstest, und ein Backhaus
+   entstand trotzdem nicht. Warum nicht, war noch am selben Tag klar: **Punkt 110**, die
+   Werkstattwahl — **behoben mit 5.87**. Damit ist die Reihenfolge dieses Abschnitts das
+   erste Mal wieder in der Spur: erst die Kette, dann der Preis.
 
    (Der Wortlaut von damals:) Nicht abschaffen, sondern verteuern: Er ist
    die Notversorgung, nicht die Konkurrenz. Und erst, wenn Schritt 1 einen Bäcker
