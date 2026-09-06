@@ -64,6 +64,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 107 | Die Grundsteuer brachte ein Viertel — **hinfällig**: Streuung, kein Fehler            | —                            | hinfällig    |
 | 108 | Bilanz und Kassenbuch gehen auseinander — **erledigt mit 5.83**, die Bilanz geht auf  | —                            | erledigt     |
 | 109 | Der Zehnt trifft nur die erste Stufe jeder Kette — Verarbeitung ist steuerfrei        | Punkte 15, 46                | Entscheidung |
+| 110 | Die Werkstattwahl schickt fast jeden in dieselbe Sackgasse — Schneiderei statt Stein  | dem nächsten Schritt         | Entscheidung |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                   | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                           | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2452,6 +2453,33 @@ Aufschlag erst _nach_ dem Messlauf vor, der zeigt, ob 5.84 einen Bäcker hervorb
 Gemacht wurde er davor, auf Wunsch — der folgende Lauf misst beides in einem und muss
 deshalb, wenn kein Backhaus entsteht, zwei Erklärungen auseinanderhalten statt einer.
 
+**Gemessen am 06.09.2026 — zwei Läufe über 2000 Ticks, Saat 86**, einmal mit Aufschlag und
+einmal mit `GRANARY_MARKUP` = 1 dagegen. Belastbar ist daran nur, was am Brotpreis hängt;
+alles Emergente ist nach dem Befund von Punkt 107 schwaches Material.
+
+|                             | ohne Aufschlag | mit 1,5 |
+| --------------------------- | -------------: | ------: |
+| `GRANARY` (Stadtkasse)      |           4712 |    7254 |
+| gekaufte Laibe              |          ~1178 |   ~1209 |
+| `BUY_FOOD`                  |            284 |     608 |
+| `BUY_FOOD/NOT_ENOUGH_MONEY` |              0 |     338 |
+| `EAT`                       |           1111 |    1130 |
+
+**Die Stadt kaufte dieselbe Menge Brot und zahlte 54 Prozent mehr dafür.** Fiskalisch tut
+der Aufschlag also genau das, was er soll — die Kasse hält am Ende 2481 statt 847, die
+Bürger 2919 statt 3662. Dass sich die Zahl der Käufe verdoppelt, ist kein Mehrbedarf,
+sondern die kleinere Portion: `leisten` deckelt am Preis.
+
+**Die Gegenrechnung steht daneben:** 338 Käufe scheiterten am Geld, vorher kein einziger.
+Das ist Punkt 100 in Reinform, und es ist der Preis, den dieser Schritt kostet.
+
+**Ein Backhaus entstand in keinem der beiden Läufe** — und auch keine Mühle, keine
+Steinmetzhütte, keine zweite Zimmerei. Der Aufschlag hat den Preis gehoben, ohne dass
+jemand die Lücke füllen konnte; die Vorbedingung ist nach 5.84 weiterhin nicht erfüllt.
+**Warum sie es nicht ist, ist seither bekannt und steht als Punkt 110.** Der Aufschlag
+bleibt bis dahin stehen: Er nimmt dem Backhaus nichts, solange keines gebaut werden kann,
+und was er der Kasse bringt, ist gemessen.
+
 ### 86. Die städtische Schmiede sperrt die Eisenkette — behoben (5.65)
 
 **Befund vom 23.08.2026, aus dem Lesen des Codes und nicht aus einem Messlauf.** Er liegt
@@ -4042,6 +4070,61 @@ er ist der kleinste Posten der Stadtkasse geworden. Wovon die Stadt lebt, sind d
 Kornspeicher (Punkt 85) und die Grundsteuer. Ob der Zehnt überhaupt noch ein Hebel ist,
 hängt daran, worauf er greift.
 
+### 110. Die Werkstattwahl schickt fast jeden in dieselbe Sackgasse
+
+**Gefunden am 06.09.2026**, auf die Frage, warum nach zwei Läufen über 2000 Ticks weder
+Mühle noch Backhaus noch Steinmetzhütte steht. Die Antwort ist eine Sortierung, und der
+Unterschied, an dem sie hängt, sind zehn Münzen.
+
+**Drei Werkstätten verlangen kein Baumaterial** — Zimmerei, Steinmetzhütte und Schmiede,
+weil sie es selbst herstellen (`producesBuildingMaterial` in `buildingService`). Jede
+andere braucht Bretter, **Quader und Eisen**. Quader gibt es nur aus einer
+Steinmetzhütte. Wer sie baut, öffnet der ganzen Stadt den Weg zu jedem weiteren Handwerk.
+
+**Vorgeschlagen wird sie fast nie.** `fehlendeWerkstatt` nimmt alle Handwerke, die in
+Bürgerhand noch fehlen, sortiert nach Können und bei gleichem Können nach Preis — und gibt
+**den ersten** zurück. Die Steinmetzhütte verlangt `MINING` und kostet 200, die
+Schneiderei verlangt `TAILORING` und kostet 190. Wer beides nicht gelernt hat, bekommt die
+billigere, und die braucht Quader, die es nicht gibt: `workshopMaterialPrice` bleibt
+`null`, `BUILD` bleibt gesperrt, `GOAL_UNREACHABLE` Tick für Tick bis zum Tod.
+
+Festgehalten in `brotkette.spec.ts`, dritter Block:
+
+| gelernt hat          | vorgeschlagen bekommt er |
+| -------------------- | ------------------------ |
+| nichts Einschlägiges | Schneiderei (190)        |
+| `CONSTRUCTION`       | Schneiderei (190)        |
+| `MINING`             | Steinmetzhütte (200)     |
+
+**Der zweite Fall ist der häufige**, und er ist der bittere: `CONSTRUCTION` übt jeder, der
+je gebaut oder Bretter gesägt hat — in den Messläufen steht es bei fast jedem Lebenden.
+Sobald die Zimmerei in Bürgerhand ist (sie ist die billigste und deshalb überall die
+erste), zählt sein Können nicht mehr, und der Preis schickt ihn zur Schneiderei.
+
+**Damit hängt die ganze Wirtschaft am Zufall des Zuzugs:** Kommt niemand mit `MINING` in
+die Stadt, entsteht nie eine Steinmetzhütte, nie ein Quader und nie ein Handwerk jenseits
+der drei, die ohne auskommen. Genau so sahen beide Läufe zu 5.86 aus — kein Lebender mit
+`MINING`, kein Quader am Markt, `PLANK` und `IRON` im Angebot und sonst nichts. Im Lauf
+nach 5.84 stand eine Steinmetzhütte; das war dann kein Verdienst von 5.84, sondern ein
+Zuzug mit dem passenden Handwerk.
+
+**Zu entscheiden ist, was die Wahl mitwissen soll.** Drei Wege, vom kleinsten zum größten:
+
+- **Was unbeschaffbar ist, kommt zuletzt.** `fehlendeWerkstatt` fragt den Markt und
+  schiebt jeden Kandidaten, dessen Material nirgends zu haben ist, hinter die baubaren.
+  Die Funktion kennt heute keinen Markt; sie bekäme ihn.
+- **Wer nicht wählen kann, baut die Grundlage.** Fehlt einschlägiges Können ganz (alle
+  Kandidaten stehen bei null), entscheidet nicht der Preis, sondern was der Stadt fehlt —
+  und das ist, solange kein Quader existiert, die Steinmetzhütte.
+- **Der Katalog trägt die Reihenfolge.** Eine Vorlage bekäme einen Rang, der sagt, was
+  eine Stadt zuerst braucht. Am ehrlichsten zur Wirtschaft, aber eine Zahl mehr, die
+  gepflegt werden will (Punkt 15).
+
+**Was dabei nicht übersehen werden darf:** Auch der erste Weg lässt die Schneiderei
+gewinnen, sobald irgendwer einmal Quader anbietet und sie dann ausgehen. Und ein vierter
+Weg wäre, den Preisunterschied zu drehen (Steinmetzhütte billiger als Schneiderei) — eine
+Zahl gegen ein Strukturproblem, also das, wovor Punkt 100 warnt.
+
 ## Der Weg durch die Wirtschaft — Stand 29.08.2026
 
 **Warum dieser Abschnitt existiert.** Die Wirtschaftsbefunde liegen als zehn Punkte
@@ -4073,7 +4156,13 @@ im Messlauf vier von fünf Toten.
    öffentliche Bau. Neu dazugekommen sind zwei Befunde aus demselben Lauf: Punkt 106 (ein
    Bauauftrag, den niemand bezahlen kann — behoben mit 5.81/5.82) und Punkt 107 (die
    eingebrochene Grundsteuer — inzwischen hinfällig, es war Streuung).
-3. **Erst dann der Kornspeicher** (Punkt 85). Nicht abschaffen, sondern verteuern: Er ist
+3. **Erst dann der Kornspeicher** (Punkt 85). **Verteuert mit 5.86 und gemessen** — er
+   bringt der Kasse 54 Prozent mehr für dieselbe Menge Brot und kostet 338 gescheiterte
+   Käufe. Ein Backhaus entstand trotzdem nicht, und seit dem 06.09.2026 ist bekannt,
+   warum: **Punkt 110**, die Werkstattwahl. Sie ist damit der nächste Schritt und steht
+   vor allem, was hier noch folgt.
+
+   (Der Wortlaut von damals:) Nicht abschaffen, sondern verteuern: Er ist
    die Notversorgung, nicht die Konkurrenz. Und erst, wenn Schritt 1 einen Bäcker
    hervorbringen **kann** — vorher verhungert die Stadt wirklich.
 

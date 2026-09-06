@@ -12,6 +12,8 @@ import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import { seededRoll } from '$lib/game/testRoll';
 import { yearsToTicks } from '$lib/game/time';
 import type { IdleReason } from '$lib/game/npc.logic';
+import type { SkillType } from '$lib/game/skill.logic';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as npcService from '$lib/server/service/npcService';
 import * as skillService from '$lib/server/service/skillService';
 
@@ -166,6 +168,82 @@ describe('Die Brotkette', () => {
 			// Es waren Quader und Eisen — und die gibt es nur, wenn jemand eine
 			// Steinmetzhütte und eine Schmiede betreibt und ihre Ware auch aushängt.
 			expect([MUEHLE, BAECKEREI]).toContain(werkstatt?.dataValues.optionId);
+		});
+	});
+
+	/**
+	 * **Und die Frage dahinter** (5.86, Punkte 85, 103): Warum liegen Quader nirgends aus?
+	 *
+	 * Die Steinmetzhütte ist eine der drei Werkstätten, die **kein Baumaterial verlangen**
+	 * — sie stellt es selbst her (`producesBuildingMaterial`). Wer sie baut, löst die
+	 * Sperre für die ganze Stadt: ohne Quader keine Mühle, kein Backhaus, keine
+	 * Schneiderei, keine Alchemistenküche.
+	 *
+	 * Gebaut wird aber, was `fehlendeWerkstatt` vorschlägt, und die sortiert nach Können
+	 * und bei gleichem Können nach Preis. Die Steinmetzhütte verlangt `MINING` und kostet
+	 * 200; die Schneiderei verlangt `TAILORING` und kostet 190. Wer beides nicht gelernt
+	 * hat — und das sind fast alle —, bekommt die zehn Münzen billigere vorgeschlagen,
+	 * und die braucht Quader.
+	 */
+	describe('welche Werkstatt einem vorgeschlagen wird', () => {
+		let stadtId: string;
+		let haeuser: Parameters<typeof npcService.fehlendeWerkstatt>[0];
+
+		beforeAll(async () => {
+			stadtId = await stadtOhneLeute();
+			// Die Lage jedes Messlaufs: Die Zimmerei steht schon in Bürgerhand — sie ist
+			// die billigste und wird deshalb überall zuerst gebaut.
+			haeuser = [
+				...(await buildingService.getBuildingsInRegion(stadtId, JETZT)),
+				{ id: 'zimmerei', ownerType: 'CHARACTER', optionId: 9, level: 1, condition: 100 }
+			] as typeof haeuser;
+		}, 300_000);
+
+		async function vorschlagFuer(skill?: SkillType): Promise<string | undefined> {
+			const id = randomUUID();
+			await Character.create({
+				id,
+				firstName: 'Zugezogene',
+				role: 'NPC',
+				gender: 'FEMALE',
+				birthTick: JETZT - yearsToTicks(30),
+				lastTickProcessed: JETZT,
+				satiety: 100,
+				lastNeedTick: JETZT,
+				actionPoints: 48,
+				money: 800,
+				RegionId: stadtId,
+				sociability: -100,
+				ambition: 60,
+				diligence: 60,
+				greed: 0
+			});
+			if (skill) await skillService.addPractice(id, skill, 500);
+			const wahl = await npcService.fehlendeWerkstatt(haeuser, id);
+			return wahl && buildingService.getBuildingOption(wahl.optionId)?.initialName;
+		}
+
+		it('ist für den, der nichts Einschlägiges kann, die Schneiderei', async () => {
+			// **Der Befund.** Sie ist zehn Münzen billiger als die Steinmetzhütte und
+			// braucht drei Quader, die es in dieser Welt nirgends zu kaufen gibt. Ergebnis
+			// ist `GOAL_UNREACHABLE`, Tick für Tick, bis er stirbt.
+			expect(await vorschlagFuer()).toBe('Schneiderei');
+		});
+
+		it('und auch für den Zimmerer, dessen Handwerk schon vergeben ist', async () => {
+			// Der häufigste Fall der Messläufe: In den Listen steht bei fast jedem
+			// `CONSTRUCTION`, weil daran jeder Bau übt. Die Zimmerei ist besetzt, also
+			// zählt sein Können nicht mehr — und der Preis schickt ihn zur Schneiderei.
+			expect(await vorschlagFuer('CONSTRUCTION')).toBe('Schneiderei');
+		});
+
+		it('nur wer Bergbau gelernt hat, bekommt die Steinmetzhütte', async () => {
+			// **Damit hängt die ganze Wirtschaft an einem Zufall des Zuzugs:** Kommt
+			// niemand mit `MINING` in die Stadt, entsteht nie eine Steinmetzhütte, nie ein
+			// Quader und nie eine Werkstatt jenseits der drei, die ohne auskommen. In den
+			// beiden Messläufen zu 5.86 hatte keiner der Lebenden `MINING`, und in keinem
+			// lag je ein Quader am Markt.
+			expect(await vorschlagFuer('MINING')).toBe('Steinmetzhütte');
 		});
 	});
 });
