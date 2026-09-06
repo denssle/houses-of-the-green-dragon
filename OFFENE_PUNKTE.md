@@ -3134,6 +3134,24 @@ einem einzigen Lauf. Gesucht ist dasselbe für das Geld: Ein- und Ausgang je Tic
 Quelle getrennt. Danach ist zu entscheiden, ob der Satz zu hoch ist, die Löhne zu niedrig
 oder der Kornspeicher zu teuer — heute lässt sich das nicht unterscheiden.
 
+**Neu gemessen nach 5.87** (2000 Ticks, Saat 86, mit der reparierten Werkstattwahl):
+**28 Tote, davon 23 an Not** — gegen 21 (16 Not) mit dem Kornspeicheraufschlag und 15 (9
+Not) ohne ihn. Die Stadt ist dabei erheblich größer geworden (47 Häuser statt 13, neun
+Betriebe statt zwei), und das ist die Wendung, die dieser Punkt bekommt: **Der Hunger
+verschwindet nicht, wenn die Wirtschaft anspringt — er wächst mit ihr.**
+
+Zwei Zahlen aus demselben Lauf sagen, wohin zu sehen ist. `WORK/EMPLOYER_BROKE` steht bei
+**2128** (Punkt 106): Es wird gebaut und angestellt, aber die Auftraggeber können nicht
+zahlen — Arbeit, die da ist und kein Brot bringt. Und die Stadtkasse hält am Ende **250
+Münzen** bei 10436 Einnahmen; sie hat alles wieder ausgegeben, davon 2880 an die
+Erschließung, also aus der Welt heraus (Punkt 102).
+
+**Damit ist die Frage dieses Punktes eine andere geworden.** Sie hieß: Nimmt die Steuer
+den Ärmsten das Brot? Sie heißt jetzt: Warum verhungern Menschen in einer Stadt, die
+arbeitet, herstellt und handelt? Der Verdacht liegt nicht mehr auf dem Satz, sondern auf
+dem **Rückweg** — Löhne, die zugesagt und nicht gezahlt werden können. Und das ist eine
+Frage an Punkt 106, nicht an die Grundsteuer.
+
 #### Die Bilanz, überschlagen — woher das Geld kommt und wohin es geht
 
 **Nachgemessen am 29.08.2026** (2000 Ticks, Saat 86, mit der Bilanz aus 5.72). Die
@@ -3635,6 +3653,23 @@ Damit ist die Reihenfolge des Restes klar, und sie ist nicht die, die oben vermu
    der Bau nichts mehr kostet —, und deshalb ist er nicht mitgemacht worden. Ein Schritt, eine
    Frage.
 
+**Stand nach 5.87 — die Erschließung ist jetzt fast alles.** Im Lauf mit der reparierten
+Werkstattwahl (2000 Ticks, Saat 86) sind **3230 Münzen vernichtet**, und davon gehen
+**2880 auf `DEVELOPMENT`**; der öffentliche Bau steht unverändert bei 350, Bürger
+vernichten weiterhin nichts. Der Posten ist nicht schlimmer geworden, er ist der einzige
+verbliebene — und er wächst mit der Stadt, weil eine Stadt, die baut, Bauland braucht.
+
+**Was das für die Reihenfolge heißt:** Von den vier Wegen, auf denen Geld verschwand, sind
+drei geschlossen (Bau 5.76, Auftrag 5.78, Ausbau 5.80). Der vierte ist eine Amtshandlung
+aus der Stadtkasse (4.9a) und damit derselbe Fall wie der öffentliche Bau: Er verlangt
+**Arbeit statt Münzen** — Vermesser und Wegebauer, die Lohn bekommen —, und er hängt an
+derselben zweiten Frage, was ein Bürgermeister beschließt, wenn Erschließung nichts mehr
+kostet.
+
+Und er ist der Grund, dass die Stadtkasse am Ende des Laufs **250 Münzen** hält, obwohl
+sie 10436 eingenommen hat: Was sie nicht als Lohn oder Sold zurückgibt, verbrennt sie im
+Bauland. Damit ist dieser Punkt der nächste am Rückweg aus Punkt 100.
+
 ### 103. Die Wirtschaft hat eine Startreihenfolge, die niemand einhält
 
 **Befund vom 29.08.2026, belegt in `brotkette.spec.ts`.** Die Frage stammt aus den
@@ -3898,6 +3933,27 @@ der Zustand also ohnehin stieg. Sie prüft jetzt, ob die **Tagelöhnerin verdien
 beide Bauherren bleiben ohne Aktionspunkte. Eine Gegenprobe gegen den alten Stand gehört
 zu jedem Test, der einen Befund abschließt — sonst behauptet er nur etwas.
 
+**Wieder da, und wieder der größte Fehlschlag der Welt — nach 5.87.** Der Lauf mit der
+reparierten Werkstattwahl (2000 Ticks, Saat 86) meldet `WORK/EMPLOYER_BROKE` **2128**,
+gegen 245 im Lauf davor. Die Zahl ist kein Rückfall: Sie wächst mit der Zahl der
+Baustellen, und die ist von zwei Bauten auf siebenundvierzig Häuser gestiegen. **Was 5.81
+und 5.82 behoben haben, war die falsche Prüfung; was hier steht, ist der Zustand selbst** —
+Bauherren, die einen Auftrag aushängen und beim Zahltag nichts haben.
+
+**Deshalb gehört der Punkt wieder aufgemacht**, und zwar als andere Frage: Nicht „prüft
+der Suchende richtig?", sondern „darf jemand Arbeit aushängen, die er nicht bezahlen
+kann?". Drei Wege sind denkbar, und keiner ist entschieden:
+
+- **Deckung beim Aushängen.** Wer einen Auftrag ausschreibt, legt den Lohn zurück — dann
+  scheitert der Bau am Geld statt der Tagelöhner an der Auszahlung.
+- **Teillohn statt Fehlschlag.** Er zahlt, was er hat; der Rest bleibt Schuld (Punkt 43).
+- **Der Auftrag verfällt.** Wer nicht zahlen kann, verliert die Baustelle an den, der
+  kann.
+
+Der Zusammenhang mit Punkt 100 ist der eigentliche Grund, dass es eilt: **2128
+vergebliche Arbeitsgänge sind 2128 Mal Brot, das nicht verdient wurde**, in einem Lauf mit
+23 Hungertoten.
+
 ### 107. Die Grundsteuer brachte auf einmal ein Viertel — hinfällig
 
 **Der Punkt beruhte auf einem Vergleich, den er nicht tragen konnte.** Aufgenommen am
@@ -4156,8 +4212,33 @@ Beide Richtungen stehen als Test in `brotkette.spec.ts`.
 **Was der erste Block derselben Datei jetzt zeigt**, ist die Probe aufs Ganze: Die
 Bäckerin, die dreißig Ticks lang stillstand, baut — nicht ihre Mühle, sondern die
 **Zimmerei**, die es in ihrer leeren Stadt noch nicht gab. `GOAL_UNREACHABLE` ist bei ihr
-auf null gefallen. Ob daraus in einer bewohnten Stadt eine Steinmetzhütte, Quader und
-irgendwann ein Backhaus werden, sagt der nächste Messlauf.
+auf null gefallen.
+
+**Gemessen am 06.09.2026, und es ist der größte Sprung, den dieses Projekt gemessen hat**
+(2000 Ticks, Saat 86, gegen denselben Lauf davor):
+
+|                      | vor 5.87           | nach 5.87                                                                                  |
+| -------------------- | ------------------ | ------------------------------------------------------------------------------------------ |
+| Häuser bei Tick 2000 | 13                 | **47**                                                                                     |
+| Betriebe             | Zimmerei, Schmiede | **Bäckerei**, Steinmetzhütte, Schmiede, Schneiderei, Alchemistenküche, Zimmerei, drei Höfe |
+| `CRAFT`              | 742                | 2067                                                                                       |
+| `HARVEST`            | 294                | 2230                                                                                       |
+| `SELL`               | 865                | 3392                                                                                       |
+| Angebote am Ende     | 2                  | 17                                                                                         |
+
+**Es steht eine Bäckerei** — die erste in der Geschichte dieser Welt. Und sie ist kein
+Einzelfall: Zwei weitere Bäckereien sind abgebrannt, eine Mühle ist zur Ruine verfallen.
+Die Brotkette ist mehrfach entstanden. Am Markt liegen Stein, Holz, Bretter, Erz, Gewänder
+und Parfüm; die Stadt handelt.
+
+Damit ist die Kausalkette geschlossen, die seit Punkt 85 vermutet und dreimal falsch
+verortet wurde: **Steinmetzhütte → Quader → jede weitere Werkstatt.** Es waren zehn Münzen
+Preisunterschied in einer Sortierung.
+
+**Was der Sprung mitbringt**, steht bei den Punkten, denen es gehört: 23 Hungertote von 28
+(Punkt 100), `WORK/EMPLOYER_BROKE` bei 2128 (Punkt 106) und die Erschließung als jetzt
+einziger großer Posten vernichteten Geldes, 2880 von 3230 (Punkt 102). Eine Stadt, die
+arbeitet, hat andere Krankheiten als eine, die stillsteht.
 
 ### 111. Warum einer nichts tut, stand nirgends — Werkzeug gebaut (5.88)
 
@@ -4223,7 +4304,10 @@ im Messlauf vier von fünf Toten.
 
 **Die Reihenfolge, wie sie sich aus den Befunden ergibt:**
 
-1. **Springt die Kette überhaupt an?** (Punkt 104 ist behoben, 103 offen.) — **Ja,
+1. **Springt die Kette überhaupt an?** (Punkt 104 ist behoben, 103 offen.) —
+   **Beantwortet am 06.09.2026 mit 5.87: ja, und zwar ganz.** Nach der Reparatur der
+   Werkstattwahl (Punkt 110) stehen bei Tick 2000 siebenundvierzig Häuser und neun
+   Betriebe, darunter eine **Bäckerei**. Was unten steht, war der Stand davor. — **Ja,
    gemessen am 04.09.2026.** Im Lauf mit Saat 86 stehen bei Tick 2000 eine zweite
    Zimmerei, eine private Schmiede und eine Steinmetzhütte; vorher war es eine einzige
    Zimmerei. `CRAFT` stieg von 435 auf 579, `IDLE` fiel von 29788 auf 25410. Damit sind
