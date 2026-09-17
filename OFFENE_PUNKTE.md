@@ -47,7 +47,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung    | Punkte 76, 16                | Entwurf      |
 | 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen      | laufend                      | teilweise    |
 | 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                    | Punkte 70, 40                | Befund       |
-| 93  | `GOAL_UNREACHABLE` deckt 85 % des Müßiggangs — Preisproblem oder zu grobe Diagnose    | dem nächsten Messlauf        | Befund       |
+| 93  | `GOAL_UNREACHABLE` deckt 85 % des Müßiggangs — **in Produktion belegt: kein Bauland** | Punkte 16, 76                | Befund       |
 | 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                        | Punkt 31                     | Befund       |
 | 95  | Die Werkzeuge maßen einen anderen Takt als den, der läuft — **behoben mit 5.69**      | —                            | erledigt     |
 | 96  | Die Stadtkasse ohne Einnahme — **gebaut mit 5.71**, fiskalisch wirksam; siehe 100     | Punkt 100                    | teilweise    |
@@ -2786,6 +2786,53 @@ Entscheidung abweicht, ist schlimmer als keine, weil man ihr glaubt."
 ist — Haus, Grundstück, Material oder Werkstatt — und wie viele Köpfe hinter jedem stehen.
 Heute ist es eine einzige Zahl über alle. Erst danach lässt sich sagen, ob hier die Preise
 klemmen oder nur die Auskunft.
+
+**Nachtrag vom 17.09.2026 — in Produktion nachgesehen (0.5.89, Tick 5648).** Die Frage
+von oben ist damit entschieden, und zwar zur ernsten Seite: **Die Stadt liefert wirklich
+nicht, was ihre Einwohner vorhaben.** Im Serverlog steht Tick für Tick fast dieselbe
+Zeile — von 21 Lebenden handeln 3 bis 6, und `GOAL_UNREACHABLE` steht konstant bei 9 bis 10.
+
+Die Kette dahinter ist lückenlos:
+
+1. **Es gibt kein freies Bauland.** `getFreeBuildingLand()` zählt `BUILDING_LAND` mit
+   `ownerType: 'NONE'`. In Grünau: 8 Grundstücke in Bürgerhand, 4 bei der Stadt, **null
+   herrenlose**. Also `plotPrice: null`, also `GOAL_UNREACHABLE` für jeden Bauwilligen —
+   die Diagnose ist hier **ehrlich**, nicht zu grob.
+2. **Neues Bauland entsteht nur durch `developLand()`**, die Erschließung durch den
+   Amtsinhaber. Sie ist auch der einzige Ort im laufenden Betrieb, der ein Grundstück auf
+   `NONE` setzt (`auctionService.ts:101`). Kein anderer Weg bringt Grund in Umlauf; was
+   der Stadt zufällt, bleibt bei ihr.
+3. **Der Bürgermeister kann nicht erschließen.** Die Regel verlangt
+   `treasury − developmentCost ≥ treasuryReserve`, also 180 Münzen. Die Stadtkasse hält
+   **13**.
+4. **Und sie wird die 180 nie erreichen.** Die Grundsteuer bringt bei Satz 7 auf 8
+   Grundstücke höchstens 56 je Spieljahr, abzüglich der Ausfälle bei denen, die nichts
+   haben (zwei Besitzer stehen bei 0 und 1 Münze). Allein die Aufwandsentschädigung kostet
+   bei 1 Münze je Tick **50 je Spieljahr**. Dazu Löhne und 9 Brände mit 295 Schaden.
+5. **Deshalb dreht das Amt an der einzigen Schraube, die bleibt.** `DEVELOP_LAND` fällt
+   durch, `SET_TAX` greift: Die Grundsteuer stieg seit Tick 5267 jedes Spieljahr pünktlich
+   um eins — 1, 2, 3, 4, 5, 6, **7**. Das Maximum liegt bei 20. Jede Erhöhung nimmt genau
+   den Bürgern Geld, die kaufen und bauen sollen.
+
+Die Chronik zeigt den Stillstand: **letzter Grundstückskauf bei Tick 5248, letzter Neubau
+bei 5291** — seither ist nichts mehr entstanden. Kein Erschließungs- oder
+Auktionsereignis, jemals; die `auctions`-Tabelle ist leer. Im Messlauf mit Saat 86 steht
+dagegen `AUCTION 40` im Kassenbuch: Der Kreislauf funktioniert grundsätzlich, er ist in
+der echten Welt nur nie angesprungen.
+
+**Was das für die Aufschlüsselung heißt, die oben gefordert wird:** Sie bleibt nützlich,
+aber sie ist nicht mehr die erste Frage. Für Grünau ist ohne sie klar, welches Ziel
+unerreichbar ist — das Bauland, und zwar für alle gleichzeitig.
+
+**Was zu entscheiden ist** (Balancing, gehört zu den Punkten 16 und 76): ob die
+Aufwandsentschädigung auf 0 darf (`OFFICE_STIPEND` erlaubt es ausdrücklich — „eine Stadt
+darf beschließen, dass das Amt eine Ehre ist"), ob die Stadt ihre **eigenen** vier
+Grundstücke versteigern können soll statt nur frisch erschlossene, oder ob die
+Erschließung billiger wird. Solange keines davon gilt, ist Grünau eine Stadt, die sich
+ihr Wachstum nicht leisten kann und stattdessen ihre Bürger besteuert.
+
+**Nicht mehr offen:** Die Rechnung der Erschließung selbst war zusätzlich falsch — die
+Lage nannte den Preis für ein Grundstück, erschlossen wurden zwei. Behoben mit 5.90.
 
 ### 94. Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück
 
