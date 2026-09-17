@@ -116,7 +116,7 @@ export async function die(
 		const tot = await Character.findByPk(characterId, { transaction: t, lock: t.LOCK.UPDATE });
 		if (!tot || tot.dataValues.deathTick !== null) return null;
 
-		const kinder = await lebendeKinder(characterId, t);
+		const kinder = await erbfaehigeKinder(characterId, tot.dataValues.DynastyId, t);
 		const erbeId: string | null = chooseHeir(tot.dataValues.heirId, kinder, tick);
 		const geschwister: string[] = kinder.map((kind) => kind.id).filter((id) => id !== erbeId);
 
@@ -225,9 +225,10 @@ export async function die(
 /**
  * Benennt einen Erben.
  *
- * Geprüft wird gegen die lebenden Kinder, nicht gegen die Datenbankbeziehung: Ein
- * Fremder, ein Toter oder ein Geschwisterkind soll hier nicht hineinrutschen. `null`
- * nimmt die Benennung zurück — dann greift wieder die gesetzliche Reihenfolge.
+ * Geprüft wird gegen die erbfähigen Kinder, nicht gegen die Datenbankbeziehung: Ein
+ * Fremder, ein Toter, ein Geschwisterkind oder ein Kind aus dem anderen Haus soll hier
+ * nicht hineinrutschen. `null` nimmt die Benennung zurück — dann greift wieder die
+ * gesetzliche Reihenfolge.
  */
 export async function designateHeir(characterId: string, heirId: string | null): Promise<boolean> {
 	if (heirId === null) {
@@ -235,7 +236,12 @@ export async function designateHeir(characterId: string, heirId: string | null):
 		return true;
 	}
 
-	const kinder = await lebendeKinder(characterId);
+	// **Dieselbe Menge wie bei der Erbfolge** — sonst benennt jemand ein Kind aus dem
+	// anderen Haus, und `chooseHeir()` übergeht die Benennung beim Erbfall stillschweigend.
+	const benennbar = await Character.findByPk(characterId, { attributes: ['DynastyId'] });
+	if (!benennbar) return false;
+
+	const kinder = await erbfaehigeKinder(characterId, benennbar.dataValues.DynastyId);
 	if (!kinder.some((kind) => kind.id === heirId)) return false;
 
 	await Character.update({ heirId }, { where: { id: characterId } });
@@ -250,8 +256,11 @@ export async function designateHeir(characterId: string, heirId: string | null):
  * ändern; danach steht der Name fest, denn die Chronik hält Ereignisse fest, deren
  * Handelnder nicht später anders heißen soll.
  *
- * Geprüft wird gegen die eigenen lebenden Kinder — dieselbe Quelle wie bei der Erbenwahl,
- * damit ein fremdes Kind hier nicht hineinrutscht.
+ * Geprüft wird gegen die eigenen lebenden Kinder, damit ein fremdes Kind hier nicht
+ * hineinrutscht — **bewusst weiter gefasst als die Erbenwahl**: Wer ein Kind gezeugt oder
+ * geboren hat, darf es benennen, auch wenn es im Haus des anderen Elternteils steht und
+ * dort nicht erbt. Der Name ist eine Sache zwischen Eltern und Kind, das Erbe eine des
+ * Hauses.
  */
 export async function renameChild(
 	parentId: string,
@@ -337,15 +346,50 @@ export async function getChildren(characterId: string, tick: number): Promise<Ch
 	}));
 }
 
-/** Die lebenden Kinder eines Charakters — Mutter oder Vater, das ist hier gleich. */
+/**
+ * Die lebenden Kinder, **die zum selben Haus gehören** — die Menge, aus der geerbt wird.
+ *
+ * Nicht jedes Kind steht im Haus seiner Mutter: `assignDynasty()` steckt es bei zwei
+ * verschiedenen Elternhäusern in genau eines, bei zwei NPCs per Wurf. Ein Kind im anderen
+ * Haus trägt einen anderen Namen — und erbt deshalb nicht.
+ *
+ * Ohne diese Einschränkung nahm `chooseHeir()` auch ein Kind aus einem fremden Haus, und
+ * `hausFortfuehren()` sah daraufhin einen Erben, wo keiner war: Das Haus blieb bestehen,
+ * obwohl niemand mehr darin lebte (Haus Weber in Produktion, Tick 5362). Bei einem
+ * gespielten Haus wäre es schlimmer ausgegangen — der Spieler hätte eine Figur im
+ * **fremden** Haus übernommen, während `dynastyService` ihm weiter die leere Hülle als
+ * sein Haus gezeigt hätte.
+ *
+ * Ein Charakter ohne Haus hat nichts weiterzugeben, an dem ein Name hinge; für ihn bleibt
+ * es bei allen leiblichen Kindern.
+ */
+export async function erbfaehigeKinder(
+	characterId: string,
+	dynastyId: string | null,
+	transaction?: Transaction
+): Promise<Child[]> {
+	return lebendeKinder(characterId, transaction, dynastyId);
+}
+
+/**
+ * Die lebenden Kinder eines Charakters — Mutter oder Vater, das ist hier gleich.
+ *
+ * `nurHaus` schränkt auf ein Haus ein; ohne die Angabe kommen alle leiblichen Kinder,
+ * auch die aus einem anderen Haus. Für die Erbfolge ist `erbfaehigeKinder()` der richtige
+ * Einstieg, für alles Leibliche — Benennen etwa — dieser hier.
+ */
 export async function lebendeKinder(
 	characterId: string,
-	transaction?: Transaction
+	transaction?: Transaction,
+	nurHaus?: string | null
 ): Promise<Child[]> {
 	const gefunden = await Character.findAll({
 		where: {
 			deathTick: null,
-			[Op.or]: [{ motherId: characterId }, { fatherId: characterId }]
+			[Op.or]: [{ motherId: characterId }, { fatherId: characterId }],
+			// `undefined` liesse Sequelize die Bedingung weglassen, `null` suchte nach
+			// hauslosen Kindern — beides nicht gemeint, deshalb die Fallunterscheidung.
+			...(nurHaus ? { DynastyId: nurHaus } : {})
 		},
 		attributes: ['id', 'birthTick'],
 		transaction

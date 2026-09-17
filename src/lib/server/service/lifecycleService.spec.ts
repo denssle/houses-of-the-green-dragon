@@ -269,6 +269,59 @@ describe('Sterben und Erben', () => {
 			expect((await Dynasty.findByPk(hausId))!.dataValues.isExtinct).toBe(false);
 		});
 
+		it('lässt das Haus erlöschen, wenn das einzige Kind im anderen Haus steht', async () => {
+			// Haus Weber in Produktion, Tick 5362: Cunnes einziges lebendes Kind stand im
+			// Haus des Vaters — `assignDynasty()` steckt ein Kind bei zwei verschiedenen
+			// Elternhäusern in genau eines. `chooseHeir()` nahm es trotzdem, und
+			// `hausFortfuehren()` sah daraufhin einen Erben, wo für **dieses** Haus keiner
+			// war. Weber blieb bestehen, ohne dass noch ein Weber lebte.
+			const weber = randomUUID();
+			const steinmetz = randomUUID();
+			await Dynasty.create({ id: weber, name: 'Weber', UserId: null, foundedAtTick: 0 });
+			await Dynasty.create({ id: steinmetz, name: 'Steinmetz', UserId: null, foundedAtTick: 0 });
+
+			const mutter = await person('Cunne', 80, { DynastyId: weber });
+			await person('Bertrada', 25, { DynastyId: steinmetz, motherId: mutter });
+
+			const fall = await lifecycleService.die(mutter, JETZT);
+
+			expect(fall?.heirId).toBeNull();
+			expect(fall?.extinctDynastyId).toBe(weber);
+			expect((await Dynasty.findByPk(weber))!.dataValues.isExtinct).toBe(true);
+		});
+
+		it('macht kein Kind im fremden Haus zum gespielten Erben', async () => {
+			// Der unangenehme Teil derselben Lücke: Der Spieler hätte eine Figur im
+			// **fremden** Haus übernommen, während `dynastyService` ihm weiter sein altes,
+			// leeres Haus als das aktive gezeigt hätte.
+			const meins = randomUUID();
+			const fremd = randomUUID();
+			await Dynasty.create({ id: meins, name: 'Haus Meins', UserId: userId, foundedAtTick: 0 });
+			await Dynasty.create({ id: fremd, name: 'Haus Fremd', UserId: null, foundedAtTick: 0 });
+
+			const spieler = await person('Spieler', 80, { role: 'PLAYER', DynastyId: meins });
+			const kind = await person('Kind', 25, { DynastyId: fremd, motherId: spieler });
+
+			await lifecycleService.die(spieler, JETZT);
+
+			expect((await stand(kind)).role).toBe('NPC');
+			expect((await Dynasty.findByPk(meins))!.dataValues.isExtinct).toBe(true);
+		});
+
+		it('lässt das Kind im eigenen Haus weiterhin erben', async () => {
+			// Die Gegenprobe: Der Filter darf die gewöhnliche Erbfolge nicht treffen.
+			const hausId = randomUUID();
+			await Dynasty.create({ id: hausId, name: 'Haus Folge', UserId: userId, foundedAtTick: 0 });
+			const eltern = await person('Eltern', 80, { role: 'PLAYER', DynastyId: hausId });
+			const kind = await person('Kind', 25, { DynastyId: hausId, motherId: eltern });
+
+			const fall = await lifecycleService.die(eltern, JETZT);
+
+			expect(fall?.heirId).toBe(kind);
+			expect(fall?.extinctDynastyId).toBeNull();
+			expect((await stand(kind)).role).toBe('PLAYER');
+		});
+
 		it('lässt ein Haus am Leben, wenn ein NPC des Hauses stirbt', async () => {
 			// Nur der Tod des **gespielten** Charakters entscheidet über das Haus. Stürbe
 			// jedes kinderlose Geschwisterkind die Dynastie mit, wäre sie nicht zu halten.
@@ -414,6 +467,20 @@ describe('Sterben und Erben', () => {
 			const tot = await person('Tot', 20, { motherId: vater, deathTick: JETZT - 5 });
 
 			expect(await lifecycleService.designateHeir(vater, tot)).toBe(false);
+		});
+
+		it('weist ein Kind aus dem anderen Haus ab', async () => {
+			// Dieselbe Menge wie die Erbfolge: Wäre die Benennung weiter, ginge sie beim
+			// Erbfall stillschweigend unter, weil `chooseHeir()` das Kind nicht mehr sieht.
+			const meins = randomUUID();
+			const fremd = randomUUID();
+			await Dynasty.create({ id: meins, name: 'Haus Meins', UserId: userId, foundedAtTick: 0 });
+			await Dynasty.create({ id: fremd, name: 'Haus Fremd', UserId: null, foundedAtTick: 0 });
+			const vater = await person('Vater', 60, { DynastyId: meins });
+			const auswaerts = await person('Auswärts', 20, { DynastyId: fremd, motherId: vater });
+
+			expect(await lifecycleService.designateHeir(vater, auswaerts)).toBe(false);
+			expect((await stand(vater)).heirId).toBeNull();
 		});
 
 		it('lässt sich zurücknehmen', async () => {
