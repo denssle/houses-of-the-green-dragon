@@ -2831,8 +2831,78 @@ Grundstücke versteigern können soll statt nur frisch erschlossene, oder ob die
 Erschließung billiger wird. Solange keines davon gilt, ist Grünau eine Stadt, die sich
 ihr Wachstum nicht leisten kann und stattdessen ihre Bürger besteuert.
 
+**Das erste davon ist mit 5.91 entschieden.** Die Aufwandsentschädigung liegt jetzt in
+NPC-Hand, und der Amtsinhaber senkt sie **vor** der Steuer der anderen — ob er es tut,
+entscheidet seine Gier. Im Messlauf fällt `STIPEND` von 450 auf 127, die Stadt wird wieder
+handlungsfähig (Zahlen bei Punkt 102). **Grünau ist damit nicht sofort geheilt:** Bei rund
+50 gesparten Münzen je Spieljahr dauert es etwa vier Jahre bis zu den 180, dann kommt eine
+Erschließung, dann beginnt das Sparen von vorn. Ein langsamer Kreislauf ist ein Anfang,
+kein Ziel — die beiden anderen Möglichkeiten bleiben offen, und der saubere Weg bleibt
+Punkt 102.
+
 **Nicht mehr offen:** Die Rechnung der Erschließung selbst war zusätzlich falsch — die
 Lage nannte den Preis für ein Grundstück, erschlossen wurden zwei. Behoben mit 5.90.
+
+**Ein Hebel dazu, mit 5.91 — und er wirkt.** Der Amtsinhaber sah die Klemme die ganze Zeit
+(`nextTaxChange` meldete sie jedes Jahr), er hatte nur keinen Hebel, der nicht die anderen
+traf: `NPC_MAYOR_LAWS` kannte zwei Gesetze, beide auf der Einnahmenseite. Der größte
+stetige Abfluss blieb unantastbar — die Aufwandsentschädigung, 50 Münzen je Spieljahr,
+gezahlt an den, der entscheidet. Seit 5.91 darf er sie senken, **vor** der Steuer der
+anderen, und ob er es tut, entscheidet seine Gier (`GREED_TO_KEEP_STIPEND`).
+
+Im Lauf über 500 Ticks mit Saat 86, gegen denselben Lauf auf 0.5.88:
+
+|                              | 0.5.88 |      0.5.91 |
+| ---------------------------- | -----: | ----------: |
+| `STIPEND` an den Amtsinhaber |    450 |     **127** |
+| `WAGE` an Bürger             |    557 |     **854** |
+| Grundsteuer eingenommen      |      0 |          78 |
+| `PLOT_SALE`                  |    640 |         760 |
+| `DEVELOPMENT` aus der Welt   |    600 |     **720** |
+| Geld bei den Bürgern am Ende |   1449 |    **1029** |
+| Tode                         |      0 | **1 (Not)** |
+
+**Die Stadt handelt wieder** — sie erschließt zwölf Parzellen statt zehn, zahlt deutlich
+mehr Lohn aus, und die Grundsteuer läuft erstmals überhaupt an. **Und sie bezahlt es
+doppelt:** Ein Einwohner ist verhungert, wo vorher niemand starb, die Bürger haben in Summe
+420 Münzen weniger — und der Anteil des vernichteten Geldes am Zufluss steigt von 35 auf
+**49 Prozent**.
+
+**Das ist der eigentliche Befund dieses Nachtrags, und er zeigt auf Punkt 102:** Eine
+handlungsfähige Stadt verbrennt _mehr_. `DEVELOPMENT` ist nicht gesunken, sondern von 600
+auf 720 gestiegen, weil eine Stadt, die baut, Bauland braucht. Der Hebel von 5.91 hat die
+Sperre gelöst und damit das Leck vergrößert. Die Erschließung gegen **Arbeit statt Münzen**
+umzustellen ist danach nicht weniger dringend, sondern mehr — und sie löst zugleich den
+Rückweg aus Punkt 100, an dem der Hungertote von oben hängt.
+
+**Wobei die Entwurfsfrage von Punkt 102 jetzt leichter zu beantworten ist.** Dort stand die
+Sorge, was ein Bürgermeister beschließt, wenn Erschließung nichts mehr kostet. Die Antwort
+liegt in 5.76: Ist Erschließung Arbeit, bremst nicht mehr das Geld, sondern **ob jemand die
+Arbeit annimmt**. Eine Stadt ohne freie Hände erschließt eben nicht, und der Aushang dafür
+existiert schon (`repairWage`, `freierArbeitsplatz`).
+
+**Getrennt nachgemessen**, derselbe Lauf auf 5.90 allein:
+
+|                            | 0.5.88 |  0.5.90 |  0.5.91 |
+| -------------------------- | -----: | ------: | ------: |
+| `DEVELOPMENT` aus der Welt |    600 | **480** | **720** |
+| `WAGE` an Bürger           |    557 |     686 |     854 |
+| `STIPEND`                  |    450 |   **0** |     127 |
+| Grundsteuer eingenommen    |      0 |       0 |      78 |
+| Tode                       |      0 |       0 | 1 (Not) |
+
+**5.90 bremst, 5.91 beschleunigt.** Die korrigierten Kosten senken die Erschließung von 600
+auf 480 — die Rücklage hält jetzt, was sie soll. Der Gehaltsverzicht hebt sie auf 720, weil
+die Stadt zum ersten Mal Geld hat, das sie ausgeben kann. Beide Änderungen sind richtig,
+und zusammen verschieben sie das Leck nach oben.
+
+**Eine Warnung zur Lesart dieser Tabelle**, die über diesen Punkt hinausgeht: Die drei
+Läufe unterscheiden sich stärker, als die Änderungen allein erklären. Dass `STIPEND` auf
+5.90 bei **null** steht, während es auf 5.88 bei 450 lag, hat mit den Erschließungskosten
+nichts zu tun — dieselbe Saat, aber eine Stadt, die einmal anders abbiegt, wählt anders,
+zahlt anders, verhungert anders. Die Saat hält die Ausgangslage fest, nicht den Verlauf.
+Einzelne Zahlen taugen hier als Richtung, nicht als Messwert; wer eine Wirkung belegen
+will, braucht mehrere Läufe oder mehrere Saaten.
 
 ### 94. Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück
 
