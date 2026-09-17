@@ -17,6 +17,8 @@ import * as mayorService from '$lib/server/service/mayorService';
 import { CAMPAIGN_TICKS } from '$lib/game/election.logic';
 import { LAW_RULES } from '$lib/game/law.logic';
 import { yearsToTicks } from '$lib/game/time';
+import { treasuryReserve } from '$lib/game/governance.logic';
+import { DEVELOPMENT_COST_PER_PLOT } from '$lib/game/auction.logic';
 
 /**
  * Führt ein NPC sein Amt?
@@ -216,6 +218,46 @@ describe('Der Bürgermeister im Amt', () => {
 
 		expect(getan?.action).not.toBe('SET_TAX');
 		expect(await lawService.rate(stadtId, 'PROPERTY_TAX')).toBe(LAW_RULES.PROPERTY_TAX.fallback);
+	});
+
+	it('erschließt erst, wenn beide Grundstücke über der Rücklage bezahlt sind', async () => {
+		// **Die Lage muss den Preis nennen, den die Amtshandlung zahlt** (5.90). Bis dahin
+		// stand in der Lage der Preis für *ein* Grundstück, erschlossen wurden aber zwei:
+		// Der Bürgermeister beschloss zum halben Preis und unterschritt danach die
+		// Rücklage, die Löhne und Instandhaltung sichern soll.
+		//
+		// Gewählt ist hier genau die Kasse, bei der die alte Rechnung aufging und die neue
+		// nicht: Sie deckt ein Grundstück über der Rücklage, aber nicht zwei.
+		const kosten = DEVELOPMENT_COST_PER_PLOT * 2;
+		const npc = await person('Amtsperson');
+		await insAmt(npc);
+		await Region.update(
+			{ treasury: DEVELOPMENT_COST_PER_PLOT + treasuryReserve(kosten) },
+			{ where: { id: stadtId } }
+		);
+
+		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
+
+		expect(getan?.action).not.toBe('DEVELOP_LAND');
+		expect((await Region.findByPk(stadtId))!.dataValues.treasury).toBeGreaterThanOrEqual(
+			treasuryReserve(kosten)
+		);
+	});
+
+	it('erschließt, sobald die Kasse beide Grundstücke trägt', async () => {
+		// Die Gegenprobe: Der angehobene Preis darf die Erschließung nicht verhindern,
+		// sondern nur verschieben, bis die Stadt sie sich wirklich leisten kann.
+		const kosten = DEVELOPMENT_COST_PER_PLOT * 2;
+		const npc = await person('Amtsperson');
+		await insAmt(npc);
+		await Region.update({ treasury: kosten + treasuryReserve(kosten) }, { where: { id: stadtId } });
+
+		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
+
+		expect(getan?.action).toBe('DEVELOP_LAND');
+		expect(getan?.value).toBe(2);
+		// Was die Stadt erschließt, geht in die Versteigerung — und ist damit frei.
+		expect(await Plot.count({ where: { RegionId: stadtId, ownerType: 'NONE' } })).toBe(2);
 	});
 
 	it('tut höchstens eines je Tick', async () => {
