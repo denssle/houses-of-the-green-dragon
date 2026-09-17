@@ -56,7 +56,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen          | —                            | erledigt     |
 | 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote          | dem nächsten Schritt         | Befund       |
 | 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                    | Punkt 100                    | teilweise    |
-| 102 | Jeder Bau verbrennt seinen Preis — **der Bau behoben mit 5.76** (der Rohbau)          | Punkte 100, 66, 74           | teilweise    |
+| 102 | Jeder Bau verbrennt seinen Preis — **nur noch die Erschließung**, sie trägt 100 %     | Punkte 93, 100, 66           | teilweise    |
 | 103 | Startreihenfolge — **Mechanismus gefunden, behoben mit 5.84** (die Pachtwahl)         | Punkte 85, 70, 15            | teilweise    |
 | 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu  | —                            | erledigt     |
 | 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                   | Punkt 16                     | Befund       |
@@ -3716,6 +3716,32 @@ kostet.
 Und er ist der Grund, dass die Stadtkasse am Ende des Laufs **250 Münzen** hält, obwohl
 sie 10436 eingenommen hat: Was sie nicht als Lohn oder Sold zurückgibt, verbrennt sie im
 Bauland. Damit ist dieser Punkt der nächste am Rückweg aus Punkt 100.
+
+**Nachgemessen am 17.09.2026, nach 5.89 — die Erschließung ist jetzt alles.** Ein kürzerer
+Lauf als die bisherigen (500 Ticks, Saat 86, sonst gleiche Bedingungen): **600 Münzen
+vernichtet, davon 600 auf `DEVELOPMENT`.** Hundert Prozent. Bürger vernichten weiterhin
+nichts, und der öffentliche Bau kam in diesem Lauf nicht vor — die Zahl ist deshalb nicht
+mit den 2880 aus dem 2000-Tick-Lauf zu vergleichen, wohl aber ihr Anteil: Von den vier
+Wegen ist nur noch dieser eine offen, und er trägt den ganzen Posten.
+
+**In Produktion verbrennt dagegen nichts — aus dem schlechtesten denkbaren Grund.** Grünau
+hat nie erschlossen (kein einziges Erschließungs- oder Auktionsereignis in der Chronik, die
+`auctions`-Tabelle ist leer), weil die Stadtkasse 13 Münzen hält und 180 gebraucht würden.
+Das Leck ist dort geschlossen, indem die Stadt aufgehört hat zu handeln.
+
+**Damit hängen dieser Punkt und Punkt 93 an derselben Amtshandlung**, von zwei Seiten: Hier
+ist die Erschließung zu teuer für die _Welt_, weil ihr Preis aus ihr verschwindet; dort ist
+sie zu teuer für die _Kasse_, weshalb es kein Bauland mehr gibt und die halbe Stadt
+`GOAL_UNREACHABLE` meldet. Der Weg, den dieser Punkt ohnehin vorzeichnet — **Arbeit statt
+Münzen**, Vermesser und Wegebauer, die Lohn bekommen —, löst beide auf einmal: Das Geld
+bliebe in der Welt, und die Schwelle von 180 Münzen entfiele, an der Grünau seit Tick 5291
+steht. Die zweite Frage bleibt dieselbe und unbeantwortet: was ein Bürgermeister
+beschließt, wenn Erschließung nichts mehr kostet.
+
+**Zum Werkzeug:** Das Kassenbuch (`treasuryService`) ist ein Modulobjekt im Speicher und
+nach jedem Neustart leer. Für Messläufe ist das richtig so, für die laufende Welt heißt es:
+Diese Aufschlüsselung gibt es dort nicht. Was oben über Grünaus Kasse steht, ist aus
+`events`, `laws` und `regions` rekonstruiert.
 
 ### 103. Die Wirtschaft hat eine Startreihenfolge, die niemand einhält
 
