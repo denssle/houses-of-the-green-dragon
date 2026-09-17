@@ -19,6 +19,7 @@ export const MAYOR_ACTIONS = [
 	'REPAIR',
 	'BUILD_PUBLIC',
 	'DEVELOP_LAND',
+	'SET_STIPEND',
 	'SET_TAX',
 	'NOTHING'
 ] as const;
@@ -63,6 +64,18 @@ export interface CityState {
 	 * etwas erlassen hat. Siehe `TAX_EFFECT_DELAY`.
 	 */
 	rateAgeInTicks: Record<NpcMayorLaw, number>;
+	/**
+	 * Was die Stadt dem Amtsinhaber je Tick zahlt — **ihr größter stetiger Abfluss** und
+	 * der einzige, an dem er selbst drehen kann.
+	 *
+	 * Steht getrennt von `rates`, weil es keine Steuer ist: Es hat keine
+	 * Bemessungsgrundlage, an der sich messen ließe, wen es trifft, und es geht in die
+	 * andere Richtung. Wo eine Steuer erhöht wird, damit mehr hereinkommt, wird die
+	 * Entschädigung gesenkt, damit weniger hinausgeht.
+	 */
+	stipend: number;
+	/** Seit wie vielen Ticks der geltende Satz gilt — `Infinity`, wenn nie erlassen. */
+	stipendAgeInTicks: number;
 }
 
 /**
@@ -138,6 +151,76 @@ export const TAX_EFFECT_DELAY: Record<NpcMayorLaw, number> = {
 	PROPERTY_TAX: TICKS_PER_YEAR,
 	TITHE: 0
 };
+
+/**
+ * **Ab welcher Gier einer sein eigenes Gehalt behält.**
+ *
+ * Die Aufwandsentschädigung ist der größte stetige Abfluss der Stadtkasse — und der
+ * Amtsinhaber zahlt sie an sich selbst. Wer sie kürzt, während die Kasse klemmt, verzichtet
+ * auf eigenes Geld für eine Stadt, die davon wächst; wer sie behält, lässt die Stadt
+ * stehen, wo sie steht.
+ *
+ * **Deshalb entscheidet das der Charakter und nicht die Rechnung.** Der Wert liegt über der
+ * Mitte, wie `AMBITION_TO_STAND`: Verzicht soll der Normalfall sein und das Festhalten die
+ * Ausnahme, die auffällt. Sonst wäre die Sperre, die dieser Hebel lösen soll, nur vom
+ * Würfel abhängig statt von einem Menschen.
+ */
+export const GREED_TO_KEEP_STIPEND = 60;
+
+export function wouldForgoStipend(greed: number): boolean {
+	return greed < GREED_TO_KEEP_STIPEND;
+}
+
+/**
+ * **Wie lange eine Änderung der Entschädigung stehen bleibt, ehe wieder gedreht wird.**
+ *
+ * Ein Spieljahr, aus demselben Grund wie bei der Grundsteuer: Der Amtsinhaber entscheidet
+ * stündlich, und ohne Frist senkte er den Satz binnen fünf Ticks auf null, ehe die erste
+ * gesparte Münze überhaupt in der Kasse sichtbar wird.
+ */
+export const STIPEND_EFFECT_DELAY = TICKS_PER_YEAR;
+
+export interface StipendChange {
+	value: number;
+}
+
+/**
+ * Ob der Amtsinhaber an seiner eigenen Entschädigung dreht — und wohin.
+ *
+ * **Bei knapper Kasse nach unten, bei überlaufender wieder nach oben.** Dieselben beiden
+ * Schwellen wie bei der Steuer, nur die Richtung ist umgekehrt: Es ist eine Ausgabe.
+ *
+ * **Warum das überhaupt nötig wurde** (Punkt 93, 17.09.2026): In Grünau stand die Kasse bei
+ * 13 Münzen, während die Entschädigung 50 je Spieljahr kostete und die Grundsteuer
+ * höchstens 56 einbrachte. Der Amtsinhaber sah die Klemme — `nextTaxChange` meldete sie
+ * jedes Jahr — und hatte doch nur einen Hebel: die Steuer der anderen. Sieben Jahre in
+ * Folge hat er sie erhöht, sein eigenes Gehalt unangetastet. Das ist dieselbe Lücke wie in
+ * Punkt 96, nur auf der Ausgabenseite: ein Gesetz, das niemand erreicht, der es bräuchte.
+ *
+ * **Das Anheben kennt keine Gier-Prüfung.** Wer verzichtet hat, darf sich wiederholen, wenn
+ * die Stadt es sich leisten kann — und wer nie verzichtet hat, hat hier ohnehin nichts zu
+ * gewinnen, weil der Satz dann schon oben steht.
+ */
+export function nextStipendChange(state: CityState): StipendChange | undefined {
+	if (state.stipendAgeInTicks < STIPEND_EFFECT_DELAY) return undefined;
+
+	const grenzen = LAW_RULES.OFFICE_STIPEND;
+	const ruecklage: number = treasuryReserve(state.developmentCost);
+	const schritt: number = TAX_RAISE_STEP_COIN;
+
+	if (state.treasury < ruecklage && state.stipend > grenzen.min) {
+		// **Der Charakter entscheidet, nicht die Lage.** Ein Gieriger lässt die Stadt
+		// stehen — und die Steuer trifft dann wie bisher die anderen.
+		if (!wouldForgoStipend(state.personality.greed)) return undefined;
+		return { value: Math.max(grenzen.min, state.stipend - schritt) };
+	}
+
+	if (state.treasury > ruecklage * 4 && state.stipend < grenzen.max) {
+		return { value: Math.min(grenzen.max, state.stipend + schritt) };
+	}
+
+	return undefined;
+}
 
 export interface TaxChange {
 	kind: NpcMayorLaw;
@@ -220,7 +303,15 @@ export function decideMayorAction(state: CityState): MayorAction {
 		return 'DEVELOP_LAND';
 	}
 
-	// 5. An der Steuer drehen. Zuletzt, weil sie andere trifft: Wer sie anhebt, nimmt
+	// 5. **Erst bei sich selbst sparen.** Die Entschädigung ist der größte stetige Abfluss
+	//    der Kasse, und sie geht an den, der hier entscheidet. Sie vor der Steuer zu
+	//    prüfen, ist keine Feinheit der Reihenfolge, sondern der Unterschied zwischen einem
+	//    Amt und einer Pfründe: Wer die Steuer der anderen anhebt, während sein eigenes
+	//    Gehalt unangetastet weiterläuft, tut das ab jetzt, weil er zu gierig zum
+	//    Verzichten ist — nicht, weil ihm niemand die Wahl gelassen hat (Punkte 93, 96).
+	if (nextStipendChange(state) !== undefined) return 'SET_STIPEND';
+
+	// 6. An der Steuer drehen. Zuletzt, weil sie andere trifft: Wer sie anhebt, nimmt
 	//    seinen Wählern etwas weg — und wird daran gemessen.
 	if (nextTaxChange(state) !== undefined) return 'SET_TAX';
 

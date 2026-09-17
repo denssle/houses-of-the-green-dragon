@@ -7,6 +7,7 @@ import {
 	decideMayorAction,
 	type MayorAction,
 	NPC_MAYOR_LAWS,
+	nextStipendChange,
 	nextTaxChange,
 	type NpcMayorLaw
 } from '$lib/game/governance.logic';
@@ -159,7 +160,9 @@ export async function governAsNpcMayor(
 		developmentCost: DEVELOPMENT_COST_PER_PLOT * GRUNDSTUECKE_JE_ERSCHLIESSUNG,
 		rates: await saetze(regionId),
 		taxBase: await bemessungsgrundlage(regionId),
-		rateAgeInTicks: await satzalter(regionId, tick)
+		rateAgeInTicks: await satzalter(regionId, tick),
+		stipend: await lawService.rate(regionId, 'OFFICE_STIPEND'),
+		stipendAgeInTicks: await lawService.rateAge(regionId, 'OFFICE_STIPEND', tick)
 	};
 
 	const entschluss: MayorAction = decideMayorAction(lage);
@@ -207,6 +210,22 @@ export async function governAsNpcMayor(
 				GRUNDSTUECKE_JE_ERSCHLIESSUNG
 			);
 			return ergebnis.ok ? { action: entschluss, value: ergebnis.plots } : undefined;
+		}
+
+		case 'SET_STIPEND': {
+			const aenderung = nextStipendChange(lage);
+			if (!aenderung) return undefined;
+
+			const ergebnis = await lawService.enact(
+				inhaber.characterId,
+				regionId,
+				'OFFICE_STIPEND',
+				aenderung.value,
+				tick
+			);
+			return ergebnis.ok
+				? { action: entschluss, detail: LAW_RULES.OFFICE_STIPEND.name, value: aenderung.value }
+				: undefined;
 		}
 
 		case 'SET_TAX': {

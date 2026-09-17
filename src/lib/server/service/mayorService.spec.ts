@@ -196,6 +196,10 @@ describe('Der Bürgermeister im Amt', () => {
 		await Region.update({ treasury: 0 }, { where: { id: stadtId } });
 		// Ein Grundstück in Bürgerhand — sonst erreichte die Grundsteuer niemanden.
 		await buergergrund(npc);
+		// **Am eigenen Gehalt ist nichts mehr zu sparen** (5.91): Seit die Entschädigung in
+		// NPC-Hand liegt, kommt sie vor der Steuer. Ohne diese Zeile prüfte der Test die
+		// neue Reihenfolge statt der Steuer — die hat ihren eigenen Fall weiter oben.
+		await lawService.enact(npc, stadtId, 'OFFICE_STIPEND', LAW_RULES.OFFICE_STIPEND.min, JETZT);
 
 		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
 
@@ -218,6 +222,40 @@ describe('Der Bürgermeister im Amt', () => {
 
 		expect(getan?.action).not.toBe('SET_TAX');
 		expect(await lawService.rate(stadtId, 'PROPERTY_TAX')).toBe(LAW_RULES.PROPERTY_TAX.fallback);
+	});
+
+	it('kürzt bei leerer Kasse zuerst die eigene Entschädigung', async () => {
+		// **Grünau, Tick 5648** (Punkt 93): 13 Münzen in der Kasse, 50 je Spieljahr für das
+		// Amt — und sieben Steuererhöhungen in Folge, weil das der einzige Hebel war.
+		const npc = await person('Amtsperson');
+		await insAmt(npc);
+		await Character.update({ greed: 0 }, { where: { id: npc } });
+		await Region.update({ treasury: 0 }, { where: { id: stadtId } });
+		await buergergrund(npc);
+
+		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
+
+		expect(getan?.action).toBe('SET_STIPEND');
+		expect(await lawService.rate(stadtId, 'OFFICE_STIPEND')).toBeLessThan(
+			LAW_RULES.OFFICE_STIPEND.fallback
+		);
+		// Die Steuer der anderen bleibt, wo sie war — sie ist erst danach an der Reihe.
+		expect(await lawService.rate(stadtId, 'PROPERTY_TAX')).toBe(LAW_RULES.PROPERTY_TAX.fallback);
+	});
+
+	it('lässt einen Gierigen sein Gehalt behalten und die Steuer erhöhen', async () => {
+		const npc = await person('Amtsperson');
+		await insAmt(npc);
+		await Character.update({ greed: 100 }, { where: { id: npc } });
+		await Region.update({ treasury: 0 }, { where: { id: stadtId } });
+		await buergergrund(npc);
+
+		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
+
+		expect(getan?.action).toBe('SET_TAX');
+		expect(await lawService.rate(stadtId, 'OFFICE_STIPEND')).toBe(
+			LAW_RULES.OFFICE_STIPEND.fallback
+		);
 	});
 
 	it('erschließt erst, wenn beide Grundstücke über der Rücklage bezahlt sind', async () => {

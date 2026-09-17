@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
 	type CityState,
 	decideMayorAction,
+	GREED_TO_KEEP_STIPEND,
+	nextStipendChange,
 	nextTaxChange,
+	STIPEND_EFFECT_DELAY,
 	TAX_RAISE_STEP,
 	TAX_RAISE_STEP_COIN,
 	taxStep,
@@ -38,6 +41,8 @@ function ruhig(werte: Partial<CityState> = {}): CityState {
 		taxBase: { PROPERTY_TAX: 11, TITHE: 1 },
 		// Nie etwas erlassen: Der Rückfallwert gilt seit Anbeginn, jede Frist ist abgelaufen.
 		rateAgeInTicks: { PROPERTY_TAX: Infinity, TITHE: Infinity },
+		stipend: LAW_RULES.OFFICE_STIPEND.fallback,
+		stipendAgeInTicks: Infinity,
 		...werte
 	};
 }
@@ -85,12 +90,77 @@ describe('Was ein Bürgermeister tut', () => {
 			expect(decideMayorAction(stadt)).toBe('DEVELOP_LAND');
 		});
 
-		it('dreht zuletzt an der Steuer', () => {
-			// Sie trifft andere: Wer sie anhebt, nimmt seinen Wählern etwas weg — und wird
-			// daran gemessen.
+		it('spart erst am eigenen Gehalt, dann an der Steuer der anderen', () => {
+			// **Der Unterschied zwischen einem Amt und einer Pfründe** (Punkte 93, 96). In
+			// Grünau stand die Kasse bei 13 Münzen, während die Entschädigung 50 je
+			// Spieljahr kostete — und der Amtsinhaber erhöhte sieben Jahre in Folge die
+			// Grundsteuer, weil das der einzige Hebel war, den er hatte.
 			const arm = ruhig({ treasury: 0, landExhausted: true });
 
+			expect(decideMayorAction(arm)).toBe('SET_STIPEND');
+			expect(nextStipendChange(arm)?.value).toBe(LAW_RULES.OFFICE_STIPEND.fallback - 1);
+		});
+
+		it('dreht zuletzt an der Steuer', () => {
+			// Sie trifft andere: Wer sie anhebt, nimmt seinen Wählern etwas weg — und wird
+			// daran gemessen. Seit 5.91 kommt sie erst, wenn am eigenen Gehalt nichts mehr
+			// zu sparen ist — hier steht es deshalb schon auf null.
+			const arm = ruhig({
+				treasury: 0,
+				landExhausted: true,
+				stipend: LAW_RULES.OFFICE_STIPEND.min
+			});
+
 			expect(decideMayorAction(arm)).toBe('SET_TAX');
+		});
+	});
+
+	describe('die Aufwandsentschädigung', () => {
+		it('bleibt, wenn die Kasse trägt', () => {
+			expect(nextStipendChange(ruhig())).toBeUndefined();
+		});
+
+		it('sinkt, wenn die Kasse unter der Rücklage steht', () => {
+			const knapp = ruhig({ treasury: treasuryReserve(ERSCHLIESSUNG) - 1 });
+
+			expect(nextStipendChange(knapp)?.value).toBe(LAW_RULES.OFFICE_STIPEND.fallback - 1);
+		});
+
+		it('behält ein Gieriger für sich', () => {
+			// Die Stadt steht dann, wo sie steht — und die Steuer trifft wie bisher die
+			// anderen. Das ist der Preis dafür, dass hier ein Mensch entscheidet und keine
+			// Rechnung.
+			const gierig = ruhig({
+				treasury: 0,
+				personality: { ...anlagen(), greed: GREED_TO_KEEP_STIPEND }
+			});
+
+			expect(nextStipendChange(gierig)).toBeUndefined();
+			expect(decideMayorAction(gierig)).toBe('SET_TAX');
+		});
+
+		it('fällt nicht unter null', () => {
+			const schon_null = ruhig({ treasury: 0, stipend: LAW_RULES.OFFICE_STIPEND.min });
+
+			expect(nextStipendChange(schon_null)).toBeUndefined();
+		});
+
+		it('steigt wieder, wenn die Kasse überläuft', () => {
+			const ueppig = ruhig({
+				treasury: treasuryReserve(ERSCHLIESSUNG) * 4 + 1,
+				stipend: LAW_RULES.OFFICE_STIPEND.min
+			});
+
+			expect(nextStipendChange(ueppig)?.value).toBe(LAW_RULES.OFFICE_STIPEND.min + 1);
+		});
+
+		it('wartet ein Spieljahr, ehe wieder gedreht wird', () => {
+			// Ohne Frist senkte ein Amtsinhaber den Satz binnen fünf Ticks auf null, ehe die
+			// erste gesparte Münze in der Kasse sichtbar wird — derselbe Fehler wie 5.71 bei
+			// der Grundsteuer.
+			const frisch = ruhig({ treasury: 0, stipendAgeInTicks: STIPEND_EFFECT_DELAY - 1 });
+
+			expect(nextStipendChange(frisch)).toBeUndefined();
 		});
 	});
 
@@ -123,7 +193,11 @@ describe('Was ein Bürgermeister tut', () => {
 
 		it('rührt keine an, die niemanden erreicht', () => {
 			// Sie brächte nichts ein und ärgerte trotzdem jemanden, sobald es ihn gibt.
-			const leer = ruhig({ treasury: 0, taxBase: { PROPERTY_TAX: 0, TITHE: 0 } });
+			const leer = ruhig({
+				treasury: 0,
+				taxBase: { PROPERTY_TAX: 0, TITHE: 0 },
+				stipend: LAW_RULES.OFFICE_STIPEND.min
+			});
 
 			expect(nextTaxChange(leer)).toBeUndefined();
 			expect(decideMayorAction(leer)).toBe('NOTHING');
@@ -201,7 +275,8 @@ describe('Was ein Bürgermeister tut', () => {
 			const frisch = ruhig({
 				treasury: 0,
 				taxBase: { PROPERTY_TAX: 11, TITHE: 0 },
-				rateAgeInTicks: { PROPERTY_TAX: TICKS_PER_YEAR - 1, TITHE: Infinity }
+				rateAgeInTicks: { PROPERTY_TAX: TICKS_PER_YEAR - 1, TITHE: Infinity },
+				stipend: LAW_RULES.OFFICE_STIPEND.min
 			});
 
 			expect(nextTaxChange(frisch)).toBeUndefined();
