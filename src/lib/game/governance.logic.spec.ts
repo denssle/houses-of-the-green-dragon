@@ -32,7 +32,8 @@ function ruhig(werte: Partial<CityState> = {}): CityState {
 		unstaffedWorkplace: false,
 		repairNeeded: false,
 		repairCost: 40,
-		missingBuildingPrice: null,
+		missingBuilding: false,
+		publicConstruction: false,
 		landExhausted: false,
 		developmentRunning: false,
 		developmentCost: ERSCHLIESSUNG,
@@ -64,25 +65,26 @@ describe('Was ein Bürgermeister tut', () => {
 
 		it('erhält, bevor es baut', () => {
 			// Herrichten ist billiger als neu bauen, und der Verfall frisst still.
-			const stadt = ruhig({ repairNeeded: true, missingBuildingPrice: 300 });
+			const stadt = ruhig({ repairNeeded: true, missingBuilding: true });
 
 			expect(decideMayorAction(stadt)).toBe('REPAIR');
 		});
 
-		it('baut, was fehlt — wenn die Rücklage bleibt', () => {
-			const genug = ruhig({
-				missingBuildingPrice: 300,
-				treasury: 300 + treasuryReserve(ERSCHLIESSUNG)
-			});
-			const knapp = ruhig({
-				missingBuildingPrice: 300,
-				treasury: 300 + treasuryReserve(ERSCHLIESSUNG) - 1
-			});
+		it('baut, was fehlt — auch mit leerer Kasse, denn es kostet nichts mehr', () => {
+			// **Die Rücklagenprüfung, die hier stand, ist mit 5.93 gefallen** (Punkt 102).
+			// Ein öffentlicher Bau ist seither ein Rohbau: Die Stadt zahlt keinen Preis,
+			// sondern Löhne — und ob sie die aufbringt, entscheidet jede einzelne Schicht,
+			// nicht der Beschluss.
+			expect(decideMayorAction(ruhig({ missingBuilding: true, treasury: 0 }))).toBe('BUILD_PUBLIC');
+		});
 
-			expect(decideMayorAction(genug)).toBe('BUILD_PUBLIC');
-			// Löhne und Instandhaltung laufen weiter — eine Stadt, die alles verbaut, kann
-			// ihre Wache nächste Woche nicht bezahlen.
-			expect(decideMayorAction(knapp)).not.toBe('BUILD_PUBLIC');
+		it('legt kein zweites Fundament, solange das erste offen ist', () => {
+			// Dieselbe Bremse wie bei der Erschließung: Was nichts kostet, hält die Kasse
+			// nicht mehr auf. Sonst hätte die Stadt drei angefangene Häuser und kein
+			// fertiges.
+			const stadt = ruhig({ missingBuilding: true, publicConstruction: true });
+
+			expect(decideMayorAction(stadt)).not.toBe('BUILD_PUBLIC');
 		});
 
 		it('weist Land aus, wenn keines mehr frei ist', () => {

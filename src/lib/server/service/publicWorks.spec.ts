@@ -13,9 +13,11 @@ import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as electionService from '$lib/server/service/electionService';
+import * as buildingActionService from '$lib/server/service/buildingActionService';
 import * as employmentService from '$lib/server/service/employmentService';
 import { CAMPAIGN_TICKS } from '$lib/game/election.logic';
 import { CONDITION_MAX, YEARS_TO_RUIN } from '$lib/game/building.logic';
+import { REPAIR_PER_SHIFT } from '$lib/game/buildingAction.logic';
 import { yearsToTicks } from '$lib/game/time';
 
 /**
@@ -42,6 +44,20 @@ const VERFALLEN: number = yearsToTicks(YEARS_TO_RUIN * 0.75);
  */
 const STARK_VERFALLEN: number = yearsToTicks(YEARS_TO_RUIN * 0.9);
 let stadtId: string;
+
+/**
+ * Einen öffentlichen Rohbau fertig machen — so, wie es die Welt tut (5.93, Punkt 102).
+ *
+ * Seit ein öffentlicher Bau nichts mehr kostet, entsteht er als Rohbau; nutzbar wird er
+ * erst nach zwanzig Schichten. Der Amtsinhaber legt hier selbst Hand an — dieselbe
+ * Amtshandlung, mit der er auch den Verfall aufhält, und der Ausweg, ohne den ein
+ * städtischer Rohbau eine Falle wäre.
+ */
+async function fertigBauen(buergermeister: string, buildingId: string): Promise<void> {
+	for (let schicht = 0; schicht < CONDITION_MAX / REPAIR_PER_SHIFT; schicht++) {
+		await buildingService.renovatePublicBuilding(buergermeister, buildingId);
+	}
+}
 
 async function person(name: string, extras: Record<string, unknown> = {}): Promise<string> {
 	const id = randomUUID();
@@ -247,7 +263,7 @@ describe('Öffentliche Bauten', () => {
 	});
 
 	describe('errichten', () => {
-		it('geht nur im Amt, nur auf städtischem Grund, nur aus der Stadtkasse', async () => {
+		it('geht nur im Amt und nur auf städtischem Grund — und kostet keine Münze', async () => {
 			const plotId = await stadtgrund();
 			const buergermeister = await person('Amtsperson');
 			const buerger = await person('Bürger');
@@ -261,9 +277,42 @@ describe('Öffentliche Bauten', () => {
 			const ergebnis = await buildingService.buildPublicBuilding(buergermeister, WACHHAUS, plotId);
 
 			expect(ergebnis.ok).toBe(true);
-			expect(await kasse()).toBe(1000 - 300);
-			// Sein eigenes Geld bleibt unangetastet — es ist das Haus der Stadt.
+			// **Die Kasse rührt sich nicht** (5.93, Punkt 102): Bis 5.92 zog dieser Bau
+			// dreihundert Münzen aus ihr, und niemand bekam sie — nachdem die Erschließung
+			// geschlossen war, trug er allein, was die Stadt noch vernichtete. Was entsteht,
+			// ist ein Rohbau; bezahlt werden die Leute, die ihn hochziehen.
+			expect(await kasse()).toBe(1000);
 			expect((await Character.findByPk(buergermeister))!.dataValues.money).toBe(100);
+			expect(ergebnis.ok && ergebnis.building.underConstruction).toBe(true);
+			expect(ergebnis.ok && ergebnis.building.condition).toBe(0);
+		});
+
+		it('wird durch Arbeit fertig — und die Stadt zahlt dafür Lohn', async () => {
+			const plotId = await stadtgrund();
+			const buergermeister = await person('Amtsperson');
+			await insAmt(buergermeister);
+			const gebaut = await buildingService.buildPublicBuilding(buergermeister, WACHHAUS, plotId);
+			if (!gebaut.ok) throw new Error('Wachhaus liess sich nicht bauen');
+
+			// Ein Tagelöhner verdient daran, ohne dass jemand einen Auftrag aushängen müsste:
+			// An einem öffentlichen Bau darf seit 5.26 jeder für den Tagelohn arbeiten.
+			const tagelöhner = await person('Tagelöhner');
+			const ergebnis = await buildingActionService.doBuildingAction(
+				'REPAIR_FOR_HIRE',
+				tagelöhner,
+				gebaut.building.id
+			);
+
+			expect(ergebnis.ok).toBe(true);
+			expect((await Character.findByPk(tagelöhner))!.dataValues.money).toBeGreaterThan(100);
+			expect(await kasse()).toBeLessThan(1000);
+
+			// Und wer die letzte Schicht tut, macht aus dem Rohbau ein Haus.
+			await fertigBauen(buergermeister, gebaut.building.id);
+
+			const fertig = await buildingService.getBuilding(gebaut.building.id);
+			expect(fertig?.underConstruction).toBe(false);
+			expect(fertig?.condition).toBe(CONDITION_MAX);
 		});
 
 		it('baut nichts Privates auf Stadtkosten', async () => {
@@ -301,16 +350,32 @@ describe('Öffentliche Bauten', () => {
 			).toEqual({ ok: false, reason: 'LIMIT_REACHED' });
 		});
 
-		it('scheitert an einer leeren Stadtkasse', async () => {
+		it('gelingt auch mit leerer Stadtkasse — gezahlt wird je Schicht', async () => {
+			// **Die Schwelle ist mit 5.93 gefallen** (Punkt 102), dieselbe Überlegung wie bei
+			// der Erschließung einen Schritt zuvor: Ein Beschluss, der nichts kostet, braucht
+			// keine Deckung. Ob die Stadt zahlen kann, entscheidet jede einzelne Schicht —
+			// und solange sie es nicht kann, wartet der Rohbau.
 			const plotId = await stadtgrund();
 			const buergermeister = await person('Amtsperson');
 			await insAmt(buergermeister);
-			await Region.update({ treasury: 10 }, { where: { id: stadtId } });
+			await Region.update({ treasury: 0 }, { where: { id: stadtId } });
 
-			expect(await buildingService.buildPublicBuilding(buergermeister, WACHHAUS, plotId)).toEqual({
-				ok: false,
-				reason: 'NOT_ENOUGH_MONEY'
-			});
+			const ergebnis = await buildingService.buildPublicBuilding(buergermeister, WACHHAUS, plotId);
+
+			expect(ergebnis.ok).toBe(true);
+			expect(await kasse()).toBe(0);
+
+			// Der Tagelöhner geht leer aus, solange die Kasse leer ist — dieselbe Regel wie
+			// bei jedem anderen Arbeitgeber (Punkt 106).
+			const tagelöhner = await person('Tagelöhner');
+			expect(
+				ergebnis.ok &&
+					(await buildingActionService.doBuildingAction(
+						'REPAIR_FOR_HIRE',
+						tagelöhner,
+						ergebnis.building.id
+					))
+			).toEqual({ ok: false, reason: 'EMPLOYER_BROKE' });
 		});
 	});
 
@@ -321,6 +386,9 @@ describe('Öffentliche Bauten', () => {
 			await insAmt(buergermeister);
 			const gebaut = await buildingService.buildPublicBuilding(buergermeister, WACHHAUS, plotId);
 			if (!gebaut.ok) throw new Error('Wachhaus liess sich nicht bauen');
+			// **Ein Rohbau sucht keine Gesellen** (5.76): Erst muss das Haus stehen, dann
+			// lässt sich eine Wache hineinsetzen.
+			await fertigBauen(buergermeister, gebaut.building.id);
 
 			await employmentService.offerJob(buergermeister, gebaut.building.id, sold);
 			return { id: gebaut.building.id, mayor: buergermeister };

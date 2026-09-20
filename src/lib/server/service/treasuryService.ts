@@ -71,14 +71,15 @@ export const KASSENZUFLUESSE = [
 /**
  * Wohin es ging — und ob jemand es bekommt.
  *
- * **Die zweite Frage ist die wichtigere.** Eine dieser drei Ausgaben hat keinen
- * Empfänger: Das Geld verlässt die Kasse und ist aus der Welt — siehe `hatEmpfaenger`.
+ * **Die zweite Frage ist die wichtigere — und seit 5.93 hat sie zum ersten Mal überall
+ * dieselbe Antwort:** Jede Ausgabe der Stadtkasse kommt bei einem Menschen an. `PUBLIC_BUILD`
+ * war die letzte, die es nicht tat (Punkt 102); seit der öffentliche Bau ein Rohbau ist,
+ * zahlt die Stadt auch dafür Löhne statt eines Preises.
  *
- * **`DEVELOPMENT` stand hier bis 5.91 und ist aus demselben Grund gestrichen** (Punkt
- * 102): Seit 5.92 kostet die Erschließung keine Münzen mehr, sondern zwanzig Schichten
- * Arbeit je Grundstück — was die Stadt dafür zahlt, ist Lohn an einen Menschen und wird
- * als `WAGE` gebucht. Damit hat die Kasse zum ersten Mal **keinen Abfluss mehr ohne
- * Empfänger außer dem öffentlichen Bau**.
+ * **`DEVELOPMENT` und `PUBLIC_BUILD` sind aus demselben Grund gestrichen** (5.92 und
+ * 5.93, Punkt 102): Weder Erschließung noch öffentlicher Bau kosten noch Münzen, beide
+ * kosten zwanzig Schichten Arbeit — und was die Stadt dafür zahlt, ist Lohn an einen
+ * Menschen und wird als `WAGE` gebucht.
  *
  * **`PUBLIC_REPAIR` stand hier bis 5.79 und ist ersatzlos gestrichen.** Seit 5.78 kostet
  * Instandsetzen keine Münze mehr, sondern Aktionspunkte; die Buchung entfiel mit der
@@ -94,9 +95,7 @@ export const KASSENABFLUESSE = [
 	/** Lohn an einen Bürger — Tagelohn an städtischen Bauten, Sold der Wache. */
 	'WAGE',
 	/** Die Aufwandsentschädigung an einen Amtsinhaber (4.7b). */
-	'STIPEND',
-	/** Ein öffentlicher Neubau aus der Kasse. */
-	'PUBLIC_BUILD'
+	'STIPEND'
 ] as const;
 
 export type Kassenzufluss = (typeof KASSENZUFLUESSE)[number];
@@ -104,14 +103,24 @@ export type Kassenabfluss = (typeof KASSENABFLUESSE)[number];
 export type Kassengrund = Kassenzufluss | Kassenabfluss;
 
 /**
- * Bekommt bei dieser Ausgabe ein Mensch das Geld?
+ * Wohin Geld fließt, ohne bei jemandem anzukommen.
  *
- * **Das ist die Frage, für die dieses Buch gebaut wurde.** Punkt 66 hat 2026 festgehalten,
- * dass Geld den Besitzer wechselt und nicht entsteht; die Gegenrichtung stand nie dabei —
- * es darf auch nicht verschwinden (Punkt 102). Wo hier `false` steht, verschwindet es.
+ * **Diese Liste ist seit 5.93 leer, und das ist der Punkt** (Punkt 102). Sie hat vier
+ * Einträge gehabt: den privaten Bau, den Auftrag, den Ausbau — und zuletzt Erschließung
+ * und öffentlichen Bau. Jeder davon ist zu Arbeit geworden, und Arbeit hat einen
+ * Empfänger.
+ *
+ * **Sie bleibt trotzdem stehen.** Punkt 66 hat 2026 festgehalten, dass Geld den Besitzer
+ * wechselt und nicht entsteht; die Gegenrichtung stand nie dabei — es darf auch nicht
+ * verschwinden. Wer hier einen Grund einträgt, sagt damit: Dieses Geld ist aus der Welt.
+ * Die leere Liste ist die Aussage, dass es zurzeit keinen solchen Grund gibt, und kein
+ * Versehen.
  */
+const OHNE_EMPFAENGER: readonly Kassenabfluss[] = [];
+
+/** Bekommt bei dieser Ausgabe ein Mensch das Geld? */
 export function hatEmpfaenger(grund: Kassenabfluss): boolean {
-	return grund === 'WAGE' || grund === 'STIPEND';
+	return !OHNE_EMPFAENGER.includes(grund);
 }
 
 export interface Kassenbuch {

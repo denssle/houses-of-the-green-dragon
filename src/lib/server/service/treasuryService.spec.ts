@@ -68,10 +68,10 @@ describe('Das Kassenbuch', () => {
 	});
 
 	it('senkt die Kasse und schreibt den Grund mit', async () => {
-		await treasuryService.ausgeben(stadtId, 25, 'PUBLIC_BUILD');
+		await treasuryService.ausgeben(stadtId, 25, 'STIPEND');
 
 		expect(await kasse()).toBe(975);
-		expect(treasuryService.kassenbuch().abfluss).toEqual({ PUBLIC_BUILD: 25 });
+		expect(treasuryService.kassenbuch().abfluss).toEqual({ STIPEND: 25 });
 	});
 
 	it('zählt denselben Grund zusammen, gleich aus welchem Dienst er kommt', async () => {
@@ -89,10 +89,10 @@ describe('Das Kassenbuch', () => {
 		// als Karteileiche zurück — und im Messbericht sieht eine Zeile, die nie erscheint,
 		// aus wie „ist nie vorgekommen". Genau so ist es einmal fehlgedeutet worden.
 		//
-		// **`DEVELOPMENT` ist mit 5.92 aus demselben Grund gefallen** (Punkt 102): Die
-		// Erschließung kostet seither Arbeit statt Münzen, und was die Stadt den Vermessern
-		// zahlt, ist Lohn — also `WAGE`.
-		expect(treasuryService.KASSENABFLUESSE).toEqual(['WAGE', 'STIPEND', 'PUBLIC_BUILD']);
+		// **`DEVELOPMENT` (5.92) und `PUBLIC_BUILD` (5.93) sind aus demselben Grund
+		// gefallen** (Punkt 102): Erschließen und öffentliches Bauen kosten seither Arbeit
+		// statt Münzen, und was die Stadt dafür zahlt, ist Lohn — also `WAGE`.
+		expect(treasuryService.KASSENABFLUESSE).toEqual(['WAGE', 'STIPEND']);
 	});
 
 	it('bucht nichts, wo nichts fließt', async () => {
@@ -106,13 +106,14 @@ describe('Das Kassenbuch', () => {
 	});
 
 	it('weiß, welche Ausgabe bei einem Menschen ankommt', async () => {
-		// **Die eigentliche Frage des Punktes.** Seit 5.92 hat nur noch **eine** der drei
-		// Ausgabearten keinen Empfänger; ihre Summe ist der Teil des vernichteten Geldes,
-		// den die Stadt selbst verbrennt — und mit der Erschließung ist der größte Posten
-		// daraus verschwunden.
-		expect(treasuryService.hatEmpfaenger('WAGE')).toBe(true);
-		expect(treasuryService.hatEmpfaenger('STIPEND')).toBe(true);
-		expect(treasuryService.hatEmpfaenger('PUBLIC_BUILD')).toBe(false);
+		// **Die eigentliche Frage des Punktes — und seit 5.93 hat sie überall dieselbe
+		// Antwort** (Punkt 102): Jede Ausgabe der Stadtkasse kommt bei einem Menschen an.
+		// Die Liste der Gründe ohne Empfänger ist leer, und das ist eine Aussage, kein
+		// Versehen: Wer wieder einen einträgt, sagt damit, dass dieses Geld aus der Welt
+		// fällt.
+		for (const grund of treasuryService.KASSENABFLUESSE) {
+			expect(treasuryService.hatEmpfaenger(grund)).toBe(true);
+		}
 	});
 
 	it('schreibt mit, was ein Dienst bewegt — ohne dass der Dienst daran denken muss', async () => {

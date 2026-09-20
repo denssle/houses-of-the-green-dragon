@@ -44,7 +44,6 @@ import * as worldService from '$lib/server/service/worldService';
 import { checkName, type NameCheck } from '$lib/game/naming.logic';
 import { TAGELOHN } from '$lib/game/economy';
 import { seasonOf } from '$lib/game/time';
-import * as treasuryService from '$lib/server/service/treasuryService';
 
 /**
  * Der Hof, der zu jeder Pacht gehört.
@@ -463,11 +462,10 @@ export async function build(
 				// **Ein Rohbau, kein Haus** (5.76, Punkt 102). Der Zustand beginnt bei null
 				// und steigt mit jeder Schicht; solange wohnt und arbeitet hier niemand.
 				//
-				// **Öffentliche Bauten bleiben vorerst ausgenommen** (`buildPublicBuilding`
-				// legt weiter fertig an). Der Rohbau gehörte auch dorthin — die Stadtkasse
-				// zahlte dann Löhne statt Preise, und genau der Rückweg fehlt ihr (Punkt
-				// 100). Er hinge aber an einer zweiten Frage: was ein Bürgermeister
-				// beschließt, wenn der Bau nichts mehr kostet. Ein Schritt, eine Frage.
+				// **Öffentliche Bauten ebenso, seit 5.93** — die Ausnahme, die hier stand,
+				// ist gefallen. Die Stadtkasse zahlt jetzt auch dort Löhne statt Preise,
+				// und das ist zugleich der Rückweg zu den Bürgern, der ihr fehlte (Punkt
+				// 100).
 				condition: 0,
 				underConstruction: true,
 				// **Der Auftrag hängt sofort aus.** Ohne ihn wäre die Baustelle für jeden
@@ -1126,6 +1124,15 @@ export async function renovatePublicBuilding(
 		// Aktionspunkte ein. Deshalb wird hier nichts mehr gebucht, und deshalb ist der
 		// Grund `PUBLIC_REPAIR` mit 5.79 aus dem Kassenbuch verschwunden: Zahlt die Stadt
 		// für Instandsetzung, tut sie es über den Tagelohn, und der ist `WAGE`.
+		// **Am Rohbau wird gebaut, nicht renoviert** (5.93) — dieselbe Tür wie beim privaten
+		// Haus seit 5.76 und aus demselben Grund: Der Amtsinhaber ist der Ausweg, ohne den
+		// ein öffentlicher Rohbau eine Falle wäre. Findet die Stadt keine Hände, legt er
+		// selbst Hand an; und weil er das schon für den Verfall tut, ist es dieselbe
+		// Amtshandlung und keine zweite.
+		if (isUnderConstruction(gebäude.dataValues)) {
+			return eigeneBauschicht(gebäude, characterId, zustandVon(gebäude, tick), tick, t);
+		}
+
 		const ergebnis = renovate(
 			{ actionPoints: amtsperson.dataValues.actionPoints },
 			zustandVon(gebäude, tick),
@@ -1236,12 +1243,17 @@ export async function buildPublicBuilding(
 			return { ok: false, reason: 'LIMIT_REACHED' } as const;
 		}
 
-		const stadt = await RegionModel.findByPk(regionId, { transaction: t, lock: t.LOCK.UPDATE });
-		const kasse: number = stadt?.dataValues.treasury ?? 0;
-		const preis: number = levelOf(vorlage, 1).price;
-		if (kasse < preis) return { ok: false, reason: 'NOT_ENOUGH_MONEY' } as const;
-
-		await treasuryService.ausgeben(regionId, preis, 'PUBLIC_BUILD', t);
+		// **Die Stadt zahlt keinen Preis mehr, sie zahlt Löhne** (5.93, Punkt 102). Bis 5.92
+		// zog dieser Bau seinen Betrag aus der Kasse, und niemand bekam ihn — nachdem die
+		// Erschließung geschlossen war, trug er allein, was die Stadt noch vernichtete. Was
+		// hier entsteht, ist deshalb ein **Rohbau** wie jeder private seit 5.76: Er steht
+		// bei null, und zwanzig Schichten machen ein Haus daraus.
+		//
+		// **Einen Aushang braucht er nicht.** An einem öffentlichen Bau darf ohnehin jeder
+		// für den Tagelohn arbeiten (`isPublicWorks`, 5.26) — `repairWage` ist der Weg für
+		// private Aufträge, und ihn hier zu setzen hieße, dieselbe Erlaubnis zweimal zu
+		// führen.
+		//
 		// Herrenloser Grund wird mit dem Bau zu staedtischem: Er ist vergeben, nur eben an
 		// die Allgemeinheit — dieselbe Regel wie beim Seed.
 		if (grundstueck.dataValues.ownerType !== 'CITY') {
@@ -1252,6 +1264,8 @@ export async function buildPublicBuilding(
 				id: randomUUID(),
 				name: vorlage.initialName,
 				optionId,
+				condition: 0,
+				underConstruction: true,
 				lastConditionTick: tick,
 				PlotId: plotId,
 				ownerType: 'CITY'

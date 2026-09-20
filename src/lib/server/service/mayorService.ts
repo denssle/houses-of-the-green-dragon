@@ -28,7 +28,7 @@ import { developmentWageBill } from '$lib/game/auction.logic';
  * trotzdem in die Lage ein, weil die **Rücklage** an ihr hängt.
  */
 const GRUNDSTUECKE_JE_ERSCHLIESSUNG = 2;
-import { levelOf } from '$lib/model/buildingTemplate';
+import { isUnderConstruction } from '$lib/game/building.logic';
 import * as auctionService from '$lib/server/service/auctionService';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as electionService from '$lib/server/service/electionService';
@@ -58,7 +58,7 @@ export interface GovernanceReport {
 /** Welche öffentlichen Bauten heute schon etwas bewirken — und was sie kosten. */
 async function fehlenderBau(
 	regionId: string
-): Promise<{ optionId: number; price: number; name: string } | undefined> {
+): Promise<{ optionId: number; name: string } | undefined> {
 	const vorhanden = await buildingService.getBuildingsInRegion(regionId);
 
 	// **Nur Bauten mit Wirkung.** Ein Rathaus mehr ändert nichts; die Schule bildet aus
@@ -76,7 +76,7 @@ async function fehlenderBau(
 		if (!vorlage) continue;
 		if (vorhanden.some((haus) => haus.optionId === optionId)) continue;
 
-		return { optionId, price: levelOf(vorlage, 1).price, name: vorlage.initialName };
+		return { optionId, name: vorlage.initialName };
 	}
 	return undefined;
 }
@@ -137,7 +137,13 @@ export async function governAsNpcMayor(
 	const baufaellig = oeffentliche
 		.filter((haus) => haus.condition < MAYOR_MAINTAINS_BELOW)
 		.sort((a, b) => a.condition - b.condition)[0];
-	const unbesetzt = await offeneStelle(oeffentliche);
+	// **Ein Rohbau sucht keine Gesellen** (5.93). Ohne diese Zeile schriebe der
+	// Amtsinhaber die Stelle einer Schule aus, die noch kein Dach hat — `offerJob` weist
+	// das mit `UNDER_CONSTRUCTION` ab, und weil `PAY_WAGE` ganz oben in der Rangfolge
+	// steht, wäre es in jedem Tick dieselbe vergebliche Amtshandlung. Dieselbe Lücke wie
+	// in den Punkten 59, 63, 87 und 97: Die Entscheidung prüfte etwas anderes als die
+	// Ausführung.
+	const unbesetzt = await offeneStelle(oeffentliche.filter((haus) => !isUnderConstruction(haus)));
 	const fehlt = await fehlenderBau(regionId);
 	const freiesLand = await buildingService.getFreeCityPlots(regionId);
 
@@ -158,7 +164,14 @@ export async function governAsNpcMayor(
 		// Herrichten auch bei leerer Kasse wählt — vorher war es die erste Amtshandlung,
 		// die ausfiel, wenn kein Geld da war, und ausgerechnet dann ist sie am nötigsten.
 		repairCost: 0,
-		missingBuildingPrice: fehlt?.price ?? null,
+		// **Und nur, wenn ein Platz dafür da ist** (5.93). Bis 5.92 verdeckte die
+		// Kassenschwelle diese Lücke: Wer nicht genug Geld hatte, kam gar nicht so weit.
+		// Jetzt kostet der Bau nichts mehr, und ohne diese Frage beschlösse der
+		// Amtsinhaber in jedem Tick eine Schule, für die kein Grundstück frei ist — die
+		// Amtshandlung bricht dann in `buildPublicBuilding` ab, und der Tick ist verbrannt.
+		// Dieselbe Lehre wie in den Punkten 59, 63, 87 und 97.
+		missingBuilding: fehlt !== undefined && freiesLand.length > 0,
+		publicConstruction: oeffentliche.some(isUnderConstruction),
 		landExhausted: freiesLand.length === 0,
 		developmentRunning: await auctionService.developmentRunning(regionId),
 		developmentCost: developmentWageBill(GRUNDSTUECKE_JE_ERSCHLIESSUNG),
@@ -202,9 +215,9 @@ export async function governAsNpcMayor(
 				fehlt.optionId,
 				platz.id
 			);
-			return ergebnis.ok
-				? { action: entschluss, detail: fehlt.name, value: fehlt.price }
-				: undefined;
+			// **Kein Betrag mehr** (5.93): Der Bau kostet die Kasse nichts; eine Zahl hier
+			// behauptete eine Münze, die niemand gezahlt hat.
+			return ergebnis.ok ? { action: entschluss, detail: fehlt.name } : undefined;
 		}
 
 		case 'DEVELOP_LAND': {

@@ -42,7 +42,17 @@ export interface CityState {
 	repairNeeded: boolean;
 	repairCost: number;
 	/** Fehlt ein öffentlicher Bau, der jetzt schon wirkt? */
-	missingBuildingPrice: number | null;
+	missingBuilding: boolean;
+	/**
+	 * Steht schon ein öffentlicher Rohbau?
+	 *
+	 * **Die Bremse, die an die Stelle des Preises getreten ist** (5.93, Punkt 102) —
+	 * dieselbe wie bei der Erschließung einen Schritt zuvor. Seit ein öffentlicher Bau
+	 * nichts mehr kostet, hielte die Kasse den Amtsinhaber nicht mehr davon ab, in jedem
+	 * Tick das nächste Fundament zu legen; die Stadt hätte drei angefangene Häuser und
+	 * kein fertiges.
+	 */
+	publicConstruction: boolean;
 	/** Ist die Stadt ohne freies Bauland? */
 	landExhausted: boolean;
 	/**
@@ -296,7 +306,11 @@ export function nextTaxChange(state: CityState): TaxChange | undefined {
  * sind vorerst aus dem Spiel.
  */
 export function decideMayorAction(state: CityState): MayorAction {
-	const ruecklage: number = treasuryReserve(state.developmentCost);
+	// **Die Rücklage kommt in dieser Rangfolge nicht mehr vor** (5.93, Punkt 102). Sie war
+	// die Schranke vor dem Bauen und dem Erschließen, solange beides einen Preis hatte;
+	// seit beides Arbeit ist, gibt es hier nichts mehr zu decken. Was sie weiterhin tut,
+	// steht unter `nextStipendChange` und `nextTaxChange`: Dort ist sie der Maßstab dafür,
+	// ob eine Kasse knapp oder üppig ist — und das ist sie geblieben.
 
 	// 1. Die Stellen besetzen, die die Stadt zu vergeben hat. Eine Schmiede ohne Schmied
 	//    stellt nichts her, obwohl die Stadt sie bezahlt hat. Steht ganz oben, weil es
@@ -307,12 +321,14 @@ export function decideMayorAction(state: CityState): MayorAction {
 	// 2. Erhalten, was steht. Billiger als neu bauen, und der Verfall frisst still.
 	if (state.repairNeeded && state.treasury >= state.repairCost) return 'REPAIR';
 
-	// 3. Bauen, was fehlt — aber nur über der Rücklage: Löhne und Instandhaltung laufen
-	//    weiter.
-	if (
-		state.missingBuildingPrice !== null &&
-		state.treasury - state.missingBuildingPrice >= ruecklage
-	) {
+	// 3. Bauen, was fehlt — und zwar eines nach dem anderen.
+	//
+	//    **Ohne Kassenprüfung, seit es nichts mehr kostet** (5.93, Punkt 102). Bis 5.92
+	//    zahlte die Stadt einen Preis, den niemand bekam; jetzt zahlt sie den Leuten, die
+	//    das Haus bauen, und zwar Schicht für Schicht. Was die Rücklage schützen sollte —
+	//    dass Löhne und Instandhaltung weiterlaufen —, schützt sich damit selbst: Ist die
+	//    Kasse leer, findet die nächste Schicht nicht statt, und der Rohbau wartet.
+	if (state.missingBuilding && !state.publicConstruction) {
 		return 'BUILD_PUBLIC';
 	}
 

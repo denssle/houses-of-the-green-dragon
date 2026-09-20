@@ -354,7 +354,11 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 				`    ${haeuser
 					.map(
 						(haus) =>
-							`${haus.dataValues.name}(${haus.dataValues.optionId}) Stufe ${haus.dataValues.level}`
+							// **Was noch keines ist, steht auch nicht da** (5.93): Ein Rohbau in dieser
+							// Liste sah aus wie ein fertiges Haus — seit auch die Stadt so baut, ist der
+							// Unterschied die halbe Auskunft.
+							`${haus.dataValues.name}(${haus.dataValues.optionId}) Stufe ${haus.dataValues.level}` +
+							(haus.dataValues.underConstruction ? ' [im Bau]' : '')
 					)
 					.sort()
 					.join(', ')}`

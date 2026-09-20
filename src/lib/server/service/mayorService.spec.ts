@@ -201,7 +201,28 @@ describe('Der Bürgermeister im Amt', () => {
 
 		expect(getan?.action).toBe('BUILD_PUBLIC');
 		expect(await Building.count({ where: { ownerType: 'CITY' } })).toBe(1);
-		expect(await kasse()).toBeLessThan(1000);
+		// **Und die Kasse bleibt unangetastet** (5.93, Punkt 102): Was entsteht, ist ein
+		// Rohbau, den Schichten fertig machen — bezahlt wird die Arbeit, nicht ein Preis.
+		expect(await kasse()).toBe(1000);
+		expect(
+			(await Building.findOne({ where: { ownerType: 'CITY' } }))!.dataValues.underConstruction
+		).toBe(true);
+	});
+
+	it('legt kein zweites Fundament, solange das erste offen ist', async () => {
+		// Die Bremse, die an die Stelle des Preises getreten ist — dieselbe wie bei der
+		// Erschließung (5.92): Ohne sie beschlösse der Amtsinhaber in jedem Tick den
+		// nächsten Bau, und die Stadt hätte drei angefangene Häuser und kein fertiges.
+		const npc = await person('Amtsperson');
+		await insAmt(npc);
+		await stadtgrund();
+		await stadtgrund();
+
+		await mayorService.governAsNpcMayor(stadtId, JETZT);
+		const zweiter = await mayorService.governAsNpcMayor(stadtId, JETZT + 1);
+
+		expect(zweiter?.action).not.toBe('BUILD_PUBLIC');
+		expect(await Building.count({ where: { ownerType: 'CITY' } })).toBe(1);
 	});
 
 	/**
