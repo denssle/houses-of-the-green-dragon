@@ -388,9 +388,7 @@ export const actions = {
 		return {
 			message:
 				ergebnis.plots +
-				' Grundstücke ausgewiesen für ' +
-				ergebnis.spent +
-				' Münzen — sie gehen unter den Hammer.'
+				' Grundstücke ausgewiesen — die Vermesser können anfangen, bezahlt wird je Schicht.'
 		};
 	},
 

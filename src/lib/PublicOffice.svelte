@@ -220,11 +220,23 @@
 	<section>
 		<h3>Bauland erschließen</h3>
 		<p>
-			Die Stadt zahlt {amt.development.costPerPlot} Münzen je Grundstück; was dabei entsteht, wird versteigert.
+			Ausweisen kostet die Stadt keine Münze — es kostet Arbeit: {amt.development.shiftsPerPlot} Schichten
+			je Grundstück, die Vermesser und Wegebauer für den Tagelohn aus der Stadtkasse leisten. Was dabei
+			fertig wird, geht unter den Hammer.
 			{#if amt.development.running > 0}
 				Zurzeit laufen {amt.development.running} Versteigerungen.
 			{/if}
 		</p>
+		{#if amt.development.sites.length > 0}
+			<p>
+				In Arbeit:
+				{#each amt.development.sites as baustelle, i (baustelle.id)}{i > 0
+						? ', '
+						: ''}{baustelle.address}
+					({baustelle.shifts} von {baustelle.shiftsNeeded} Schichten){/each}. Solange daran
+				gearbeitet wird, weist die Stadt nichts Neues aus.
+			</p>
+		{/if}
 		<form method="POST" action="?/develop" use:enhance>
 			<input
 				type="number"
@@ -238,8 +250,8 @@
 		</form>
 		<p>
 			<small>
-				Ein sicheres Geschäft ist es nicht: Sind alle satt, bleibt die Stadt auf den Kosten sitzen.
-				Ist Bauland knapp, bringt die Versteigerung ein Vielfaches.
+				Ein sicheres Geschäft ist es nicht: Sind alle satt, bleibt die Stadt auf dem Lohn sitzen,
+				den sie gezahlt hat. Ist Bauland knapp, bringt die Versteigerung ein Vielfaches.
 			</small>
 		</p>
 	</section>

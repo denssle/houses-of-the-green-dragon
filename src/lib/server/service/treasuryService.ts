@@ -71,8 +71,14 @@ export const KASSENZUFLUESSE = [
 /**
  * Wohin es ging — und ob jemand es bekommt.
  *
- * **Die zweite Frage ist die wichtigere.** Zwei dieser vier Ausgaben haben keinen
+ * **Die zweite Frage ist die wichtigere.** Eine dieser drei Ausgaben hat keinen
  * Empfänger: Das Geld verlässt die Kasse und ist aus der Welt — siehe `hatEmpfaenger`.
+ *
+ * **`DEVELOPMENT` stand hier bis 5.91 und ist aus demselben Grund gestrichen** (Punkt
+ * 102): Seit 5.92 kostet die Erschließung keine Münzen mehr, sondern zwanzig Schichten
+ * Arbeit je Grundstück — was die Stadt dafür zahlt, ist Lohn an einen Menschen und wird
+ * als `WAGE` gebucht. Damit hat die Kasse zum ersten Mal **keinen Abfluss mehr ohne
+ * Empfänger außer dem öffentlichen Bau**.
  *
  * **`PUBLIC_REPAIR` stand hier bis 5.79 und ist ersatzlos gestrichen.** Seit 5.78 kostet
  * Instandsetzen keine Münze mehr, sondern Aktionspunkte; die Buchung entfiel mit der
@@ -90,9 +96,7 @@ export const KASSENABFLUESSE = [
 	/** Die Aufwandsentschädigung an einen Amtsinhaber (4.7b). */
 	'STIPEND',
 	/** Ein öffentlicher Neubau aus der Kasse. */
-	'PUBLIC_BUILD',
-	/** Die Erschließung neuen Baulands (4.9a). */
-	'DEVELOPMENT'
+	'PUBLIC_BUILD'
 ] as const;
 
 export type Kassenzufluss = (typeof KASSENZUFLUESSE)[number];

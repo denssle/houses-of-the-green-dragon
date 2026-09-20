@@ -153,6 +153,11 @@ function satz(entry: ChronicleLine): string {
 			return `In ${haus} hat es gebrannt — der Zustand fiel um ${entry.value ?? 0}.`;
 		case 'LAND_DEVELOPED':
 			return `${wer} hat ${entry.value ?? 0} neue Grundstücke ausweisen lassen.`;
+		case 'LAND_SURVEYED':
+			// `detail` trägt die Lage — ein Grundstück hat keinen Namen, nur eine Adresse.
+			return entry.detail
+				? `${wer} hat ${entry.detail} fertig erschlossen — die Fläche kommt unter den Hammer.`
+				: `${wer} hat ein Grundstück fertig erschlossen.`;
 		case 'AUCTION_WON':
 			return `${wer} hat ein Grundstück ersteigert — für ${entry.value ?? 0} Münzen.`;
 		case 'MOVED_IN':

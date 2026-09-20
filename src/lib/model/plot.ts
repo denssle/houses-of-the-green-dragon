@@ -15,4 +15,11 @@ export interface Plot {
 	ownerType: OwnerType;
 	ownerCharacterId: string | null;
 	forSalePrice: number | null;
+	/**
+	 * Geleistete Erschließungsschichten — `null`, wenn keine Erschließung läuft (5.92).
+	 *
+	 * Wer wissen will, ob hier gebaut werden darf, fragt `isUnderDevelopment()`: Die Null
+	 * ist der Anfang einer Baustelle, nicht ihr Fehlen.
+	 */
+	developmentShifts: number | null;
 }

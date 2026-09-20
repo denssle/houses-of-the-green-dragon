@@ -31,6 +31,11 @@ export const EVENT_KINDS = [
 	'RAID',
 	'FIRE',
 	'LAND_DEVELOPED',
+	// **Was dabei fertig wird, ist ein zweites Ereignis** (5.92, Punkt 102). Ausweisen ist
+	// eine Amtshandlung, Erschließen ist Arbeit — und zwischen beiden liegen zwanzig
+	// Schichten. Beides unter einen Namen zu legen hieße, im Bericht nicht unterscheiden
+	// zu können, ob die Stadt beschlossen oder zustande gebracht hat.
+	'LAND_SURVEYED',
 	'AUCTION_WON',
 	// Wo jemand gewohnt hat und was er erworben hat, gehört zu den wenigen Angaben, die ein
 	// ganzes Leben umspannen — und stand bis 5.3 nirgends.

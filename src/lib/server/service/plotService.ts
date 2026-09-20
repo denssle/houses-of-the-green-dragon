@@ -9,6 +9,7 @@ import { Plot as PlotModel } from '$lib/db/model/plot';
 import type { Plot } from '$lib/model/plot';
 import { convertToPlot } from '$lib/db/attributes/plot.attributes';
 import { buyPlot as buyPlotLogic } from '$lib/game/buildingAction.logic';
+import { isUnderDevelopment } from '$lib/game/auction.logic';
 import { purchase } from '$lib/game/building.logic';
 import { PLOT_PRICE } from '$lib/game/economy';
 import * as characterService from '$lib/server/service/characterService';
@@ -56,6 +57,11 @@ async function withBuildings(plots: Plot[]): Promise<PlotOnList[]> {
 /**
  * Nie vergebenes Bauland in der Region — das, was sich zum Festpreis kaufen lässt.
  *
+ * **Und ohne die, auf denen noch die Vermesser stehen** (5.92, Punkt 102): Eine
+ * Erschließung ist eine Baustelle, bis die letzte Schicht getan ist. Stünde sie hier mit,
+ * ließe sich für vierzig Münzen ein Weg kaufen, den die Stadt gerade erst anlegen lässt —
+ * und die Arbeit, die sie bezahlt hat, hätte jemand anders geerbt.
+ *
  * **Ohne die Grundstücke, auf die gerade geboten wird.** Neu erschlossenes Land gehört
  * zunächst niemandem und stünde deshalb hier mit; wer wollte, könnte es für den alten
  * Festpreis mitnehmen, statt zu bieten — und die Versteigerung wäre eine Zierde. Beim
@@ -74,6 +80,7 @@ export async function getFreeBuildingLand(regionId: string): Promise<PlotOnList[
 			RegionId: regionId,
 			type: 'BUILDING_LAND',
 			ownerType: 'NONE',
+			developmentShifts: null,
 			...(unterDemHammer.length > 0 ? { id: { [Op.notIn]: unterDemHammer } } : {})
 		},
 		order: [['address', 'ASC']]
@@ -123,6 +130,13 @@ export async function buyPlot(plotId: string, characterId: string): Promise<BuyR
 			transaction: t
 		});
 		if (laeuft > 0) return { ok: false, reason: 'NOT_FOR_SALE' } as const;
+
+		// Dasselbe für die Baustelle (5.92): Was noch erschlossen wird, ist kein
+		// Grundstück, das man kaufen könnte — und aus der Liste zu nehmen genügt nicht,
+		// solange das Formular die Kennung annimmt.
+		if (isUnderDevelopment(grundstück.dataValues)) {
+			return { ok: false, reason: 'NOT_FOR_SALE' } as const;
+		}
 
 		const ergebnis = buyPlotLogic(
 			{ money: käufer.dataValues.money, regionId: käufer.dataValues.RegionId },

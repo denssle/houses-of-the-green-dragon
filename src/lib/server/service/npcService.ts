@@ -56,6 +56,7 @@ import * as employmentService from '$lib/server/service/employmentService';
 import * as lawService from '$lib/server/service/lawService';
 import * as skillService from '$lib/server/service/skillService';
 import { repairWage } from '$lib/game/buildingAction.logic';
+import * as auctionService from '$lib/server/service/auctionService';
 import { isWorthTaking } from '$lib/game/employment.logic';
 
 /**
@@ -364,6 +365,13 @@ async function handelnd(
 			if (lage.state.hasJob) {
 				return buch('WORK', await employmentService.workForEmployer(npcId));
 			}
+			// **Oder auf der Erschließung** (5.92): Dieselbe Lohnarbeit, nur ohne Haus —
+			// Wege, Gräben, Vermessung, bezahlt aus der Stadtkasse. Welches von beiden es
+			// wird, hat die Lageaufnahme nach dem Lohn entschieden; hier steht höchstens
+			// eines von beiden.
+			if (lage.surveyPlotId) {
+				return buch('WORK', await auctionService.surveyForHire(npcId, lage.surveyPlotId));
+			}
 			return buch(
 				'WORK',
 				lage.workplaceId
@@ -621,6 +629,8 @@ async function lageAufnehmen(
 	| {
 			state: NpcState;
 			workplaceId?: string;
+			/** Die Erschließung, an der er arbeiten würde — statt an einem Haus (5.92). */
+			surveyPlotId?: string;
 			homeId?: string;
 			matchId?: string;
 			jobId?: string;
@@ -856,7 +866,9 @@ async function lageAufnehmen(
 		wahlzettel.candidates.length > 0 &&
 		isSettled(werte.arrivedTick ?? null, tick);
 
-	const arbeitsplatz = await freierArbeitsplatz(haeuserDerStadt, npcId, werte.RegionId);
+	const arbeit = await freierArbeitsplatz(haeuserDerStadt, npcId, werte.RegionId);
+	const arbeitsplatz: string | undefined = arbeit?.art === 'BUILDING' ? arbeit.id : undefined;
+	const vermessung: string | undefined = arbeit?.art === 'SURVEY' ? arbeit.id : undefined;
 	const stelle = await employmentService.getJobOf(npcId);
 	// Wer schon eine Stelle hat, sieht sich nicht um — ein NPC, der jede Stunde den
 	// Arbeitgeber wechselt, wäre kein Handwerker, sondern ein Flattermann.
@@ -879,6 +891,7 @@ async function lageAufnehmen(
 		regionId: werte.RegionId,
 		cheapestBread: await tradeService.cheapestOffer(werte.RegionId, 'BREAD', npcId),
 		workplaceId: arbeitsplatz,
+		surveyPlotId: vermessung,
 		homeId: unterkunft,
 		matchId: partner,
 		jobId: besser?.buildingId,
@@ -899,7 +912,7 @@ async function lageAufnehmen(
 			homeAvailable: unterkunft !== undefined,
 			isMarried: werte.spouseId !== null,
 			isAdult: ageInYears(werte.birthTick, tick) >= AGE_OF_MAJORITY,
-			workAvailable: arbeitsplatz !== undefined || stelle !== undefined,
+			workAvailable: arbeit !== undefined || stelle !== undefined,
 			hasJob: stelle !== undefined,
 			betterJobAvailable: besser !== undefined,
 			matchAvailable: partner !== undefined,
@@ -1001,11 +1014,20 @@ async function lageAufnehmen(
  *
  * Genommen wird der schlechteste Bau: Wo es am nötigsten ist, wird zuerst gearbeitet.
  */
+/**
+ * Wo für Lohn gearbeitet werden kann — ein Haus oder eine Erschließung.
+ *
+ * **Die Baustelle der Stadt steht in derselben Reihe wie die Häuser** (5.92, Punkt 102).
+ * Sie wäre sonst Arbeit, die niemand findet: Die Vermessung hängt an keinem Gebäude, und
+ * wer nur Häuser durchsieht, läuft an ihr vorbei.
+ */
+export type Arbeitsangebot = { art: 'BUILDING'; id: string } | { art: 'SURVEY'; id: string };
+
 async function freierArbeitsplatz(
 	haeuser: Haus[],
 	characterId: string,
 	regionId: string
-): Promise<string | undefined> {
+): Promise<Arbeitsangebot | undefined> {
 	const zuHaben = haeuser.filter(
 		(haus) =>
 			haus.condition < CONDITION_MAX &&
@@ -1033,7 +1055,43 @@ async function freierArbeitsplatz(
 	// nicht bezahlen können. Eine Abfrage je Aufnahme — dieselbe Größenordnung wie die
 	// Beutel, und aus demselben Grund gerechtfertigt.
 	const koennen: number = await skillService.getLevel(characterId, 'CONSTRUCTION');
-	return (await zahlbare(nachLohn, regionId, koennen))[0]?.id;
+	const bestesHaus = (await zahlbare(nachLohn, regionId, koennen))[0];
+
+	// **Und die Erschließung** (5.92). Sie zahlt den Tagelohn wie jeder städtische Bau —
+	// wer also anderswo **mehr** geboten bekommt, geht dorthin. Bei gleichem Lohn geht die
+	// Vermessung vor: Sie ist das, woran die Stadt am dringendsten hängt, denn ohne
+	// Bauland wächst sie nicht (Punkt 93), während ein angeschlagenes Haus wenigstens
+	// steht.
+	const bestesHausLohn: number = bestesHaus
+		? repairWage(bestesHaus.repairWage ?? TAGELOHN, koennen)
+		: 0;
+	if (bestesHaus && bestesHausLohn > repairWage(TAGELOHN, koennen)) {
+		return { art: 'BUILDING', id: bestesHaus.id };
+	}
+
+	const baustelle = await zahlbareBaustelle(regionId, koennen);
+	if (baustelle) return { art: 'SURVEY', id: baustelle };
+	return bestesHaus ? { art: 'BUILDING', id: bestesHaus.id } : undefined;
+}
+
+/**
+ * Die Erschließung, an der gearbeitet werden kann — wenn die Stadt den Lohn aufbringt.
+ *
+ * **Geprüft wird der Beutel und nicht nur der Aushang**, dieselbe Lehre wie in 5.81 und
+ * 5.82 (Punkt 106): Eine Baustelle, deren Auftraggeber nicht zahlen kann, zieht sonst
+ * Tick für Tick jemanden an, lässt eine Transaktion scheitern und steht am nächsten Tag
+ * wieder da. Bei der Stadt ist das keine Kleinigkeit — sie kann leer sein, und seit 5.92
+ * beschließt sie die Erschließung auch dann.
+ */
+async function zahlbareBaustelle(regionId: string, koennen: number): Promise<string | undefined> {
+	const baustellen = await auctionService.getDevelopments(regionId);
+	if (baustellen.length === 0) return undefined;
+
+	const kasse: number = (await Region.findByPk(regionId))?.dataValues.treasury ?? 0;
+	if (kasse < repairWage(TAGELOHN, koennen)) return undefined;
+
+	// Die am weitesten gediehene zuerst: Ein fertiges Grundstück nützt mehr als zwei halbe.
+	return [...baustellen].sort((a, b) => b.shifts - a.shifts)[0].id;
 }
 
 /**

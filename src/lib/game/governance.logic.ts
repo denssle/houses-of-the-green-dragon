@@ -45,6 +45,25 @@ export interface CityState {
 	missingBuildingPrice: number | null;
 	/** Ist die Stadt ohne freies Bauland? */
 	landExhausted: boolean;
+	/**
+	 * Läuft schon eine Erschließung?
+	 *
+	 * **Die Bremse, die an die Stelle des Preises getreten ist** (5.92, Punkt 102). Seit
+	 * das Ausweisen nichts mehr kostet, sondern Arbeit ist, fehlt der Kasse der Riegel:
+	 * Ohne diese Frage wiese der Amtsinhaber in jedem Tick zwei weitere Parzellen aus,
+	 * solange kein Bauland frei ist — und die Stadt hätte hundert angefangene Wege statt
+	 * eines fertigen Grundstücks.
+	 */
+	developmentRunning: boolean;
+	/**
+	 * Was eine Erschließung an Lohn kostet — der Maßstab für die Rücklage.
+	 *
+	 * **Nicht mehr die Schwelle, an der die Handlung hängt.** Bis 5.91 war es ein Preis,
+	 * der im Voraus in der Kasse stehen musste; jetzt ist es die Lohnsumme, die über
+	 * zwanzig Schichten je Parzelle anfällt. Die Zahl ist dieselbe geblieben (zwei
+	 * Parzellen zu je zwanzig Schichten Tagelohn sind 120 Münzen) — sie sagt nur etwas
+	 * anderes.
+	 */
 	developmentCost: number;
 	/** Die geltenden Sätze der Steuern, an denen ein Amtsinhaber drehen darf. */
 	rates: Record<NpcMayorLaw, number>;
@@ -297,9 +316,18 @@ export function decideMayorAction(state: CityState): MayorAction {
 		return 'BUILD_PUBLIC';
 	}
 
-	// 4. Land erschließen, wenn keines mehr frei ist. Die Versteigerung bringt es zurück,
-	//    aber erst später — deshalb nach dem Bauen.
-	if (state.landExhausted && state.treasury - state.developmentCost >= ruecklage) {
+	// 4. Land erschließen, wenn keines mehr frei ist — und wenn nicht ohnehin schon eine
+	//    Erschließung läuft.
+	//
+	//    **Ohne Kassenprüfung, seit es nichts mehr kostet** (5.92, Punkt 102). Die alte
+	//    Bedingung verlangte den vollen Preis plus Rücklage, also 360 Münzen, ehe der
+	//    Amtsinhaber überhaupt ausweisen durfte. In Grünau stand die Kasse bei 13, und
+	//    deshalb ist dort seit Tick 5291 kein Grundstück mehr entstanden, während die halbe
+	//    Stadt `GOAL_UNREACHABLE` meldete, weil es keines gab. Eine Amtshandlung, deren
+	//    Kosten erst beim Arbeiten anfallen, darf nicht an einer Schwelle scheitern, die
+	//    den ganzen Betrag im Voraus sehen will: Was die Löhne angeht, entscheidet die
+	//    Schicht, nicht der Beschluss.
+	if (state.landExhausted && !state.developmentRunning) {
 		return 'DEVELOP_LAND';
 	}
 

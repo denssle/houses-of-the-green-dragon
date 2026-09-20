@@ -5,7 +5,7 @@ import * as employmentService from '$lib/server/service/employmentService';
 import * as lawService from '$lib/server/service/lawService';
 import * as worldService from '$lib/server/service/worldService';
 import { OFFICE_NAMES } from '$lib/game/election.logic';
-import { DEVELOPMENT_COST_PER_PLOT, MAX_PLOTS_PER_DEVELOPMENT } from '$lib/game/auction.logic';
+import { DEVELOPMENT_SHIFTS_PER_PLOT, MAX_PLOTS_PER_DEVELOPMENT } from '$lib/game/auction.logic';
 import { LAW_KINDS, LAW_RULES } from '$lib/game/law.logic';
 import { ticksToYears, yearOf } from '$lib/game/time';
 
@@ -73,10 +73,14 @@ export async function officeData(regionId: string, characterId: string) {
 				};
 			})
 		),
-		// Erschließen: was es kostet und wie viel auf einmal geht.
+		// Erschließen: was es an Arbeit kostet, wie viel auf einmal geht — und was gerade
+		// läuft. **Beides zählt** (5.92): die Baustellen, auf denen noch gearbeitet wird,
+		// und die Versteigerungen der fertigen. Solange eine Baustelle offen ist, weist der
+		// Amtsinhaber keine neue aus.
 		development: {
-			costPerPlot: DEVELOPMENT_COST_PER_PLOT,
+			shiftsPerPlot: DEVELOPMENT_SHIFTS_PER_PLOT,
 			max: MAX_PLOTS_PER_DEVELOPMENT,
+			sites: await auctionService.getDevelopments(regionId),
 			running: (await auctionService.getOpenAuctions(regionId)).length
 		},
 		freePlots: await buildingService.getFreeCityPlots(regionId),

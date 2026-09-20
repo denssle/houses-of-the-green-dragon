@@ -12,17 +12,20 @@ import {
 	type NpcMayorLaw
 } from '$lib/game/governance.logic';
 import { LAW_RULES } from '$lib/game/law.logic';
-import { DEVELOPMENT_COST_PER_PLOT } from '$lib/game/auction.logic';
+import { developmentWageBill } from '$lib/game/auction.logic';
 
 /**
  * Wie viele Grundstücke der Amtsinhaber auf einmal erschließen lässt.
  *
  * **Die Zahl steht hier einmal, weil sie zweimal gebraucht wird**: in der Lage, aus der
- * `decideMayorAction()` entscheidet, und in der Amtshandlung, die zahlt. Bis 5.90 stand
- * in der Lage der Preis für *ein* Grundstück, erschlossen wurden aber zwei — der
+ * `decideMayorAction()` entscheidet, und in der Amtshandlung, die sie anlegt. Bis 5.90
+ * stand in der Lage der Preis für *ein* Grundstück, erschlossen wurden aber zwei — der
  * Bürgermeister beschloss die Erschließung also zum halben Preis und unterschritt danach
  * die Rücklage, die Löhne und Instandhaltung sichern soll. Bei einer Kasse von 180 blieben
  * 60 statt der vorgesehenen 120.
+ *
+ * Seit 5.92 zahlt die Erschließung keinen Preis mehr, sondern Löhne; die Zahl geht
+ * trotzdem in die Lage ein, weil die **Rücklage** an ihr hängt.
  */
 const GRUNDSTUECKE_JE_ERSCHLIESSUNG = 2;
 import { levelOf } from '$lib/model/buildingTemplate';
@@ -157,7 +160,8 @@ export async function governAsNpcMayor(
 		repairCost: 0,
 		missingBuildingPrice: fehlt?.price ?? null,
 		landExhausted: freiesLand.length === 0,
-		developmentCost: DEVELOPMENT_COST_PER_PLOT * GRUNDSTUECKE_JE_ERSCHLIESSUNG,
+		developmentRunning: await auctionService.developmentRunning(regionId),
+		developmentCost: developmentWageBill(GRUNDSTUECKE_JE_ERSCHLIESSUNG),
 		rates: await saetze(regionId),
 		taxBase: await bemessungsgrundlage(regionId),
 		rateAgeInTicks: await satzalter(regionId, tick),

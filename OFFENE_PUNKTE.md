@@ -8,104 +8,104 @@ spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
 bis 10). Die Spalte „Fällig vor" sagt etwas anderes und bleibt deshalb: nicht wann er
 gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen ist.
 
-| #   | Punkt                                                                                 | Fällig vor                   | Art          |
-| --- | ------------------------------------------------------------------------------------- | ---------------------------- | ------------ |
-| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                               | Heiltrank (4.6c)             | Entwurf      |
-| 6   | Kämpfe und Verletzungen                                                               | Waffen und Gift (4.6c)       | Entwurf      |
-| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                     | 4.7 / Punkt 6                | Entwurf      |
-| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                              | 4.8                          | Entwurf      |
-| 14  | Startbedingungen für neue Spieler — **entschieden mit 5.6**                           | —                            | erledigt     |
-| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**    | 4.8 / Punkt 6                | Entwurf      |
-| 63  | Der geschlossene Kreis — **erledigt mit 5.16**                                        | —                            | erledigt     |
-| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                          | laufend                      | Entwurf      |
-| 65  | Der Zehnt erreicht die Felder nicht — **behoben (5.24), festgehalten (5.51)**         | —                            | erledigt     |
-| 66  | Wo Geld aus dem Nichts kam — **Zehnt geschlossen mit 5.83**; Raubgut offen (Punkt 23) | Punkt 23                     | teilweise    |
-| 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern           | dem nächsten Messlauf        | Befund       |
-| 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt         | —                            | erledigt     |
-| 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                     | —                            | erledigt     |
-| 70  | Niemand lernt ein Handwerk, das es nicht gibt — alle schmieden, keiner backt          | der Brotkette                | Entscheidung |
-| 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                                | —                            | erledigt     |
-| 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                     | —                            | erledigt     |
-| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                               | laufend                      | Entwurf      |
-| 74  | Der Auftrag an Tagelöhner — **erledigt mit 5.27 und 5.78**; offen bleibt der Ausbau   | —                            | erledigt     |
-| 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                     | Punkte 15, 20, 51            | Entwurf      |
-| 54  | Ein Test, der würfelt — **erledigt mit 5.55**                                         | —                            | erledigt     |
-| 75  | Die Testläufe dauern zu lange — jede Änderung wartet darauf                           | laufend                      | Befund       |
-| 76  | Niemand kann sich einen Ausbau leisten — 86 Münzen gegen 340                          | dem nächsten Messlauf        | Befund       |
-| 78  | Werben kennt kein Alter — **behoben mit 5.41**                                        | —                            | erledigt     |
-| 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                  | —                            | erledigt     |
-| 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                    | —                            | erledigt     |
-| 81  | Fremde Häuser haben keine Seite — **erledigt mit 5.46**                               | —                            | erledigt     |
-| 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                             | —                            | erledigt     |
-| 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**             | —                            | erledigt     |
-| 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung          | dem nächsten Schritt         | Befund       |
-| 85  | Der Kornspeicher backt aus dem Nichts — **gemessen, mit 5.87 zurückgenommen**         | Punkt 110 / dem Backhaus     | teilweise    |
-| 86  | Die städtische Schmiede sperrte die Eisenkette — **behoben mit 5.65**                 | —                            | erledigt     |
-| 87  | Ein Sparziel, das ins Leere führt — Bauland ohne Werkstatt darauf                     | dem nächsten Messlauf        | Befund       |
-| 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick             | laufend                      | Befund       |
-| 89  | Ein Betrieb je Handwerk, für immer — ihre Zahl ist eine Konstante der Vorlagen        | Punkte 15, 34                | Entwurf      |
-| 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung    | Punkte 76, 16                | Entwurf      |
-| 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen      | laufend                      | teilweise    |
-| 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                    | Punkte 70, 40                | Befund       |
-| 93  | `GOAL_UNREACHABLE` deckt 85 % des Müßiggangs — **in Produktion belegt: kein Bauland** | Punkte 16, 76                | Befund       |
-| 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                        | Punkt 31                     | Befund       |
-| 95  | Die Werkzeuge maßen einen anderen Takt als den, der läuft — **behoben mit 5.69**      | —                            | erledigt     |
-| 96  | Die Stadtkasse ohne Einnahme — **gebaut mit 5.71**, fiskalisch wirksam; siehe 100     | Punkt 100                    | teilweise    |
-| 97  | `VOTE` ohne Bürgerrecht — **behoben mit 5.72**; das Bürgerrecht selbst ist Punkt 49   | —                            | erledigt     |
-| 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten   | Punkte 89, 16                | Befund       |
-| 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen          | —                            | erledigt     |
-| 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote          | dem nächsten Schritt         | Befund       |
-| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                    | Punkt 100                    | teilweise    |
-| 102 | Jeder Bau verbrennt seinen Preis — **nur noch die Erschließung**, sie trägt 100 %     | Punkte 93, 100, 66           | teilweise    |
-| 103 | Startreihenfolge — **Mechanismus gefunden, behoben mit 5.84** (die Pachtwahl)         | Punkte 85, 70, 15            | teilweise    |
-| 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu  | —                            | erledigt     |
-| 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                   | Punkt 16                     | Befund       |
-| 106 | Ein Bauauftrag, den niemand bezahlen kann — **behoben mit 5.81**                      | —                            | erledigt     |
-| 107 | Die Grundsteuer brachte ein Viertel — **hinfällig**: Streuung, kein Fehler            | —                            | hinfällig    |
-| 108 | Bilanz und Kassenbuch gehen auseinander — **erledigt mit 5.83**, die Bilanz geht auf  | —                            | erledigt     |
-| 109 | Der Zehnt trifft nur die erste Stufe jeder Kette — Verarbeitung ist steuerfrei        | Punkte 15, 46                | Entscheidung |
-| 110 | Die Werkstattwahl schickt jeden in dieselbe Sackgasse — **behoben mit 5.87**          | —                            | erledigt     |
-| 111 | Warum einer nichts tut, stand nirgends — **Werkzeug gebaut mit 5.88**                 | —                            | erledigt     |
-| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                | laufend                      | Entwurf      |
-| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                   | laufend                      | Entwurf      |
-| 20  | Verschleiß von Gegenständen                                                           | Kleidung und Werkzeug (4.6c) | Entwurf      |
-| 15  | Weltinhalte: Berufe, Waren und Rezepte                                                | laufend                      | Entwurf      |
-| 16  | Balancing im engeren Sinn                                                             | laufend                      | laufend      |
-| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                       | zweite Stadt / Erschließung  | Entwurf      |
-| 32  | Die Ämter: Zuschnitt, was gewählt und was ernannt wird, der Richter                   | Ämter über den Bürgermeister | Entscheidung |
-| 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen  | laufend                      | Entwurf      |
-| 34  | Wer einen Handwerksbetrieb führen darf                                                | Berufe (Punkt 15)            | Entwurf      |
-| 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                         | zusammen mit Punkt 34        | Entwurf      |
-| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                          | Punkt 34                     | Entwurf      |
-| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                  | Punkte 23, 39, 43            | Entwurf      |
-| 48  | Was beim Tod aus den Zurückbleibenden wird — **erledigt mit 5.1**                     | —                            | erledigt     |
-| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                    | Zuwanderung (Punkt 41)       | Entwurf      |
-| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten     | Fernhandel                   | Entwurf      |
-| 51  | Mitgift, Testament und Stiftung                                                       | laufend                      | Entwurf      |
-| 52  | Der Lebenslauf — **erledigt mit 5.3**                                                 | —                            | erledigt     |
-| 53  | Zwei Knöpfe namens „Arbeiten" — **erledigt mit 5.31**                                 | —                            | erledigt     |
-| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                | laufend                      | Entwurf      |
-| 36  | Gebäude und Betriebe benennen — **erledigt mit 5.2**                                  | —                            | erledigt     |
-| 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum         | —                            | erledigt     |
-| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                     | Ehe für alle                 | Entwurf      |
-| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit              | später                       | Entwurf      |
-| 40  | Der abwesende Spieler — **erledigt mit 5.5**, zwei Restfragen                         | —                            | erledigt     |
-| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist               | zweite Stadt                 | Entwurf      |
-| 42  | Kindern einen Namen geben — **erledigt mit 5.2**                                      | —                            | erledigt     |
-| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                           | erste verliehene Münze       | Entwurf      |
-| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                       | Punkt 43 / Punkt 23          | Entwurf      |
-| 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                   | —                            | erledigt     |
-| 26  | Datensicherung per Cron, einmal wiederhergestellt — **erledigt mit 5.8**              | —                            | erledigt     |
-| 55  | Die Stadt kommt nicht in Gang — **erledigt mit 5.11**, ein Rest bleibt                | —                            | erledigt     |
-| 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt — **erledigt mit 5.11**        | —                            | erledigt     |
-| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                 | laufend                      | Entwurf      |
-| 62  | Geburts- und Errichtungsdatum — **erledigt mit 5.52**                                 | —                            | erledigt     |
-| 57  | Der Takt der Welt steht nirgends — **erledigt mit 5.53**                              | —                            | erledigt     |
-| 58  | Wege, die nur beschrieben und nicht verlinkt sind — **erledigt mit 5.52**             | —                            | erledigt     |
-| 59  | Aktionen, die scheitern müssen — **erledigt mit 5.54** (Bauseite)                     | —                            | erledigt     |
-| 60  | Listen ohne Ordnung, Wahlen ohne Termin — **erledigt mit 5.52**                       | —                            | erledigt     |
-| 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen     | —                            | erledigt     |
-| 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                               | —                            | erledigt     |
+| #   | Punkt                                                                                          | Fällig vor                   | Art          |
+| --- | ---------------------------------------------------------------------------------------------- | ---------------------------- | ------------ |
+| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                                        | Heiltrank (4.6c)             | Entwurf      |
+| 6   | Kämpfe und Verletzungen                                                                        | Waffen und Gift (4.6c)       | Entwurf      |
+| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                              | 4.7 / Punkt 6                | Entwurf      |
+| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                                       | 4.8                          | Entwurf      |
+| 14  | Startbedingungen für neue Spieler — **entschieden mit 5.6**                                    | —                            | erledigt     |
+| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**             | 4.8 / Punkt 6                | Entwurf      |
+| 63  | Der geschlossene Kreis — **erledigt mit 5.16**                                                 | —                            | erledigt     |
+| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                                   | laufend                      | Entwurf      |
+| 65  | Der Zehnt erreicht die Felder nicht — **behoben (5.24), festgehalten (5.51)**                  | —                            | erledigt     |
+| 66  | Wo Geld aus dem Nichts kam — **Zehnt geschlossen mit 5.83**; Raubgut offen (Punkt 23)          | Punkt 23                     | teilweise    |
+| 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern                    | dem nächsten Messlauf        | Befund       |
+| 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt                  | —                            | erledigt     |
+| 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                              | —                            | erledigt     |
+| 70  | Niemand lernt ein Handwerk, das es nicht gibt — alle schmieden, keiner backt                   | der Brotkette                | Entscheidung |
+| 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                                         | —                            | erledigt     |
+| 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                              | —                            | erledigt     |
+| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                                        | laufend                      | Entwurf      |
+| 74  | Der Auftrag an Tagelöhner — **erledigt mit 5.27 und 5.78**; offen bleibt der Ausbau            | —                            | erledigt     |
+| 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                              | Punkte 15, 20, 51            | Entwurf      |
+| 54  | Ein Test, der würfelt — **erledigt mit 5.55**                                                  | —                            | erledigt     |
+| 75  | Die Testläufe dauern zu lange — jede Änderung wartet darauf                                    | laufend                      | Befund       |
+| 76  | Niemand kann sich einen Ausbau leisten — 86 Münzen gegen 340                                   | dem nächsten Messlauf        | Befund       |
+| 78  | Werben kennt kein Alter — **behoben mit 5.41**                                                 | —                            | erledigt     |
+| 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                           | —                            | erledigt     |
+| 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                             | —                            | erledigt     |
+| 81  | Fremde Häuser haben keine Seite — **erledigt mit 5.46**                                        | —                            | erledigt     |
+| 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                                      | —                            | erledigt     |
+| 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**                      | —                            | erledigt     |
+| 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung                   | dem nächsten Schritt         | Befund       |
+| 85  | Der Kornspeicher backt aus dem Nichts — **gemessen, mit 5.87 zurückgenommen**                  | Punkt 110 / dem Backhaus     | teilweise    |
+| 86  | Die städtische Schmiede sperrte die Eisenkette — **behoben mit 5.65**                          | —                            | erledigt     |
+| 87  | Ein Sparziel, das ins Leere führt — Bauland ohne Werkstatt darauf                              | dem nächsten Messlauf        | Befund       |
+| 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick                      | laufend                      | Befund       |
+| 89  | Ein Betrieb je Handwerk, für immer — ihre Zahl ist eine Konstante der Vorlagen                 | Punkte 15, 34                | Entwurf      |
+| 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung             | Punkte 76, 16                | Entwurf      |
+| 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen               | laufend                      | teilweise    |
+| 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                             | Punkte 70, 40                | Befund       |
+| 93  | `GOAL_UNREACHABLE` — kein Bauland; **die Schwelle fiel mit 5.92**, Gegenprobe offen            | Punkte 16, 76                | Befund       |
+| 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                                 | Punkt 31                     | Befund       |
+| 95  | Die Werkzeuge maßen einen anderen Takt als den, der läuft — **behoben mit 5.69**               | —                            | erledigt     |
+| 96  | Die Stadtkasse ohne Einnahme — **gebaut mit 5.71**, fiskalisch wirksam; siehe 100              | Punkt 100                    | teilweise    |
+| 97  | `VOTE` ohne Bürgerrecht — **behoben mit 5.72**; das Bürgerrecht selbst ist Punkt 49            | —                            | erledigt     |
+| 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten            | Punkte 89, 16                | Befund       |
+| 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen                   | —                            | erledigt     |
+| 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote                   | dem nächsten Schritt         | Befund       |
+| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                             | Punkt 100                    | teilweise    |
+| 102 | Jeder Bau verbrennt seinen Preis — **Erschließung behoben (5.92)**; offen: der öffentliche Bau | Punkt 100                    | teilweise    |
+| 103 | Startreihenfolge — **Mechanismus gefunden, behoben mit 5.84** (die Pachtwahl)                  | Punkte 85, 70, 15            | teilweise    |
+| 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu           | —                            | erledigt     |
+| 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                            | Punkt 16                     | Befund       |
+| 106 | Ein Bauauftrag, den niemand bezahlen kann — **behoben mit 5.81**                               | —                            | erledigt     |
+| 107 | Die Grundsteuer brachte ein Viertel — **hinfällig**: Streuung, kein Fehler                     | —                            | hinfällig    |
+| 108 | Bilanz und Kassenbuch gehen auseinander — **erledigt mit 5.83**, die Bilanz geht auf           | —                            | erledigt     |
+| 109 | Der Zehnt trifft nur die erste Stufe jeder Kette — Verarbeitung ist steuerfrei                 | Punkte 15, 46                | Entscheidung |
+| 110 | Die Werkstattwahl schickt jeden in dieselbe Sackgasse — **behoben mit 5.87**                   | —                            | erledigt     |
+| 111 | Warum einer nichts tut, stand nirgends — **Werkzeug gebaut mit 5.88**                          | —                            | erledigt     |
+| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                         | laufend                      | Entwurf      |
+| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                            | laufend                      | Entwurf      |
+| 20  | Verschleiß von Gegenständen                                                                    | Kleidung und Werkzeug (4.6c) | Entwurf      |
+| 15  | Weltinhalte: Berufe, Waren und Rezepte                                                         | laufend                      | Entwurf      |
+| 16  | Balancing im engeren Sinn                                                                      | laufend                      | laufend      |
+| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                                | zweite Stadt / Erschließung  | Entwurf      |
+| 32  | Die Ämter: Zuschnitt, was gewählt und was ernannt wird, der Richter                            | Ämter über den Bürgermeister | Entscheidung |
+| 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen           | laufend                      | Entwurf      |
+| 34  | Wer einen Handwerksbetrieb führen darf                                                         | Berufe (Punkt 15)            | Entwurf      |
+| 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                                  | zusammen mit Punkt 34        | Entwurf      |
+| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                                   | Punkt 34                     | Entwurf      |
+| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                           | Punkte 23, 39, 43            | Entwurf      |
+| 48  | Was beim Tod aus den Zurückbleibenden wird — **erledigt mit 5.1**                              | —                            | erledigt     |
+| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                             | Zuwanderung (Punkt 41)       | Entwurf      |
+| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten              | Fernhandel                   | Entwurf      |
+| 51  | Mitgift, Testament und Stiftung                                                                | laufend                      | Entwurf      |
+| 52  | Der Lebenslauf — **erledigt mit 5.3**                                                          | —                            | erledigt     |
+| 53  | Zwei Knöpfe namens „Arbeiten" — **erledigt mit 5.31**                                          | —                            | erledigt     |
+| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                         | laufend                      | Entwurf      |
+| 36  | Gebäude und Betriebe benennen — **erledigt mit 5.2**                                           | —                            | erledigt     |
+| 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum                  | —                            | erledigt     |
+| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                              | Ehe für alle                 | Entwurf      |
+| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit                       | später                       | Entwurf      |
+| 40  | Der abwesende Spieler — **erledigt mit 5.5**, zwei Restfragen                                  | —                            | erledigt     |
+| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist                        | zweite Stadt                 | Entwurf      |
+| 42  | Kindern einen Namen geben — **erledigt mit 5.2**                                               | —                            | erledigt     |
+| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                                    | erste verliehene Münze       | Entwurf      |
+| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                                | Punkt 43 / Punkt 23          | Entwurf      |
+| 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                            | —                            | erledigt     |
+| 26  | Datensicherung per Cron, einmal wiederhergestellt — **erledigt mit 5.8**                       | —                            | erledigt     |
+| 55  | Die Stadt kommt nicht in Gang — **erledigt mit 5.11**, ein Rest bleibt                         | —                            | erledigt     |
+| 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt — **erledigt mit 5.11**                 | —                            | erledigt     |
+| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                          | laufend                      | Entwurf      |
+| 62  | Geburts- und Errichtungsdatum — **erledigt mit 5.52**                                          | —                            | erledigt     |
+| 57  | Der Takt der Welt steht nirgends — **erledigt mit 5.53**                                       | —                            | erledigt     |
+| 58  | Wege, die nur beschrieben und nicht verlinkt sind — **erledigt mit 5.52**                      | —                            | erledigt     |
+| 59  | Aktionen, die scheitern müssen — **erledigt mit 5.54** (Bauseite)                              | —                            | erledigt     |
+| 60  | Listen ohne Ordnung, Wahlen ohne Termin — **erledigt mit 5.52**                                | —                            | erledigt     |
+| 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen              | —                            | erledigt     |
+| 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                                        | —                            | erledigt     |
 
 #### Noch zu erfassen:
 
@@ -2904,6 +2904,16 @@ zahlt anders, verhungert anders. Die Saat hält die Ausgangslage fest, nicht den
 Einzelne Zahlen taugen hier als Richtung, nicht als Messwert; wer eine Wirkung belegen
 will, braucht mehrere Läufe oder mehrere Saaten.
 
+**Nachtrag vom 20.09.2026: Die Sperre ist gefallen** (5.92, Punkt 102). Die Erschließung
+kostet keine Münzen mehr, sondern Arbeit — und damit ist die Schwelle weg, an der Grünau
+seit Tick 5291 stand: Der Amtsinhaber weist aus, sobald kein Bauland frei ist, und die
+Löhne fallen erst an, wenn jemand gräbt. Was `GOAL_UNREACHABLE` daraus macht, ist damit
+**noch nicht** beantwortet: Im Lauf über 500 Ticks steht die Zahl bei 240 statt 272 — eine
+Richtung, kein Beleg, und in diesem kurzen Lauf war Bauland ohnehin nicht der Engpass. Die
+Gegenprobe ist ein Lauf über 2000 Ticks; die ehrliche Gegenrechnung steht in Punkt 102:
+Zwischen Beschluss und Bauplatz liegen jetzt zwanzig Schichten, und es wird immer nur eine
+Erschließung auf einmal betrieben.
+
 ### 94. Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück
 
 **Befund vom 27.08.2026, entstanden mit 5.67.** Seit die Ernte am Markt verkäuflich ist,
@@ -3535,7 +3545,7 @@ unverändert: im Messlauf die Summen je Handlungsart mitführen, was `BUY_FOOD` 
 was `WORK` eingebracht hat. Das ist ein eigener Schritt, weil es die NPC-Schleife berührt
 und die schon einmal an ihrer Abfragezahl gelitten hat (Punkt 67).
 
-### 102. Jeder Bau verbrennt seinen Preis — der Bau behoben mit 5.76 (der Rohbau)
+### 102. Jeder Bau verbrennt seinen Preis — behoben (5.92), der öffentliche Bau bleibt
 
 **Befund vom 29.08.2026, aus der ersten gemessenen Bilanz (Punkt 100).** 91 Prozent des
 Geldes, das in die Welt kommt, verschwindet wieder. Die größte Stelle ist eine einzige
@@ -3783,6 +3793,10 @@ aus der Stadtkasse (4.9a) und damit derselbe Fall wie der öffentliche Bau: Er v
 derselben zweiten Frage, was ein Bürgermeister beschließt, wenn Erschließung nichts mehr
 kostet.
 
+**Genau so gebaut mit 5.92** (20.09.2026): zwanzig Schichten je Parzelle zum Tagelohn, und
+die zweite Frage ist beantwortet — es läuft höchstens eine Erschließung auf einmal. Damit
+ist dieser Weg zu, und offen bleibt allein der öffentliche Bau.
+
 Und er ist der Grund, dass die Stadtkasse am Ende des Laufs **250 Münzen** hält, obwohl
 sie 10436 eingenommen hat: Was sie nicht als Lohn oder Sold zurückgibt, verbrennt sie im
 Bauland. Damit ist dieser Punkt der nächste am Rückweg aus Punkt 100.
@@ -3812,6 +3826,82 @@ beschließt, wenn Erschließung nichts mehr kostet.
 nach jedem Neustart leer. Für Messläufe ist das richtig so, für die laufende Welt heißt es:
 Diese Aufschlüsselung gibt es dort nicht. Was oben über Grünaus Kasse steht, ist aus
 `events`, `laws` und `regions` rekonstruiert.
+
+**Behoben mit 5.92 — die Erschließung ist Arbeit geworden.** Der letzte der vier Wege ist
+zu, und zwar auf demselben Weg wie die drei davor: **Ein Grundstück ausweisen ist ein
+Vorhaben, kein Kauf.**
+
+- `developLand()` zieht keine Münze mehr aus der Kasse. Was entsteht, ist eine
+  **Baustelle** — ein Grundstück mit `developmentShifts`, das niemand kaufen, bebauen oder
+  ersteigern kann, weil es noch keines ist.
+- Fertig wird sie durch **zwanzig Schichten** je Parzelle (`surveyForHire`): Vermessen,
+  Graben, Wegebau, bezahlt zum Tagelohn aus der Stadtkasse — an Menschen. Zwanzig
+  Schichten zum Tagelohn sind sechzig Münzen, also **genau der Preis von vorher**; der
+  Messlauf soll zeigen, wohin dasselbe Geld fließt, und nicht, dass Erschließen billiger
+  wurde. Derselbe Maßstab wie beim Rohbau (5.76).
+- Wer die letzte Schicht leistet, eröffnet die Versteigerung — in derselben Transaktion.
+- `DEVELOPMENT` ist aus dem Kassenbuch **ersatzlos gestrichen** (die Lehre aus 5.79: Wer
+  eine Zahlung entfernt, nimmt ihren Grund mit). Was die Stadt zahlt, ist `WAGE`.
+
+**Und die Schwelle ist mitgefallen — das ist der zweite Teil dieses Schritts.** Was nichts
+kostet, braucht keine Deckung: Der Amtsinhaber weist aus, sobald kein Bauland frei ist,
+ohne Kassenprüfung. Damit ist auch **Punkt 93 beantwortet**, von der anderen Seite her: In
+Grünau stand die Kasse bei 13 Münzen gegen eine Schwelle von 180, und deshalb ist dort seit
+Tick 5291 kein Grundstück mehr entstanden, während die halbe Stadt `GOAL_UNREACHABLE`
+meldete. Löhne fallen je Schicht an und werden je Schicht geprüft (`zahlbareBaustelle`,
+dieselbe Lehre wie 5.81/5.82) — eine leere Kasse **verzögert** die Erschließung jetzt,
+statt sie zu verbieten.
+
+**An die Stelle des Preises tritt eine andere Bremse:** Es läuft höchstens eine
+Erschließung. Ohne sie wiese ein Bürgermeister in jedem Tick zwei weitere Parzellen aus,
+solange kein Bauland frei ist, und die Stadt hätte hundert angefangene Wege statt eines
+fertigen Grundstücks. Das ist die Antwort auf die Frage, die dieser Punkt zweimal offen
+gelassen hat — was ein Bürgermeister beschließt, wenn Erschließung nichts mehr kostet.
+
+**Gemessen am 20.09.2026, Saat 86, 500 Ticks — derselbe Lauf vor und nach dem Schritt:**
+
+|                       |       vor 5.92 |      nach 5.92 |
+| --------------------- | -------------: | -------------: |
+| Von außen zugeflossen |           1719 |           1719 |
+| **Vernichtet**        | **480** (28 %) | **350** (20 %) |
+| davon `DEVELOPMENT`   |            480 |          **0** |
+| davon `PUBLIC_BUILD`  |              0 |            350 |
+| Geld bei Bürgern      |           1654 |           1291 |
+| Stadtkasse            |            271 |            764 |
+| Bestand insgesamt     |           1925 |           2055 |
+| Verkauftes Bauland    |       640 (16) |       400 (10) |
+| Zuschläge (`AUCTION`) |              0 |            120 |
+| `CONTENT` / `NO_WORK` |      1564 / 26 |       2281 / 4 |
+
+**Die Erschließung vernichtet nichts mehr** — das ist keine Streuung, sondern Konstruktion:
+Den Posten gibt es nicht mehr. Was bleibt, ist **der öffentliche Bau**, und er ist jetzt
+das, was die Erschließung war: der einzige Abfluss der Kasse ohne Empfänger. Die 350 sind
+in diesem Lauf sogar neu — vorher baute die Stadt gar nichts, weil ihr Geld im Bauland
+verbrannte.
+
+**Zwei Dinge, die dieser Lauf nicht beantwortet**, und die deshalb hier stehen statt in
+einer Erfolgsmeldung:
+
+- **Bauland entsteht langsamer.** 400 statt 640 Münzen Erstverkauf, zehn statt sechzehn
+  Grundstücke. Das ist die ehrliche Kehrseite: Zwischen Beschluss und Bauplatz liegen jetzt
+  zwanzig Schichten, und es wird immer nur eine Erschließung auf einmal betrieben. Ob das
+  den Engpass aus Punkt 93 mildert oder nur verschiebt, sagt erst ein Lauf über 2000 Ticks.
+- **Die Bürger halten 363 Münzen weniger, die Stadt 493 mehr.** Der Gesamtbestand steigt um
+  genau die 130, die nicht mehr verbrannt werden — aber die Verteilung hat sich verschoben,
+  und über die Ursache steht hier nichts, weil ein Lauf sie nicht hergibt (`GRANARY` 744
+  statt 488, `STIPEND` 218 statt 401, die Grundsteuer kam erstmals zustande). Dieselbe
+  Warnung wie nach 5.91: Dieselbe Saat hält die Ausgangslage fest, nicht den Verlauf.
+
+**Zum Werkzeug:** Der Bericht sagt jetzt, was die Erschließung wirklich tut — „Bauland
+ausgewiesen N Parzellen, davon fertig erschlossen M, versteigert K". Seit ihr Lohn unter
+`WAGE` steht, wäre sonst aus keiner Zahl mehr zu sehen, ob die Stadt beschlossen oder
+zustande gebracht hat. Dazu ein eigenes Chronikereignis `LAND_SURVEYED`: Ausweisen ist eine
+Amtshandlung, Erschließen ist Arbeit, und zwischen beiden liegen zwanzig Schichten.
+
+**Was damit offen bleibt — einer:** der öffentliche Bau (`PUBLIC_BUILD`). Er ist derselbe
+Fall und hängt an derselben zweiten Frage, die dieser Schritt für die Erschließung
+beantwortet hat: Ein städtischer Rohbau hieße, dass die Kasse Löhne zahlt statt Preise —
+und genau dieser Rückweg zu den Bürgern fehlt ihr in Punkt 100.
 
 ### 103. Die Wirtschaft hat eine Startreihenfolge, die niemand einhält
 

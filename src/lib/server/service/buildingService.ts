@@ -1284,7 +1284,10 @@ export async function getFreeCityPlots(
 	regionId: string
 ): Promise<{ id: string; address: string }[]> {
 	const flaechen = await PlotModel.findAll({
-		where: { RegionId: regionId, ownerType: { [Op.in]: ['CITY', 'NONE'] } }
+		// **Keine Baustellen** (5.92): Eine Fläche, auf der noch die Vermesser stehen, ist
+		// kein freier Bauplatz — weder für die Schule des Bürgermeisters noch für die
+		// Frage, ob der Stadt das Land ausgegangen ist.
+		where: { RegionId: regionId, ownerType: { [Op.in]: ['CITY', 'NONE'] }, developmentShifts: null }
 	});
 
 	const frei: { id: string; address: string }[] = [];

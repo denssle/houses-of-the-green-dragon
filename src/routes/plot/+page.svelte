@@ -131,6 +131,31 @@
 		</section>
 	{/if}
 
+	{#if data.developments.length > 0}
+		<section>
+			<h3>In Erschließung</h3>
+			<p>
+				<i>
+					Hier legt die Stadt Wege an und lässt vermessen. Wer Hand anlegt, bekommt den Tagelohn aus
+					der Stadtkasse — und wer die letzte Schicht tut, macht aus der Baustelle ein Grundstück,
+					das versteigert wird.
+				</i>
+			</p>
+			<ul>
+				{#each data.developments as baustelle (baustelle.id)}
+					<li>
+						<b>{baustelle.address}</b>
+						— {baustelle.shifts} von {baustelle.shiftsNeeded} Schichten
+						<form method="POST" action="?/survey" use:enhance>
+							<input type="hidden" name="plotId" value={baustelle.id} />
+							<button type="submit">Hand anlegen</button>
+						</form>
+					</li>
+				{/each}
+			</ul>
+		</section>
+	{/if}
+
 	<h3>Freies Bauland</h3>
 	<p><i>Was die Stadt noch nie vergeben hat — {data.price} Münzen je Grundstück.</i></p>
 	{#if data.freeLand.length === 0}

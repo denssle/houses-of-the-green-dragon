@@ -22,11 +22,13 @@ export interface PlotAttributes {
 	ownerType: OwnerType;
 	OwnerCharacterId: string | null;
 	forSalePrice: number | null;
+	/** Geleistete Erschließungsschichten — `null`, wenn keine Erschließung läuft (5.92). */
+	developmentShifts: number | null;
 }
 
 export type PlotCreationAttributes = Optional<
 	PlotAttributes,
-	'resourceType' | 'ownerType' | 'OwnerCharacterId' | 'forSalePrice'
+	'resourceType' | 'ownerType' | 'OwnerCharacterId' | 'forSalePrice' | 'developmentShifts'
 >;
 
 export function convertToPlot(attributes: PlotAttributes): Plot {
@@ -38,6 +40,7 @@ export function convertToPlot(attributes: PlotAttributes): Plot {
 		regionId: attributes.RegionId,
 		ownerType: attributes.ownerType,
 		ownerCharacterId: attributes.OwnerCharacterId,
-		forSalePrice: attributes.forSalePrice
+		forSalePrice: attributes.forSalePrice,
+		developmentShifts: attributes.developmentShifts
 	};
 }

@@ -34,6 +34,7 @@ function ruhig(werte: Partial<CityState> = {}): CityState {
 		repairCost: 40,
 		missingBuildingPrice: null,
 		landExhausted: false,
+		developmentRunning: false,
 		developmentCost: ERSCHLIESSUNG,
 		rates: { PROPERTY_TAX: LAW_RULES.PROPERTY_TAX.fallback, TITHE: LAW_RULES.TITHE.fallback },
 		// Elf Grundstücke in Bürgerhand und eine Pacht — die Lage im Messlauf nach vierzig
@@ -90,12 +91,31 @@ describe('Was ein Bürgermeister tut', () => {
 			expect(decideMayorAction(stadt)).toBe('DEVELOP_LAND');
 		});
 
+		it('weist auch mit leerer Kasse aus — es kostet nichts mehr', () => {
+			// **Die Sperre, hinter der Grünau stand** (5.92, Punkte 102 und 93): Die alte
+			// Bedingung verlangte 360 Münzen im Voraus, die Kasse hielt 13, und deshalb ist
+			// dort seit Tick 5291 kein Grundstück mehr entstanden. Seit die Erschließung
+			// Arbeit ist statt eines Preises, fällt der Lohn schichtweise an — und wird
+			// schichtweise geprüft.
+			expect(decideMayorAction(ruhig({ treasury: 0, landExhausted: true }))).toBe('DEVELOP_LAND');
+		});
+
+		it('weist nicht zweimal aus, solange die erste Baustelle offen ist', () => {
+			// Die Bremse, die an die Stelle des Preises getreten ist: Sonst hätte die Stadt
+			// hundert angefangene Wege statt eines fertigen Grundstücks.
+			const stadt = ruhig({ landExhausted: true, developmentRunning: true });
+
+			expect(decideMayorAction(stadt)).not.toBe('DEVELOP_LAND');
+		});
+
 		it('spart erst am eigenen Gehalt, dann an der Steuer der anderen', () => {
 			// **Der Unterschied zwischen einem Amt und einer Pfründe** (Punkte 93, 96). In
 			// Grünau stand die Kasse bei 13 Münzen, während die Entschädigung 50 je
 			// Spieljahr kostete — und der Amtsinhaber erhöhte sieben Jahre in Folge die
 			// Grundsteuer, weil das der einzige Hebel war, den er hatte.
-			const arm = ruhig({ treasury: 0, landExhausted: true });
+			// `developmentRunning`, damit nicht die Erschließung dazwischenkommt: Die kostet
+			// seit 5.92 nichts und geht deshalb vor — aber nur, solange keine läuft.
+			const arm = ruhig({ treasury: 0, landExhausted: true, developmentRunning: true });
 
 			expect(decideMayorAction(arm)).toBe('SET_STIPEND');
 			expect(nextStipendChange(arm)?.value).toBe(LAW_RULES.OFFICE_STIPEND.fallback - 1);
@@ -108,6 +128,7 @@ describe('Was ein Bürgermeister tut', () => {
 			const arm = ruhig({
 				treasury: 0,
 				landExhausted: true,
+				developmentRunning: true,
 				stipend: LAW_RULES.OFFICE_STIPEND.min
 			});
 

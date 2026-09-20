@@ -17,10 +17,11 @@ import * as electionService from '$lib/server/service/electionService';
 import {
 	AUCTION_TICKS,
 	BID_INCREMENT,
-	DEVELOPMENT_COST_PER_PLOT,
+	DEVELOPMENT_SHIFTS_PER_PLOT,
 	MINIMUM_BID
 } from '$lib/game/auction.logic';
 import { CAMPAIGN_TICKS } from '$lib/game/election.logic';
+import { TAGELOHN } from '$lib/game/economy';
 import { yearsToTicks } from '$lib/game/time';
 
 /**
@@ -68,9 +69,24 @@ async function geld(id: string): Promise<number> {
 	return (await Character.findByPk(id))!.dataValues.money;
 }
 
-/** Eine laufende Versteigerung — der Bürgermeister lässt ein Grundstück ausweisen. */
+/**
+ * Eine laufende Versteigerung — ausgewiesen und fertig erschlossen.
+ *
+ * **Seit 5.92 liegen dazwischen zwanzig Schichten** (Punkt 102): Ausweisen legt eine
+ * Baustelle an, unter den Hammer kommt sie erst, wenn jemand sie fertiggemacht hat. Die
+ * letzte Schicht geht hier den echten Weg — sie ist es, die die Versteigerung eröffnet.
+ */
 async function versteigerung(buergermeister: string): Promise<string> {
 	await auctionService.developLand(buergermeister, stadtId, 1);
+	const baustelle = (await auctionService.getDevelopments(stadtId))[0];
+	await Plot.update(
+		{ developmentShifts: DEVELOPMENT_SHIFTS_PER_PLOT - 1 },
+		{ where: { id: baustelle.id } }
+	);
+
+	const wegebauer = await person('Wegebauer', 0);
+	await auctionService.surveyForHire(wegebauer, baustelle.id);
+
 	const offen = await auctionService.getOpenAuctions(stadtId);
 	return offen[0].id;
 }
@@ -97,7 +113,7 @@ describe('Erschließung und Versteigerung', () => {
 	});
 
 	describe('erschließen', () => {
-		it('darf nur der Amtsinhaber, und die Stadt zahlt', async () => {
+		it('darf nur der Amtsinhaber — und was entsteht, ist eine Baustelle', async () => {
 			const buergermeister = await person('Amtsperson', 100);
 			const buerger = await person('Bürger', 100);
 			await insAmt(buergermeister);
@@ -109,23 +125,91 @@ describe('Erschließung und Versteigerung', () => {
 
 			const ergebnis = await auctionService.developLand(buergermeister, stadtId, 2);
 
-			expect(ergebnis).toEqual({ ok: true, plots: 2, spent: 2 * DEVELOPMENT_COST_PER_PLOT });
-			expect(await kasse()).toBe(1000 - 2 * DEVELOPMENT_COST_PER_PLOT);
+			// **Kein Preis mehr** (5.92, Punkt 102): Die Kasse rührt sich beim Beschließen
+			// nicht, und unter den Hammer kommt noch nichts. Was dasteht, sind zwei
+			// Baustellen.
+			expect(ergebnis).toEqual({ ok: true, plots: 2, spent: 0 });
+			expect(await kasse()).toBe(1000);
 			expect(await Plot.count()).toBe(2);
-			// Erschlossenes Land geht nicht in den Verkauf, sondern unter den Hammer.
-			expect(await auctionService.getOpenAuctions(stadtId)).toHaveLength(2);
+			expect(await auctionService.getOpenAuctions(stadtId)).toHaveLength(0);
+			expect(await auctionService.getDevelopments(stadtId)).toHaveLength(2);
 		});
 
-		it('scheitert an einer leeren Stadtkasse', async () => {
+		it('gelingt auch mit leerer Stadtkasse', async () => {
+			// **Die Schwelle, hinter der Grünau stand** (Punkt 93): 13 Münzen in der Kasse,
+			// 180 nötig, seit Tick 5291 kein Grundstück mehr. Der Lohn fällt jetzt je
+			// Schicht an — eine leere Kasse verzögert die Erschließung, statt sie zu
+			// verbieten.
 			const buergermeister = await person('Amtsperson', 100);
 			await insAmt(buergermeister);
-			await Region.update({ treasury: 10 }, { where: { id: stadtId } });
+			await Region.update({ treasury: 0 }, { where: { id: stadtId } });
+
+			expect(await auctionService.developLand(buergermeister, stadtId, 1)).toEqual({
+				ok: true,
+				plots: 1,
+				spent: 0
+			});
+			expect(await Plot.count()).toBe(1);
+		});
+
+		it('weist nichts Neues aus, solange eine Baustelle offen ist', async () => {
+			const buergermeister = await person('Amtsperson', 100);
+			await insAmt(buergermeister);
+			await auctionService.developLand(buergermeister, stadtId, 1);
 
 			expect(await auctionService.developLand(buergermeister, stadtId, 1)).toEqual({
 				ok: false,
-				reason: 'NOT_ENOUGH_MONEY'
+				reason: 'NOTHING_TO_DO'
 			});
-			expect(await Plot.count()).toBe(0);
+			expect(await Plot.count()).toBe(1);
+		});
+
+		it('macht aus der Baustelle durch Arbeit ein Grundstück — und zahlt dafür Lohn', async () => {
+			const buergermeister = await person('Amtsperson', 100);
+			await insAmt(buergermeister);
+			await auctionService.developLand(buergermeister, stadtId, 1);
+
+			const baustelle = (await auctionService.getDevelopments(stadtId))[0];
+			expect(baustelle.shifts).toBe(0);
+			expect(baustelle.shiftsNeeded).toBe(DEVELOPMENT_SHIFTS_PER_PLOT);
+
+			const wegebauer = await person('Wegebauer', 0);
+			const erste = await auctionService.surveyForHire(wegebauer, baustelle.id);
+
+			expect(erste).toEqual({ ok: true, earned: TAGELOHN, finished: false });
+			// **Das Geld verschwindet nicht mehr, es wechselt den Besitzer** — die Kehrseite
+			// von Punkt 66, um die es in Punkt 102 geht.
+			expect(await geld(wegebauer)).toBe(TAGELOHN);
+			expect(await kasse()).toBe(1000 - TAGELOHN);
+
+			// Die letzte Schicht eröffnet die Versteigerung.
+			await Plot.update(
+				{ developmentShifts: DEVELOPMENT_SHIFTS_PER_PLOT - 1 },
+				{ where: { id: baustelle.id } }
+			);
+			const letzte = await auctionService.surveyForHire(wegebauer, baustelle.id);
+
+			expect(letzte.ok && letzte.finished).toBe(true);
+			expect(await auctionService.getDevelopments(stadtId)).toHaveLength(0);
+			expect(await auctionService.getOpenAuctions(stadtId)).toHaveLength(1);
+		});
+
+		it('lässt niemanden auf einer Baustelle arbeiten, die die Stadt nicht bezahlen kann', async () => {
+			// Dieselbe Regel wie beim privaten Auftraggeber (Punkt 106): Wer nicht zahlen
+			// kann, dessen Schicht findet nicht statt — und zwar bevor sie geleistet ist.
+			const buergermeister = await person('Amtsperson', 100);
+			await insAmt(buergermeister);
+			await auctionService.developLand(buergermeister, stadtId, 1);
+			await Region.update({ treasury: 0 }, { where: { id: stadtId } });
+
+			const baustelle = (await auctionService.getDevelopments(stadtId))[0];
+			const wegebauer = await person('Wegebauer', 0);
+
+			expect(await auctionService.surveyForHire(wegebauer, baustelle.id)).toEqual({
+				ok: false,
+				reason: 'EMPLOYER_BROKE'
+			});
+			expect(await geld(wegebauer)).toBe(0);
 		});
 
 		it('gibt jedem Grundstück eine eigene Adresse', async () => {

@@ -5,7 +5,10 @@ import {
 	type Bid,
 	BID_INCREMENT,
 	canBid,
-	DEVELOPMENT_COST_PER_PLOT,
+	DEVELOPMENT_SHIFTS_PER_PLOT,
+	developmentWageBill,
+	isUnderDevelopment,
+	surveyShift,
 	MINIMUM_BID,
 	nextBid,
 	npcBid,
@@ -134,11 +137,58 @@ describe('Versteigerungen', () => {
 		});
 	});
 
+	describe('die Erschließung als Arbeit (5.92, Punkt 102)', () => {
+		const arbeiter = { actionPoints: 4, money: 10, buildingSkill: 0 };
+
+		it('zahlt den Tagelohn aus der Stadtkasse und bringt die Fläche voran', () => {
+			const ergebnis = surveyShift(arbeiter, { treasury: 100 }, 0);
+
+			expect(ergebnis.ok).toBe(true);
+			if (!ergebnis.ok) return;
+			// Was der Arbeiter bekommt, fehlt der Kasse — und nichts davon verschwindet.
+			expect(ergebnis.money - arbeiter.money).toBe(100 - ergebnis.treasury);
+			expect(ergebnis.earned).toBeGreaterThan(0);
+			expect(ergebnis.shifts).toBe(1);
+			expect(ergebnis.actionPoints).toBe(3);
+		});
+
+		it('findet nicht statt, wenn die Stadt nicht zahlen kann', () => {
+			// Dieselbe Regel wie beim privaten Auftraggeber (Punkt 106): Wer nicht zahlen
+			// kann, dessen Schicht findet nicht statt.
+			expect(surveyShift(arbeiter, { treasury: 0 }, 0)).toEqual({
+				ok: false,
+				reason: 'EMPLOYER_BROKE'
+			});
+		});
+
+		it('hört auf, wenn die Fläche fertig ist', () => {
+			expect(surveyShift(arbeiter, { treasury: 100 }, DEVELOPMENT_SHIFTS_PER_PLOT)).toEqual({
+				ok: false,
+				reason: 'NOTHING_TO_DO'
+			});
+		});
+
+		it('braucht einen Aktionspunkt', () => {
+			expect(surveyShift({ ...arbeiter, actionPoints: 0 }, { treasury: 100 }, 0)).toEqual({
+				ok: false,
+				reason: 'NOT_ENOUGH_ACTION_POINTS'
+			});
+		});
+
+		it('unterscheidet die angefangene Baustelle vom fertigen Grundstück', () => {
+			// **Die Null ist der Anfang eines Baus, nicht sein Fehlen.** Wer die Zahl
+			// vergleicht statt zu fragen, hält jede frische Baustelle für fertiges Land.
+			expect(isUnderDevelopment({ developmentShifts: 0 })).toBe(true);
+			expect(isUnderDevelopment({ developmentShifts: null })).toBe(false);
+		});
+	});
+
 	describe('die Zahlen', () => {
 		it('lassen das Erschließen ein Wagnis bleiben', () => {
 			// Teurer als der alte Festpreis: Ob es sich lohnt, entscheidet die Knappheit
-			// und nicht die Tabelle.
-			expect(DEVELOPMENT_COST_PER_PLOT).toBeGreaterThan(PLOT_PRICE);
+			// und nicht die Tabelle. Seit 5.92 steht dort kein Preis mehr, sondern die
+			// Lohnsumme — dieselbe Zahl, nur in anderen Händen.
+			expect(developmentWageBill(1)).toBeGreaterThan(PLOT_PRICE);
 			expect(MINIMUM_BID).toBe(PLOT_PRICE);
 		});
 

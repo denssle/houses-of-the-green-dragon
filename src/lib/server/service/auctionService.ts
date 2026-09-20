@@ -12,26 +12,31 @@ import {
 	award,
 	type Bid,
 	canBid,
-	DEVELOPMENT_COST_PER_PLOT,
+	DEVELOPMENT_SHIFTS_PER_PLOT,
+	isUnderDevelopment,
 	MAX_PLOTS_PER_DEVELOPMENT,
 	nextBid,
 	npcBid,
-	ranking
+	ranking,
+	surveyShift
 } from '$lib/game/auction.logic';
 import { Building } from '$lib/db/model/building';
 import { TICKS_PER_YEAR } from '$lib/game/time';
 import * as buildingService from '$lib/server/service/buildingService';
+import * as characterService from '$lib/server/service/characterService';
 import * as chronicleService from '$lib/server/service/chronicleService';
 import * as electionService from '$lib/server/service/electionService';
 import * as nameService from '$lib/server/service/nameService';
+import * as skillService from '$lib/server/service/skillService';
 import * as worldService from '$lib/server/service/worldService';
 
 /**
  * Erschließung und Versteigerung.
  *
- * Der Bürgermeister lässt Bauland ausweisen, die Stadt zahlt dafür — und was dabei
- * entsteht, geht an den Höchstbietenden. Damit hat die Stadtkasse zum ersten Mal eine
- * Einnahme, die größer sein kann als die Ausgabe: Wie viel, entscheidet die Knappheit.
+ * Der Bürgermeister lässt Bauland ausweisen, die Stadt zahlt den Leuten, die es herrichten
+ * — und was dabei entsteht, geht an den Höchstbietenden. Damit hat die Stadtkasse zum
+ * ersten Mal eine Einnahme, die größer sein kann als die Ausgabe: Wie viel, entscheidet
+ * die Knappheit.
  *
  * **Der Zuschlag ist eine Rechnung, kein gespeicherter Zustand** — das höchste Gebot,
  * dessen Bieter noch zahlen kann. Wer inzwischen sein Geld ausgegeben hat, wird
@@ -56,11 +61,25 @@ export type DevelopResult =
 	| { ok: false; reason: ActionFailureReason };
 
 /**
- * Bauland ausweisen — die dritte Amtshandlung mit Kosten.
+ * Bauland ausweisen — die dritte Amtshandlung, und seit 5.92 die einzige ohne Preis.
  *
- * Die Stadt zahlt je Grundstück; die Grundstücke gehen anschließend in die
- * Versteigerung, nicht in den Verkauf. Deshalb ist die Erschließung kein sicheres
- * Geschäft: Sind alle satt, bleibt sie auf den Kosten sitzen.
+ * **Was hier entsteht, ist eine Baustelle** (Punkt 102). Bis 5.91 zog die Stadt sechzig
+ * Münzen je Parzelle aus ihrer Kasse, und niemand bekam sie: Von den vier Wegen, auf denen
+ * Geld aus der Welt verschwand, war das nach 5.76, 5.78 und 5.80 der letzte — und er trug
+ * im Messlauf nach 5.89 **den ganzen vernichteten Betrag**. Jetzt kostet die Erschließung,
+ * was sie an Arbeit kostet: zwanzig Schichten je Grundstück, bezahlt zum Tagelohn an die,
+ * die sie leisten (`surveyForHire`).
+ *
+ * **Und deshalb braucht sie keine Deckung mehr.** Die alte Prüfung verlangte den vollen
+ * Preis im Voraus, und das war in Grünau die Sperre, hinter der die ganze Stadt stand: 13
+ * Münzen in der Kasse, 180 nötig, seit Tick 5291 keine einzige Erschließung — während die
+ * halbe Einwohnerschaft `GOAL_UNREACHABLE` meldete, weil es kein Bauland gab (Punkt 93).
+ * Löhne fallen schichtweise an und werden schichtweise geprüft; eine leere Kasse verzögert
+ * die Erschließung jetzt, statt sie zu verbieten.
+ *
+ * Die Grundstücke gehen anschließend in die Versteigerung, nicht in den Verkauf — aber
+ * erst, wenn sie fertig sind. Deshalb ist die Erschließung kein sicheres Geschäft: Sind
+ * alle satt, bleibt die Stadt auf dem Lohn sitzen, den sie gezahlt hat.
  */
 export async function developLand(
 	characterId: string,
@@ -77,11 +96,15 @@ export async function developLand(
 
 	return sequelize.transaction(async (t: Transaction) => {
 		const stadt = await Region.findByPk(regionId, { transaction: t, lock: t.LOCK.UPDATE });
-		const kasse: number = stadt?.dataValues.treasury ?? 0;
-		const kosten: number = count * DEVELOPMENT_COST_PER_PLOT;
-		if (!stadt || kasse < kosten) return { ok: false, reason: 'NOT_ENOUGH_MONEY' } as const;
+		if (!stadt) return { ok: false, reason: 'NOT_IN_OFFICE' } as const;
 
-		await treasuryService.ausgeben(regionId, kosten, 'DEVELOPMENT', t);
+		// **Eine Baustelle nach der anderen** (5.92). Was nichts kostet, hat keine
+		// natürliche Bremse mehr — ohne diese Frage wiese ein Bürgermeister in jedem Tick
+		// zwei neue Parzellen aus, solange kein Bauland frei ist, und die Stadt hätte
+		// hundert angefangene Wege statt eines fertigen Grundstücks.
+		if (await developmentRunning(regionId, t)) {
+			return { ok: false, reason: 'NOTHING_TO_DO' } as const;
+		}
 
 		// Die Adresse ergibt sich aus dem, was schon steht: erst die Gasse auffüllen, dann
 		// die nächste anfangen. Sonst hieße jedes neue Grundstück „Neustadt 1".
@@ -91,17 +114,129 @@ export async function developLand(
 			const gasse: string = NEUE_GASSEN[Math.floor(laufend / 4) % NEUE_GASSEN.length];
 			const hausnummer: number = (laufend % 4) + 1;
 
-			const plotId: string = randomUUID();
 			await Plot.create(
 				{
-					id: plotId,
+					id: randomUUID(),
 					address: `${gasse} ${hausnummer}`,
 					type: 'BUILDING_LAND',
 					RegionId: regionId,
-					ownerType: 'NONE'
+					ownerType: 'NONE',
+					// Der erste Tag der Baustelle — nicht ihr Fehlen (siehe Migration 0026).
+					developmentShifts: 0
 				},
 				{ transaction: t }
 			);
+		}
+
+		// **Die Versteigerung fängt hier nicht an**, sondern mit der letzten Schicht in
+		// `surveyForHire()`. Wer
+		// auf eine Fläche bietet, auf der noch die Vermesser stehen, bekäme einen Zuschlag
+		// auf etwas, worauf er nicht bauen darf.
+		await chronicleService.record(
+			'LAND_DEVELOPED',
+			regionId,
+			tick,
+			{ subjectId: characterId, value: count },
+			t
+		);
+		return { ok: true, plots: count, spent: 0 } as const;
+	});
+}
+
+/** Läuft in dieser Stadt gerade eine Erschließung? */
+export async function developmentRunning(regionId: string, t?: Transaction): Promise<boolean> {
+	const offen: number = await Plot.count({
+		where: { RegionId: regionId, developmentShifts: { [Op.ne]: null } },
+		...(t ? { transaction: t } : {})
+	});
+	return offen > 0;
+}
+
+/** Die Baustellen der Stadt — was an Erschließung offen ist, in der Reihenfolge ihrer Adresse. */
+export async function getDevelopments(regionId: string): Promise<DevelopmentSite[]> {
+	const flaechen = await Plot.findAll({
+		where: { RegionId: regionId, developmentShifts: { [Op.ne]: null } },
+		order: [['address', 'ASC']]
+	});
+	return flaechen.map((flaeche) => ({
+		id: flaeche.dataValues.id,
+		address: flaeche.dataValues.address,
+		shifts: flaeche.dataValues.developmentShifts ?? 0,
+		shiftsNeeded: DEVELOPMENT_SHIFTS_PER_PLOT
+	}));
+}
+
+export interface DevelopmentSite {
+	id: string;
+	address: string;
+	shifts: number;
+	shiftsNeeded: number;
+}
+
+export type SurveyResult =
+	| { ok: true; earned: number; finished: boolean }
+	| { ok: false; reason: ActionFailureReason };
+
+/**
+ * Eine Schicht auf einer Erschließung leisten — gegen Lohn aus der Stadtkasse (5.92).
+ *
+ * **Das Gegenstück zu `REPAIR_FOR_HIRE`**, und aus demselben Grund gebaut: Die Stadt hat
+ * das Erschließen immer schon bezahlt, nur zahlte sie an niemanden. Jetzt zahlt sie
+ * Menschen — und dieselbe Arbeit, die das Leck schließt, ist der Rückweg aus der
+ * Stadtkasse zu den Bürgern, der ihr in Punkt 100 fehlt.
+ *
+ * **Jeder darf**, ohne Aushang und ohne Anstellung: Es ist städtische Arbeit wie die
+ * Instandsetzung eines öffentlichen Baus. Und wer die letzte Schicht leistet, macht das
+ * Grundstück fertig — die Versteigerung beginnt in derselben Transaktion.
+ */
+export async function surveyForHire(characterId: string, plotId: string): Promise<SurveyResult> {
+	const tick: number = await worldService.currentTick();
+
+	return sequelize.transaction(async (t: Transaction) => {
+		const flaeche = await Plot.findByPk(plotId, { transaction: t, lock: t.LOCK.UPDATE });
+		if (!flaeche) return { ok: false, reason: 'NOT_A_WORKPLACE' } as const;
+		if (!isUnderDevelopment(flaeche.dataValues)) {
+			return { ok: false, reason: 'NOTHING_TO_DO' } as const;
+		}
+
+		const regionId: string = flaeche.dataValues.RegionId;
+		const stadt = await Region.findByPk(regionId, { transaction: t, lock: t.LOCK.UPDATE });
+		if (!stadt) return { ok: false, reason: 'NOT_A_WORKPLACE' } as const;
+
+		// Erst nachwachsen lassen, dann abrechnen — dieselbe Reihenfolge wie bei jeder
+		// anderen Schicht: Sonst ginge sie gegen den Punktestand von gestern.
+		const arbeiter = await characterService.loadForAction(characterId, tick, t);
+		if (!arbeiter) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+
+		const ergebnis = surveyShift(
+			{
+				actionPoints: arbeiter.dataValues.actionPoints,
+				money: arbeiter.dataValues.money,
+				buildingSkill: await skillService.getLevel(characterId, 'CONSTRUCTION', t)
+			},
+			{ treasury: stadt.dataValues.treasury ?? 0 },
+			flaeche.dataValues.developmentShifts ?? 0
+		);
+		if (!ergebnis.ok) return ergebnis;
+
+		await arbeiter.update(
+			{ actionPoints: ergebnis.actionPoints, money: ergebnis.money },
+			{ transaction: t }
+		);
+		// **Gebucht wird als das, was es ist**: Lohn an einen Menschen (Punkt 101). Der
+		// Grund `DEVELOPMENT` ist mit diesem Schritt ersatzlos gestrichen — es gibt keine
+		// Ausgabe mehr, die ihn bucht, und ein Kassenbuch mit einem Posten, den nichts je
+		// bucht, liest sich im Bericht wie „ist nie vorgekommen" (die Lehre aus 5.79).
+		await treasuryService.ausgeben(regionId, ergebnis.earned, 'WAGE', t);
+		// Wer Wege baut, lernt das Bauen — wie an jeder anderen Baustelle auch.
+		await skillService.addPractice(characterId, 'CONSTRUCTION', 1, t);
+
+		const fertig: boolean = ergebnis.shifts >= DEVELOPMENT_SHIFTS_PER_PLOT;
+		await flaeche.update(
+			{ developmentShifts: fertig ? null : ergebnis.shifts },
+			{ transaction: t }
+		);
+		if (fertig) {
 			await Auction.create(
 				{
 					id: randomUUID(),
@@ -113,16 +248,16 @@ export async function developLand(
 				},
 				{ transaction: t }
 			);
+			await chronicleService.record(
+				'LAND_SURVEYED',
+				regionId,
+				tick,
+				{ subjectId: characterId, value: 1, detail: flaeche.dataValues.address },
+				t
+			);
 		}
 
-		await chronicleService.record(
-			'LAND_DEVELOPED',
-			regionId,
-			tick,
-			{ subjectId: characterId, value: count },
-			t
-		);
-		return { ok: true, plots: count, spent: kosten } as const;
+		return { ok: true, earned: ergebnis.earned, finished: fertig } as const;
 	});
 }
 

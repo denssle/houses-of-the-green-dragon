@@ -15,6 +15,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			plotsForSale: [],
 			buildingsForSale: [],
 			auctions: [],
+			developments: [],
 			price: PLOT_PRICE
 		};
 	}
@@ -26,6 +27,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		buildingsForSale: await buildingService.getBuildingsForSale(character.regionId),
 		// Neu erschlossenes Land geht nicht in den Verkauf, sondern unter den Hammer.
 		auctions: await auctionService.getOpenAuctions(character.regionId, character.id),
+		// Und was noch nicht so weit ist: die Baustellen, an denen sich für Tagelohn
+		// arbeiten lässt (5.92).
+		developments: await auctionService.getDevelopments(character.regionId),
 		price: PLOT_PRICE
 	};
 };
@@ -81,6 +85,28 @@ export const actions = {
 		const ergebnis = await plotService.buyFromOwner(character.id, plotId);
 		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
 		return { message: 'Der Boden gehört jetzt dir.' };
+	},
+
+	/**
+	 * Eine Schicht auf einer Erschließung — für jeden, nicht nur für Tagelöhner (5.92).
+	 *
+	 * Sie steht hier und nicht bei der Arbeit, weil sie hier zu sehen ist: neben der
+	 * Fläche, um die es geht, und neben der Versteigerung, die daraus wird.
+	 */
+	survey: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Kein Charakter, der graben könnte' });
+
+		const plotId = (await request.formData()).get('plotId')?.toString();
+		if (!plotId) return fail(400, { message: 'Auf welcher Fläche?' });
+
+		const ergebnis = await auctionService.surveyForHire(character.id, plotId);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return {
+			message: ergebnis.finished
+				? `Feierabend, ${ergebnis.earned} Münzen Lohn — und die Fläche ist fertig. Sie geht unter den Hammer.`
+				: `Feierabend. ${ergebnis.earned} Münzen Lohn von der Stadt.`
+		};
 	},
 
 	bid: async ({ request, locals }) => {

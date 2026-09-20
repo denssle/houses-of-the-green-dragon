@@ -28,7 +28,10 @@ export const Plot: ModelStatic<Model<PlotAttributes, PlotCreationAttributes>> = 
 		},
 		OwnerCharacterId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
 		// Gesetzt heißt: steht zum Verkauf. Verkaufen ist ein Preis, kein Auktionsobjekt.
-		forSalePrice: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
+		forSalePrice: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
+		// Wie viele Schichten die Erschließung schon hinter sich hat — `null` heißt: keine
+		// im Gange, die Fläche ist fertig (5.92, Punkt 102).
+		developmentShifts: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
 	},
 	{ timestamps: true }
 );

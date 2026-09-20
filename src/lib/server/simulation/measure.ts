@@ -9,6 +9,7 @@ import { Event } from '$lib/db/model/event';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import { seededRoll } from '$lib/game/testRoll';
+import type { EventKind } from '$lib/game/chronicle.logic';
 import type { IdleReason, NpcAction } from '$lib/game/npc.logic';
 import * as needService from '$lib/server/service/needService';
 import * as buildingService from '$lib/server/service/buildingService';
@@ -372,6 +373,14 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		`  Geburten ${chronik.geburten}, Tode ${chronik.tode}` +
 			`${todeNach(todesursachen)}, Zuzug ${chronik.zuzug}, Brände ${chronik.braende}`,
 		`  Grundsteuer eingenommen ${chronik.steuer}, nicht eintreibbar ${chronik.ausgefallen}`,
+		// **Was die Erschließung wirklich tut** (5.92, Punkt 102). Seit sie Arbeit ist statt
+		// eines Preises, sagt das Kassenbuch nichts mehr über sie: Ihr Lohn steht unter
+		// `WAGE`, zusammen mit jedem anderen Handschlag. Ohne diese Zeile wäre aus dem
+		// Bericht nicht zu sehen, ob die Stadt beschlossen und nichts zustande gebracht hat
+		// — genau der Unterschied, um den es hier geht.
+		`  Bauland ausgewiesen ${await ereignissumme('LAND_DEVELOPED')} Parzellen, ` +
+			`davon fertig erschlossen ${await ereignisse('LAND_SURVEYED')}, ` +
+			`versteigert ${await ereignisse('AUCTION_WON')}`,
 		'',
 		...(startgeld === undefined
 			? []
@@ -477,4 +486,26 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	);
 
 	return { lines: zeilen };
+}
+
+/**
+ * Wie oft ein Ereignis in diesem Lauf vorkam.
+ *
+ * Gezählt wird die Chronik und nicht ein eigener Zähler: Sie ist ohnehin da, und zwei
+ * Zählungen derselben Sache laufen früher oder später auseinander — dieselbe Überlegung,
+ * aus der Sold und Steuer seit 5.77 nur noch im Kassenbuch stehen.
+ */
+async function ereignisse(kind: EventKind): Promise<number> {
+	return Event.count({ where: { kind } });
+}
+
+/**
+ * Was dabei zusammenkam — die Summe der Beträge statt der Zahl der Ereignisse.
+ *
+ * Eine Erschließung weist zwei Parzellen auf einmal aus; „4 ausgewiesen, davon 6 fertig"
+ * wäre keine Auskunft, sondern ein Rätsel.
+ */
+async function ereignissumme(kind: EventKind): Promise<number> {
+	const zeilen = await Event.findAll({ where: { kind }, attributes: ['value'] });
+	return zeilen.reduce((summe, zeile) => summe + (zeile.dataValues.value ?? 0), 0);
 }

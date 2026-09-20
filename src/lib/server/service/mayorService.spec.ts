@@ -11,14 +11,15 @@ import { Region } from '$lib/db/model/region';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
+import * as auctionService from '$lib/server/service/auctionService';
 import * as electionService from '$lib/server/service/electionService';
 import * as lawService from '$lib/server/service/lawService';
 import * as mayorService from '$lib/server/service/mayorService';
 import { CAMPAIGN_TICKS } from '$lib/game/election.logic';
 import { LAW_RULES } from '$lib/game/law.logic';
 import { yearsToTicks } from '$lib/game/time';
-import { treasuryReserve } from '$lib/game/governance.logic';
-import { DEVELOPMENT_COST_PER_PLOT } from '$lib/game/auction.logic';
+import { DEVELOPMENT_SHIFTS_PER_PLOT } from '$lib/game/auction.logic';
+import { TAGELOHN } from '$lib/game/economy';
 
 /**
  * Führt ein NPC sein Amt?
@@ -95,6 +96,25 @@ async function buergergrund(besitzerId: string): Promise<void> {
 		RegionId: stadtId,
 		ownerType: 'CHARACTER',
 		OwnerCharacterId: besitzerId
+	});
+}
+
+/**
+ * Eine Erschließung, an der schon gearbeitet wird.
+ *
+ * **Sie gehört in jede Lage, in der es ums Sparen geht** (5.92): Seit die Erschließung
+ * nichts mehr kostet, ist sie die erste Wahl einer Stadt ohne freies Bauland — und die
+ * Testwelten haben keines. Ohne diese Baustelle käme der Amtsinhaber nie zu der Frage, um
+ * die es im jeweiligen Test geht.
+ */
+async function laufendeErschliessung(): Promise<void> {
+	await Plot.create({
+		id: randomUUID(),
+		address: 'Neustadt 1',
+		type: 'BUILDING_LAND',
+		RegionId: stadtId,
+		ownerType: 'NONE',
+		developmentShifts: 0
 	});
 }
 
@@ -200,6 +220,10 @@ describe('Der Bürgermeister im Amt', () => {
 		// NPC-Hand liegt, kommt sie vor der Steuer. Ohne diese Zeile prüfte der Test die
 		// neue Reihenfolge statt der Steuer — die hat ihren eigenen Fall weiter oben.
 		await lawService.enact(npc, stadtId, 'OFFICE_STIPEND', LAW_RULES.OFFICE_STIPEND.min, JETZT);
+		// **Und die Erschließung läuft schon** (5.92): Seit sie nichts mehr kostet, geht sie
+		// bei leerer Kasse vor — sie bringt der Stadt etwas ein, statt ihre Bürger zu
+		// belasten. Auch das ist die Rangfolge, nicht die Steuer.
+		await laufendeErschliessung();
 
 		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
 
@@ -232,6 +256,7 @@ describe('Der Bürgermeister im Amt', () => {
 		await Character.update({ greed: 0 }, { where: { id: npc } });
 		await Region.update({ treasury: 0 }, { where: { id: stadtId } });
 		await buergergrund(npc);
+		await laufendeErschliessung();
 
 		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
 
@@ -249,6 +274,7 @@ describe('Der Bürgermeister im Amt', () => {
 		await Character.update({ greed: 100 }, { where: { id: npc } });
 		await Region.update({ treasury: 0 }, { where: { id: stadtId } });
 		await buergergrund(npc);
+		await laufendeErschliessung();
 
 		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
 
@@ -258,44 +284,50 @@ describe('Der Bürgermeister im Amt', () => {
 		);
 	});
 
-	it('erschließt erst, wenn beide Grundstücke über der Rücklage bezahlt sind', async () => {
-		// **Die Lage muss den Preis nennen, den die Amtshandlung zahlt** (5.90). Bis dahin
-		// stand in der Lage der Preis für *ein* Grundstück, erschlossen wurden aber zwei:
-		// Der Bürgermeister beschloss zum halben Preis und unterschritt danach die
-		// Rücklage, die Löhne und Instandhaltung sichern soll.
-		//
-		// Gewählt ist hier genau die Kasse, bei der die alte Rechnung aufging und die neue
-		// nicht: Sie deckt ein Grundstück über der Rücklage, aber nicht zwei.
-		const kosten = DEVELOPMENT_COST_PER_PLOT * 2;
+	it('erschließt auch mit leerer Kasse — es kostet keine Münze mehr', async () => {
+		// **Die beiden Tests, die hier bis 5.91 standen, sind mit der Schwelle gefallen**
+		// (5.92, Punkt 102): Sie prüften, dass der Amtsinhaber erst ausweist, wenn er beide
+		// Grundstücke über der Rücklage bezahlen kann. Diese Rechnung gibt es nicht mehr —
+		// die Erschließung ist Arbeit, der Lohn fällt je Schicht an. Was die Schwelle
+		// angerichtet hat, steht in Punkt 93: In Grünau hielt die Kasse 13 Münzen, nötig
+		// waren 180, und seit Tick 5291 ist dort kein Grundstück mehr entstanden.
 		const npc = await person('Amtsperson');
 		await insAmt(npc);
-		await Region.update(
-			{ treasury: DEVELOPMENT_COST_PER_PLOT + treasuryReserve(kosten) },
-			{ where: { id: stadtId } }
-		);
-
-		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
-
-		expect(getan?.action).not.toBe('DEVELOP_LAND');
-		expect((await Region.findByPk(stadtId))!.dataValues.treasury).toBeGreaterThanOrEqual(
-			treasuryReserve(kosten)
-		);
-	});
-
-	it('erschließt, sobald die Kasse beide Grundstücke trägt', async () => {
-		// Die Gegenprobe: Der angehobene Preis darf die Erschließung nicht verhindern,
-		// sondern nur verschieben, bis die Stadt sie sich wirklich leisten kann.
-		const kosten = DEVELOPMENT_COST_PER_PLOT * 2;
-		const npc = await person('Amtsperson');
-		await insAmt(npc);
-		await Region.update({ treasury: kosten + treasuryReserve(kosten) }, { where: { id: stadtId } });
+		await Region.update({ treasury: 0 }, { where: { id: stadtId } });
 
 		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
 
 		expect(getan?.action).toBe('DEVELOP_LAND');
 		expect(getan?.value).toBe(2);
-		// Was die Stadt erschließt, geht in die Versteigerung — und ist damit frei.
+		// Angelegt, aber noch nicht unter dem Hammer: Erst die Arbeit macht daraus ein
+		// Grundstück, auf dem jemand bauen kann.
 		expect(await Plot.count({ where: { RegionId: stadtId, ownerType: 'NONE' } })).toBe(2);
+		expect(await auctionService.getOpenAuctions(stadtId)).toHaveLength(0);
+		expect(await auctionService.getDevelopments(stadtId)).toHaveLength(2);
+		expect((await Region.findByPk(stadtId))!.dataValues.treasury).toBe(0);
+	});
+
+	it('weist nicht zweimal aus, solange die erste Baustelle offen ist', async () => {
+		// Die Bremse, die an die Stelle des Preises getreten ist: Ohne sie legte der
+		// Amtsinhaber in jedem Tick zwei weitere Parzellen an, solange kein Bauland frei
+		// ist.
+		const npc = await person('Amtsperson');
+		await insAmt(npc);
+		await Region.update({ treasury: 1000 }, { where: { id: stadtId } });
+		await laufendeErschliessung();
+
+		const getan = await mayorService.governAsNpcMayor(stadtId, JETZT);
+
+		expect(getan?.action).not.toBe('DEVELOP_LAND');
+		// Die eine Baustelle von vorhin — keine zweite daneben.
+		expect(await auctionService.getDevelopments(stadtId)).toHaveLength(1);
+	});
+
+	it('zahlt für eine Erschließung genau ihren alten Preis — nur an Menschen', async () => {
+		// Der Maßstab dieses Schritts: zwanzig Schichten zum Tagelohn sind sechzig Münzen,
+		// und damit liegt die Erschließung dort, wo ihr Münzpreis lag. Der Messlauf soll
+		// zeigen, wohin dasselbe Geld fließt, und nicht, dass Erschließen billiger wurde.
+		expect(DEVELOPMENT_SHIFTS_PER_PLOT * TAGELOHN).toBe(60);
 	});
 
 	it('tut höchstens eines je Tick', async () => {
