@@ -66,6 +66,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 109 | Der Zehnt trifft nur die erste Stufe jeder Kette — Verarbeitung ist steuerfrei        | Punkte 15, 46                | Entscheidung |
 | 110 | Die Werkstattwahl schickt jeden in dieselbe Sackgasse — **behoben mit 5.87**          | —                            | erledigt     |
 | 111 | Warum einer nichts tut, stand nirgends — **Werkzeug gebaut mit 5.88**                 | —                            | erledigt     |
+| 112 | Ein Betrieb im Umland stand außerhalb des Steuerrechts — **behoben (5.94)**           | —                            | erledigt     |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                   | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                           | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -4574,6 +4575,47 @@ Kandidaten stehen im Raum — keine laufende Pacht (ein Hof im Besitz ist kein V
 keine Zutat für seine Alchemistenküche, und kein Geld über der Rücklage, um das eine oder
 andere zu beschaffen; der Notausgang Tagelohn steht nur offen, wenn die Stadt gerade
 Arbeit hat (`workAvailable`). Welcher es war, sagt jetzt ein Lauf mit seinem Namen.
+
+### 112. Ein Betrieb im Umland stand außerhalb des Steuerrechts — behoben (5.94)
+
+**Befund vom 20.09.2026, beim Nachsehen nach Punkt 102.** Nachdem mit 5.93 der letzte
+Abfluss ohne Empfänger geschlossen war, lag die Frage nahe, ob wirklich nirgends mehr Geld
+verschwindet. Die Durchsicht aller Stellen, die `money` oder `treasury` bewegen, hat kein
+Leck gefunden — aber eine Stelle, die in dieselbe Richtung zeigt:
+
+**`tradeService` schlug Verkaufssteuer und Standgeld in der Region des Grundstücks nach,
+auf dem der Laden steht.** Für eine Werkstatt am Markt ist das die Stadt. Für einen
+**Pachthof** ist es die Abbaufläche im Umland — und dort hat nie jemand ein Gesetz
+erlassen, also fiel der Satz auf den Rückfallwert null.
+
+**Zwei Folgen, und die zweite ist die gefährlichere:**
+
+- **Wer aus seinem Hof verkaufte, zahlte keine Verkaufssteuer**, während dieselbe Ware aus
+  einer Werkstatt in der Stadt besteuert wurde. Ein Schlupfloch, das niemandem auffiel,
+  weil der Satz voreingestellt null ist und ein NPC-Bürgermeister ihn gar nicht anfassen
+  kann (`NPC_MAYOR_LAWS`). Ein Spieler im Amt kann es — und ab dann wäre der Hof der Weg
+  daran vorbei.
+- **Gebucht wurde in dieselbe falsche Kasse.** Hätte je ein Satz im Umland gegolten, läge
+  das Geld in einer Regionskasse, die weder Amt noch Ausgaben hat. Von dort kommt nichts
+  zurück: Es wäre aus der Welt, und keine Buchung hätte es gezeigt — die Messbilanz zählt
+  ohnehin nur die Kasse der Startstadt.
+
+**Behoben mit 5.94:** `alsLaden` liefert statt der rohen Region die **Stadt** dazu
+(`cityOf`), und Satz wie Buchung hängen an derselben Zahl. Das ist dieselbe Verwechslung
+wie in Punkt 65 beim Zehnt („An die Stadt, nicht an den Acker") und dieselbe Antwort; sie
+steht einmal in `alsLaden` und nicht viermal an den Aufrufstellen, damit Nachschlagen und
+Buchen nicht auseinanderlaufen können.
+
+**Der Test misst, was ohne ihn niemand sieht** (`taxReach.spec.ts`): ein Hof auf echter
+Pachtfläche, ein Gesetz in der Stadt, ein Kauf daraus — und die Gegenprobe mit dem alten
+Verhalten meldet null statt zwei Münzen. Am Standgeld ändert sich nichts: Es fällt nur am
+Marktplatz an (`stallFeeFor`), und der steht in der Stadt.
+
+**Was dabei offen bleibt, weil es ein eigener Punkt ist:** Die Messbilanz summiert nur die
+Kasse der Startstadt. Solange es eine gibt, stimmt das; mit der zweiten Stadt (Punkt 31)
+zählte sie deren Geld als vernichtet. Und das **Startkapital** eines neu registrierten
+Spielers entsteht aus dem Nichts — gewollt (Punkt 14), aber der Bilanz unbekannt: In
+Produktion läse sie es als Geld, das in der Welt entstanden ist.
 
 ## Der Weg durch die Wirtschaft — Stand 29.08.2026
 

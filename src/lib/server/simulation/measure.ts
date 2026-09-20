@@ -142,10 +142,11 @@ async function bilanzzeilen(
  * Streuung herausstellte, was ohne diese Aufschlüsselung ebenso wenig zu sagen gewesen
  * wäre).
  *
- * **Bei jeder Ausgabe steht, ob jemand das Geld bekommt.** Das ist keine Verzierung: Zwei
- * der vier Ausgabearten haben keinen Empfänger, und ihre Summe ist der Teil des
- * vernichteten Geldes, den die Stadt selbst verbrennt — die Zahl, um die es in Punkt 102
- * und 100 geht.
+ * **Bei jeder Ausgabe steht, ob jemand das Geld bekommt.** Das ist keine Verzierung: Ihre
+ * Summe war der Teil des vernichteten Geldes, den die Stadt selbst verbrennt — die Zahl,
+ * um die es in Punkt 102 ging. **Seit 5.93 steht dort null**, weil es keinen Grund ohne
+ * Empfänger mehr gibt; die Zeile bleibt trotzdem, denn sie ist der Wächter, der es
+ * meldet, wenn wieder einer dazukommt.
  */
 function kassenbuchzeilen(buch: Kassenbuch): string[] {
 	const sortiert = <T extends string>(posten: Partial<Record<T, number>>): [T, number][] =>

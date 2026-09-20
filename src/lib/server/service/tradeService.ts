@@ -14,6 +14,7 @@ import * as characterService from '$lib/server/service/characterService';
 import * as lawService from '$lib/server/service/lawService';
 import * as nameService from '$lib/server/service/nameService';
 import * as needService from '$lib/server/service/needService';
+import * as regionService from '$lib/server/service/regionService';
 import * as worldService from '$lib/server/service/worldService';
 
 /**
@@ -35,7 +36,22 @@ async function alsLaden(buildingId: string): Promise<
 			ownerType: string;
 			ownerCharacterId: string | null;
 			isMarket: boolean;
-			regionId: string | null;
+			/**
+			 * **Die Stadt zum Laden, nicht die Fläche, auf der er steht** (5.94, Punkt 112).
+			 *
+			 * Hier stand bis dahin die rohe Region des Grundstücks, und für eine Werkstatt am
+			 * Markt ist das dasselbe. Für einen **Pachthof** ist es das nicht: Der steht auf
+			 * einer Abbaufläche im Umland, und dort hat nie jemand ein Gesetz erlassen. Wer
+			 * aus seinem Hof verkaufte, zahlte deshalb weder Verkaufssteuer noch Standgeld —
+			 * beide Sätze fielen auf null zurück, während dieselbe Ware aus einer Werkstatt
+			 * in der Stadt besteuert wurde.
+			 *
+			 * Dieselbe Verwechslung wie in Punkt 65 beim Zehnt, und dieselbe Antwort:
+			 * `cityOf`. Sie steht **einmal** hier und nicht viermal an den Aufrufstellen —
+			 * der Satz muss dort nachgeschlagen werden, wo er auch hingebucht wird, sonst
+			 * laufen die beiden auseinander.
+			 */
+			cityId: string | null;
 	  }
 	| undefined
 > {
@@ -43,12 +59,15 @@ async function alsLaden(buildingId: string): Promise<
 	if (!gebaeude) return undefined;
 
 	const grundstueck = gebaeude.plotId ? await Plot.findByPk(gebaeude.plotId) : null;
+	const regionId: string | null = grundstueck?.dataValues.RegionId ?? null;
 	return {
 		id: gebaeude.id,
 		ownerType: gebaeude.ownerType,
 		ownerCharacterId: gebaeude.ownerCharacterId,
 		isMarket: gebaeude.optionId === MARKET_OPTION_ID,
-		regionId: grundstueck?.dataValues.RegionId ?? null
+		// Eine Abfrage je Laden, und für eine Stadtfläche ist es genau eine: `cityOf`
+		// erkennt eine Stadt an ihrem Typ und sucht dann keinen Weg mehr (Punkt 67).
+		cityId: regionId === null ? null : await regionService.cityOf(regionId)
 	};
 }
 
@@ -268,7 +287,7 @@ export async function placeOffer(
 	const art: ShopKind = shopKindFor(laden, sellerId);
 	const tick: number = await worldService.currentTick();
 	// Der Satz ist ein Gesetz, kein Literal — der Buergermeister kann ihn verschoben haben.
-	const standgeld: number = laden.regionId ? await lawService.rate(laden.regionId, 'STALL_FEE') : 0;
+	const standgeld: number = laden.cityId ? await lawService.rate(laden.cityId, 'STALL_FEE') : 0;
 
 	return sequelize.transaction(async (t: Transaction) => {
 		const verkaeufer = await characterService.loadForAction(sellerId, tick, t);
@@ -344,8 +363,8 @@ export async function placeOffer(
 
 		if (geplant.fee > 0) {
 			await verkaeufer.update({ money: geplant.sellerMoney }, { transaction: t });
-			if (laden.regionId) {
-				await treasuryService.einnehmen(laden.regionId, geplant.fee, 'STALL_FEE', t);
+			if (laden.cityId) {
+				await treasuryService.einnehmen(laden.cityId, geplant.fee, 'STALL_FEE', t);
 			}
 		}
 
@@ -425,8 +444,8 @@ export async function buyFromOffer(
 		if (!kaeufer) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
 
 		const laden = await alsLaden(angebot.dataValues.BuildingId);
-		const steuersatz: number = laden?.regionId
-			? await lawService.rate(laden.regionId, 'SALES_TAX', t)
+		const steuersatz: number = laden?.cityId
+			? await lawService.rate(laden.cityId, 'SALES_TAX', t)
 			: 0;
 
 		const ergebnis = buy(
@@ -456,8 +475,8 @@ export async function buyFromOffer(
 			transaction: t
 		});
 		// Der Verkäufer bekommt, was am Schild steht; die Steuer zahlt der Käufer obendrauf.
-		if (ergebnis.tax > 0 && laden?.regionId) {
-			await treasuryService.einnehmen(laden.regionId, ergebnis.tax, 'SALES_TAX', t);
+		if (ergebnis.tax > 0 && laden?.cityId) {
+			await treasuryService.einnehmen(laden.cityId, ergebnis.tax, 'SALES_TAX', t);
 		}
 
 		// Ein leeres Angebot verschwindet — wie Beziehungen und Vorräte, die auf null
