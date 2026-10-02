@@ -31,6 +31,10 @@ export const SKILL_TYPES = [
 	'CONSTRUCTION',
 	'FARMING',
 	'BAKING',
+	// Seit 5.96 getrennt vom Backen: Die Mühle trug `BAKING`, und damit galt das Backen
+	// beim Zuzug als versorgt, sobald irgendwo gemahlen wurde — auch wenn in der ganzen
+	// Stadt niemand einen Laib zustande brachte.
+	'MILLING',
 	// Mit der Baukette (4.10): Wer Holz schlägt, ist kein Bauer, und wer Stein bricht,
 	// kein Schmied. Beide Fertigkeiten wirken wie die anderen — auf Ertrag und Kosten.
 	'FORESTRY',
@@ -49,7 +53,8 @@ export const SKILL_NAMES: Record<SkillType, string> = {
 	TAILORING: 'Schneiderei',
 	CONSTRUCTION: 'Bauen',
 	FARMING: 'Ackerbau',
-	BAKING: 'Backen'
+	BAKING: 'Backen',
+	MILLING: 'Mahlen'
 };
 
 /** Die höchste erreichbare Stufe. */

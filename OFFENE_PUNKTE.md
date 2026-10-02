@@ -23,7 +23,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern           | dem nächsten Messlauf        | Befund       |
 | 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt         | —                            | erledigt     |
 | 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                     | —                            | erledigt     |
-| 70  | Niemand lernt ein Handwerk, das es nicht gibt — alle schmieden, keiner backt          | der Brotkette                | Entscheidung |
+| 70  | Niemand lernt ein Handwerk, das es nicht gibt — **Mahlen eigenständig seit 5.96**     | Punkte 114, 115              | teilweise    |
 | 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                                | —                            | erledigt     |
 | 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                     | —                            | erledigt     |
 | 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                               | laufend                      | Entwurf      |
@@ -1594,6 +1594,17 @@ Grünau eine Stadt aus Schmieden, die kein Brot backen kann.
 (Punkt 71). Ein Bäcker, der von außerhalb ankommt, bringt sein Handwerk mit; damit kommt
 Wissen in die Stadt, ohne dass jemand es dort erst erlernen müsste. Das ist zugleich die
 historisch richtige Antwort: Handwerk wanderte mit den Handwerkern.
+
+**Mit 5.96 hat das Mahlen eine eigene Fertigkeit** (`MILLING`). Mühle und Backhaus trugen
+bis dahin beide `BAKING`, und das hatte zwei Folgen, die der Messlauf vom 02.10.2026 zeigt:
+Die Bäckerin baute eine **Mühle**, weil unter gleich gut Beherrschtem das billigere Haus
+gewann — und solange die Mühle stand, galt Backen beim Zuzug als versorgt, obwohl in der
+Stadt niemand einen Laib backte. Migration 0027 gibt jedem, der eine Mühle besitzt oder in
+einer arbeitet, sein Können als `MILLING` mit.
+
+**Was der Zuzug trotzdem nicht leistet, steht in Punkt 114:** In 2000 Ticks kamen zwei
+Bäcker, auch in den tausend Ticks, in denen keine Mühle und kein Backhaus in Bürgerhand
+war.
 
 ### 67. Die NPC-Schleife ist zu teuer geworden
 

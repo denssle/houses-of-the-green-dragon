@@ -296,14 +296,14 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			limited: false,
 			limitedTo: 0,
 
-			skill: 'BAKING',
+			skill: 'MILLING',
 			recipes: [
 				{
 					input: [{ itemId: 'GRAIN', quantity: 3 }],
 					outputItemId: 'FLOUR',
 					baseOutput: 2,
 					actionPointCost: 1,
-					skill: 'BAKING'
+					skill: 'MILLING'
 				}
 			],
 			levels: [

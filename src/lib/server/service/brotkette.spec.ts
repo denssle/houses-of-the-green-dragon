@@ -307,7 +307,7 @@ describe('Die Brotkette', () => {
 			expect(await vorschlagFuer('MINING')).toBe('Steinmetzhütte');
 		});
 
-		it('und die Bäckerin bekommt weiter die Mühle — sobald es Quader gibt', async () => {
+		it('und die Bäckerin bekommt weiter ihr Backhaus — sobald es Quader gibt', async () => {
 			// **Die Gegenprobe, und die wichtigere Hälfte der Regel** (5.87): Sie greift
 			// nur, solange das Material fehlt. Liegen Quader und Eisen am Markt, zählt
 			// wieder das Können — sonst hätte die Stadt eine Steinmetzhütte und sonst nie
@@ -320,7 +320,9 @@ describe('Die Brotkette', () => {
 				['PLANK', 40]
 			]);
 
-			expect(await vorschlagFuer('BAKING')).toBe('Mühle');
+			expect(await vorschlagFuer('BAKING')).toBe('Bäckerei');
+			// Seit 5.96 mahlt, wer `MILLING` kann — nicht mehr jeder, der backt.
+			expect(await vorschlagFuer('MILLING')).toBe('Mühle');
 			expect(await vorschlagFuer()).toBe('Schneiderei');
 		});
 	});

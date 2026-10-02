@@ -27,7 +27,7 @@ import { yearsToTicks } from '$lib/game/time';
 const JETZT = 10_000;
 /**
  * Mühle (200) und Backhaus (220) sind beide teurer als Zimmerei (180) und Schneiderei
- * (190) — und teilen sich die Fertigkeit `BAKING`. Wer backen kann, kann auch mahlen.
+ * (190). Seit 5.96 hat jede ihre eigene Fertigkeit: `MILLING` und `BAKING`.
  */
 const MUEHLE = 4;
 const BACKHAUS = 5;
@@ -134,27 +134,10 @@ describe('Welche Werkstatt einer baut', () => {
 		// Zimmerei, obwohl die zwanzig Münzen billiger wäre. Können geht in den Ertrag ein;
 		// ein Meister holt aus derselben Werkstatt mehr heraus als ein Anfänger.
 		//
-		// Es wird die **Mühle**, nicht das Backhaus: Beide gehören zu `BAKING`, und unter
-		// gleich gut Beherrschtem gewinnt das billigere. Das trifft hier auch die richtige
-		// Reihenfolge — ohne Mehl backt niemand.
+		// Bis 5.96 wurde es hier die **Mühle**: Beide gehörten zu `BAKING`, und unter gleich
+		// gut Beherrschtem gewann das billigere. Seitdem baut die Bäckerin ihr Backhaus.
 		const baeckerin = await person('Bäckerin');
 		await skillService.addPractice(baeckerin, 'BAKING', 500);
-
-		const wahl = await npcService.fehlendeWerkstatt(
-			await buildingService.getBuildingsInRegion(stadtId),
-			baeckerin
-		);
-
-		expect(wahl?.optionId).toBe(MUEHLE);
-		expect(wahl?.price).toBeGreaterThan(180);
-	});
-
-	it('geht zum Backhaus über, sobald die Mühle steht', async () => {
-		// Die Kette wächst dadurch in ihrer eigenen Reihenfolge: Was fehlt, entscheidet
-		// die Stadt, und unter dem Fehlenden entscheidet das Können.
-		const baeckerin = await person('Bäckerin');
-		await skillService.addPractice(baeckerin, 'BAKING', 500);
-		await hausMitGrund(MUEHLE, baeckerin);
 
 		const wahl = await npcService.fehlendeWerkstatt(
 			await buildingService.getBuildingsInRegion(stadtId),
@@ -162,6 +145,21 @@ describe('Welche Werkstatt einer baut', () => {
 		);
 
 		expect(wahl?.optionId).toBe(BACKHAUS);
+		expect(wahl?.price).toBeGreaterThan(180);
+	});
+
+	it('und der Müller seine Mühle (5.96)', async () => {
+		// Die zweite Hälfte der Trennung: Wer mahlen kann, baut die Mühle — und das Backen
+		// gilt beim Zuzug erst dann als versorgt, wenn ein Backhaus steht.
+		const mueller = await person('Müller');
+		await skillService.addPractice(mueller, 'MILLING', 500);
+
+		const wahl = await npcService.fehlendeWerkstatt(
+			await buildingService.getBuildingsInRegion(stadtId),
+			mueller
+		);
+
+		expect(wahl?.optionId).toBe(MUEHLE);
 	});
 
 	it('entscheidet bei gleichem Können nach dem Preis', async () => {
@@ -214,9 +212,9 @@ describe('Welche Werkstatt einer baut', () => {
 		// **Punkt 89.** Ein Betrieb, der der Stadt aus einem erbenlosen Nachlass zufiel,
 		// wird von niemandem geführt. Bliebe er als „vorhanden" stehen, wäre das Handwerk
 		// für alle Zeit besetzt — von einem Haus, in dem niemand arbeitet.
-		const baeckerin = await person('Bäckerin');
-		await skillService.addPractice(baeckerin, 'BAKING', 500);
-		await hausMitGrund(MUEHLE, baeckerin);
+		const mueller = await person('Müller');
+		await skillService.addPractice(mueller, 'MILLING', 500);
+		await hausMitGrund(MUEHLE, mueller);
 
 		await Building.update(
 			{ ownerType: 'CITY', OwnerCharacterId: null, escheatedTick: JETZT },
@@ -225,7 +223,7 @@ describe('Welche Werkstatt einer baut', () => {
 
 		const wahl = await npcService.fehlendeWerkstatt(
 			await buildingService.getBuildingsInRegion(stadtId),
-			baeckerin
+			mueller
 		);
 
 		expect(wahl?.optionId).toBe(MUEHLE);
