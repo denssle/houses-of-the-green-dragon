@@ -84,6 +84,19 @@ export interface MeasureOptions {
 	 * ab dem zwanzigsten Tick wieder die alte Welt.
 	 */
 	startgeld?: number;
+	/**
+	 * **`MEASURE_FOOD=20`** legt jedem Lebenden und jedem Ankömmling so viele Laibe in die
+	 * Kammer (5.95, Punkt 85).
+	 *
+	 * Das Gegenstück zu `startgeld`, und aus demselben Grund gebaut: Als der Kornspeicher
+	 * probeweise gestrichen war (5.95, wieder zurückgenommen), verhungerte die Stadt binnen
+	 * zehn Spieljahren — bei einem Lauf mit 400 Münzen je Kopf sogar etwas schneller. Geld
+	 * war also nicht die Sperre. Die Frage danach lautet: Schafft es die Brotkette, wenn sie
+	 * überhaupt Zeit bekommt? Dafür braucht die Gründergeneration Vorrat und keine Münzen.
+	 *
+	 * Ein Werkzeug, kein Weltinhalt — was eine Welt mitbekommt, ist Punkt 14.
+	 */
+	startvorrat?: number;
 }
 
 export interface Measurement {
@@ -185,7 +198,7 @@ function verteilung(zaehlung: Record<string, number>): string[] {
 }
 
 export async function measure(options: MeasureOptions): Promise<Measurement> {
-	const { ticks, every = 250, seed = true, saat, verfolge, startgeld } = options;
+	const { ticks, every = 250, seed = true, saat, verfolge, startgeld, startvorrat } = options;
 	const zeilen: string[] = [];
 
 	const wuerfel: () => number = saat === undefined ? Math.random : seededRoll(saat);
@@ -284,6 +297,17 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		}
 	}
 
+	// **Und der Startvorrat**, wenn einer verlangt ist. Er geht nicht in die Geldbilanz:
+	// Brot ist Ware, und die zählt dieser Bericht nicht — was er zeigt, ist, ob die Stadt
+	// die Zeit nutzt, die ihr der Vorrat kauft.
+	let versorgt = 0;
+	if (startvorrat !== undefined) {
+		const lebende = await Character.findAll({ where: { deathTick: null } });
+		for (const person of lebende) {
+			versorgt += await brotGeben(person.dataValues.id, startvorrat);
+		}
+	}
+
 	const start: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
 	const begonnen: number = Date.now();
 	const bestandVorher: number = (await geldmenge()) + (await stadtkasse(stadtId));
@@ -323,6 +347,10 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 					bilanz.geschenkt += dazu;
 					await angekommen.update({ money: angekommen.dataValues.money + dazu });
 				}
+			}
+			// Derselbe Vorrat für den Zugezogenen, aus demselben Grund.
+			if (startvorrat !== undefined) {
+				versorgt += await brotGeben(stunde.arrival.characterId, startvorrat);
 			}
 		}
 		// **Sold, Steuer und Amtsausgaben zählt seit 5.77 das Kassenbuch** — und zwar
@@ -393,6 +421,9 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 					`  Startgeld ${startgeld} je Kopf — ${ausgestattet} an die Anwesenden, ` +
 						`${bilanz.geschenkt} an Zugezogene (ein Werkzeug, kein Weltinhalt)`
 				]),
+		...(startvorrat === undefined
+			? []
+			: [`  Startvorrat ${startvorrat} Laibe je Kopf — ${versorgt} verteilt (ein Werkzeug)`]),
 		'',
 		'=== DIE KASSE ===',
 		...(await bilanzzeilen(stadtId, bestandVorher, bilanz)),
@@ -513,4 +544,22 @@ async function ereignisse(kind: EventKind): Promise<number> {
 async function ereignissumme(kind: EventKind): Promise<number> {
 	const zeilen = await Event.findAll({ where: { kind }, attributes: ['value'] });
 	return zeilen.reduce((summe, zeile) => summe + (zeile.dataValues.value ?? 0), 0);
+}
+
+/**
+ * Brot in die Kammer legen — so viel, wie hineinpasst.
+ *
+ * Über `needService.changeStock`, damit die Inventargrenze aus 5.33 gilt: Wer in der
+ * Unterkunft wohnt, kann keine dreißig Laibe horten, und der Messlauf soll keine Welt
+ * bauen, die es so nicht geben kann.
+ */
+async function brotGeben(characterId: string, laibe: number): Promise<number> {
+	let gegeben = 0;
+	await sequelize.transaction(async (t) => {
+		for (let i = 0; i < laibe; i++) {
+			if (!(await needService.changeStock(characterId, 'BREAD', 1, t))) break;
+			gegeben++;
+		}
+	});
+	return gegeben;
 }

@@ -9,6 +9,7 @@ import { measure } from '$lib/server/simulation/measure';
  *     npm run measure                    500 Ticks
  *     MEASURE_TICKS=2000 npm run measure     (PowerShell: $env:MEASURE_TICKS=2000)
  *     MEASURE_SEED=86 npm run measure        dieselbe Stadt wie beim letzten Mal
+ *     MEASURE_FOOD=20 npm run measure        jedem zwanzig Laibe in die Kammer
  *
  * **`MEASURE_SEED` ist der Unterschied zwischen Beschreiben und Belegen** (5.64). Ohne
  * Saat würfelt jeder Lauf eine eigene Stadt; zwei solche Läufe zu vergleichen misst die
@@ -43,12 +44,21 @@ const saat: number | undefined =
 const verfolge: string | undefined = process.env.MEASURE_TRACE;
 const startgeld: number | undefined =
 	process.env.MEASURE_MONEY === undefined ? undefined : Number(process.env.MEASURE_MONEY);
+/**
+ * **`MEASURE_FOOD=20`** legt jedem so viele Laibe in die Kammer (5.95, Punkt 85).
+ *
+ * Das Gegenstück zu `MEASURE_MONEY`, und nach demselben Befund gebaut: Ohne Kornspeicher
+ * (probeweise gestrichen in 5.95) verhungert die Stadt, und zwar mit vollen Beuteln. Geld
+ * war nicht die Sperre — die Frage ist, ob die Brotkette anspringt, wenn sie Zeit bekommt.
+ */
+const startvorrat: number | undefined =
+	process.env.MEASURE_FOOD === undefined ? undefined : Number(process.env.MEASURE_FOOD);
 
 describe('Messlauf', () => {
 	it.runIf(ticks > 0)(
 		`läuft ${ticks} Ticks und schreibt den Bericht`,
 		async () => {
-			const bericht = await measure({ ticks, every, saat, verfolge, startgeld });
+			const bericht = await measure({ ticks, every, saat, verfolge, startgeld, startvorrat });
 			const text: string = bericht.lines.join('\n');
 
 			writeFileSync('messung.txt', text, 'utf8');

@@ -1,3 +1,5 @@
+import { TICKS_PER_YEAR } from '$lib/game/time';
+
 /**
  * Bedürfnisse — die Nachfrageseite der Wirtschaft.
  *
@@ -27,6 +29,48 @@ export const SATIETY_MAX = 100;
 export const TICKS_TO_STARVE = 100;
 
 export const SATIETY_LOSS_PER_TICK: number = SATIETY_MAX / TICKS_TO_STARVE;
+
+/**
+ * Wie lange die Stadt versorgt sein soll, damit ein Handwerk als gedeckt gilt.
+ *
+ * Ein Spieljahr. Liegt weniger am Markt, als die Einwohnerschaft in dieser Zeit verzehrt,
+ * ist die Ware knapp — und dann darf ein zweiter Betrieb desselben Handwerks entstehen
+ * (5.95, Punkt 89).
+ *
+ * **Warum nicht der Tagesbedarf.** Der wäre fast immer unterschritten: Ein Bäcker backt
+ * nicht jede Stunde, und zwischen zwei Schichten stünde die Stadt rechnerisch vor dem
+ * Verhungern. Ein Jahr glättet das und lässt trotzdem keine Hungersnot zu — der Vorrat
+ * eines Jahres ist doppelt so viel, wie ein Mensch zum Verhungern braucht.
+ */
+export const SUPPLY_BUFFER_TICKS = TICKS_PER_YEAR;
+
+/**
+ * Wie viel von einer Nahrungsware eine Stadt je Tick verzehrt.
+ *
+ * **Die Rechnung steht, seit es Sättigung gibt, sie wurde nur nie ausgesprochen:** Ein
+ * Tick zehrt `SATIETY_LOSS_PER_TICK`, ein Laib gibt `nourishment` zurück. Bei hundert
+ * Punkten Sättigung und vierzig je Brot heißt das: ein Laib alle vierzig Ticks und Kopf.
+ */
+export function foodDemandPerTick(residents: number, nourishment: number): number {
+	if (nourishment <= 0) return 0;
+	return (residents * SATIETY_LOSS_PER_TICK) / nourishment;
+}
+
+/**
+ * Was am Markt liegen müsste, damit die Ware als gedeckt gilt.
+ *
+ * Die Zahl, an der sich „die Stadt braucht noch eine Bäckerei" bemisst (Punkt 89). Sie
+ * misst **Knappheit und nicht Vergangenheit** — kein Gedächtnis, keine neue Tabelle,
+ * sondern eine Momentaufnahme aus dem, was ohnehin dasteht: Einwohner und Warenbestand.
+ * Damit kommt die Rückkopplung ohne den Umbau aus Punkt 90 aus.
+ */
+export function supplyNeeded(
+	residents: number,
+	nourishment: number,
+	bufferTicks: number = SUPPLY_BUFFER_TICKS
+): number {
+	return Math.ceil(foodDemandPerTick(residents, nourishment) * bufferTicks);
+}
 
 /**
  * Die Schwellen, an denen Not spürbar wird.

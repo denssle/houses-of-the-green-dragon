@@ -39,11 +39,11 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                             | —                            | erledigt     |
 | 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**             | —                            | erledigt     |
 | 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung          | dem nächsten Schritt         | Befund       |
-| 85  | Der Kornspeicher backt aus dem Nichts — **gemessen, mit 5.87 zurückgenommen**         | Punkt 110 / dem Backhaus     | teilweise    |
+| 85  | Der Kornspeicher backt aus dem Nichts — **Abschaffung gemessen, zurückgestellt**      | Punkte 113–115               | teilweise    |
 | 86  | Die städtische Schmiede sperrte die Eisenkette — **behoben mit 5.65**                 | —                            | erledigt     |
 | 87  | Ein Sparziel, das ins Leere führt — Bauland ohne Werkstatt darauf                     | dem nächsten Messlauf        | Befund       |
 | 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick             | laufend                      | Befund       |
-| 89  | Ein Betrieb je Handwerk, für immer — ihre Zahl ist eine Konstante der Vorlagen        | Punkte 15, 34                | Entwurf      |
+| 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                 | Punkte 15, 34, 115           | teilweise    |
 | 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung    | Punkte 76, 16                | Entwurf      |
 | 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen      | laufend                      | teilweise    |
 | 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                    | Punkte 70, 40                | Befund       |
@@ -67,6 +67,9 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 110 | Die Werkstattwahl schickt jeden in dieselbe Sackgasse — **behoben mit 5.87**          | —                            | erledigt     |
 | 111 | Warum einer nichts tut, stand nirgends — **Werkzeug gebaut mit 5.88**                 | —                            | erledigt     |
 | 112 | Ein Betrieb im Umland stand außerhalb des Steuerrechts — **behoben (5.94)**           | —                            | erledigt     |
+| 113 | Eine Versteigerung, bei der niemand bieten darf — **entschieden, wird 5.97**          | dem nächsten Schritt         | Entscheidung |
+| 114 | Der Zuzug fragt nach Gebäuden, nicht nach Bedarf                                      | Punkt 115                    | Befund       |
+| 115 | Wer nichts absetzt, sattelt nicht um — **entschieden, drei Schritte**                 | Punkt 85                     | Entscheidung |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                | laufend                      | Entwurf      |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                   | laufend                      | Entwurf      |
 | 20  | Verschleiß von Gegenständen                                                           | Kleidung und Werkzeug (4.6c) | Entwurf      |
@@ -2494,6 +2497,42 @@ sie ein Handgriff ist und kein Umbau.
 
 **Und der Weg dorthin führt über Punkt 110**, nicht über den Preis.
 
+**Probeweise gestrichen am 02.10.2026 (5.95) — und zurückgenommen, ehe es committet war.**
+Der Kornspeicher war schon ausgebaut: `buyFromGranary` weg, `BUY_FOOD` kauft nur noch am
+Markt, die Seite `/granary` gelöscht. Gemessen über 2000 Ticks, Saat 86:
+
+|                     | ohne Vorrat | 20 Laibe je Kopf |
+| ------------------- | ----------: | ---------------: |
+| Tode (davon Hunger) |     29 (29) |          34 (33) |
+| Geburten            |           2 |               13 |
+| Lebende am Ende     |       **0** |                6 |
+| Mühle / Backhaus    |       — / — |  ab 500 / ab 750 |
+
+**Ohne Vorrat stirbt Grünau aus.** Es entstehen sieben Zimmereien und vier Schmieden, aber
+nie eine Mühle: Die Besitzer verhungern, ihr Betrieb fällt heim und gibt das Handwerk frei
+(Punkt 89), und der Nächste baut wieder das Billigste ohne Materialbedarf daneben.
+
+**Mit Vorrat verschiebt sich das Sterben nur.** Zwanzig Laibe tragen gut 800 Ticks; bis
+dahin stirbt niemand, danach 18 Menschen in 250 Ticks. Die Kette entsteht, aber in der
+falschen Reihenfolge und zu spät: Die Müllerin (Ermgard, mit eigenem Getreideacker) mahlte
+450 Ticks lang Mehl, das niemand kaufte, weil es noch kein Backhaus gab, und lebte mit
+0 bis 25 Münzen von der Hand in den Mund. Das Backhaus baute eine Bäuerin ohne `BAKING`,
+die 150 Ticks später starb. Danach fielen Mühle und Backhaus an die Stadt und fanden in
+über tausend Ticks **keinen Bieter** (Punkt 113). In der ganzen Stadt kam `BUY_INPUT`
+siebenmal vor.
+
+**Alle sieben Pächter starben mit Geld in der Tasche und ohne Brot** — einer mit 804
+Münzen. Es lag nicht am Geld, sondern daran, dass nichts zu kaufen war; und wer hungert
+und kein Brot findet, kennt nur noch Lohnarbeit (`ueberleben` in `npc.logic.ts`), keine
+Ernte und kein Backen.
+
+**Damit bleibt er, bis die Kette trägt.** Was 5.95 von dem Versuch behält, ist die
+Knappheitsregel aus Punkt 89 und das Messwerkzeug `MEASURE_FOOD`. Der Ausbau selbst ist
+überschaubar — `buyFromGranary`, `granaryOffers`, `GRANARY_MARKUP`, der Rückfall in
+`BUY_FOOD`, der Posten `GRANARY` im Kassenbuch und die Seite `/granary` — und wird neu
+gemacht, wenn ein Lauf ohne Kornspeicher eine Stadt zeigt, die sich ernährt. Woran es bis
+dahin hängt, steht in den Punkten 113 bis 115.
+
 ### 86. Die städtische Schmiede sperrt die Eisenkette — behoben (5.65)
 
 **Befund vom 23.08.2026, aus dem Lesen des Codes und nicht aus einem Messlauf.** Er liegt
@@ -2646,6 +2685,23 @@ Betrieb wäre die einfachste Zahl, unbediente Nachfrage die ehrlichere (wer woll
 und fand nichts?) — letztere setzt aber voraus, dass irgendwo mitgeschrieben wird, was
 nicht zustande kam, und das ist Punkt 90. Gehört zusammen mit Punkt 34 (wer einen Betrieb
 führen darf) und Punkt 15 entschieden.
+
+**Gebaut mit 5.95 — für Nahrung.** `fehlendeWerkstatt` gibt ein Handwerk wieder frei, wenn
+seine Ware knapp ist: Liegt am Markt und in den Betriebslagern weniger, als die Stadt in
+einem Spieljahr isst (`supplyNeeded` in `need.logic.ts`, ein Laib alle vierzig Ticks und
+Kopf), steht der Betrieb wieder zur Wahl. Ein Rohbau desselben Handwerks zählt als
+Antwort, damit nicht alle zugleich dieselbe Bäckerei beginnen (Punkt 88). Der Kornspeicher
+zählt bewusst **nicht** als Versorgung — sonst wäre Brot nie knapp.
+
+**Gemessen hat es nichts bewegt**, und der Grund ist lehrreich: Gefragt wird nur, wer noch
+keine Werkstatt hat, und der einzige Bäcker der Stadt hatte 180 Münzen gegen ein Backhaus
+für 220. Die Knappheit wurde erkannt; bezahlen konnte sie niemand. Für Bretter und Quader
+bleibt es bei einem Betrieb je Handwerk — für sie gibt es keine Verzehrzahl.
+
+**Ein Fehler im ersten Anlauf, festgehalten:** Die Knappheit wurde nur geprüft, wenn
+**jedes** Handwerk schon vergeben war. Fehlte irgendeines, kam die zweite Bäckerei nie zur
+Wahl. Der Test dazu war rot, die beiden Gegenproben grün — und keiner prüfte die Knappheit,
+weil die Bäckerin kein Baumaterial hatte und die Wahl auf die Zimmerei auswich (5.87).
 
 ### 90. Die NPC-Entscheidung hat kein Gedächtnis
 
@@ -4702,3 +4758,66 @@ oder der Bauplatz halte die Bäcker ab (beides falsch). Getroffen hat jedes Mal 
 Messung: die Todesursache, die Kassenbilanz, der Test mit der Bäckerin. **Zuerst die
 Aufschlüsselung, dann der Eingriff** — der Satz stand schon in Punkt 93 und hat sich an
 einem Abend dreimal bewährt.
+
+### 113. Eine Versteigerung, bei der niemand bieten darf
+
+**Befund vom 02.10.2026, aus dem Messlauf zu Punkt 85.** Nach dem Tod der Bäckerin fiel
+ihr Backhaus an die Stadt und kam in über tausend Ticks **fünfzehnmal unter den Hammer,
+ohne ein einziges Gebot**. Über den ganzen Lauf gab es bei rund 230 Versteigerungen etwa
+zwanzig Gebote.
+
+**Zwei Regeln in `npcsBietenLassen` zusammen:**
+
+- **Bieten darf nur, wer noch kein Grundstück besitzt.** Für Bauland ist das plausibel; für
+  einen Betrieb heißt es, dass ausgerechnet der Handwerker mit eigenem Wohnhaus ihn nicht
+  ersteigern kann. Der einzige Bäcker der Stadt besaß eins.
+- **Geboten wird ein Viertel des Vermögens, mindestens 40** (`MINIMUM_BID` =
+  `PLOT_PRICE`). Wer weniger als 160 Münzen hat, bietet nie.
+
+**Und ein dritter Fehler, der erst bei niedrigem Startpreis zählt:** Die NPCs bieten in
+einem einzigen Durchgang, jeder erhöht einmal um den Mindestschritt. Es gewinnt nicht das
+höchste Interesse, sondern wer in der Reihe zuletzt noch mithält.
+
+**Entschieden am 02.10.2026:** Mitbieten darf jeder, der zahlen kann; die Versteigerung
+beginnt bei einer Münze, für Bauland wie für Nachlässe. Wie hoch einer geht, hängt an
+seinem Nutzen — wer das Handwerk des Betriebs kann oder dessen Ware knapp ist, bietet
+viel, wer ein Dach sucht, bietet für das Wohnhaus. Gesteigert wird, bis einer übrig ist.
+Gebaut wird das als 5.97.
+
+### 114. Der Zuzug fragt nach Gebäuden, nicht nach Bedarf
+
+**Befund vom 02.10.2026.** `skillToBring` bringt bevorzugt ein Handwerk, das in der Stadt
+fehlt, und „fehlt" heißt: kein Gebäude dieses Fachs in Bürgerhand. Ackerbau, Holzarbeit
+und Bergbau haben aber **kein eigenes Werkstattgebäude**; sie hängen an Pachtflächen und
+gelten deshalb **immer** als fehlend. Im Messlauf kamen in 2000 Ticks zwei Bäcker — auch in
+den tausend Ticks, in denen keine Mühle und kein Backhaus in Bürgerhand standen, war Backen
+nur eines von fünf, sechs Losen.
+
+**Zu entwerfen:** Der Zuzug sollte nach dem fragen, was knapp ist — dieselbe Rechnung wie
+in Punkt 89 —, statt nach dem, was fehlt. Gehört zu Punkt 115.
+
+### 115. Wer nichts absetzt, sattelt nicht um
+
+**Befund vom 02.10.2026.** Am Ende eines Laufs lagen 500 Bretter bei der Zimmerei, 617
+Quader bei der Steinmetzhütte und 98 Gewänder bei der Schneiderei — während die Stadt
+verhungerte. Niemand, dessen Ware liegen bleibt, wechselt zu einer, die fehlt:
+
+- Die Werkstattwahl fragt nur, wer **noch keine** Werkstatt hat, und dort entscheidet das
+  eigene Können vor der Knappheit.
+- Eine Anstellung nimmt nur, wer **keine** hat (`TAKE_JOB` in `sicherheit`).
+- Ein Betrieb, der nichts absetzt, wird nicht aufgegeben (Punkt 89).
+
+**Entschieden am 02.10.2026:** Alle drei Wege sollen gehen — in dieser Reihenfolge, je
+ein Schritt mit eigener Messung:
+
+1. **Werkstattwahl nach Bedarf.** Knappheit schlägt Können: Ein Zimmermann, dessen Bretter
+   auf Halde liegen, baut die Bäckerei, wenn Brot fehlt.
+2. **Anstellung im knappen Betrieb.** Wer nichts absetzt, nimmt eine Stelle dort an, auch
+   wenn er schon eine hat — und lernt dabei das Handwerk. Daran hängt
+   `WORK/EMPLOYER_BROKE` (300 Fehlschläge je Lauf): Wer einstellt, muss zahlen können.
+3. **Den eigenen Betrieb umstellen.** Wer eine Werkstatt voller unverkäuflicher Ware hat,
+   gibt sie auf und sattelt um. Hängt an Punkt 113, denn die aufgegebene Werkstatt braucht
+   einen Abnehmer.
+
+**Offen ist das Maß für „liegt auf Halde".** Für Nahrung gibt es die Verzehrzahl aus
+Punkt 89; für Bretter und Quader gibt es keine, ihr Bedarf hängt daran, wer gerade baut.

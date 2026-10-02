@@ -5,8 +5,10 @@ import { sequelize } from '$lib/db/sequelize';
 import '$lib/db/db';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
+import { Inventory } from '$lib/db/model/inventory';
 import { Plot } from '$lib/db/model/plot';
 import { Skill } from '$lib/db/model/skill';
+import { BuildingStock } from '$lib/db/model/shop';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as npcService from '$lib/server/service/npcService';
@@ -42,7 +44,11 @@ let stadtId: string;
  * nicht vorhanden. Beim ersten Anlauf war genau das der Grund, warum ein Test grün war,
  * ohne etwas zu prüfen.
  */
-async function hausMitGrund(optionId: number, besitzerId: string): Promise<void> {
+async function hausMitGrund(
+	optionId: number,
+	besitzerId: string,
+	extras: { underConstruction?: boolean; lager?: { itemId: string; quantity: number } } = {}
+): Promise<string> {
 	const plotId = randomUUID();
 	await Plot.create({
 		id: plotId,
@@ -52,15 +58,26 @@ async function hausMitGrund(optionId: number, besitzerId: string): Promise<void>
 		ownerType: 'CHARACTER',
 		OwnerCharacterId: besitzerId
 	});
+	const id = randomUUID();
 	await Building.create({
-		id: randomUUID(),
+		id,
 		name: `Haus ${optionId}`,
 		optionId,
+		condition: extras.underConstruction ? 0 : 100,
+		underConstruction: extras.underConstruction ?? false,
 		lastConditionTick: JETZT,
 		PlotId: plotId,
 		ownerType: 'CHARACTER',
 		OwnerCharacterId: besitzerId
 	});
+	if (extras.lager) {
+		await BuildingStock.create({
+			BuildingId: id,
+			itemId: extras.lager.itemId,
+			quantity: extras.lager.quantity
+		});
+	}
+	return id;
 }
 
 async function person(name: string): Promise<string> {
@@ -96,6 +113,7 @@ describe('Welche Werkstatt einer baut', () => {
 		// unter die Zeile davor.
 		await Building.destroy({ where: { ownerType: 'CHARACTER' } });
 		await Building.destroy({ where: { escheatedTick: { [Op.ne]: null } } });
+		await BuildingStock.destroy({ where: {} });
 	});
 
 	it('nimmt ohne Können die billigste, die fehlt', async () => {
@@ -217,6 +235,10 @@ describe('Welche Werkstatt einer baut', () => {
 		// Ein NPC, der die vierte Bäckerei danebenstellt, ruiniert sich und den Markt.
 		// Geprüft am ganzen Backhandwerk: Stehen Mühle und Backhaus, bleibt für die
 		// Bäckerin nichts aus ihrem Fach — dann entscheidet wieder der Preis.
+		//
+		// **Ohne Stadt gefragt**, und das ist seit 5.95 der Unterschied: Wer keine Region
+		// mitgibt, bekommt die Wahl ohne die Frage nach der Versorgung — so, wie sie bis
+		// dahin für alle galt.
 		const baeckerin = await person('Bäckerin');
 		await skillService.addPractice(baeckerin, 'BAKING', 500);
 		await hausMitGrund(MUEHLE, baeckerin);
@@ -230,5 +252,74 @@ describe('Welche Werkstatt einer baut', () => {
 		expect(wahl?.optionId).not.toBe(MUEHLE);
 		expect(wahl?.optionId).not.toBe(BACKHAUS);
 		expect(wahl?.optionId).toBe(ZIMMEREI);
+	});
+
+	describe('wenn die Stadt nicht satt wird (5.95, Punkt 89)', () => {
+		/**
+		 * Eine Bäckerin, deren Backhaus und Mühle stehen — das Fach ist vergeben.
+		 *
+		 * **Mit Baumaterial in der Kammer.** Ohne das wiche die Wahl auf eine Werkstatt aus,
+		 * die keines verlangt (5.87, Punkt 110), und jeder Test hier landete bei der
+		 * Zimmerei — der erste wäre rot und die beiden Gegenproben grün, ohne dass einer
+		 * von ihnen die Knappheit geprüft hätte. Genau so ist es beim ersten Anlauf gewesen.
+		 */
+		async function mitBackhandwerk(): Promise<string> {
+			const baeckerin = await person('Bäckerin');
+			await skillService.addPractice(baeckerin, 'BAKING', 500);
+			for (const itemId of ['PLANK', 'BLOCK', 'IRON']) {
+				await Inventory.create({ CharacterId: baeckerin, itemId, quantity: 100 });
+			}
+			await hausMitGrund(MUEHLE, baeckerin);
+			await hausMitGrund(BACKHAUS, baeckerin);
+			return baeckerin;
+		}
+
+		it('gibt das Handwerk wieder frei, wenn kein Brot da ist', async () => {
+			// **Der Kern des Schritts.** Eine Bäckerei versorgt keine Stadt: Im Lauf über
+			// 2000 Ticks buk die eine sieben Laibe, während tausend gebraucht wurden, und
+			// dreiunddreißig Menschen verhungerten neben ihr. Steht nichts am Markt, ist
+			// das Fach wieder offen — für die zweite Bäckerei.
+			const baeckerin = await mitBackhandwerk();
+
+			const wahl = await npcService.fehlendeWerkstatt(
+				await buildingService.getBuildingsInRegion(stadtId),
+				baeckerin,
+				stadtId
+			);
+
+			expect(wahl?.optionId).toBe(BACKHAUS);
+		});
+
+		it('lässt es vergeben, solange die Versorgung reicht', async () => {
+			// Die Gegenprobe, ohne die der Schritt eine Einbahn wäre: Wer versorgt ist,
+			// braucht keinen zweiten Bäcker. Ein Spieljahr Vorrat genügt — bei einer
+			// Handvoll Einwohner sind das wenige Laibe (`supplyNeeded`).
+			const baeckerin = await mitBackhandwerk();
+			await hausMitGrund(ZIMMEREI, baeckerin, { lager: { itemId: 'BREAD', quantity: 200 } });
+
+			const wahl = await npcService.fehlendeWerkstatt(
+				await buildingService.getBuildingsInRegion(stadtId),
+				baeckerin,
+				stadtId
+			);
+
+			expect(wahl?.optionId).not.toBe(BACKHAUS);
+		});
+
+		it('zählt einen Rohbau als Antwort auf die Lücke', async () => {
+			// **Gegen die Herde** (Punkte 88 und 90): In der Stunde, in der die Lücke
+			// aufgeht, bekäme sonst jeder NPC dieselbe Bäckerei vorgeschlagen, und die
+			// Stadt bekäme sechs davon. So entsteht eine nach der anderen.
+			const baeckerin = await mitBackhandwerk();
+			await hausMitGrund(BACKHAUS, baeckerin, { underConstruction: true });
+
+			const wahl = await npcService.fehlendeWerkstatt(
+				await buildingService.getBuildingsInRegion(stadtId),
+				baeckerin,
+				stadtId
+			);
+
+			expect(wahl?.optionId).not.toBe(BACKHAUS);
+		});
 	});
 });
