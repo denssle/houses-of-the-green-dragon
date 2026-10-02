@@ -20,6 +20,7 @@ import {
 	REPAIR_BELOW
 } from '$lib/game/npc.logic';
 import { getItemTemplate } from '$lib/model/itemTemplate';
+import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 import * as supplyService from '$lib/server/service/supplyService';
 import {
 	CONDITION_MAX,
@@ -1305,17 +1306,29 @@ export async function fehlendeWerkstatt(
 	// fehlte, etwa die Alchemistenküche, kam die zweite Bäckerei nie zur Wahl. Eine Stadt
 	// verhungert nicht langsamer, weil ihr noch ein Tränkebrauer fehlt. Teuer wird es
 	// trotzdem nur, wo ein Nahrungsbetrieb steht (Punkt 67, siehe `knappeHandwerke`).
-	if (regionId) {
-		const vergeben = handwerke.filter((vorlage) => !kandidaten.includes(vorlage));
-		kandidaten.push(...(await supplyService.knappeHandwerke(vergeben, vorhanden, regionId)));
+	//
+	// **Gefragt wird seit 5.98 auch nach dem, was noch fehlt** (Punkt 115): Die Knappheit
+	// ordnet die Wahl, und dafür muss sie auch das Backhaus kennen, das es noch gar nicht
+	// gibt.
+	const knapp: BuildingTemplate[] = regionId
+		? await supplyService.knappeHandwerke(handwerke, vorhanden, regionId)
+		: [];
+	for (const vorlage of knapp) {
+		if (!kandidaten.includes(vorlage)) kandidaten.push(vorlage);
 	}
 
-	const bewertet: { optionId: number; price: number; koennen: number; bedarf: MaterialNeed[] }[] =
-		[];
+	const bewertet: {
+		optionId: number;
+		price: number;
+		knapp: boolean;
+		koennen: number;
+		bedarf: MaterialNeed[];
+	}[] = [];
 	for (const vorlage of kandidaten) {
 		bewertet.push({
 			optionId: vorlage.optionId,
 			price: levelOf(vorlage, 1).price,
+			knapp: knapp.includes(vorlage),
 			// Ohne Person oder ohne Fertigkeit in der Vorlage zählt nur der Preis — dann
 			// verhält sich die Wahl wie vor 5.19.
 			koennen:
@@ -1328,7 +1341,13 @@ export async function fehlendeWerkstatt(
 		});
 	}
 
-	bewertet.sort((a, b) => b.koennen - a.koennen || a.price - b.price);
+	// **Was die Stadt braucht, vor dem, was er kann** (5.98, Punkt 115). Bis hierher
+	// entschied das Können zuerst: Wer Holz bearbeiten konnte, stellte die siebte Zimmerei
+	// neben sechs, deren Bretter auf Halde lagen, während die Stadt verhungerte. Das Können
+	// ordnet weiterhin — unter dem Knappen und unter dem Übrigen.
+	bewertet.sort(
+		(a, b) => Number(b.knapp) - Number(a.knapp) || b.koennen - a.koennen || a.price - b.price
+	);
 	const beste = bewertet[0];
 
 	// **Ein Vorschlag, den niemand bauen kann, ist keiner** (5.87, Punkt 110).

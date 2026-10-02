@@ -320,4 +320,80 @@ describe('Welche Werkstatt einer baut', () => {
 			expect(wahl?.optionId).not.toBe(BACKHAUS);
 		});
 	});
+
+	describe('was die Stadt braucht, vor dem, was einer kann (5.98, Punkt 115)', () => {
+		/** Jemand mit Baumaterial in der Kammer — sonst wiche jede Wahl auf die Zimmerei aus. */
+		async function mitMaterial(name: string): Promise<string> {
+			const id = await person(name);
+			for (const itemId of ['PLANK', 'BLOCK', 'IRON']) {
+				await Inventory.create({ CharacterId: id, itemId, quantity: 100 });
+			}
+			return id;
+		}
+
+		it('schickt den Zimmermann zur Bäckerei, wenn Brot fehlt', async () => {
+			// **Der Kern des Schritts.** Bis hierher entschied das Können zuerst: Im Messlauf
+			// ohne Kornspeicher standen am Ende sieben Zimmereien und keine Bäckerei.
+			const zimmermann = await mitMaterial('Zimmermann');
+			await skillService.addPractice(zimmermann, 'CONSTRUCTION', 500);
+
+			const wahl = await npcService.fehlendeWerkstatt(
+				await buildingService.getBuildingsInRegion(stadtId),
+				zimmermann,
+				stadtId
+			);
+
+			expect(wahl?.optionId).toBe(BACKHAUS);
+		});
+
+		it('aber nicht, wenn die Stadt versorgt ist', async () => {
+			// Die Gegenprobe: Ohne Knappheit bleibt es beim Können.
+			const zimmermann = await mitMaterial('Zimmermann');
+			await skillService.addPractice(zimmermann, 'CONSTRUCTION', 500);
+			const nachbar = await person('Nachbar');
+			await hausMitGrund(SCHMIEDE, nachbar, { lager: { itemId: 'BREAD', quantity: 500 } });
+
+			const wahl = await npcService.fehlendeWerkstatt(
+				await buildingService.getBuildingsInRegion(stadtId),
+				zimmermann,
+				stadtId
+			);
+
+			expect(wahl?.optionId).toBe(ZIMMEREI);
+		});
+
+		it('kennt auch die Mühle als knapp, wenn ein Backhaus kein Mehl bekommt', async () => {
+			// Mehl isst niemand — bis 5.98 galt eine Mühle deshalb nie als knapp, und eine
+			// Wahl nach Knappheit hätte Bäckereien neben eine Stadt ohne Mühle gestellt.
+			// Steht das Backhaus und ist Brot da, fehlt nur noch das Mehl.
+			const baecker = await person('Bäcker');
+			await hausMitGrund(BACKHAUS, baecker, { lager: { itemId: 'BREAD', quantity: 500 } });
+			const jemand = await mitMaterial('Jemand');
+
+			const wahl = await npcService.fehlendeWerkstatt(
+				await buildingService.getBuildingsInRegion(stadtId),
+				jemand,
+				stadtId
+			);
+
+			expect(wahl?.optionId).toBe(MUEHLE);
+		});
+
+		it('und nicht mehr, sobald Mehl bereitliegt', async () => {
+			const baecker = await person('Bäcker');
+			const backhaus = await hausMitGrund(BACKHAUS, baecker, {
+				lager: { itemId: 'BREAD', quantity: 500 }
+			});
+			await BuildingStock.create({ BuildingId: backhaus, itemId: 'FLOUR', quantity: 100 });
+			const jemand = await mitMaterial('Jemand');
+
+			const wahl = await npcService.fehlendeWerkstatt(
+				await buildingService.getBuildingsInRegion(stadtId),
+				jemand,
+				stadtId
+			);
+
+			expect(wahl?.optionId).not.toBe(MUEHLE);
+		});
+	});
 });

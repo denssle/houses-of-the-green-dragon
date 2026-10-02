@@ -7,6 +7,8 @@ import type { Building as Haus } from '$lib/model/building';
 import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import { supplyNeeded } from '$lib/game/need.logic';
+import { inputSupplyNeeded } from '$lib/game/production.logic';
+import { getBuildingOption } from '$lib/server/service/buildingService';
 
 /**
  * Was die Stadt hat, gemessen an dem, was sie braucht.
@@ -36,8 +38,13 @@ import { supplyNeeded } from '$lib/game/need.logic';
  * (Herdenverhalten, Punkte 88 und 90). So entsteht eine nach der anderen: Ist die Lücke
  * danach immer noch offen, ist die nächste dran.
  *
- * **Nur Nahrung**, und das sei benannt: Für Bretter und Quader gibt es keine Verzehrzahl,
- * an der sich Bedarf messen ließe — ihr Bedarf hängt daran, wer gerade baut. Für sie
+ * **Gegessen oder verarbeitet** (seit 5.98, Punkt 115). Bis dahin zählte nur Nahrung —
+ * und Mehl isst niemand, also galt eine Mühle nie als knapp. Jetzt zählt auch, was die
+ * bestehenden Betriebe der Stadt als Zutat brauchen (`inputSupplyNeeded`): Steht ein
+ * Backhaus in Bürgerhand und liegt kein Mehl bereit, ist die Mühle knapp.
+ *
+ * **Was weder gegessen noch verarbeitet wird, bleibt außen vor** — Bretter und Quader
+ * gehen in Bauten, nicht in Rezepte, und ihr Bedarf hängt daran, wer gerade baut. Für sie
  * bleibt es bei einer je Handwerk, und Punkt 89 bleibt insoweit offen.
  *
  * **Der Kornspeicher zählt nicht mit**, und das mit Absicht. Er verkauft ohne Bestand und
@@ -49,22 +56,31 @@ export async function knappeHandwerke(
 	vorhanden: Haus[],
 	regionId: string
 ): Promise<BuildingTemplate[]> {
-	// Erst sortieren, was ohne Datenbank geht: Nur Nahrungsbetriebe kommen in Frage, und
-	// wer schon daran baut, hat die Lücke bereits beantwortet. Bleibt nichts übrig, kostet
-	// die ganze Frage keine Abfrage.
-	const nahrung = handwerke
+	// Erst sortieren, was ohne Datenbank geht: Gefragt wird nach Handwerken, deren Ware
+	// jemand isst oder ein bestehender Betrieb verarbeitet — und wer schon daran baut, hat
+	// die Lücke bereits beantwortet. Bleibt nichts übrig, kostet die Frage keine Abfrage.
+	const verarbeiter = vorhanden.filter(
+		(haus) => haus.ownerType === 'CHARACTER' && !haus.underConstruction
+	);
+	const fragen = handwerke
 		.flatMap((vorlage) => {
 			const rezept = vorlage.recipes?.[0];
 			const ware = rezept ? getItemTemplate(rezept.outputItemId) : undefined;
-			return ware?.nourishment
-				? [{ vorlage, itemId: ware.itemId, nourishment: ware.nourishment }]
-				: [];
+			if (!ware) return [];
+			// Wie viel davon die Betriebe der Stadt je Durchgang verarbeiten (5.98).
+			const jeDurchgang: number[] = verarbeiter.flatMap((haus) =>
+				(getBuildingOption(haus.optionId)?.recipes ?? []).flatMap((r) =>
+					r.input.filter((zutat) => zutat.itemId === ware.itemId).map((zutat) => zutat.quantity)
+				)
+			);
+			if (!ware.nourishment && jeDurchgang.length === 0) return [];
+			return [{ vorlage, itemId: ware.itemId, nourishment: ware.nourishment ?? 0, jeDurchgang }];
 		})
 		.filter(
 			({ vorlage }) =>
 				!vorhanden.some((haus) => haus.optionId === vorlage.optionId && haus.underConstruction)
 		);
-	if (nahrung.length === 0) return [];
+	if (fragen.length === 0) return [];
 
 	const einwohner: number = await Character.count({
 		where: { RegionId: regionId, deathTick: null }
@@ -72,8 +88,11 @@ export async function knappeHandwerke(
 	if (einwohner === 0) return [];
 
 	const knapp: BuildingTemplate[] = [];
-	for (const { vorlage, itemId, nourishment } of nahrung) {
-		const noetig: number = supplyNeeded(einwohner, nourishment);
+	for (const { vorlage, itemId, nourishment, jeDurchgang } of fragen) {
+		// Was gegessen wird und was verarbeitet wird, zusammen: Brot, das der Wirt zu Suppe
+		// machte, fehlte am Tisch genauso.
+		const noetig: number =
+			(nourishment > 0 ? supplyNeeded(einwohner, nourishment) : 0) + inputSupplyNeeded(jeDurchgang);
 		if ((await warenbestand(regionId, itemId)) < noetig) knapp.push(vorlage);
 	}
 	return knapp;

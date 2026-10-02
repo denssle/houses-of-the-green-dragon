@@ -139,3 +139,23 @@ export function produce(
 export function titheOn(harvest: number, percent: number): number {
 	return taxOn(harvest, percent);
 }
+
+/**
+ * Wie viele Durchgänge Zutaten für einen Betrieb bereitliegen sollen (5.98, Punkt 115).
+ *
+ * **Die Knappheit eine Stufe weiter oben.** Aus Punkt 89 kommt die Frage, ob Brot fehlt —
+ * gemessen an dem, was die Stadt isst. Mehl isst niemand; also galt eine Mühle nie als
+ * knapp, und eine Werkstattwahl, die nach Knappheit geht, hätte Bäckereien neben eine
+ * Stadt ohne Mühle gestellt. Der Bedarf an einer Zutat ist das, was die Betriebe
+ * verarbeiten wollen, die sie brauchen.
+ *
+ * **Zehn Durchgänge** — so viel, wie ein Bäcker in gut einer Woche Spielzeit verbackt.
+ * Weniger, und die Zutat gälte schon zwischen zwei Lieferungen als knapp; mehr, und eine
+ * Mühle, die stetig liefert, sähe aus wie eine, die fehlt.
+ */
+export const INPUT_BUFFER_BATCHES = 10;
+
+/** Was von einer Zutat bereitliegen müsste, damit ihre Verarbeiter versorgt sind. */
+export function inputSupplyNeeded(perBatch: number[]): number {
+	return perBatch.reduce((summe, menge) => summe + menge * INPUT_BUFFER_BATCHES, 0);
+}
