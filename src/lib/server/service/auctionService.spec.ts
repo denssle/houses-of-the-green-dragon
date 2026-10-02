@@ -14,6 +14,7 @@ import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as auctionService from '$lib/server/service/auctionService';
 import * as electionService from '$lib/server/service/electionService';
+import * as skillService from '$lib/server/service/skillService';
 import {
 	AUCTION_TICKS,
 	BID_INCREMENT,
@@ -473,6 +474,80 @@ describe('Erschließung und Versteigerung', () => {
 			expect(grund!.dataValues.OwnerCharacterId).toBe(bieter);
 			expect(haus!.dataValues.OwnerCharacterId).toBe(bieter);
 			expect(haus!.dataValues.ownerType).toBe('CHARACTER');
+		});
+
+		describe('und wer dafür bietet (5.97, Punkt 113)', () => {
+			const BAECKEREI = 5;
+
+			/** Ein eigenes Wohnhaus — bis 5.97 schloss es vom Bieten aus. */
+			async function mitHaus(characterId: string): Promise<void> {
+				const plotId = randomUUID();
+				await Plot.create({
+					id: plotId,
+					address: `Wohngasse ${plotId.slice(0, 4)}`,
+					type: 'BUILDING_LAND',
+					RegionId: stadtId,
+					ownerType: 'CHARACTER',
+					OwnerCharacterId: characterId
+				});
+				await Building.create({
+					id: randomUUID(),
+					name: 'Kate',
+					optionId: WOHNHAUS,
+					lastConditionTick: JETZT,
+					PlotId: plotId,
+					ownerType: 'CHARACTER',
+					OwnerCharacterId: characterId
+				});
+			}
+
+			async function zuschlagFuer(optionId: number): Promise<string | null | undefined> {
+				const { hausId } = await stadtgrund(optionId);
+				await auctionService.auctionEscheatedEstates(stadtId, JETZT);
+				await auctionService.advanceAuctions(stadtId, JETZT + AUCTION_TICKS);
+				return (await Building.findByPk(hausId!))!.dataValues.OwnerCharacterId;
+			}
+
+			it('gibt die Bäckerei der Bäckerin — auch wenn sie ein Haus hat und ein anderer reicher ist', async () => {
+				// **Der Befund aus dem Messlauf zu 5.95:** Die Bäckerei kam fünfzehnmal unter den
+				// Hammer, ohne ein Gebot. Der einzige Bäcker besaß ein Wohnhaus und durfte nicht
+				// bieten; und hätte er gedurft, hätte der Reichste gewonnen, denn jeder bot
+				// pauschal ein Viertel.
+				const baeckerin = await person('Bäckerin', 400, 'NPC');
+				await skillService.addPractice(baeckerin, 'BAKING', 500);
+				await mitHaus(baeckerin);
+				await person('Reicher ohne Fach', 700, 'NPC');
+
+				expect(await zuschlagFuer(BAECKEREI)).toBe(baeckerin);
+			});
+
+			it('und sie zahlt einen Schritt über dem Zweiten, nicht ihr Limit', async () => {
+				const baeckerin = await person('Bäckerin', 400, 'NPC');
+				await skillService.addPractice(baeckerin, 'BAKING', 500);
+				await mitHaus(baeckerin);
+				// Ohne Fach und ohne Werkstatt, und Brot ist knapp: Er ginge bis 175.
+				await person('Reicher ohne Fach', 700, 'NPC');
+
+				await zuschlagFuer(BAECKEREI);
+
+				expect(await geld(baeckerin)).toBe(400 - (175 + BID_INCREMENT));
+			});
+
+			it('lässt keinen Nachlass liegen, nur weil niemand Passendes da ist', async () => {
+				// Wer ein Haus hat, will kein zweites — aber für eine Münze nimmt er es.
+				const nachbar = await person('Nachbar', 100, 'NPC');
+				await mitHaus(nachbar);
+
+				expect(await zuschlagFuer(WOHNHAUS)).toBe(nachbar);
+				expect(await geld(nachbar)).toBe(100 - MINIMUM_BID);
+			});
+
+			it('lässt Kinder nicht mitbieten', async () => {
+				const kind = await person('Kind', 500, 'NPC');
+				await Character.update({ birthTick: JETZT - yearsToTicks(8) }, { where: { id: kind } });
+
+				expect(await zuschlagFuer(WOHNHAUS)).toBeNull();
+			});
 		});
 	});
 });

@@ -1,5 +1,5 @@
 import type { ActionFailureReason } from '$lib/game/actionFailure';
-import { canAfford, PLOT_PRICE, TAGELOHN } from '$lib/game/economy';
+import { canAfford, TAGELOHN } from '$lib/game/economy';
 import { REPAIR_ACTION_POINT_COST, repairWage } from '$lib/game/buildingAction.logic';
 import { TICKS_PER_YEAR } from '$lib/game/time';
 
@@ -116,8 +116,16 @@ export const MAX_PLOTS_PER_DEVELOPMENT = 4;
  */
 export const AUCTION_TICKS: number = Math.round(TICKS_PER_YEAR / 2);
 
-/** Unter diesem Gebot geht nichts weg. */
-export const MINIMUM_BID: number = PLOT_PRICE;
+/**
+ * Unter diesem Gebot geht nichts weg — **eine Münze** (5.97, Punkt 113).
+ *
+ * Bis hierher stand hier der Grundstückspreis, vierzig Münzen. Zusammen mit dem Viertel,
+ * das ein NPC höchstens bot, hieß das: Mitbieten kann nur, wer 160 Münzen hat. Im Messlauf
+ * zu 5.95 kam die heimgefallene Bäckerei fünfzehnmal unter den Hammer und bekam kein
+ * einziges Gebot. Den Preis soll die Konkurrenz machen, nicht eine Schwelle: Wer etwas
+ * wirklich will, bietet hoch, und wer allein ist, bekommt es billig.
+ */
+export const MINIMUM_BID = 1;
 
 /**
  * Um wie viel ein Gebot das bisherige übertreffen muss.
@@ -192,16 +200,85 @@ export function award(bids: Bid[], purse: Map<string, number>): Bid | undefined 
 }
 
 /**
- * Was ein NPC zu bieten bereit ist.
+ * Wie sehr ein NPC etwas will — und damit, wie hoch er geht (5.97, Punkt 113).
  *
- * Ein Viertel seines Vermögens, und nur, wenn er überhaupt etwas übrig hat. Ein NPC, der
- * alles auf ein Grundstück wirft, verhungert daneben; einer, der gar nicht bietet, macht
- * jede Versteigerung ohne Spieler zur Formsache.
+ * - **`HIGH`**: Er kann damit etwas anfangen, das er sonst nicht hat — das Handwerk des
+ *   Betriebs, dessen Ware knapp ist, oder das erste eigene Dach.
+ * - **`MEDIUM`**: Er hat Verwendung, aber keine dringende — Bauland für den, der noch
+ *   keinen Grund besitzt.
+ * - **`LOW`**: Er nähme es, wenn es billig ist. Damit bleibt kein Nachlass liegen, nur
+ *   weil gerade niemand Passendes in der Stadt ist.
  */
-export const NPC_BID_SHARE = 0.25;
+export type BidInterest = 'HIGH' | 'MEDIUM' | 'LOW';
 
-export function npcBid(money: number, highest: number | null): number | undefined {
-	const grenze: number = Math.floor(money * NPC_BID_SHARE);
-	const noetig: number = nextBid(highest);
-	return grenze >= noetig ? noetig : undefined;
+/**
+ * Welchen Teil seines Geldes ein NPC dafür einsetzt.
+ *
+ * **Das Viertel ist geblieben, für den mittleren Fall.** Bis 5.97 bot jeder pauschal ein
+ * Viertel seines Vermögens, gleich ob er mit dem Grundstück etwas anfangen konnte — wer am
+ * meisten hatte, bekam den Zuschlag, und die Bäckerei ging an den Reichsten statt an den
+ * Bäcker. Die Hälfte für den, der es braucht, ist die Obergrenze, unter der er nicht
+ * verhungert: Ein Brot kostet vier Münzen, und wer hundert hat, behält fünfzig.
+ */
+export const NPC_BID_SHARE: Record<BidInterest, number> = {
+	HIGH: 0.5,
+	MEDIUM: 0.25,
+	LOW: 0.05
+};
+
+/** Wie weit ein NPC höchstens geht. */
+export function npcBidLimit(money: number, interest: BidInterest): number {
+	return Math.floor(Math.max(0, money) * NPC_BID_SHARE[interest]);
+}
+
+/** Was ein NPC höchstens zu zahlen bereit ist — eine Zeile je Bieter. */
+export interface BidLimit {
+	bidderId: string;
+	limit: number;
+}
+
+/**
+ * Wie die NPCs eine Versteigerung unter sich ausmachen — das Gebot, das am Ende steht.
+ *
+ * **Eine Steigerung, kein Durchgang.** Bis 5.97 bot jeder NPC der Reihe nach einmal den
+ * Mindestschritt, und es gewann, wer in der Reihe zuletzt noch mithielt — nicht, wer am
+ * meisten wollte. Hier wird ausgerechnet, wie eine echte Steigerung endet: Es bleibt der
+ * mit dem höchsten Limit übrig, und er zahlt einen Schritt über dem, was der Zweite noch
+ * mitgegangen wäre — mehr nicht, und nie mehr als sein eigenes Limit.
+ *
+ * **Ein bestehendes Gebot zählt mit.** Hat ein Spieler geboten, muss der NPC ihn
+ * übertreffen; ist der Höchstbietende selbst einer der NPCs, erhöht er nur, wenn ihn ein
+ * anderer sonst überböte.
+ *
+ * `undefined`, wenn kein NPC das nötige Gebot aufbringen will.
+ */
+export function npcBidding(
+	limits: BidLimit[],
+	highest: Bid | null
+): { bidderId: string; amount: number } | undefined {
+	const reihe = [...limits].filter((zeile) => zeile.limit > 0).sort((a, b) => b.limit - a.limit);
+	const erster = reihe[0];
+	if (!erster) return undefined;
+
+	const bisher: number | null = highest?.amount ?? null;
+	const fuehrtSchon: boolean = highest?.bidderId === erster.bidderId;
+
+	// Was der Erste überbieten muss: den Zweiten unter den NPCs — und, wenn er nicht selbst
+	// vorne liegt, das stehende Gebot.
+	const zweiter: number | undefined = reihe[1]?.limit;
+	const gegner: number[] = [
+		...(zweiter !== undefined ? [zweiter] : []),
+		...(bisher !== null && !fuehrtSchon ? [bisher] : [])
+	];
+	const noetig: number = gegner.length === 0 ? MINIMUM_BID : Math.max(...gegner) + BID_INCREMENT;
+	const gebot: number = Math.min(erster.limit, noetig);
+
+	if (fuehrtSchon) {
+		// Er liegt vorn; er erhöht nur, wenn es jemand anderes darüber schaffte.
+		return bisher !== null && gebot > bisher
+			? { bidderId: erster.bidderId, amount: gebot }
+			: undefined;
+	}
+	if (gebot < nextBid(bisher)) return undefined;
+	return { bidderId: erster.bidderId, amount: gebot };
 }

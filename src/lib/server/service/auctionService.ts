@@ -15,19 +15,24 @@ import {
 	DEVELOPMENT_SHIFTS_PER_PLOT,
 	isUnderDevelopment,
 	MAX_PLOTS_PER_DEVELOPMENT,
+	type BidInterest,
+	type BidLimit,
 	nextBid,
-	npcBid,
+	npcBidding,
+	npcBidLimit,
 	ranking,
 	surveyShift
 } from '$lib/game/auction.logic';
 import { Building } from '$lib/db/model/building';
-import { TICKS_PER_YEAR } from '$lib/game/time';
+import { AGE_OF_MAJORITY, ageInYears, TICKS_PER_YEAR } from '$lib/game/time';
+import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as chronicleService from '$lib/server/service/chronicleService';
 import * as electionService from '$lib/server/service/electionService';
 import * as nameService from '$lib/server/service/nameService';
 import * as skillService from '$lib/server/service/skillService';
+import * as supplyService from '$lib/server/service/supplyService';
 import * as worldService from '$lib/server/service/worldService';
 
 /**
@@ -441,42 +446,108 @@ export async function advanceAuctions(regionId: string, tick: number): Promise<A
  * NPCs bieten mit.
  *
  * Sonst wäre jede Versteigerung ohne anwesenden Spieler eine Formsache, und die Stadt
- * bekäme für ihr erschlossenes Land nie mehr als das Mindestgebot. Geboten wird nur, wer
- * noch kein Grundstück hat — wer schon eins besitzt, hat Dringenderes mit seinem Geld
- * vor.
+ * bekäme für ihr erschlossenes Land nie mehr als das Mindestgebot.
+ *
+ * **Mitbieten darf seit 5.97 jeder Volljährige, der zahlen kann** (Punkt 113). Bis dahin
+ * bot nur, wer noch kein Grundstück hatte — für Bauland plausibel, für einen Betrieb
+ * verkehrt: Der einzige Bäcker der Stadt besaß ein Wohnhaus und durfte deshalb die
+ * heimgefallene Bäckerei nicht ersteigern. Sie kam fünfzehnmal unter den Hammer, ohne ein
+ * Gebot.
+ *
+ * **Wie weit einer geht, hängt an seinem Nutzen** (`interesseAn`), und ausgemacht wird es
+ * als Steigerung (`npcBidding`): Es steht am Ende genau ein Gebot, das des Bieters mit dem
+ * höchsten Limit, einen Schritt über dem Zweiten.
  */
 async function npcsBietenLassen(
 	auctionId: string,
 	regionId: string,
 	tick: number
 ): Promise<number> {
+	const auktion = await Auction.findByPk(auctionId);
+	if (!auktion) return 0;
+	const haus = await Building.findOne({ where: { PlotId: auktion.dataValues.PlotId } });
+	const vorlage = haus ? buildingService.getBuildingOption(haus.dataValues.optionId) : undefined;
+	// Einmal je Versteigerung, nicht je Bieter: Die Knappheit ist eine Frage an die Stadt.
+	const knapp: boolean =
+		vorlage?.type === 'CRAFT' &&
+		(
+			await supplyService.knappeHandwerke(
+				[vorlage],
+				await buildingService.getBuildingsInRegion(regionId),
+				regionId
+			)
+		).length > 0;
+
 	const npcs = await Character.findAll({
 		where: { RegionId: regionId, deathTick: null, role: 'NPC', money: { [Op.gt]: 0 } }
 	});
 
-	let neue = 0;
+	const limits: BidLimit[] = [];
 	for (const npc of npcs) {
-		const schonBesitz: number = await Plot.count({
-			where: { OwnerCharacterId: npc.dataValues.id }
-		});
-		if (schonBesitz > 0) continue;
-
-		const bisher: Bid[] = await gebote(auctionId);
-		const bestes: Bid | undefined = ranking(bisher)[0];
-		if (bestes?.bidderId === npc.dataValues.id) continue;
-
-		const gebot: number | undefined = npcBid(npc.dataValues.money, bestes?.amount ?? null);
-		if (gebot === undefined) continue;
-
-		await BidRow.upsert({
-			AuctionId: auctionId,
-			CharacterId: npc.dataValues.id,
-			amount: gebot,
-			tick
-		});
-		neue++;
+		const werte = npc.dataValues;
+		if (ageInYears(werte.birthTick, tick) < AGE_OF_MAJORITY) continue;
+		const interesse: BidInterest = await interesseAn(werte.id, vorlage, knapp);
+		limits.push({ bidderId: werte.id, limit: npcBidLimit(werte.money, interesse) });
 	}
-	return neue;
+
+	const bestes: Bid | null = ranking(await gebote(auctionId))[0] ?? null;
+	const wahl = npcBidding(limits, bestes);
+	if (!wahl) return 0;
+
+	await BidRow.upsert({
+		AuctionId: auctionId,
+		CharacterId: wahl.bidderId,
+		amount: wahl.amount,
+		tick
+	});
+	return 1;
+}
+
+/**
+ * Was einem NPC das Versteigerte nützt (5.97, Punkt 113).
+ *
+ * - **Ein Betrieb**: viel, wer sein Handwerk kann — er holt daraus, was ein Anfänger nicht
+ *   schafft. Ist die Ware knapp, will ihn auch, wer keine eigene Werkstatt hat, aber nur
+ *   mittel: **Das Können geht der Knappheit vor**, sonst setzte bei Brotmangel jeder die
+ *   Hälfte seines Geldes auf die Bäckerei, und sie ginge wieder an den Reichsten statt an
+ *   den Bäcker.
+ * - **Ein Wohnhaus**: viel, wer kein eigenes Dach hat.
+ * - **Bauland**: mittel, wer noch keinen Grund besitzt — die alte Regel, nur nicht mehr als
+ *   Ausschluss aller anderen.
+ * - **Alles andere**: wenig. Damit bleibt kein Nachlass liegen, nur weil gerade niemand
+ *   Passendes in der Stadt lebt.
+ */
+async function interesseAn(
+	characterId: string,
+	vorlage: BuildingTemplate | undefined,
+	knapp: boolean
+): Promise<BidInterest> {
+	if (!vorlage) {
+		const besitz: number = await Plot.count({ where: { OwnerCharacterId: characterId } });
+		return besitz === 0 ? 'MEDIUM' : 'LOW';
+	}
+
+	if (vorlage.type === 'CRAFT') {
+		if (vorlage.skill && (await skillService.getLevel(characterId, vorlage.skill)) > 0) {
+			return 'HIGH';
+		}
+		if (!knapp) return 'LOW';
+		const eigene = await buildingService.getBuildingsOfCharacter(characterId);
+		const hatWerkstatt: boolean = eigene.some(
+			(eigenes) => buildingService.getBuildingOption(eigenes.optionId)?.type === 'CRAFT'
+		);
+		return hatWerkstatt ? 'LOW' : 'MEDIUM';
+	}
+
+	if (vorlage.type === 'RESIDENCE') {
+		const eigene = await buildingService.getBuildingsOfCharacter(characterId);
+		const hatDach: boolean = eigene.some(
+			(eigenes) => buildingService.getBuildingOption(eigenes.optionId)?.type === 'RESIDENCE'
+		);
+		return hatDach ? 'LOW' : 'HIGH';
+	}
+
+	return 'LOW';
 }
 
 // --- Anzeigen ------------------------------------------------------------------------
