@@ -42,6 +42,7 @@ function lage(werte: Partial<NpcState> = {}): NpcState {
 		workAvailable: true,
 		hasJob: false,
 		betterJobAvailable: false,
+		scarceJobAvailable: false,
 		matchAvailable: false,
 		foodPrice: 4,
 		wearsGarment: true,

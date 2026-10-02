@@ -87,6 +87,11 @@ export interface NpcState {
 	hasJob: boolean;
 	/** Bietet jemand mehr als die Tagelöhnerei? */
 	betterJobAvailable: boolean;
+	/**
+	 * Sucht ein Betrieb Leute, dessen Ware in der Stadt knapp ist — und ist seine eigene
+	 * Stelle nicht schon in einem solchen (5.99, Punkt 115)?
+	 */
+	scarceJobAvailable: boolean;
 	/** Gibt es jemanden, um den er werben könnte? */
 	matchAvailable: boolean;
 	/** Was ein Stück Nahrung kostet. */
@@ -564,6 +569,16 @@ function sicherheit(state: NpcState): NpcAction | undefined {
 	// Eine feste Stelle nehmen, wenn sie mehr bringt als die Tagelöhnerei. Kostet nichts
 	// und wirkt ab der nächsten Schicht — deshalb vor dem Arbeiten.
 	if (!state.hasJob && state.betterJobAvailable && state.isAdult) return 'TAKE_JOB';
+
+	// **Umsatteln, wo die Stadt Hände braucht** (5.99, Punkt 115). Bis hierher sah sich nur
+	// um, wer keine Stelle hatte — wer einmal in der Zimmerei angefangen hatte, sägte dort
+	// Bretter auf Halde, während nebenan die Bäckerei Leute suchte und die Stadt verhungerte.
+	// Gewechselt wird nur in einen Betrieb, dessen Ware knapp ist, und nur aus einer Stelle,
+	// deren Ware es nicht ist: So pendelt niemand zwischen zwei knappen hin und her.
+	//
+	// **Nicht, wer einen eigenen Betrieb hat.** Für ihn ist der Wechsel eine andere Frage
+	// — ob er seinen aufgibt — und die ist Schritt 4.
+	if (state.scarceJobAvailable && state.isAdult && !state.ownsWorkshop) return 'TAKE_JOB';
 
 	// Wieder zu Kräften kommen, wenn Arbeit wartet. Der Trank füllt nur auf, was fehlt;
 	// im Müßiggang wäre er ein teures Getränk.

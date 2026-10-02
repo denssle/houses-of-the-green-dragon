@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { canTakeJob, isWorthTaking, positionsAt, workShift } from '$lib/game/employment.logic';
+import {
+	canTakeJob,
+	isWorthTaking,
+	positionsAt,
+	workShift,
+	canCarryNewHand,
+	SWITCH_RUNWAY_SHIFTS
+} from '$lib/game/employment.logic';
 import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 
 const BAECKEREI: BuildingTemplate = {
@@ -165,6 +172,13 @@ describe('Anstellung', () => {
 			// je ein Aushang dieser Welt nennt. Verlangte die Prüfung mehr, gäbe es keine
 			// Anstellung — und die Zeile darunter wäre die einzige, die je zuträfe.
 			expect(isWorthTaking(3, 3)).toBe(true);
+		});
+	});
+
+	describe('wer einen Wechsler tragen kann (5.99)', () => {
+		it('wer eine Weile zahlen kann', () => {
+			expect(canCarryNewHand(3 * SWITCH_RUNWAY_SHIFTS, 3)).toBe(true);
+			expect(canCarryNewHand(3 * SWITCH_RUNWAY_SHIFTS - 1, 3)).toBe(false);
 		});
 	});
 });

@@ -31,6 +31,7 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		workAvailable: true,
 		hasJob: false,
 		betterJobAvailable: false,
+		scarceJobAvailable: false,
 		matchAvailable: true,
 		foodPrice: 4,
 		// Der Zufriedene hat alles: Er trägt ein Gewand und hat einen Trank im Inventar,
@@ -115,6 +116,25 @@ describe('Was ein NPC tut', () => {
 
 		it('nimmt eine Stelle, die mehr bringt als die Tagelöhnerei', () => {
 			expect(decideNpcAction(zufrieden({ betterJobAvailable: true }))).toBe('TAKE_JOB');
+		});
+
+		it('wechselt aber dorthin, wo die Stadt Hände braucht (5.99, Punkt 115)', () => {
+			// Die Ausnahme vom Satz darunter: nicht zu mehr Lohn, sondern zu knapper Ware.
+			expect(decideNpcAction(zufrieden({ hasJob: true, scarceJobAvailable: true }))).toBe(
+				'TAKE_JOB'
+			);
+		});
+
+		it('nicht, wer einen eigenen Betrieb hat — das ist eine andere Frage', () => {
+			expect(
+				decideNpcAction(zufrieden({ hasJob: true, scarceJobAvailable: true, ownsWorkshop: true }))
+			).not.toBe('TAKE_JOB');
+		});
+
+		it('und nicht als Kind', () => {
+			expect(decideNpcAction(zufrieden({ scarceJobAvailable: true, isAdult: false }))).not.toBe(
+				'TAKE_JOB'
+			);
 		});
 
 		it('sieht sich nicht um, wer schon eine Stelle hat', () => {

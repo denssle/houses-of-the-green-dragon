@@ -59,7 +59,7 @@ import * as lawService from '$lib/server/service/lawService';
 import * as skillService from '$lib/server/service/skillService';
 import { repairWage } from '$lib/game/buildingAction.logic';
 import * as auctionService from '$lib/server/service/auctionService';
-import { isWorthTaking } from '$lib/game/employment.logic';
+import { canCarryNewHand, isWorthTaking } from '$lib/game/employment.logic';
 
 /**
  * NPCs handeln.
@@ -358,7 +358,9 @@ async function handelnd(
 		case 'TAKE_JOB':
 			return buch(
 				'TAKE_JOB',
-				lage.jobId ? await employmentService.takeJob(npcId, lage.jobId) : undefined
+				lage.jobId
+					? await employmentService.takeJob(npcId, lage.jobId, lage.switchJob ?? false)
+					: undefined
 			);
 
 		case 'WORK':
@@ -636,6 +638,8 @@ async function lageAufnehmen(
 			homeId?: string;
 			matchId?: string;
 			jobId?: string;
+			/** Ob er dafür seine bisherige Stelle aufgibt (5.99). */
+			switchJob?: boolean;
 			leisten: number;
 			money: number;
 			/** Nur fürs Protokoll (5.88) — die Entscheidung kennt keine Namen. */
@@ -876,6 +880,11 @@ async function lageAufnehmen(
 	// Arbeitgeber wechselt, wäre kein Handwerker, sondern ein Flattermann.
 	const offen = stelle ? [] : await employmentService.getOpenJobs(werte.RegionId, npcId);
 	const besser = offen.filter((angebot) => isWorthTaking(angebot.wage, TAGELOHN))[0];
+	// Wer keinen eigenen Betrieb hat, sieht sich nach einer Stelle um, wo die Stadt Hände
+	// braucht (5.99, Punkt 115) — auch, wenn er schon eine hat.
+	const knappeStelle = werkstatt
+		? undefined
+		: await stelleImKnappenBetrieb(npcId, werte.RegionId, haeuserDerStadt, stelle);
 	const unterkunft = werte.HomeBuildingId
 		? undefined
 		: await freierWohnplatz(werte.RegionId, npcId);
@@ -896,7 +905,8 @@ async function lageAufnehmen(
 		surveyPlotId: vermessung,
 		homeId: unterkunft,
 		matchId: partner,
-		jobId: besser?.buildingId,
+		jobId: knappeStelle?.buildingId ?? besser?.buildingId,
+		switchJob: knappeStelle !== undefined && stelle !== undefined,
 		state: {
 			personality: {
 				courage: werte.courage,
@@ -917,6 +927,7 @@ async function lageAufnehmen(
 			workAvailable: arbeit !== undefined || stelle !== undefined,
 			hasJob: stelle !== undefined,
 			betterJobAvailable: besser !== undefined,
+			scarceJobAvailable: knappeStelle !== undefined,
 			matchAvailable: partner !== undefined,
 			foodPrice: brot.basePrice,
 			// Was über das Nötigste hinausgeht (4.12). Ohne diese fünf Angaben kauft ein
@@ -1370,6 +1381,56 @@ export async function fehlendeWerkstatt(
 	// nichts dergleichen, bleibt es beim ersten Vorschlag: Ein unerreichbares Ziel ist
 	// immer noch ehrlicher als gar keines, und `GOAL_UNREACHABLE` sagt es beim Namen.
 	return bewertet.find((kandidat) => kandidat.bedarf.length === 0) ?? beste;
+}
+
+/**
+ * Eine offene Stelle in einem Betrieb, dessen Ware die Stadt nicht satt bekommt (5.99,
+ * Punkt 115).
+ *
+ * **Dieselbe Knappheit wie bei der Werkstattwahl** (`knappeHandwerke`): gegessen oder
+ * verarbeitet, und weniger da, als gebraucht wird. Nur ohne den Schutz gegen die Herde —
+ * ein Rohbau desselben Handwerks ist eine Antwort auf die Frage „wer baut die nächste
+ * Bäckerei", nicht auf „wer arbeitet in der, die steht".
+ *
+ * **Und nur, wenn der Arbeitgeber zahlen kann** (`canCarryNewHand`): Wer wechselt, gibt
+ * eine Stelle auf. In einen Betrieb, der ihn nicht bezahlt, wechselt keiner.
+ *
+ * `undefined` auch dann, wenn seine jetzige Stelle schon in einem knappen Betrieb ist —
+ * sonst pendelte er zwischen zweien.
+ */
+async function stelleImKnappenBetrieb(
+	npcId: string,
+	regionId: string,
+	haeuser: Haus[],
+	jetzige: { buildingId: string } | undefined
+): Promise<{ buildingId: string } | undefined> {
+	const handwerke = buildingService
+		.getBuildingOptions()
+		.filter((vorlage) => vorlage.type === 'CRAFT');
+	// Erst, was ohne Knappheitsfrage geht: Gibt es überhaupt eine Handwerksstelle, die den
+	// Wechsel lohnt? Meistens nicht, und dann kostet die Frage nichts weiter (Punkt 67).
+	const stellen = (await employmentService.getOpenJobs(regionId, npcId)).filter(
+		(angebot) =>
+			angebot.buildingId !== jetzige?.buildingId &&
+			isWorthTaking(angebot.wage, TAGELOHN) &&
+			canCarryNewHand(angebot.employerMoney, angebot.wage) &&
+			handwerke.some((vorlage) => vorlage.optionId === angebot.optionId)
+	);
+	if (stellen.length === 0) return undefined;
+
+	const fertige = haeuser.filter(
+		(haus) => haus.ownerType === 'CHARACTER' && !haus.underConstruction
+	);
+	const knapp = await supplyService.knappeHandwerke(handwerke, fertige, regionId);
+	if (knapp.length === 0) return undefined;
+
+	if (jetzige) {
+		const jetzigesHaus = haeuser.find((haus) => haus.id === jetzige.buildingId);
+		if (jetzigesHaus && knapp.some((vorlage) => vorlage.optionId === jetzigesHaus.optionId)) {
+			return undefined;
+		}
+	}
+	return stellen.find((angebot) => knapp.some((vorlage) => vorlage.optionId === angebot.optionId));
 }
 
 /**
