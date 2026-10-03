@@ -22,18 +22,22 @@
 # Abfrage geht über die Standardeingabe an `mysql` — so gibt es keine zweite
 # Ebene Anführungszeichen, an der sich etwas einschmuggeln ließe.
 #
-# **Der Schlüssel liegt im Syncthing-Ordner** und trägt dessen Rechte (0644).
-# OpenSSH weist ihn deshalb ab. Statt die Rechte dort zu ändern — Syncthing trägt
-# sie auf die anderen Geräte weiter — arbeitet das Skript mit einer Kopie, die es
-# beim Verlassen wieder wegräumt.
+# **Der Schlüssel wird gefunden wie in `~/Sync/Sonstiges/claude/uberspace.sh`:**
+# zuerst die lokale Kopie `~/.ssh/uberspace`, sonst der Sync-Ordner. Unter Linux kommt
+# der Schlüssel per Syncthing mit 0644 an, und SSH lehnt ihn dann ab; dort gehört die
+# Kopie einmal angelegt:
 #
-# Der Windows-Zweig ist ungeprüft: Unter Git Bash kennt `chmod` keine
-# Unix-Rechte, OpenSSH dort nimmt den Schlüssel erfahrungsgemäß trotzdem an.
+#     install -m 600 ~/Sync/Sonstiges/Schlüssel/ssh-keys/uberspace ~/.ssh/uberspace
+#
+# Unter Windows prüft SSH keine Rechte, dort genügt der Sync-Ordner. Bis 2026-10 legte
+# das Skript dafür bei jedem Aufruf eine eigene Wegwerfkopie an — ein zweiter Weg zum
+# selben Schlüssel, den kein anderes Skript ging.
+#
+# Der Windows-Zweig ist ungeprüft.
 set -euo pipefail
 
 HOST="${GRUENAU_HOST:-enzlor@enzlor.uber.space}"
 DB="${GRUENAU_DB:-enzlor_houses}"
-KEY_GLOB="$HOME/Sync/Sonstiges/Schlüssel/ssh-keys/*uberspace"
 
 abfrage="${1:-}"
 if [ -z "$abfrage" ]; then
@@ -71,16 +75,17 @@ while [ -n "${rest//[[:space:]]/}" ]; do
 	esac
 done
 
-# Der Schlüssel, in einer Kopie mit engen Rechten.
-schluessel="$(ls $KEY_GLOB 2>/dev/null | head -1 || true)"
+# Der Schlüssel — dieselbe Reihenfolge wie in uberspace.sh.
+if [ -f ~/.ssh/uberspace ]; then
+	schluessel=~/.ssh/uberspace
+else
+	# Den .pub-Schlüssel aussortieren; der Glob fängt beide.
+	schluessel=$(ls ~/Sync/Sonstiges/Schlüssel/ssh-keys/*uberspace 2>/dev/null | grep -v '\.pub$' | head -1 || true)
+fi
 if [ -z "$schluessel" ]; then
-	echo "Kein Schlüssel unter $KEY_GLOB gefunden." >&2
+	echo "Kein SSH-Schlüssel unter ~/.ssh/uberspace oder ~/Sync/Sonstiges/Schlüssel/ssh-keys/*uberspace gefunden." >&2
 	exit 4
 fi
-kopie="$(mktemp)"
-trap 'rm -f "$kopie"' EXIT
-cat "$schluessel" >"$kopie"
-chmod 600 "$kopie" 2>/dev/null || true
 
-printf '%s\n' "$abfrage" | ssh -i "$kopie" -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
-	"$HOST" "mysql $DB --table"
+printf '%s\n' "$abfrage" | ssh -i "$schluessel" -o BatchMode=yes -o ConnectTimeout=15 \
+	-o StrictHostKeyChecking=accept-new "$HOST" "mysql $DB --table"
