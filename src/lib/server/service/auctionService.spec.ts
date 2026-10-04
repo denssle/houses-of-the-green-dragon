@@ -550,4 +550,76 @@ describe('Erschließung und Versteigerung', () => {
 			});
 		});
 	});
+
+	describe('wer für Bauland bietet (5.100, Punkt 113)', () => {
+		const WOHNHAUS = 1;
+		const ZIMMEREI = 9;
+
+		/** Ein eigenes Grundstück, wahlweise mit einem Haus darauf. */
+		async function grund(besitzerId: string, optionId?: number): Promise<void> {
+			const plotId = randomUUID();
+			await Plot.create({
+				id: plotId,
+				address: `Eigengasse ${plotId.slice(0, 4)}`,
+				type: 'BUILDING_LAND',
+				RegionId: stadtId,
+				ownerType: 'CHARACTER',
+				OwnerCharacterId: besitzerId
+			});
+			if (optionId === undefined) return;
+			await Building.create({
+				id: randomUUID(),
+				name: 'Eigenes',
+				optionId,
+				lastConditionTick: JETZT,
+				PlotId: plotId,
+				ownerType: 'CHARACTER',
+				OwnerCharacterId: besitzerId
+			});
+		}
+
+		async function zuschlag(): Promise<string | null> {
+			const buergermeister = await person('Amtsperson', 100);
+			await insAmt(buergermeister);
+			const auktion = await versteigerung(buergermeister);
+			const plotId = (await Auction.findByPk(auktion))!.dataValues.PlotId;
+			await auctionService.advanceAuctions(stadtId, JETZT + AUCTION_TICKS);
+			return (await Plot.findByPk(plotId))!.dataValues.OwnerCharacterId;
+		}
+
+		it('geht an den, der bauen will — nicht an den Reichen, der alles hat', async () => {
+			// **Der Befund aus dem Messlauf zu 5.99:** Ein Zimmerer mit Haus und Werkstatt
+			// ersteigerte 27 von 39 Bauplätzen und baute auf keinem.
+			const zimmerer = await person('Reicher Zimmerer', 1500, 'NPC');
+			await grund(zimmerer, WOHNHAUS);
+			await grund(zimmerer, ZIMMEREI);
+			const bauwillig = await person('Bauwillige', 200, 'NPC');
+
+			expect(await zuschlag()).toBe(bauwillig);
+		});
+
+		it('bleibt unverkauft, wenn niemand etwas vorhat', async () => {
+			const zimmerer = await person('Reicher Zimmerer', 1500, 'NPC');
+			await grund(zimmerer, WOHNHAUS);
+			await grund(zimmerer, ZIMMEREI);
+
+			expect(await zuschlag()).toBeNull();
+		});
+
+		it('aber nicht an den, der schon einen leeren Bauplatz hat', async () => {
+			// Er hat, wo er bauen kann; ein zweiter Platz wäre Vorrat.
+			const sammler = await person('Sammler', 1500, 'NPC');
+			await grund(sammler);
+
+			expect(await zuschlag()).toBeNull();
+		});
+
+		it('wohl aber an den, der ein Dach hat und eine Werkstatt bauen will', async () => {
+			// Haben ist besser als brauchen — wenn einer etwas damit vorhat.
+			const handwerkerin = await person('Handwerkerin', 400, 'NPC');
+			await grund(handwerkerin, WOHNHAUS);
+
+			expect(await zuschlag()).toBe(handwerkerin);
+		});
+	});
 });

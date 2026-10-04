@@ -504,6 +504,39 @@ async function npcsBietenLassen(
 }
 
 /**
+ * Will er auf dem Bauland etwas bauen? (5.100, Punkt 113)
+ *
+ * **Haben ist nur dann besser als brauchen, wenn einer etwas damit vorhat.** Bis hierher
+ * bot für Bauland jeder mit — wer schon Grund hatte, mit „geringem Interesse". Im Messlauf
+ * zu 5.99 ging das so aus: Ein einziger reicher Zimmerer mit Haus und Werkstatt ersteigerte
+ * 27 von 39 Bauplätzen, weil fünf Prozent von 1500 Münzen mehr sind als ein Viertel von
+ * 200, und baute auf keinem. Alle anderen Käufer bauten sofort.
+ *
+ * Vorhaben heißt: **ein eigenes Dach** oder **eine eigene Werkstatt**, wo noch keine steht.
+ * Und wer schon einen unbebauten Bauplatz hat, braucht keinen zweiten — er hat ja, wo er
+ * bauen kann.
+ *
+ * **Was hier fehlt, ist festgehalten:** Ein Unternehmer, der einen zweiten Betrieb gründet
+ * und Leute einstellt, kommt in der Entscheidungslogik nicht vor. Sobald es ihn gibt,
+ * gehört er hierher.
+ */
+async function bauabsicht(characterId: string): Promise<BidInterest> {
+	const grund = await Plot.findAll({
+		where: { OwnerCharacterId: characterId, type: 'BUILDING_LAND' },
+		attributes: ['id']
+	});
+	for (const flaeche of grund) {
+		const bebaut = await Building.count({ where: { PlotId: flaeche.dataValues.id } });
+		if (bebaut === 0) return 'NONE';
+	}
+
+	const eigene = await buildingService.getBuildingsOfCharacter(characterId);
+	const hat = (typ: string): boolean =>
+		eigene.some((eigenes) => buildingService.getBuildingOption(eigenes.optionId)?.type === typ);
+	return hat('RESIDENCE') && hat('CRAFT') ? 'NONE' : 'MEDIUM';
+}
+
+/**
  * Was einem NPC das Versteigerte nützt (5.97, Punkt 113).
  *
  * - **Ein Betrieb**: viel, wer sein Handwerk kann — er holt daraus, was ein Anfänger nicht
@@ -512,8 +545,7 @@ async function npcsBietenLassen(
  *   Hälfte seines Geldes auf die Bäckerei, und sie ginge wieder an den Reichsten statt an
  *   den Bäcker.
  * - **Ein Wohnhaus**: viel, wer kein eigenes Dach hat.
- * - **Bauland**: mittel, wer noch keinen Grund besitzt — die alte Regel, nur nicht mehr als
- *   Ausschluss aller anderen.
+ * - **Bauland**: mittel, wer darauf etwas bauen will; sonst nichts (`bauabsicht`).
  * - **Alles andere**: wenig. Damit bleibt kein Nachlass liegen, nur weil gerade niemand
  *   Passendes in der Stadt lebt.
  */
@@ -522,10 +554,7 @@ async function interesseAn(
 	vorlage: BuildingTemplate | undefined,
 	knapp: boolean
 ): Promise<BidInterest> {
-	if (!vorlage) {
-		const besitz: number = await Plot.count({ where: { OwnerCharacterId: characterId } });
-		return besitz === 0 ? 'MEDIUM' : 'LOW';
-	}
+	if (!vorlage) return bauabsicht(characterId);
 
 	if (vorlage.type === 'CRAFT') {
 		if (vorlage.skill && (await skillService.getLevel(characterId, vorlage.skill)) > 0) {

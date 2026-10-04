@@ -208,8 +208,12 @@ export function award(bids: Bid[], purse: Map<string, number>): Bid | undefined 
  *   keinen Grund besitzt.
  * - **`LOW`**: Er nähme es, wenn es billig ist. Damit bleibt kein Nachlass liegen, nur
  *   weil gerade niemand Passendes in der Stadt ist.
+ * - **`NONE`**: Er hat damit nichts vor und bietet nicht (5.100, Punkt 113). Gilt für
+ *   Bauland, das er weder bewohnen noch bebauen will — im Messlauf zu 5.99 ersteigerte
+ *   ein einziger reicher Zimmerer mit „geringem Interesse" 27 von 39 Bauplätzen und baute
+ *   auf keinem.
  */
-export type BidInterest = 'HIGH' | 'MEDIUM' | 'LOW';
+export type BidInterest = 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE';
 
 /**
  * Welchen Teil seines Geldes ein NPC dafür einsetzt.
@@ -223,7 +227,8 @@ export type BidInterest = 'HIGH' | 'MEDIUM' | 'LOW';
 export const NPC_BID_SHARE: Record<BidInterest, number> = {
 	HIGH: 0.5,
 	MEDIUM: 0.25,
-	LOW: 0.05
+	LOW: 0.05,
+	NONE: 0
 };
 
 /** Wie weit ein NPC höchstens geht. */
