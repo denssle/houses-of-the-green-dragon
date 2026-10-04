@@ -20,7 +20,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                          | laufend                      | Entwurf      |
 | 65  | Der Zehnt erreicht die Felder nicht — **behoben (5.24), festgehalten (5.51)**         | —                            | erledigt     |
 | 66  | Wo Geld aus dem Nichts kam — **Zehnt geschlossen mit 5.83**; Raubgut offen (Punkt 23) | Punkt 23                     | teilweise    |
-| 67  | Die NPC-Schleife ist zu teuer geworden — 700 ms je Tick bei acht Einwohnern           | dem nächsten Messlauf        | Befund       |
+| 67  | Die NPC-Schleife ist zu teuer geworden — **ein Messlauf kostet fünfzig Minuten**      | dem nächsten Umbauschritt    | Befund       |
 | 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt         | —                            | erledigt     |
 | 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                     | —                            | erledigt     |
 | 70  | Niemand lernt ein Handwerk, das es nicht gibt — **Mahlen eigenständig seit 5.96**     | Punkte 114, 115              | teilweise    |
@@ -30,7 +30,7 @@ gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen 
 | 74  | Der Auftrag an Tagelöhner — **erledigt mit 5.27 und 5.78**; offen bleibt der Ausbau   | —                            | erledigt     |
 | 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                     | Punkte 15, 20, 51            | Entwurf      |
 | 54  | Ein Test, der würfelt — **erledigt mit 5.55**                                         | —                            | erledigt     |
-| 75  | Die Testläufe dauern zu lange — jede Änderung wartet darauf                           | laufend                      | Befund       |
+| 75  | Die Testläufe dauern zu lange — **Suite bei zwei Minuten, Messläufe sind es (67)**    | Punkt 67                     | teilweise    |
 | 76  | Niemand kann sich einen Ausbau leisten — 86 Münzen gegen 340                          | dem nächsten Messlauf        | Befund       |
 | 78  | Werben kennt kein Alter — **behoben mit 5.41**                                        | —                            | erledigt     |
 | 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                  | —                            | erledigt     |
@@ -1678,6 +1678,27 @@ stecken in den **Diensten**, die `lageAufnehmen` ruft — jeder holt sich, was e
 selbst. Wer hier weiterkommen will, muss an die Stadtlage je Tick oder an die Dienste, nicht
 an einzelne Aufrufe.
 
+**Nachgemessen am 04.10.2026 — die Messläufe sind inzwischen das Nadelöhr.** Ein Lauf
+über 2000 Ticks (Saat 86) kostet je nach Stadt sehr Verschiedenes:
+
+| Stand                                  | Lebende am Ende |          Dauer | je Tick |
+| -------------------------------------- | --------------: | -------------: | ------: |
+| ohne Kornspeicher, Stadt stirbt (5.95) |               6 |          930 s |   0,5 s |
+| mit Kornspeicher (5.99)                |              46 |         2894 s |   1,4 s |
+| zwei Läufe parallel (5.96 und 5.97)    |               — | je 2700–2900 s |       — |
+
+**Eine lebende Stadt kostet knapp fünfzig Minuten je Messung**, und seit die Schritte
+einzeln gemessen werden (Punkt 115), wartet jeder Schritt darauf. Die Zeit wächst mit den
+Einwohnern, weil jede NPC-Entscheidung ihre eigene Lageaufnahme macht.
+
+**Und die Schritte 5.95 bis 5.99 haben je NPC neue Fragen dazugelegt**, das sei offen
+gesagt: Die Knappheit (`supplyService.knappeHandwerke`) wird in der Werkstattwahl und in
+der Stellensuche je Entscheidung neu ermittelt — Einwohnerzahl, Warenbestand je Ware —,
+obwohl sie eine Frage an die **Stadt** ist und sich innerhalb eines Ticks kaum ändert. Sie
+ist der naheliegendste Kandidat für die „Stadtlage je Tick" von oben: einmal je Tick und
+Stadt ermittelt, allen NPCs gereicht. Gemessen ist ihr Anteil nicht; vor dem Umbau gehört
+ein Abfragezähler daneben, wie bei 5.49.
+
 ### 64. Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite
 
 Zurzeit ist ein Gebäude eine Zeile in einer Liste, und eine gepachtete Fläche steht als
@@ -2144,6 +2165,11 @@ brauchte nach 5.83 **2316 Sekunden**, nach 5.81 noch 1705 und nach 5.76 838 — 
 davon es ist, weiß niemand**; die Aufschlüsselung aus 5.48 wäre der Weg, und sie steht seit
 Punkt 67 bereit. Zuerst messen, dann eingreifen — die Zahlen oben sind Anlass, keine
 Ursache.
+
+**Nachgemessen am 03.10.2026:** Die volle Suite braucht für rund 900 Tests gut **zwei
+Minuten** Wanduhr — weniger als die Hälfte von August, bei mehr Tests. Das drängt nicht
+mehr. Was drängt, sind die Messläufe (Punkt 67): fünfzig Minuten je Lauf mit lebender
+Stadt.
 
 ### 76. Niemand kann sich einen Ausbau leisten
 
