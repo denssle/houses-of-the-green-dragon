@@ -13,65 +13,58 @@ Text verweisen weiter auf „Punkt 63" und Co., und die Messungen darin sind der
 vieles, was heute im Code steht. Die Nummern bleiben, wo sie sind; hier stehen nur die
 offenen, nach Nummer sortiert.
 
-| #   | Punkt                                                                                 | Fällig vor                   | Art          |
-| --- | ------------------------------------------------------------------------------------- | ---------------------------- | ------------ |
-| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                               | Heiltrank (4.6c)             | Entwurf      |
-| 6   | Kämpfe und Verletzungen                                                               | Waffen und Gift (4.6c)       | Entwurf      |
-| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                     | 4.7 / Punkt 6                | Entwurf      |
-| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                              | 4.8                          | Entwurf      |
-| 15  | Weltinhalte: Berufe, Waren und Rezepte                                                | laufend                      | Entwurf      |
-| 16  | Balancing im engeren Sinn                                                             | laufend                      | laufend      |
-| 20  | Verschleiß von Gegenständen                                                           | Kleidung und Werkzeug (4.6c) | Entwurf      |
-| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**    | 4.8 / Punkt 6                | Entwurf      |
-| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                   | laufend                      | Entwurf      |
-| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                | laufend                      | Entwurf      |
-| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                       | zweite Stadt / Erschließung  | Entwurf      |
-| 32  | Die Ämter: Zuschnitt, was gewählt und was ernannt wird, der Richter                   | Ämter über den Bürgermeister | Entscheidung |
-| 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen  | laufend                      | Entwurf      |
-| 34  | Wer einen Handwerksbetrieb führen darf                                                | Berufe (Punkt 15)            | Entwurf      |
-| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                | laufend                      | Entwurf      |
-| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                     | Ehe für alle                 | Entwurf      |
-| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit              | später                       | Entwurf      |
-| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist               | zweite Stadt                 | Entwurf      |
-| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                           | erste verliehene Münze       | Entwurf      |
-| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                       | Punkt 43 / Punkt 23          | Entwurf      |
-| 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                         | zusammen mit Punkt 34        | Entwurf      |
-| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                          | Punkt 34                     | Entwurf      |
-| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                  | Punkte 23, 39, 43            | Entwurf      |
-| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                    | Zuwanderung (Punkt 41)       | Entwurf      |
-| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten     | Fernhandel                   | Entwurf      |
-| 51  | Mitgift, Testament und Stiftung                                                       | laufend                      | Entwurf      |
-| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                 | laufend                      | Entwurf      |
-| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                          | laufend                      | Entwurf      |
-| 66  | Wo Geld aus dem Nichts kam — **Zehnt geschlossen mit 5.83**; Raubgut offen (Punkt 23) | Punkt 23                     | teilweise    |
-| 67  | Die NPC-Schleife ist zu teuer geworden — **ein Messlauf kostet fünfzig Minuten**      | dem nächsten Umbauschritt    | Befund       |
-| 70  | Niemand lernt ein Handwerk, das es nicht gibt — **Mahlen eigenständig seit 5.96**     | Punkte 114, 115              | teilweise    |
-| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                               | laufend                      | Entwurf      |
-| 75  | Die Testläufe dauern zu lange — **Suite bei zwei Minuten, Messläufe sind es (67)**    | Punkt 67                     | teilweise    |
-| 76  | Niemand kann sich einen Ausbau leisten — 86 Münzen gegen 340                          | dem nächsten Messlauf        | Befund       |
-| 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                     | Punkte 15, 20, 51            | Entwurf      |
-| 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung          | dem nächsten Schritt         | Befund       |
-| 85  | Der Kornspeicher backt aus dem Nichts — **Abschaffung gemessen, zurückgestellt**      | Punkte 113–115               | teilweise    |
-| 87  | Ein Sparziel, das ins Leere führt — Bauland ohne Werkstatt darauf                     | dem nächsten Messlauf        | Befund       |
-| 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick             | laufend                      | Befund       |
-| 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                 | Punkte 15, 34, 115           | teilweise    |
-| 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung    | Punkte 76, 16                | Entwurf      |
-| 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen      | laufend                      | teilweise    |
-| 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                    | Punkte 70, 40                | Befund       |
-| 93  | `GOAL_UNREACHABLE` — kein Bauland; **die Schwelle fiel mit 5.92**, Gegenprobe offen   | Punkte 16, 76                | Befund       |
-| 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                        | Punkt 31                     | Befund       |
-| 96  | Die Stadtkasse ohne Einnahme — **gebaut mit 5.71**, fiskalisch wirksam; siehe 100     | Punkt 100                    | teilweise    |
-| 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten   | Punkte 89, 16                | Befund       |
-| 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote          | dem nächsten Schritt         | Befund       |
-| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                    | Punkt 100                    | teilweise    |
-| 103 | Startreihenfolge — **Mechanismus gefunden, behoben mit 5.84** (die Pachtwahl)         | Punkte 85, 70, 15            | teilweise    |
-| 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                   | Punkt 16                     | Befund       |
-| 109 | Der Zehnt trifft nur die erste Stufe jeder Kette — Verarbeitung ist steuerfrei        | Punkte 15, 46                | Entscheidung |
-| 113 | Eine Versteigerung, bei der niemand bieten darf — **gebaut bis 5.101, Messung offen** | dem nächsten Messlauf        | teilweise    |
-| 114 | Der Zuzug fragt nach Gebäuden, nicht nach Bedarf                                      | Punkt 115                    | Befund       |
-| 115 | Wer nichts absetzt, sattelt nicht um — **5.98 und 5.99 gebaut, Schritt 4 offen**      | Punkt 117                    | teilweise    |
-| 116 | Wie viele Menschen eine Bäckerei satt macht — rechnerisch 120                         | Punkte 15, 16                | Entscheidung |
-| 117 | Wer Grund hat, soll ihn nutzen — oder dafür zahlen                                    | Punkt 50                     | Entwurf      |
+| #   | Punkt                                                                                   | Fällig vor                   | Art          |
+| --- | --------------------------------------------------------------------------------------- | ---------------------------- | ------------ |
+| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                                 | Heiltrank (4.6c)             | Entwurf      |
+| 6   | Kämpfe und Verletzungen                                                                 | Waffen und Gift (4.6c)       | Entwurf      |
+| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                       | 4.7 / Punkt 6                | Entwurf      |
+| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                                | 4.8                          | Entwurf      |
+| 15  | Weltinhalte: Berufe, Waren und Rezepte                                                  | laufend                      | Entwurf      |
+| 16  | Balancing im engeren Sinn                                                               | laufend                      | laufend      |
+| 20  | Verschleiß von Gegenständen                                                             | Kleidung und Werkzeug (4.6c) | Entwurf      |
+| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**      | 4.8 / Punkt 6                | Entwurf      |
+| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                     | laufend                      | Entwurf      |
+| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                  | laufend                      | Entwurf      |
+| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                         | zweite Stadt / Erschließung  | Entwurf      |
+| 32  | Die Ämter: Zuschnitt, was gewählt und was ernannt wird, der Richter                     | Ämter über den Bürgermeister | Entscheidung |
+| 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen    | laufend                      | Entwurf      |
+| 34  | Wer einen Handwerksbetrieb führen darf                                                  | Berufe (Punkt 15)            | Entwurf      |
+| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                  | laufend                      | Entwurf      |
+| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                       | Ehe für alle                 | Entwurf      |
+| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit                | später                       | Entwurf      |
+| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist                 | zweite Stadt                 | Entwurf      |
+| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                             | erste verliehene Münze       | Entwurf      |
+| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                         | Punkt 43 / Punkt 23          | Entwurf      |
+| 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                           | zusammen mit Punkt 34        | Entwurf      |
+| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                            | Punkt 34                     | Entwurf      |
+| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                    | Punkte 23, 39, 43            | Entwurf      |
+| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                      | Zuwanderung (Punkt 41)       | Entwurf      |
+| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten       | Fernhandel                   | Entwurf      |
+| 51  | Mitgift, Testament und Stiftung                                                         | laufend                      | Entwurf      |
+| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                   | laufend                      | Entwurf      |
+| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                            | laufend                      | Entwurf      |
+| 67  | Die NPC-Schleife ist zu teuer geworden — **ein Messlauf kostet fünfzig Minuten**        | dem nächsten Umbauschritt    | Befund       |
+| 70  | Niemand lernt ein Handwerk, das es nicht gibt — **Mahlen eigenständig seit 5.96**       | Punkte 114, 115              | teilweise    |
+| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                                 | laufend                      | Entwurf      |
+| 75  | Die Testläufe dauern zu lange — **Suite bei zwei Minuten, Messläufe sind es (67)**      | Punkt 67                     | teilweise    |
+| 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                       | Punkte 15, 20, 51            | Entwurf      |
+| 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung            | dem nächsten Schritt         | Befund       |
+| 85  | Der Kornspeicher backt aus dem Nichts — **mit 5.101 kaum noch gebraucht**               | dem Lauf ohne ihn            | teilweise    |
+| 87  | Ein Sparziel, das ins Leere führt — Bauland ohne Werkstatt darauf                       | dem nächsten Messlauf        | Befund       |
+| 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick               | laufend                      | Befund       |
+| 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                   | Punkte 15, 34, 115           | teilweise    |
+| 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung      | Punkte 76, 16                | Entwurf      |
+| 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen        | laufend                      | teilweise    |
+| 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                      | Punkte 70, 40                | Befund       |
+| 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                          | Punkt 31                     | Befund       |
+| 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten     | Punkte 89, 16                | Befund       |
+| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                      | Punkt 100                    | teilweise    |
+| 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                     | Punkt 16                     | Befund       |
+| 109 | Der Zehnt trifft nur die erste Stufe jeder Kette — Verarbeitung ist steuerfrei          | Punkte 15, 46                | Entscheidung |
+| 114 | Der Zuzug fragt nach Gebäuden, nicht nach Bedarf                                        | Punkt 115                    | Befund       |
+| 115 | Wer nichts absetzt, sattelt nicht um — **5.98 und 5.99 gebaut, Schritt 4 offen**        | Punkt 117                    | teilweise    |
+| 116 | Wie viele Menschen eine Bäckerei satt macht — **und wie viel Vorrat als versorgt gilt** | Punkte 15, 16                | Entscheidung |
+| 117 | Wer Grund hat, soll ihn nutzen — oder dafür zahlen                                      | Punkt 50                     | Entwurf      |
 
 #### Noch zu erfassen:
 
@@ -782,77 +775,6 @@ Person weiterzuziehen oder das Werben zu beenden, wenn die Zuneigung schon hoch 
 und es nur an der Gegenseite hängt. Zu klären, wenn die Zuneigung mehr Zustände kennt als
 heute.
 
-### 66. Wo Geld aus dem Nichts kam — behoben (5.24 bis 5.26)
-
-**Behoben.** Der Tagelohn hat einen Zahler (5.24), und seit 5.26 hinterlässt die Arbeit
-auch etwas: Die Tagelöhnerei in der städtischen Schmiede ist gefallen, an ihrer Stelle
-setzen Tagelöhner öffentliche Bauten instand. Damit ist die Ausgabe der Stadt gedeckt —
-sie hat Instandhaltung immer schon bezahlt, nur an niemanden. Gemessen: null Fehlschläge,
-Stadtkasse bei 727 statt 0, und die ganze Produktionskette läuft.
-
-**Was offen bleibt:** Der Zehnt macht weiterhin aus Ware Münzen — `titheOn` nimmt den
-Ertrag, und die Stadt bekommt den Gegenwert, den niemand bezahlt hat. Raubgut verschwindet
-ersatzlos (löst sich mit Punkt 23, sobald ein Überfall einen Täter hat). Und privates
-Renovieren zieht dem Eigentümer Geld ab, das niemand bekommt — dafür braucht es den Auftrag
-an Tagelöhner (Punkt 74).
-
-**Der ursprüngliche Befund:**
-
-**Die Richtlinie steht seit dem 16.08.2026 in `KONZEPT.md`:** Geld wechselt den Besitzer,
-es entsteht und vergeht nicht. Wer Lohn zahlt, zahlt aus seiner Kasse. Dieser Punkt ist
-die Bestandsaufnahme dessen, was heute dagegen verstößt.
-
-**Was bereits stimmt** — und deshalb nicht angefasst werden muss: Der Lohn eines
-**Anstellungsverhältnisses** ist gedeckt. `workShift` prüft die Kasse des Arbeitgebers und
-gibt `EMPLOYER_BROKE` zurück, bevor Aktionspunkte verbraucht sind; `kasseVon` holt das Geld
-beim Eigentümer oder, bei einem städtischen Haus, aus der Stadtkasse. Ebenso sauber sind
-Käufe, Standgeld, Verkaufssteuer, Schulgeld, Grundsteuer, Pachtgebühr und der Erbfall: Dort
-wandert Geld, es entsteht keines.
-
-**1. Der Tagelohn hat keinen Zahler** — die größte Quelle, und die älteste.
-
-```ts
-// buildingAction.logic.ts:73 — work()
-money: worker.money + earned;
-```
-
-Niemand wird belastet. Wer in der städtischen Schmiede eine Schicht arbeitet, erschafft
-seine drei Münzen. Das ist die „Krücke aus 3.3", die `economy.ts` beim `TAGELOHN` selbst
-so nennt — nur ist sie inzwischen die **Hauptgeldquelle der Welt**: In Grünau besitzt
-niemand einen Betrieb, also lebt jeder davon.
-
-Damit hängt der Eingriff an einer Abwägung, die vor dem Umbau zu entscheiden ist: Zahlt
-künftig die Stadtkasse, kann sie leerlaufen — und dann verdient niemand mehr etwas. Bei
-204 Münzen in Grünau und einem Zehnt, der nichts einbringt (Punkte 63 und 65), wäre das
-kein theoretischer Fall. Der Tagelohn ist heute das Ventil, das die Welt am Leben hält;
-wer es schließt, muss vorher wissen, was an seine Stelle tritt.
-
-**2. Der Zehnt macht aus Ware Münzen.** Bei der Ernte (`productionService.ts:144`) und
-seit 5.15 auch beim Knecht (`employmentService.ts:284`) verliert der Erntende einen Teil
-des Ertrags, und die Stadt bekommt **Münzen im Gegenwert**. Niemand hat sie bezahlt. Zwei
-Wege stehen offen: die Stadt nimmt den Zehnt in Ware (dann braucht sie ein Lager, was
-`harvest` ausdrücklich vermeiden wollte) — oder sie verkauft ihn und bekommt erst dann
-Geld, von einem Käufer, der es verliert.
-
-**3. Raubgut verschwindet.** `hazardService` zieht dem Opfer die Beute ab und schreibt sie
-niemandem gut — bei einer Person wie bei der Stadtkasse. Das ist dieselbe Lücke, die
-Punkt 23 von der anderen Seite beschreibt: Wo ein Täter fehlt, fehlt auch der Empfänger.
-Mit dem Räuber als Beruf löst sich beides zugleich.
-
-**4. Geld versickert in Kassen ohne Ausgaben** — das ist Punkt 65: Zehnt und Pachtgebühr
-gehen an die Region der Fläche, und die Umlandregionen haben weder Amt noch Bauten. Aus
-dem Kreislauf ist es damit ebenso heraus, als wäre es gelöscht.
-
-Die Reihenfolge ist keine Frage des Aufwands, sondern der Wirkung: **Punkt 1 zuerst zu
-schließen, ohne 63 gelöst zu haben, legt die Wirtschaft still.** Zuerst muss es einen
-zweiten Weg geben, an Geld zu kommen — nämlich Waren zu verkaufen, die jemand herstellt.
-
-**Der offene Rest ist am 05.09.2026 beziffert und mit 5.83 geschlossen worden** (Punkt 108): Der Zehnt schafft
-Münzen aus dem Nichts — der Bauer verliert Ware, die Stadtkasse gewinnt Geld, das niemand
-gezahlt hat. Im Messlauf über 2000 Ticks sind das **1032 Münzen**. Sichtbar wurde es erst,
-nachdem 5.78 und 5.80 die Vernichtung auf der Bürgerseite geschlossen hatten: Vorher ging
-die Schöpfung in ihr unter.
-
 ### 73. NPCs kaufen nur nach dem Preis, nicht nach dem Menschen
 
 **Wo einer kauft, ist im Spiel eine Beziehung und keine Rechenaufgabe.** Heute nimmt jeder
@@ -1312,82 +1234,6 @@ Minuten** Wanduhr — weniger als die Hälfte von August, bei mehr Tests. Das dr
 mehr. Was drängt, sind die Messläufe (Punkt 67): fünfzig Minuten je Lauf mit lebender
 Stadt.
 
-### 76. Niemand kann sich einen Ausbau leisten
-
-**Der Befund aus 5.30.** Ausbauen ist gebaut, hat Wirkung (Ertrag, Kraftvorrat) und die
-NPCs haben die Handlungen dafür — geprüft und getestet. Nur: In 1200 Ticks baut niemand
-aus. Alheid stand am Ende bei **86 Münzen**, ihre Zimmerei kostet **340**.
-
-Dabei erzeugt und verkauft sie mehr als je zuvor (966 Ernten, 410 Durchgänge, 409
-Angebote). Was hereinkommt, geht für Brot wieder hinaus.
-
-**Das ist keine Frage der Entscheidungslogik mehr, sondern der Preise.** Ein Brett zu
-sechs Münzen trägt keine Werkstatt für dreihundertvierzig. Zu prüfen wäre, welche der
-Stellschrauben es sein soll — der Erlös je Ware, die Ausbaukosten, oder die Menge, die ein
-Durchgang bringt. Es gehört zu Punkt 16.
-
-**Eine Warnung dazu:** Der naheliegende Weg, ein Sparziel zu setzen und die NPCs darauf
-hinarbeiten zu lassen, ist bereits gegangen und hat 5.30 ausgelöst — er machte aus
-Unternehmern Tagelöhner. Die Rangfolge ist jetzt in Ordnung; die Kasse ist es nicht.
-
-**Nachgemessen am 22.08.2026, 600 Ticks (zwölf Spieljahre).** Der Befund besteht — und er
-ist präziser als „die Preise stimmen nicht":
-
-|                             |                                                      |
-| --------------------------- | ---------------------------------------------------- |
-| Gebäude über Stufe 1        | **keines**                                           |
-| Odilia (Zimmerin), Geld     | 89 — der Ausbau kostet 340                           |
-| Ihre Herstellung / Angebote | 231 Durchgänge, 231-mal ausgehängt                   |
-| **Unverkauft im Angebot**   | **725 Bretter zu 6 Münzen**                          |
-| Unverkauft im Betriebslager | 890 Holz                                             |
-| Häufigster Müßiggangsgrund  | `STILL_SAVING` (3603) — alle sparen, keiner kommt an |
-| Bauten in 600 Ticks         | 2                                                    |
-
-**In Grünau ist es dasselbe Bild** (Beobachtung vom 22.08.2026): „Ich biete Bretter an,
-aber niemand kauft und niemand baut." Der Befund ist damit keine Eigenart des Messlaufs,
-sondern die Lage in der laufenden Welt — und er trifft den Spieler genauso wie die NPCs.
-
-**Es fehlt nicht das Geld, es fehlt der Käufer.** Bretter haben genau einen Zweck: bauen.
-Gebaut wird zweimal in zwölf Spieljahren, also verkauft die Zimmerin so gut wie nichts,
-obwohl sie unablässig herstellt und aushängt. Daraus wird ein Kreis: kein Absatz → kein
-Geld → kein Bau → kein Absatz. Dass alle sparen, ist die Folge und nicht die Ursache.
-
-**Dahinter steckt ein Bauprinzip:** Gekauft wird in dieser Welt nur, was ein Bedürfnis
-stillt — Brot den Hunger, das Gewand das Ansehen, der Trank die Kraft. Baumaterial stillt
-keines; es ist ein Zwischenprodukt, dessen einziger Abnehmer der Bauwillige ist. Damit
-hängt die halbe Wirtschaft an einer Handlung, die ein NPC höchstens einmal im Leben tut.
-
-**Der naheliegende Hebel wäre die Instandsetzung** — und er trägt nicht. `renovate()`
-kostet heute nur Geld; ein Dach richtet man aber mit Holz, und Häuser verfallen laufend.
-Das klingt nach der Nachfrage, die nicht am Bauen hängt. Nachgerechnet ist es zu wenig:
-
-|                                                |                                    |
-| ---------------------------------------------- | ---------------------------------- |
-| Verfall der ganzen Stadt (neun Häuser)         | 45 Zustandspunkte je Spieljahr     |
-| Material für ein Wohnhaus (100 Münzen Bauwert) | 4 Bretter                          |
-| Daraus folgende Nachfrage                      | **rund zwei Bretter je Spieljahr** |
-| Ausstoß einer einzigen Zimmerei                | **58 Bretter je Spieljahr**        |
-
-**Das Verhältnis ist das Eigentliche.** Odilia stellt Jahr für Jahr das Zehnfache dessen
-her, was die Stadt braucht, und hört nicht auf: `decideNpcAction` prüft, ob Zutaten da
-sind — nicht, ob das Erzeugnis einen Abnehmer findet. Die 725 Bretter im Angebot sind
-deshalb kein Preisproblem, sondern eine **fehlende Rückkopplung**. An Preisen zu drehen
-ändert daran nichts: Bei doppeltem Brettpreis lägen dieselben 725 Bretter herum.
-
-**Zwei Arbeiten stecken darin, und sie sind verschieden groß:**
-
-- **Die Rückkopplung.** Wer viel unverkauft aushängen hat, stellt nichts mehr her, sondern
-  tut etwas anderes — Lohnarbeit, ernten, ausbauen. Eine Bedingung in `npc.logic`,
-  testbar, wirkt sofort und macht NPC-Zeit frei. Sie löst nicht, dass Baumaterial zu wenige
-  Abnehmer hat.
-- **Die Verwendungen.** Zwischenprodukte brauchen Endverbraucher: Instandsetzung, Möbel,
-  Brennholz, Werkzeug. Das ist die strukturelle Antwort und gehört zu **Punkt 15**
-  (Berufe, Waren, Rezepte), wo ohnehin über Verwendungen entschieden wird.
-
-**Entschieden am 22.08.2026: erst messen und festhalten.** Beides wartet auf Punkt 15 —
-dort fällt die Entscheidung über Verwendungen, und die Rückkopplung ist danach anders zu
-bemessen als heute. Die Zahlen oben sind der Stand, gegen den sich das dann prüfen lässt.
-
 ### 77. Was das Inventar noch nicht kann
 
 **Gebaut ist die Grenze** (5.33): Zwanzig Stück am Leib, dazu, was das Dach hergibt,
@@ -1437,6 +1283,10 @@ Kind, sobald es das konnte. Denkbar ist ein **Mindestalter unterhalb der Volljä
 
 Das gehört zusammen mit Punkt 24 (NPC-Eltern und die Schule) entschieden: Ob ein Kind
 lernt oder arbeitet, ist dieselbe Frage von zwei Seiten — und ein Tag ist nur einmal da.
+
+**Nachgesehen am 04.10.2026: weiter offen.** Weder `workAvailable` in der Lageaufnahme
+noch `WORK` in der Überlebensstufe noch der Bau- oder Vermessungsdienst prüfen das Alter.
+Nur die Anstellung (`canTakeJob`) und seit 5.99 der Stellenwechsel tun es.
 
 ### 85. Der Kornspeicher backt aus dem Nichts — verteuert mit 5.86
 
@@ -1596,6 +1446,12 @@ Stadt größer war. **Er überbrückt, und die Kette wächst darunter heran.** D
 zu seiner Abschaffung, nicht der Grund, ihn zu behalten: Der nächste Lauf ohne ihn wird
 gemacht, sobald die Schritte aus Punkt 115 gemessen sind.
 
+**Und mit 5.101 braucht ihn die Stadt kaum noch — gemessen am 04.10.2026.** `GRANARY`
+brachte in 2000 Ticks **660 Münzen**, rund 165 Laibe für 44 Einwohner; in 5.96 waren es
+3728, in 5.99 4972. `BUY_INPUT` stieg auf 892: Bäckereien kaufen Mehl, die Stadt isst ihr
+Brot. **Damit ist der nächste Lauf der ohne Kornspeicher.** Der Rückbau ist neu zu machen
+(siehe oben), dann wird gemessen.
+
 ### 87. Ein Sparziel, das ins Leere führt
 
 **Befund vom 23.08.2026.** Derselbe Fehler wie in Punkt 55 und 63, eine Ebene höher — und
@@ -1633,6 +1489,11 @@ schlimmer als keine — genau das steht in `npc.logic` schon als Warnung.
 **Zusammenhang mit Punkt 86:** Heute tritt der Fall über die gesperrte Eisenkette ein. Ist
 die behoben, bleibt er für den Tag, an dem alle Werkstätten stehen (Punkt 89) — dann trifft
 er jeden neuen Unternehmungslustigen.
+
+**Nachgesehen am 04.10.2026: weiter offen, aber leise.** Die Stelle in `savingsTarget` ist
+unverändert. Ihre Wirkung ist klein geworden: `GOAL_UNREACHABLE` steht im Lauf auf 5.101
+bei 240. Seit 5.100 bietet in Versteigerungen nur, wer bauen will — aber ob „eine
+Werkstatt bauen" erreichbar ist, fragt auch dort niemand.
 
 ### 88. Die Zugreihenfolge ist ein stiller Vorteil
 
@@ -1806,176 +1667,6 @@ Lohnarbeit über das hinaus, was Essen und Instandhaltung kosten; oder ein Antei
 Punkte, der ungenutzt verfällt. „Erhalten ja, entscheiden nein" ist der richtige Satz — er
 sollte nur auch für den Geldbeutel gelten.
 
-### 93. `GOAL_UNREACHABLE` deckt 85 Prozent des Müßiggangs
-
-**Befund vom 27.08.2026.** In drei Messläufen über 1500 Ticks mit derselben Saat 86 steht
-die Diagnose fast unverändert hoch:
-
-| Stand                        | `GOAL_UNREACHABLE` | `NO_WORK` | `CONTENT` |
-| ---------------------------- | -----------------: | --------: | --------: |
-| 0.5.65                       |             15 279 |     1 702 |     1 242 |
-| 0.5.66 (Anstellungen)        |             15 466 |     1 400 |     1 257 |
-| 0.5.67 (Ernte auf den Markt) |             15 560 |     1 382 |     1 180 |
-
-Von rund 18 100 Müßiggangsrunden sind das durchweg **85 Prozent**, und keiner der beiden
-Eingriffe hat daran etwas geändert. Die Diagnose stammt aus 5.16 (Punkt 63) und sollte den
-seltenen, schweren Fall benennen: einer hat etwas vor, dessen Preis niemand nennt. Dass
-sie der Normalzustand ist, heißt eines von zweien — und beides wäre wichtig zu wissen.
-
-**Entweder die Stadt liefert wirklich nicht, was ihre Einwohner vorhaben.** Dann ist es
-der größte Balancing-Befund der Phase und gehört zu den Punkten 16 und 76.
-
-**Oder die Diagnose ist zu grob.** `idleReason` erkennt ein Vorhaben an
-
-```ts
-const willBauen: boolean =
-	(state.isMarried && !state.ownsHome && state.homePrice !== null) ||
-	(!state.ownsWorkshop && isEnterprising(state.personality));
-```
-
-und meldet `GOAL_UNREACHABLE`, sobald `savingsTarget` dazu `null` ergibt. Für den
-Unternehmenden ohne Werkstatt wird es aber schon dann `null`, wenn die Stadt **keine
-Werkstattlücke mehr hat** (`workshopPrice === null` — ein Betrieb je Handwerk, Punkt 89)
-oder **kein Bauland mehr frei ist** (`plotPrice === null`). Beides ist in einer gewachsenen
-Stadt der Normalfall. Ein Mann, der schlicht keinen Grund mehr hat, etwas anzufangen,
-steht damit in derselben Zeile wie einer, dem das Baumaterial fehlt — und die zweite Lage
-ist ein Notstand, die erste ein zufriedenes Leben.
-
-Der Kommentar an `IDLE_REASONS` warnt selbst davor: „Eine Diagnose, die von der
-Entscheidung abweicht, ist schlimmer als keine, weil man ihr glaubt."
-
-**Zu bauen ist zuerst eine Aufschlüsselung**, kein Eingriff: _welches_ Ziel unerreichbar
-ist — Haus, Grundstück, Material oder Werkstatt — und wie viele Köpfe hinter jedem stehen.
-Heute ist es eine einzige Zahl über alle. Erst danach lässt sich sagen, ob hier die Preise
-klemmen oder nur die Auskunft.
-
-**Nachtrag vom 17.09.2026 — in Produktion nachgesehen (0.5.89, Tick 5648).** Die Frage
-von oben ist damit entschieden, und zwar zur ernsten Seite: **Die Stadt liefert wirklich
-nicht, was ihre Einwohner vorhaben.** Im Serverlog steht Tick für Tick fast dieselbe
-Zeile — von 21 Lebenden handeln 3 bis 6, und `GOAL_UNREACHABLE` steht konstant bei 9 bis 10.
-
-Die Kette dahinter ist lückenlos:
-
-1. **Es gibt kein freies Bauland.** `getFreeBuildingLand()` zählt `BUILDING_LAND` mit
-   `ownerType: 'NONE'`. In Grünau: 8 Grundstücke in Bürgerhand, 4 bei der Stadt, **null
-   herrenlose**. Also `plotPrice: null`, also `GOAL_UNREACHABLE` für jeden Bauwilligen —
-   die Diagnose ist hier **ehrlich**, nicht zu grob.
-2. **Neues Bauland entsteht nur durch `developLand()`**, die Erschließung durch den
-   Amtsinhaber. Sie ist auch der einzige Ort im laufenden Betrieb, der ein Grundstück auf
-   `NONE` setzt (`auctionService.ts:101`). Kein anderer Weg bringt Grund in Umlauf; was
-   der Stadt zufällt, bleibt bei ihr.
-3. **Der Bürgermeister kann nicht erschließen.** Die Regel verlangt
-   `treasury − developmentCost ≥ treasuryReserve`, also 180 Münzen. Die Stadtkasse hält
-   **13**.
-4. **Und sie wird die 180 nie erreichen.** Die Grundsteuer bringt bei Satz 7 auf 8
-   Grundstücke höchstens 56 je Spieljahr, abzüglich der Ausfälle bei denen, die nichts
-   haben (zwei Besitzer stehen bei 0 und 1 Münze). Allein die Aufwandsentschädigung kostet
-   bei 1 Münze je Tick **50 je Spieljahr**. Dazu Löhne und 9 Brände mit 295 Schaden.
-5. **Deshalb dreht das Amt an der einzigen Schraube, die bleibt.** `DEVELOP_LAND` fällt
-   durch, `SET_TAX` greift: Die Grundsteuer stieg seit Tick 5267 jedes Spieljahr pünktlich
-   um eins — 1, 2, 3, 4, 5, 6, **7**. Das Maximum liegt bei 20. Jede Erhöhung nimmt genau
-   den Bürgern Geld, die kaufen und bauen sollen.
-
-Die Chronik zeigt den Stillstand: **letzter Grundstückskauf bei Tick 5248, letzter Neubau
-bei 5291** — seither ist nichts mehr entstanden. Kein Erschließungs- oder
-Auktionsereignis, jemals; die `auctions`-Tabelle ist leer. Im Messlauf mit Saat 86 steht
-dagegen `AUCTION 40` im Kassenbuch: Der Kreislauf funktioniert grundsätzlich, er ist in
-der echten Welt nur nie angesprungen.
-
-**Was das für die Aufschlüsselung heißt, die oben gefordert wird:** Sie bleibt nützlich,
-aber sie ist nicht mehr die erste Frage. Für Grünau ist ohne sie klar, welches Ziel
-unerreichbar ist — das Bauland, und zwar für alle gleichzeitig.
-
-**Was zu entscheiden ist** (Balancing, gehört zu den Punkten 16 und 76): ob die
-Aufwandsentschädigung auf 0 darf (`OFFICE_STIPEND` erlaubt es ausdrücklich — „eine Stadt
-darf beschließen, dass das Amt eine Ehre ist"), ob die Stadt ihre **eigenen** vier
-Grundstücke versteigern können soll statt nur frisch erschlossene, oder ob die
-Erschließung billiger wird. Solange keines davon gilt, ist Grünau eine Stadt, die sich
-ihr Wachstum nicht leisten kann und stattdessen ihre Bürger besteuert.
-
-**Das erste davon ist mit 5.91 entschieden.** Die Aufwandsentschädigung liegt jetzt in
-NPC-Hand, und der Amtsinhaber senkt sie **vor** der Steuer der anderen — ob er es tut,
-entscheidet seine Gier. Im Messlauf fällt `STIPEND` von 450 auf 127, die Stadt wird wieder
-handlungsfähig (Zahlen bei Punkt 102). **Grünau ist damit nicht sofort geheilt:** Bei rund
-50 gesparten Münzen je Spieljahr dauert es etwa vier Jahre bis zu den 180, dann kommt eine
-Erschließung, dann beginnt das Sparen von vorn. Ein langsamer Kreislauf ist ein Anfang,
-kein Ziel — die beiden anderen Möglichkeiten bleiben offen, und der saubere Weg bleibt
-Punkt 102.
-
-**Nicht mehr offen:** Die Rechnung der Erschließung selbst war zusätzlich falsch — die
-Lage nannte den Preis für ein Grundstück, erschlossen wurden zwei. Behoben mit 5.90.
-
-**Ein Hebel dazu, mit 5.91 — und er wirkt.** Der Amtsinhaber sah die Klemme die ganze Zeit
-(`nextTaxChange` meldete sie jedes Jahr), er hatte nur keinen Hebel, der nicht die anderen
-traf: `NPC_MAYOR_LAWS` kannte zwei Gesetze, beide auf der Einnahmenseite. Der größte
-stetige Abfluss blieb unantastbar — die Aufwandsentschädigung, 50 Münzen je Spieljahr,
-gezahlt an den, der entscheidet. Seit 5.91 darf er sie senken, **vor** der Steuer der
-anderen, und ob er es tut, entscheidet seine Gier (`GREED_TO_KEEP_STIPEND`).
-
-Im Lauf über 500 Ticks mit Saat 86, gegen denselben Lauf auf 0.5.88:
-
-|                              | 0.5.88 |      0.5.91 |
-| ---------------------------- | -----: | ----------: |
-| `STIPEND` an den Amtsinhaber |    450 |     **127** |
-| `WAGE` an Bürger             |    557 |     **854** |
-| Grundsteuer eingenommen      |      0 |          78 |
-| `PLOT_SALE`                  |    640 |         760 |
-| `DEVELOPMENT` aus der Welt   |    600 |     **720** |
-| Geld bei den Bürgern am Ende |   1449 |    **1029** |
-| Tode                         |      0 | **1 (Not)** |
-
-**Die Stadt handelt wieder** — sie erschließt zwölf Parzellen statt zehn, zahlt deutlich
-mehr Lohn aus, und die Grundsteuer läuft erstmals überhaupt an. **Und sie bezahlt es
-doppelt:** Ein Einwohner ist verhungert, wo vorher niemand starb, die Bürger haben in Summe
-420 Münzen weniger — und der Anteil des vernichteten Geldes am Zufluss steigt von 35 auf
-**49 Prozent**.
-
-**Das ist der eigentliche Befund dieses Nachtrags, und er zeigt auf Punkt 102:** Eine
-handlungsfähige Stadt verbrennt _mehr_. `DEVELOPMENT` ist nicht gesunken, sondern von 600
-auf 720 gestiegen, weil eine Stadt, die baut, Bauland braucht. Der Hebel von 5.91 hat die
-Sperre gelöst und damit das Leck vergrößert. Die Erschließung gegen **Arbeit statt Münzen**
-umzustellen ist danach nicht weniger dringend, sondern mehr — und sie löst zugleich den
-Rückweg aus Punkt 100, an dem der Hungertote von oben hängt.
-
-**Wobei die Entwurfsfrage von Punkt 102 jetzt leichter zu beantworten ist.** Dort stand die
-Sorge, was ein Bürgermeister beschließt, wenn Erschließung nichts mehr kostet. Die Antwort
-liegt in 5.76: Ist Erschließung Arbeit, bremst nicht mehr das Geld, sondern **ob jemand die
-Arbeit annimmt**. Eine Stadt ohne freie Hände erschließt eben nicht, und der Aushang dafür
-existiert schon (`repairWage`, `freierArbeitsplatz`).
-
-**Getrennt nachgemessen**, derselbe Lauf auf 5.90 allein:
-
-|                            | 0.5.88 |  0.5.90 |  0.5.91 |
-| -------------------------- | -----: | ------: | ------: |
-| `DEVELOPMENT` aus der Welt |    600 | **480** | **720** |
-| `WAGE` an Bürger           |    557 |     686 |     854 |
-| `STIPEND`                  |    450 |   **0** |     127 |
-| Grundsteuer eingenommen    |      0 |       0 |      78 |
-| Tode                       |      0 |       0 | 1 (Not) |
-
-**5.90 bremst, 5.91 beschleunigt.** Die korrigierten Kosten senken die Erschließung von 600
-auf 480 — die Rücklage hält jetzt, was sie soll. Der Gehaltsverzicht hebt sie auf 720, weil
-die Stadt zum ersten Mal Geld hat, das sie ausgeben kann. Beide Änderungen sind richtig,
-und zusammen verschieben sie das Leck nach oben.
-
-**Eine Warnung zur Lesart dieser Tabelle**, die über diesen Punkt hinausgeht: Die drei
-Läufe unterscheiden sich stärker, als die Änderungen allein erklären. Dass `STIPEND` auf
-5.90 bei **null** steht, während es auf 5.88 bei 450 lag, hat mit den Erschließungskosten
-nichts zu tun — dieselbe Saat, aber eine Stadt, die einmal anders abbiegt, wählt anders,
-zahlt anders, verhungert anders. Die Saat hält die Ausgangslage fest, nicht den Verlauf.
-Einzelne Zahlen taugen hier als Richtung, nicht als Messwert; wer eine Wirkung belegen
-will, braucht mehrere Läufe oder mehrere Saaten.
-
-**Nachtrag vom 20.09.2026: Die Sperre ist gefallen** (5.92, Punkt 102). Die Erschließung
-kostet keine Münzen mehr, sondern Arbeit — und damit ist die Schwelle weg, an der Grünau
-seit Tick 5291 stand: Der Amtsinhaber weist aus, sobald kein Bauland frei ist, und die
-Löhne fallen erst an, wenn jemand gräbt. Was `GOAL_UNREACHABLE` daraus macht, ist damit
-**noch nicht** beantwortet: Im Lauf über 500 Ticks steht die Zahl bei 240 statt 272 — eine
-Richtung, kein Beleg, und in diesem kurzen Lauf war Bauland ohnehin nicht der Engpass. Die
-Gegenprobe ist ein Lauf über 2000 Ticks; die ehrliche Gegenrechnung steht in Punkt 102:
-Zwischen Beschluss und Bauplatz liegen jetzt zwanzig Schichten, und es wird immer nur eine
-Erschließung auf einmal betrieben.
-
 ### 94. Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück
 
 **Befund vom 27.08.2026, entstanden mit 5.67.** Seit die Ernte am Markt verkäuflich ist,
@@ -2000,88 +1691,6 @@ Einschränkung, die er nicht kommen sieht.
 ist eine Spalte am `ShopOffer` und ein Zweig in `withdrawOffer`. Solange Entfernungen
 nichts kosten, ist der Lagerort ohnehin eine Frage der Buchung; mit Punkt 31 (der Karte)
 wird daraus eine mit Gewicht, und dann gehört diese Stelle ohnehin angefasst.
-
-### 96. Die Stadtkasse hat keine Einnahme, die ein NPC-Bürgermeister erhöhen kann
-
-**Befund vom 28.08.2026, aus dem ersten Lauf mit vollem Takt.** In vierzig Spieljahren
-wurde **keine einzige Münze Grundsteuer** eingezogen, und die Kasse stand die ganze Zeit
-auf null. Zwei Zeilen erklären es:
-
-```ts
-PROPERTY_TAX: { … fallback: 0, min: 0, max: 20 }   // law.logic.ts
-export const NPC_MAYOR_LAW: LawKind = 'TITHE';      // governance.logic.ts
-```
-
-Der Satz steht bei null, und das **einzige** Gesetz, das ein NPC im Amt je anfasst, ist
-der Zehnt. In einer Stadt ohne Spieler kann die Grundsteuer damit nie erhoben werden —
-nicht weil jemand sie abgeschafft hätte, sondern weil niemand da ist, der sie beschließen
-könnte. Dem gegenüber stehen der Sold von einer Münze **je Tick** und die
-Instandsetzungslöhne.
-
-**Daran hängt die halbe Welt**, und zwar in dieser Reihenfolge:
-
-- **Die Tagelöhnerei zahlt aus derselben leeren Kasse.** 4199 von 5637 gewählten Schichten
-  scheiterten an `EMPLOYER_BROKE` — die einzige verlässliche Einnahme der Einwohner fällt
-  zu drei Vierteln aus. Der Kommentar in `employment.logic.ts` hat die Ursache schon
-  richtig benannt („die leere Kasse war nie die eines Meisters, sondern die der Stadt");
-  gemessen wurde sie nie, weil das Werkzeug sie nicht kannte (Punkt 95).
-- **`DEVELOP_LAND` kostet Geld.** Eine leere Kasse weist kein Bauland aus, also bleibt es
-  bei den zwölf Parzellen des Weltaufbaus, also bleibt `BUY_PLOT` bei acht Käufen in
-  vierzig Jahren. **Das ist die Sperre, hinter der Punkt 86 zuletzt stand.**
-- **Und dahinter wartet die Brotkette.** Im Messlauf sitzen inzwischen drei zugezogene
-  Bäcker mit 187, 189 und 266 Münzen in der Stadt; das Backhaus kostet 220. Sie bauen
-  nicht, weil kein Grundstück frei ist. **Punkt 85 ist damit nicht mehr die bindende
-  Sperre** — der Kornspeicher unterbietet einen Bäcker, den es aus einem anderen Grund
-  nicht gibt.
-
-**Nachgemessen mit Saat 7** (28.08.2026, 2000 Ticks, voller Takt): derselbe Befund in
-einer ganz anderen Stadt. Wieder **null Münzen Grundsteuer** in vierzig Spieljahren, die
-Kasse durchweg unter 220, und 3667 von 5129 Schichten (71,5 %) an `EMPLOYER_BROKE`
-gescheitert — gegen 4199 von 5637 (74,5 %) bei Saat 86. Das ist keine Eigenart einer
-gewürfelten Ausgangslage, sondern die Bauart.
-
-**Gebaut mit 5.71 — und fiskalisch wirksam.** Entschieden wurde die dritte der unten
-genannten Möglichkeiten: `NPC_MAYOR_LAW` ist weg, `nextTaxChange` wählt den Hebel nach der
-**Bemessungsgrundlage** (Grundstücke in Bürgerhand für die Grundsteuer, laufende Pachten
-für den Zehnt) und rührt keine Steuer an, die niemanden erreicht. Der Startsatz bleibt
-null: Eine Welt beginnt ohne Grundsteuer, und wer sie einführt, verantwortet das.
-
-Zwei Dinge mussten dabei nachgezogen werden, und beide sind Befunde für sich:
-
-- **Ein Anteil springt in Fünfern, eine Münze nicht** (`TAX_RAISE_STEP_COIN = 1`). Fünf
-  Münzen mehr Grundsteuer sind ein Vermögen — ein Grundstück kostet vierzig.
-- **Man dreht nicht wieder, ehe die letzte Drehung gewirkt hat** (`TAX_EFFECT_DELAY`). Der
-  Bürgermeister entscheidet **stündlich**, die Grundsteuer wird **jährlich** eingezogen:
-  Ohne Frist erhöhte er sie zwanzigmal, ehe die erste Münze ankam, und stand binnen
-  zwanzig Ticks am Höchstsatz. In `worldComesAlive` ist daran jemand verhungert — der Test
-  hat den Fehler gefangen, ehe ein Messlauf ihn zeigen konnte.
-
-**Gemessen, 2000 Ticks, Saat 86, gegen denselben Lauf davor:**
-
-|                         |                 vorher |             nachher |
-| ----------------------- | ---------------------: | ------------------: |
-| Grundsteuer eingenommen |                  **0** |            **3468** |
-| Stadtkasse              |           durchweg ≤29 |         236 bis 782 |
-| `EMPLOYER_BROKE`        | 4199 von 5637 (74,5 %) | 872 von 2727 (32 %) |
-| `BUY_PLOT`              |                      8 |              **22** |
-| Häuser am Ende          |                     11 |                  19 |
-
-Die Kasse kommt aus dem Nullpunkt, Land wird wieder erschlossen, und die Arbeit gelingt
-öfter. **Punkt 86 und 87 sind damit von ihrer Sperre befreit.**
-
-**Und es hat einen Preis, der schwerer wiegt als der Gewinn — siehe Punkt 100.** Die
-Bevölkerung fällt von 36 auf 28, und vier von fünf Toten verhungern. Dieser Punkt ist
-deshalb **nicht** erledigt, sondern verschoben: Die Stadt kann sich jetzt finanzieren, und
-was sie ihren Bürgern dafür abnimmt, können die nicht aufbringen.
-
-**Die ursprüngliche Frage, zur Erinnerung — woher eine Stadt ohne Spieler ihr Geld
-nimmt.** Drei Wege, die sich
-nicht ausschließen: die Grundsteuer auf einen Satz über null stellen (dann trägt der
-Grundbesitz die Stadt, und der `fallback` ist eine Entscheidung statt einer Vorgabe); den
-NPC-Bürgermeister auch über sie beschließen lassen (dann ist es Politik, und ein Haushalt
-wird zum Wahlkampfthema); oder den Sold an die Kassenlage binden. Das erste ist eine Zahl,
-das zweite eine Erweiterung von `decideMayorAction`, das dritte eine Zeile in
-`payOfficeStipends`. Gehört zu den Punkten 16 und 32.
 
 ### 98. Renoviert wird fast nie, und ein Brand kann eine Stadt um ihr Handwerk bringen
 
@@ -2155,180 +1764,6 @@ steht der Name in der Zeile selbst.
 **Was die Zahlen dann sagen, ist noch offen** — dieser Eintrag hält nur fest, dass sie ab
 jetzt da sind. Die Frage dahinter (brennt das Handwerk ab, oder entsteht es nie?) gehört zu
 Punkt 103 und wird am nächsten vollen Lauf entschieden, nicht hier.
-
-### 100. Die Stadt verhungert an ihrer eigenen Steuer
-
-**Befund vom 29.08.2026, aus drei Läufen über 2000 Ticks mit Saat 86.** Mit der
-Grundsteuer aus Punkt 96 kommt die Stadtkasse aus dem Nullpunkt — und die Bevölkerung
-bricht ein:
-
-|                      | vor der Steuer | mit Steuer | + Schwelle 25 |
-| -------------------- | -------------: | ---------: | ------------: |
-| Lebende am Ende      |             36 |         25 |            28 |
-| Tode                 |             15 |         37 |            28 |
-| **davon an der Not** | nicht gemessen |     **30** |        **23** |
-| Geld bei Leuten      |           2559 |       1720 |          2998 |
-| `NO_WORK`            |           1632 |       5439 |          5607 |
-
-**Vier von fünf Toten verhungern.** Das ist keine alternde Stadt, sondern eine verarmende:
-In der Einwohnerliste stehen am Ende Leute mit **null** Münzen und leerer Kammer, während
-ein Laib Brot vier kostet. Der reichste Mann der Stadt hatte vorher 594 Münzen, nachher 108.
-
-**Eine Vermutung ist bereits widerlegt.** Naheliegend war: Der Bürgermeister hält seit der
-gefüllten Kasse alle öffentlichen Bauten instand und nimmt damit den Tagelöhnern ihren
-Broterwerb — `REPAIR_FOR_HIRE` ist seit 5.26 die einzige verlässliche Einnahme, und
-`NO_WORK` war von 1632 auf 5439 gestiegen. Daraufhin wurde `MAYOR_MAINTAINS_BELOW` von 50
-auf 25 gesenkt: Das Amt richtet nur noch im letzten Viertel her, alles darüber bleibt
-bezahlte Arbeit. **Es half, aber nicht deshalb** — die Toten gingen von 37 auf 28 zurück
-und den Leuten blieb deutlich mehr Geld, doch `NO_WORK` fiel nicht, sondern stieg leicht.
-Wäre die Vermutung richtig gewesen, hätte genau diese Zahl sinken müssen. Die Schwelle
-bleibt trotzdem: Ein Amtsinhaber, der Auftraggeber **und** Handwerker in einer Person ist,
-war ohnehin nicht gemeint (Punkt 74).
-
-**Was fehlt, ist eine Bilanz.** Der Messbericht zählt Handlungen, keine Münzen. Wir wissen,
-was die Stadt einnimmt (3468), aber nicht, was sie als Lohn auszahlt, was der Kornspeicher
-einzieht, was zwischen Bürgern fließt. Ohne das ist jeder weitere Eingriff die dritte
-Vermutung in Folge — und die erste war schon falsch.
-
-**Zu bauen ist deshalb zuerst eine Aufschlüsselung, kein Eingriff** — derselbe Satz wie in
-Punkt 93, und er hat sich hier zum zweiten Mal bewährt: Erst die Todesursache im Bericht
-(5.71) hat aus „die Bevölkerung sinkt" die Diagnose „sie verhungert" gemacht, und das in
-einem einzigen Lauf. Gesucht ist dasselbe für das Geld: Ein- und Ausgang je Tick, nach
-Quelle getrennt. Danach ist zu entscheiden, ob der Satz zu hoch ist, die Löhne zu niedrig
-oder der Kornspeicher zu teuer — heute lässt sich das nicht unterscheiden.
-
-**Neu gemessen nach 5.87** (2000 Ticks, Saat 86, mit der reparierten Werkstattwahl):
-**28 Tote, davon 23 an Not** — gegen 21 (16 Not) mit dem Kornspeicheraufschlag und 15 (9
-Not) ohne ihn. Die Stadt ist dabei erheblich größer geworden (47 Häuser statt 13, neun
-Betriebe statt zwei), und das ist die Wendung, die dieser Punkt bekommt: **Der Hunger
-verschwindet nicht, wenn die Wirtschaft anspringt — er wächst mit ihr.**
-
-Zwei Zahlen aus demselben Lauf sagen, wohin zu sehen ist. `WORK/EMPLOYER_BROKE` steht bei
-**2128** (Punkt 106): Es wird gebaut und angestellt, aber die Auftraggeber können nicht
-zahlen — Arbeit, die da ist und kein Brot bringt. Und die Stadtkasse hält am Ende **250
-Münzen** bei 10436 Einnahmen; sie hat alles wieder ausgegeben, davon 2880 an die
-Erschließung, also aus der Welt heraus (Punkt 102).
-
-**Damit ist die Frage dieses Punktes eine andere geworden.** Sie hieß: Nimmt die Steuer
-den Ärmsten das Brot? Sie heißt jetzt: Warum verhungern Menschen in einer Stadt, die
-arbeitet, herstellt und handelt? Der Verdacht liegt nicht mehr auf dem Satz, sondern auf
-dem **Rückweg** — Löhne, die zugesagt und nicht gezahlt werden können. Und das ist eine
-Frage an Punkt 106, nicht an die Grundsteuer.
-
-#### Die Bilanz, überschlagen — woher das Geld kommt und wohin es geht
-
-**Nachgemessen am 29.08.2026** (2000 Ticks, Saat 86, mit der Bilanz aus 5.72). Die
-Schätzung darunter hat die Richtung getroffen und die Größenordnung verfehlt:
-
-```
-Bestand am Anfang 686, am Ende 1233 (Bürger 1016, Kasse 217)
-Von außen zugeflossen (Zuzug) 6035
-**Vernichtet 5488**
-An Bürger zurück: Sold 1836
-Vom Amt selbst verbaut (Untergrenze) 0
-```
-
-**Von 6035 Münzen, die in vierzig Spieljahren in die Welt kamen, sind 5488 wieder
-verschwunden — 91 Prozent.** Netto ist die Welt um 547 Münzen reicher geworden, bei 22
-Zuwanderern mit im Schnitt 274 Münzen. Der größte Rückweg zu den Bürgern ist nicht der
-Tagelohn, sondern der **Sold mit 1836** — und der geht an je eine Person.
-
-Und die Zeile „Vom Amt selbst verbaut: 0" schließt den Verdächtigen aus, dem die Schwelle
-25 galt: Der Bürgermeister hat in 2000 Ticks kein einziges Mal selbst renoviert. Es ist
-nicht das Amt. **Es ist das Bauen — siehe Punkt 102.**
-
-Die überschlagene Rechnung darunter bleibt stehen, weil sie die Posten benennt, die die
-Bilanz noch nicht trennt.
-
-**Gerechnet und nicht gemessen** (29.08.2026): aus den Konstanten und den Handlungszahlen
-desselben Laufs über 2000 Ticks, Saat 86. Sie ersetzt die Aufschlüsselung nicht, aber sie
-sagt, wonach diese suchen soll.
-
-| Abfluss aus Bürgerhand  |    Münzen | wohin                                                                                                                 |
-| ----------------------- | --------: | --------------------------------------------------------------------------------------------------------------------- |
-| Brot                    | **~4090** | 1022 Laibe à 4 — in dieser Stadt steht **kein Backhaus**, also fast alles an den Kornspeicher, also in die Stadtkasse |
-| Grundsteuer             |  **3468** | Stadtkasse (gemessen)                                                                                                 |
-| Grundstücke             |      ~880 | 22 Käufe à 40, Stadtland                                                                                              |
-| Standgeld, Zehnt, Pacht |     wenig | Stadtkasse                                                                                                            |
-| Eigene Renovierung      |         ? | **vernichtet** — `renovateBuilding` zieht ab, niemand bekommt es (Punkt 74)                                           |
-
-| Zufluss in Bürgerhand |      Münzen | woher                                                                    |
-| --------------------- | ----------: | ------------------------------------------------------------------------ |
-| **Zuzug**             |   **~7200** | 29 Ankünfte à 150–400 abzüglich Einzugsgeld — **von außerhalb der Welt** |
-| Tagelohn              |    ~500–600 | Stadtkasse, und gedeckelt (siehe unten)                                  |
-| Anstellungen          | fast nichts | `OFFER_JOB` 3, `TAKE_JOB` 5 im ganzen Lauf                               |
-| Verkauf untereinander |     0 netto | verschiebt, schafft nicht                                                |
-
-**Der Tagelohn ist gedeckelt, und zwar als Rechnung.** `REPAIR_FOR_HIRE` gibt es nur unter
-voller Güte. Ein Gebäude verfällt um `CONDITION_LOSS_PER_TICK` = 0,1 Punkte je Tick, eine
-Schicht hebt es um `REPAIR_PER_SHIFT` = 5 und kostet die Stadt `TAGELOHN` = 3 — also 0,6
-Münzen je Zustandspunkt. Bei vier bis fünf öffentlichen Bauten verfallen 0,4 bis 0,5 Punkte
-je Tick, und mehr Arbeit **kann es nicht geben**: rund **0,25 Münzen je Tick für die ganze
-Stadt**, ob dort acht oder achtzig Menschen leben. Der Rückweg wächst nicht mit der
-Bevölkerung.
-
-**Und wenn der Bürgermeister selbst herrichtet, kostet derselbe Punkt 2 statt 0,6 Münzen**
-(`RENOVATION_COST_PER_POINT`). Er war also nicht nur der Konkurrent seiner Tagelöhner,
-sondern der dreimal teurere Weg — Geld verließ die Kasse, ohne bei jemandem anzukommen.
-Das rechtfertigt die Schwelle 25 nachträglich, aus einem anderen Grund als dem, aus dem
-sie gesetzt wurde.
-
-**Die Antwort auf „woher kommt das Geld": vom Zuzug.** Die Stadt lebt von Ersparnissen,
-die Fremde von draußen mitbringen. Nichts in dieser Welt schafft Geld — Arbeit schafft
-Waren —, und der Kreislauf ist keine Schleife, sondern eine Einbahnstraße: Bürger →
-Stadtkasse breit, Stadtkasse → Bürger ein Strohhalm. Die Grundsteuer hat das nicht
-verursacht, sie hat es sichtbar gemacht. Die 4199 gescheiterten Schichten davor waren
-dasselbe Problem von der anderen Seite.
-
-#### Warum die Rohstoffkette den Kreislauf nicht schließt
-
-Der Einwand liegt nahe: Rohstoffe sind unbegrenzt, sie werden veredelt und verkauft — das
-müsste doch ein Kreislauf sein. **Er wäre einer, wenn das Erzeugte gegessen würde.**
-
-Diese Welt hat eine **Produktionskette, aber keine Verbrauchskette.** Alles, was sie
-herstellt, ist dauerhaft: Holz, Bretter, Quader, Eisen. Verbraucht wird davon nur beim
-**Bauen**, und gebaut wird in zwanzig Spieljahren ein gutes Dutzend Mal. Deshalb liegen am
-Ende der Läufe 3817 Stämme und 2165 Bretter unverkauft am Markt — die Kette produziert
-gegen eine Nachfrage, die es nicht gibt (Punkt 76). Unbegrenzte Rohstoffe machen das nicht
-besser, sondern schlimmer: unbegrenztes Angebot bei fast null Nachfrage. Der Preis von
-sechs Münzen je Brett ist eine Behauptung, kein Marktpreis.
-
-**Das Einzige, was in dieser Welt laufend verbraucht wird, ist Brot** — 1022 Laibe im
-Lauf, gegen ein knappes Dutzend Bauten. Brot ist die eigentliche Wirtschaft, und genau
-dieser Posten kommt **nicht aus der Wirtschaft**, sondern aus dem Kornspeicher, der ihn
-aus dem Nichts schöpft und dafür Münzen einzieht (Punkt 85).
-
-Damit steht es scharf: **Die einzige wiederkehrende Nachfrage der Welt wird von einem
-staatlichen Monopol bedient, das seine Ware nicht herstellen muss.** Gäbe es statt seiner
-einen Bäcker, blieben dieselben 4000 Münzen im Kreis — Bauer → Müller → Bäcker → Lohn →
-Brot —, und die Kette hätte zum ersten Mal einen Abnehmer, der jeden Tag wiederkommt. Der
-Kornspeicher ist in dieser Bilanz keine Krücke mehr, sondern eine Pumpe.
-
-**Daraus folgt eine Reihenfolge**, und sie widerspricht der bisherigen Einschätzung in
-Punkt 85 („der Kornspeicher kann erst weg, wenn die Kette trägt"): Die Kette kann gar nicht
-tragen, solange er steht — er ist die einzige Nachfrage, die es zu bedienen gäbe. Zu prüfen
-ist deshalb die Zwischenstufe, die dort schon vorgeschlagen ist: **ein Preis über dem der
-Bäcker**, der ihn zur Notversorgung macht statt zur Konkurrenz. Das ist eine Zahl, kein
-Umbau — und mit der Bilanz oben lässt sich vorher ausrechnen, was sie bewirkt.
-
-**Bis dahin ist die Steuer eine offene Wunde in der laufenden Welt.** Wer Grünau vor dem
-nächsten Schritt schützen will, kann den Bürgermeister die Grundsteuer nicht beschließen
-lassen — es ist eine Zeile in `NPC_MAYOR_LAWS`.
-
-**Zwei Annahmen dieses Punktes sind am 05.09.2026 gefallen** (Kassenbuch aus 5.77, 2000
-Ticks, Saat 86):
-
-- **Nicht die Steuer nimmt den Bürgern das Geld, sondern das Brot.** `PROPERTY_TAX` bringt
-  1098, `GRANARY` dagegen 4768 — über die Hälfte aller Stadteinnahmen. Was die Ärmsten
-  arm macht, ist die Notversorgung, für die sie bezahlen.
-- **Und der Rückweg ist kein Strohhalm.** Hier stand „rund 1,25 Münzen je Tick"; gemessen
-  sind es 3,9 (`WAGE` 5813 und `STIPEND` 1948 über 2000 Ticks). Die Stadt gibt fast genau
-  aus, was sie einnimmt (9191 gegen 9170) — sie ist eine Umverteilungsmaschine, deren
-  Quelle eine Krücke ist.
-
-Was das für den Hunger heißt, ist damit **nicht** beantwortet: Es starben weiterhin 20 von
-26 an Not. Die Ursache dafür ist nach diesen Zahlen aber woanders zu suchen als bei der
-Grundsteuer.
 
 ### 101. Das Kassenbuch — jede Bewegung mit einem Grund — gebaut mit 5.77
 
@@ -2481,95 +1916,6 @@ unverändert: im Messlauf die Summen je Handlungsart mitführen, was `BUY_FOOD` 
 was `WORK` eingebracht hat. Das ist ein eigener Schritt, weil es die NPC-Schleife berührt
 und die schon einmal an ihrer Abfragezahl gelitten hat (Punkt 67).
 
-### 103. Die Wirtschaft hat eine Startreihenfolge, die niemand einhält
-
-**Befund vom 29.08.2026, belegt in `brotkette.spec.ts`.** Die Frage stammt aus den
-Messläufen: In der Stadt saßen drei zugezogene Bäcker mit 187, 189 und 266 Münzen — ein
-Backhaus kostet 220 —, und keiner baute je eines. Die Vermutungen dazu waren das Geld
-(Punkt 76), der Bauplatz (Punkt 87) und der Kornspeicher, der jeden Bäcker unterbiete
-(Punkt 85).
-
-**Alle drei sind widerlegt.** Der Test stellt eine Bäckerin hin, der nichts fehlt:
-achthundert Münzen, ein eigenes Grundstück, beide Handwerke gelernt, niemand sonst in der
-Stadt. Sie zieht in die Unterkunft ein und **steht dann dreißig Ticks lang still**, ohne
-eine einzige Münze auszugeben — `GOAL_UNREACHABLE`, 29 von 30 Runden.
-
-**Die Gegenprobe nennt die Ursache.** Dieselbe Lage, nur mit zwölf Brettern, sechs Quadern
-und vier Eisen in der Kammer: Sie baut sofort. Es waren nicht die Münzen, sondern das
-Material.
-
-**Und dahinter steht eine Regel, die niemand als Reihenfolge gelesen hat.** `materialFor`
-verlangt für jede Werkstatt (`CRAFT`) Bretter **und Quader und Eisen**; nur ein Wohnhaus
-kommt mit Brettern aus. Ausgenommen sind allein die Vorlagen, die selbst Baumaterial
-herstellen (`producesBuildingMaterial`, `BUILDING_MATERIALS = ['PLANK', 'BLOCK', 'IRON']`)
-— und das sind genau drei:
-
-| Werkstatt                                      | erzeugt                   | braucht zum Bau |
-| ---------------------------------------------- | ------------------------- | --------------- |
-| **Zimmerei**                                   | `PLANK`                   | nichts          |
-| **Steinmetzhütte**                             | `BLOCK`                   | nichts          |
-| **Schmiede**                                   | `IRON`                    | nichts          |
-| Mühle, Bäckerei, Schneiderei, Alchemistenküche | Mehl, Brot, Gewand, Trank | **alle drei**   |
-
-Diese Welt hat also eine **Bootstrap-Reihenfolge**: Erst müssen drei bestimmte Werkstätten
-stehen _und ihre Ware aushängen_, ehe irgendein anderes Handwerk überhaupt möglich ist.
-Und in keinem Messlauf ist mehr als **eine** davon entstanden — die Zimmerei, bei Saat 86
-wie bei Saat 7. Mühle, Bäckerei, Schneiderei und Alchemistenküche waren in vierzig
-Spieljahren nie baubar, ganz gleich, wer zuzog und wie viel er mitbrachte.
-
-**Damit erklärt sich Punkt 100 von der anderen Seite.** Die Welt hat eine Produktionskette
-ohne Verbrauchskette, weil die einzige Kette, die etwas Verbrauchbares herstellt — Getreide,
-Mehl, Brot —, hinter einer Sperre liegt, die nie aufgeht. Es fehlt keine Nachfrage; es
-fehlt die Erlaubnis anzufangen.
-
-**Zu entscheiden ist, wie eine Stadt in Gang kommt.** Drei Wege, und der erste ist der
-billigste:
-
-- **Die Startstadt trägt eine Steinmetzhütte und eine Schmiede**, wie sie heute schon eine
-  Schmiede trägt. Das ist eine Zeile im Weltaufbau — birgt aber genau den Fehler, der als
-  Punkt 86 behoben wurde: Ein städtischer Betrieb ließ das Handwerk als „vorhanden" gelten
-  und sperrte den privaten. Seit 5.65 zählt `fehlendeWerkstatt` nur noch Bürgerhand, der
-  Weg ist also frei.
-- **Der Materialbedarf richtet sich nach dem Handwerk**, nicht nach dem Typ. Ein Backhaus
-  ist ein Ofen und ein Dach; dass es Eisen wie eine Schmiede braucht, ist eine Vereinfachung
-  aus 4.10 und keine Absicht.
-- **Zugezogene bringen Material mit**, nicht nur Geld und Können. Das passt zu Punkt 71 —
-  wer die Reise auf sich nimmt, kommt mit einem Vorhaben — und macht den Zuzug zu dem, was
-  er in dieser Wirtschaft ohnehin ist: der einzigen Quelle von außen.
-
-Der Test bleibt stehen, wie `ironChain.spec.ts`: Er beschreibt die Sperre und wird rot,
-sobald sie fällt.
-
-**Der Mechanismus ist am 05.09.2026 gefunden — und behoben mit 5.84.** Gesucht wurde er
-beim Kornspeicher (Punkt 85), der eigentlich der nächste Schritt sein sollte; die Sperre
-saß zwei Stufen davor.
-
-**Was der Messlauf zeigte:** Verpachtet waren Eichwald 1, Eichwald 2 und die Erzgrube.
-**Nie verpachtet: das Mühlenfeld mit drei freien Flächen und der Steinbruch.** Am Markt
-lagen Holz, Bretter und Erz — kein Getreide, kein Stein, kein Quader, kein Eisen. In der
-Stadt konnten vier Menschen ackern und zwei backen, und eine Steinmetzhütte stand.
-
-**Die Ursache war eine Zeile:**
-
-```ts
-const freieFlaeche = flaechen.find((f) => !f.leased && f.resourceType);
-```
-
-Die **erste** freie Fläche mit einem Rohstoff — gleich welchem. Ein Steinmetz pachtete
-einen Acker und stand weiter ohne Stein da. Und weil `materialFor` für **jeden** Betrieb
-Bretter, Quader **und** Eisen verlangt, hing daran die ganze Kette: ohne Stein keine
-Quader, ohne Quader keine Mühle und keine Bäckerei, ganz gleich wie viele backen können.
-
-**Warum die Welt trotzdem nicht ganz stillstand:** Wer die Kette selbst in Gang setzt,
-braucht kein Material (`producesBuildingMaterial` in `build()`) — Zimmerei, Steinmetzhütte
-und Schmiede lassen sich ohne Vorleistung errichten. Genau deshalb sind sie die einzigen
-Werkstätten, die je entstanden. Sie waren nicht das Ende der Kette, sondern ihr
-Bootstrap — und der Bootstrap lief leer, weil niemand den Rohstoff dafür pachtete.
-
-**Seit 5.84 sucht der Pachtwillige die Fläche, deren Ernte sein Betrieb verarbeiten kann**,
-und nimmt erst danach die nächstbeste. Wer keine Werkstatt hat, wählt wie bisher — für ihn
-ist jede Ernte gleich viel wert.
-
 ### 105. Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält
 
 **Angemerkt am 29.08.2026**, aus der Frage, ob eine ausgestorbene Stadt sich wieder füllt.
@@ -2669,167 +2015,16 @@ er ist der kleinste Posten der Stadtkasse geworden. Wovon die Stadt lebt, sind d
 Kornspeicher (Punkt 85) und die Grundsteuer. Ob der Zehnt überhaupt noch ein Hebel ist,
 hängt daran, worauf er greift.
 
-## Der Weg durch die Wirtschaft — Stand 29.08.2026
+## Die Wirtschaft — Stand 04.10.2026
 
-**Warum dieser Abschnitt existiert.** Die Wirtschaftsbefunde liegen als zehn Punkte
-verstreut, und ihre **Reihenfolge** war dreimal falsch angenommen: Punkt 85 hielt den
-Kornspeicher für die Sperre vor der Brotkette, Punkt 86 stand hinter Punkt 87, und beide
-standen in Wahrheit hinter Punkt 104. Wer hier anfängt, soll nicht wieder von vorn
-erschließen müssen, was worauf wartet.
+**Die Brotkette trägt.** Im Lauf auf 5.101 (Saat 86, 2000 Ticks) kaufen Bäckereien Mehl
+(`BUY_INPUT` 892), die Stadt wächst auf 68 Häuser, und der Kornspeicher bringt nur noch 660
+Münzen — er überbrückt kaum noch etwas. Die größte Einnahme der Stadt ist die Grundsteuer.
+Was jetzt ansteht, steht in den Punkten darunter und bei 85: der Lauf ohne Kornspeicher,
+die überschießende Zahl der Mühlen (116) und der vierte Weg des Umsattelns (115).
 
-**Der Stand in vier Sätzen** (Stand des Befunds; Schritt 1 und 2 sind seither
-beantwortet — siehe unten). Geld entsteht in dieser Welt nur durch Zuzug (~6000 Münzen
-in vierzig Spieljahren); 91 Prozent davon verschwinden wieder, das meiste beim Bauen. Was
-bleibt, fließt über Brot, Steuer und Grundstücke in die Stadtkasse, deren Rückweg zu den
-Bürgern rund 1,25 Münzen je Tick beträgt. Die einzige laufend verbrauchte Ware ist Brot,
-und die kommt nicht aus der Wirtschaft, sondern aus dem Kornspeicher. Deshalb verhungern
-im Messlauf vier von fünf Toten.
-
-**Die Reihenfolge, wie sie sich aus den Befunden ergibt:**
-
-1. **Springt die Kette überhaupt an?** (Punkt 104 ist behoben, 103 offen.) —
-   **Beantwortet am 06.09.2026 mit 5.87: ja, und zwar ganz.** Nach der Reparatur der
-   Werkstattwahl (Punkt 110) stehen bei Tick 2000 siebenundvierzig Häuser und neun
-   Betriebe, darunter eine **Bäckerei**. Was unten steht, war der Stand davor. — **Ja,
-   gemessen am 04.09.2026.** Im Lauf mit Saat 86 stehen bei Tick 2000 eine zweite
-   Zimmerei, eine private Schmiede und eine Steinmetzhütte; vorher war es eine einzige
-   Zimmerei. `CRAFT` stieg von 435 auf 579, `IDLE` fiel von 29788 auf 25410. Damit sind
-   die folgenden Fragen keine theoretischen mehr. Ein Backhaus steht weiterhin nicht —
-   das bleibt Schritt 3.
-2. **Hört das Geld auf zu verschwinden?** (Punkt 102.) — **Der Bau: ja, mit 5.76** (der
-   Rohbau), und **gemessen am 04.09.2026**: 72 statt 93 Prozent vernichtet, rund 2250
-   Münzen weniger verbrannt, das Geld bei den Bürgern fast verdoppelt und die Bevölkerung
-   mit ihm (32 statt 18 Lebende). Offen bleiben Renovieren, Ausbauen, Erschließung und der
-   öffentliche Bau. Neu dazugekommen sind zwei Befunde aus demselben Lauf: Punkt 106 (ein
-   Bauauftrag, den niemand bezahlen kann — behoben mit 5.81/5.82) und Punkt 107 (die
-   eingebrochene Grundsteuer — inzwischen hinfällig, es war Streuung).
-3. **Erst dann der Kornspeicher** (Punkt 85). **Verteuert mit 5.86, gemessen und mit 5.87
-   zurückgenommen** — er brachte der Kasse 54 Prozent mehr für dieselbe Menge Brot, kostete
-   338 gescheiterte Käufe und einen Hungertoten im Selbsterhaltungstest, und ein Backhaus
-   entstand trotzdem nicht. Warum nicht, war noch am selben Tag klar: **Punkt 110**, die
-   Werkstattwahl — **behoben mit 5.87**. Damit ist die Reihenfolge dieses Abschnitts das
-   erste Mal wieder in der Spur: erst die Kette, dann der Preis.
-
-   (Der Wortlaut von damals:) Nicht abschaffen, sondern verteuern: Er ist
-   die Notversorgung, nicht die Konkurrenz. Und erst, wenn Schritt 1 einen Bäcker
-   hervorbringen **kann** — vorher verhungert die Stadt wirklich.
-
-   **Und seit dem Kassenbuch (5.77) mit einer Einsicht mehr:** Der Kornspeicher ist über
-   die Hälfte der Stadteinnahmen (`GRANARY` 4768 von 9170). Wer ihn verteuert, verteuert
-   das Brot der Ärmsten **und** vergrößert die Stadtkasse; wer ihn abschafft, nimmt der
-   Stadt ihr Einkommen. Beides gehört zusammen entschieden, und beides trifft Punkt 100.
-
-   **Davor stand Punkt 74** — der private Auftrag, mit rund 2350 vernichteten Münzen der
-   größte verbliebene Posten von Punkt 102. **Erledigt mit 5.78**; was davon bleibt, ist
-   der Ausbau (~750). Ob der vor dem Kornspeicher drankommt, entscheidet der nächste
-   Messlauf: Er ist der kleinste der drei offenen Posten, aber der letzte, an dem ein
-   Bürger Geld ins Nichts zahlt.
-
-4. **Vor alledem aber zwei Befunde aus den Messläufen vom 05.09.2026**, die keinen Umbau
-   der Wirtschaft brauchen und beide dringender sind als der Kornspeicher:
-
-   - **Punkt 106** — der Bauauftrag, den niemand bezahlen kann. `WORK/EMPLOYER_BROKE` war
-     über drei Schritte von 781 auf **5602** gewachsen und die größte Fehlerquelle der
-     Welt. **Behoben mit 5.81**; was es gebracht hat, sagt der nächste Messlauf.
-   - **Punkt 108** — Bilanz und Kassenbuch gehen auseinander. Solange Geld an einer
-     unbekannten Stelle entsteht und an einer zweiten verschwindet, misst jeder folgende
-     Schritt auf wackligem Grund.
-
-5. **Und erst dann wieder die Steuer** (Punkt 100). Sie funktioniert fiskalisch und tötet
-   heute Menschen; ob sie es nach 2 und 3 noch tut, ist eine andere Frage. Vorher daran zu
-   drehen hieße, eine Zahl gegen ein Strukturproblem zu setzen.
-
-**Was dabei nicht vergessen werden darf:** Bis Schritt 2 und 4 entschieden sind, macht die
-Grundsteuer die laufende Welt ärmer. Die Notbremse ist eine Zeile — `NPC_MAYOR_LAWS` auf
-`['TITHE']` —, und sie gehört gezogen, bevor deployt wird.
-
-**Und das Werkzeug, das bei jedem Schritt fehlt**, ist Punkt 101: Solange die Kasse nur
-eine Zahl je Richtung kennt, lässt sich nicht sagen, ob der größte Posten das Brot ist, die
-Steuer oder ein Bau. Die Bilanz aus 5.72 nennt die Summe, nicht die Posten.
-
-**Eine methodische Lehre dieser Sitzung, weil sie teuer war:** Vier Vermutungen über
-Ursachen wurden geprüft und drei davon fielen — der Bürgermeister nehme den Tagelöhnern die
-Arbeit weg (falsch), er müsse sie ausschreiben (die Arbeit ist ohnehin offen), das Geld
-oder der Bauplatz halte die Bäcker ab (beides falsch). Getroffen hat jedes Mal erst die
-Messung: die Todesursache, die Kassenbilanz, der Test mit der Bäckerin. **Zuerst die
-Aufschlüsselung, dann der Eingriff** — der Satz stand schon in Punkt 93 und hat sich an
-einem Abend dreimal bewährt.
-
-### 113. Eine Versteigerung, bei der niemand bieten darf
-
-**Befund vom 02.10.2026, aus dem Messlauf zu Punkt 85.** Nach dem Tod der Bäckerin fiel
-ihr Backhaus an die Stadt und kam in über tausend Ticks **fünfzehnmal unter den Hammer,
-ohne ein einziges Gebot**. Über den ganzen Lauf gab es bei rund 230 Versteigerungen etwa
-zwanzig Gebote.
-
-**Zwei Regeln in `npcsBietenLassen` zusammen:**
-
-- **Bieten darf nur, wer noch kein Grundstück besitzt.** Für Bauland ist das plausibel; für
-  einen Betrieb heißt es, dass ausgerechnet der Handwerker mit eigenem Wohnhaus ihn nicht
-  ersteigern kann. Der einzige Bäcker der Stadt besaß eins.
-- **Geboten wird ein Viertel des Vermögens, mindestens 40** (`MINIMUM_BID` =
-  `PLOT_PRICE`). Wer weniger als 160 Münzen hat, bietet nie.
-
-**Und ein dritter Fehler, der erst bei niedrigem Startpreis zählt:** Die NPCs bieten in
-einem einzigen Durchgang, jeder erhöht einmal um den Mindestschritt. Es gewinnt nicht das
-höchste Interesse, sondern wer in der Reihe zuletzt noch mithält.
-
-**Entschieden am 02.10.2026:** Mitbieten darf jeder, der zahlen kann; die Versteigerung
-beginnt bei einer Münze, für Bauland wie für Nachlässe. Wie hoch einer geht, hängt an
-seinem Nutzen — wer das Handwerk des Betriebs kann oder dessen Ware knapp ist, bietet
-viel, wer ein Dach sucht, bietet für das Wohnhaus. Gesteigert wird, bis einer übrig ist.
-Gebaut wird das als 5.97.
-
-**Gebaut mit 5.97 — und gemessen schlechter als vorher.** Gegen die Basis 5.96, beide
-2000 Ticks mit Saat 86 und Kornspeicher:
-
-|                                             |    5.96 |   5.97 |
-| ------------------------------------------- | ------: | -----: |
-| Häuser am Ende                              |      52 |     30 |
-| Bäckereien / Mühlen                         |   8 / 1 |  1 / 0 |
-| `BUY_INPUT`                                 |     254 |      1 |
-| Tode (davon Not)                            |  10 (1) |  9 (4) |
-| `GRANARY`                                   |    3728 |   5700 |
-| Bauland erschlossen                         |      46 |     20 |
-| … versteigert / zum Festpreis (`PLOT_SALE`) | 12 / 41 | 24 / 8 |
-
-**Der Verdacht liegt beim Bauland.** Bis 5.96 fand dessen Versteigerung kaum Bieter; das
-Grundstück ging danach zum Festpreis an den, der darauf bauen wollte (`BUY_PLOT`). Seit
-5.97 bietet jeder mit — auch wer Haus und Werkstatt schon hat, mit „geringem Interesse"
-(fünf Prozent). Ein Reicher mit 1000 Münzen bietet damit so viel wie ein Bauwilliger mit
-200 (ein Viertel), und das Land geht an jemanden, der nicht baut. Doppelt so viele
-Versteigerungen, ein Fünftel der Festverkäufe, halb so viele Bauten. Nachgewiesen ist das
-nicht — ein Lauf mit einer Saat ist schwaches Material (Punkt 107), die Richtung aber
-deutlich.
-
-**Offen, und am 02.10.2026 bewusst nicht entschieden:** Naheliegend wäre, dass ein NPC für
-Bauland nichts bietet, wenn er damit nichts vorhat. Dagegen steht: **„Manchmal ist haben
-besser als brauchen."** Wer Grund besitzt, kann bauen und Leute einstellen, und der
-Betrieb trägt sich vielleicht selbst — so entsteht Unternehmertum, und eine Regel, die nur
-den Bedarf kennt, schneidet es ab. Die Frage ist also nicht, ob Besitz ohne Plan bieten
-darf, sondern wie hoch, und was er danach mit dem Grund tut. Der Stand ist auf dem Branch
-`brotkette` committet, damit die Messung zu den Folgeschritten auf ihm aufsetzen kann.
-
-**Nachgesehen am 03.10.2026, ehe entschieden wurde** — ein Lauf auf 5.99 (Saat 86, 2000
-Ticks) mit einem Beobachter, der jeden Zuschlag festhielt und am Ende nachsah, was aus dem
-Grund geworden war. **Von 39 Bauland-Zuschlägen gingen 27 an einen einzigen NPC**: Frowin,
-Zimmerer mit Wohnhaus und Werkstatt, reich geworden von 327 auf 1800 Münzen. Er bot mit
-„geringem Interesse" — fünf Prozent von 1500 schlagen ein Viertel von 200 — und baute auf
-**keiner** seiner Parzellen. Die übrigen zwölf Käufer hatten vorher keinen Grund und bauten
-fast alle im selben oder nächsten Tick. Als Frowin ohne Erben starb, fielen seine Plätze an
-die Stadt und **blieben dort für immer leer**: Versteigert wurden nur bebaute Nachlässe.
-
-**Entschieden und gebaut:**
-
-- **5.100 — Bauland bekommt, wer darauf bauen will** (Variante B). Für Bauland bietet ein
-  NPC nur, wenn er ein eigenes Dach oder eine eigene Werkstatt braucht; wer schon einen
-  leeren Bauplatz hat, bietet nicht. Das Interesse hat dafür die Stufe `NONE`.
-- **5.101 — Ein leerer Nachlass kommt wieder unter den Hammer.** Grundstücke tragen jetzt
-  wie Gebäude einen `escheatedTick` (Migration 0028); ein leerer heimgefallener Bauplatz
-  wird versteigert, ursprünglicher Stadtgrund nicht.
-
-**„Haben ist besser als brauchen" ist damit nicht verworfen**, sondern an die Stelle
-verlegt, an die es gehört — Punkt 117.
+Die Übersicht vom 29.08.2026, die hier stand, ist mit ihren Punkten ins Archiv gezogen
+(`ERLEDIGTE_PUNKTE.md`, am Ende).
 
 ### 114. Der Zuzug fragt nach Gebäuden, nicht nach Bedarf
 
@@ -2928,6 +2123,14 @@ Knappheit auch Zutaten; ob die Zahl der Bäckereien damit fällt, zeigt der näc
 **Zu entscheiden ist trotzdem, ob 120 die richtige Zahl ist.** Sie bestimmt, wie viele
 Menschen in der Brotkette arbeiten — und damit, wie viel Arbeit für alles andere übrig
 bleibt. Gehört zu Punkt 15 (Weltinhalte) und zum Balancing (Punkt 16).
+
+**Mit 5.101 schießt es auf der anderen Seite über (04.10.2026):** acht Bäckereien und
+**elf Mühlen**, eine zwölfte im Bau. Die Zutaten-Knappheit aus 5.98 verlangt je
+verarbeitendem Betrieb zehn Durchgänge Vorrat — bei acht Bäckereien 160 Säcke Mehl —, und
+solange die nicht bereitliegen, gilt die Mühle als knapp. Die Herdenbremse (ein Rohbau
+zählt als Antwort) hält nur einen Bau auf einmal zurück, nicht die Summe. Zu entscheiden
+ist hier also auch, **wie viel Vorrat** als versorgt gilt (`INPUT_BUFFER_BATCHES`), nicht
+nur, wie viel ein Betrieb erzeugt.
 
 ### 117. Wer Grund hat, soll ihn nutzen — oder dafür zahlen
 
