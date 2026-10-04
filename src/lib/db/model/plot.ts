@@ -31,7 +31,8 @@ export const Plot: ModelStatic<Model<PlotAttributes, PlotCreationAttributes>> = 
 		forSalePrice: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
 		// Wie viele Schichten die Erschließung schon hinter sich hat — `null` heißt: keine
 		// im Gange, die Fläche ist fertig (5.92, Punkt 102).
-		developmentShifts: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
+		developmentShifts: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
+		escheatedTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null }
 	},
 	{ timestamps: true }
 );

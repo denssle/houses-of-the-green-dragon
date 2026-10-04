@@ -13,6 +13,7 @@ import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as auctionService from '$lib/server/service/auctionService';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as electionService from '$lib/server/service/electionService';
 import * as skillService from '$lib/server/service/skillService';
 import {
@@ -415,6 +416,63 @@ describe('Erschließung und Versteigerung', () => {
 
 			expect(await auctionService.auctionEscheatedEstates(stadtId, JETZT)).toBe(1);
 			expect(await auctionService.getOpenAuctions(stadtId)).toHaveLength(1);
+		});
+
+		/** Ein leerer Bauplatz, der der Stadt aus einem Nachlass zufiel (5.101). */
+		async function leererNachlass(): Promise<string> {
+			const { plotId } = await stadtgrund();
+			await Plot.update({ escheatedTick: JETZT }, { where: { id: plotId } });
+			return plotId;
+		}
+
+		it('bietet auch einen leeren Bauplatz aus einem Nachlass aus (5.101)', async () => {
+			// **Punkt 113.** Im Messlauf zu 5.99 fielen 27 Bauplätze eines Verstorbenen an die
+			// Stadt und wurden nie wieder vergeben: Sie sahen aus wie ursprünglicher Stadtgrund.
+			await leererNachlass();
+
+			expect(await auctionService.auctionEscheatedEstates(stadtId, JETZT)).toBe(1);
+		});
+
+		it('aber nicht, wenn die Stadt inzwischen darauf gebaut hat', async () => {
+			// Zwischen zwei Versteigerungen darf der Bürgermeister den Platz nutzen; dann
+			// gehört er zu seiner Schule und kommt nicht mit unter den Hammer.
+			const plotId = await leererNachlass();
+			await Building.create({
+				id: randomUUID(),
+				name: 'Schule',
+				optionId: 8,
+				lastConditionTick: JETZT,
+				PlotId: plotId,
+				ownerType: 'CITY'
+			});
+
+			expect(await auctionService.auctionEscheatedEstates(stadtId, JETZT)).toBe(0);
+		});
+
+		it('löscht den Heimfall mit dem Zuschlag', async () => {
+			const plotId = await leererNachlass();
+			await auctionService.auctionEscheatedEstates(stadtId, JETZT);
+			const auktion = (await auctionService.getOpenAuctions(stadtId))[0];
+			const bieter = await person('Bieterin', 500);
+			await auctionService.bid(bieter, auktion.id, 10);
+
+			await auctionService.advanceAuctions(stadtId, JETZT + AUCTION_TICKS);
+
+			const grund = (await Plot.findByPk(plotId))!.dataValues;
+			expect(grund.OwnerCharacterId).toBe(bieter);
+			expect(grund.escheatedTick).toBeNull();
+		});
+
+		it('hält den Bürgermeister von Land fern, das unter dem Hammer ist', async () => {
+			// Sonst stünde eine Schule auf einem Grundstück, für das gerade jemand bietet.
+			const plotId = await leererNachlass();
+			expect((await buildingService.getFreeCityPlots(stadtId)).map((p) => p.id)).toContain(plotId);
+
+			await auctionService.auctionEscheatedEstates(stadtId, JETZT);
+
+			expect((await buildingService.getFreeCityPlots(stadtId)).map((p) => p.id)).not.toContain(
+				plotId
+			);
 		});
 
 		it('lässt freien Stadtgrund in Ruhe', async () => {

@@ -289,23 +289,42 @@ export const RE_AUCTION_AFTER = TICKS_PER_YEAR;
  * Preis entsteht aus der Knappheit, und die Stadtkasse bekommt, was die Stadt für die
  * Beerdigung ausgelegt hat, in anderer Form zurück.
  *
- * **Nur bebaute Grundstücke.** Freier städtischer Grund bleibt, wo er ist: Aus ihm baut
- * der Bürgermeister Schule und Unterkunft (`getFreeCityPlots`). Eine Stadt, die jedes
- * freie Fleckchen sofort ausbietet, kann nie wieder etwas errichten.
+ * **Was aus einem Nachlass kommt, bebaut oder nicht.** Freier Grund, der der Stadt von
+ * jeher gehört, bleibt, wo er ist: Aus ihm baut der Bürgermeister Schule und Unterkunft
+ * (`getFreeCityPlots`). Bis 5.101 hieß das auch: **jeder leere Bauplatz** — denn ein
+ * heimgefallener sah aus wie ursprünglicher Stadtgrund. Im Messlauf zu 5.99 waren das 27
+ * Bauplätze eines Verstorbenen, die nie wieder vergeben wurden (Punkt 113). Seitdem trägt
+ * auch das Grundstück den Tick seines Heimfalls.
  *
  * Läuft im Takt, nicht als Amtshandlung: „So bald wie möglich" darf nicht daran hängen,
  * dass ein Bürgermeister im Amt ist und gerade diese eine Handlung wählt.
  */
 export async function auctionEscheatedEstates(regionId: string, tick: number): Promise<number> {
 	const heimgefallen = await buildingService.getEscheatedBuildings(regionId);
+	const leerePlaetze = await Plot.findAll({
+		where: {
+			RegionId: regionId,
+			type: 'BUILDING_LAND',
+			ownerType: 'CITY',
+			escheatedTick: { [Op.ne]: null }
+		},
+		attributes: ['id']
+	});
+	const plotIds: string[] = heimgefallen.flatMap((haus) => (haus.plotId ? [haus.plotId] : []));
+	for (const platz of leerePlaetze) {
+		// **Nur, was wirklich leer ist.** Hat der Bürgermeister zwischen zwei Versteigerungen
+		// eine Schule daraufgestellt, gehört der Platz jetzt zu ihr — sie käme sonst mit
+		// unter den Hammer.
+		if ((await Building.count({ where: { PlotId: platz.dataValues.id } })) === 0) {
+			plotIds.push(platz.dataValues.id);
+		}
+	}
 
 	let eroeffnet = 0;
-	for (const haus of heimgefallen) {
-		if (!haus.plotId) continue;
-
+	for (const plotId of new Set(plotIds)) {
 		// Läuft schon eine — oder ist gerade eine ohne Zuschlag geschlossen worden?
 		const letzte = await Auction.findOne({
-			where: { PlotId: haus.plotId },
+			where: { PlotId: plotId },
 			order: [['openedTick', 'DESC']]
 		});
 		if (letzte && !letzte.dataValues.closed) continue;
@@ -313,7 +332,7 @@ export async function auctionEscheatedEstates(regionId: string, tick: number): P
 
 		await Auction.create({
 			id: randomUUID(),
-			PlotId: haus.plotId,
+			PlotId: plotId,
 			RegionId: regionId,
 			openedTick: tick,
 			closesTick: tick + AUCTION_TICKS,
@@ -416,8 +435,9 @@ export async function advanceAuctions(regionId: string, tick: number): Promise<A
 				transaction: t
 			});
 			await treasuryService.einnehmen(regionId, sieger.amount, 'AUCTION', t);
+			// Der Heimfall ist mit dem Zuschlag vorbei (5.101).
 			await Plot.update(
-				{ ownerType: 'CHARACTER', OwnerCharacterId: sieger.bidderId },
+				{ ownerType: 'CHARACTER', OwnerCharacterId: sieger.bidderId, escheatedTick: null },
 				{ where: { id: auktion.dataValues.PlotId }, transaction: t }
 			);
 			// **Das Haus wechselt mit dem Boden** (Punkt 79). Bei erschlossenem Bauland steht

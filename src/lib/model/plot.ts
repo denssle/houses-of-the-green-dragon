@@ -22,4 +22,9 @@ export interface Plot {
 	 * ist der Anfang einer Baustelle, nicht ihr Fehlen.
 	 */
 	developmentShifts: number | null;
+	/**
+	 * Wann das Grundstück aus einem erbenlosen Nachlass an die Stadt fiel — `null`, solange
+	 * es von jeher ihr gehört (5.101). Dieselbe Unterscheidung wie am Gebäude.
+	 */
+	escheatedTick: number | null;
 }
