@@ -27,9 +27,9 @@ import * as worldService from '$lib/server/service/worldService';
  * Lohn arbeiten lässt und den Ertrag behält, braucht Anstellungsverhältnisse — die
  * kommen mit 4.6d. Bis dahin ist die Mühle ein Werkzeug, kein Arbeitgeber.
  *
- * Damit hat Brot zum ersten Mal eine Herkunft. Der städtische Kornspeicher bleibt
- * vorerst, weil sonst niemand über die erste Ernte käme — aber er ist ab jetzt der
- * Notnagel und nicht mehr die einzige Quelle.
+ * Damit hat Brot zum ersten Mal eine Herkunft. Der städtische Kornspeicher blieb danach
+ * noch lange als Notnagel, weil sonst niemand über die erste Ernte gekommen wäre — bis
+ * 5.102, als die Kette die Stadt allein ernährte (Punkt 85).
  */
 
 export type ProductionResult =

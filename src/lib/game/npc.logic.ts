@@ -94,8 +94,23 @@ export interface NpcState {
 	scarceJobAvailable: boolean;
 	/** Gibt es jemanden, um den er werben könnte? */
 	matchAvailable: boolean;
-	/** Was ein Stück Nahrung kostet. */
+	/**
+	 * Was ein Brot kostet — die Grundlage der Rücklage (`desiredReserve`).
+	 *
+	 * **Bleibt eine Zahl, auch wenn gerade niemand Brot verkauft.** Sie sagt, was das
+	 * Überleben kostet, und danach spart einer auch dann, wenn der Laden leer ist. Ob es
+	 * heute etwas zu kaufen gibt, ist eine andere Frage — die steht nebenan.
+	 */
 	foodPrice: number;
+	/**
+	 * Verkauft überhaupt jemand Brot?
+	 *
+	 * **Seit 5.102 gibt es keine Krücke mehr, die immer liefert** (Punkt 85): Der
+	 * Kornspeicher ist gestrichen, und damit kann die Stadt ohne Brot dastehen. Ohne diese
+	 * Frage entschiede ein Hungriger `BUY_FOOD`, fände nichts und verbrennte den Tick —
+	 * dieselbe Lücke wie in den Punkten 59, 63, 87 und 97.
+	 */
+	foodAvailable: boolean;
 
 	// --- Was über das Nötigste hinausgeht (4.12) --------------------------------------
 	/** Trägt er ein heiles Gewand? */
@@ -542,7 +557,7 @@ function ueberleben(state: NpcState): NpcAction | undefined {
 	if (!hungrig) return undefined;
 
 	if (state.food > 0) return 'EAT';
-	if (state.money >= state.foodPrice) return 'BUY_FOOD';
+	if (state.foodAvailable && state.money >= state.foodPrice) return 'BUY_FOOD';
 	// Wer hungert und nichts hat, arbeitet — unabhängig von seinem Fleiß. Sonst
 	// verhungerte der Träge zuverlässig, und Faulheit wäre keine Eigenart mehr, sondern
 	// ein Todesurteil.
