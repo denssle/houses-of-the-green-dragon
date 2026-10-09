@@ -167,7 +167,16 @@ export async function hasUnofferedPosition(building: {
 }
 
 /** Eine Stelle antreten. */
-export async function takeJob(characterId: string, buildingId: string): Promise<EmploymentResult> {
+export async function takeJob(
+	characterId: string,
+	buildingId: string,
+	/**
+	 * Die bisherige Stelle dafür aufgeben (5.99, Punkt 115). In derselben Transaktion: Wer
+	 * wechselt, soll nicht zwischen zwei Stellen ohne eine dastehen, wenn die neue doch
+	 * nicht zu haben ist.
+	 */
+	kuendigen = false
+): Promise<EmploymentResult> {
 	const tick: number = await worldService.currentTick();
 
 	return sequelize.transaction(async (t: Transaction) => {
@@ -208,7 +217,7 @@ export async function takeJob(characterId: string, buildingId: string): Promise<
 			{
 				id: characterId,
 				isAdult: ageInYears(bewerber.dataValues.birthTick, tick) >= AGE_OF_MAJORITY,
-				hasJob: schonAngestellt !== null
+				hasJob: schonAngestellt !== null && !kuendigen
 			},
 			{
 				ownerId: gebaeude.dataValues.OwnerCharacterId,
@@ -218,6 +227,28 @@ export async function takeJob(characterId: string, buildingId: string): Promise<
 			}
 		);
 		if (!geprueft.ok) return geprueft;
+
+		if (schonAngestellt && kuendigen) {
+			// Dieselbe Stelle noch einmal antreten ist kein Wechsel.
+			if (schonAngestellt.dataValues.BuildingId === buildingId) {
+				return { ok: false, reason: 'ALREADY_EMPLOYED' } as const;
+			}
+			const alterBetrieb: string = schonAngestellt.dataValues.BuildingId;
+			const alterChef = await Building.findByPk(alterBetrieb, { transaction: t });
+			await schonAngestellt.destroy({ transaction: t });
+			await chronicleService.record(
+				'JOB_ENDED',
+				(await regionOf(alterBetrieb)) ?? null,
+				tick,
+				{
+					subjectId: characterId,
+					objectId: alterChef?.dataValues.OwnerCharacterId ?? null,
+					buildingId: alterBetrieb,
+					detail: 'QUIT'
+				},
+				t
+			);
+		}
 
 		await Employment.create(
 			{
@@ -464,9 +495,17 @@ export async function workForEmployer(employeeId: string): Promise<ShiftResult> 
 export interface JobOnList {
 	buildingId: string;
 	buildingName: string;
+	/** Welche Art Betrieb — damit ein NPC fragen kann, ob seine Ware knapp ist (5.99). */
+	optionId: number;
 	wage: number;
 	free: number;
 	employerName: string;
+	/**
+	 * Was der Arbeitgeber gerade hat — beim städtischen Betrieb die Stadtkasse (5.99).
+	 *
+	 * Ein Stand, keine Zusage: Wer wechselt, soll wissen, ob der Lohn eine Weile kommt.
+	 */
+	employerMoney: number;
 }
 
 /** Was in dieser Stadt an Stellen offensteht. */
@@ -488,10 +527,18 @@ export async function getOpenJobs(regionId: string, seekerId?: string): Promise<
 		const chef = eintrag.ownerCharacterId
 			? await Character.findByPk(eintrag.ownerCharacterId)
 			: null;
+		const stadtId: string | undefined = eintrag.ownerCharacterId
+			? undefined
+			: await regionOf(eintrag.id);
+		const stadtkasse: number = stadtId
+			? ((await Region.findByPk(stadtId))?.dataValues.treasury ?? 0)
+			: 0;
 		stellen.push({
 			buildingId: eintrag.id,
 			buildingName: eintrag.name,
+			optionId: eintrag.optionId,
 			wage: eintrag.offeredWage,
+			employerMoney: chef ? chef.dataValues.money : stadtkasse,
 			free: frei,
 			// Bei einem staedtischen Betrieb ist die Stadt der Arbeitgeber, kein Mensch.
 			// Sonst steht dort ein Name mit Haus (5.10): Bei wem man in Dienst tritt, ist

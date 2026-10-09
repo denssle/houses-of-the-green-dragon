@@ -219,6 +219,17 @@ describe('Sterben und Erben', () => {
 			expect(danach.escheatedTick).toBe(JETZT);
 		});
 
+		it('merkt es sich auch am leeren Grundstück (5.101)', async () => {
+			// **Punkt 113.** Ohne den Vermerk sah ein leerer heimgefallener Bauplatz aus wie
+			// ursprünglicher Stadtgrund und kam nie wieder unter den Hammer.
+			const einsam = await person('Einsam', 80);
+			const acker = await grundstueck(einsam);
+
+			await lifecycleService.die(einsam, JETZT);
+
+			expect((await Plot.findByPk(acker))!.dataValues.escheatedTick).toBe(JETZT);
+		});
+
 		it('macht aus vergebenem Bauland kein nie vergebenes', async () => {
 			// `NONE` hieße „die Stadt hat es nie hergegeben“ und stellte das Grundstück
 			// wieder zum Erstverkauf — für 40 Münzen, obwohl darauf ein Haus steht.

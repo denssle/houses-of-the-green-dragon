@@ -24,11 +24,18 @@ export interface PlotAttributes {
 	forSalePrice: number | null;
 	/** Geleistete Erschließungsschichten — `null`, wenn keine Erschließung läuft (5.92). */
 	developmentShifts: number | null;
+	/** Wann das Grundstück aus einem erbenlosen Nachlass an die Stadt fiel (5.101). */
+	escheatedTick: number | null;
 }
 
 export type PlotCreationAttributes = Optional<
 	PlotAttributes,
-	'resourceType' | 'ownerType' | 'OwnerCharacterId' | 'forSalePrice' | 'developmentShifts'
+	| 'resourceType'
+	| 'ownerType'
+	| 'OwnerCharacterId'
+	| 'forSalePrice'
+	| 'developmentShifts'
+	| 'escheatedTick'
 >;
 
 export function convertToPlot(attributes: PlotAttributes): Plot {
@@ -41,6 +48,7 @@ export function convertToPlot(attributes: PlotAttributes): Plot {
 		ownerType: attributes.ownerType,
 		ownerCharacterId: attributes.OwnerCharacterId,
 		forSalePrice: attributes.forSalePrice,
-		developmentShifts: attributes.developmentShifts
+		developmentShifts: attributes.developmentShifts,
+		escheatedTick: attributes.escheatedTick
 	};
 }

@@ -7,7 +7,8 @@ import * as treasuryService from '$lib/server/service/treasuryService';
 import { Skill } from '$lib/db/model/skill';
 import { NEUGEBORENE } from '$lib/db/names';
 import { HERKUNFT } from '$lib/db/names';
-import { SATIETY_MAX } from '$lib/game/need.logic';
+import { ARRIVAL_PROVISIONS, SATIETY_MAX } from '$lib/game/need.logic';
+import { Inventory } from '$lib/db/model/inventory';
 import { randomPersonality } from '$lib/game/personality.logic';
 import { SKILL_TYPES, type SkillType } from '$lib/game/skill.logic';
 import { TICKS_PER_YEAR } from '$lib/game/time';
@@ -136,6 +137,14 @@ export async function admitNewcomers(
 				level: mitgebracht.skillLevel,
 				progress: 0
 			},
+			{ transaction: t }
+		);
+
+		// **Und die Wegzehrung** (5.103, Punkt 85): Seit es keinen Kornspeicher mehr gibt,
+		// verhungerte ein Zugezogener, der in seiner ersten Woche keine Arbeit fand, neben
+		// einer Stadt voller Bäcker — sein Geld reichte, aber er kam nicht dazu.
+		await Inventory.create(
+			{ CharacterId: characterId, itemId: 'BREAD', quantity: ARRIVAL_PROVISIONS },
 			{ transaction: t }
 		);
 

@@ -13,7 +13,9 @@ import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as auctionService from '$lib/server/service/auctionService';
+import * as buildingService from '$lib/server/service/buildingService';
 import * as electionService from '$lib/server/service/electionService';
+import * as skillService from '$lib/server/service/skillService';
 import {
 	AUCTION_TICKS,
 	BID_INCREMENT,
@@ -416,6 +418,63 @@ describe('Erschließung und Versteigerung', () => {
 			expect(await auctionService.getOpenAuctions(stadtId)).toHaveLength(1);
 		});
 
+		/** Ein leerer Bauplatz, der der Stadt aus einem Nachlass zufiel (5.101). */
+		async function leererNachlass(): Promise<string> {
+			const { plotId } = await stadtgrund();
+			await Plot.update({ escheatedTick: JETZT }, { where: { id: plotId } });
+			return plotId;
+		}
+
+		it('bietet auch einen leeren Bauplatz aus einem Nachlass aus (5.101)', async () => {
+			// **Punkt 113.** Im Messlauf zu 5.99 fielen 27 Bauplätze eines Verstorbenen an die
+			// Stadt und wurden nie wieder vergeben: Sie sahen aus wie ursprünglicher Stadtgrund.
+			await leererNachlass();
+
+			expect(await auctionService.auctionEscheatedEstates(stadtId, JETZT)).toBe(1);
+		});
+
+		it('aber nicht, wenn die Stadt inzwischen darauf gebaut hat', async () => {
+			// Zwischen zwei Versteigerungen darf der Bürgermeister den Platz nutzen; dann
+			// gehört er zu seiner Schule und kommt nicht mit unter den Hammer.
+			const plotId = await leererNachlass();
+			await Building.create({
+				id: randomUUID(),
+				name: 'Schule',
+				optionId: 8,
+				lastConditionTick: JETZT,
+				PlotId: plotId,
+				ownerType: 'CITY'
+			});
+
+			expect(await auctionService.auctionEscheatedEstates(stadtId, JETZT)).toBe(0);
+		});
+
+		it('löscht den Heimfall mit dem Zuschlag', async () => {
+			const plotId = await leererNachlass();
+			await auctionService.auctionEscheatedEstates(stadtId, JETZT);
+			const auktion = (await auctionService.getOpenAuctions(stadtId))[0];
+			const bieter = await person('Bieterin', 500);
+			await auctionService.bid(bieter, auktion.id, 10);
+
+			await auctionService.advanceAuctions(stadtId, JETZT + AUCTION_TICKS);
+
+			const grund = (await Plot.findByPk(plotId))!.dataValues;
+			expect(grund.OwnerCharacterId).toBe(bieter);
+			expect(grund.escheatedTick).toBeNull();
+		});
+
+		it('hält den Bürgermeister von Land fern, das unter dem Hammer ist', async () => {
+			// Sonst stünde eine Schule auf einem Grundstück, für das gerade jemand bietet.
+			const plotId = await leererNachlass();
+			expect((await buildingService.getFreeCityPlots(stadtId)).map((p) => p.id)).toContain(plotId);
+
+			await auctionService.auctionEscheatedEstates(stadtId, JETZT);
+
+			expect((await buildingService.getFreeCityPlots(stadtId)).map((p) => p.id)).not.toContain(
+				plotId
+			);
+		});
+
 		it('lässt freien Stadtgrund in Ruhe', async () => {
 			// Aus ihm baut der Bürgermeister Schule und Unterkunft. Eine Stadt, die jedes
 			// freie Fleckchen ausbietet, kann nie wieder etwas errichten.
@@ -473,6 +532,152 @@ describe('Erschließung und Versteigerung', () => {
 			expect(grund!.dataValues.OwnerCharacterId).toBe(bieter);
 			expect(haus!.dataValues.OwnerCharacterId).toBe(bieter);
 			expect(haus!.dataValues.ownerType).toBe('CHARACTER');
+		});
+
+		describe('und wer dafür bietet (5.97, Punkt 113)', () => {
+			const BAECKEREI = 5;
+
+			/** Ein eigenes Wohnhaus — bis 5.97 schloss es vom Bieten aus. */
+			async function mitHaus(characterId: string): Promise<void> {
+				const plotId = randomUUID();
+				await Plot.create({
+					id: plotId,
+					address: `Wohngasse ${plotId.slice(0, 4)}`,
+					type: 'BUILDING_LAND',
+					RegionId: stadtId,
+					ownerType: 'CHARACTER',
+					OwnerCharacterId: characterId
+				});
+				await Building.create({
+					id: randomUUID(),
+					name: 'Kate',
+					optionId: WOHNHAUS,
+					lastConditionTick: JETZT,
+					PlotId: plotId,
+					ownerType: 'CHARACTER',
+					OwnerCharacterId: characterId
+				});
+			}
+
+			async function zuschlagFuer(optionId: number): Promise<string | null | undefined> {
+				const { hausId } = await stadtgrund(optionId);
+				await auctionService.auctionEscheatedEstates(stadtId, JETZT);
+				await auctionService.advanceAuctions(stadtId, JETZT + AUCTION_TICKS);
+				return (await Building.findByPk(hausId!))!.dataValues.OwnerCharacterId;
+			}
+
+			it('gibt die Bäckerei der Bäckerin — auch wenn sie ein Haus hat und ein anderer reicher ist', async () => {
+				// **Der Befund aus dem Messlauf zu 5.95:** Die Bäckerei kam fünfzehnmal unter den
+				// Hammer, ohne ein Gebot. Der einzige Bäcker besaß ein Wohnhaus und durfte nicht
+				// bieten; und hätte er gedurft, hätte der Reichste gewonnen, denn jeder bot
+				// pauschal ein Viertel.
+				const baeckerin = await person('Bäckerin', 400, 'NPC');
+				await skillService.addPractice(baeckerin, 'BAKING', 500);
+				await mitHaus(baeckerin);
+				await person('Reicher ohne Fach', 700, 'NPC');
+
+				expect(await zuschlagFuer(BAECKEREI)).toBe(baeckerin);
+			});
+
+			it('und sie zahlt einen Schritt über dem Zweiten, nicht ihr Limit', async () => {
+				const baeckerin = await person('Bäckerin', 400, 'NPC');
+				await skillService.addPractice(baeckerin, 'BAKING', 500);
+				await mitHaus(baeckerin);
+				// Ohne Fach und ohne Werkstatt, und Brot ist knapp: Er ginge bis 175.
+				await person('Reicher ohne Fach', 700, 'NPC');
+
+				await zuschlagFuer(BAECKEREI);
+
+				expect(await geld(baeckerin)).toBe(400 - (175 + BID_INCREMENT));
+			});
+
+			it('lässt keinen Nachlass liegen, nur weil niemand Passendes da ist', async () => {
+				// Wer ein Haus hat, will kein zweites — aber für eine Münze nimmt er es.
+				const nachbar = await person('Nachbar', 100, 'NPC');
+				await mitHaus(nachbar);
+
+				expect(await zuschlagFuer(WOHNHAUS)).toBe(nachbar);
+				expect(await geld(nachbar)).toBe(100 - MINIMUM_BID);
+			});
+
+			it('lässt Kinder nicht mitbieten', async () => {
+				const kind = await person('Kind', 500, 'NPC');
+				await Character.update({ birthTick: JETZT - yearsToTicks(8) }, { where: { id: kind } });
+
+				expect(await zuschlagFuer(WOHNHAUS)).toBeNull();
+			});
+		});
+	});
+
+	describe('wer für Bauland bietet (5.100, Punkt 113)', () => {
+		const WOHNHAUS = 1;
+		const ZIMMEREI = 9;
+
+		/** Ein eigenes Grundstück, wahlweise mit einem Haus darauf. */
+		async function grund(besitzerId: string, optionId?: number): Promise<void> {
+			const plotId = randomUUID();
+			await Plot.create({
+				id: plotId,
+				address: `Eigengasse ${plotId.slice(0, 4)}`,
+				type: 'BUILDING_LAND',
+				RegionId: stadtId,
+				ownerType: 'CHARACTER',
+				OwnerCharacterId: besitzerId
+			});
+			if (optionId === undefined) return;
+			await Building.create({
+				id: randomUUID(),
+				name: 'Eigenes',
+				optionId,
+				lastConditionTick: JETZT,
+				PlotId: plotId,
+				ownerType: 'CHARACTER',
+				OwnerCharacterId: besitzerId
+			});
+		}
+
+		async function zuschlag(): Promise<string | null> {
+			const buergermeister = await person('Amtsperson', 100);
+			await insAmt(buergermeister);
+			const auktion = await versteigerung(buergermeister);
+			const plotId = (await Auction.findByPk(auktion))!.dataValues.PlotId;
+			await auctionService.advanceAuctions(stadtId, JETZT + AUCTION_TICKS);
+			return (await Plot.findByPk(plotId))!.dataValues.OwnerCharacterId;
+		}
+
+		it('geht an den, der bauen will — nicht an den Reichen, der alles hat', async () => {
+			// **Der Befund aus dem Messlauf zu 5.99:** Ein Zimmerer mit Haus und Werkstatt
+			// ersteigerte 27 von 39 Bauplätzen und baute auf keinem.
+			const zimmerer = await person('Reicher Zimmerer', 1500, 'NPC');
+			await grund(zimmerer, WOHNHAUS);
+			await grund(zimmerer, ZIMMEREI);
+			const bauwillig = await person('Bauwillige', 200, 'NPC');
+
+			expect(await zuschlag()).toBe(bauwillig);
+		});
+
+		it('bleibt unverkauft, wenn niemand etwas vorhat', async () => {
+			const zimmerer = await person('Reicher Zimmerer', 1500, 'NPC');
+			await grund(zimmerer, WOHNHAUS);
+			await grund(zimmerer, ZIMMEREI);
+
+			expect(await zuschlag()).toBeNull();
+		});
+
+		it('aber nicht an den, der schon einen leeren Bauplatz hat', async () => {
+			// Er hat, wo er bauen kann; ein zweiter Platz wäre Vorrat.
+			const sammler = await person('Sammler', 1500, 'NPC');
+			await grund(sammler);
+
+			expect(await zuschlag()).toBeNull();
+		});
+
+		it('wohl aber an den, der ein Dach hat und eine Werkstatt bauen will', async () => {
+			// Haben ist besser als brauchen — wenn einer etwas damit vorhat.
+			const handwerkerin = await person('Handwerkerin', 400, 'NPC');
+			await grund(handwerkerin, WOHNHAUS);
+
+			expect(await zuschlag()).toBe(handwerkerin);
 		});
 	});
 });

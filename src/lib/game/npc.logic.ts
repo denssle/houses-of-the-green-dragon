@@ -87,10 +87,30 @@ export interface NpcState {
 	hasJob: boolean;
 	/** Bietet jemand mehr als die Tagelöhnerei? */
 	betterJobAvailable: boolean;
+	/**
+	 * Sucht ein Betrieb Leute, dessen Ware in der Stadt knapp ist — und ist seine eigene
+	 * Stelle nicht schon in einem solchen (5.99, Punkt 115)?
+	 */
+	scarceJobAvailable: boolean;
 	/** Gibt es jemanden, um den er werben könnte? */
 	matchAvailable: boolean;
-	/** Was ein Stück Nahrung kostet. */
+	/**
+	 * Was ein Brot kostet — die Grundlage der Rücklage (`desiredReserve`).
+	 *
+	 * **Bleibt eine Zahl, auch wenn gerade niemand Brot verkauft.** Sie sagt, was das
+	 * Überleben kostet, und danach spart einer auch dann, wenn der Laden leer ist. Ob es
+	 * heute etwas zu kaufen gibt, ist eine andere Frage — die steht nebenan.
+	 */
 	foodPrice: number;
+	/**
+	 * Verkauft überhaupt jemand Brot?
+	 *
+	 * **Seit 5.102 gibt es keine Krücke mehr, die immer liefert** (Punkt 85): Der
+	 * Kornspeicher ist gestrichen, und damit kann die Stadt ohne Brot dastehen. Ohne diese
+	 * Frage entschiede ein Hungriger `BUY_FOOD`, fände nichts und verbrennte den Tick —
+	 * dieselbe Lücke wie in den Punkten 59, 63, 87 und 97.
+	 */
+	foodAvailable: boolean;
 
 	// --- Was über das Nötigste hinausgeht (4.12) --------------------------------------
 	/** Trägt er ein heiles Gewand? */
@@ -537,7 +557,7 @@ function ueberleben(state: NpcState): NpcAction | undefined {
 	if (!hungrig) return undefined;
 
 	if (state.food > 0) return 'EAT';
-	if (state.money >= state.foodPrice) return 'BUY_FOOD';
+	if (state.foodAvailable && state.money >= state.foodPrice) return 'BUY_FOOD';
 	// Wer hungert und nichts hat, arbeitet — unabhängig von seinem Fleiß. Sonst
 	// verhungerte der Träge zuverlässig, und Faulheit wäre keine Eigenart mehr, sondern
 	// ein Todesurteil.
@@ -564,6 +584,16 @@ function sicherheit(state: NpcState): NpcAction | undefined {
 	// Eine feste Stelle nehmen, wenn sie mehr bringt als die Tagelöhnerei. Kostet nichts
 	// und wirkt ab der nächsten Schicht — deshalb vor dem Arbeiten.
 	if (!state.hasJob && state.betterJobAvailable && state.isAdult) return 'TAKE_JOB';
+
+	// **Umsatteln, wo die Stadt Hände braucht** (5.99, Punkt 115). Bis hierher sah sich nur
+	// um, wer keine Stelle hatte — wer einmal in der Zimmerei angefangen hatte, sägte dort
+	// Bretter auf Halde, während nebenan die Bäckerei Leute suchte und die Stadt verhungerte.
+	// Gewechselt wird nur in einen Betrieb, dessen Ware knapp ist, und nur aus einer Stelle,
+	// deren Ware es nicht ist: So pendelt niemand zwischen zwei knappen hin und her.
+	//
+	// **Nicht, wer einen eigenen Betrieb hat.** Für ihn ist der Wechsel eine andere Frage
+	// — ob er seinen aufgibt — und die ist Schritt 4.
+	if (state.scarceJobAvailable && state.isAdult && !state.ownsWorkshop) return 'TAKE_JOB';
 
 	// Wieder zu Kräften kommen, wenn Arbeit wartet. Der Trank füllt nur auf, was fehlt;
 	// im Müßiggang wäre er ein teures Getränk.

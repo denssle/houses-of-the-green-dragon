@@ -314,10 +314,14 @@ describe('Die Brotkette', () => {
 			// etwas anderes.
 			expect(await vorschlagFuer('BAKING')).toBe('Steinmetzhütte');
 
+			// **Und Brot**, seit 5.98: Fehlt es, ist die Bäckerei knapp, und Knappes geht dem
+			// Können vor — dann bekäme jeder das Backhaus, auch der Müller. Hier geht es um das
+			// Können, also ist die Stadt versorgt.
 			await marktMit([
 				['BLOCK', 40],
 				['IRON', 40],
-				['PLANK', 40]
+				['PLANK', 40],
+				['BREAD', 1000]
 			]);
 
 			expect(await vorschlagFuer('BAKING')).toBe('Bäckerei');

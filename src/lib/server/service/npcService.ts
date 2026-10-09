@@ -21,8 +21,7 @@ import {
 } from '$lib/game/npc.logic';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import type { BuildingTemplate } from '$lib/model/buildingTemplate';
-import { BuildingStock, ShopOffer } from '$lib/db/model/shop';
-import { supplyNeeded } from '$lib/game/need.logic';
+import * as supplyService from '$lib/server/service/supplyService';
 import {
 	CONDITION_MAX,
 	isUnderConstruction,
@@ -34,7 +33,7 @@ import {
 	upgradeMaterial,
 	residentsAt
 } from '$lib/game/building.logic';
-import { PLOT_PRICE, TAGELOHN, granaryPrice } from '$lib/game/economy';
+import { PLOT_PRICE, TAGELOHN } from '$lib/game/economy';
 import { LEASE_FEE } from '$lib/server/service/productionService';
 import {
 	AGE_OF_MAJORITY,
@@ -60,7 +59,7 @@ import * as lawService from '$lib/server/service/lawService';
 import * as skillService from '$lib/server/service/skillService';
 import { repairWage } from '$lib/game/buildingAction.logic';
 import * as auctionService from '$lib/server/service/auctionService';
-import { isWorthTaking } from '$lib/game/employment.logic';
+import { canCarryNewHand, isWorthTaking } from '$lib/game/employment.logic';
 
 /**
  * NPCs handeln.
@@ -333,33 +332,30 @@ async function handelnd(
 			return buch('EAT', await needService.eatItem(npcId, 'BREAD'));
 
 		case 'BUY_FOOD': {
-			// **Zuerst beim Nachbarn.** Das billigste Angebot in der Stadt geht dem
-			// Kornspeicher vor — sonst bliebe die Krücke aus 4.6a für immer die einzige
-			// Quelle, und ein Bäcker fände nie einen Kunden.
+			// **Beim Nachbarn, und nur dort** (5.102, Punkt 85). Hinter dieser Handlung stand
+			// bis hierher der Kornspeicher als letzte Instanz: Wer am Markt nichts fand,
+			// bekam beim Amt immer etwas. Mit der Krücke ist diese Zeile gefallen — Brot
+			// kommt von Bauern, Müllern und Bäckern oder gar nicht.
 			//
-			// Die Menge muss dabei **am Preis des Angebots** hängen und nicht am
-			// Kornspeicherpreis: Sonst versucht ein NPC mit zwanzig Münzen fünf Laibe zu
-			// sechs zu kaufen, scheitert am Geld und landet doch wieder beim Amt. Genau
-			// so ist es beim ersten Durchlauf passiert.
+			// Die Menge hängt **am Preis des Angebots**: Wer zwanzig Münzen hat, kauft beim
+			// teuren Bäcker weniger Laibe als beim billigen, und nicht fünf auf Verdacht.
 			const angebot = lage.cheapestBread;
-			if (angebot && angebot.quantity > 0 && angebot.pricePerUnit > 0) {
-				const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
-				const wieviel: number = Math.min(5, angebot.quantity, bezahlbar);
-				if (wieviel > 0) {
-					const gekauft = await tradeService.buyFromOffer(npcId, angebot.id, wieviel);
-					if (gekauft.ok) return { action: 'BUY_FOOD' };
-				}
+			if (!angebot || angebot.quantity <= 0 || angebot.pricePerUnit <= 0) {
+				return { action: 'BUY_FOOD', failure: 'NOT_FOR_SALE' };
 			}
-			return buch(
-				'BUY_FOOD',
-				await needService.buyFromGranary(npcId, 'BREAD', Math.max(1, Math.min(5, lage.leisten)))
-			);
+			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
+			const wieviel: number = Math.min(5, angebot.quantity, bezahlbar);
+			if (wieviel <= 0) return { action: 'BUY_FOOD', failure: 'NOT_ENOUGH_MONEY' };
+
+			return buch('BUY_FOOD', await tradeService.buyFromOffer(npcId, angebot.id, wieviel));
 		}
 
 		case 'TAKE_JOB':
 			return buch(
 				'TAKE_JOB',
-				lage.jobId ? await employmentService.takeJob(npcId, lage.jobId) : undefined
+				lage.jobId
+					? await employmentService.takeJob(npcId, lage.jobId, lage.switchJob ?? false)
+					: undefined
 			);
 
 		case 'WORK':
@@ -637,7 +633,8 @@ async function lageAufnehmen(
 			homeId?: string;
 			matchId?: string;
 			jobId?: string;
-			leisten: number;
+			/** Ob er dafür seine bisherige Stelle aufgibt (5.99). */
+			switchJob?: boolean;
 			money: number;
 			/** Nur fürs Protokoll (5.88) — die Entscheidung kennt keine Namen. */
 			name: string;
@@ -877,27 +874,33 @@ async function lageAufnehmen(
 	// Arbeitgeber wechselt, wäre kein Handwerker, sondern ein Flattermann.
 	const offen = stelle ? [] : await employmentService.getOpenJobs(werte.RegionId, npcId);
 	const besser = offen.filter((angebot) => isWorthTaking(angebot.wage, TAGELOHN))[0];
+	// Wer keinen eigenen Betrieb hat, sieht sich nach einer Stelle um, wo die Stadt Hände
+	// braucht (5.99, Punkt 115) — auch, wenn er schon eine hat.
+	const knappeStelle = werkstatt
+		? undefined
+		: await stelleImKnappenBetrieb(npcId, werte.RegionId, haeuserDerStadt, stelle);
 	const unterkunft = werte.HomeBuildingId
 		? undefined
 		: await freierWohnplatz(werte.RegionId, npcId);
 	const partner = werte.spouseId ? undefined : await naechsterPartner(npc.dataValues, tick);
+	// **Einmal gelesen, zweimal gebraucht** (5.102): Die Entscheidung fragt danach, ob es
+	// überhaupt Brot gibt und was es kostet, und die Handlung kauft daraus. Zwei Abfragen
+	// wären zwei Antworten, die auseinanderlaufen können.
+	const cheapestBread = await tradeService.cheapestOffer(werte.RegionId, 'BREAD', npcId);
 
 	return {
-		// **Am Kornspeicherpreis gerechnet, nicht am Grundpreis** — denn dorthin führt
-		// diese Zahl. Seit dem Aufschlag (Punkt 85) sind das zwei verschiedene, und wer
-		// mit der kleineren rechnet, bestellt fünf Laibe und bekommt `NOT_ENOUGH_MONEY`.
-		leisten: Math.floor(werte.money / granaryPrice(brot.basePrice)),
 		// **Nur fürs Protokoll** (5.88): Eine Kennung sagt beim Lesen nichts, ein Name
 		// schon — und die Entscheidung selbst rührt ihn nicht an.
 		name: werte.firstName,
 		money: werte.money,
 		regionId: werte.RegionId,
-		cheapestBread: await tradeService.cheapestOffer(werte.RegionId, 'BREAD', npcId),
+		cheapestBread,
 		workplaceId: arbeitsplatz,
 		surveyPlotId: vermessung,
 		homeId: unterkunft,
 		matchId: partner,
-		jobId: besser?.buildingId,
+		jobId: knappeStelle?.buildingId ?? besser?.buildingId,
+		switchJob: knappeStelle !== undefined && stelle !== undefined,
 		state: {
 			personality: {
 				courage: werte.courage,
@@ -918,8 +921,13 @@ async function lageAufnehmen(
 			workAvailable: arbeit !== undefined || stelle !== undefined,
 			hasJob: stelle !== undefined,
 			betterJobAvailable: besser !== undefined,
+			scarceJobAvailable: knappeStelle !== undefined,
 			matchAvailable: partner !== undefined,
-			foodPrice: brot.basePrice,
+			// **Was Brot kostet, wo es welches gibt** (5.102): der Preis des billigsten
+			// Angebots, und ohne Angebot der Grundpreis als Schätzwert. Die Zahl trägt die
+			// Rücklage — wer nichts zu kaufen findet, soll trotzdem wissen, wofür er spart.
+			foodPrice: cheapestBread?.pricePerUnit ?? brot.basePrice,
+			foodAvailable: cheapestBread !== undefined && cheapestBread.quantity > 0,
 			// Was über das Nötigste hinausgeht (4.12). Ohne diese fünf Angaben kauft ein
 			// NPC ausschließlich Nahrung, und jeder Beruf außer dem Bäcker bliebe ohne
 			// Kundschaft.
@@ -1307,17 +1315,29 @@ export async function fehlendeWerkstatt(
 	// fehlte, etwa die Alchemistenküche, kam die zweite Bäckerei nie zur Wahl. Eine Stadt
 	// verhungert nicht langsamer, weil ihr noch ein Tränkebrauer fehlt. Teuer wird es
 	// trotzdem nur, wo ein Nahrungsbetrieb steht (Punkt 67, siehe `knappeHandwerke`).
-	if (regionId) {
-		const vergeben = handwerke.filter((vorlage) => !kandidaten.includes(vorlage));
-		kandidaten.push(...(await knappeHandwerke(vergeben, vorhanden, regionId)));
+	//
+	// **Gefragt wird seit 5.98 auch nach dem, was noch fehlt** (Punkt 115): Die Knappheit
+	// ordnet die Wahl, und dafür muss sie auch das Backhaus kennen, das es noch gar nicht
+	// gibt.
+	const knapp: BuildingTemplate[] = regionId
+		? await supplyService.knappeHandwerke(handwerke, vorhanden, regionId)
+		: [];
+	for (const vorlage of knapp) {
+		if (!kandidaten.includes(vorlage)) kandidaten.push(vorlage);
 	}
 
-	const bewertet: { optionId: number; price: number; koennen: number; bedarf: MaterialNeed[] }[] =
-		[];
+	const bewertet: {
+		optionId: number;
+		price: number;
+		knapp: boolean;
+		koennen: number;
+		bedarf: MaterialNeed[];
+	}[] = [];
 	for (const vorlage of kandidaten) {
 		bewertet.push({
 			optionId: vorlage.optionId,
 			price: levelOf(vorlage, 1).price,
+			knapp: knapp.includes(vorlage),
 			// Ohne Person oder ohne Fertigkeit in der Vorlage zählt nur der Preis — dann
 			// verhält sich die Wahl wie vor 5.19.
 			koennen:
@@ -1330,7 +1350,13 @@ export async function fehlendeWerkstatt(
 		});
 	}
 
-	bewertet.sort((a, b) => b.koennen - a.koennen || a.price - b.price);
+	// **Was die Stadt braucht, vor dem, was er kann** (5.98, Punkt 115). Bis hierher
+	// entschied das Können zuerst: Wer Holz bearbeiten konnte, stellte die siebte Zimmerei
+	// neben sechs, deren Bretter auf Halde lagen, während die Stadt verhungerte. Das Können
+	// ordnet weiterhin — unter dem Knappen und unter dem Übrigen.
+	bewertet.sort(
+		(a, b) => Number(b.knapp) - Number(a.knapp) || b.koennen - a.koennen || a.price - b.price
+	);
 	const beste = bewertet[0];
 
 	// **Ein Vorschlag, den niemand bauen kann, ist keiner** (5.87, Punkt 110).
@@ -1356,81 +1382,53 @@ export async function fehlendeWerkstatt(
 }
 
 /**
- * Welche Handwerke die Stadt nicht satt bekommen — die Nachfrageseite der Werkstattwahl.
+ * Eine offene Stelle in einem Betrieb, dessen Ware die Stadt nicht satt bekommt (5.99,
+ * Punkt 115).
  *
- * **Knappheit statt Gedächtnis** (5.95, Punkt 89). Zur Wahl stand, was nicht zustande kam
- * mitzuschreiben — wer wollte kaufen und fand nichts (Punkt 90). Das wäre die ehrlichere
- * Größe und kostet eine Tabelle, die Neustarts überleben muss. Hier steht die andere:
- * **Was liegt da, gemessen an dem, was die Stadt isst?** Beides ist vorhanden — Einwohner
- * und Warenbestand —, und die Rechnung dahinter ist so alt wie die Sättigung: ein Laib
- * alle vierzig Ticks und Kopf (`supplyNeeded`).
+ * **Dieselbe Knappheit wie bei der Werkstattwahl** (`knappeHandwerke`): gegessen oder
+ * verarbeitet, und weniger da, als gebraucht wird. Nur ohne den Schutz gegen die Herde —
+ * ein Rohbau desselben Handwerks ist eine Antwort auf die Frage „wer baut die nächste
+ * Bäckerei", nicht auf „wer arbeitet in der, die steht".
  *
- * **Gezählt wird, was zu haben ist**: Preisschilder und Betriebslager zusammen. Ware im
- * Lager eines Bäckers ist Versorgung, die morgen am Markt hängt — sie jetzt zu übersehen
- * hieße, eine zweite Bäckerei zu verlangen, während die erste eine volle Kammer hat.
+ * **Und nur, wenn der Arbeitgeber zahlen kann** (`canCarryNewHand`): Wer wechselt, gibt
+ * eine Stelle auf. In einen Betrieb, der ihn nicht bezahlt, wechselt keiner.
  *
- * **Ein Rohbau zählt als Antwort.** Sonst bekäme in der Stunde, in der die Lücke aufgeht,
- * **jeder** NPC dieselbe Bäckerei vorgeschlagen, und die Stadt bekäme sechs davon
- * (Herdenverhalten, Punkte 88 und 90). So entsteht eine nach der anderen: Ist die Lücke
- * danach immer noch offen, ist die nächste dran.
- *
- * **Nur Nahrung**, und das sei benannt: Für Bretter und Quader gibt es keine Verzehrzahl,
- * an der sich Bedarf messen ließe — ihr Bedarf hängt daran, wer gerade baut. Für sie
- * bleibt es bei einer je Handwerk, und Punkt 89 bleibt insoweit offen.
- *
- * **Der Kornspeicher zählt nicht mit**, und das mit Absicht. Er verkauft ohne Bestand und
- * ohne Grenze; zählte er als Versorgung, wäre Brot nie knapp, und die Regel bestätigte die
- * Krücke, statt die Kette anzuschieben, die sie ablösen soll (Punkt 85).
+ * `undefined` auch dann, wenn seine jetzige Stelle schon in einem knappen Betrieb ist —
+ * sonst pendelte er zwischen zweien.
  */
-async function knappeHandwerke(
-	handwerke: BuildingTemplate[],
-	vorhanden: Haus[],
-	regionId: string
-): Promise<BuildingTemplate[]> {
-	// Erst sortieren, was ohne Datenbank geht: Nur Nahrungsbetriebe kommen in Frage, und
-	// wer schon daran baut, hat die Lücke bereits beantwortet. Bleibt nichts übrig, kostet
-	// die ganze Frage keine Abfrage.
-	const nahrung = handwerke
-		.flatMap((vorlage) => {
-			const rezept = vorlage.recipes?.[0];
-			const ware = rezept ? getItemTemplate(rezept.outputItemId) : undefined;
-			return ware?.nourishment
-				? [{ vorlage, itemId: ware.itemId, nourishment: ware.nourishment }]
-				: [];
-		})
-		.filter(
-			({ vorlage }) =>
-				!vorhanden.some((haus) => haus.optionId === vorlage.optionId && haus.underConstruction)
-		);
-	if (nahrung.length === 0) return [];
+async function stelleImKnappenBetrieb(
+	npcId: string,
+	regionId: string,
+	haeuser: Haus[],
+	jetzige: { buildingId: string } | undefined
+): Promise<{ buildingId: string } | undefined> {
+	const handwerke = buildingService
+		.getBuildingOptions()
+		.filter((vorlage) => vorlage.type === 'CRAFT');
+	// Erst, was ohne Knappheitsfrage geht: Gibt es überhaupt eine Handwerksstelle, die den
+	// Wechsel lohnt? Meistens nicht, und dann kostet die Frage nichts weiter (Punkt 67).
+	const stellen = (await employmentService.getOpenJobs(regionId, npcId)).filter(
+		(angebot) =>
+			angebot.buildingId !== jetzige?.buildingId &&
+			isWorthTaking(angebot.wage, TAGELOHN) &&
+			canCarryNewHand(angebot.employerMoney, angebot.wage) &&
+			handwerke.some((vorlage) => vorlage.optionId === angebot.optionId)
+	);
+	if (stellen.length === 0) return undefined;
 
-	const einwohner: number = await Character.count({
-		where: { RegionId: regionId, deathTick: null }
-	});
-	if (einwohner === 0) return [];
+	const fertige = haeuser.filter(
+		(haus) => haus.ownerType === 'CHARACTER' && !haus.underConstruction
+	);
+	const knapp = await supplyService.knappeHandwerke(handwerke, fertige, regionId);
+	if (knapp.length === 0) return undefined;
 
-	const knapp: BuildingTemplate[] = [];
-	for (const { vorlage, itemId, nourishment } of nahrung) {
-		const noetig: number = supplyNeeded(einwohner, nourishment);
-		if ((await warenbestand(regionId, itemId)) < noetig) knapp.push(vorlage);
+	if (jetzige) {
+		const jetzigesHaus = haeuser.find((haus) => haus.id === jetzige.buildingId);
+		if (jetzigesHaus && knapp.some((vorlage) => vorlage.optionId === jetzigesHaus.optionId)) {
+			return undefined;
+		}
 	}
-	return knapp;
-}
-
-/** Wie viel von einer Ware in dieser Stadt zu haben ist — am Schild und im Lager. */
-async function warenbestand(regionId: string, itemId: string): Promise<number> {
-	const haeuser = await Building.findAll({
-		include: [{ model: Plot, as: 'plot', where: { RegionId: regionId }, required: true }],
-		attributes: ['id']
-	});
-	const ids: string[] = haeuser.map((haus) => haus.dataValues.id);
-	if (ids.length === 0) return 0;
-
-	const angebote: number =
-		(await ShopOffer.sum('quantity', { where: { BuildingId: { [Op.in]: ids }, itemId } })) ?? 0;
-	const lager: number =
-		(await BuildingStock.sum('quantity', { where: { BuildingId: { [Op.in]: ids }, itemId } })) ?? 0;
-	return angebote + lager;
+	return stellen.find((angebot) => knapp.some((vorlage) => vorlage.optionId === angebot.optionId));
 }
 
 /**

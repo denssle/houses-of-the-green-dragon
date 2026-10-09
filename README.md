@@ -27,6 +27,8 @@ ist, gehört nichts davon auf einen öffentlichen Server.**
 - **[CLAUDE.md](CLAUDE.md)** — Arbeitsregeln fürs Projekt (Versionsnummer, Deploy)
 - **[OFFENE_PUNKTE.md](OFFENE_PUNKTE.md)** — was noch zu entscheiden oder zu entwerfen
   ist, jeweils mit Fälligkeit
+- **[ERLEDIGTE_PUNKTE.md](ERLEDIGTE_PUNKTE.md)** — was davon entschieden, gebaut oder
+  hinfällig ist, mit dem vollen Abschnitt; die Nummern sind dieselben
 
 ## Technik
 

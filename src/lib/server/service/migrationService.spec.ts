@@ -7,6 +7,9 @@ import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
 import { Skill } from '$lib/db/model/skill';
+import { Inventory } from '$lib/db/model/inventory';
+import { ARRIVAL_PROVISIONS } from '$lib/game/need.logic';
+import { CARRIED_CAPACITY } from '$lib/game/inventory.logic';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
 import { findStartRegionId, seedWorld } from '$lib/db/seed';
@@ -100,6 +103,18 @@ describe('Zuzug', () => {
 		const angekommen = await migrationService.admitNewcomers(stadtId, JETZT, KOMMT);
 
 		expect(angekommen?.skill).not.toBe('SMITHING');
+	});
+
+	it('bringt Wegzehrung mit (5.103)', async () => {
+		// **Punkt 85.** Seit es keinen Kornspeicher mehr gibt, soll niemand in seiner ersten
+		// Woche verhungern, nur weil er noch keine Arbeit gefunden hat.
+		const angekommen = await migrationService.admitNewcomers(stadtId, JETZT, KOMMT);
+
+		const brot = await Inventory.findOne({
+			where: { CharacterId: angekommen!.characterId, itemId: 'BREAD' }
+		});
+		expect(brot?.dataValues.quantity).toBe(ARRIVAL_PROVISIONS);
+		expect(ARRIVAL_PROVISIONS).toBeLessThanOrEqual(CARRIED_CAPACITY);
 	});
 
 	it('steht in der Chronik', async () => {

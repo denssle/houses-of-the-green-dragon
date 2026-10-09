@@ -11,7 +11,8 @@ import {
 	surveyShift,
 	MINIMUM_BID,
 	nextBid,
-	npcBid,
+	npcBidding,
+	npcBidLimit,
 	ranking
 } from '$lib/game/auction.logic';
 import { PLOT_PRICE } from '$lib/game/economy';
@@ -24,7 +25,9 @@ describe('Versteigerungen', () => {
 		it('mindestens das Mindestgebot', () => {
 			const reich = { money: 1000, isHighest: false };
 			expect(canBid(reich, OFFEN, MINIMUM_BID)).toEqual({ ok: true });
-			expect(canBid(reich, OFFEN, MINIMUM_BID - 1)).toEqual({ ok: false, reason: 'BID_TOO_LOW' });
+			// Seit 5.97 ist das eine Münze — darunter liegt nur noch die Null, und die ist kein
+			// Gebot.
+			expect(canBid(reich, OFFEN, MINIMUM_BID - 1)).toEqual({ ok: false, reason: 'NOTHING_TO_DO' });
 		});
 
 		it('und über dem bisherigen Gebot, mit Abstand', () => {
@@ -122,18 +125,108 @@ describe('Versteigerungen', () => {
 		});
 	});
 
-	describe('was ein NPC bietet', () => {
-		it('ein Viertel seines Vermögens, aber nur das Nötige', () => {
-			// Er bietet den Mindestschritt, nicht sein Maximum: Sonst zöge ein einzelner
-			// reicher NPC jeden Preis sofort an die Decke.
-			expect(npcBid(1000, null)).toBe(MINIMUM_BID);
-			expect(npcBid(1000, 100)).toBe(100 + BID_INCREMENT);
+	describe('wie weit ein NPC geht (5.97, Punkt 113)', () => {
+		it('hängt an seinem Nutzen, nicht nur an seinem Geld', () => {
+			// Bis 5.97 bot jeder ein Viertel — und die Bäckerei ging an den Reichsten statt
+			// an den Bäcker.
+			expect(npcBidLimit(200, 'HIGH')).toBe(100);
+			expect(npcBidLimit(200, 'MEDIUM')).toBe(50);
+			expect(npcBidLimit(200, 'LOW')).toBe(10);
 		});
 
-		it('nichts, wenn es zu teuer wird', () => {
-			// Ein NPC, der alles auf ein Grundstück wirft, verhungert daneben.
-			expect(npcBid(100, 500)).toBeUndefined();
-			expect(npcBid(0, null)).toBeUndefined();
+		it('und nie über das, was er hat', () => {
+			expect(npcBidLimit(0, 'HIGH')).toBe(0);
+			expect(npcBidLimit(-5, 'HIGH')).toBe(0);
+		});
+	});
+
+	describe('wie die NPCs eine Versteigerung ausmachen (5.97, Punkt 113)', () => {
+		const gebot = (bidderId: string, amount: number): Bid => ({ bidderId, amount, tick: 0 });
+
+		it('gewinnt, wer am meisten will — nicht, wer zuletzt in der Reihe steht', () => {
+			// **Der Kern.** Die Reihenfolge der Liste darf nichts entscheiden.
+			const wahl = npcBidding(
+				[
+					{ bidderId: 'reich-aber-lau', limit: 30 },
+					{ bidderId: 'baecker', limit: 90 },
+					{ bidderId: 'nachbar', limit: 12 }
+				],
+				null
+			);
+			expect(wahl?.bidderId).toBe('baecker');
+		});
+
+		it('und zahlt einen Schritt über dem Zweiten, nicht sein Limit', () => {
+			// So endet eine echte Steigerung: Bei 35 steigt der Zweite aus.
+			expect(
+				npcBidding(
+					[
+						{ bidderId: 'a', limit: 90 },
+						{ bidderId: 'b', limit: 30 }
+					],
+					null
+				)
+			).toEqual({ bidderId: 'a', amount: 30 + BID_INCREMENT });
+		});
+
+		it('bekommt es für eine Münze, wenn er allein ist', () => {
+			// Entschieden so: Den Preis macht die Konkurrenz, keine Schwelle.
+			expect(npcBidding([{ bidderId: 'a', limit: 90 }], null)).toEqual({
+				bidderId: 'a',
+				amount: MINIMUM_BID
+			});
+		});
+
+		it('geht nie über sein Limit, auch bei Gleichstand', () => {
+			const wahl = npcBidding(
+				[
+					{ bidderId: 'a', limit: 40 },
+					{ bidderId: 'b', limit: 40 }
+				],
+				null
+			);
+			expect(wahl?.amount).toBe(40);
+		});
+
+		it('überbietet ein stehendes Gebot, wenn er kann', () => {
+			expect(npcBidding([{ bidderId: 'a', limit: 90 }], gebot('spieler', 50))).toEqual({
+				bidderId: 'a',
+				amount: 50 + BID_INCREMENT
+			});
+		});
+
+		it('und lässt es stehen, wenn er nicht kann', () => {
+			expect(npcBidding([{ bidderId: 'a', limit: 52 }], gebot('spieler', 50))).toBeUndefined();
+		});
+
+		it('überbietet sich nicht selbst', () => {
+			// Liegt er vorn und will niemand mehr, bleibt sein Gebot, wie es ist.
+			expect(
+				npcBidding(
+					[
+						{ bidderId: 'a', limit: 90 },
+						{ bidderId: 'b', limit: 10 }
+					],
+					gebot('a', 20)
+				)
+			).toBeUndefined();
+		});
+
+		it('erhöht aber, wenn ihn ein anderer sonst überböte', () => {
+			expect(
+				npcBidding(
+					[
+						{ bidderId: 'a', limit: 90 },
+						{ bidderId: 'b', limit: 60 }
+					],
+					gebot('a', 20)
+				)
+			).toEqual({ bidderId: 'a', amount: 60 + BID_INCREMENT });
+		});
+
+		it('bietet nichts, wenn keiner etwas will', () => {
+			expect(npcBidding([], null)).toBeUndefined();
+			expect(npcBidding([{ bidderId: 'a', limit: 0 }], null)).toBeUndefined();
 		});
 	});
 
@@ -189,7 +282,10 @@ describe('Versteigerungen', () => {
 			// und nicht die Tabelle. Seit 5.92 steht dort kein Preis mehr, sondern die
 			// Lohnsumme — dieselbe Zahl, nur in anderen Händen.
 			expect(developmentWageBill(1)).toBeGreaterThan(PLOT_PRICE);
-			expect(MINIMUM_BID).toBe(PLOT_PRICE);
+		});
+
+		it('beginnen bei einer Münze (5.97)', () => {
+			expect(MINIMUM_BID).toBe(1);
 		});
 
 		it('geben einer Versteigerung einen Realtag', () => {

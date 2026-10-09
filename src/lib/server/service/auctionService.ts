@@ -15,19 +15,24 @@ import {
 	DEVELOPMENT_SHIFTS_PER_PLOT,
 	isUnderDevelopment,
 	MAX_PLOTS_PER_DEVELOPMENT,
+	type BidInterest,
+	type BidLimit,
 	nextBid,
-	npcBid,
+	npcBidding,
+	npcBidLimit,
 	ranking,
 	surveyShift
 } from '$lib/game/auction.logic';
 import { Building } from '$lib/db/model/building';
-import { TICKS_PER_YEAR } from '$lib/game/time';
+import { AGE_OF_MAJORITY, ageInYears, TICKS_PER_YEAR } from '$lib/game/time';
+import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as chronicleService from '$lib/server/service/chronicleService';
 import * as electionService from '$lib/server/service/electionService';
 import * as nameService from '$lib/server/service/nameService';
 import * as skillService from '$lib/server/service/skillService';
+import * as supplyService from '$lib/server/service/supplyService';
 import * as worldService from '$lib/server/service/worldService';
 
 /**
@@ -284,23 +289,42 @@ export const RE_AUCTION_AFTER = TICKS_PER_YEAR;
  * Preis entsteht aus der Knappheit, und die Stadtkasse bekommt, was die Stadt für die
  * Beerdigung ausgelegt hat, in anderer Form zurück.
  *
- * **Nur bebaute Grundstücke.** Freier städtischer Grund bleibt, wo er ist: Aus ihm baut
- * der Bürgermeister Schule und Unterkunft (`getFreeCityPlots`). Eine Stadt, die jedes
- * freie Fleckchen sofort ausbietet, kann nie wieder etwas errichten.
+ * **Was aus einem Nachlass kommt, bebaut oder nicht.** Freier Grund, der der Stadt von
+ * jeher gehört, bleibt, wo er ist: Aus ihm baut der Bürgermeister Schule und Unterkunft
+ * (`getFreeCityPlots`). Bis 5.101 hieß das auch: **jeder leere Bauplatz** — denn ein
+ * heimgefallener sah aus wie ursprünglicher Stadtgrund. Im Messlauf zu 5.99 waren das 27
+ * Bauplätze eines Verstorbenen, die nie wieder vergeben wurden (Punkt 113). Seitdem trägt
+ * auch das Grundstück den Tick seines Heimfalls.
  *
  * Läuft im Takt, nicht als Amtshandlung: „So bald wie möglich" darf nicht daran hängen,
  * dass ein Bürgermeister im Amt ist und gerade diese eine Handlung wählt.
  */
 export async function auctionEscheatedEstates(regionId: string, tick: number): Promise<number> {
 	const heimgefallen = await buildingService.getEscheatedBuildings(regionId);
+	const leerePlaetze = await Plot.findAll({
+		where: {
+			RegionId: regionId,
+			type: 'BUILDING_LAND',
+			ownerType: 'CITY',
+			escheatedTick: { [Op.ne]: null }
+		},
+		attributes: ['id']
+	});
+	const plotIds: string[] = heimgefallen.flatMap((haus) => (haus.plotId ? [haus.plotId] : []));
+	for (const platz of leerePlaetze) {
+		// **Nur, was wirklich leer ist.** Hat der Bürgermeister zwischen zwei Versteigerungen
+		// eine Schule daraufgestellt, gehört der Platz jetzt zu ihr — sie käme sonst mit
+		// unter den Hammer.
+		if ((await Building.count({ where: { PlotId: platz.dataValues.id } })) === 0) {
+			plotIds.push(platz.dataValues.id);
+		}
+	}
 
 	let eroeffnet = 0;
-	for (const haus of heimgefallen) {
-		if (!haus.plotId) continue;
-
+	for (const plotId of new Set(plotIds)) {
 		// Läuft schon eine — oder ist gerade eine ohne Zuschlag geschlossen worden?
 		const letzte = await Auction.findOne({
-			where: { PlotId: haus.plotId },
+			where: { PlotId: plotId },
 			order: [['openedTick', 'DESC']]
 		});
 		if (letzte && !letzte.dataValues.closed) continue;
@@ -308,7 +332,7 @@ export async function auctionEscheatedEstates(regionId: string, tick: number): P
 
 		await Auction.create({
 			id: randomUUID(),
-			PlotId: haus.plotId,
+			PlotId: plotId,
 			RegionId: regionId,
 			openedTick: tick,
 			closesTick: tick + AUCTION_TICKS,
@@ -411,8 +435,9 @@ export async function advanceAuctions(regionId: string, tick: number): Promise<A
 				transaction: t
 			});
 			await treasuryService.einnehmen(regionId, sieger.amount, 'AUCTION', t);
+			// Der Heimfall ist mit dem Zuschlag vorbei (5.101).
 			await Plot.update(
-				{ ownerType: 'CHARACTER', OwnerCharacterId: sieger.bidderId },
+				{ ownerType: 'CHARACTER', OwnerCharacterId: sieger.bidderId, escheatedTick: null },
 				{ where: { id: auktion.dataValues.PlotId }, transaction: t }
 			);
 			// **Das Haus wechselt mit dem Boden** (Punkt 79). Bei erschlossenem Bauland steht
@@ -441,42 +466,137 @@ export async function advanceAuctions(regionId: string, tick: number): Promise<A
  * NPCs bieten mit.
  *
  * Sonst wäre jede Versteigerung ohne anwesenden Spieler eine Formsache, und die Stadt
- * bekäme für ihr erschlossenes Land nie mehr als das Mindestgebot. Geboten wird nur, wer
- * noch kein Grundstück hat — wer schon eins besitzt, hat Dringenderes mit seinem Geld
- * vor.
+ * bekäme für ihr erschlossenes Land nie mehr als das Mindestgebot.
+ *
+ * **Mitbieten darf seit 5.97 jeder Volljährige, der zahlen kann** (Punkt 113). Bis dahin
+ * bot nur, wer noch kein Grundstück hatte — für Bauland plausibel, für einen Betrieb
+ * verkehrt: Der einzige Bäcker der Stadt besaß ein Wohnhaus und durfte deshalb die
+ * heimgefallene Bäckerei nicht ersteigern. Sie kam fünfzehnmal unter den Hammer, ohne ein
+ * Gebot.
+ *
+ * **Wie weit einer geht, hängt an seinem Nutzen** (`interesseAn`), und ausgemacht wird es
+ * als Steigerung (`npcBidding`): Es steht am Ende genau ein Gebot, das des Bieters mit dem
+ * höchsten Limit, einen Schritt über dem Zweiten.
  */
 async function npcsBietenLassen(
 	auctionId: string,
 	regionId: string,
 	tick: number
 ): Promise<number> {
+	const auktion = await Auction.findByPk(auctionId);
+	if (!auktion) return 0;
+	const haus = await Building.findOne({ where: { PlotId: auktion.dataValues.PlotId } });
+	const vorlage = haus ? buildingService.getBuildingOption(haus.dataValues.optionId) : undefined;
+	// Einmal je Versteigerung, nicht je Bieter: Die Knappheit ist eine Frage an die Stadt.
+	const knapp: boolean =
+		vorlage?.type === 'CRAFT' &&
+		(
+			await supplyService.knappeHandwerke(
+				[vorlage],
+				await buildingService.getBuildingsInRegion(regionId),
+				regionId
+			)
+		).length > 0;
+
 	const npcs = await Character.findAll({
 		where: { RegionId: regionId, deathTick: null, role: 'NPC', money: { [Op.gt]: 0 } }
 	});
 
-	let neue = 0;
+	const limits: BidLimit[] = [];
 	for (const npc of npcs) {
-		const schonBesitz: number = await Plot.count({
-			where: { OwnerCharacterId: npc.dataValues.id }
-		});
-		if (schonBesitz > 0) continue;
-
-		const bisher: Bid[] = await gebote(auctionId);
-		const bestes: Bid | undefined = ranking(bisher)[0];
-		if (bestes?.bidderId === npc.dataValues.id) continue;
-
-		const gebot: number | undefined = npcBid(npc.dataValues.money, bestes?.amount ?? null);
-		if (gebot === undefined) continue;
-
-		await BidRow.upsert({
-			AuctionId: auctionId,
-			CharacterId: npc.dataValues.id,
-			amount: gebot,
-			tick
-		});
-		neue++;
+		const werte = npc.dataValues;
+		if (ageInYears(werte.birthTick, tick) < AGE_OF_MAJORITY) continue;
+		const interesse: BidInterest = await interesseAn(werte.id, vorlage, knapp);
+		limits.push({ bidderId: werte.id, limit: npcBidLimit(werte.money, interesse) });
 	}
-	return neue;
+
+	const bestes: Bid | null = ranking(await gebote(auctionId))[0] ?? null;
+	const wahl = npcBidding(limits, bestes);
+	if (!wahl) return 0;
+
+	await BidRow.upsert({
+		AuctionId: auctionId,
+		CharacterId: wahl.bidderId,
+		amount: wahl.amount,
+		tick
+	});
+	return 1;
+}
+
+/**
+ * Will er auf dem Bauland etwas bauen? (5.100, Punkt 113)
+ *
+ * **Haben ist nur dann besser als brauchen, wenn einer etwas damit vorhat.** Bis hierher
+ * bot für Bauland jeder mit — wer schon Grund hatte, mit „geringem Interesse". Im Messlauf
+ * zu 5.99 ging das so aus: Ein einziger reicher Zimmerer mit Haus und Werkstatt ersteigerte
+ * 27 von 39 Bauplätzen, weil fünf Prozent von 1500 Münzen mehr sind als ein Viertel von
+ * 200, und baute auf keinem. Alle anderen Käufer bauten sofort.
+ *
+ * Vorhaben heißt: **ein eigenes Dach** oder **eine eigene Werkstatt**, wo noch keine steht.
+ * Und wer schon einen unbebauten Bauplatz hat, braucht keinen zweiten — er hat ja, wo er
+ * bauen kann.
+ *
+ * **Was hier fehlt, ist festgehalten:** Ein Unternehmer, der einen zweiten Betrieb gründet
+ * und Leute einstellt, kommt in der Entscheidungslogik nicht vor. Sobald es ihn gibt,
+ * gehört er hierher.
+ */
+async function bauabsicht(characterId: string): Promise<BidInterest> {
+	const grund = await Plot.findAll({
+		where: { OwnerCharacterId: characterId, type: 'BUILDING_LAND' },
+		attributes: ['id']
+	});
+	for (const flaeche of grund) {
+		const bebaut = await Building.count({ where: { PlotId: flaeche.dataValues.id } });
+		if (bebaut === 0) return 'NONE';
+	}
+
+	const eigene = await buildingService.getBuildingsOfCharacter(characterId);
+	const hat = (typ: string): boolean =>
+		eigene.some((eigenes) => buildingService.getBuildingOption(eigenes.optionId)?.type === typ);
+	return hat('RESIDENCE') && hat('CRAFT') ? 'NONE' : 'MEDIUM';
+}
+
+/**
+ * Was einem NPC das Versteigerte nützt (5.97, Punkt 113).
+ *
+ * - **Ein Betrieb**: viel, wer sein Handwerk kann — er holt daraus, was ein Anfänger nicht
+ *   schafft. Ist die Ware knapp, will ihn auch, wer keine eigene Werkstatt hat, aber nur
+ *   mittel: **Das Können geht der Knappheit vor**, sonst setzte bei Brotmangel jeder die
+ *   Hälfte seines Geldes auf die Bäckerei, und sie ginge wieder an den Reichsten statt an
+ *   den Bäcker.
+ * - **Ein Wohnhaus**: viel, wer kein eigenes Dach hat.
+ * - **Bauland**: mittel, wer darauf etwas bauen will; sonst nichts (`bauabsicht`).
+ * - **Alles andere**: wenig. Damit bleibt kein Nachlass liegen, nur weil gerade niemand
+ *   Passendes in der Stadt lebt.
+ */
+async function interesseAn(
+	characterId: string,
+	vorlage: BuildingTemplate | undefined,
+	knapp: boolean
+): Promise<BidInterest> {
+	if (!vorlage) return bauabsicht(characterId);
+
+	if (vorlage.type === 'CRAFT') {
+		if (vorlage.skill && (await skillService.getLevel(characterId, vorlage.skill)) > 0) {
+			return 'HIGH';
+		}
+		if (!knapp) return 'LOW';
+		const eigene = await buildingService.getBuildingsOfCharacter(characterId);
+		const hatWerkstatt: boolean = eigene.some(
+			(eigenes) => buildingService.getBuildingOption(eigenes.optionId)?.type === 'CRAFT'
+		);
+		return hatWerkstatt ? 'LOW' : 'MEDIUM';
+	}
+
+	if (vorlage.type === 'RESIDENCE') {
+		const eigene = await buildingService.getBuildingsOfCharacter(characterId);
+		const hatDach: boolean = eigene.some(
+			(eigenes) => buildingService.getBuildingOption(eigenes.optionId)?.type === 'RESIDENCE'
+		);
+		return hatDach ? 'LOW' : 'HIGH';
+	}
+
+	return 'LOW';
 }
 
 // --- Anzeigen ------------------------------------------------------------------------

@@ -147,3 +147,20 @@ export function workShift(
 export function isWorthTaking(offeredWage: number, fallbackWage: number): boolean {
 	return offeredWage >= fallbackWage;
 }
+
+/**
+ * Wie viele Schichten ein Arbeitgeber bezahlen können muss, damit einer zu ihm wechselt
+ * (5.99, Punkt 115).
+ *
+ * Wer für eine knappe Ware die Stelle wechselt, gibt etwas auf. Ein Betrieb, dessen
+ * Besitzer ihn nicht bezahlen kann, ist kein Wechsel, sondern ein Absturz — und
+ * `WORK/EMPLOYER_BROKE` stand schon vorher mit dreihundert Fehlschlägen je Lauf im Bericht.
+ * Zehn Schichten sind gut eine Woche Spielzeit: genug, dass die Ware des Betriebs bis dahin
+ * verkauft ist und der Lohn aus ihrem Erlös kommt.
+ */
+export const SWITCH_RUNWAY_SHIFTS = 10;
+
+/** Kann der Arbeitgeber einen, der zu ihm wechselt, eine Weile bezahlen? */
+export function canCarryNewHand(employerMoney: number, wage: number): boolean {
+	return employerMoney >= wage * SWITCH_RUNWAY_SHIFTS;
+}

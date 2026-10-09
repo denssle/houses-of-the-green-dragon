@@ -340,4 +340,55 @@ describe('Anstellung', () => {
 			expect(await employmentService.getJobOf(knecht)).toBeDefined();
 		});
 	});
+
+	describe('die Stelle wechseln (5.99, Punkt 115)', () => {
+		it('gibt die alte Stelle auf und tritt die neue an — in einem Zug', async () => {
+			const { knecht, betrieb } = await angestellt();
+			const andere = await person('Andere Meisterin', 500);
+			const neuer = await zimmerei(andere);
+			await employmentService.offerJob(andere, neuer, 3);
+
+			expect(await employmentService.takeJob(knecht, neuer, true)).toEqual({ ok: true });
+			expect((await employmentService.getJobOf(knecht))?.buildingId).toBe(neuer);
+			expect((await employmentService.getStaff(betrieb)).length).toBe(0);
+		});
+
+		it('behält die alte, wenn die neue nicht zu haben ist', async () => {
+			// In derselben Transaktion: Wer wechseln will und keinen Platz findet, steht
+			// nicht plötzlich ohne Stelle da.
+			const { knecht, betrieb } = await angestellt();
+			const andere = await person('Andere Meisterin', 500);
+			const ohneAushang = await zimmerei(andere);
+
+			expect((await employmentService.takeJob(knecht, ohneAushang, true)).ok).toBe(false);
+			expect((await employmentService.getJobOf(knecht))?.buildingId).toBe(betrieb);
+		});
+
+		it('wechselt nicht, ohne es zu wollen', async () => {
+			// Ohne den Schalter bleibt alles beim Alten: Wer eine Stelle hat, nimmt keine
+			// zweite.
+			const { knecht } = await angestellt();
+			const andere = await person('Andere Meisterin', 500);
+			const neuer = await zimmerei(andere);
+			await employmentService.offerJob(andere, neuer, 3);
+
+			expect(await employmentService.takeJob(knecht, neuer)).toEqual({
+				ok: false,
+				reason: 'ALREADY_EMPLOYED'
+			});
+		});
+
+		it('nennt beim Aushang Art und Kasse des Betriebs', async () => {
+			// Daran entscheidet ein NPC, ob sich der Wechsel lohnt.
+			const meisterin = await person('Meisterin', 321);
+			const betrieb = await zimmerei(meisterin);
+			await employmentService.offerJob(meisterin, betrieb, 3);
+
+			const stelle = (await employmentService.getOpenJobs(stadtId)).find(
+				(angebot) => angebot.buildingId === betrieb
+			);
+			expect(stelle?.optionId).toBe(ZIMMEREI);
+			expect(stelle?.employerMoney).toBe(321);
+		});
+	});
 });

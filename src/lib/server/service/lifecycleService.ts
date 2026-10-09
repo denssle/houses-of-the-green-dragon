@@ -448,7 +448,10 @@ async function anDieStadt(
 ): Promise<void> {
 	await treasuryService.einnehmen(regionId, geld, 'ESCHEAT', t);
 	await Plot.update(
-		{ ownerType: 'CITY', OwnerCharacterId: null, forSalePrice: null },
+		// **Mit dem Tick, wie am Haus** (5.101, Punkt 113): Ohne ihn war ein leerer
+		// heimgefallener Bauplatz nicht von ursprünglichem Stadtgrund zu unterscheiden —
+		// und kam nie wieder unter den Hammer.
+		{ ownerType: 'CITY', OwnerCharacterId: null, forSalePrice: null, escheatedTick: tick },
 		{ where: { OwnerCharacterId: verstorbenId }, transaction: t }
 	);
 	await Building.update(

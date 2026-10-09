@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { randomPersonality } from '$lib/game/personality.logic';
-import { SATIETY_MAX } from '$lib/game/need.logic';
+import { FOUNDER_PROVISIONS, SATIETY_MAX } from '$lib/game/need.logic';
+import { Inventory } from '$lib/db/model/inventory';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Dynasty } from '$lib/db/model/dynasty';
@@ -250,8 +251,9 @@ export async function seedWorld(roll: () => number = Math.random): Promise<boole
 			foundedAtTick: jetzt
 		});
 
+		const id = randomUUID();
 		await Character.create({
-			id: randomUUID(),
+			id,
 			firstName: person.firstName,
 			role: 'NPC',
 			gender: person.gender,
@@ -270,6 +272,9 @@ export async function seedWorld(roll: () => number = Math.random): Promise<boole
 			...randomPersonality(roll),
 			...(person.unternehmend ? { ambition: GRUENDER_EHRGEIZ, diligence: GRUENDER_FLEISS } : {})
 		});
+		// **Proviant für die Gründerzeit** (5.103, Punkt 85). Bis die erste Bäckerei steht,
+		// vergehen Hunderte Ticks; ohne Kornspeicher verhungerte die Gründergeneration davor.
+		await Inventory.create({ CharacterId: id, itemId: 'BREAD', quantity: FOUNDER_PROVISIONS });
 	}
 
 	return true;

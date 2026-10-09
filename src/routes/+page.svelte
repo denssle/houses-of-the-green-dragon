@@ -10,7 +10,7 @@
 	hinaus, zuletzt das Verzeichnis der Häuser.
 
 	Die Wege stehen in Gruppen, weil sie in Gruppen gebraucht werden — wer hungrig ist,
-	sucht den Kornspeicher nicht zwischen Arbeit und Grundstücken. Eine einzige Reihe aus
+	sucht die Preise nicht zwischen Arbeit und Grundstücken. Eine einzige Reihe aus
 	acht Kästen zwingt jedesmal zum Lesen aller acht.
 
 	**Geschnitten wird nach der Absicht, nicht nach der Bauart** (5.61): „Du" (was du hast
@@ -74,7 +74,6 @@
 				gleich hießen, obwohl sie Verschiedenes zeigen.
 			-->
 			<a href="{base}/market">Preise</a>
-			<a href="{base}/granary">Kornspeicher</a>
 			<a href="{base}/land">Umland</a>
 			<a href="{base}/plot">Grundstücke</a>
 			<a href="{base}/building/new">Gebäude bauen</a>

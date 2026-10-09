@@ -44,8 +44,6 @@ import { Region } from '$lib/db/model/region';
  * Frage „wovon lebt die Stadt" ist es derselbe Posten.
  */
 export const KASSENZUFLUESSE = [
-	/** Brot aus dem Kornspeicher — die Krücke aus 4.6b, bis es Bäcker gibt. */
-	'GRANARY',
 	/** Die Grundsteuer, je Grundstück und Spieljahr (4.7b). */
 	'PROPERTY_TAX',
 	/** Der Zehnt auf jede Ernte — in Münzen, denn die Kasse ist kein Kornspeicher. */
@@ -75,6 +73,10 @@ export const KASSENZUFLUESSE = [
  * dieselbe Antwort:** Jede Ausgabe der Stadtkasse kommt bei einem Menschen an. `PUBLIC_BUILD`
  * war die letzte, die es nicht tat (Punkt 102); seit der öffentliche Bau ein Rohbau ist,
  * zahlt die Stadt auch dafür Löhne statt eines Preises.
+ *
+ * **`GRANARY` ist mit 5.102 gefallen** (Punkt 85): Den städtischen Kornspeicher, der Brot
+ * aus dem Nichts verkaufte, gibt es nicht mehr — und mit der Einnahme ist ihr Grund
+ * gegangen. Im letzten Lauf mit ihm brachte er noch 660 Münzen, die Grundsteuer 4447.
  *
  * **`DEVELOPMENT` und `PUBLIC_BUILD` sind aus demselben Grund gestrichen** (5.92 und
  * 5.93, Punkt 102): Weder Erschließung noch öffentlicher Bau kosten noch Münzen, beide

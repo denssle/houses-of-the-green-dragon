@@ -7,6 +7,7 @@ import { type BuildingTemplate, levelOf } from '$lib/model/buildingTemplate';
 import { sequelize } from '$lib/db/sequelize';
 import { Building as BuildingModel } from '$lib/db/model/building';
 import { Plot as PlotModel } from '$lib/db/model/plot';
+import { Auction } from '$lib/db/model/auction';
 import { convertToBuilding } from '$lib/db/attributes/building.attributes';
 import { build as buildLogic, REPAIR_PER_SHIFT } from '$lib/game/buildingAction.logic';
 import {
@@ -1297,11 +1298,22 @@ export async function buildPublicBuilding(
 export async function getFreeCityPlots(
 	regionId: string
 ): Promise<{ id: string; address: string }[]> {
+	// **Und nichts, was gerade unter dem Hammer ist** (5.101): Seit auch leere Nachlässe
+	// versteigert werden, stünde sonst eine Schule auf einem Grundstück, für das gerade
+	// jemand bietet.
+	const versteigert: string[] = (
+		await Auction.findAll({ where: { RegionId: regionId, closed: false }, attributes: ['PlotId'] })
+	).map((zeile) => zeile.dataValues.PlotId);
 	const flaechen = await PlotModel.findAll({
 		// **Keine Baustellen** (5.92): Eine Fläche, auf der noch die Vermesser stehen, ist
 		// kein freier Bauplatz — weder für die Schule des Bürgermeisters noch für die
 		// Frage, ob der Stadt das Land ausgegangen ist.
-		where: { RegionId: regionId, ownerType: { [Op.in]: ['CITY', 'NONE'] }, developmentShifts: null }
+		where: {
+			RegionId: regionId,
+			ownerType: { [Op.in]: ['CITY', 'NONE'] },
+			developmentShifts: null,
+			...(versteigert.length > 0 ? { id: { [Op.notIn]: versteigert } } : {})
+		}
 	});
 
 	const frei: { id: string; address: string }[] = [];
