@@ -49,7 +49,7 @@ offenen, nach Nummer sortiert.
 | 75  | Die Testläufe dauern zu lange — **Suite bei zwei Minuten, Messläufe sind es (67)**      | Punkt 67                     | teilweise    |
 | 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                       | Punkte 15, 20, 51            | Entwurf      |
 | 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung            | dem nächsten Schritt         | Befund       |
-| 85  | Der Kornspeicher backt aus dem Nichts — **mit 5.101 kaum noch gebraucht**               | dem Lauf ohne ihn            | teilweise    |
+| 85  | Der Kornspeicher backt aus dem Nichts — **abgerissen mit 5.102, Anlaufhilfe fehlt**     | Gründerproviant              | teilweise    |
 | 87  | Ein Sparziel, das ins Leere führt — Bauland ohne Werkstatt darauf                       | dem nächsten Messlauf        | Befund       |
 | 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick               | laufend                      | Befund       |
 | 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                   | Punkte 15, 34, 115           | teilweise    |
@@ -1451,6 +1451,44 @@ brachte in 2000 Ticks **660 Münzen**, rund 165 Laibe für 44 Einwohner; in 5.96
 3728, in 5.99 4972. `BUY_INPUT` stieg auf 892: Bäckereien kaufen Mehl, die Stadt isst ihr
 Brot. **Damit ist der nächste Lauf der ohne Kornspeicher.** Der Rückbau ist neu zu machen
 (siehe oben), dann wird gemessen.
+
+**Abgerissen mit 5.102 und gemessen am 04./05.10.2026** (Saat 86, 2000 Ticks):
+
+|                     | 5.101 (mit ihm) | 5.102, ohne Vorrat | 5.102, 20 Laibe Start |
+| ------------------- | --------------: | -----------------: | --------------------: |
+| Häuser am Ende      |              68 |                 21 |                **86** |
+| Lebende am Ende     |              44 |                  — |                **62** |
+| Geburten            |              28 |                  1 |                    39 |
+| Tode (davon Not)    |          11 (4) |            29 (29) |                12 (6) |
+| Bäckereien / Mühlen |          8 / 11 |              — / — |                9 / 12 |
+
+**Ohne Vorrat stirbt die Gründergeneration**, ehe die Kette steht: elf Hungertote bis Tick
+250, danach ein Kommen und Sterben. Man verhungert in hundert Ticks; die erste Bäckerei
+braucht fünfhundert. **Mit zwanzig Laiben Proviant je Kopf wird es der beste Lauf aller
+bisherigen** — bis Tick 1250 stirbt niemand, die Stadt wächst ohne Unterbrechung auf 86
+Häuser, und am Ende liegt in neun Bäckereien und am Markt Brot zum Kauf. Die Kette trägt;
+was fehlt, ist eine Anlaufhilfe, und die kommt bisher aus dem Messwerkzeug.
+
+**Entschieden am 05.10.2026, gebaut wird es als Nächstes:**
+
+1. **Gründerproviant** — der Weltaufbau (`seedWorld`) gibt jedem Gründer Brot für ein paar
+   Wochen in die Kammer. Genau das ist gemessen.
+2. **Proviant für Zugezogene** — wer ankommt, bringt ein paar Laibe mit. Wer reist, hat
+   Wegzehrung dabei; und wer in der ersten Woche Arbeit sucht, soll dabei nicht
+   verhungern.
+
+**Offen aus demselben Lauf:**
+
+- **Die Stadtkasse steht am Ende bei null**, die Grundsteuer brachte 1381 statt 4447. Das
+  fehlende `GRANARY` erklärt das nicht allein. Eine Stadt ohne Geld zahlt weder Sold noch
+  Löhne für öffentliche Bauten — nachsehen, ehe es live geht.
+- **Sechs Hungertote, alle nach Tick 1250.** Möglich: Zugezogene ohne Proviant (dann löst
+  es Punkt 2), oder die leere Kasse.
+- **`selfSustaining.spec.ts` ist rot**: Er lässt die Welt fünf Spieljahre laufen, und so
+  früh steht die Kette nicht. Mit dem Gründerproviant gehört er neu betrachtet.
+- **Vor dem Deploy** die Live-Welt ansehen (`scripts/gruenau-sql.sh`): Wie viele Bäcker,
+  Mühlen und wie viel Brot gibt es dort? Für Grünau ist die Gründerzeit vorbei; dort zählt,
+  ob die bestehende Stadt ohne Kornspeicher über die Runden kommt.
 
 ### 87. Ein Sparziel, das ins Leere führt
 
