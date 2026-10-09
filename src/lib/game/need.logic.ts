@@ -80,6 +80,31 @@ export function supplyNeeded(
  * selbst verschuldet hat — statt ihn ohne Ansage zu töten. Bei Permadeath ist das der
  * Unterschied zwischen einer harten Regel und einer unfairen.
  */
+/**
+ * Wie viel Brot einer mitbringt, der eine Stadt gründet (5.103, Punkt 85).
+ *
+ * **Die Anlaufhilfe, die der Kornspeicher war.** Ohne ihn verhungert man in hundert Ticks,
+ * und die erste Bäckerei braucht im besten Lauf fünfhundert. Im Messlauf ohne Kornspeicher
+ * und ohne Vorrat starben elf Gründer bis Tick 250 und die Stadt mit ihnen; mit zwanzig
+ * Laiben je Kopf wurde es der beste Lauf aller bisherigen (86 Häuser, bis Tick 1250 kein
+ * Toter). Zwanzig Laibe sind 800 Punkte Sättigung — gut 800 Ticks, in denen die Kette
+ * anlaufen kann.
+ *
+ * **Und genau so viel, wie in die Kammer passt** (`CARRIED_CAPACITY`): Wer ohne eigenes Dach
+ * ankommt, trägt nichts anderes, bis er gegessen hat. So war es auch in der Messung.
+ */
+export const FOUNDER_PROVISIONS = 20;
+
+/**
+ * Wie viel Wegzehrung ein Zugezogener mitbringt (5.103, Punkt 85).
+ *
+ * Wer reist, hat Proviant dabei — und wer in der ersten Woche Arbeit sucht, soll dabei nicht
+ * verhungern. **Gemessen ist derselbe Wert wie für die Gründer** (`MEASURE_FOOD` gab beiden
+ * zwanzig); „ein paar Laibe" wäre eher weniger, und das ist eine Balancing-Frage für Punkt
+ * 16, sobald ein Lauf zeigt, wie lange ein Zugezogener bis zum ersten Lohn braucht.
+ */
+export const ARRIVAL_PROVISIONS = 20;
+
 export const SATIETY_COMFORTABLE = 50;
 export const SATIETY_WEAKENED = 30;
 export const SATIETY_STARVING = 10;

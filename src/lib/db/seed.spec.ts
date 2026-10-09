@@ -10,6 +10,9 @@ import {
 import { seededRoll } from '$lib/game/testRoll';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
+import { Inventory } from '$lib/db/model/inventory';
+import { FOUNDER_PROVISIONS } from '$lib/game/need.logic';
+import { CARRIED_CAPACITY } from '$lib/game/inventory.logic';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
 import { RegionLink } from '$lib/db/model/regionLink';
@@ -109,6 +112,25 @@ describe('Weltaufbau', () => {
 			expect(alter).toBeGreaterThanOrEqual(16);
 			expect(alter).toBeLessThan(100);
 		}
+	});
+
+	it('gibt jedem Gründer Proviant mit (5.103)', async () => {
+		// **Punkt 85.** Ohne Kornspeicher verhungerte die Gründergeneration, ehe die erste
+		// Bäckerei stand — elf Tote bis Tick 250 im Messlauf. Mit Proviant überlebte sie.
+		const leute = await Character.findAll();
+		expect(leute.length).toBeGreaterThan(0);
+		for (const person of leute) {
+			const brot = await Inventory.findOne({
+				where: { CharacterId: person.dataValues.id, itemId: 'BREAD' }
+			});
+			expect(brot?.dataValues.quantity).toBe(FOUNDER_PROVISIONS);
+		}
+	});
+
+	it('und nicht mehr, als einer tragen kann', () => {
+		// Ohne eigenes Dach fasst die Kammer `CARRIED_CAPACITY`; mehr Proviant wäre einer
+		// Kammer zugebucht, die ihn gar nicht hält.
+		expect(FOUNDER_PROVISIONS).toBeLessThanOrEqual(CARRIED_CAPACITY);
 	});
 
 	// Der Weltaufbau läuft bei jedem Serverstart. Wäre er nicht wiederholbar, hätte die
