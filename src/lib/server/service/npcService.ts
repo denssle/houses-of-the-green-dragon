@@ -57,6 +57,7 @@ import * as electionService from '$lib/server/service/electionService';
 import * as employmentService from '$lib/server/service/employmentService';
 import * as lawService from '$lib/server/service/lawService';
 import * as skillService from '$lib/server/service/skillService';
+import type { SkillType } from '$lib/game/skill.logic';
 import { repairWage } from '$lib/game/buildingAction.logic';
 import * as auctionService from '$lib/server/service/auctionService';
 import { canCarryNewHand, isWorthTaking } from '$lib/game/employment.logic';
@@ -696,6 +697,10 @@ async function lageAufnehmen(
 	 */
 	const haeuserDerStadt = await buildingService.getBuildingsInRegion(werte.RegionId, tick);
 
+	// Was er besitzt und was der Markt hergibt, ebenso einmal je Aufnahme (Punkt 67).
+	const nachschlag: Nachschlag = nachschlagFuer(npcId, werte.RegionId);
+	const { besitz, billigstes } = nachschlag;
+
 	const vorrat = await needService.getStock(npcId);
 	const essbar: number = vorrat
 		.filter((posten) => posten.nourishment)
@@ -703,8 +708,8 @@ async function lageAufnehmen(
 
 	// Was der Markt hergibt: Ohne Angebot kein Kauf — und ohne Kauf keine Nachfrage für
 	// die Betriebe aus 4.10 und 4.11.
-	const gewand = await tradeService.cheapestOffer(werte.RegionId, 'GARMENT', npcId);
-	const trank = await tradeService.cheapestOffer(werte.RegionId, 'TONIC', npcId);
+	const gewand = await billigstes('GARMENT');
+	const trank = await billigstes('TONIC');
 
 	// Was er selbst besitzt und betreibt (4.13).
 	const eigene = await buildingService.getBuildingsOfCharacter(npcId, tick);
@@ -737,10 +742,10 @@ async function lageAufnehmen(
 	const freieFlaechen = flaechen.filter((flaeche) => !flaeche.leased && flaeche.resourceType);
 	const freieFlaeche =
 		freieFlaechen.find((flaeche) => gebraucht.includes(flaeche.resourceType!)) ?? freieFlaechen[0];
-	const zuVerkaufen = werkstatt ? await unverkauftes(npcId, werkstatt) : undefined;
+	const zuVerkaufen = werkstatt ? await unverkauftes(werkstatt, vorrat) : undefined;
 	const werkstattLuecke = werkstatt
 		? undefined
-		: await fehlendeWerkstatt(haeuserDerStadt, npcId, werte.RegionId);
+		: await fehlendeWerkstatt(haeuserDerStadt, npcId, werte.RegionId, nachschlag);
 
 	// Ein eigenes Dach und was daran hängt (4.14).
 	const wohnhaus = eigene.find(
@@ -798,10 +803,8 @@ async function lageAufnehmen(
 		: werkstattVorlage
 			? materialFor(levelOf(werkstattVorlage, 1).price, werkstattVorlage.type)
 			: [];
-	const fehltMaterial = await fehlendesMaterial(npcId, materialBedarf);
-	const material = fehltMaterial
-		? await tradeService.cheapestOffer(werte.RegionId, fehltMaterial.itemId, npcId)
-		: undefined;
+	const fehltMaterial = await fehlendesMaterial(besitz, materialBedarf);
+	const material = fehltMaterial ? await billigstes(fehltMaterial.itemId) : undefined;
 	// Dasselbe für die Werkstatt (5.62). **Eine eigene Abfrage und keine geteilte**: Das
 	// Wohnhaus braucht Bretter, die Werkstatt Quader und Eisen dazu — wer beides über
 	// dieselbe Angabe führt, spart auf die eine Ware und kauft die andere.
@@ -815,25 +818,23 @@ async function lageAufnehmen(
 		: undefined;
 	const ausbauMaterial =
 		ausbauVorlage && auszubauen ? upgradeMaterial(ausbauVorlage, auszubauen.level) : [];
-	const fehltAusbauMaterial = await fehlendesMaterial(npcId, ausbauMaterial);
+	const fehltAusbauMaterial = await fehlendesMaterial(besitz, ausbauMaterial);
 	const ausbauBaustoff = fehltAusbauMaterial
-		? await tradeService.cheapestOffer(werte.RegionId, fehltAusbauMaterial.itemId, npcId)
+		? await billigstes(fehltAusbauMaterial.itemId)
 		: undefined;
 
-	const fehltWerkstattMaterial = await fehlendesMaterial(npcId, werkstattMaterial);
+	const fehltWerkstattMaterial = await fehlendesMaterial(besitz, werkstattMaterial);
 	const werkstattBaustoff = fehltWerkstattMaterial
-		? await tradeService.cheapestOffer(werte.RegionId, fehltWerkstattMaterial.itemId, npcId)
+		? await billigstes(fehltWerkstattMaterial.itemId)
 		: undefined;
 	const stelleFrei = werkstatt ? await employmentService.hasUnofferedPosition(werkstatt) : false;
 	// In einem Rohbau steht keine Werkbank — er zählt als eigene Werkstatt (sonst baute
 	// sein Besitzer eine zweite), aber herstellen lässt sich darin nichts.
 	const kannHerstellenJetzt =
-		werkstatt && !isUnderConstruction(werkstatt) ? await kannHerstellen(npcId, werkstatt) : false;
+		werkstatt && !isUnderConstruction(werkstatt) ? await kannHerstellen(besitz, werkstatt) : false;
 	const fehlendeZutat =
-		werkstatt && !kannHerstellenJetzt ? await fehlendeRezeptZutat(npcId, werkstatt) : undefined;
-	const zutatAngebot = fehlendeZutat
-		? await tradeService.cheapestOffer(werte.RegionId, fehlendeZutat.itemId, npcId)
-		: undefined;
+		werkstatt && !kannHerstellenJetzt ? await fehlendeRezeptZutat(werkstatt, vorrat) : undefined;
+	const zutatAngebot = fehlendeZutat ? await billigstes(fehlendeZutat.itemId) : undefined;
 	// Der zweite Verkaufsweg (5.18) — nur befragt, wenn der eigene Laden nichts hergibt:
 	// Was dort hängt, kostet kein Standgeld.
 	// **Erst fragen, ob es etwas zu verkaufen gibt — dann erst, wo und zu welchem Preis.**
@@ -843,7 +844,7 @@ async function lageAufnehmen(
 	// Regelfall nichts übrig ist, hat den Durchlauf spürbar verteuert.
 	const rohUeberschuss = zuVerkaufen
 		? undefined
-		: await marktUeberschuss(npcId, werkstatt, [...materialBedarf, ...werkstattMaterial]);
+		: await marktUeberschuss(besitz, werkstatt, [...materialBedarf, ...werkstattMaterial]);
 	const marktplatz = rohUeberschuss ? marktplatzIn(haeuserDerStadt) : undefined;
 	const standgeld: number = rohUeberschuss ? await lawService.rate(werte.RegionId, 'STALL_FEE') : 0;
 	// **Wer das Standgeld nicht hat, hat keinen Stand.** Ohne diese Frage wählte ein
@@ -872,19 +873,19 @@ async function lageAufnehmen(
 		wahlzettel.candidates.length > 0 &&
 		isSettled(werte.arrivedTick ?? null, tick);
 
-	const arbeit = await freierArbeitsplatz(haeuserDerStadt, npcId, werte.RegionId);
+	const arbeit = await freierArbeitsplatz(haeuserDerStadt, npcId, werte.RegionId, nachschlag);
 	const arbeitsplatz: string | undefined = arbeit?.art === 'BUILDING' ? arbeit.id : undefined;
 	const vermessung: string | undefined = arbeit?.art === 'SURVEY' ? arbeit.id : undefined;
 	const stelle = await employmentService.getJobOf(npcId);
 	// Wer schon eine Stelle hat, sieht sich nicht um — ein NPC, der jede Stunde den
 	// Arbeitgeber wechselt, wäre kein Handwerker, sondern ein Flattermann.
-	const offen = stelle ? [] : await employmentService.getOpenJobs(werte.RegionId, npcId);
+	const offen = stelle ? [] : await nachschlag.offeneStellen();
 	const besser = offen.filter((angebot) => isWorthTaking(angebot.wage, TAGELOHN))[0];
 	// Wer keinen eigenen Betrieb hat, sieht sich nach einer Stelle um, wo die Stadt Hände
 	// braucht (5.99, Punkt 115) — auch, wenn er schon eine hat.
 	const knappeStelle = werkstatt
 		? undefined
-		: await stelleImKnappenBetrieb(npcId, werte.RegionId, haeuserDerStadt, stelle);
+		: await stelleImKnappenBetrieb(werte.RegionId, haeuserDerStadt, stelle, nachschlag);
 	const unterkunft = werte.HomeBuildingId
 		? undefined
 		: await freierWohnplatz(werte.RegionId, npcId);
@@ -900,7 +901,7 @@ async function lageAufnehmen(
 		name: werte.firstName,
 		money: werte.money,
 		regionId: werte.RegionId,
-		cheapestBread: await tradeService.cheapestOffer(werte.RegionId, 'BREAD', npcId),
+		cheapestBread: await billigstes('BREAD'),
 		workplaceId: arbeitsplatz,
 		surveyPlotId: vermessung,
 		homeId: unterkunft,
@@ -1039,7 +1040,8 @@ export type Arbeitsangebot = { art: 'BUILDING'; id: string } | { art: 'SURVEY'; 
 async function freierArbeitsplatz(
 	haeuser: Haus[],
 	characterId: string,
-	regionId: string
+	regionId: string,
+	nachschlag: Nachschlag
 ): Promise<Arbeitsangebot | undefined> {
 	const zuHaben = haeuser.filter(
 		(haus) =>
@@ -1067,7 +1069,7 @@ async function freierArbeitsplatz(
 	// Können, und wer nur den Aushang prüft, schickt Meister zu Bauherren, die den Meister
 	// nicht bezahlen können. Eine Abfrage je Aufnahme — dieselbe Größenordnung wie die
 	// Beutel, und aus demselben Grund gerechtfertigt.
-	const koennen: number = await skillService.getLevel(characterId, 'CONSTRUCTION');
+	const koennen: number = await nachschlag.koennen('CONSTRUCTION');
 	const bestesHaus = (await zahlbare(nachLohn, regionId, koennen))[0];
 
 	// **Und die Erschließung** (5.92). Sie zahlt den Tagelohn wie jeder städtische Bau —
@@ -1294,7 +1296,9 @@ function menge(vorrat: { itemId: string; quantity: number }[], itemId: string): 
 export async function fehlendeWerkstatt(
 	haeuser: Haus[],
 	characterId?: string,
-	regionId?: string
+	regionId?: string,
+	/** Aus der Lageaufnahme gereicht; ohne wird hier selbst nachgeschlagen. */
+	nachschlag?: Nachschlag
 ): Promise<{ optionId: number; price: number } | undefined> {
 	const vorhanden = haeuser.filter((haus) => haus.ownerType === 'CHARACTER');
 
@@ -1343,7 +1347,10 @@ export async function fehlendeWerkstatt(
 			// Ohne Person oder ohne Fertigkeit in der Vorlage zählt nur der Preis — dann
 			// verhält sich die Wahl wie vor 5.19.
 			koennen:
-				characterId && vorlage.skill ? await skillService.getLevel(characterId, vorlage.skill) : 0,
+				characterId && vorlage.skill
+					? await (nachschlag?.koennen(vorlage.skill) ??
+							skillService.getLevel(characterId, vorlage.skill))
+					: 0,
 			// Was der Bau verlangt — leer bei denen, die ihr Material selbst herstellen.
 			// Dieselbe Ausnahme wie in `build`, aus derselben Quelle.
 			bedarf: vorlage.recipes?.some((rezept) => producesBuildingMaterial(rezept.outputItemId))
@@ -1375,7 +1382,9 @@ export async function fehlendeWerkstatt(
 	// Werkstätten vorn, die kein Material verlangen, kostet das hier keine einzige
 	// Abfrage.
 	if (!beste || beste.bedarf.length === 0 || !characterId || !regionId) return beste;
-	if (await beschaffbar(characterId, regionId, beste.bedarf)) return beste;
+	if (await beschaffbar(beste.bedarf, nachschlag ?? nachschlagFuer(characterId, regionId))) {
+		return beste;
+	}
 
 	// Was ohne Material auskommt, rückt vor — in derselben Ordnung wie oben. Gibt es
 	// nichts dergleichen, bleibt es beim ersten Vorschlag: Ein unerreichbares Ziel ist
@@ -1399,17 +1408,17 @@ export async function fehlendeWerkstatt(
  * sonst pendelte er zwischen zweien.
  */
 async function stelleImKnappenBetrieb(
-	npcId: string,
 	regionId: string,
 	haeuser: Haus[],
-	jetzige: { buildingId: string } | undefined
+	jetzige: { buildingId: string } | undefined,
+	nachschlag: Nachschlag
 ): Promise<{ buildingId: string } | undefined> {
 	const handwerke = buildingService
 		.getBuildingOptions()
 		.filter((vorlage) => vorlage.type === 'CRAFT');
 	// Erst, was ohne Knappheitsfrage geht: Gibt es überhaupt eine Handwerksstelle, die den
 	// Wechsel lohnt? Meistens nicht, und dann kostet die Frage nichts weiter (Punkt 67).
-	const stellen = (await employmentService.getOpenJobs(regionId, npcId)).filter(
+	const stellen = (await nachschlag.offeneStellen()).filter(
 		(angebot) =>
 			angebot.buildingId !== jetzige?.buildingId &&
 			isWorthTaking(angebot.wage, TAGELOHN) &&
@@ -1440,16 +1449,12 @@ async function stelleImKnappenBetrieb(
  * (`getOwnedStock`, 5.25), und kauft den Rest beim billigsten Anbieter. Deshalb zählt
  * beides zusammen und nicht nur das eine.
  */
-async function beschaffbar(
-	characterId: string,
-	regionId: string,
-	bedarf: MaterialNeed[]
-): Promise<boolean> {
-	const vorrat = await tradeService.getOwnedStock(characterId);
+async function beschaffbar(bedarf: MaterialNeed[], nachschlag: Nachschlag): Promise<boolean> {
+	const vorrat = await nachschlag.besitz();
 	for (const posten of bedarf) {
 		const fehlt: number = posten.quantity - (vorrat.get(posten.itemId) ?? 0);
 		if (fehlt <= 0) continue;
-		const angebot = await tradeService.cheapestOffer(regionId, posten.itemId, characterId);
+		const angebot = await nachschlag.billigstes(posten.itemId);
 		if (!angebot || angebot.quantity < fehlt) return false;
 	}
 	return true;
@@ -1465,8 +1470,8 @@ async function beschaffbar(
  * Selbsterhaltungstest.
  */
 async function unverkauftes(
-	characterId: string,
-	werkstatt: { id: string; optionId: number }
+	werkstatt: { id: string; optionId: number },
+	inventar: { itemId: string; quantity: number }[]
 ): Promise<{ itemId: string; quantity: number; inInventory: number } | undefined> {
 	const erzeugnisse: string[] = (
 		buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? []
@@ -1474,7 +1479,6 @@ async function unverkauftes(
 	if (erzeugnisse.length === 0) return undefined;
 
 	const lager = await tradeService.getBuildingStock(werkstatt.id);
-	const inventar = await needService.getStock(characterId);
 
 	// **Kein Blick auf bestehende Angebote mehr.** Bis 5.18 wurde übersprungen, wofür schon
 	// ein Schild hing — mit der Folge, dass ein liegengebliebenes Angebot den Nachschub für
@@ -1493,6 +1497,50 @@ async function unverkauftes(
 		}
 	}
 	return undefined;
+}
+
+/**
+ * Was einer besitzt (`getOwnedStock`), erst auf Nachfrage geholt.
+ */
+type Besitz = () => Promise<Map<string, number>>;
+
+/**
+ * **Was eine Lageaufnahme nachschlägt — je einmal, gleich wie oft gefragt wird** (Punkt 67).
+ *
+ * Bis hierher holten die Helfer es je für sich. Den eigenen Besitz fünfmal — für Haus,
+ * Ausbau und Werkstatt, für den Marktüberschuss und die Werkbank —, jedes Mal Inventar,
+ * eigene Häuser, deren Lager und die Weltzeit dazu. Und den Markt für jede Ware einzeln:
+ * Brot, Gewand, Trank, drei Baustoffe, eine Zutat, je mit den Häusern der Stadt und der
+ * Aufbereitung. Gemessen waren das über 200 Abfragen je Tick für neun Einwohner, alle mit
+ * demselben Ergebnis.
+ *
+ * **Ein Parameter, kein Zwischenspeicher** — wie `haeuserDerStadt`: Er lebt genau so lange
+ * wie eine Aufnahme, und innerhalb einer Aufnahme handelt niemand. Geholt wird erst, wenn
+ * jemand fragt: Wer nichts bauen will, braucht seinen Besitz nicht zu kennen.
+ */
+interface Nachschlag {
+	besitz: Besitz;
+	/** Das billigste Angebot dieser Ware in der Stadt, das nicht von ihm selbst stammt. */
+	billigstes: (itemId: string) => Promise<tradeService.OfferOnList | undefined>;
+	/** Die offenen Stellen der Stadt, wie er sie sieht (`getOpenJobs`). */
+	offeneStellen: () => Promise<Awaited<ReturnType<typeof employmentService.getOpenJobs>>>;
+	/** Seine Stufe in einer Fertigkeit (`getLevel`). */
+	koennen: (fertigkeit: SkillType) => Promise<number>;
+}
+
+function nachschlagFuer(characterId: string, regionId: string): Nachschlag {
+	let besitz: Promise<Map<string, number>> | undefined;
+	let angebote: Promise<Map<string, tradeService.OfferOnList>> | undefined;
+	let stellen: ReturnType<Nachschlag['offeneStellen']> | undefined;
+	let stufen: Promise<Map<SkillType, number>> | undefined;
+	return {
+		besitz: () => (besitz ??= tradeService.getOwnedStock(characterId)),
+		billigstes: async (itemId) =>
+			(await (angebote ??= tradeService.cheapestOffers(regionId, characterId))).get(itemId),
+		offeneStellen: () => (stellen ??= employmentService.getOpenJobs(regionId, characterId)),
+		koennen: async (fertigkeit) =>
+			(await (stufen ??= skillService.getLevels(characterId))).get(fertigkeit) ?? 0
+	};
 }
 
 /** Der Marktplatz der Stadt — der einzige Laden, der niemandem gehört. */
@@ -1534,7 +1582,7 @@ function marktplatzIn(haeuser: Haus[]): string | undefined {
  * einer braucht.
  */
 async function marktUeberschuss(
-	characterId: string,
+	besitz: Besitz,
 	werkstatt: { id: string; optionId: number } | undefined,
 	materialBedarf: { itemId: string; quantity: number }[]
 ): Promise<{ itemId: string; quantity: number } | undefined> {
@@ -1559,7 +1607,7 @@ async function marktUeberschuss(
 		}
 	}
 
-	for (const [itemId, menge] of await tradeService.getOwnedStock(characterId)) {
+	for (const [itemId, menge] of await besitz()) {
 		const vorlage = getItemTemplate(itemId);
 		if (!vorlage) continue;
 
@@ -1578,7 +1626,7 @@ async function marktUeberschuss(
  * stünde vor demselben Rätsel wie ein Spieler vor der Umstellung.
  */
 async function kannHerstellen(
-	characterId: string,
+	besitz: Besitz,
 	werkstatt: { id: string; optionId: number }
 ): Promise<boolean> {
 	const rezepte = buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? [];
@@ -1586,7 +1634,7 @@ async function kannHerstellen(
 
 	// **Alles, was ihm gehört** (5.25, Punkt 72) — Inventar und alle seine Häuser. Wer sein
 	// Holz auf dem Hof hat, kann in seiner Zimmerei trotzdem sägen.
-	const vorrat = await tradeService.getOwnedStock(characterId);
+	const vorrat = await besitz();
 
 	return rezepte.some((rezept) =>
 		rezept.input.every((zutat) => (vorrat.get(zutat.itemId) ?? 0) >= zutat.quantity)
@@ -1616,8 +1664,8 @@ const WOHNHAUS_OPTION_ID = 1;
  * `kannHerstellen`: Wo die Ware liegt, ist eine Frage der Buchung und keine des Könnens.
  */
 async function fehlendeRezeptZutat(
-	characterId: string,
-	werkstatt: { id: string; optionId: number }
+	werkstatt: { id: string; optionId: number },
+	inventar: { itemId: string; quantity: number }[]
 ): Promise<{ itemId: string; quantity: number } | undefined> {
 	const rezepte = buildingService.getBuildingOption(werkstatt.optionId)?.recipes ?? [];
 	if (rezepte.length === 0) return undefined;
@@ -1626,7 +1674,7 @@ async function fehlendeRezeptZutat(
 	for (const posten of await tradeService.getBuildingStock(werkstatt.id)) {
 		vorrat.set(posten.itemId, posten.quantity);
 	}
-	for (const posten of await needService.getStock(characterId)) {
+	for (const posten of inventar) {
 		vorrat.set(posten.itemId, (vorrat.get(posten.itemId) ?? 0) + posten.quantity);
 	}
 
@@ -1642,7 +1690,7 @@ async function fehlendeRezeptZutat(
 }
 
 async function fehlendesMaterial(
-	characterId: string,
+	besitz: Besitz,
 	bedarf: { itemId: string; quantity: number }[]
 ): Promise<{ itemId: string; quantity: number } | undefined> {
 	if (bedarf.length === 0) return undefined;
@@ -1650,7 +1698,7 @@ async function fehlendesMaterial(
 	// **Auch hier alles, was ihm gehört** (5.25): Bretter, die in seiner Zimmerei liegen,
 	// sind zum Bauen genauso da wie die in seinem Inventar. Vorher zählte nur das Inventar —
 	// und seit das Erzeugnis im Betrieb bleibt, wäre sie meist leer.
-	const vorrat = await tradeService.getOwnedStock(characterId);
+	const vorrat = await besitz();
 
 	for (const posten of bedarf) {
 		const da: number = vorrat.get(posten.itemId) ?? 0;

@@ -903,6 +903,38 @@ Stapelzähler nannte drei Verursacher statt dreiundvierzig: `getBuildingsInRegio
 entgegen, wie sie längst eine Transaktion entgegennehmen — kein Zwischenspeicher, der
 veralten könnte.
 
+**Mit 5.105 schlägt eine Lageaufnahme jedes nur einmal nach** (09.10.2026). Vorher gemessen,
+fest gewürfelt wie `worldComesAlive` (Saat 96), je zehn Ticks:
+
+| Stand                        | Abfragen je Tick | ms je Tick |
+| ---------------------------- | ---------------- | ---------- |
+| Tick 40, 9 Lebende, vorher   | 730              | 384        |
+| Tick 40, nachher             | 482              | ~230–290   |
+| Tick 190, 14 Lebende, vorher | 1264             | 743        |
+| Tick 190, nachher            | 703              | 367        |
+
+Die volle Testsuite fiel von 356 auf 167 Sekunden. Das Verhalten ist unverändert: Ein
+Fingerabdruck der ganzen Welt (alle Tabellen ohne Kennungen und Zeitstempel) nach 50 und
+nach 200 Ticks ist vorher und nachher bitgleich.
+
+Was es war: `nachschlagFuer` in `npcService.ts` holt den eigenen Besitz (`getOwnedStock`),
+die billigsten Angebote je Ware (`cheapestOffers`, neu), die offenen Stellen und die
+Fertigkeiten (`getLevels`, neu) erst auf Nachfrage und dann für die ganze Aufnahme. Der
+Besitz kam vorher bis zu sechsmal je Aufnahme, der Markt je Ware einmal. Dazu fragte
+`getBallot` je Kandidat ein `findByPk` nach, obwohl `displayNames` die Leute gerade geholt
+hatte.
+
+**Und eine Annahme von oben stimmt nicht mehr:** Die Tickzeit geht nicht fast vollständig in
+die Abfragen. Mit `benchmark` gemessen ist es noch etwa die Hälfte (183 von 367 ms bei Tick
+190), der Rest ist JavaScript — Sequelize-Instanzen bauen und die Spiellogik selbst. Wer hier
+weitermacht, misst zuerst diesen Rest, statt nur Abfragen zu zählen. Die größten
+verbliebenen Posten bei Tick 40: `getAreas` (3 je Aufnahme), `getFreeBuildingLand` samt
+`withBuildings`, `getBallot` (noch 2), `freierWohnraum` und die Weltzeit, die
+`getBuildingsInRegion` ohne mitgereichten Tick nachschlägt.
+
+Die Stadtlage **je Tick** statt je Aufnahme ist weiter offen — und bleibt eine
+Verhaltensänderung: Ein Bild, das über den Tick lebt, ist nach dem ersten Kauf falsch.
+
 **Mit 5.56 sind es 540 Abfragen je Tick** (613 ms). Die Angebotsliste fragt seither nicht
 mehr je Zeile nach — was sich in der frischen Messwelt nicht zeigt, weil dort ein einziges
 Angebot hängt, wohl aber in einer gewachsenen Stadt; ein Test hält es fest.

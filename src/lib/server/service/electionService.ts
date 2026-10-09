@@ -352,17 +352,21 @@ export async function getBallot(regionId: string, viewerId?: string): Promise<Ba
 
 	const kandidaten = [];
 	for (const kandidatur of kandidaturen) {
-		const person = await Character.findByPk(kandidatur.dataValues.CharacterId);
-		if (!person) continue;
+		// **Wer einen Namen hat, den gibt es** (Punkt 67): `displayNames` hat die Kandidaten
+		// eben in einem Zug geholt. Bis hierher kam je Kandidat ein eigenes `findByPk` dazu —
+		// und `getBallot` fragt jeder Einwohner in jeder Lageaufnahme.
+		const id: string = kandidatur.dataValues.CharacterId;
+		const name: string | undefined = namen.get(id);
+		if (name === undefined) continue;
 		kandidaten.push({
-			id: person.dataValues.id,
-			name: namen.get(person.dataValues.id) ?? person.dataValues.firstName,
+			id,
+			name,
 			// Zwischenstände sind sichtbar: Ein Wahlkampf, in dem niemand weiß, wo er
 			// steht, ist keiner.
 			votes: stimmen.filter(
 				(s) => s.dataValues.CandidateCharacterId === kandidatur.dataValues.CharacterId
 			).length,
-			mine: person.dataValues.id === viewerId
+			mine: id === viewerId
 		});
 	}
 

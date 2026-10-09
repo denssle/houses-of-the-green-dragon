@@ -614,3 +614,37 @@ export async function cheapestOffer(
 	// die eigenen sind eine Zeile darüber schon ausgeschlossen.
 	return (await zuListe([passend[0]]))[0];
 }
+
+/**
+ * `cheapestOffer` für alle Waren auf einmal — das billigste fremde Angebot je Ware.
+ *
+ * **Für eine Lageaufnahme** (Punkt 67): Ein NPC fragt darin nach Brot, Gewand, Trank und je
+ * nach Lage nach drei Baustoffen und einer Zutat. Einzeln waren das je Frage die Häuser der
+ * Stadt, die Angebote und deren Aufbereitung — gemessen rund hundert Abfragen je Tick für
+ * neun Einwohner. Hier sind es fünf je Aufnahme, gleich wie oft gefragt wird.
+ *
+ * Gewählt wird nach derselben Regel wie dort: aufsteigend nach Preis, das erste, das nicht
+ * vom Fragenden selbst stammt.
+ */
+export async function cheapestOffers(
+	regionId: string,
+	exceptSellerId?: string
+): Promise<Map<string, OfferOnList>> {
+	const gebaeude = await Building.findAll({
+		include: [{ model: Plot, as: 'plot', where: { RegionId: regionId }, required: true }],
+		attributes: ['id']
+	});
+	const ids: string[] = gebaeude.map((haus) => haus.dataValues.id);
+	if (ids.length === 0) return new Map();
+
+	const angebote = await ShopOffer.findAll({
+		where: { BuildingId: { [Op.in]: ids } },
+		order: [['pricePerUnit', 'ASC']]
+	});
+	const erstes = new Map<string, (typeof angebote)[number]>();
+	for (const angebot of angebote) {
+		if (angebot.dataValues.SellerCharacterId === exceptSellerId) continue;
+		if (!erstes.has(angebot.dataValues.itemId)) erstes.set(angebot.dataValues.itemId, angebot);
+	}
+	return new Map((await zuListe([...erstes.values()])).map((zeile) => [zeile.itemId, zeile]));
+}

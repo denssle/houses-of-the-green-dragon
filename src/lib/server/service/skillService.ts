@@ -41,6 +41,20 @@ export async function getLevel(
 }
 
 /**
+ * `getLevel` für alle Fertigkeiten auf einmal — für den, der mehrere nachschlägt (Punkt 67).
+ * Was nicht drinsteht, hat er nicht gelernt: Stufe 0, wie dort.
+ */
+export async function getLevels(characterId: string): Promise<Map<SkillType, number>> {
+	const stufen = new Map<SkillType, number>();
+	for (const zeile of await Skill.findAll({ where: { CharacterId: characterId } })) {
+		// Die erste Zeile je Fertigkeit, wie bei `findOne`.
+		if (!stufen.has(zeile.dataValues.type))
+			stufen.set(zeile.dataValues.type, zeile.dataValues.level);
+	}
+	return stufen;
+}
+
+/**
  * Übung eintragen.
  *
  * Wird aus den Handlungen heraus gerufen, die etwas trainieren — eine Schicht in der
