@@ -13,7 +13,7 @@ import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as needService from '$lib/server/service/needService';
 import * as tradeService from '$lib/server/service/tradeService';
 import { CARRIED_CAPACITY } from '$lib/game/inventory.logic';
-import { ShopOffer } from '$lib/db/model/shop';
+import { granaryPrice } from '$lib/game/economy';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import { yearsToTicks } from '$lib/game/time';
 
@@ -49,40 +49,6 @@ async function person(geld: number = 1000): Promise<string> {
 		RegionId: stadtId
 	});
 	return id;
-}
-
-/**
- * Brot kaufen — beim Bäcker, denn das Amt verkauft seit 5.102 keines mehr (Punkt 85).
- *
- * **Der Kaufweg gehört zu dem, was hier geprüft wird.** Die Inventargrenze greift beim
- * Einkaufen, und dass dabei kein Geld für nichts fließt, ist der halbe Punkt von 5.33 —
- * eine direkte Buchung ins Inventar prüfte das nicht mehr. Also kauft der Test dort, wo die
- * Welt kauft: an einem Preisschild.
- */
-async function kauft(
-	kaeuferId: string,
-	itemId: string,
-	menge: number
-): Promise<{ ok: boolean; reason?: string }> {
-	const haendler = await haendlerMitWare(itemId, Math.max(menge, 100));
-	const angebot = await ShopOffer.findOne({ where: { SellerCharacterId: haendler, itemId } });
-	const ergebnis = await tradeService.buyFromOffer(kaeuferId, angebot!.dataValues.id, menge);
-	return ergebnis.ok ? { ok: true } : { ok: false, reason: ergebnis.reason };
-}
-
-/** Ein Verkäufer mit einem Preisschild am Marktplatz. */
-async function haendlerMitWare(itemId: string, menge: number): Promise<string> {
-	const haendler = await person(0);
-	const marktplatz = await Building.findOne({ where: { optionId: 6 } });
-	await ShopOffer.create({
-		id: randomUUID(),
-		BuildingId: marktplatz!.dataValues.id,
-		SellerCharacterId: haendler,
-		itemId,
-		quantity: menge,
-		pricePerUnit: getItemTemplate(itemId)!.basePrice
-	});
-	return haendler;
 }
 
 /** Ein Wohnhaus auf eigenem Grund, mit Bezug. */
@@ -169,16 +135,16 @@ describe('Das Inventar', () => {
 		it('geht, solange es hineinpasst', async () => {
 			const jemand = await person();
 
-			expect(await kauft(jemand, 'BREAD', 20)).toEqual({ ok: true });
+			expect(await needService.buyFromGranary(jemand, 'BREAD', 20)).toEqual({ ok: true });
 			expect(await needService.inventoryUsed(jemand)).toBe(20);
 		});
 
 		/** Der Kern von 5.33: Irgendwann ist das Inventar voll, und dann ist es voll. */
 		it('scheitert am vollen Inventar — und kostet dann nichts', async () => {
 			const jemand = await person(1000);
-			await kauft(jemand, 'BREAD', 20);
+			await needService.buyFromGranary(jemand, 'BREAD', 20);
 
-			expect(await kauft(jemand, 'BREAD', 1)).toEqual({
+			expect(await needService.buyFromGranary(jemand, 'BREAD', 1)).toEqual({
 				ok: false,
 				reason: 'INVENTORY_FULL'
 			});
@@ -186,17 +152,37 @@ describe('Das Inventar', () => {
 			// wäre die Transaktion mit einer Fehlermeldung festgeschrieben und der Käufer
 			// um seine Münzen ärmer.
 			expect((await Character.findByPk(jemand))!.dataValues.money).toBe(
-				1000 - 20 * getItemTemplate('BREAD')!.basePrice
+				1000 - 20 * granaryPrice(getItemTemplate('BREAD')!.basePrice)
 			);
 			expect(await imInventar(jemand, 'BREAD')).toBe(20);
 		});
 
+		/**
+		 * **Punkt 85**: Der Kornspeicher soll die Notversorgung sein und nicht die
+		 * Konkurrenz — dafür gibt es `GRANARY_MARKUP`. Er steht seit 5.87 auf 1, weil der
+		 * Aufschlag verfrüht war; was hier geprüft wird, ist deshalb nicht seine Höhe,
+		 * sondern **dass abgerechnet wird, was auf dem Schild steht**. Genau daran hing
+		 * beim ersten Anlauf ein Fehler: Die Seite nannte den Katalogpreis und das Amt
+		 * buchte einen anderen.
+		 */
+		it('verlangt genau den Preis, den er aushängt', async () => {
+			const jemand = await person(1000);
+
+			await needService.buyFromGranary(jemand, 'BREAD', 10);
+
+			const gezahlt: number = 1000 - (await Character.findByPk(jemand))!.dataValues.money;
+			expect(gezahlt).toBe(10 * needService.granaryOffers()[0].price);
+			expect(needService.granaryOffers()[0].price).toBe(
+				granaryPrice(getItemTemplate('BREAD')!.basePrice)
+			);
+		});
+
 		it('geht wieder, sobald ein Dach dazukommt', async () => {
 			const jemand = await person();
-			await kauft(jemand, 'BREAD', 20);
+			await needService.buyFromGranary(jemand, 'BREAD', 20);
 			await wohntIn(jemand, 2);
 
-			expect(await kauft(jemand, 'BREAD', 40)).toEqual({ ok: true });
+			expect(await needService.buyFromGranary(jemand, 'BREAD', 40)).toEqual({ ok: true });
 			expect(await needService.inventoryUsed(jemand)).toBe(60);
 		});
 	});
@@ -212,7 +198,7 @@ describe('Das Inventar', () => {
 			await Inventory.create({ CharacterId: jemand, itemId: 'PLANK', quantity: 300 });
 
 			expect(await imInventar(jemand, 'PLANK')).toBe(300);
-			expect(await kauft(jemand, 'BREAD', 1)).toEqual({
+			expect(await needService.buyFromGranary(jemand, 'BREAD', 1)).toEqual({
 				ok: false,
 				reason: 'INVENTORY_FULL'
 			});
@@ -228,7 +214,7 @@ describe('Das Inventar', () => {
 			expect(await tradeService.moveToStock(jemand, haus, 'PLANK', 290)).toEqual({ ok: true });
 
 			expect(await imInventar(jemand, 'PLANK')).toBe(10);
-			expect(await kauft(jemand, 'BREAD', 5)).toEqual({ ok: true });
+			expect(await needService.buyFromGranary(jemand, 'BREAD', 5)).toEqual({ ok: true });
 		});
 
 		it('geht den ganzen Weg hin und zurück', async () => {
@@ -237,7 +223,7 @@ describe('Das Inventar', () => {
 			// nur hineinführt, wäre eine Einbahn.
 			const jemand = await person();
 			const haus = await wohntIn(jemand, 1);
-			await kauft(jemand, 'BREAD', 30);
+			await needService.buyFromGranary(jemand, 'BREAD', 30);
 
 			expect(await tradeService.moveToStock(jemand, haus, 'BREAD', 25)).toEqual({ ok: true });
 			expect(await imInventar(jemand, 'BREAD')).toBe(5);

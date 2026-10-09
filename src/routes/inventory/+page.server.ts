@@ -16,8 +16,8 @@ import { CARRIED_CAPACITY } from '$lib/game/inventory.logic';
  * die Bau- und Gebäudeseiten verstreut. Wer wissen wollte, was er besitzt, musste raten,
  * wo er nachsieht.
  *
- * Hier steht beides beisammen: was da ist, und wie viel noch hineinpasst. (Den
- * Kornspeicher gibt es seit 5.102 nicht mehr.)
+ * Hier steht beides beisammen: was da ist, und wie viel noch hineinpasst. Der Kornspeicher
+ * ist damit wieder das, was er ist — ein Laden.
  */
 export const load: PageServerLoad = async ({ locals }) => {
 	const character = locals.currentCharacter;

@@ -3,6 +3,7 @@ import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
 import { Character } from '$lib/db/model/character';
 import { Inventory } from '$lib/db/model/inventory';
+import * as treasuryService from '$lib/server/service/treasuryService';
 import type {
 	CharacterAttributes,
 	CharacterCreationAttributes
@@ -11,6 +12,7 @@ import { currentSatiety, eat, satietyLabel, wouldBeWasted } from '$lib/game/need
 import { inventoryCapacity, fitsInInventory } from '$lib/game/inventory.logic';
 import * as buildingService from '$lib/server/service/buildingService';
 import { getItemTemplate, type ItemTemplate } from '$lib/model/itemTemplate';
+import { canAfford, granaryPrice } from '$lib/game/economy';
 import { tonicRestores } from '$lib/game/attire.logic';
 import * as characterService from '$lib/server/service/characterService';
 import * as worldService from '$lib/server/service/worldService';
@@ -181,6 +183,70 @@ export async function eatItem(characterId: string, itemId: string): Promise<Need
 		);
 		return { ok: true } as const;
 	});
+}
+
+// --- Der städtische Kornspeicher -----------------------------------------------------
+
+/**
+ * Brot bei der Stadt kaufen.
+ *
+ * Eine Krücke, und eine bewusste: Solange es keine Bauern und keine Mühlen gibt, kommt
+ * Nahrung nirgendwoher — und ohne Nahrung verhungert die halbe Stadt, bevor die
+ * Produktion gebaut ist. Der Kornspeicher ist dieselbe Art Brücke wie die städtische
+ * Schmiede aus 3.3: Er hält den Grundweg begehbar, bis es einen echten Markt gibt.
+ *
+ * Das Geld geht an die **Stadtkasse**, wie beim Erstverkauf von Bauland. Mit 4.6c
+ * verkaufen Betriebe ihr eigenes Brot, und dann gehört diese Funktion überprüft —
+ * vermerkt bei Punkt 14 der offenen Punkte.
+ *
+ * **Er nimmt seit Punkt 85 einen Aufschlag** (`granaryPrice`) und ist damit die teuerste
+ * Quelle der Stadt statt der billigsten. Eine Krücke, die unterbietet, wird nie
+ * überflüssig: Solange er zum Grundpreis verkaufte, lohnte kein Backhaus, und der Grund,
+ * ihn abzuschaffen, konnte gar nicht erst entstehen.
+ */
+export async function buyFromGranary(
+	characterId: string,
+	itemId: string,
+	quantity: number
+): Promise<NeedResult> {
+	const vorlage: ItemTemplate | undefined = getItemTemplate(itemId);
+	if (!vorlage) return { ok: false, reason: 'NOT_FOR_SALE' };
+	if (!Number.isInteger(quantity) || quantity < 1) {
+		return { ok: false, reason: 'NOTHING_TO_DO' };
+	}
+
+	const tick: number = await worldService.currentTick();
+
+	return sequelize.transaction(async (t: Transaction) => {
+		const käufer = await characterService.loadForAction(characterId, tick, t);
+		if (!käufer) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+
+		const kosten: number = granaryPrice(vorlage.basePrice) * quantity;
+		if (!canAfford(käufer.dataValues.money, kosten)) {
+			return { ok: false, reason: 'NOT_ENOUGH_MONEY' } as const;
+		}
+
+		// **Erst hineinlegen, dann zahlen.** Passt es nicht ins Inventar, findet der Kauf
+		// nicht statt — sonst wäre das Geld weg und die Ware nirgends.
+		if (!(await changeStock(characterId, itemId, quantity, t))) {
+			return { ok: false, reason: 'INVENTORY_FULL' } as const;
+		}
+		await käufer.update({ money: käufer.dataValues.money - kosten }, { transaction: t });
+		await treasuryService.einnehmen(käufer.dataValues.RegionId, kosten, 'GRANARY', t);
+		return { ok: true } as const;
+	});
+}
+
+/**
+ * Was der Kornspeicher führt — heute genau eine Ware.
+ *
+ * **Mit dem Preis, den er nimmt**, und nicht mit dem aus der Vorlage: Seit dem Aufschlag
+ * (Punkt 85) sind das zwei verschiedene Zahlen, und die Seite muss die nennen, die beim
+ * Klick auf „Kaufen" abgebucht wird.
+ */
+export function granaryOffers(): Array<ItemTemplate & { price: number }> {
+	const brot: ItemTemplate = getItemTemplate('BREAD')!;
+	return [{ ...brot, price: granaryPrice(brot.basePrice) }];
 }
 
 /** Der Ausschnitt eines Charakters, den die Sättigung braucht. */

@@ -6,8 +6,6 @@ import { Character } from '$lib/db/model/character';
 import { Building } from '$lib/db/model/building';
 import { Dynasty } from '$lib/db/model/dynasty';
 import { Plot } from '$lib/db/model/plot';
-import { ShopOffer } from '$lib/db/model/shop';
-import { getItemTemplate } from '$lib/model/itemTemplate';
 import { User } from '$lib/db/model/user';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
@@ -73,23 +71,6 @@ describe('Der verwaiste Charakter im Takt', () => {
 	it('versorgt einen Hungernden, den lange niemand gespielt hat', async () => {
 		// Ohne Selbstverwaltung verhungert er: 4,5 % Risiko je Tick, und niemand ist da,
 		// der ihm ein Brot kauft.
-		//
-		// **Mit einem Bäcker am Markt** (5.102, Punkt 85): Bis dahin verkaufte der
-		// Kornspeicher jedem Brot, und der Test brauchte keinen Händler. Ohne Angebot gibt
-		// es nichts zu kaufen — und dann prüfte er den Markt statt den Verwalter.
-		//
-		// **Zweihundert Laibe, nicht zwanzig.** Die hungrigen NPCs der Startwelt kommen im
-		// Takt zuerst dran und kaufen zwanzig leer, bevor der Verwalter an der Reihe ist.
-		const baecker = await spieler('Bäcker', { satiety: 100, lastSeenTick: JETZT });
-		const marktplatz = await Building.findOne({ where: { optionId: 6 } });
-		await ShopOffer.create({
-			id: randomUUID(),
-			BuildingId: marktplatz!.dataValues.id,
-			SellerCharacterId: baecker,
-			itemId: 'BREAD',
-			quantity: 200,
-			pricePerUnit: getItemTemplate('BREAD')!.basePrice
-		});
 		const vergessen = await spieler('Vergessen', {
 			lastSeenTick: JETZT - ABSENCE_AFTER_TICKS
 		});

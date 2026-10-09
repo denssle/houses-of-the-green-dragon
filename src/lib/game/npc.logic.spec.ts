@@ -34,7 +34,6 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		scarceJobAvailable: false,
 		matchAvailable: true,
 		foodPrice: 4,
-		foodAvailable: true,
 		// Der Zufriedene hat alles: Er trägt ein Gewand und hat einen Trank im Inventar,
 		// damit die neuen Stufen aus 4.12 nicht ungewollt zuschlagen.
 		wearsGarment: true,

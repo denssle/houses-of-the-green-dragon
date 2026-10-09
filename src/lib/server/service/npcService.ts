@@ -33,7 +33,7 @@ import {
 	upgradeMaterial,
 	residentsAt
 } from '$lib/game/building.logic';
-import { PLOT_PRICE, TAGELOHN } from '$lib/game/economy';
+import { PLOT_PRICE, TAGELOHN, granaryPrice } from '$lib/game/economy';
 import { LEASE_FEE } from '$lib/server/service/productionService';
 import {
 	AGE_OF_MAJORITY,
@@ -332,22 +332,27 @@ async function handelnd(
 			return buch('EAT', await needService.eatItem(npcId, 'BREAD'));
 
 		case 'BUY_FOOD': {
-			// **Beim Nachbarn, und nur dort** (5.102, Punkt 85). Hinter dieser Handlung stand
-			// bis hierher der Kornspeicher als letzte Instanz: Wer am Markt nichts fand,
-			// bekam beim Amt immer etwas. Mit der Krücke ist diese Zeile gefallen — Brot
-			// kommt von Bauern, Müllern und Bäckern oder gar nicht.
+			// **Zuerst beim Nachbarn.** Das billigste Angebot in der Stadt geht dem
+			// Kornspeicher vor — sonst bliebe die Krücke aus 4.6a für immer die einzige
+			// Quelle, und ein Bäcker fände nie einen Kunden.
 			//
-			// Die Menge hängt **am Preis des Angebots**: Wer zwanzig Münzen hat, kauft beim
-			// teuren Bäcker weniger Laibe als beim billigen, und nicht fünf auf Verdacht.
+			// Die Menge muss dabei **am Preis des Angebots** hängen und nicht am
+			// Kornspeicherpreis: Sonst versucht ein NPC mit zwanzig Münzen fünf Laibe zu
+			// sechs zu kaufen, scheitert am Geld und landet doch wieder beim Amt. Genau
+			// so ist es beim ersten Durchlauf passiert.
 			const angebot = lage.cheapestBread;
-			if (!angebot || angebot.quantity <= 0 || angebot.pricePerUnit <= 0) {
-				return { action: 'BUY_FOOD', failure: 'NOT_FOR_SALE' };
+			if (angebot && angebot.quantity > 0 && angebot.pricePerUnit > 0) {
+				const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
+				const wieviel: number = Math.min(5, angebot.quantity, bezahlbar);
+				if (wieviel > 0) {
+					const gekauft = await tradeService.buyFromOffer(npcId, angebot.id, wieviel);
+					if (gekauft.ok) return { action: 'BUY_FOOD' };
+				}
 			}
-			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
-			const wieviel: number = Math.min(5, angebot.quantity, bezahlbar);
-			if (wieviel <= 0) return { action: 'BUY_FOOD', failure: 'NOT_ENOUGH_MONEY' };
-
-			return buch('BUY_FOOD', await tradeService.buyFromOffer(npcId, angebot.id, wieviel));
+			return buch(
+				'BUY_FOOD',
+				await needService.buyFromGranary(npcId, 'BREAD', Math.max(1, Math.min(5, lage.leisten)))
+			);
 		}
 
 		case 'TAKE_JOB':
@@ -635,6 +640,7 @@ async function lageAufnehmen(
 			jobId?: string;
 			/** Ob er dafür seine bisherige Stelle aufgibt (5.99). */
 			switchJob?: boolean;
+			leisten: number;
 			money: number;
 			/** Nur fürs Protokoll (5.88) — die Entscheidung kennt keine Namen. */
 			name: string;
@@ -883,18 +889,18 @@ async function lageAufnehmen(
 		? undefined
 		: await freierWohnplatz(werte.RegionId, npcId);
 	const partner = werte.spouseId ? undefined : await naechsterPartner(npc.dataValues, tick);
-	// **Einmal gelesen, zweimal gebraucht** (5.102): Die Entscheidung fragt danach, ob es
-	// überhaupt Brot gibt und was es kostet, und die Handlung kauft daraus. Zwei Abfragen
-	// wären zwei Antworten, die auseinanderlaufen können.
-	const cheapestBread = await tradeService.cheapestOffer(werte.RegionId, 'BREAD', npcId);
 
 	return {
+		// **Am Kornspeicherpreis gerechnet, nicht am Grundpreis** — denn dorthin führt
+		// diese Zahl. Seit dem Aufschlag (Punkt 85) sind das zwei verschiedene, und wer
+		// mit der kleineren rechnet, bestellt fünf Laibe und bekommt `NOT_ENOUGH_MONEY`.
+		leisten: Math.floor(werte.money / granaryPrice(brot.basePrice)),
 		// **Nur fürs Protokoll** (5.88): Eine Kennung sagt beim Lesen nichts, ein Name
 		// schon — und die Entscheidung selbst rührt ihn nicht an.
 		name: werte.firstName,
 		money: werte.money,
 		regionId: werte.RegionId,
-		cheapestBread,
+		cheapestBread: await tradeService.cheapestOffer(werte.RegionId, 'BREAD', npcId),
 		workplaceId: arbeitsplatz,
 		surveyPlotId: vermessung,
 		homeId: unterkunft,
@@ -923,11 +929,7 @@ async function lageAufnehmen(
 			betterJobAvailable: besser !== undefined,
 			scarceJobAvailable: knappeStelle !== undefined,
 			matchAvailable: partner !== undefined,
-			// **Was Brot kostet, wo es welches gibt** (5.102): der Preis des billigsten
-			// Angebots, und ohne Angebot der Grundpreis als Schätzwert. Die Zahl trägt die
-			// Rücklage — wer nichts zu kaufen findet, soll trotzdem wissen, wofür er spart.
-			foodPrice: cheapestBread?.pricePerUnit ?? brot.basePrice,
-			foodAvailable: cheapestBread !== undefined && cheapestBread.quantity > 0,
+			foodPrice: brot.basePrice,
 			// Was über das Nötigste hinausgeht (4.12). Ohne diese fünf Angaben kauft ein
 			// NPC ausschließlich Nahrung, und jeder Beruf außer dem Bäcker bliebe ohne
 			// Kundschaft.

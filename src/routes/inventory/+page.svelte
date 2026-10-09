@@ -53,8 +53,9 @@
 	{#if data.stock.length === 0}
 		<p>
 			<i>Dein Inventar ist leer.</i>
-			Gekauftes und Geerntetes landet hier — was es in der Stadt zu kaufen gibt, steht unter
-			<a href="{base}/market" class="link">Preise</a>.
+			Gekauftes und Geerntetes landet hier — im
+			<a href="{base}/granary" class="link">Kornspeicher</a>
+			gibt es Brot, im <a href="{base}/market" class="link">Markt</a> alles andere.
 		</p>
 	{:else}
 		<ul>
