@@ -1,4 +1,4 @@
-import type { QueryInterface } from 'sequelize';
+import { type QueryInterface, QueryTypes } from 'sequelize';
 
 /**
  * Mahlen wird eine eigene Fertigkeit (5.96).
@@ -16,11 +16,20 @@ import type { QueryInterface } from 'sequelize';
  * weil sich der Katalog ändert.
  *
  * Wer keine Mühle hat, bekommt nichts — ein Bäcker hat nie gemahlen.
+ *
+ * **Erst lesen, dann schreiben — nicht in einem Zug.** Die erste Fassung war ein einziges
+ * `INSERT … SELECT … WHERE NOT EXISTS (SELECT … FROM skills …)`: Einfügen in eine Tabelle
+ * und im selben Satz in einer Unterabfrage aus ihr lesen. SQLite lässt das zu, MySQL
+ * ausdrücklich nicht, und ob MariaDB es tut, ließ sich hier nicht prüfen — live läuft
+ * MariaDB. Getrennt in Lesen und Schreiben, ist es auf jeder Datenbank derselbe Vorgang.
  */
 export async function up(queryInterface: QueryInterface): Promise<void> {
-	await queryInterface.sequelize.query(`
-		INSERT INTO skills (CharacterId, type, level, progress, createdAt, updatedAt)
-		SELECT s.CharacterId, 'MILLING', s.level, s.progress, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+	const muellerInnen = await queryInterface.sequelize.query<{
+		CharacterId: string;
+		level: number;
+		progress: number;
+	}>(
+		`SELECT s.CharacterId, s.level, s.progress
 		FROM skills s
 		WHERE s.type = 'BAKING'
 			AND (
@@ -33,11 +42,31 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
 					JOIN buildings b ON b.id = e.BuildingId
 					WHERE b.optionId = 4
 				)
+			)`,
+		{ type: QueryTypes.SELECT }
+	);
+	if (muellerInnen.length === 0) return;
+
+	const schon = new Set(
+		(
+			await queryInterface.sequelize.query<{ CharacterId: string }>(
+				`SELECT CharacterId FROM skills WHERE type = 'MILLING'`,
+				{ type: QueryTypes.SELECT }
 			)
-			AND NOT EXISTS (
-				SELECT 1 FROM skills m WHERE m.CharacterId = s.CharacterId AND m.type = 'MILLING'
-			)
-	`);
+		).map((zeile) => zeile.CharacterId)
+	);
+	const jetzt = new Date();
+	const neu = muellerInnen
+		.filter((zeile) => !schon.has(zeile.CharacterId))
+		.map((zeile) => ({
+			CharacterId: zeile.CharacterId,
+			type: 'MILLING',
+			level: zeile.level,
+			progress: zeile.progress,
+			createdAt: jetzt,
+			updatedAt: jetzt
+		}));
+	if (neu.length > 0) await queryInterface.bulkInsert('skills', neu);
 }
 
 export async function down(queryInterface: QueryInterface): Promise<void> {
