@@ -1,7 +1,7 @@
 {
 	"name": "houses-of-the-green-dragon",
 	"private": true,
-	"version": "0.5.105",
+	"version": "0.5.106",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -15,7 +15,8 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"measure": "vitest run src/lib/server/simulation/measureRun.spec.ts",
-		"test:unit": "vitest",
+		"test:unit": "vitest --project unit",
+		"test:sim": "vitest run --project sim",
 		"test:e2e": "playwright test"
 	},
 	"overrides": {

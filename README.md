@@ -48,7 +48,8 @@ npm run dev
 Weitere Skripte:
 
 ```bash
-npm run test:unit # Tests (Vitest, alle src/**/*.spec.ts)
+npm run test:unit # Tests (Vitest, ohne die minutenlangen Simulationen)
+npm run test:sim  # nur die Simulationen (mehrere Minuten; die CI läuft über beides)
 npm run build     # Produktionsbuild
 npm run preview   # Produktionsbuild lokal ansehen
 npm run check     # Typprüfung (svelte-check)
