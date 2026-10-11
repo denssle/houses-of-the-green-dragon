@@ -192,13 +192,17 @@ export async function buildingHasStock(
  * Sechseckraster), gehört diese Stelle als erste überarbeitet: Dann wird aus dem
  * Fernzugriff ein Fuhrwerk.
  */
-export async function getOwnedStock(characterId: string): Promise<Map<string, number>> {
+export async function getOwnedStock(
+	characterId: string,
+	/** Der Tick, wenn ihn der Aufrufer kennt — sonst wird die Weltzeit nachgeschlagen. */
+	tick?: number
+): Promise<Map<string, number>> {
 	const vorrat = new Map<string, number>();
 
 	for (const posten of await needService.getStock(characterId)) {
 		vorrat.set(posten.itemId, (vorrat.get(posten.itemId) ?? 0) + posten.quantity);
 	}
-	for (const haus of await buildingService.getBuildingsOfCharacter(characterId)) {
+	for (const haus of await buildingService.getBuildingsOfCharacter(characterId, tick)) {
 		for (const posten of await getBuildingStock(haus.id)) {
 			vorrat.set(posten.itemId, (vorrat.get(posten.itemId) ?? 0) + posten.quantity);
 		}

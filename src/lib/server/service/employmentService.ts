@@ -1,5 +1,5 @@
 import * as chronicleService from '$lib/server/service/chronicleService';
-import { type Transaction } from 'sequelize';
+import { Op, type Transaction } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
 import { Building } from '$lib/db/model/building';
@@ -508,9 +508,45 @@ export interface JobOnList {
 	employerMoney: number;
 }
 
-/** Was in dieser Stadt an Stellen offensteht. */
-export async function getOpenJobs(regionId: string, seekerId?: string): Promise<JobOnList[]> {
-	const gebaeude = await buildingService.getBuildingsInRegion(regionId);
+/**
+ * Was in dieser Stadt an Stellen offensteht.
+ *
+ * `haeuser` sind die Häuser der Stadt, wenn der Aufrufer sie schon in der Hand hält — die
+ * Lageaufnahme eines NPC tut das immer (Punkt 67).
+ */
+export async function getOpenJobs(
+	regionId: string,
+	seekerId?: string,
+	haeuser?: Awaited<ReturnType<typeof buildingService.getBuildingsInRegion>>
+): Promise<JobOnList[]> {
+	const gebaeude = haeuser ?? (await buildingService.getBuildingsInRegion(regionId));
+
+	// **Belegung, Arbeitgeber und Namen je in einem Zug** (Punkt 67). Vorher kostete jede
+	// ausgeschriebene Stelle eine Zählung, einen Arbeitgeber und dessen Namen einzeln — und
+	// jeder Einwohner fragt in jeder Lageaufnahme danach.
+	const ausgeschrieben = gebaeude.filter((eintrag) => eintrag.offeredWage !== null);
+	const belegung = new Map<string, number>();
+	const arbeitgeber = new Map<string, Awaited<ReturnType<typeof Character.findAll>>[number]>();
+	let namen = new Map<string, string>();
+	if (ausgeschrieben.length > 0) {
+		const vertraege = await Employment.findAll({
+			where: { BuildingId: { [Op.in]: ausgeschrieben.map((eintrag) => eintrag.id) } },
+			attributes: ['BuildingId']
+		});
+		for (const vertrag of vertraege) {
+			const id: string = vertrag.dataValues.BuildingId;
+			belegung.set(id, (belegung.get(id) ?? 0) + 1);
+		}
+		const chefIds: string[] = ausgeschrieben
+			.map((eintrag) => eintrag.ownerCharacterId)
+			.filter((id): id is string => id !== null);
+		if (chefIds.length > 0) {
+			for (const chef of await Character.findAll({ where: { id: { [Op.in]: chefIds } } })) {
+				arbeitgeber.set(chef.dataValues.id, chef);
+			}
+			namen = await nameService.displayNames(chefIds);
+		}
+	}
 
 	const stellen: JobOnList[] = [];
 	for (const eintrag of gebaeude) {
@@ -520,12 +556,12 @@ export async function getOpenJobs(regionId: string, seekerId?: string): Promise<
 		const vorlage = buildingService.getBuildingOption(eintrag.optionId);
 		if (!vorlage) continue;
 
-		const belegt: number = await Employment.count({ where: { BuildingId: eintrag.id } });
+		const belegt: number = belegung.get(eintrag.id) ?? 0;
 		const frei: number = positionsAt(vorlage, eintrag.level) - belegt;
 		if (frei <= 0) continue;
 
 		const chef = eintrag.ownerCharacterId
-			? await Character.findByPk(eintrag.ownerCharacterId)
+			? (arbeitgeber.get(eintrag.ownerCharacterId) ?? null)
 			: null;
 		const stadtId: string | undefined = eintrag.ownerCharacterId
 			? undefined
@@ -544,7 +580,7 @@ export async function getOpenJobs(regionId: string, seekerId?: string): Promise<
 			// Sonst steht dort ein Name mit Haus (5.10): Bei wem man in Dienst tritt, ist
 			// eine Frage der Familie.
 			employerName: chef
-				? ((await nameService.displayName(chef.dataValues.id)) ?? 'jemand')
+				? (namen.get(chef.dataValues.id) ?? 'jemand')
 				: eintrag.ownerCharacterId
 					? 'jemand'
 					: 'der Stadt'

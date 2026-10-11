@@ -940,6 +940,16 @@ formatiert genau diesen Stack ohne Übersetzung: 305–320 → 239–251 ms je T
 Übersetzung nicht. Der Rest verteilt sich auf Sequelize selbst (ein Drittel: Abfragen bauen,
 Instanzen füllen), das Warten auf SQLite (ein Viertel) und erst dann unseren Code.
 
+**Und die letzten Doppelungen** (11.10.2026): `getOpenJobs` holt Belegung, Arbeitgeber und
+Namen in einem Zug und nimmt die Häuser der Lage an, die Lage fragt nur noch, _ob_ es Bauland
+gibt (`hasFreeBuildingLand`), und `getOwnedStock` bekommt den Tick. Bei Tick 190 703 → 666
+Abfragen, an der Uhr nicht messbar (Rauschen ±25 ms). **Damit ist das Zählen ausgereizt:** Was
+bleibt, fällt je Einwohner einmal an — eigene Flächen, Wohnung, Vorrat — und ließe sich nur
+über die Stadtlage je Tick teilen, die das Verhalten ändert und deshalb ausscheidet. Der
+nächste Hebel wäre ein anderer: `raw: true` in den heißen Lesepfaden, damit Sequelize keine
+Instanzen baut. Erst an einer Stelle ausprobieren und messen. **Zurückgestellt** zugunsten
+der übrigen Punkte.
+
 Die Stadtlage **je Tick** statt je Aufnahme ist weiter offen — und bleibt eine
 Verhaltensänderung: Ein Bild, das über den Tick lebt, ist nach dem ersten Kauf falsch.
 

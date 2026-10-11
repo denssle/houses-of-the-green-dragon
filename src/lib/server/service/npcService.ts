@@ -698,7 +698,7 @@ async function lageAufnehmen(
 	const haeuserDerStadt = await buildingService.getBuildingsInRegion(werte.RegionId, tick);
 
 	// Was er besitzt und was der Markt hergibt, ebenso einmal je Aufnahme (Punkt 67).
-	const nachschlag: Nachschlag = nachschlagFuer(npcId, werte.RegionId);
+	const nachschlag: Nachschlag = nachschlagFuer(npcId, werte.RegionId, haeuserDerStadt, tick);
 	const { besitz, billigstes } = nachschlag;
 
 	const vorrat = await needService.getStock(npcId);
@@ -717,7 +717,7 @@ async function lageAufnehmen(
 		(haus) => buildingService.getBuildingOption(haus.optionId)?.type === 'CRAFT'
 	);
 	const grundstuecke = await plotService.getPlotsOfCharacter(npcId);
-	const freiesBauland: boolean = (await plotService.getFreeBuildingLand(werte.RegionId)).length > 0;
+	const freiesBauland: boolean = await plotService.hasFreeBuildingLand(werte.RegionId);
 	const flaechen = await productionService.getAreas(npcId);
 	const eigenePacht = flaechen.find((flaeche) => flaeche.leasedByMe);
 	// **Die Fläche, die zum Betrieb passt — nicht die erste beste** (5.84, Punkt 103).
@@ -1528,16 +1528,24 @@ interface Nachschlag {
 	koennen: (fertigkeit: SkillType) => Promise<number>;
 }
 
-function nachschlagFuer(characterId: string, regionId: string): Nachschlag {
+function nachschlagFuer(
+	characterId: string,
+	regionId: string,
+	/** Die Häuser der Stadt, wenn sie schon geholt sind. */
+	haeuser?: Haus[],
+	/** Der Tick des Takts — sonst wird die Weltzeit nachgeschlagen. */
+	tick?: number
+): Nachschlag {
 	let besitz: Promise<Map<string, number>> | undefined;
 	let angebote: Promise<Map<string, tradeService.OfferOnList>> | undefined;
 	let stellen: ReturnType<Nachschlag['offeneStellen']> | undefined;
 	let stufen: Promise<Map<SkillType, number>> | undefined;
 	return {
-		besitz: () => (besitz ??= tradeService.getOwnedStock(characterId)),
+		besitz: () => (besitz ??= tradeService.getOwnedStock(characterId, tick)),
 		billigstes: async (itemId) =>
 			(await (angebote ??= tradeService.cheapestOffers(regionId, characterId))).get(itemId),
-		offeneStellen: () => (stellen ??= employmentService.getOpenJobs(regionId, characterId)),
+		offeneStellen: () =>
+			(stellen ??= employmentService.getOpenJobs(regionId, characterId, haeuser)),
 		koennen: async (fertigkeit) =>
 			(await (stufen ??= skillService.getLevels(characterId))).get(fertigkeit) ?? 0
 	};

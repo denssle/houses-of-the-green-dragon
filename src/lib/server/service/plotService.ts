@@ -69,23 +69,36 @@ async function withBuildings(plots: Plot[]): Promise<PlotOnList[]> {
  * Münzen, einmal unter dem Hammer.
  */
 export async function getFreeBuildingLand(regionId: string): Promise<PlotOnList[]> {
+	const gefunden = await PlotModel.findAll({
+		where: await freiesBaulandIn(regionId),
+		order: [['address', 'ASC']]
+	});
+	return withBuildings(gefunden.map((eintrag) => convertToPlot(eintrag.dataValues)));
+}
+
+/**
+ * Ob es freies Bauland gibt — dieselbe Frage wie `getFreeBuildingLand`, ohne die Liste.
+ *
+ * Die Lageaufnahme eines NPC will nur das wissen (Punkt 67); die Liste samt Bebauung zu
+ * holen, um sie dann zu zählen, kostete je Einwohner und Tick eine Abfrage mehr.
+ */
+export async function hasFreeBuildingLand(regionId: string): Promise<boolean> {
+	return (await PlotModel.count({ where: await freiesBaulandIn(regionId) })) > 0;
+}
+
+async function freiesBaulandIn(regionId: string) {
 	const versteigert = await Auction.findAll({
 		where: { RegionId: regionId, closed: false },
 		attributes: ['PlotId']
 	});
 	const unterDemHammer: string[] = versteigert.map((zeile) => zeile.dataValues.PlotId);
-
-	const gefunden = await PlotModel.findAll({
-		where: {
-			RegionId: regionId,
-			type: 'BUILDING_LAND',
-			ownerType: 'NONE',
-			developmentShifts: null,
-			...(unterDemHammer.length > 0 ? { id: { [Op.notIn]: unterDemHammer } } : {})
-		},
-		order: [['address', 'ASC']]
-	});
-	return withBuildings(gefunden.map((eintrag) => convertToPlot(eintrag.dataValues)));
+	return {
+		RegionId: regionId,
+		type: 'BUILDING_LAND' as const,
+		ownerType: 'NONE' as const,
+		developmentShifts: null,
+		...(unterDemHammer.length > 0 ? { id: { [Op.notIn]: unterDemHammer } } : {})
+	};
 }
 
 /** Was einem Charakter gehört. */
