@@ -54,7 +54,7 @@ offenen, nach Nummer sortiert.
 | 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                  | 34                         | teilweise   |
 | 90  | Die NPC-Entscheidung hat kein Gedächtnis — **zuerst das Verkaufsgedächtnis**           | —                          | entschieden |
 | 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen       | —                          | teilweise   |
-| 92  | Der Verwalter arbeitet ohne Ende — **entschieden: nur für Essen und Erhalt**           | —                          | entschieden |
+| 92  | Der Verwalter arbeitet ohne Ende — **Lohngrenze gebaut mit 0.6.2**, Monokultur offen   | —                          | teilweise   |
 | 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                         | —                          | Befund      |
 | 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten    | —                          | Befund      |
 | 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                     | —                          | teilweise   |
@@ -74,7 +74,7 @@ dem davor auf, zwischen den Strängen gibt es kaum Abhängigkeiten. Welcher Stra
 ist eine Frage der Lust und nicht der Reihenfolge.
 
 **Jederzeit, für sich** — klein, keine Voraussetzung, gut für einen Abend:
-121 (Geburten bei Saat 86), 92 (Verwalter), 88 (Zugreihenfolge),
+121 (Geburten bei Saat 86), 92 (Rest: immer dasselbe Handwerk), 88 (Zugreihenfolge),
 94 (Angebot zurück ins Lager), 91 (Tick-Vermerk), 87 (Rest: Versteigerung), 105, 98, 61,
 101 (Bürgerseite), 64 (Seiten je Gebäude).
 
@@ -1983,9 +1983,15 @@ sollte nur auch für den Geldbeutel gelten.
 **Entschieden am 11.10.2026:** Ein Verwalter arbeitet für Lohn nur so weit, wie Essen und
 Instandhaltung es verlangen — dann ruht er. „Erhalten ja, entscheiden nein" gilt auch für den
 Geldbeutel: Wer zurückkommt, findet sein Haus und seinen Hunger versorgt, aber keinen Schatz.
-**Umzusetzen** in `decideCaretakerAction`: Lohnarbeit nur, solange das Geld unter Rücklage
-plus fälliger Instandhaltung liegt. Die zweite Hälfte des Befunds (immer dasselbe Handwerk)
-bleibt offen.
+**Umgesetzt mit 0.6.2** in `decideCaretakerAction`: Lohnarbeit nur, solange das Geld unter
+`caretakerNeed` liegt — Rücklage plus, wenn das Haus verfällt und Material fehlt, dessen
+Preis (das Herrichten selbst kostet seit 5.78 keine Münze). Auch die Arbeit, die die
+Hierarchie selbst vorschlägt, fällt darunter: Sparen auf ein Grundstück oder ein Haus ist
+ein Vorhaben, und das fasst der Spieler. Fällt der Tagelohn weg, fragt der Verwalter die
+Hierarchie ein zweites Mal ohne ihn — so kommt er zum Renovieren, das sonst hinter dem
+Sparen stand. Ungemessen: wie oft Verwalter in der laufenden Welt überhaupt greifen.
+
+**Offen bleibt die zweite Hälfte** (immer dasselbe Handwerk).
 
 ### 94. Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück
 

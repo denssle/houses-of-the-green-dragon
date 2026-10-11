@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	ABSENCE_AFTER_TICKS,
 	CARETAKER_ACTIONS,
+	caretakerNeed,
 	decideCaretakerAction,
 	decideNpcAction,
 	isUnattended,
@@ -120,13 +121,67 @@ describe('Der abwesende Spieler', () => {
 
 			expect(decideCaretakerAction(obdachlos)).toBe('MOVE_IN');
 		});
+	});
 
-		it('lässt ihn nicht werben, sondern arbeiten', () => {
-			// Wen er heiratet, entscheidet der Spieler und niemand sonst.
+	describe('wie viel er verdienen darf (0.6.2, Punkt 92)', () => {
+		it('arbeitet bis zur Rücklage und nicht darüber hinaus', () => {
+			// Wer zurückkommt, findet Haus und Hunger versorgt, aber keinen Schatz.
+			const bedarf: number = caretakerNeed(lage());
+
+			expect(decideCaretakerAction(lage({ money: bedarf - 1 }))).toBe('WORK');
+			expect(decideCaretakerAction(lage({ money: bedarf }))).toBe('IDLE');
+		});
+
+		it('wirbt nicht und arbeitet auch nicht stattdessen', () => {
+			// Wen er heiratet, entscheidet der Spieler und niemand sonst. Bis 0.6.2 ging der
+			// Verwalter an dieser Stelle arbeiten, mit vollem Beutel.
 			const umworben = lage({ isMarried: false, matchAvailable: true });
 
 			expect(decideNpcAction(umworben)).toBe('COURT');
-			expect(decideCaretakerAction(umworben)).toBe('WORK');
+			expect(decideCaretakerAction(umworben)).toBe('IDLE');
+		});
+
+		it('spart nicht auf ein Vorhaben', () => {
+			// Ein Verheirateter ohne Haus spart auf den Boden dafür. Das ist ein Plan, und
+			// Pläne fasst der Spieler.
+			const hausWunsch = lage({ ownsHome: false, plotPrice: 5_000, money: 200 });
+
+			expect(decideNpcAction(hausWunsch)).toBe('WORK');
+			expect(decideCaretakerAction(hausWunsch)).toBe('IDLE');
+		});
+
+		it('verdient auch das Material für ein verfallendes Haus', () => {
+			const ruecklage: number = caretakerNeed(lage());
+			const baufaellig = lage({
+				repairNeeded: true,
+				materialMissing: true,
+				materialPrice: 20,
+				money: ruecklage + 10
+			});
+
+			expect(caretakerNeed(baufaellig)).toBe(ruecklage + 20);
+			expect(decideCaretakerAction(baufaellig)).toBe('WORK');
+		});
+
+		it('renoviert, statt auf ein Vorhaben zu sparen', () => {
+			// Die Hierarchie stellt das Sparen vor das Herrichten. Für den Verwalter fällt
+			// das Sparen weg — dann bleibt die Zeit fürs Haus.
+			const beides = lage({
+				ownsHome: false,
+				plotPrice: 5_000,
+				money: 200,
+				repairNeeded: true,
+				repairCost: 0
+			});
+
+			expect(decideNpcAction(beides)).toBe('WORK');
+			expect(decideCaretakerAction(beides)).toBe('RENOVATE');
+		});
+
+		it('arbeitet für Brot, wenn er hungert und nichts hat', () => {
+			const hungrig = lage({ satiety: 10, food: 0, money: 0 });
+
+			expect(decideCaretakerAction(hungrig)).toBe('WORK');
 		});
 
 		it('erlaubt nichts, was Besitz festlegt', () => {

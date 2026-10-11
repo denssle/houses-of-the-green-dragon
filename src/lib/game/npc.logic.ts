@@ -536,15 +536,39 @@ export const CARETAKER_ACTIONS: readonly NpcAction[] = [
 	'RENOVATE'
 ] as const;
 
+/**
+ * Wie viel Geld ein Verwalter für seinen Schützling bereithält (0.6.2, Punkt 92): die
+ * Rücklage und, wenn das Haus verfällt und Material fehlt, dessen Preis. Das Herrichten
+ * selbst kostet seit 5.78 keine Münze, nur Material und Kraft.
+ */
+export function caretakerNeed(state: NpcState): number {
+	const ruecklage: number = desiredReserve(state.personality, state.foodPrice);
+	const material: number =
+		state.repairNeeded && state.materialMissing ? (state.materialPrice ?? 0) : 0;
+	return ruecklage + material;
+}
+
 export function decideCaretakerAction(state: NpcState): NpcAction {
 	const gewuenscht: NpcAction = decideNpcAction(state);
+	const lohnNoetig: boolean =
+		state.workAvailable && state.actionPoints > 0 && state.money < caretakerNeed(state);
+
+	// **Erhalten ja, entscheiden nein — auch für den Geldbeutel** (0.6.2, Punkt 92). Bis
+	// hierher verdingte sich der Verwalter jede Stunde, die nichts anderes verlangte, und
+	// wer wegblieb, kam reicher zurück als jeder, der spielte. Jetzt arbeitet er nur, bis
+	// Essen und Instandhaltung gedeckt sind; worauf der Charakter sonst sparen würde, ist
+	// ein Vorhaben, und Vorhaben fasst der Spieler.
+	if (gewuenscht === 'WORK' && !lohnNoetig) {
+		// Ohne den Tagelohn bliebe vielleicht Zeit für das Haus: Die Hierarchie stellt das
+		// Sparen vor das Renovieren, und für den Verwalter gibt es kein Sparen mehr.
+		const ohneLohn: NpcAction = decideNpcAction({ ...state, workAvailable: false });
+		return CARETAKER_ACTIONS.includes(ohneLohn) ? ohneLohn : 'IDLE';
+	}
 	if (CARETAKER_ACTIONS.includes(gewuenscht)) return gewuenscht;
 
 	// Was die Hierarchie sonst vorschlägt, ist eine Entscheidung — und die steht dem
-	// Verwalter nicht zu. Statt untätig zu bleiben, wird gearbeitet: Wer abwesend ist, soll
-	// wenigstens nicht ärmer werden, und Zeit, die am Deckel der Aktionspunkte verfällt,
-	// ist ohnehin verloren.
-	if (state.workAvailable && state.actionPoints > 0) return 'WORK';
+	// Verwalter nicht zu. Stattdessen wird gearbeitet, aber nur, solange es nötig ist.
+	if (lohnNoetig) return 'WORK';
 	return 'IDLE';
 }
 
