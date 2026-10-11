@@ -279,7 +279,10 @@ export function savingsTarget(state: NpcState): number | null {
 
 	// Etwas Eigenes — nur, wen sein Wesen dazu drängt. Sonst spart die halbe Stadt auf eine
 	// Werkstatt, und es gäbe niemanden mehr, der darin arbeitet.
-	if (!state.ownsWorkshop && isEnterprising(state.personality)) {
+	//
+	// **Und nur, wenn sie zu bauen ist** (Punkt 87): Bis hierher sparte einer auf den Boden,
+	// ohne zu fragen, ob danach etwas darauf steht — und kaufte ihn auch.
+	if (!state.ownsWorkshop && isEnterprising(state.personality) && werkstattErreichbar(state)) {
 		if (!state.hasFreePlot) return state.plotPrice;
 		// **Der Preis des Werkstattmaterials, nicht der des Hausmaterials** (5.62). Bis
 		// dahin stand hier `materialPrice`: die Bretter für die Kate, während es an
@@ -458,9 +461,12 @@ export function idleReason(state: NpcState): IdleReason {
 	// **Ein Ziel, das man nicht kaufen kann.** Wer ein Vorhaben hat, dem aber der Preis
 	// fehlt, weil es das Nötige nirgends gibt, spart auf nichts — und arbeitet deshalb
 	// nur bis zur Rücklage. Von außen sieht das aus wie Zufriedenheit.
+	//
+	// **Eine Werkstatt will nur bauen, wem eine fehlt** (Punkt 87) — dieselbe Bedingung wie
+	// in `savingsTarget` und `entfaltung`. Stehen alle Handwerke, hat er nichts vor.
 	const willBauen: boolean =
 		(state.isMarried && !state.ownsHome && state.homePrice !== null) ||
-		(!state.ownsWorkshop && isEnterprising(state.personality));
+		(!state.ownsWorkshop && isEnterprising(state.personality) && state.workshopPrice !== null);
 	// **Und es muss wirklich unbezifferbar sein** (5.76). Seit der Bau selbst keine Münze
 	// mehr kostet, ist „kein Sparziel" auch der Zustand dessen, der alles beisammen hat —
 	// der baut im selben Tick und ist gar nicht müßig. Diagnostiziert wird deshalb nur der
@@ -854,7 +860,8 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 		!state.hasFreePlot &&
 		state.plotPrice !== null &&
 		uebrig >= state.plotPrice &&
-		isEnterprising(state.personality)
+		isEnterprising(state.personality) &&
+		werkstattErreichbar(state)
 	) {
 		return 'BUY_PLOT';
 	}
@@ -905,6 +912,21 @@ function hatEigeneArbeit(state: NpcState): boolean {
  * und niemand wäre mehr da, der darin arbeitet.
  */
 export const ENTERPRISE_THRESHOLD = 20;
+
+/**
+ * **Ließe sich eine Werkstatt bauen?** (Punkt 87) Es fehlt eine, und ihr Material ist da oder
+ * am Markt zu haben — genau das, was `BUILD` und `BUY_WORKSHOP_MATERIAL` verlangen.
+ *
+ * Gefragt wird es überall, wo ein Unternehmungslustiger auf eine Werkstatt hinarbeitet:
+ * beim Sparen, beim Kauf des Bodens und in der Diagnose. Laufen die drei auseinander, kauft
+ * einer Bauland, auf dem er nie baut, und `idleReason` nennt das Sparen.
+ */
+function werkstattErreichbar(state: NpcState): boolean {
+	return (
+		state.workshopPrice !== null &&
+		(!state.workshopMaterialMissing || state.workshopMaterialPrice !== null)
+	);
+}
 
 export function isEnterprising(personality: Personality): boolean {
 	return (personality.ambition + personality.diligence) / 2 >= ENTERPRISE_THRESHOLD;

@@ -1665,6 +1665,21 @@ unverändert. Ihre Wirkung ist klein geworden: `GOAL_UNREACHABLE` steht im Lauf 
 bei 240. Seit 5.100 bietet in Versteigerungen nur, wer bauen will — aber ob „eine
 Werkstatt bauen" erreichbar ist, fragt auch dort niemand.
 
+**Gebaut mit 5.106 (11.10.2026).** `werkstattErreichbar` in `npc.logic.ts`: Es fehlt eine
+Werkstatt, und ihr Material ist da oder am Markt. Daran hängen jetzt alle drei Stellen —
+`savingsTarget` spart nur noch auf Boden für eine Werkstatt, die zu bauen ist, `entfaltung`
+kauft ihn nur dann, und `idleReason` will nur bauen, wem eine Werkstatt fehlt. Die
+Versteigerung (`bauabsicht`) fragt weiterhin nicht danach; ihr fehlt der NPC-Zustand.
+
+**Erste Messung** (Saat 86, 2000 Ticks, vorher gegen nachher): `BUY_PLOT` 11 → 8,
+`GOAL_UNREACHABLE` 2348 → 2493. `STILL_SAVING` kam schon vorher nicht vor — die
+Fehldiagnose aus dem Befund gibt es in dieser Form nicht mehr. **Aber die Lohnarbeit
+halbiert sich** (`WORK` 7018 → 3483): Wer auf Boden für eine unerreichbare Werkstatt
+sparte, baute nie, arbeitete aber. Ohne Sparziel hört er an der Rücklage auf. Am Ende 58
+statt 63 Lebende, Stadtkasse 365 statt 1122, Grundsteuer 1445 statt 2177; dafür kein
+Hungertoter, 10 Bäckereien und 6 Mühlen statt 8 und 13. Ob die schwächere Stadt Muster oder
+Zufall ist, sagt eine Saat nicht — Gegenmessung folgt.
+
 ### 88. Die Zugreihenfolge ist ein stiller Vorteil
 
 **Befund vom 23.08.2026.** `actForNpcs` holt die Einwohner ohne `order`:

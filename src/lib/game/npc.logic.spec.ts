@@ -298,6 +298,57 @@ describe('Was ein NPC tut', () => {
 			expect(decideNpcAction(bereit)).toBe('BUY_PLOT');
 		});
 
+		/**
+		 * **Kein Boden für eine Werkstatt, die er nicht bauen kann** (Punkt 87).
+		 *
+		 * Gespart und gekauft wurde das Grundstück, ohne zu fragen, ob danach etwas darauf
+		 * steht. Ein Unternehmungslustiger erwarb Bauland, das er nie bebaute, und band die
+		 * Parzelle für immer — und die Diagnose nannte das „Sparen", den gesunden Fall.
+		 */
+		describe('wenn die Werkstatt unerreichbar ist', () => {
+			// Das Material fehlt, und niemand bietet es an.
+			const ohneMaterial = {
+				money: 36 + 40,
+				isMarried: true,
+				ownsHome: true,
+				workshopMaterialMissing: true,
+				workshopMaterialPrice: null
+			};
+			// Es fehlt gar keine Werkstatt mehr — alle Handwerke stehen (Punkt 89).
+			const nichtsZuBauen = {
+				money: 36 + 40,
+				isMarried: true,
+				ownsHome: true,
+				workshopPrice: null
+			};
+
+			it('spart nicht auf den Boden dafür', () => {
+				expect(savingsTarget(gruender(ohneMaterial))).toBeNull();
+				expect(savingsTarget(gruender(nichtsZuBauen))).toBeNull();
+			});
+
+			it('kauft ihn auch nicht', () => {
+				expect(decideNpcAction(gruender(ohneMaterial))).not.toBe('BUY_PLOT');
+				expect(decideNpcAction(gruender(nichtsZuBauen))).not.toBe('BUY_PLOT');
+			});
+
+			it('nennt das Ziel unerreichbar statt Sparen', () => {
+				expect(idleReason(gruender({ ...ohneMaterial, workAvailable: true }))).toBe(
+					'GOAL_UNREACHABLE'
+				);
+			});
+
+			it('und hat nichts vor, wenn es nichts zu bauen gibt', () => {
+				expect(idleReason(gruender(nichtsZuBauen))).toBe('CONTENT');
+			});
+
+			it('kauft aber, sobald das Material am Markt ist', () => {
+				const erreichbar = gruender({ ...ohneMaterial, workshopMaterialPrice: 5 });
+				expect(savingsTarget(erreichbar)).toBe(40);
+				expect(decideNpcAction(erreichbar)).toBe('BUY_PLOT');
+			});
+		});
+
 		it('spart auf den nächsten Schritt, nicht auf das ganze Vorhaben', () => {
 			// Das Grundstück ist das Ziel, solange keines da ist. **Steht es, gibt es nichts
 			// mehr zu sparen** (5.76): Der Bau selbst kostet keine Münze mehr, sondern
