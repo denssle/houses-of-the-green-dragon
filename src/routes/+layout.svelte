@@ -51,6 +51,9 @@
 				<a href="{base}/konto" class="link">Konto</a>
 			{/if}
 		</nav>
+		{#if data.version}
+			<p class="mt-2 text-center text-xs text-gray-400">Version {data.version}</p>
+		{/if}
 	</footer>
 </div>
 

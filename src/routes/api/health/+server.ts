@@ -1,4 +1,5 @@
 import { sequelize } from '$lib/db/sequelize';
+import { appVersion } from '$lib/server/version';
 import { createMigrator } from '$lib/db/migrations';
 import * as worldService from '$lib/server/service/worldService';
 
@@ -31,7 +32,7 @@ interface HealthResponse {
 export async function GET(): Promise<Response> {
 	const body: HealthResponse = {
 		status: 'ok',
-		version: process.env.npm_package_version ?? 'unknown',
+		version: appVersion() ?? 'unknown',
 		dialect: sequelize.getDialect()
 	};
 
