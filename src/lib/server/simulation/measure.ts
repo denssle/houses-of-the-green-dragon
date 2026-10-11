@@ -22,6 +22,8 @@ import {
 	kassenbuchLeeren
 } from '$lib/server/service/treasuryService';
 import { tickWorld } from '$lib/server/worldTick';
+import { FERTILE_FROM_AGE, FERTILE_TO_AGE } from '$lib/game/family.logic';
+import { ageInYears } from '$lib/game/time';
 import { protokollieren } from '$lib/server/service/npcService';
 
 /**
@@ -308,6 +310,16 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		}
 	}
 
+	/**
+	 * **Woran eine Geburt scheitert** (0.6.3, Punkt 121). Empfangen kann nur, wer
+	 * verheiratet, im Alter dazu, nicht schon schwanger ist und daheim Platz hat
+	 * (`conceives`). Gezählt in Frauen-Ticks je Fenster, vor dem Takt — und ohne den Würfel
+	 * anzufassen, sonst wäre der Lauf nicht mehr derselbe.
+	 */
+	const leer = () => ({ ledig: 0, schwanger: 0, ohneDach: 0, ohnePlatz: 0, mitPlatz: 0 });
+	let frauenFenster = leer();
+	const frauenGesamt = leer();
+
 	const start: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
 	const begonnen: number = Date.now();
 	const bestandVorher: number = (await geldmenge()) + (await stadtkasse(stadtId));
@@ -318,6 +330,22 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		// Sterben, keine Wahl, kein Bürgermeister, keine Grundsteuer, kein Unglück. Der
 		// Bericht beschrieb damit eine Stadt, die es nirgends gibt: ohne Nachwuchs und mit
 		// einer Kasse, die nur ausgab. Siehe Punkt 95.
+		for (const frau of await Character.findAll({
+			where: { deathTick: null, gender: 'FEMALE' }
+		})) {
+			const alter: number = ageInYears(frau.dataValues.birthTick, start + i);
+			if (alter < FERTILE_FROM_AGE || alter > FERTILE_TO_AGE) continue;
+			let lage: keyof typeof frauenFenster;
+			if (frau.dataValues.spouseId === null) lage = 'ledig';
+			else if (frau.dataValues.pregnantSinceTick !== null) lage = 'schwanger';
+			else {
+				const platz = await buildingService.freierWohnraum(frau.dataValues.HomeBuildingId);
+				lage = platz === null ? 'ohneDach' : platz < 1 ? 'ohnePlatz' : 'mitPlatz';
+			}
+			frauenFenster[lage]++;
+			frauenGesamt[lage]++;
+		}
+
 		const stunde = await tickWorld(start + i, { roll: wuerfel, regionId: stadtId });
 
 		for (const [was, wieoft] of Object.entries(stunde.npcs.byAction)) {
@@ -379,6 +407,8 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 					`${await Character.count({ where: { deathTick: null } })} Lebende ` +
 					`(${chronik.geburten} geboren, ${chronik.tode} gestorben, ${chronik.zuzug} zugezogen)`
 			);
+			zeilen.push(`    Frauen-Ticks im Alter: ${frauenZeile(frauenFenster)}`);
+			frauenFenster = leer();
 			zeilen.push(
 				`    ${haeuser
 					.map(
@@ -405,6 +435,7 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 			`Saat ${saat === undefined ? 'frei gewürfelt' : saat}) ===`,
 		`  Geburten ${chronik.geburten}, Tode ${chronik.tode}` +
 			`${todeNach(todesursachen)}, Zuzug ${chronik.zuzug}, Brände ${chronik.braende}`,
+		`  Frauen-Ticks im Alter: ${frauenZeile(frauenGesamt)}`,
 		`  Grundsteuer eingenommen ${chronik.steuer}, nicht eintreibbar ${chronik.ausgefallen}`,
 		// **Was die Erschließung wirklich tut** (5.92, Punkt 102). Seit sie Arbeit ist statt
 		// eines Preises, sagt das Kassenbuch nichts mehr über sie: Ihr Lohn steht unter
@@ -562,4 +593,11 @@ async function brotGeben(characterId: string, laibe: number): Promise<number> {
 		}
 	});
 	return gegeben;
+}
+
+function frauenZeile(z: Record<string, number>): string {
+	return (
+		`ledig ${z.ledig}, schwanger ${z.schwanger}, ohne Dach ${z.ohneDach}, ` +
+		`ohne Platz ${z.ohnePlatz}, mit Platz ${z.mitPlatz}`
+	);
 }

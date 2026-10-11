@@ -23,7 +23,8 @@ import { measure } from '$lib/server/simulation/measure';
  * Ohne `MEASURE_TICKS` läuft er gar nicht erst, und mit läuft er ohne jede Erwartung durch.
  * Was der Bericht bedeutet, entscheidet der Mensch davor.
  *
- * Der Bericht geht nach `messung.txt` **und** auf die Ausgabe — die Datei, weil ein Lauf
+ * Der Bericht geht nach `messung.txt` (oder `MEASURE_OUT`, wenn mehrere Läufe nebeneinander
+ * im selben Verzeichnis stehen) **und** auf die Ausgabe — die Datei, weil ein Lauf
  * über zweitausend Ticks eine gute halbe Stunde dauert und man ihn danach in Ruhe lesen
  * will, statt im Scrollback zu suchen.
  */
@@ -61,7 +62,7 @@ describe('Messlauf', () => {
 			const bericht = await measure({ ticks, every, saat, verfolge, startgeld, startvorrat });
 			const text: string = bericht.lines.join('\n');
 
-			writeFileSync('messung.txt', text, 'utf8');
+			writeFileSync(process.env.MEASURE_OUT ?? 'messung.txt', text, 'utf8');
 			console.log(text);
 		},
 		// Großzügig: Ein Tick kostet rund siebenhundert Millisekunden (Punkt 67), und wer
