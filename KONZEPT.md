@@ -223,6 +223,10 @@ ist — bei der Lehre im eigenen Betrieb (Abschnitt 10), die ein Kind ausdrückl
 Werkstatt schickt. Beides gehört in denselben Schritt, sonst wird zweimal an derselben
 Altersgrenze gedreht.
 
+**Die Grenze steht seit dem 11.10.2026: Gearbeitet wird ab zwölf**, mit vollem Ertrag (Punkt 84).
+Die feste Anstellung, Heirat und Wahl bleiben bei der Volljährigkeit mit sechzehn. Die Lehre
+im eigenen Betrieb nutzt dieselbe Zwölf.
+
 **Vermacht wird über den Erben hinaus.** Neben der Benennung des Erben soll ein
 **Testament** stehen: einzelne Beträge an einzelne Personen, an die Zunft, an eine Kirche.
 Das ist die Gelegenheit, Dinge zu regeln, die keine Erbregel trifft — den treuen Gesellen
@@ -719,10 +723,17 @@ werden muss: Heute bekommt der Wahlsieger Kasse, Wache, Bauten und Gesetze in ei
 Verteilt muss er mit Leuten auskommen, die er sich nicht ausgesucht hat, und ein Haus, das
 die Bürgermeisterwahl verloren hat, kann trotzdem ein Amt halten.
 
-Welche Ämter es genau gibt, welche **gewählt** und welche vom Bürgermeister **ernannt**
-werden, ist die eigentliche Zuschnittsfrage und noch offen (Punkt 32). Zwei Leitplanken
-stehen dafür bereits fest: Der Richter wird gewählt, und die Stadtwache bleibt eine
-Anstellung und wird nie ein Amt.
+**Der Zuschnitt** (entschieden am 11.10.2026, Punkt 32): **Gewählt** werden zwei — der
+Bürgermeister für fünf Jahre und der Richter für acht, damit nicht dieselbe Stimmung beide
+Ämter besetzt. **Ernannt** werden vom Bürgermeister der Kämmerer, der Baumeister und der
+Wachmeister: Sie führen aus, was er verantwortet, und er trägt ihre Fehler bei der nächsten
+Wahl. Die Stadtwache bleibt eine Anstellung und wird nie ein Amt.
+
+Wenige Wahlen und viele Ernennungen, weil fünf Wahlen bei zwölf Einwohnern absurd wären,
+weil der Bürgermeister ein Amt bleiben soll, um das es sich zu kämpfen lohnt — und weil
+Ämter so zur Beute werden: Wer einen Kandidaten unterstützt, hofft auf die Kämmerei. Die
+Gewaltenteilung ist damit nur halb; genau deshalb ist der Richter die Ausnahme, denn er
+entscheidet über Freiheit.
 
 **Das Amt ist gerechnet, nicht gespeichert.** Bürgermeister ist der bestplatzierte
 Kandidat der letzten Wahl, der noch lebt. Daraus ergibt sich die Nachfolge von selbst:
@@ -753,6 +764,11 @@ wäre das Ende der Wirtschaft und nicht mehr rückgängig zu machen. Nach unten 
 die Null erlaubt: Eine Stadt aushungern zu lassen ist eine politische Entscheidung, keine
 kaputte. Zwischen den Grenzen gilt ein Erlass sofort — Missbrauch wird nicht verhindert,
 sondern abgewählt.
+
+**Der Zehnt trifft die Ernte, nicht die Verarbeitung** (entschieden am 11.10.2026, Punkt 109). Er
+ist eine Abgabe auf die Feldfrucht und keine Umsatzsteuer: Sägen, Mahlen, Backen und
+Schmieden bleiben frei davon. Wenn das Handwerk eine Abgabe tragen soll, dann über die
+Zünfte und nicht über einen zweiten Zehnt.
 
 Die **Grundsteuer** trifft den Besitz statt den Ertrag und ist die einzige Abgabe, die an
 der Zeit hängt: einmal im Spieljahr, je Grundstück. Sie macht Horten teuer. Wer nicht

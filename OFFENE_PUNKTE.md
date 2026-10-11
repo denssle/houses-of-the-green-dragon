@@ -13,58 +13,57 @@ Text verweisen weiter auf „Punkt 63" und Co., und die Messungen darin sind der
 vieles, was heute im Code steht. Die Nummern bleiben, wo sie sind; hier stehen nur die
 offenen, nach Nummer sortiert.
 
-| #   | Punkt                                                                                   | Fällig vor                   | Art          |
-| --- | --------------------------------------------------------------------------------------- | ---------------------------- | ------------ |
-| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                                 | Heiltrank (4.6c)             | Entwurf      |
-| 6   | Kämpfe und Verletzungen                                                                 | Waffen und Gift (4.6c)       | Entwurf      |
-| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                       | 4.7 / Punkt 6                | Entwurf      |
-| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                                | 4.8                          | Entwurf      |
-| 15  | Weltinhalte: Berufe, Waren und Rezepte                                                  | laufend                      | Entwurf      |
-| 16  | Balancing im engeren Sinn                                                               | laufend                      | laufend      |
-| 20  | Verschleiß von Gegenständen                                                             | Kleidung und Werkzeug (4.6c) | Entwurf      |
-| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**      | 4.8 / Punkt 6                | Entwurf      |
-| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                     | laufend                      | Entwurf      |
-| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                  | laufend                      | Entwurf      |
-| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                         | zweite Stadt / Erschließung  | Entwurf      |
-| 32  | Die Ämter: Zuschnitt, was gewählt und was ernannt wird, der Richter                     | Ämter über den Bürgermeister | Entscheidung |
-| 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen    | laufend                      | Entwurf      |
-| 34  | Wer einen Handwerksbetrieb führen darf                                                  | Berufe (Punkt 15)            | Entwurf      |
-| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                  | laufend                      | Entwurf      |
-| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                       | Ehe für alle                 | Entwurf      |
-| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit                | später                       | Entwurf      |
-| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist                 | zweite Stadt                 | Entwurf      |
-| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                             | erste verliehene Münze       | Entwurf      |
-| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                         | Punkt 43 / Punkt 23          | Entwurf      |
-| 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                           | zusammen mit Punkt 34        | Entwurf      |
-| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                            | Punkt 34                     | Entwurf      |
-| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                    | Punkte 23, 39, 43            | Entwurf      |
-| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                      | Zuwanderung (Punkt 41)       | Entwurf      |
-| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten       | Fernhandel                   | Entwurf      |
-| 51  | Mitgift, Testament und Stiftung                                                         | laufend                      | Entwurf      |
-| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                   | laufend                      | Entwurf      |
-| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                            | laufend                      | Entwurf      |
-| 67  | Die NPC-Schleife ist zu teuer geworden — **halbiert mit 5.105, zurückgestellt**         | dem nächsten Umbauschritt    | Befund       |
-| 70  | Niemand lernt ein Handwerk, das es nicht gibt — **Mahlen eigenständig seit 5.96**       | Punkte 114, 115              | teilweise    |
-| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                                 | laufend                      | Entwurf      |
-| 75  | Die Testläufe dauern zu lange — **Alltag 17 s, volle Suite gut zwei Minuten**           | Punkt 67                     | teilweise    |
-| 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                       | Punkte 15, 20, 51            | Entwurf      |
-| 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung            | dem nächsten Schritt         | Befund       |
-| 85  | Der Kornspeicher backt aus dem Nichts — **live noch da (0.5.105), Abriss in Etappe B**  | live: Mühle, Bäckerei, Brot  | teilweise    |
-| 87  | Ein Sparziel, das ins Leere führt — **behoben mit 5.106**, die Versteigerung offen      | dem nächsten Messlauf        | teilweise    |
-| 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick               | laufend                      | Befund       |
-| 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                   | Punkte 15, 34, 115           | teilweise    |
-| 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung      | Punkte 76, 16                | Entwurf      |
-| 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen        | laufend                      | teilweise    |
-| 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                      | Punkte 70, 40                | Befund       |
-| 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                          | Punkt 31                     | Befund       |
-| 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten     | Punkte 89, 16                | Befund       |
-| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                      | Punkt 100                    | teilweise    |
-| 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                     | Punkt 16                     | Befund       |
-| 109 | Der Zehnt trifft nur die erste Stufe jeder Kette — Verarbeitung ist steuerfrei          | Punkte 15, 46                | Entscheidung |
-| 114 | Der Zuzug fragt nach Gebäuden, nicht nach Bedarf                                        | Punkt 115                    | Befund       |
-| 115 | Wer nichts absetzt, sattelt nicht um — **5.98 und 5.99 gebaut, Schritt 4 offen**        | Punkt 117                    | teilweise    |
-| 116 | Wie viele Menschen eine Bäckerei satt macht — **und wie viel Vorrat als versorgt gilt** | Punkte 15, 16                | Entscheidung |
-| 117 | Wer Grund hat, soll ihn nutzen — oder dafür zahlen                                      | Punkt 50                     | Entwurf      |
+| #   | Punkt                                                                                  | Fällig vor                   | Art         |
+| --- | -------------------------------------------------------------------------------------- | ---------------------------- | ----------- |
+| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                                | Heiltrank (4.6c)             | Entwurf     |
+| 6   | Kämpfe und Verletzungen                                                                | Waffen und Gift (4.6c)       | Entwurf     |
+| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                      | 4.7 / Punkt 6                | Entwurf     |
+| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                               | 4.8                          | Entwurf     |
+| 15  | Weltinhalte: Berufe, Waren und Rezepte                                                 | laufend                      | Entwurf     |
+| 16  | Balancing im engeren Sinn                                                              | laufend                      | laufend     |
+| 20  | Verschleiß von Gegenständen                                                            | Kleidung und Werkzeug (4.6c) | Entwurf     |
+| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**     | 4.8 / Punkt 6                | Entwurf     |
+| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                    | laufend                      | Entwurf     |
+| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                 | laufend                      | Entwurf     |
+| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                        | zweite Stadt / Erschließung  | Entwurf     |
+| 32  | Die Ämter — **Zuschnitt entschieden**: zwei Wahlen, drei Ernennungen                   | Ämter über den Bürgermeister | entschieden |
+| 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen   | laufend                      | Entwurf     |
+| 34  | Wer einen Handwerksbetrieb führen darf                                                 | Berufe (Punkt 15)            | Entwurf     |
+| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                 | laufend                      | Entwurf     |
+| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                      | Ehe für alle                 | Entwurf     |
+| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit               | später                       | Entwurf     |
+| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist                | zweite Stadt                 | Entwurf     |
+| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                            | erste verliehene Münze       | Entwurf     |
+| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                        | Punkt 43 / Punkt 23          | Entwurf     |
+| 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                          | zusammen mit Punkt 34        | Entwurf     |
+| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                           | Punkt 34                     | Entwurf     |
+| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                   | Punkte 23, 39, 43            | Entwurf     |
+| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                     | Zuwanderung (Punkt 41)       | Entwurf     |
+| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten      | Fernhandel                   | Entwurf     |
+| 51  | Mitgift, Testament und Stiftung                                                        | laufend                      | Entwurf     |
+| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                  | laufend                      | Entwurf     |
+| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                           | laufend                      | Entwurf     |
+| 67  | Die NPC-Schleife ist zu teuer geworden — **halbiert mit 5.105, zurückgestellt**        | dem nächsten Umbauschritt    | Befund      |
+| 70  | Niemand lernt ein Handwerk, das es nicht gibt — **Mahlen eigenständig seit 5.96**      | Punkte 114, 115              | teilweise   |
+| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                                | laufend                      | Entwurf     |
+| 75  | Die Testläufe dauern zu lange — **Alltag 17 s, volle Suite gut zwei Minuten**          | Punkt 67                     | teilweise   |
+| 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                      | Punkte 15, 20, 51            | Entwurf     |
+| 84  | Sehr junge Kinder können für Lohn arbeiten — **entschieden: ab zwölf, voller Ertrag**  | dem nächsten Schritt         | entschieden |
+| 85  | Der Kornspeicher backt aus dem Nichts — **live noch da (0.5.105), Abriss in Etappe B** | live: Mühle, Bäckerei, Brot  | teilweise   |
+| 87  | Ein Sparziel, das ins Leere führt — **behoben mit 5.106**, die Versteigerung offen     | dem nächsten Messlauf        | teilweise   |
+| 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick              | laufend                      | Befund      |
+| 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                  | Punkte 15, 34, 115           | teilweise   |
+| 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung     | Punkte 76, 16                | Entwurf     |
+| 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen       | laufend                      | teilweise   |
+| 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                     | Punkte 70, 40                | Befund      |
+| 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                         | Punkt 31                     | Befund      |
+| 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten    | Punkte 89, 16                | Befund      |
+| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                     | Punkt 100                    | teilweise   |
+| 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                    | Punkt 16                     | Befund      |
+| 114 | Der Zuzug fragt nach Gebäuden, nicht nach Bedarf                                       | Punkt 115                    | Befund      |
+| 115 | Wer nichts absetzt, sattelt nicht um — **5.98 und 5.99 gebaut, Schritt 4 offen**       | Punkt 117                    | teilweise   |
+| 116 | Wie viele Menschen eine Bäckerei satt macht — **entschieden: Vorrat 3 statt 10**       | Punkte 15, 16                | entschieden |
+| 117 | Wer Grund hat, soll ihn nutzen — oder dafür zahlen                                     | Punkt 50                     | Entwurf     |
 
 #### Noch zu erfassen:
 
@@ -189,6 +188,18 @@ Einzelwahlen nicht hergeben.
 Dagegen spricht, dass die Gewaltenteilung dann nur halb ist — die Exekutive hängt komplett
 am Bürgermeister. Genau deshalb ist der Richter die Ausnahme: Der eine Zweig, der ihn
 bremsen können muss, ist der, der über Freiheit entscheidet.
+
+**Entschieden am 11.10.2026: der Vorschlag.** Gewählt werden der **Bürgermeister** (fünf Jahre
+wie bisher) und der **Richter** (acht Jahre, damit er einen Bürgermeister überdauert, der ihn
+nicht wollte). Der Bürgermeister ernennt **Kämmerer**, **Baumeister** und **Wachmeister**.
+Die Stadtwache bleibt eine Anstellung. Festgehalten in `KONZEPT.md`, Abschnitt 5.
+
+Damit ist die Amtszeit des Richters aus der Liste darunter erledigt, und die Frage „wer
+zahlt, wenn ein anderer bestellt" entschärft sich wie beschrieben: Alle Ernannten dienen
+demselben Herrn. **Offen bleibt**, ob jedes Amt einen eigenen Sold-Satz bekommt — und in
+welcher Reihenfolge die Ämter gebaut werden. Naheliegend ist der Richter zuerst, weil er
+der einzige Zweig ist, der heute ganz fehlt; er braucht aber Räuber oder Schuldner, über die
+er richten kann (Punkte 23, 43).
 
 **Was in jedem Fall zu klären bleibt:**
 
@@ -1357,6 +1368,17 @@ lernt oder arbeitet, ist dieselbe Frage von zwei Seiten — und ein Tag ist nur 
 noch `WORK` in der Überlebensstufe noch der Bau- oder Vermessungsdienst prüfen das Alter.
 Nur die Anstellung (`canTakeJob`) und seit 5.99 der Stellenwechsel tun es.
 
+**Entschieden am 11.10.2026: Gearbeitet wird ab zwölf, mit vollem Ertrag.** Eine Grenze unterhalb
+der Volljährigkeit (sechzehn), weil ein Kind in dieser Welt hilft, sobald es kann — und mit
+vollem Ertrag, weil ein gedämpfter Lohn eine zweite Regel wäre, die niemand sieht. Unter
+zwölf wird nicht gearbeitet.
+
+**Umzusetzen:** Eine Altersgrenze (`AGE_OF_WORK = 12` neben `AGE_OF_MAJORITY`), geprüft
+überall, wo heute nur die Anstellung prüft — `REPAIR_FOR_HIRE`, `harvest`, `craft`, die
+Vermessung, und in der Lageaufnahme `workAvailable`, damit ein Achtjähriger es gar nicht
+erst vorhat. Die feste Anstellung bleibt bei sechzehn. Die Lehre im eigenen Betrieb
+(Punkt 45) dreht später nicht noch einmal an dieser Zahl, sondern nutzt sie.
+
 ### 85. Der Kornspeicher backt aus dem Nichts — verteuert mit 5.86
 
 **Angemerkt am 22.08.2026:** „Eigentlich sollte der Kornspeicher wie auch die städtische
@@ -2190,46 +2212,6 @@ in der die Stadt es am nötigsten hat. Ein Bürgermeister ohne eine Münze kann 
 jetzt selbst herrichten. **Was bleibt, ist der Fall ohne Menschen:** Stirbt die Stadt
 vollständig aus, gibt es auch niemanden mehr, der Aktionspunkte hat.
 
-### 109. Der Zehnt trifft nur die erste Stufe jeder Kette
-
-**Aufgefallen am 05.09.2026**, beim Nachsehen, wer den Zehnt eigentlich wann zahlt (nach
-5.83). Die Antwort ist eindeutig und wirft eine Frage auf, die noch niemand gestellt hat.
-
-**Erhoben wird ausschließlich auf die Ernte.** `harvest` verzehntet, `craft` nicht — und
-beim Knecht fällt nur etwas an, wenn sein Arbeitsplatz auf einer **Pachtfläche** steht
-(`boden`); in einer gewöhnlichen Werkstatt nie. Das ist keine Nachlässigkeit, sondern
-entspricht dem, was das Gesetz verspricht: „Anteil jeder **Ernte**, der an die Stadt geht"
-(`LAW_RULES.TITHE`), und der Begründung im Code — er trifft die Ernte, nicht den
-Erntenden.
-
-**Die Folge ist trotzdem bemerkenswert:** Ein Zimmerer, der eigenes Holz schlägt, zahlt
-einmal auf den Stamm und danach nie wieder. Die gesamte Wertschöpfung — sägen, mahlen,
-backen, schmieden — ist **steuerfrei**, und je länger eine Kette wird, desto kleiner wird
-der besteuerte Anteil an ihrem Wert. Die Stadt verdient an den Bauern und den
-Rohstoffbrechern; an einer Stadt voller Handwerker verdient sie am Zehnt nichts.
-
-**Wo Herstellung heute überhaupt vorkommt**, ist keine Steuer: Das Standgeld ist eine
-Miete für den Marktstand, die Handelssteuer trifft den Kauf. Zwischen Rohstoff und Verkauf
-liegt eine steuerfreie Strecke.
-
-**Zu entscheiden ist, ob das so sein soll**, und es ist eine Frage an das Konzept und nicht
-an den Code. Drei Lesarten, die alle vertretbar sind:
-
-- **So ist es gewollt.** Ein Zehnt ist historisch eine Abgabe auf die Feldfrucht und keine
-  Umsatzsteuer. Handwerk wird über Zünfte belastet (Punkt 46), nicht über den Zehnt. Dann
-  gehört diese Beobachtung nur dokumentiert — und dieser Punkt ist damit erledigt.
-- **Es fehlt eine Abgabe auf das Handwerk.** Dann ist sie ein eigenes Gesetz mit eigenem
-  Satz, kein zweiter Zehnt — und sie gehört zu den Steuerarten aus 4.7b, die dort
-  ausdrücklich als erweiterbar angelegt sind.
-- **Der Zehnt soll die Wertschöpfung treffen.** Dann müsste `craft` mit verzehntet werden,
-  und die Frage nach der Doppelbesteuerung entsteht: Wer Holz erntet **und** sägt, zahlt
-  zweimal auf dasselbe Stück.
-
-**Warum es jetzt zählt:** Nach 5.83 ist der Zehnt von rund 1000 auf 246 Münzen gefallen —
-er ist der kleinste Posten der Stadtkasse geworden. Wovon die Stadt lebt, sind der
-Kornspeicher (Punkt 85) und die Grundsteuer. Ob der Zehnt überhaupt noch ein Hebel ist,
-hängt daran, worauf er greift.
-
 ## Die Wirtschaft — Stand 04.10.2026
 
 **Die Brotkette trägt.** Im Lauf auf 5.101 (Saat 86, 2000 Ticks) kaufen Bäckereien Mehl
@@ -2348,6 +2330,15 @@ solange die nicht bereitliegen, gilt die Mühle als knapp. Die Herdenbremse (ein
 zählt als Antwort) hält nur einen Bau auf einmal zurück, nicht die Summe. Zu entscheiden
 ist hier also auch, **wie viel Vorrat** als versorgt gilt (`INPUT_BUFFER_BATCHES`), nicht
 nur, wie viel ein Betrieb erzeugt.
+
+**Die Messläufe vom 11.10.2026** (Punkt 87, drei Saaten) zeigen dasselbe Bild in beide
+Richtungen: 3 bis 13 Mühlen für 4 bis 11 Bäckereien.
+
+**Entschieden am 11.10.2026:** Die Backrate bleibt — ein Bäcker reicht rechnerisch für 120
+Menschen. Gedreht wird am Vorrat: `INPUT_BUFFER_BATCHES` von **10 auf 3**. Ein Betrieb gilt
+als versorgt, wenn drei Durchgänge Zutat bereitliegen. **Umzusetzen** mit einem Messlauf
+über drei Saaten vorher und nachher; Maßstab ist das Verhältnis von Mühlen zu Bäckereien,
+ohne dass Hungertote dazukommen.
 
 ### 117. Wer Grund hat, soll ihn nutzen — oder dafür zahlen
 
