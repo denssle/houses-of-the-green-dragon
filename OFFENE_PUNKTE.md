@@ -43,10 +43,10 @@ offenen, nach Nummer sortiert.
 | 51  | Mitgift, Testament und Stiftung                                                         | laufend                      | Entwurf      |
 | 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                   | laufend                      | Entwurf      |
 | 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                            | laufend                      | Entwurf      |
-| 67  | Die NPC-Schleife ist zu teuer geworden — **ein Messlauf kostet fünfzig Minuten**        | dem nächsten Umbauschritt    | Befund       |
+| 67  | Die NPC-Schleife ist zu teuer geworden — **halbiert mit 5.105, zurückgestellt**         | dem nächsten Umbauschritt    | Befund       |
 | 70  | Niemand lernt ein Handwerk, das es nicht gibt — **Mahlen eigenständig seit 5.96**       | Punkte 114, 115              | teilweise    |
 | 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                                 | laufend                      | Entwurf      |
-| 75  | Die Testläufe dauern zu lange — **Suite bei zwei Minuten, Messläufe sind es (67)**      | Punkt 67                     | teilweise    |
+| 75  | Die Testläufe dauern zu lange — **Alltag 17 s, volle Suite gut zwei Minuten**           | Punkt 67                     | teilweise    |
 | 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                       | Punkte 15, 20, 51            | Entwurf      |
 | 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung            | dem nächsten Schritt         | Befund       |
 | 85  | Der Kornspeicher backt aus dem Nichts — **live noch da (0.5.105), Abriss in Etappe B**  | live: Mühle, Bäckerei, Brot  | teilweise    |
@@ -1283,6 +1283,22 @@ Ursache.
 Minuten** Wanduhr — weniger als die Hälfte von August, bei mehr Tests. Das drängt nicht
 mehr. Was drängt, sind die Messläufe (Punkt 67): fünfzig Minuten je Lauf mit lebender
 Stadt.
+
+**Nachgemessen und angegangen am 09./11.10.2026.** Die Suite war wieder auf **356 Sekunden**
+gewachsen, und die Zeit je Datei — oben als nächster Schritt genannt — zeigte, woran: drei
+Simulationen (`worldComesAlive` 353 s, `selfSustaining` 207 s, `selfSustainingEconomy`
+169 s), alle übrigen Dateien je unter neun Sekunden. Die Wanduhr der Suite war schlicht die
+der langsamsten Simulation.
+
+- **Die Suite ist geteilt**, wie oben vorgeschlagen: `npm run test:unit` lässt die drei aus
+  (**17 Sekunden**), `npm run test:sim` nimmt nur sie, ein schlichtes `vitest run` — so
+  ruft es die CI — beide.
+- **Ein Tick kostet die Hälfte** (Punkt 67, 5.105): 743 → 367 ms bei 14 Einwohnern.
+- **Sequelizes Vorsorge-Stack** läuft in Tests nicht mehr durch Vites Source-Map-Übersetzung
+  (`vitest.setup.ts`): noch einmal gut 20 % je Tick.
+
+Die volle Suite braucht damit **gut zwei Minuten** (133–141 s). Was bleibt, ist dasselbe wie
+in Punkt 67: Die Simulationen und Messläufe hängen an der Tickzeit.
 
 ### 77. Was das Inventar noch nicht kann
 
