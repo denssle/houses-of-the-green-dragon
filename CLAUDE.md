@@ -10,28 +10,23 @@ aus. Damit lässt sich nach jedem Deploy in einem Blick sagen, **was dort eigent
 läuft** — vorausgesetzt, die Zahl wird gepflegt. Sonst ist sie schlimmer als keine: Sie
 behauptet eine Auskunft, die sie nicht gibt.
 
-**Das Schema ist `0.<Phase>.<Schritt>`:**
+**Das Schema ist SemVer, und wir bleiben bei `0.x`** (seit dem 11.10.2026). Bis dahin hieß
+es `0.<Phase>.<Schritt>` mit `1.0.0` als Stichtag für den öffentlichen Betrieb — beides
+ist aufgegeben, siehe die Bauordnung in `OFFENE_PUNKTE.md`. Ab `0.5.111` gilt:
 
-- **Phase** ist die Phase aus `ENTWICKLUNG.md` — zurzeit 5. Mit dem Beginn von Phase 6
-  würde daraus `0.6.0`; wahrscheinlicher ist, dass vorher `1.0.0` fällt, denn Phase 5 ist
-  die letzte vor dem öffentlichen Betrieb (siehe unten).
-- **Schritt** zählt die abgeschlossenen Umbauschritte innerhalb der Phase (5.38, 5.39,
-  5.40 — jeder ist einer). Die Zahl ist fortlaufend und muss nicht mit der Schrittnummer
-  übereinstimmen; sie soll nur steigen.
-- **Fehlerbehebungen und Feinschliff** ohne eigenen Umbauschritt erhöhen ebenfalls den
-  letzten Teil. Eine Version, die zweimal dasselbe bedeutet, ist keine.
+- **Patch** (`0.5.112`): Fehlerbehebungen, Feinschliff, Balancing ohne neues System,
+  Beschleunigung und Werkzeug, die nichts am Spiel ändern.
+- **Minor** (`0.6.0`): ein Schritt, der etwas Neues ins Spiel bringt — eine Handlung, ein
+  Gebäude, ein Amt, eine Regel, die es vorher nicht gab.
+- **Major** gibt es unter `1.0.0` nicht. Ob und wann `1.0.0` fällt, ist offen und an
+  keinen Stichtag gebunden.
 
-`1.0.0` bleibt dem Tag vorbehalten, an dem das Spiel öffentlich läuft — nicht nur
-technisch erreichbar, sondern für Fremde spielbar.
+Eine Version, die zweimal dasselbe bedeutet, ist keine — jede Änderung am Laufenden hebt
+die Zahl.
 
-**Danach gilt klassisches SemVer** (entschieden am 11.10.2026). Die Phase steckt dann nicht mehr
-in der Zahl:
-
-- **Patch** (`1.0.1`): Fehlerbehebungen, Feinschliff, Balancing ohne neues System.
-- **Minor** (`1.1.0`): ein Schritt, der etwas Neues ins Spiel bringt — eine Handlung, ein
-  Gebäude, ein Amt.
-- **Major** (`2.0.0`): wenn eine laufende Welt nicht einfach weiterläuft — ein Neubeginn
-  der Welt oder ein Bruch, den Spieler selbst auffangen müssen.
+**Schritte heißen nach ihrer Version.** Bis `0.5.110` trugen Umbauschritte eine eigene
+Nummer (5.38, 5.106), auf die Code und Dokumente verweisen. Die alten bleiben, wie sie
+sind; neue Verweise nennen die Version, mit der etwas kam (`0.5.111`, `0.6.0`).
 
 **Wann sie steigt:** in demselben Commit, der die Änderung bringt. Ein nachgereichter
 Versions-Commit ist eine Zeile, die niemand mit dem Inhalt verbindet.

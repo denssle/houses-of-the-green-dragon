@@ -1,75 +1,122 @@
 # Offene Punkte
 
-Alles, was noch entschieden oder entworfen werden muss, mit dem Zeitpunkt, zu dem es
-spätestens fallen muss. Entschiedenes steht in `KONZEPT.md`, der Weg dorthin in
-`ENTWICKLUNG.md`.
+Alles, was noch entschieden, entworfen oder gebaut werden muss. Entschiedenes steht in
+`KONZEPT.md`, was gebaut wurde, in `ENTWICKLUNG.md`.
 
-**In welchem Schritt ein Punkt drankommt**, steht dort unter „Der Weg von hier" (Phasen 5
-bis 10). Die Spalte „Fällig vor" sagt etwas anderes und bleibt deshalb: nicht wann er
-gebaut wird, sondern woran er hängt — was nicht gehen kann, solange er offen ist.
+**Es gibt keine Phasen und keinen Stichtag mehr** (seit dem 11.10.2026). Was als Nächstes
+drankommt, sagt die **Bauordnung** unter der Tabelle: welcher Punkt auf welchem aufbaut.
+Die Spalte **„Baut auf"** nennt genau das — die Punkte, die stehen müssen, bevor dieser
+sinnvoll gebaut werden kann. Ein Strich heißt: Er steht für sich und kann jederzeit dran.
 
 **Erledigtes steht in `ERLEDIGTE_PUNKTE.md`** — mit seinem vollen Abschnitt, denn Code und
 Text verweisen weiter auf „Punkt 63" und Co., und die Messungen darin sind der Grund für
 vieles, was heute im Code steht. Die Nummern bleiben, wo sie sind; hier stehen nur die
 offenen, nach Nummer sortiert.
 
-| #   | Punkt                                                                                  | Fällig vor                   | Art         |
-| --- | -------------------------------------------------------------------------------------- | ---------------------------- | ----------- |
-| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                                | Heiltrank (4.6c)             | Entwurf     |
-| 6   | Kämpfe und Verletzungen                                                                | Waffen und Gift (4.6c)       | Entwurf     |
-| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                      | 4.7 / Punkt 6                | Entwurf     |
-| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                               | 4.8                          | Entwurf     |
-| 15  | Weltinhalte: Berufe, Waren und Rezepte                                                 | laufend                      | Entwurf     |
-| 16  | Balancing im engeren Sinn                                                              | laufend                      | laufend     |
-| 20  | Verschleiß von Gegenständen — **entschieden: am Gebrauch, Ausrüstung einzeln**         | Kleidung und Werkzeug (4.6c) | entschieden |
-| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**     | 4.8 / Punkt 6                | Entwurf     |
-| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                    | laufend                      | Entwurf     |
-| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                 | laufend                      | Entwurf     |
-| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                        | zweite Stadt / Erschließung  | Entwurf     |
-| 32  | Die Ämter — **Zuschnitt entschieden**: zwei Wahlen, drei Ernennungen                   | Ämter über den Bürgermeister | entschieden |
-| 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen   | laufend                      | Entwurf     |
-| 34  | Wer einen Handwerksbetrieb führen darf — **entschieden: Stufe 5, Stillstand beim Tod** | zusammen mit Punkt 45        | entschieden |
-| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                 | laufend                      | Entwurf     |
-| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                      | Ehe für alle                 | Entwurf     |
-| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit               | später                       | Entwurf     |
-| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist                | zweite Stadt                 | Entwurf     |
-| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                            | erste verliehene Münze       | Entwurf     |
-| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                        | Punkt 43 / Punkt 23          | Entwurf     |
-| 45  | Die Lehre im eigenen Betrieb — **entschieden: ab zwölf, halbes Lerntempo**             | zusammen mit Punkt 34        | entschieden |
-| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                           | Punkt 34                     | Entwurf     |
-| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                   | Punkte 23, 39, 43            | Entwurf     |
-| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                     | Zuwanderung (Punkt 41)       | Entwurf     |
-| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten      | Fernhandel                   | Entwurf     |
-| 51  | Mitgift, Testament und Stiftung                                                        | laufend                      | Entwurf     |
-| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                  | laufend                      | Entwurf     |
-| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                           | laufend                      | Entwurf     |
-| 67  | Die NPC-Schleife ist zu teuer geworden — **halbiert mit 5.105, zurückgestellt**        | dem nächsten Umbauschritt    | Befund      |
-| 70  | Niemand lernt ein Handwerk, das es nicht gibt — **Mahlen eigenständig seit 5.96**      | Punkte 114, 115              | teilweise   |
-| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                                | laufend                      | Entwurf     |
-| 75  | Die Testläufe dauern zu lange — **Alltag 17 s, volle Suite gut zwei Minuten**          | Punkt 67                     | teilweise   |
-| 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                      | Punkte 15, 20, 51            | Entwurf     |
-| 84  | Sehr junge Kinder können für Lohn arbeiten — **entschieden: ab zwölf, voller Ertrag**  | dem nächsten Schritt         | entschieden |
-| 85  | Der Kornspeicher backt aus dem Nichts — **live noch da (0.5.105), Abriss in Etappe B** | live: Mühle, Bäckerei, Brot  | teilweise   |
-| 87  | Ein Sparziel, das ins Leere führt — **behoben mit 5.106**, die Versteigerung offen     | dem nächsten Messlauf        | teilweise   |
-| 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick              | laufend                      | Befund      |
-| 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                  | Punkte 15, 34, 115           | teilweise   |
-| 90  | Die NPC-Entscheidung hat kein Gedächtnis — **zuerst das Verkaufsgedächtnis**           | Punkte 76, 16                | entschieden |
-| 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen       | laufend                      | teilweise   |
-| 92  | Der Verwalter arbeitet ohne Ende — **entschieden: nur für Essen und Erhalt**           | Punkte 70, 40                | entschieden |
-| 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                         | Punkt 31                     | Befund      |
-| 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten    | Punkte 89, 16                | Befund      |
-| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                     | Punkt 100                    | teilweise   |
-| 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                    | Punkt 16                     | Befund      |
-| 114 | Der Zuzug fragt nach Gebäuden, nicht nach Bedarf                                       | Punkt 115                    | Befund      |
-| 115 | Wer nichts absetzt, sattelt nicht um — **5.98 und 5.99 gebaut, Schritt 4 offen**       | Punkt 117                    | teilweise   |
-| 116 | Wie viele Menschen eine Bäckerei satt macht — **entschieden: Vorrat 3 statt 10**       | Punkte 15, 16                | entschieden |
-| 117 | Wer Grund hat, soll ihn nutzen — oder dafür zahlen                                     | Punkt 50                     | Entwurf     |
+| #   | Punkt                                                                                  | Baut auf                   | Art         |
+| --- | -------------------------------------------------------------------------------------- | -------------------------- | ----------- |
+| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                                | —                          | Entwurf     |
+| 6   | Kämpfe und Verletzungen                                                                | —                          | Entwurf     |
+| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                      | 6, 32                      | Entwurf     |
+| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                               | laufend                    | Entwurf     |
+| 15  | Weltinhalte: Berufe, Waren und Rezepte                                                 | laufend                    | Entwurf     |
+| 16  | Balancing im engeren Sinn                                                              | laufend                    | laufend     |
+| 20  | Verschleiß von Gegenständen — **entschieden: am Gebrauch, Ausrüstung einzeln**         | 77                         | entschieden |
+| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**     | 6, 44, 47                  | Entwurf     |
+| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                    | 45                         | Entwurf     |
+| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                 | laufend                    | Entwurf     |
+| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                        | —                          | Entwurf     |
+| 32  | Die Ämter — **Zuschnitt entschieden**: zwei Wahlen, drei Ernennungen                   | —                          | entschieden |
+| 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen   | 90                         | Entwurf     |
+| 34  | Wer einen Handwerksbetrieb führen darf — **entschieden: Stufe 5, Stillstand beim Tod** | 84                         | entschieden |
+| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                 | 118                        | Entwurf     |
+| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                      | —                          | Entwurf     |
+| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit               | — (Stadtreligion: 49, 119) | Entwurf     |
+| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist                | 31, 119                    | Entwurf     |
+| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                            | 44, 118                    | Entwurf     |
+| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                        | 32                         | Entwurf     |
+| 45  | Die Lehre im eigenen Betrieb — **entschieden: ab zwölf, halbes Lerntempo**             | 84                         | entschieden |
+| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                           | 34, 45                     | Entwurf     |
+| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                   | —                          | Entwurf     |
+| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                     | 41, 119                    | Entwurf     |
+| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten      | 49, 120                    | Entwurf     |
+| 51  | Mitgift, Testament und Stiftung                                                        | 38, 77                     | Entwurf     |
+| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                  | —                          | Entwurf     |
+| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                           | —                          | Entwurf     |
+| 67  | Die NPC-Schleife ist zu teuer geworden — **halbiert mit 5.105, zurückgestellt**        | —                          | Befund      |
+| 70  | Niemand lernt ein Handwerk, das es nicht gibt — **Mahlen eigenständig seit 5.96**      | 115                        | teilweise   |
+| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                                | 90                         | Entwurf     |
+| 75  | Die Testläufe dauern zu lange — **Alltag 17 s, volle Suite gut zwei Minuten**          | 67                         | teilweise   |
+| 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                      | —                          | Entwurf     |
+| 84  | Sehr junge Kinder können für Lohn arbeiten — **entschieden: ab zwölf, voller Ertrag**  | —                          | entschieden |
+| 85  | Der Kornspeicher backt aus dem Nichts — **live noch da (0.5.105), Abriss in Etappe B** | live: Mühle, Bäckerei      | teilweise   |
+| 87  | Ein Sparziel, das ins Leere führt — **behoben mit 5.106**, die Versteigerung offen     | —                          | teilweise   |
+| 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick              | —                          | Befund      |
+| 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                  | 34                         | teilweise   |
+| 90  | Die NPC-Entscheidung hat kein Gedächtnis — **zuerst das Verkaufsgedächtnis**           | —                          | entschieden |
+| 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen       | —                          | teilweise   |
+| 92  | Der Verwalter arbeitet ohne Ende — **entschieden: nur für Essen und Erhalt**           | —                          | entschieden |
+| 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                         | —                          | Befund      |
+| 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten    | —                          | Befund      |
+| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                     | —                          | teilweise   |
+| 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                    | —                          | Befund      |
+| 114 | Der Zuzug fragt nach Gebäuden, nicht nach Bedarf                                       | 115                        | Befund      |
+| 115 | Wer nichts absetzt, sattelt nicht um — **5.98 und 5.99 gebaut, Schritt 4 offen**       | 117                        | teilweise   |
+| 116 | Wie viele Menschen eine Bäckerei satt macht — **entschieden: Vorrat 3 statt 10**       | —                          | entschieden |
+| 117 | Wer Grund hat, soll ihn nutzen — oder dafür zahlen                                     | —                          | Entwurf     |
+| 118 | Verträge zwischen Charakteren — eine Form für Auftrag, Kredit und Lehrvertrag          | —                          | Entwurf     |
+| 119 | Die zweite Stadt — alles Regionsblinde wird regionsfähig                               | 31                         | Entwurf     |
+| 120 | Fernhandel — Lieferungen mit Ankunft, Preisunterschiede zwischen Städten               | 41, 119                    | Entwurf     |
+
+## Die Bauordnung
+
+Stand 11.10.2026. Keine Phasen, sondern **Stränge**: Innerhalb eines Strangs baut jeder Schritt auf
+dem davor auf, zwischen den Strängen gibt es kaum Abhängigkeiten. Welcher Strang drankommt,
+ist eine Frage der Lust und nicht der Reihenfolge.
+
+**Jederzeit, für sich** — klein, keine Voraussetzung, gut für einen Abend:
+116 (Mehlvorrat, in Arbeit), 84 (Arbeit ab zwölf), 92 (Verwalter), 88 (Zugreihenfolge),
+94 (Angebot zurück ins Lager), 91 (Tick-Vermerk), 87 (Rest: Versteigerung), 105, 98, 61,
+101 (Bürgerseite), 64 (Seiten je Gebäude).
+
+**Handwerk:** 84 → **34 + 45** (Meisterpflicht und Lehre, ein Schritt) → 46 (Zünfte) — und
+89 (ein Betrieb je Handwerk) hängt an 34. Daneben 24 (Schule), weil Lehre und Schule sich
+die Aktionspunkte eines Kindes teilen.
+
+**Das Gedächtnis der NPCs:** **90** (zuerst der Absatz) → 73 (kaufen nach dem Menschen) und
+33 (Lohn verhandeln). Der Strang, der die Wirtschaft am meisten verändert.
+
+**Umsatteln und Zuzug:** **117** (Grund nutzen oder zahlen) → 115 Schritt 4 → 114 (Zuzug nach
+Bedarf) und 70 (Handwerke lernen, die es noch nicht gibt).
+
+**Recht und Schuld:** **32** (Ämter, Richter zuerst) → 44 (Schuldturm) — und unabhängig davon
+**118** (Verträge). Beide zusammen tragen 43 (Geldverleih); 118 allein trägt 35 (Bauherr).
+**47** (Ruf) und 6 (Kampf) stehen für sich; mit 44 zusammen ergeben sie 23 (Räuber). 7
+(Mut und Ehrgeiz für NPCs) kommt nach 6 und 32.
+
+**Besitz und Familie:** **77** (Einzelstücke im Inventar) → 20 (Verschleiß). 38 (Ehe für alle,
+Adoption) → 51 (Mitgift, Testament), das auch 77 fürs Vererben braucht.
+
+**Die größere Welt:** **31** (Sechseckkarte) → 119 (zweite Stadt) → 41 (Reisen) → 120
+(Fernhandel) und 49 (Bürgerrecht) → 50 (Zoll, Bannrechte, Bauordnung). Der teuerste
+Strang: 119 berührt jede Abfrage, die heute eine Region annimmt — vorher zählen, wie viele
+das sind.
+
+**Was für sich steht, aber groß ist:** 5 (Krankheiten, mit Brunnen und Bader), 39 (Religion,
+Kirche, Feste; nur die Stadtreligion braucht 49 und 119).
+
+**Laufend und nie fertig:** 15 (Weltinhalte), 16 (Balancing), 30 (was NPCs noch nicht tun —
+Bedingung jedes Schritts, kein eigener), 12 (öffentliche Gebäude wachsen mit), 67 und 75
+(Tempo), 85 (wartet auf die Live-Welt).
+
+**Was am meisten freischaltet:** 118 (Verträge) trägt drei Punkte, 32 und 47 je zwei, 90 zwei,
+31 die ganze größere Welt. Wer einen Strang öffnen will, fängt dort an.
 
 #### Noch zu erfassen:
 
 _(Die Notizen vom 22.08.2026 sind als Punkte 78 bis 83 erfasst.)_
 
-## Vor Phase 4
+## Leib, Kampf und Stadtbild
 
 ### 5. Krankheiten
 
@@ -97,6 +144,8 @@ tatsächlich ein Weg an ein Erbe.
 Wichtig für den Zuschnitt: Der Raub braucht Ware, die unterwegs ist — also `shipment`
 aus 4.9 oder wenigstens den Transport innerhalb einer Region. Ohne das gibt es nichts zu
 überfallen.
+
+_Fertig, wenn:_ Ein Überfall geht aus, ohne dass jemand die Regeln kennen muss, um ihn zu überleben. (aus dem alten Phasenplan)
 
 ### 7. Verhaltensregeln der NPCs
 
@@ -147,7 +196,7 @@ Brunnen gegen Seuchen setzt Punkt 5 voraus; eine Mauer gegen Räuber und ein Lö
 gegen Brände hätten seit 4.8 dagegen sofort eine Wirkung — die Unglücke sind da, nur
 fehlt bisher jeder Bau, der gegen sie hilft. Die Wache ist der einzige.
 
-## Vor der Politik
+## Die Ämter
 
 ### 32. Die Ämter: Zuschnitt, Wahl und Ernennung
 
@@ -239,7 +288,9 @@ passen dagegen nicht hinein**: Sie haben keine Wahlliste, aus der sich der Inhab
 errechnen ließe, und brauchen daher doch eine gespeicherte Zeile samt Regel für den Fall,
 dass der Ernannte stirbt. Das ist der Preis der Ernennung und gehört in die Abwägung.
 
-## Laufend
+_Fertig, wenn:_ Ein Bürgermeister muss mit einem Richter auskommen, den er nicht wollte. (aus dem alten Phasenplan)
+
+## Entwürfe
 
 ### 31. Die Karte als Sechseckraster
 
@@ -282,6 +333,8 @@ zugeschnitten. Offen ist:
 Fällig ist das nicht sofort: Solange es eine Stadt gibt, tut die Ortsliste ihren Dienst.
 Fällig wird es mit der **zweiten Stadt** oder mit der **Erschließung**, denn beides fragt
 nach einer Richtung, und eine Richtung hat eine Liste nicht.
+
+_Fertig, wenn:_ Eine Stadt verdichtet sich von selbst, ohne dass es eine Vorschrift gibt. (aus dem alten Phasenplan)
 
 ### 33. Lohn: Aushang, Verhandlung, wer wen einstellt
 
@@ -343,6 +396,8 @@ es versäumt. Was daran noch fehlt, ist die andere Richtung: Ein NPC, der Tag f�
 einer leeren Werkstatt steht, sollte irgendwann kündigen — das hängt an der Frage weiter
 oben, ob ein NPC überhaupt kündigt.
 
+_Fertig, wenn:_ Eine Stadt mit drei Schmieden und zwei Gesellen hat steigende Löhne. (aus dem alten Phasenplan)
+
 ### 34. Wer einen Handwerksbetrieb führen darf
 
 **Die Richtung steht** (`KONZEPT.md`, Abschnitte 3 und 4): Eine Schmiede zu betreiben
@@ -381,6 +436,8 @@ Zu entscheiden ist die **Schwelle und was bei ihrem Verlust geschieht**:
 - **NPCs nach derselben Regel**, und **die Betriebsseite sagt, woran es hängt.**
 - **Gebaut zusammen mit der Lehre** (Punkt 45).
 
+_Fertig, wenn:_ Eine Schmiede ohne Schmied steht still, und man sieht, warum. (aus dem alten Phasenplan)
+
 ### 35. Der Bauherr als Beruf
 
 **Die Richtung steht** (`KONZEPT.md`, Abschnitt 4): Wer nicht selbst Holz und Stein
@@ -395,6 +452,8 @@ Charakteren — und davon gibt es bisher nur einen, die Anstellung.
 
 Offen ist auch, ob NPCs den Beruf ergreifen. Ohne das ist er nur für Spieler da, und ein
 Spieler, der drei Tage nicht hereinschaut, ist ein Bauherr, auf den niemand warten will.
+
+_Fertig, wenn:_ Man kann ein Haus bestellen, statt es zu bauen. (aus dem alten Phasenplan)
 
 ### 38. Adoption
 
@@ -421,6 +480,8 @@ Zu entscheiden ist, **wer abgegeben werden darf und was es kostet**:
 
 Fällig ist der Punkt mit der Ehe für alle: Ohne Adoption wäre sie eine Erlaubnis, die das
 Haus kostet.
+
+_Fertig, wenn:_ Ein Haus ohne leibliche Kinder hat einen Weg weiter. (aus dem alten Phasenplan)
 
 ### 39. Religion, Kirche und Feste
 
@@ -483,6 +544,8 @@ Zu entscheiden bleibt:
 Der Prüfstein bleibt derselbe wie bei Waren und Bauten: **Wo wirkt es?** Eine Kirche ohne
 Wirkung ist ein teures Haus mit einem Turm.
 
+_Fertig, wenn:_ Eine Stadt hat eine Mehrheit, eine Minderheit und einen Streit darüber. (aus dem alten Phasenplan)
+
 ### 41. Reisen
 
 **Die Richtung steht** (`KONZEPT.md`, Abschnitt 2): Der Aufenthaltsort ist die Bedingung
@@ -516,6 +579,8 @@ Zu entscheiden bleibt:
 
 Fällig wird das mit der **zweiten Stadt** — vorher gibt es nichts, wohin man reisen
 könnte. Der Punkt hängt damit an 31.
+
+_Fertig, wenn:_ Wer in einer anderen Stadt etwas will, ist erst einmal ein paar Ticks unterwegs. (aus dem alten Phasenplan)
 
 ### 43. Geldverleih und Schulden
 
@@ -562,6 +627,8 @@ Dazu kommt:
 - **Sieht man, wer verschuldet ist?** Ein Haus, dessen Lage man einschätzen kann, ist ein
   Haus, mit dem man verhandeln kann. Ganz offen wäre zu viel, ganz verborgen zu wenig.
 
+_Fertig, wenn:_ Jemand hat sich verschuldet, gebaut, und es hat sich gelohnt — oder eben nicht. (aus dem alten Phasenplan)
+
 ### 44. Der Schuldturm
 
 **Die Richtung steht** (`KONZEPT.md`, Abschnitte 3 und 4): Ein öffentliches Gebäude, in das
@@ -595,6 +662,8 @@ Willen geschieht**, das ihn nicht umbringt. Das ist ein neuer Zustand und verlan
   einer Woche Abwesenheit im Turm sitzt, weil sein selbstverwalteter Charakter (Punkt 40)
   sich verschuldet hat, ist ein Fall, der nicht eintreten darf — die Selbstverwaltung
   nimmt keine Kredite auf.
+
+_Fertig, wenn:_ Jemand sitzt, jemand anderes holt ihn heraus, und beides steht in der Chronik. (aus dem alten Phasenplan)
 
 ### 45. Die Lehre im eigenen Betrieb
 
@@ -641,6 +710,8 @@ Zu entscheiden ist das Verhältnis von Ertrag und Lernen:
 
 Gebaut wird es zusammen mit Punkt 34 — die Pflicht nicht ohne den Weg dorthin.
 
+_Fertig, wenn:_ Ein Kind, das mit zwölf in die Werkstatt geht, kann sie als Erwachsener führen. (aus dem alten Phasenplan)
+
 ### 46. Zünfte
 
 **Die Richtung steht** (`KONZEPT.md`, Abschnitt 17): Eine Körperschaft je Handwerk, mit
@@ -674,6 +745,8 @@ Zunft nichts zu verleihen. Zu entscheiden:
   geborene Ratsherren. Das berührt Punkt 32 unmittelbar und sollte zusammen entschieden
   werden.
 
+_Fertig, wenn:_ Zwei Häuser streiten sich um eine Zunftmeisterwahl, und der Rat kann nichts dagegen tun. (aus dem alten Phasenplan)
+
 ### 47. Ansehen und Ruf
 
 **Die Richtung steht** (`KONZEPT.md`, Abschnitt 15): Der Ruf ist eine Zahl am Charakter,
@@ -697,6 +770,8 @@ Zu entscheiden:
 - **Die unehrlichen Gewerbe.** Henker, Abdecker, Totengräber: gut bezahlt, weil sie Ansehen
   kosten. Zu klären ist, ob die Stadt sie braucht (dann muss jemand sie tun) und ob man aus
   ihnen wieder herauskommt.
+
+_Fertig, wenn:_ Wer sich anständig verhält, merkt es an der Stadt — und wer nicht, auch. (aus dem alten Phasenplan)
 
 ### 49. Bürgerrecht und Stand
 
@@ -750,6 +825,8 @@ Weil damit ein Besitzverbot an einem Beschluss hängt, sind zwei Dinge zu kläre
 - **Gilt es auch für NPCs?** Muss es, sonst hat die halbe Stadt Sonderrechte. Und
   NPC-Zuwanderer brauchen denselben Weg hinein.
 
+_Fertig, wenn:_ Ein Zuwanderer arbeitet ein Jahr, bevor er mitreden darf. (aus dem alten Phasenplan)
+
 ### 50. Zoll, Bannrechte und Bauordnung
 
 Drei neue Gesetzes- und Amtshebel (`KONZEPT.md`, Abschnitt 5). Sie gehören zusammen, weil
@@ -773,6 +850,8 @@ zeigt.
   einzige, bei der eine Mehrheit einer Minderheit etwas wegnehmen könnte — was durch die
   Regel verhindert wird, dass sie nur nach vorn wirkt.
 
+_Fertig, wenn:_ Zwei Städte führen unterschiedliche Politik, und man merkt es am Preis. (aus dem alten Phasenplan)
+
 ### 51. Mitgift, Testament und Stiftung
 
 Drei Wege, auf denen Vermögen den Besitzer wechselt, ohne dass jemand kauft oder stirbt.
@@ -790,6 +869,8 @@ Drei Wege, auf denen Vermögen den Besitzer wechselt, ohne dass jemand kauft ode
   eigene Kosten, das Ansehen über den Tod hinaus bringt (Punkt 47). Zu klären: ob der
   Stifter mitbestimmt, was gebaut wird, oder ob er nur zahlt — und ob sein Name daran
   hängen bleibt. Er sollte, sonst ist es eine Spende.
+
+_Fertig, wenn:_ Eine Heirat zwischen zwei Häusern kostet etwas, und ein Testament sagt, wer was bekommt. (aus dem alten Phasenplan)
 
 ### 61. Wer ledig ist, baut nie etwas
 
@@ -1162,6 +1243,8 @@ die länger hält als ein Bissen.
 Winter, eine Waffe je Kampf. Dafür wird **Ausrüstung einzeln geführt**, Verbrauchsgüter
 bleiben eine Menge. Gebaut wird das mit der ersten Ware, die länger hält als ein Bissen.
 
+_Fertig, wenn:_ Ein Handwerk bleibt ein Beruf und wird nicht ein einmaliger Auftrag. (aus dem alten Phasenplan)
+
 ### 23. Räuber als Beruf
 
 **Ein Beruf, den man ergreift wie jeden anderen.** Wer ihn wählt, baut eine Bande auf —
@@ -1222,6 +1305,8 @@ Damit ist dieser Punkt kein Aufräumen mehr, sondern eine Lücke: **In Grünau g
 zurzeit nur noch Feuer.** Was hier entworfen wird — Räuber mit Gesicht, eine Wache mit
 Gegner —, füllt sie.
 
+_Fertig, wenn:_ Ein NPC ergreift den Beruf, und die Stadt reagiert darauf. (aus dem alten Phasenplan)
+
 ### 30. Was NPCs noch nicht tun
 
 **Erledigt (4.13):** Sie kaufen Grundstücke, bauen Werkstätten, pachten Flächen, ernten,
@@ -1265,7 +1350,7 @@ wirft ein Betrieb ab. Bewusst am laufenden Spiel justiert, nicht vorab am Reißb
 Voraussetzung dafür ist, dass die Werte an einer Stelle stehen (Templates und Konstanten
 im Code) und nicht über die Logik verstreut sind.
 
-## Vor dem ersten öffentlichen Betrieb — was noch fehlt
+## Befunde aus der laufenden Welt
 
 Der Umbau selbst ist abgeschlossen (siehe `ENTWICKLUNG.md`). Was von seiner letzten Phase
 übrig blieb, ist keine Architektur mehr, sondern das, was ein Spiel braucht, bevor Fremde
@@ -2396,3 +2481,36 @@ ab, aber auch den Unternehmer, den der Satz meint. Zwei Dinge fehlen dafür:
 
 **Dazu eine Lücke, die beides berührt:** Grund lässt sich nicht wieder abgeben. Wer zu
 viel hat, kann ihn weder verkaufen noch der Stadt zurückgeben.
+
+## Aus dem alten Phasenplan
+
+Drei Vorhaben standen bis zum 11.10.2026 nur in `ENTWICKLUNG.md` (Phasen 7 und 8), ohne eigene
+Nummer — obwohl andere Punkte auf ihnen aufbauen. Mit der Bauordnung haben sie eine.
+
+### 118. Verträge zwischen Charakteren
+
+Es gibt bisher genau einen Vertrag — die Anstellung. Es kommen drei dazu: **Bauauftrag**
+(Punkt 35), **Kredit** (Punkt 43) und **Lehrvertrag** für fremde Kinder (Punkt 45). Statt
+dreimal „A bietet, B nimmt an" zu bauen, entsteht die Form einmal: ein Angebot mit
+Bedingungen, das jemand annehmen oder ablehnen kann, und das danach in beide Richtungen
+bindet.
+
+_Fertig, wenn:_ Ein Angebot, das jemand annehmen oder ablehnen kann, ist eine Sache und
+nicht drei.
+
+### 119. Die zweite Stadt
+
+Gründung auf einer Kachel ohne Nachbarstadt (Punkt 31); alles, was heute regionsblind ist,
+wird regionsfähig. Der eigentliche Umbau — jede Abfrage, die stillschweigend „die
+Startstadt" annimmt, muss danach zwei Orte vertragen. **Vorher zählen**, wie viele Stellen
+das wirklich sind, statt es zu schätzen.
+
+_Fertig, wenn:_ Zwei Städte laufen nebeneinander, jede mit eigener Kasse, Wahl und Chronik.
+
+### 120. Fernhandel
+
+Eine Lieferung (`shipment`) mit Ankunfts-Tick, und Preisunterschiede zwischen Städten, die
+sie lohnend machen. Erst damit gibt es etwas zu überfallen, das nicht in derselben Stadt
+steht (Punkt 23), und etwas, worauf ein Zoll (Punkt 50) greifen kann.
+
+_Fertig, wenn:_ Eine Karawane bindet Kapital und kommt an — oder nicht.
