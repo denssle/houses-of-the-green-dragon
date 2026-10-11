@@ -13,6 +13,7 @@ import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as npcService from '$lib/server/service/npcService';
 import * as skillService from '$lib/server/service/skillService';
+import * as supplyService from '$lib/server/service/supplyService';
 import { yearsToTicks } from '$lib/game/time';
 
 /**
@@ -362,21 +363,34 @@ describe('Welche Werkstatt einer baut', () => {
 			expect(wahl?.optionId).toBe(ZIMMEREI);
 		});
 
-		it('kennt auch die Mühle als knapp, wenn ein Backhaus kein Mehl bekommt', async () => {
+		/** Was die Stadt an Handwerken als knapp führt — direkt gefragt, ohne die Wahl darum. */
+		async function knappeIn(): Promise<number[]> {
+			const handwerke = buildingService
+				.getBuildingOptions()
+				.filter((vorlage) => vorlage.type === 'CRAFT');
+			const haeuser = await buildingService.getBuildingsInRegion(stadtId);
+			return (await supplyService.knappeHandwerke(handwerke, haeuser, stadtId)).map(
+				(vorlage) => vorlage.optionId
+			);
+		}
+
+		it('kennt auch die Mühle als knapp, wenn ein Backhaus kein Mehl bekommt und Brot fehlt', async () => {
 			// Mehl isst niemand — bis 5.98 galt eine Mühle deshalb nie als knapp, und eine
 			// Wahl nach Knappheit hätte Bäckereien neben eine Stadt ohne Mühle gestellt.
-			// Steht das Backhaus und ist Brot da, fehlt nur noch das Mehl.
-			const baecker = await person('Bäcker');
-			await hausMitGrund(BACKHAUS, baecker, { lager: { itemId: 'BREAD', quantity: 500 } });
-			const jemand = await mitMaterial('Jemand');
+			await hausMitGrund(BACKHAUS, await person('Bäcker'));
 
-			const wahl = await npcService.fehlendeWerkstatt(
-				await buildingService.getBuildingsInRegion(stadtId),
-				jemand,
-				stadtId
-			);
+			expect(await knappeIn()).toContain(MUEHLE);
+		});
 
-			expect(wahl?.optionId).toBe(MUEHLE);
+		it('aber nicht, solange genug Brot da ist (0.5.111, Punkt 116)', async () => {
+			// **Ein leerer Mehlsack neben einem vollen Brotregal ist ein ausgelasteter Bäcker**
+			// und kein Anlass für eine Mühle. Bis 0.5.110 hieß es hier „Mühle knapp" — und im
+			// Messlauf standen am Ende siebzehn Mühlen neben neun Bäckereien und 200 Broten.
+			await hausMitGrund(BACKHAUS, await person('Bäcker'), {
+				lager: { itemId: 'BREAD', quantity: 500 }
+			});
+
+			expect(await knappeIn()).not.toContain(MUEHLE);
 		});
 
 		it('und nicht mehr, sobald Mehl bereitliegt', async () => {

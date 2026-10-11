@@ -62,11 +62,11 @@ offenen, nach Nummer sortiert.
 | 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält                    | —                          | Befund      |
 | 114 | Der Zuzug fragt nach Gebäuden, nicht nach Bedarf                                       | 115                        | Befund      |
 | 115 | Wer nichts absetzt, sattelt nicht um — **5.98 und 5.99 gebaut, Schritt 4 offen**       | 117                        | teilweise   |
-| 116 | Wie viele Menschen eine Bäckerei satt macht — **entschieden: Vorrat 3 statt 10**       | —                          | entschieden |
 | 117 | Wer Grund hat, soll ihn nutzen — oder dafür zahlen                                     | —                          | Entwurf     |
 | 118 | Verträge zwischen Charakteren — eine Form für Auftrag, Kredit und Lehrvertrag          | —                          | Entwurf     |
 | 119 | Die zweite Stadt — alles Regionsblinde wird regionsfähig                               | 31                         | Entwurf     |
 | 120 | Fernhandel — Lieferungen mit Ankunft, Preisunterschiede zwischen Städten               | 41, 119                    | Entwurf     |
+| 121 | Weniger Geburten bei Saat 86 seit 0.5.111 — Zufall oder Mechanismus?                   | —                          | Befund      |
 
 ## Die Bauordnung
 
@@ -75,7 +75,7 @@ dem davor auf, zwischen den Strängen gibt es kaum Abhängigkeiten. Welcher Stra
 ist eine Frage der Lust und nicht der Reihenfolge.
 
 **Jederzeit, für sich** — klein, keine Voraussetzung, gut für einen Abend:
-116 (Mehlvorrat, in Arbeit), 84 (Arbeit ab zwölf), 92 (Verwalter), 88 (Zugreihenfolge),
+84 (Arbeit ab zwölf), 121 (Geburten bei Saat 86), 92 (Verwalter), 88 (Zugreihenfolge),
 94 (Angebot zurück ins Lager), 91 (Tick-Vermerk), 87 (Rest: Versteigerung), 105, 98, 61,
 101 (Bürgerseite), 64 (Seiten je Gebäude).
 
@@ -2423,45 +2423,6 @@ der Grund lag beim Bauland (Punkt 113, behoben mit 5.100 und 5.101).
 **Für Schritt 4 vorgemerkt:** Am Ende lagen 1336 Quader bei der Steinmetzhütte, 5056 Holz
 und 1832 Erz am Markt.
 
-### 116. Wie viele Menschen eine Bäckerei satt macht
-
-**Angemerkt am 02.10.2026, beim Messlauf zu 5.96:** Die Stadt hatte am Ende **acht
-Bäckereien** für rund vierzig Einwohner. „Vielleicht sollten wir an der Schraube drehen,
-wie viel Brot eine Bäckerei erzeugt — also wie viele Bäckereien wie viele Leute am Leben
-halten."
-
-**Was die Zahlen heute sagen:** Ein Durchgang im Backhaus macht aus zwei Mehl drei Laibe
-und kostet einen Aktionspunkt; ein Mensch isst einen Laib alle vierzig Ticks
-(`foodDemandPerTick`). Ein Bäcker, der jeden Tick backt, macht also **rechnerisch 120
-Menschen satt** — vorausgesetzt, er hat Mehl. Dafür braucht er je Durchgang anderthalb
-Mahlgänge (drei Korn zu zwei Mehl) und viereinhalb Korn vom Acker.
-
-**Acht Bäckereien heißt deshalb nicht, dass eine zu wenig backt**, sondern vermutlich, dass
-die Knappheitsregel aus Punkt 89 eine Lücke bei der Zutat als Lücke bei der Bäckerei las:
-Kein Brot da, also noch ein Backhaus — während das Mehl fehlte. Seit 5.98 kennt die
-Knappheit auch Zutaten; ob die Zahl der Bäckereien damit fällt, zeigt der nächste Lauf.
-
-**Zu entscheiden ist trotzdem, ob 120 die richtige Zahl ist.** Sie bestimmt, wie viele
-Menschen in der Brotkette arbeiten — und damit, wie viel Arbeit für alles andere übrig
-bleibt. Gehört zu Punkt 15 (Weltinhalte) und zum Balancing (Punkt 16).
-
-**Mit 5.101 schießt es auf der anderen Seite über (04.10.2026):** acht Bäckereien und
-**elf Mühlen**, eine zwölfte im Bau. Die Zutaten-Knappheit aus 5.98 verlangt je
-verarbeitendem Betrieb zehn Durchgänge Vorrat — bei acht Bäckereien 160 Säcke Mehl —, und
-solange die nicht bereitliegen, gilt die Mühle als knapp. Die Herdenbremse (ein Rohbau
-zählt als Antwort) hält nur einen Bau auf einmal zurück, nicht die Summe. Zu entscheiden
-ist hier also auch, **wie viel Vorrat** als versorgt gilt (`INPUT_BUFFER_BATCHES`), nicht
-nur, wie viel ein Betrieb erzeugt.
-
-**Die Messläufe vom 11.10.2026** (Punkt 87, drei Saaten) zeigen dasselbe Bild in beide
-Richtungen: 3 bis 13 Mühlen für 4 bis 11 Bäckereien.
-
-**Entschieden am 11.10.2026:** Die Backrate bleibt — ein Bäcker reicht rechnerisch für 120
-Menschen. Gedreht wird am Vorrat: `INPUT_BUFFER_BATCHES` von **10 auf 3**. Ein Betrieb gilt
-als versorgt, wenn drei Durchgänge Zutat bereitliegen. **Umzusetzen** mit einem Messlauf
-über drei Saaten vorher und nachher; Maßstab ist das Verhältnis von Mühlen zu Bäckereien,
-ohne dass Hungertote dazukommen.
-
 ### 117. Wer Grund hat, soll ihn nutzen — oder dafür zahlen
 
 **Aus der Entscheidung zu Punkt 113 (03.10.2026).** „Manchmal ist haben besser als
@@ -2514,3 +2475,32 @@ sie lohnend machen. Erst damit gibt es etwas zu überfallen, das nicht in dersel
 steht (Punkt 23), und etwas, worauf ein Zoll (Punkt 50) greifen kann.
 
 _Fertig, wenn:_ Eine Karawane bindet Kapital und kommt an — oder nicht.
+
+## Aus der Arbeit an Punkt 116
+
+### 121. Weniger Geburten bei Saat 86 — Zufall oder Mechanismus?
+
+**Befund vom 11.10.2026**, beim Messlauf zu 0.5.111 (Punkt 116, siehe `ERLEDIGTE_PUNKTE.md`).
+Dieselbe Stadt, je 2000 Ticks:
+
+| Saat 86         | vorher | nur Vorrat 3 | Vorrat 3 + Signal |
+| --------------- | -----: | -----------: | ----------------: |
+| Lebende am Ende |     58 |           49 |                45 |
+| Geburten        |     36 |           26 |                25 |
+| Häuser          |     74 |           78 |                61 |
+
+Bei Saat 7 leben nachher sieben **mehr** (46 → 53, Geburten 29 → 28), bei Saat 42 gleich
+viele (43, Geburten 21 → 21). Eine von drei Städten also, und eine kleine Änderung verschiebt
+jeden späteren Verlauf — **Zufall ist möglich.** Was dagegen spricht: Der Rückgang tritt bei
+86 in **beiden** Varianten auf, mit fast derselben Zahl, obwohl die eine 78 Häuser hat und
+die andere 61. Am Wohnraum allein liegt es demnach eher nicht.
+
+**Der Verdacht, ausdrücklich ungeprüft:** Mit dem kleineren Vorrat liegt weniger Mehl auf
+Lager und mehr Brot am Markt; wer Kinder will, braucht nach `npc.logic` Rücklage und Dach.
+Ob sich an der Rücklage junger Paare etwas verschoben hat — weil weniger Lohn in der Kette
+fließt, seit weniger Mühlen gebaut werden —, ist eine Vermutung und keine Messung.
+
+**Zu klären, bevor jemand eingreift:** Wann im Lauf gehen die Geburten auseinander? Woran
+scheitern die Paare, die keine Kinder bekommen — Ehe, Dach, Platz, Geld? `MEASURE_TRACE`
+auf ein Paar aus 86 und die Zahlen je 250 Ticks im Bericht reichen dafür. Und: eine vierte
+und fünfte Saat, um zu sehen, ob 86 die Ausnahme ist.

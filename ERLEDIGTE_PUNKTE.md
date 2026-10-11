@@ -61,6 +61,7 @@ Ausgelagert am 04.10.2026, als das Erledigte vierzig Prozent der Liste ausmachte
 | 111 | Warum einer nichts tut, stand nirgends — **Werkzeug gebaut mit 5.88**                 | —          | erledigt  |
 | 112 | Ein Betrieb im Umland stand außerhalb des Steuerrechts — **behoben (5.94)**           | —          | erledigt  |
 | 113 | Eine Versteigerung, bei der niemand bieten darf — **behoben mit 5.97, 5.100, 5.101**  | —          | erledigt  |
+| 116 | Wie viele Menschen eine Bäckerei satt macht — **erledigt mit 0.5.111**                | —          | erledigt  |
 
 **Gestrichene Nummern.** Zehn Punkte sind erledigt und samt Abschnitt aus der Liste
 gefallen — Code und Text verweisen aber weiter auf sie, denn die Kommentare stammen aus der
@@ -2981,3 +2982,64 @@ oder der Bauplatz halte die Bäcker ab (beides falsch). Getroffen hat jedes Mal 
 Messung: die Todesursache, die Kassenbilanz, der Test mit der Bäckerin. **Zuerst die
 Aufschlüsselung, dann der Eingriff** — der Satz stand schon in Punkt 93 und hat sich an
 einem Abend dreimal bewährt.
+
+### 116. Wie viele Menschen eine Bäckerei satt macht — erledigt mit 0.5.111
+
+**Angemerkt am 02.10.2026, beim Messlauf zu 5.96:** Die Stadt hatte am Ende **acht
+Bäckereien** für rund vierzig Einwohner. „Vielleicht sollten wir an der Schraube drehen,
+wie viel Brot eine Bäckerei erzeugt — also wie viele Bäckereien wie viele Leute am Leben
+halten."
+
+**Was die Zahlen heute sagen:** Ein Durchgang im Backhaus macht aus zwei Mehl drei Laibe
+und kostet einen Aktionspunkt; ein Mensch isst einen Laib alle vierzig Ticks
+(`foodDemandPerTick`). Ein Bäcker, der jeden Tick backt, macht also **rechnerisch 120
+Menschen satt** — vorausgesetzt, er hat Mehl. Dafür braucht er je Durchgang anderthalb
+Mahlgänge (drei Korn zu zwei Mehl) und viereinhalb Korn vom Acker.
+
+**Acht Bäckereien heißt deshalb nicht, dass eine zu wenig backt**, sondern vermutlich, dass
+die Knappheitsregel aus Punkt 89 eine Lücke bei der Zutat als Lücke bei der Bäckerei las:
+Kein Brot da, also noch ein Backhaus — während das Mehl fehlte. Seit 5.98 kennt die
+Knappheit auch Zutaten; ob die Zahl der Bäckereien damit fällt, zeigt der nächste Lauf.
+
+**Zu entscheiden ist trotzdem, ob 120 die richtige Zahl ist.** Sie bestimmt, wie viele
+Menschen in der Brotkette arbeiten — und damit, wie viel Arbeit für alles andere übrig
+bleibt. Gehört zu Punkt 15 (Weltinhalte) und zum Balancing (Punkt 16).
+
+**Mit 5.101 schießt es auf der anderen Seite über (04.10.2026):** acht Bäckereien und
+**elf Mühlen**, eine zwölfte im Bau. Die Zutaten-Knappheit aus 5.98 verlangt je
+verarbeitendem Betrieb zehn Durchgänge Vorrat — bei acht Bäckereien 160 Säcke Mehl —, und
+solange die nicht bereitliegen, gilt die Mühle als knapp. Die Herdenbremse (ein Rohbau
+zählt als Antwort) hält nur einen Bau auf einmal zurück, nicht die Summe. Zu entscheiden
+ist hier also auch, **wie viel Vorrat** als versorgt gilt (`INPUT_BUFFER_BATCHES`), nicht
+nur, wie viel ein Betrieb erzeugt.
+
+**Die Messläufe vom 11.10.2026** (Punkt 87, drei Saaten) zeigen dasselbe Bild in beide
+Richtungen: 3 bis 13 Mühlen für 4 bis 11 Bäckereien.
+
+**Entschieden am 11.10.2026:** Die Backrate bleibt — ein Bäcker reicht rechnerisch für 120
+Menschen. Gedreht wird am Vorrat: `INPUT_BUFFER_BATCHES` von **10 auf 3**. Ein Betrieb gilt
+als versorgt, wenn drei Durchgänge Zutat bereitliegen. **Umzusetzen** mit einem Messlauf
+über drei Saaten vorher und nachher; Maßstab ist das Verhältnis von Mühlen zu Bäckereien,
+ohne dass Hungertote dazukommen.
+
+**Gebaut mit 0.5.111 (11.10.2026) — und dabei kam die eigentliche Ursache heraus.** Der Vorrat
+allein (`INPUT_BUFFER_BATCHES` 10 → 3) half bei zwei von drei Saaten und machte die dritte
+schlimmer: **siebzehn Mühlen für neun Bäckereien** (Saat 86). Der Bestand am Ende zeigte,
+warum: kein Mehl am Markt, aber 203 Brote. Die Bäcker verbacken jedes Mehl, sobald es da ist,
+der Mehlsack fällt immer wieder auf null — und die Regel las das als fehlende Mühle, ganz
+gleich, wie viel Brot herumlag. Die Zahl war nie der Hebel, das Signal war es.
+
+**Deshalb zusätzlich in `supplyService` (`knappheitIn`):** Eine Ware, die nur verarbeitet
+und nicht gegessen wird, ist erst knapp, wenn auch ihr Erzeugnis knapp ist. Mehl fehlt nur,
+wenn Brot fehlt.
+
+| Saat | Bäck. / Mühlen vorher | nur Vorrat 3 | Vorrat 3 + Signal | Hungertote vorher → nachher |
+| ---- | --------------------: | -----------: | ----------------: | --------------------------: |
+| 86   |                10 / 6 |       9 / 17 |         **8 / 4** |                       0 → 1 |
+| 7    |                11 / 7 |        7 / 6 |         **7 / 4** |                       2 → 0 |
+| 42   |                 4 / 3 |        4 / 1 |         **4 / 1** |                       1 → 0 |
+
+Eine Mühle auf etwa zwei Bäckereien, stabil über die Zeit (bei Saat 86 nach Tick 1250 keine
+neue mehr), Mehl und Brot am Ende beide am Markt. Die Backrate blieb unangetastet. **Offen
+geblieben ist eine Beobachtung, die als Punkt 121 weiterläuft:** Saat 86 hat mit beiden
+Varianten deutlich weniger Geburten.

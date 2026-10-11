@@ -87,15 +87,69 @@ export async function knappeHandwerke(
 	});
 	if (einwohner === 0) return [];
 
+	const ware = knappheitIn(verarbeiter, einwohner, regionId);
 	const knapp: BuildingTemplate[] = [];
-	for (const { vorlage, itemId, nourishment, jeDurchgang } of fragen) {
-		// Was gegessen wird und was verarbeitet wird, zusammen: Brot, das der Wirt zu Suppe
-		// machte, fehlte am Tisch genauso.
-		const noetig: number =
-			(nourishment > 0 ? supplyNeeded(einwohner, nourishment) : 0) + inputSupplyNeeded(jeDurchgang);
-		if ((await warenbestand(regionId, itemId)) < noetig) knapp.push(vorlage);
+	for (const { vorlage, itemId } of fragen) {
+		if (await ware(itemId)) knapp.push(vorlage);
 	}
 	return knapp;
+}
+
+/**
+ * Ob eine Ware in der Stadt knapp ist — **und bei einer Zutat, ob es darauf ankommt**.
+ *
+ * Was gegessen wird und was verarbeitet wird, zählt zusammen: Brot, das der Wirt zu Suppe
+ * machte, fehlte am Tisch genauso.
+ *
+ * **Eine Zutat ist nur knapp, wenn auch ihr Erzeugnis knapp ist** (0.5.111, Punkt 116). Bis
+ * hierher genügte ein leerer Mehlsack: Die Bäcker verbacken jedes Mehl, sobald es da ist,
+ * also fiel der Bestand immer wieder auf null — und die Regel verlangte die nächste Mühle,
+ * während 200 Brote unverkauft am Markt lagen. Im Messlauf (Saat 86) wurden es siebzehn
+ * Mühlen für neun Bäckereien. Gefragt wird deshalb eine Stufe weiter: Fehlt das Brot,
+ * fehlt das Mehl. Fehlt das Brot nicht, ist ein leerer Mehlsack ein ausgelasteter Bäcker
+ * und kein Anlass für eine Mühle.
+ *
+ * Was auch gegessen wird, prüft nur sich selbst — Hunger ist Grund genug. Die Rechnung geht
+ * die Kette hinauf (Korn → Mehl → Brot), merkt sich jede Antwort und bricht einen Kreis ab,
+ * statt sich darin zu verlaufen.
+ */
+function knappheitIn(
+	verarbeiter: Haus[],
+	einwohner: number,
+	regionId: string
+): (itemId: string) => Promise<boolean> {
+	const antworten = new Map<string, Promise<boolean>>();
+	const knapp = (itemId: string, unterwegs: Set<string>): Promise<boolean> => {
+		const bekannt = antworten.get(itemId);
+		if (bekannt) return bekannt;
+		const antwort = (async (): Promise<boolean> => {
+			const nourishment: number = getItemTemplate(itemId)?.nourishment ?? 0;
+			const rezepte = verarbeiter.flatMap((haus) =>
+				(getBuildingOption(haus.optionId)?.recipes ?? []).filter((rezept) =>
+					rezept.input.some((zutat) => zutat.itemId === itemId)
+				)
+			);
+			const jeDurchgang: number[] = rezepte.flatMap((rezept) =>
+				rezept.input.filter((zutat) => zutat.itemId === itemId).map((zutat) => zutat.quantity)
+			);
+			const noetig: number =
+				(nourishment > 0 ? supplyNeeded(einwohner, nourishment) : 0) +
+				inputSupplyNeeded(jeDurchgang);
+			if ((await warenbestand(regionId, itemId)) >= noetig) return false;
+			if (nourishment > 0) return true;
+
+			// Nur Zutat: knapp, wenn eines der Erzeugnisse daraus es auch ist.
+			const weiter = new Set(unterwegs).add(itemId);
+			for (const erzeugnis of new Set(rezepte.map((rezept) => rezept.outputItemId))) {
+				if (weiter.has(erzeugnis)) continue;
+				if (await knapp(erzeugnis, weiter)) return true;
+			}
+			return false;
+		})();
+		antworten.set(itemId, antwort);
+		return antwort;
+	};
+	return (itemId) => knapp(itemId, new Set());
 }
 
 /** Wie viel von einer Ware in dieser Stadt zu haben ist — am Schild und im Lager. */

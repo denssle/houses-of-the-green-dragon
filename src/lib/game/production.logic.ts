@@ -149,11 +149,14 @@ export function titheOn(harvest: number, percent: number): number {
  * Stadt ohne Mühle gestellt. Der Bedarf an einer Zutat ist das, was die Betriebe
  * verarbeiten wollen, die sie brauchen.
  *
- * **Zehn Durchgänge** — so viel, wie ein Bäcker in gut einer Woche Spielzeit verbackt.
- * Weniger, und die Zutat gälte schon zwischen zwei Lieferungen als knapp; mehr, und eine
- * Mühle, die stetig liefert, sähe aus wie eine, die fehlt.
+ * **Drei Durchgänge** (0.5.111, Punkt 116). Bis hierher waren es zehn — so viel, wie ein
+ * Bäcker in gut einer Woche Spielzeit verbackt. Das war zu viel: Bei acht Bäckereien
+ * hätten 160 Säcke Mehl bereitliegen müssen, damit die Mühle nicht mehr als knapp galt,
+ * und so stellte die Stadt Mühle um Mühle daneben — in den Messläufen bis zu dreizehn für
+ * acht Bäckereien. Weniger als drei, und die Zutat gälte schon zwischen zwei Lieferungen
+ * als versorgt, obwohl der nächste Durchgang sie aufbraucht.
  */
-export const INPUT_BUFFER_BATCHES = 10;
+export const INPUT_BUFFER_BATCHES = 3;
 
 /** Was von einer Zutat bereitliegen müsste, damit ihre Verarbeiter versorgt sind. */
 export function inputSupplyNeeded(perBatch: number[]): number {
