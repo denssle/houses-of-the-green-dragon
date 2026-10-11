@@ -25,6 +25,8 @@ export default defineConfig({
 		// Node statt jsdom: getestet werden die reinen Logikmodule und die
 		// Datenbankschicht, keine Komponenten.
 		environment: 'node',
+		// Siehe dort: Sequelizes Vorsorge-Stack kostete ein Sechstel jedes Ticks.
+		setupFiles: ['./vitest.setup.ts'],
 		projects: [
 			{
 				extends: true,

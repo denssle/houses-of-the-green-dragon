@@ -932,6 +932,14 @@ verbliebenen Posten bei Tick 40: `getAreas` (3 je Aufnahme), `getFreeBuildingLan
 `withBuildings`, `getBallot` (noch 2), `freierWohnraum` und die Weltzeit, die
 `getBuildingsInRegion` ohne mitgereichten Tick nachschlägt.
 
+**Der erste Blick in diesen Rest** (CPU-Profil über zehn Ticks bei Tick 190): Ein Sechstel
+der Zeit ging unter Vitest in Stacktraces. Sequelize liest bei jeder SQLite-Abfrage einen
+Vorsorge-Stack aus, und Vite rechnet ihn über die Source-Maps zurück. `vitest.setup.ts`
+formatiert genau diesen Stack ohne Übersetzung: 305–320 → 239–251 ms je Tick, volle Suite
+167 → 133 s, Fingerabdruck gleich. Das betrifft nur Tests — im Betrieb gibt es die
+Übersetzung nicht. Der Rest verteilt sich auf Sequelize selbst (ein Drittel: Abfragen bauen,
+Instanzen füllen), das Warten auf SQLite (ein Viertel) und erst dann unseren Code.
+
 Die Stadtlage **je Tick** statt je Aufnahme ist weiter offen — und bleibt eine
 Verhaltensänderung: Ein Bild, das über den Tick lebt, ist nach dem ersten Kauf falsch.
 
