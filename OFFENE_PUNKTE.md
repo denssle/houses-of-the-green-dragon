@@ -50,7 +50,7 @@ offenen, nach Nummer sortiert.
 | 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                       | Punkte 15, 20, 51            | Entwurf      |
 | 84  | Sehr junge Kinder können für Lohn arbeiten — geprüft wird nur die Anstellung            | dem nächsten Schritt         | Befund       |
 | 85  | Der Kornspeicher backt aus dem Nichts — **live noch da (0.5.105), Abriss in Etappe B**  | live: Mühle, Bäckerei, Brot  | teilweise    |
-| 87  | Ein Sparziel, das ins Leere führt — Bauland ohne Werkstatt darauf                       | dem nächsten Messlauf        | Befund       |
+| 87  | Ein Sparziel, das ins Leere führt — **behoben mit 5.106**, die Versteigerung offen      | dem nächsten Messlauf        | teilweise    |
 | 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick               | laufend                      | Befund       |
 | 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                   | Punkte 15, 34, 115           | teilweise    |
 | 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung      | Punkte 76, 16                | Entwurf      |
@@ -950,6 +950,9 @@ nächste Hebel wäre ein anderer: `raw: true` in den heißen Lesepfaden, damit S
 Instanzen baut. Erst an einer Stelle ausprobieren und messen. **Zurückgestellt** zugunsten
 der übrigen Punkte.
 
+**Was es den Messläufen gebracht hat** (11.10.2026): 2000 Ticks in 28 bis 37 Minuten — mit
+vier Läufen gleichzeitig auf acht Kernen. Zuletzt hieß es hier fünfzig Minuten für einen.
+
 Die Stadtlage **je Tick** statt je Aufnahme ist weiter offen — und bleibt eine
 Verhaltensänderung: Ein Bild, das über den Tick lebt, ist nach dem ersten Kauf falsch.
 
@@ -1677,8 +1680,35 @@ Fehldiagnose aus dem Befund gibt es in dieser Form nicht mehr. **Aber die Lohnar
 halbiert sich** (`WORK` 7018 → 3483): Wer auf Boden für eine unerreichbare Werkstatt
 sparte, baute nie, arbeitete aber. Ohne Sparziel hört er an der Rücklage auf. Am Ende 58
 statt 63 Lebende, Stadtkasse 365 statt 1122, Grundsteuer 1445 statt 2177; dafür kein
-Hungertoter, 10 Bäckereien und 6 Mühlen statt 8 und 13. Ob die schwächere Stadt Muster oder
-Zufall ist, sagt eine Saat nicht — Gegenmessung folgt.
+Hungertoter, 10 Bäckereien und 6 Mühlen statt 8 und 13. Ob die schwächere Stadt Muster oder Zufall ist, sagt eine Saat nicht.
+
+**Gegengemessen mit zwei weiteren Saaten (11.10.2026):** je 2000 Ticks, vorher (`949c0cc`)
+gegen nachher (`e115f4e`).
+
+|                    | 86 vorher | nachher | 7 vorher | nachher | 42 vorher | nachher |
+| ------------------ | --------: | ------: | -------: | ------: | --------: | ------: |
+| Lebende am Ende    |        63 |      58 |       34 |  **46** |        34 |  **43** |
+| Tode (Not)         |     8 (1) |   9 (0) |    9 (3) |  12 (2) |    16 (7) |   8 (1) |
+| Grundsteuer        |      2177 |    1445 |     4408 |    2506 |      3806 |    1703 |
+| Stadtkasse am Ende |      1122 |     365 |      149 |     992 |      2204 |    1072 |
+| `WORK`             |      7018 |    3483 |     4573 |    4659 |      4417 |    2425 |
+| `BUY_PLOT`         |        11 |       8 |       13 |       7 |         7 |       7 |
+| `GOAL_UNREACHABLE` |      2348 |    2493 |      306 |    2933 |       515 |    3307 |
+
+- **Die schwächere Stadt war Zufall.** In den beiden anderen Läufen leben am Ende deutlich
+  _mehr_ Menschen, und Hungertote gibt es in allen dreien weniger (1 → 0, 3 → 2, 7 → 1).
+- **Die halbierte Lohnarbeit ist eine Neigung, kein Gesetz**: zwei von drei Läufen.
+- **Durchgehend ist nur eines: Die Grundsteuer sinkt um ein bis zwei Drittel.**
+  Naheliegend, aber ungemessen: Es wird weniger Boden gehortet, der nie bebaut wird. Ob die
+  Stadtkasse das auf Dauer trägt, ist eine Frage für Punkt 16 — am Ende stand sie in allen
+  Läufen im Plus.
+- **Die Diagnose sagt jetzt, was ist**: `GOAL_UNREACHABLE` versechs- bis verzehnfacht sich
+  bei 7 und 42. Diese Unternehmungslustigen gab es vorher auch; sie liefen unter anderem
+  Namen.
+
+**Offen bleibt die Versteigerung**: `bauabsicht` bietet für Bauland, wem Haus oder Werkstatt
+fehlt — ohne zu fragen, ob die Werkstatt erreichbar ist. Dafür braucht der Dienst den
+NPC-Zustand oder wenigstens `werkstattErreichbar` als eigene Abfrage.
 
 ### 88. Die Zugreihenfolge ist ein stiller Vorteil
 
