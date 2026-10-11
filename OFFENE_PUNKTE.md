@@ -28,14 +28,14 @@ offenen, nach Nummer sortiert.
 | 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                        | —                          | Entwurf     |
 | 32  | Die Ämter — **Zuschnitt entschieden**: zwei Wahlen, drei Ernennungen                   | —                          | entschieden |
 | 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen   | 90                         | Entwurf     |
-| 34  | Wer einen Handwerksbetrieb führen darf — **entschieden: Stufe 5, Stillstand beim Tod** | 84                         | entschieden |
+| 34  | Wer einen Handwerksbetrieb führen darf — **entschieden: Stufe 5, Stillstand beim Tod** | —                          | entschieden |
 | 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                 | 118                        | Entwurf     |
 | 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                      | —                          | Entwurf     |
 | 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit               | — (Stadtreligion: 49, 119) | Entwurf     |
 | 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist                | 31, 119                    | Entwurf     |
 | 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                            | 44, 118                    | Entwurf     |
 | 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                        | 32                         | Entwurf     |
-| 45  | Die Lehre im eigenen Betrieb — **entschieden: ab zwölf, halbes Lerntempo**             | 84                         | entschieden |
+| 45  | Die Lehre im eigenen Betrieb — **entschieden: ab zwölf, halbes Lerntempo**             | —                          | entschieden |
 | 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                           | 34, 45                     | Entwurf     |
 | 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                   | —                          | Entwurf     |
 | 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                     | 41, 119                    | Entwurf     |
@@ -48,7 +48,6 @@ offenen, nach Nummer sortiert.
 | 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                                | 90                         | Entwurf     |
 | 75  | Die Testläufe dauern zu lange — **Alltag 17 s, volle Suite gut zwei Minuten**          | 67                         | teilweise   |
 | 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                      | —                          | Entwurf     |
-| 84  | Sehr junge Kinder können für Lohn arbeiten — **entschieden: ab zwölf, voller Ertrag**  | —                          | entschieden |
 | 85  | Der Kornspeicher backt aus dem Nichts — **live noch da (0.5.105), Abriss in Etappe B** | live: Mühle, Bäckerei      | teilweise   |
 | 87  | Ein Sparziel, das ins Leere führt — **behoben mit 5.106**, die Versteigerung offen     | —                          | teilweise   |
 | 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick              | —                          | Befund      |
@@ -75,11 +74,11 @@ dem davor auf, zwischen den Strängen gibt es kaum Abhängigkeiten. Welcher Stra
 ist eine Frage der Lust und nicht der Reihenfolge.
 
 **Jederzeit, für sich** — klein, keine Voraussetzung, gut für einen Abend:
-84 (Arbeit ab zwölf), 121 (Geburten bei Saat 86), 92 (Verwalter), 88 (Zugreihenfolge),
+121 (Geburten bei Saat 86), 92 (Verwalter), 88 (Zugreihenfolge),
 94 (Angebot zurück ins Lager), 91 (Tick-Vermerk), 87 (Rest: Versteigerung), 105, 98, 61,
 101 (Bürgerseite), 64 (Seiten je Gebäude).
 
-**Handwerk:** 84 → **34 + 45** (Meisterpflicht und Lehre, ein Schritt) → 46 (Zünfte) — und
+**Handwerk:** **34 + 45** (Meisterpflicht und Lehre, ein Schritt) → 46 (Zünfte) — und
 89 (ein Betrieb je Handwerk) hängt an 34. Daneben 24 (Schule), weil Lehre und Schule sich
 die Aktionspunkte eines Kindes teilen.
 
@@ -1451,44 +1450,6 @@ Fall von `CHAMBER_FULL` — die vollste NPC-Kammer hielt vier Laibe Brot, weil W
 5.24 dort liegen bleibt, wo sie entsteht. Die Grenze trifft heute nur den Spieler, der
 hortet. Beißt sie später auch bei NPCs, ist das ein Befund und keine Panne: Dann hat einer
 mehr, als er tragen kann, und muss etwas damit anfangen.
-
-### 84. Sehr junge Kinder können für Lohn arbeiten
-
-**Beobachtet am 22.08.2026 in der laufenden Welt.** Nachgesehen, wo das Alter geprüft wird:
-
-- **Die Anstellung prüft es.** `canTakeJob` weist ein Kind mit `TOO_YOUNG` ab, und
-  `employmentService` rechnet dafür eigens das Alter aus. Ein Kind kann sich also nicht
-  verdingen.
-- **Die Lohnarbeit prüft es nicht.** `REPAIR_FOR_HIRE` — seit 5.26 der eigentliche
-  Broterwerb — fragt nach Zustand, Auftrag und Aktionspunkten, nicht nach dem Alter. Ein
-  Achtjähriger kann am Rathaus herrichten und wird dafür aus der Stadtkasse bezahlt.
-- **Die eigene Arbeit prüft es auch nicht** (`harvest`, `craft`). Das fällt seltener auf,
-  weil ein Kind selten eine Pacht oder Werkstatt besitzt — unmöglich ist es nicht, denn
-  geerbt wird ohne Altersgrenze.
-- **Die Schule kennt die Grenze**: Ab `AGE_OF_MAJORITY` ist Schluss mit dem Unterricht.
-
-**Zu entscheiden ist nicht das Ob, sondern das Ab-wann.** „Kinder arbeiten gar nicht" wäre
-die einfachste Regel und die unhistorischste; in einer mittelalterlichen Stadt half ein
-Kind, sobald es das konnte. Denkbar ist ein **Mindestalter unterhalb der Volljährigkeit**
-(die Lehre beginnt früh, siehe Punkt 45) oder ein geringerer Ertrag statt eines Verbots.
-
-Das gehört zusammen mit Punkt 24 (NPC-Eltern und die Schule) entschieden: Ob ein Kind
-lernt oder arbeitet, ist dieselbe Frage von zwei Seiten — und ein Tag ist nur einmal da.
-
-**Nachgesehen am 04.10.2026: weiter offen.** Weder `workAvailable` in der Lageaufnahme
-noch `WORK` in der Überlebensstufe noch der Bau- oder Vermessungsdienst prüfen das Alter.
-Nur die Anstellung (`canTakeJob`) und seit 5.99 der Stellenwechsel tun es.
-
-**Entschieden am 11.10.2026: Gearbeitet wird ab zwölf, mit vollem Ertrag.** Eine Grenze unterhalb
-der Volljährigkeit (sechzehn), weil ein Kind in dieser Welt hilft, sobald es kann — und mit
-vollem Ertrag, weil ein gedämpfter Lohn eine zweite Regel wäre, die niemand sieht. Unter
-zwölf wird nicht gearbeitet.
-
-**Umzusetzen:** Eine Altersgrenze (`AGE_OF_WORK = 12` neben `AGE_OF_MAJORITY`), geprüft
-überall, wo heute nur die Anstellung prüft — `REPAIR_FOR_HIRE`, `harvest`, `craft`, die
-Vermessung, und in der Lageaufnahme `workAvailable`, damit ein Achtjähriger es gar nicht
-erst vorhat. Die feste Anstellung bleibt bei sechzehn. Die Lehre im eigenen Betrieb
-(Punkt 45) dreht später nicht noch einmal an dieser Zahl, sondern nutzt sie.
 
 ### 85. Der Kornspeicher backt aus dem Nichts — verteuert mit 5.86
 

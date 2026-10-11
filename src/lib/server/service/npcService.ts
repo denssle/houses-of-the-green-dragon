@@ -1,15 +1,18 @@
 ﻿import { garmentIntact } from '$lib/game/attire.logic';
 import { CAMPAIGN_TICKS, isSettled, npcChoice } from '$lib/game/election.logic';
+import * as householdService from '$lib/server/service/householdService';
 import { Op } from 'sequelize';
 import { Region } from '$lib/db/model/region';
 import { levelOf, upgradePrice } from '$lib/model/buildingTemplate';
 import { Building } from '$lib/db/model/building';
 import type { Building as Haus } from '$lib/model/building';
 import { Character } from '$lib/db/model/character';
+import { Inventory } from '$lib/db/model/inventory';
 import { Plot } from '$lib/db/model/plot';
 import {
 	decideCaretakerAction,
 	decideNpcActionWithStage,
+	eatingThreshold,
 	stateFlags,
 	type Stufe,
 	type IdleReason,
@@ -37,7 +40,9 @@ import { PLOT_PRICE, TAGELOHN, granaryPrice } from '$lib/game/economy';
 import { LEASE_FEE } from '$lib/server/service/productionService';
 import {
 	AGE_OF_MAJORITY,
+	AGE_OF_WORK,
 	ageInYears,
+	isOfWorkingAge,
 	buildingCostFactor,
 	MAX_ACTION_POINTS,
 	type Season,
@@ -330,7 +335,7 @@ async function handelnd(
 
 	switch (handlung) {
 		case 'EAT':
-			return buch('EAT', await needService.eatItem(npcId, 'BREAD'));
+			return buch('EAT', await needService.eatItem(npcId, 'BREAD', lage.brotQuelle));
 
 		case 'BUY_FOOD': {
 			// **Zuerst beim Nachbarn.** Das billigste Angebot in der Stadt geht dem
@@ -646,6 +651,8 @@ async function lageAufnehmen(
 			/** Nur fürs Protokoll (5.88) — die Entscheidung kennt keine Namen. */
 			name: string;
 			regionId: string;
+			/** Aus wessen Kammer er isst, wenn nicht aus der eigenen — ein Kind aus dem Haushalt (0.6.0). */
+			brotQuelle?: string;
 			cheapestBread?: { id: string; quantity: number; pricePerUnit: number };
 			cheapestGarment?: { id: string; quantity: number; pricePerUnit: number };
 			cheapestTonic?: { id: string; quantity: number; pricePerUnit: number };
@@ -705,6 +712,18 @@ async function lageAufnehmen(
 	const essbar: number = vorrat
 		.filter((posten) => posten.nourishment)
 		.reduce((summe, posten) => summe + posten.quantity, 0);
+
+	// **Ein Kind unter zwölf lebt aus dem Haushalt** (0.6.0, Punkt 84). Es arbeitet nicht und
+	// isst, was die Eltern — oder die Erwachsenen im selben Haus — in der Kammer haben. Hat es
+	// gar keinen Haushalt, darf es weiter für sein Brot arbeiten: Sonst verhungerte eine
+	// Waise allein im Haus zwangsläufig, und das wäre eine Härte ohne Ausweg.
+	const haushalt = isOfWorkingAge(werte.birthTick, tick)
+		? undefined
+		: await householdService.haushaltVon(werte, tick);
+	const eigenesBrot: number = vorrat.find((posten) => posten.itemId === 'BREAD')?.quantity ?? 0;
+	const brotQuelle: string | undefined =
+		haushalt && eigenesBrot === 0 ? haushalt.brotBei : undefined;
+	const kindHungert: boolean = await hungerndesKind(npcId, tick);
 
 	// Was der Markt hergibt: Ohne Angebot kein Kauf — und ohne Kauf keine Nachfrage für
 	// die Betriebe aus 4.10 und 4.11.
@@ -901,6 +920,7 @@ async function lageAufnehmen(
 		name: werte.firstName,
 		money: werte.money,
 		regionId: werte.RegionId,
+		brotQuelle,
 		cheapestBread: await billigstes('BREAD'),
 		workplaceId: arbeitsplatz,
 		surveyPlotId: vermessung,
@@ -920,12 +940,15 @@ async function lageAufnehmen(
 			actionPoints: werte.actionPoints,
 			money: werte.money,
 			satiety: needService.satietyOf(werte, tick),
-			food: essbar,
+			food: essbar + (brotQuelle && haushalt ? haushalt.brot : 0),
 			hasHome: werte.HomeBuildingId !== null,
 			homeAvailable: unterkunft !== undefined,
 			isMarried: werte.spouseId !== null,
 			isAdult: ageInYears(werte.birthTick, tick) >= AGE_OF_MAJORITY,
-			workAvailable: arbeit !== undefined || stelle !== undefined,
+			workAvailable:
+				(arbeit !== undefined || stelle !== undefined) &&
+				(haushalt === undefined || haushalt.leute.length === 0),
+			childHungry: kindHungert,
 			hasJob: stelle !== undefined,
 			betterJobAvailable: besser !== undefined,
 			scarceJobAvailable: knappeStelle !== undefined,
@@ -1713,4 +1736,36 @@ async function fehlendesMaterial(
 		if (da < posten.quantity) return { itemId: posten.itemId, quantity: posten.quantity - da };
 	}
 	return undefined;
+}
+
+/**
+ * Hat er ein Kind unter zwölf, das hungert, und liegt in dessen Haushalt kein Brot
+ * (0.6.0, Punkt 84)? Dann ist es an ihm, welches zu besorgen.
+ *
+ * Eine Abfrage für die meisten: Wer keine kleinen Kinder hat, ist nach ihr fertig.
+ */
+async function hungerndesKind(npcId: string, tick: number): Promise<boolean> {
+	const kinder = await Character.findAll({
+		where: {
+			deathTick: null,
+			[Op.or]: [{ motherId: npcId }, { fatherId: npcId }],
+			birthTick: { [Op.gt]: tick - yearsToTicks(AGE_OF_WORK) }
+		}
+	});
+	for (const kind of kinder) {
+		const werte = kind.dataValues;
+		const wesen = {
+			courage: werte.courage,
+			diligence: werte.diligence,
+			greed: werte.greed,
+			sociability: werte.sociability,
+			ambition: werte.ambition,
+			agreeableness: werte.agreeableness
+		};
+		if (needService.satietyOf(werte, tick) >= eatingThreshold(wesen)) continue;
+		const eigenes = await Inventory.findOne({ where: { CharacterId: werte.id, itemId: 'BREAD' } });
+		if ((eigenes?.dataValues.quantity ?? 0) > 0) continue;
+		if ((await householdService.haushaltVon(werte, tick)).brot === 0) return true;
+	}
+	return false;
 }

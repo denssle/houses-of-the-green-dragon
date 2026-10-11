@@ -1,4 +1,5 @@
 import type { ActionFailureReason } from '$lib/game/actionFailure';
+import * as householdService from '$lib/server/service/householdService';
 import { type Transaction } from 'sequelize';
 import type { BuildingAction } from '$lib/model/buildingAction';
 import { sequelize } from '$lib/db/sequelize';
@@ -85,6 +86,10 @@ async function fuerLohnHerrichten(characterId: string, buildingId: string): Prom
 		// Stand von gestern, und wer lange nicht da war, könnte gar nicht arbeiten.
 		const arbeiter = await characterService.loadForAction(characterId, tick, t);
 		if (!arbeiter) return { ok: false, reason: 'NOT_A_WORKPLACE' } as const;
+		// Unter zwölf wird nicht gearbeitet — außer ohne Haushalt (0.6.0, Punkt 84).
+		if (!(await householdService.darfArbeiten(arbeiter.dataValues, tick))) {
+			return { ok: false, reason: 'TOO_YOUNG' } as const;
+		}
 
 		const kasse = await employmentService.kasseVon(buildingId, gebäude.ownerCharacterId, t);
 		if (!kasse) return { ok: false, reason: 'NOT_A_WORKPLACE' } as const;

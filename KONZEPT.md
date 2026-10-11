@@ -227,6 +227,12 @@ Altersgrenze gedreht.
 Die feste Anstellung, Heirat und Wahl bleiben bei der Volljährigkeit mit sechzehn. Die Lehre
 im eigenen Betrieb nutzt dieselbe Zwölf.
 
+**Wer jünger ist, lebt aus dem Haushalt** (gebaut mit 0.6.0). Ein Kind unter zwölf isst aus
+der Kammer seiner Eltern, und wenn dort nichts ist, kaufen die Eltern nach — notfalls von
+dem, was sie dafür erarbeiten. Kinder kosten damit, was sie kosten sollen. Nur ein Kind
+ganz ohne Haushalt darf weiter selbst für sein Brot arbeiten; sonst verhungerte eine Waise
+allein im Haus zwangsläufig.
+
 **Vermacht wird über den Erben hinaus.** Neben der Benennung des Erben soll ein
 **Testament** stehen: einzelne Beträge an einzelne Personen, an die Zunft, an eine Kirche.
 Das ist die Gelegenheit, Dinge zu regeln, die keine Erbregel trifft — den treuen Gesellen

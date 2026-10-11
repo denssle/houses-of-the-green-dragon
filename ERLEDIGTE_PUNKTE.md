@@ -6,62 +6,63 @@ vollen Abschnitt, wie er dort stand. Die Nummern sind dieselben: Wo im Code oder
 
 Ausgelagert am 04.10.2026, als das Erledigte vierzig Prozent der Liste ausmachte.
 
-| #   | Punkt                                                                                 | Fällig vor | Art       |
-| --- | ------------------------------------------------------------------------------------- | ---------- | --------- |
-| 14  | Startbedingungen für neue Spieler — **entschieden mit 5.6**                           | —          | erledigt  |
-| 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                   | —          | erledigt  |
-| 26  | Datensicherung per Cron, einmal wiederhergestellt — **erledigt mit 5.8**              | —          | erledigt  |
-| 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen     | —          | erledigt  |
-| 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                               | —          | erledigt  |
-| 36  | Gebäude und Betriebe benennen — **erledigt mit 5.2**                                  | —          | erledigt  |
-| 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum         | —          | erledigt  |
-| 40  | Der abwesende Spieler — **erledigt mit 5.5**, zwei Restfragen                         | —          | erledigt  |
-| 42  | Kindern einen Namen geben — **erledigt mit 5.2**                                      | —          | erledigt  |
-| 48  | Was beim Tod aus den Zurückbleibenden wird — **erledigt mit 5.1**                     | —          | erledigt  |
-| 52  | Der Lebenslauf — **erledigt mit 5.3**                                                 | —          | erledigt  |
-| 53  | Zwei Knöpfe namens „Arbeiten" — **erledigt mit 5.31**                                 | —          | erledigt  |
-| 54  | Ein Test, der würfelt — **erledigt mit 5.55**                                         | —          | erledigt  |
-| 55  | Die Stadt kommt nicht in Gang — **erledigt mit 5.11**, ein Rest bleibt                | —          | erledigt  |
-| 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt — **erledigt mit 5.11**        | —          | erledigt  |
-| 57  | Der Takt der Welt steht nirgends — **erledigt mit 5.53**                              | —          | erledigt  |
-| 58  | Wege, die nur beschrieben und nicht verlinkt sind — **erledigt mit 5.52**             | —          | erledigt  |
-| 59  | Aktionen, die scheitern müssen — **erledigt mit 5.54** (Bauseite)                     | —          | erledigt  |
-| 60  | Listen ohne Ordnung, Wahlen ohne Termin — **erledigt mit 5.52**                       | —          | erledigt  |
-| 62  | Geburts- und Errichtungsdatum — **erledigt mit 5.52**                                 | —          | erledigt  |
-| 63  | Der geschlossene Kreis — **erledigt mit 5.16**                                        | —          | erledigt  |
-| 65  | Der Zehnt erreicht die Felder nicht — **behoben (5.24), festgehalten (5.51)**         | —          | erledigt  |
-| 66  | Wo Geld aus dem Nichts kam — **Zehnt geschlossen mit 5.83**; Raubgut offen (Punkt 23) | —          | erledigt  |
-| 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt         | —          | erledigt  |
-| 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                     | —          | erledigt  |
-| 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                                | —          | erledigt  |
-| 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                     | —          | erledigt  |
-| 74  | Der Auftrag an Tagelöhner — **erledigt mit 5.27 und 5.78**; offen bleibt der Ausbau   | —          | erledigt  |
-| 76  | Niemand kann sich einen Ausbau leisten — 86 Münzen gegen 340                          | —          | überholt  |
-| 78  | Werben kennt kein Alter — **behoben mit 5.41**                                        | —          | erledigt  |
-| 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                  | —          | erledigt  |
-| 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                    | —          | erledigt  |
-| 81  | Fremde Häuser haben keine Seite — **erledigt mit 5.46**                               | —          | erledigt  |
-| 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                             | —          | erledigt  |
-| 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**             | —          | erledigt  |
-| 86  | Die städtische Schmiede sperrte die Eisenkette — **behoben mit 5.65**                 | —          | erledigt  |
-| 93  | `GOAL_UNREACHABLE` — kein Bauland; **die Schwelle fiel mit 5.92**, Gegenprobe offen   | —          | erledigt  |
-| 95  | Die Werkzeuge maßen einen anderen Takt als den, der läuft — **behoben mit 5.69**      | —          | erledigt  |
-| 96  | Die Stadtkasse ohne Einnahme — **gebaut mit 5.71**, fiskalisch wirksam; siehe 100     | —          | erledigt  |
-| 97  | `VOTE` ohne Bürgerrecht — **behoben mit 5.72**; das Bürgerrecht selbst ist Punkt 49   | —          | erledigt  |
-| 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen          | —          | erledigt  |
-| 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote          | —          | überholt  |
-| 102 | Jeder Bau verbrennt seinen Preis — **erledigt (5.93)**: nichts verschwindet mehr      | —          | erledigt  |
-| 103 | Startreihenfolge — **Mechanismus gefunden, behoben mit 5.84** (die Pachtwahl)         | —          | erledigt  |
-| 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu  | —          | erledigt  |
-| 106 | Ein Bauauftrag, den niemand bezahlen kann — **behoben mit 5.81**                      | —          | erledigt  |
-| 107 | Die Grundsteuer brachte ein Viertel — **hinfällig**: Streuung, kein Fehler            | —          | hinfällig |
-| 108 | Bilanz und Kassenbuch gehen auseinander — **erledigt mit 5.83**, die Bilanz geht auf  | —          | erledigt  |
-| 109 | Der Zehnt trifft nur die erste Stufe — **so gewollt, entschieden am 11.10.2026**      | —          | erledigt  |
-| 110 | Die Werkstattwahl schickt jeden in dieselbe Sackgasse — **behoben mit 5.87**          | —          | erledigt  |
-| 111 | Warum einer nichts tut, stand nirgends — **Werkzeug gebaut mit 5.88**                 | —          | erledigt  |
-| 112 | Ein Betrieb im Umland stand außerhalb des Steuerrechts — **behoben (5.94)**           | —          | erledigt  |
-| 113 | Eine Versteigerung, bei der niemand bieten darf — **behoben mit 5.97, 5.100, 5.101**  | —          | erledigt  |
-| 116 | Wie viele Menschen eine Bäckerei satt macht — **erledigt mit 0.5.111**                | —          | erledigt  |
+| #   | Punkt                                                                                              | Fällig vor | Art       |
+| --- | -------------------------------------------------------------------------------------------------- | ---------- | --------- |
+| 14  | Startbedingungen für neue Spieler — **entschieden mit 5.6**                                        | —          | erledigt  |
+| 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                                | —          | erledigt  |
+| 26  | Datensicherung per Cron, einmal wiederhergestellt — **erledigt mit 5.8**                           | —          | erledigt  |
+| 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen                  | —          | erledigt  |
+| 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                                            | —          | erledigt  |
+| 36  | Gebäude und Betriebe benennen — **erledigt mit 5.2**                                               | —          | erledigt  |
+| 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum                      | —          | erledigt  |
+| 40  | Der abwesende Spieler — **erledigt mit 5.5**, zwei Restfragen                                      | —          | erledigt  |
+| 42  | Kindern einen Namen geben — **erledigt mit 5.2**                                                   | —          | erledigt  |
+| 48  | Was beim Tod aus den Zurückbleibenden wird — **erledigt mit 5.1**                                  | —          | erledigt  |
+| 52  | Der Lebenslauf — **erledigt mit 5.3**                                                              | —          | erledigt  |
+| 53  | Zwei Knöpfe namens „Arbeiten" — **erledigt mit 5.31**                                              | —          | erledigt  |
+| 54  | Ein Test, der würfelt — **erledigt mit 5.55**                                                      | —          | erledigt  |
+| 55  | Die Stadt kommt nicht in Gang — **erledigt mit 5.11**, ein Rest bleibt                             | —          | erledigt  |
+| 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt — **erledigt mit 5.11**                     | —          | erledigt  |
+| 57  | Der Takt der Welt steht nirgends — **erledigt mit 5.53**                                           | —          | erledigt  |
+| 58  | Wege, die nur beschrieben und nicht verlinkt sind — **erledigt mit 5.52**                          | —          | erledigt  |
+| 59  | Aktionen, die scheitern müssen — **erledigt mit 5.54** (Bauseite)                                  | —          | erledigt  |
+| 60  | Listen ohne Ordnung, Wahlen ohne Termin — **erledigt mit 5.52**                                    | —          | erledigt  |
+| 62  | Geburts- und Errichtungsdatum — **erledigt mit 5.52**                                              | —          | erledigt  |
+| 63  | Der geschlossene Kreis — **erledigt mit 5.16**                                                     | —          | erledigt  |
+| 65  | Der Zehnt erreicht die Felder nicht — **behoben (5.24), festgehalten (5.51)**                      | —          | erledigt  |
+| 66  | Wo Geld aus dem Nichts kam — **Zehnt geschlossen mit 5.83**; Raubgut offen (Punkt 23)              | —          | erledigt  |
+| 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt                      | —          | erledigt  |
+| 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                                  | —          | erledigt  |
+| 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                                             | —          | erledigt  |
+| 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                                  | —          | erledigt  |
+| 74  | Der Auftrag an Tagelöhner — **erledigt mit 5.27 und 5.78**; offen bleibt der Ausbau                | —          | erledigt  |
+| 76  | Niemand kann sich einen Ausbau leisten — 86 Münzen gegen 340                                       | —          | überholt  |
+| 78  | Werben kennt kein Alter — **behoben mit 5.41**                                                     | —          | erledigt  |
+| 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                               | —          | erledigt  |
+| 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                                 | —          | erledigt  |
+| 81  | Fremde Häuser haben keine Seite — **erledigt mit 5.46**                                            | —          | erledigt  |
+| 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                                          | —          | erledigt  |
+| 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**                          | —          | erledigt  |
+| 84  | Sehr junge Kinder können für Lohn arbeiten — **erledigt mit 0.6.0**, Kinder leben aus dem Haushalt | —          | erledigt  |
+| 86  | Die städtische Schmiede sperrte die Eisenkette — **behoben mit 5.65**                              | —          | erledigt  |
+| 93  | `GOAL_UNREACHABLE` — kein Bauland; **die Schwelle fiel mit 5.92**, Gegenprobe offen                | —          | erledigt  |
+| 95  | Die Werkzeuge maßen einen anderen Takt als den, der läuft — **behoben mit 5.69**                   | —          | erledigt  |
+| 96  | Die Stadtkasse ohne Einnahme — **gebaut mit 5.71**, fiskalisch wirksam; siehe 100                  | —          | erledigt  |
+| 97  | `VOTE` ohne Bürgerrecht — **behoben mit 5.72**; das Bürgerrecht selbst ist Punkt 49                | —          | erledigt  |
+| 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen                       | —          | erledigt  |
+| 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote                       | —          | überholt  |
+| 102 | Jeder Bau verbrennt seinen Preis — **erledigt (5.93)**: nichts verschwindet mehr                   | —          | erledigt  |
+| 103 | Startreihenfolge — **Mechanismus gefunden, behoben mit 5.84** (die Pachtwahl)                      | —          | erledigt  |
+| 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu               | —          | erledigt  |
+| 106 | Ein Bauauftrag, den niemand bezahlen kann — **behoben mit 5.81**                                   | —          | erledigt  |
+| 107 | Die Grundsteuer brachte ein Viertel — **hinfällig**: Streuung, kein Fehler                         | —          | hinfällig |
+| 108 | Bilanz und Kassenbuch gehen auseinander — **erledigt mit 5.83**, die Bilanz geht auf               | —          | erledigt  |
+| 109 | Der Zehnt trifft nur die erste Stufe — **so gewollt, entschieden am 11.10.2026**                   | —          | erledigt  |
+| 110 | Die Werkstattwahl schickt jeden in dieselbe Sackgasse — **behoben mit 5.87**                       | —          | erledigt  |
+| 111 | Warum einer nichts tut, stand nirgends — **Werkzeug gebaut mit 5.88**                              | —          | erledigt  |
+| 112 | Ein Betrieb im Umland stand außerhalb des Steuerrechts — **behoben (5.94)**                        | —          | erledigt  |
+| 113 | Eine Versteigerung, bei der niemand bieten darf — **behoben mit 5.97, 5.100, 5.101**               | —          | erledigt  |
+| 116 | Wie viele Menschen eine Bäckerei satt macht — **erledigt mit 0.5.111**                             | —          | erledigt  |
 
 **Gestrichene Nummern.** Zehn Punkte sind erledigt und samt Abschnitt aus der Liste
 gefallen — Code und Text verweisen aber weiter auf sie, denn die Kommentare stammen aus der
@@ -1164,6 +1165,77 @@ Fehler nur sichtbarer, statt ihn zu beheben.
 **Erledigt mit 5.44**, in drei Abschnitten: was der Stadt gehört, was den Leuten gehört
 (mit Eigentümer), und — nur wenn vorhanden — was ohne Erben zurückgefallen ist und auf die
 Versteigerung wartet.
+
+### 84. Sehr junge Kinder können für Lohn arbeiten — erledigt mit 0.6.0
+
+**Beobachtet am 22.08.2026 in der laufenden Welt.** Nachgesehen, wo das Alter geprüft wird:
+
+- **Die Anstellung prüft es.** `canTakeJob` weist ein Kind mit `TOO_YOUNG` ab, und
+  `employmentService` rechnet dafür eigens das Alter aus. Ein Kind kann sich also nicht
+  verdingen.
+- **Die Lohnarbeit prüft es nicht.** `REPAIR_FOR_HIRE` — seit 5.26 der eigentliche
+  Broterwerb — fragt nach Zustand, Auftrag und Aktionspunkten, nicht nach dem Alter. Ein
+  Achtjähriger kann am Rathaus herrichten und wird dafür aus der Stadtkasse bezahlt.
+- **Die eigene Arbeit prüft es auch nicht** (`harvest`, `craft`). Das fällt seltener auf,
+  weil ein Kind selten eine Pacht oder Werkstatt besitzt — unmöglich ist es nicht, denn
+  geerbt wird ohne Altersgrenze.
+- **Die Schule kennt die Grenze**: Ab `AGE_OF_MAJORITY` ist Schluss mit dem Unterricht.
+
+**Zu entscheiden ist nicht das Ob, sondern das Ab-wann.** „Kinder arbeiten gar nicht" wäre
+die einfachste Regel und die unhistorischste; in einer mittelalterlichen Stadt half ein
+Kind, sobald es das konnte. Denkbar ist ein **Mindestalter unterhalb der Volljährigkeit**
+(die Lehre beginnt früh, siehe Punkt 45) oder ein geringerer Ertrag statt eines Verbots.
+
+Das gehört zusammen mit Punkt 24 (NPC-Eltern und die Schule) entschieden: Ob ein Kind
+lernt oder arbeitet, ist dieselbe Frage von zwei Seiten — und ein Tag ist nur einmal da.
+
+**Nachgesehen am 04.10.2026: weiter offen.** Weder `workAvailable` in der Lageaufnahme
+noch `WORK` in der Überlebensstufe noch der Bau- oder Vermessungsdienst prüfen das Alter.
+Nur die Anstellung (`canTakeJob`) und seit 5.99 der Stellenwechsel tun es.
+
+**Entschieden am 11.10.2026: Gearbeitet wird ab zwölf, mit vollem Ertrag.** Eine Grenze unterhalb
+der Volljährigkeit (sechzehn), weil ein Kind in dieser Welt hilft, sobald es kann — und mit
+vollem Ertrag, weil ein gedämpfter Lohn eine zweite Regel wäre, die niemand sieht. Unter
+zwölf wird nicht gearbeitet.
+
+**Umzusetzen:** Eine Altersgrenze (`AGE_OF_WORK = 12` neben `AGE_OF_MAJORITY`), geprüft
+überall, wo heute nur die Anstellung prüft — `REPAIR_FOR_HIRE`, `harvest`, `craft`, die
+Vermessung, und in der Lageaufnahme `workAvailable`, damit ein Achtjähriger es gar nicht
+erst vorhat. Die feste Anstellung bleibt bei sechzehn. Die Lehre im eigenen Betrieb
+(Punkt 45) dreht später nicht noch einmal an dieser Zahl, sondern nutzt sie.
+
+**Gebaut mit 0.6.0 (11.10.2026) — und dabei kam heraus, dass die Frage größer war.** Nicht ein
+Achtjähriger am Rathaus war das Problem, sondern **jedes** NPC-Kind: Ein Neugeborenes kam
+satt, aber mit null Münzen zur Welt, und wurde es hungrig, ging es arbeiten. Eltern
+versorgten niemanden. Eine Altersgrenze allein hätte Kinder verhungern lassen.
+
+**Deshalb, entschieden am selben Tag: Kinder unter zwölf leben aus dem Haushalt.**
+
+- `AGE_OF_WORK = 12` (`time.ts`). Lohnarbeit, Vermessung, Ernte und Herstellung prüfen
+  `householdService.darfArbeiten` — dieselbe Regel, die die Lageaufnahme fragt. Ein erster
+  Entwurf prüfte im Dienst nur das Alter und hätte den Ausweg unten abgewiesen; ein Test
+  fand es.
+- **Ein Kind isst aus der Kammer der Eltern**, sonst eines Erwachsenen im selben Haus
+  (`haushaltVon`, `eatItem` mit Quelle).
+- **Die Eltern sorgen**: Hungert ein Kind unter zwölf und liegt im Haushalt kein Brot, kauft
+  der Elternteil — auch satt —, und ohne Geld geht er dafür arbeiten (`childHungry`,
+  `kindVersorgen` in der Überlebensstufe).
+- **Der Ausweg:** Ein Kind ganz ohne Haushalt darf weiter für sein Brot arbeiten.
+
+**Gemessen** (drei Saaten, je 2000 Ticks, gegen 0.5.111):
+
+|                    | 86 vorher | nachher | 7 vorher | nachher | 42 vorher | nachher |
+| ------------------ | --------: | ------: | -------: | ------: | --------: | ------: |
+| Lebende am Ende    |        45 |      33 |       53 |      52 |        43 |      46 |
+| Geburten           |        25 |      18 |       28 |      41 |        21 |      24 |
+| Hungertote         |         1 |       1 |        0 |       4 |         0 |       0 |
+| Stadtkasse am Ende |       649 |      12 |     1633 |     629 |       991 |     943 |
+
+**Kein Kind ist verhungert.** Die vier Hungertoten bei Saat 7 sind Erwachsene zwischen 33
+und 42 (nachgezählt mit einem eigenen Lauf), in der Stadt mit den meisten Geburten. Der
+Verdacht, ungeprüft: Eltern, die ihr Brot für die Kinder ausgaben. Das ist die Härte, die
+die Regel will — Kinder kosten etwas —, und als Balancing-Frage bewusst nicht weiter
+verfolgt. Saat 86 schrumpft weiter; das gehört zu Punkt 121.
 
 ### 86. Die städtische Schmiede sperrt die Eisenkette — behoben (5.65)
 

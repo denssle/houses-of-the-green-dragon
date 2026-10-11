@@ -1,4 +1,5 @@
 import { Op, type Transaction } from 'sequelize';
+import * as householdService from '$lib/server/service/householdService';
 import { randomUUID } from 'node:crypto';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
@@ -305,6 +306,10 @@ export async function harvest(characterId: string, plotId: string): Promise<Prod
 	return sequelize.transaction(async (t: Transaction) => {
 		const baeuerin = await characterService.loadForAction(characterId, tick, t);
 		if (!baeuerin) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+		// Unter zwölf wird nicht gearbeitet — außer ohne Haushalt (0.6.0, Punkt 84).
+		if (!(await householdService.darfArbeiten(baeuerin.dataValues, tick))) {
+			return { ok: false, reason: 'TOO_YOUNG' } as const;
+		}
 
 		const ergebnis = produce(
 			{
@@ -411,6 +416,10 @@ export async function craft(
 	return sequelize.transaction(async (t: Transaction) => {
 		const handwerker = await characterService.loadForAction(characterId, tick, t);
 		if (!handwerker) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+		// Unter zwölf wird nicht gearbeitet — außer ohne Haushalt (0.6.0, Punkt 84).
+		if (!(await householdService.darfArbeiten(handwerker.dataValues, tick))) {
+			return { ok: false, reason: 'TOO_YOUNG' } as const;
+		}
 
 		// **Alles, was ihm gehört** (5.25, Punkt 72). Seit die Ernte auf dem Hof liegt und
 		// das Erzeugnis in der Werkstatt, ist Besitz auf mehrere Häuser verteilt — und wer

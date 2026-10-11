@@ -156,8 +156,17 @@ export async function changeStock(
  * Kostet keinen Aktionspunkt: Essen ist kein Vorhaben, sondern eine Notwendigkeit — wer
  * dafür bezahlen müsste, verhungerte ausgerechnet dann, wenn er schon geschwächt ist.
  * Bezahlt wird mit der Ware selbst.
+ *
+ * **`ausKammerVon`: aus wessen Vorrat** (0.6.0, Punkt 84). Ein Kind unter zwölf arbeitet
+ * nicht und lebt aus dem Haushalt — es isst, was in der Kammer der Eltern liegt. Ohne
+ * Angabe isst jeder aus seiner eigenen. Wer das Kind zu versorgen hat, entscheidet der
+ * Aufrufer; hier wird nur gegessen.
  */
-export async function eatItem(characterId: string, itemId: string): Promise<NeedResult> {
+export async function eatItem(
+	characterId: string,
+	itemId: string,
+	ausKammerVon: string = characterId
+): Promise<NeedResult> {
 	const vorlage: ItemTemplate | undefined = getItemTemplate(itemId);
 	const naehrwert: number | undefined = vorlage?.nourishment;
 	if (naehrwert === undefined) return { ok: false, reason: 'NOT_EDIBLE' };
@@ -171,7 +180,7 @@ export async function eatItem(characterId: string, itemId: string): Promise<Need
 		const stand: number = satietyOf(esser.dataValues, tick);
 		if (wouldBeWasted(stand)) return { ok: false, reason: 'NOTHING_TO_DO' } as const;
 
-		if (!(await changeStock(characterId, itemId, -1, t))) {
+		if (!(await changeStock(ausKammerVon, itemId, -1, t))) {
 			return { ok: false, reason: 'NOT_IN_STOCK' } as const;
 		}
 

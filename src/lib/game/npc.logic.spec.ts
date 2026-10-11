@@ -29,6 +29,7 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		isMarried: true,
 		isAdult: true,
 		workAvailable: true,
+		childHungry: false,
 		hasJob: false,
 		betterJobAvailable: false,
 		scarceJobAvailable: false,

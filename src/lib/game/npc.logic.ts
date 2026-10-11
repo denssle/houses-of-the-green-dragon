@@ -81,8 +81,18 @@ export interface NpcState {
 	homeAvailable: boolean;
 	isMarried: boolean;
 	isAdult: boolean;
-	/** Steht ein Arbeitsplatz offen, an dem er verdienen könnte? */
+	/**
+	 * Steht ein Arbeitsplatz offen, an dem er verdienen könnte?
+	 *
+	 * Für ein Kind unter zwölf nie (0.6.0, Punkt 84) — außer es hat keinen Haushalt, der es
+	 * versorgt. Das rechnet die Lageaufnahme; die Entscheidung muss es nicht wissen.
+	 */
 	workAvailable: boolean;
+	/**
+	 * Hungert ein Kind unter zwölf, das er versorgt, und liegt im Haushalt kein Brot
+	 * (0.6.0, Punkt 84)? Dann ist es an ihm.
+	 */
+	childHungry: boolean;
 	/** Hat er eine feste Anstellung? */
 	hasJob: boolean;
 	/** Bietet jemand mehr als die Tagelöhnerei? */
@@ -399,6 +409,7 @@ export function decideNpcActionWithStage(state: NpcState): { action: NpcAction; 
 export function stateFlags(state: NpcState): string[] {
 	const flags: string[] = [];
 	if (!state.isAdult) flags.push('kind');
+	if (state.childHungry) flags.push('kind_hungert');
 	if (state.actionPoints <= 0) flags.push('erschöpft');
 	if (state.satiety < eatingThreshold(state.personality)) flags.push('hungrig');
 	if (state.food > 0) flags.push('hat_brot');
@@ -545,13 +556,26 @@ export function decideCaretakerAction(state: NpcState): NpcAction {
  */
 function ueberleben(state: NpcState): NpcAction | undefined {
 	const hungrig: boolean = state.satiety < eatingThreshold(state.personality);
-	if (!hungrig) return undefined;
+	if (!hungrig) return kindVersorgen(state);
 
 	if (state.food > 0) return 'EAT';
 	if (state.money >= state.foodPrice) return 'BUY_FOOD';
 	// Wer hungert und nichts hat, arbeitet — unabhängig von seinem Fleiß. Sonst
 	// verhungerte der Träge zuverlässig, und Faulheit wäre keine Eigenart mehr, sondern
 	// ein Todesurteil.
+	if (state.workAvailable && state.actionPoints > 0) return 'WORK';
+	return kindVersorgen(state);
+}
+
+/**
+ * **Und wer Kinder hat, sorgt für sie** (0.6.0, Punkt 84). Ein Kind unter zwölf arbeitet
+ * nicht; es isst aus dem Haushalt. Ist dort nichts, kauft der Elternteil — und hat er kein
+ * Geld, geht er dafür arbeiten. Steht in der Überlebensstufe, denn für das Kind ist es eine:
+ * Bis hierher verdiente es sich sein Brot selbst, vom ersten Tag an.
+ */
+function kindVersorgen(state: NpcState): NpcAction | undefined {
+	if (!state.childHungry) return undefined;
+	if (state.money >= state.foodPrice) return 'BUY_FOOD';
 	if (state.workAvailable && state.actionPoints > 0) return 'WORK';
 	return undefined;
 }

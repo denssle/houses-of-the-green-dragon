@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import * as householdService from '$lib/server/service/householdService';
 import { Op, type Transaction } from 'sequelize';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { sequelize } from '$lib/db/sequelize';
@@ -212,6 +213,10 @@ export async function surveyForHire(characterId: string, plotId: string): Promis
 		// anderen Schicht: Sonst ginge sie gegen den Punktestand von gestern.
 		const arbeiter = await characterService.loadForAction(characterId, tick, t);
 		if (!arbeiter) return { ok: false, reason: 'NO_SUCH_PERSON' } as const;
+		// Unter zwölf wird nicht gearbeitet — außer ohne Haushalt (0.6.0, Punkt 84).
+		if (!(await householdService.darfArbeiten(arbeiter.dataValues, tick))) {
+			return { ok: false, reason: 'TOO_YOUNG' } as const;
+		}
 
 		const ergebnis = surveyShift(
 			{

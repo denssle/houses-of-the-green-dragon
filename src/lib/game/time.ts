@@ -38,6 +38,21 @@ export const MAX_ACTION_POINTS = 48;
 /** Ab diesem Alter gilt ein Charakter als erwachsen. */
 export const AGE_OF_MAJORITY = 16;
 
+/**
+ * **Ab diesem Alter wird gearbeitet** (0.6.0, Punkt 84) — Lohnarbeit, Vermessung, Ernte,
+ * Herstellung. Unter der Volljährigkeit, weil ein Kind in dieser Welt hilft, sobald es kann;
+ * mit vollem Ertrag, weil ein gedämpfter Lohn eine zweite Regel wäre, die niemand sieht.
+ * Die feste Anstellung, Heirat und Wahl bleiben bei `AGE_OF_MAJORITY`.
+ *
+ * Wer jünger ist, lebt aus dem Haushalt (`npcService`, `needService.eatItem`).
+ */
+export const AGE_OF_WORK = 12;
+
+/** Darf er arbeiten? */
+export function isOfWorkingAge(birthTick: number, currentTick: number): boolean {
+	return ageInYears(birthTick, currentTick) >= AGE_OF_WORK;
+}
+
 /** Übliche Lebenserwartung in Jahren — rund vier Monate Echtzeit. */
 export const LIFE_EXPECTANCY_YEARS = 70;
 
