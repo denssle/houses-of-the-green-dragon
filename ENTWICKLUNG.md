@@ -3701,8 +3701,9 @@ Erledigt.
 
 **Danach `1.0.0`.** Damit endet auch das Versionsschema aus `CLAUDE.md`, das
 `0.<Phase>.<Schritt>` vorsieht; ab dem öffentlichen Betrieb zählt die erste Stelle nicht
-mehr die Phase. Naheliegend ist, jede weitere Phase als Minor zu führen — Phase 6 wird
-`1.1.x`. Das gehört entschieden, bevor der Tag da ist.
+mehr die Phase. **Entschieden am 11.10.2026: klassisches SemVer** — Patch für Fehler und
+Feinschliff, Minor für Neues im Spiel, Major für einen Bruch mit der laufenden Welt. Die
+Einzelheiten stehen in `CLAUDE.md`.
 
 ## Phase 6 — Ruf und Handwerk
 

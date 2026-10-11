@@ -22,9 +22,16 @@ behauptet eine Auskunft, die sie nicht gibt.
   letzten Teil. Eine Version, die zweimal dasselbe bedeutet, ist keine.
 
 `1.0.0` bleibt dem Tag vorbehalten, an dem das Spiel öffentlich läuft — nicht nur
-technisch erreichbar, sondern für Fremde spielbar. **Was danach gilt, ist offen**:
-`ENTWICKLUNG.md` schlägt vor, jede weitere Phase als Minor zu führen (Phase 6 wird
-`1.1.x`). Das gehört entschieden, bevor der Tag da ist.
+technisch erreichbar, sondern für Fremde spielbar.
+
+**Danach gilt klassisches SemVer** (entschieden am 11.10.2026). Die Phase steckt dann nicht mehr
+in der Zahl:
+
+- **Patch** (`1.0.1`): Fehlerbehebungen, Feinschliff, Balancing ohne neues System.
+- **Minor** (`1.1.0`): ein Schritt, der etwas Neues ins Spiel bringt — eine Handlung, ein
+  Gebäude, ein Amt.
+- **Major** (`2.0.0`): wenn eine laufende Welt nicht einfach weiterläuft — ein Neubeginn
+  der Welt oder ein Bruch, den Spieler selbst auffangen müssen.
 
 **Wann sie steigt:** in demselben Commit, der die Änderung bringt. Ein nachgereichter
 Versions-Commit ist eine Zeile, die niemand mit dem Inhalt verbindet.

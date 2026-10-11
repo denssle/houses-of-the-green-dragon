@@ -1070,6 +1070,11 @@ eine Härte ohne Weg daran vorbei. Mit der Lehre im eigenen Betrieb hat der Spie
 Weg, und er kostet, was er kosten soll — die Jahre, in denen das Kind noch nichts
 erwirtschaftet.
 
+**Festgelegt am 11.10.2026** (Punkte 34 und 45): Meister ist, wer sein Handwerk auf **Stufe fünf**
+beherrscht. Stirbt er und hat der Erbe sie nicht, steht der Betrieb still, ohne Frist, bis
+der Erbe so weit ist oder einen Meister anstellt. Die Lehre beginnt mit zwölf, bringt ein,
+was das Können hergibt, und lehrt halb so schnell wie eine Lehrstunde — dafür ohne Lehrgeld.
+
 Damit stehen sich zwei Erziehungen gegenüber, und das ist die eigentliche Entscheidung:
 **Schule oder Werkstatt.** Die Schule ist breit, kostet Geld und gibt, was gerade ein
 Lehrer beherrscht; die Werkstatt ist eng, kostet Ertrag und gibt genau das eine Handwerk,

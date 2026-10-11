@@ -21,21 +21,21 @@ offenen, nach Nummer sortiert.
 | 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                               | 4.8                          | Entwurf     |
 | 15  | Weltinhalte: Berufe, Waren und Rezepte                                                 | laufend                      | Entwurf     |
 | 16  | Balancing im engeren Sinn                                                              | laufend                      | laufend     |
-| 20  | Verschleiß von Gegenständen                                                            | Kleidung und Werkzeug (4.6c) | Entwurf     |
+| 20  | Verschleiß von Gegenständen — **entschieden: am Gebrauch, Ausrüstung einzeln**         | Kleidung und Werkzeug (4.6c) | entschieden |
 | 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**     | 4.8 / Punkt 6                | Entwurf     |
 | 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                    | laufend                      | Entwurf     |
 | 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                 | laufend                      | Entwurf     |
 | 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                        | zweite Stadt / Erschließung  | Entwurf     |
 | 32  | Die Ämter — **Zuschnitt entschieden**: zwei Wahlen, drei Ernennungen                   | Ämter über den Bürgermeister | entschieden |
 | 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen   | laufend                      | Entwurf     |
-| 34  | Wer einen Handwerksbetrieb führen darf                                                 | Berufe (Punkt 15)            | Entwurf     |
+| 34  | Wer einen Handwerksbetrieb führen darf — **entschieden: Stufe 5, Stillstand beim Tod** | zusammen mit Punkt 45        | entschieden |
 | 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                 | laufend                      | Entwurf     |
 | 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                      | Ehe für alle                 | Entwurf     |
 | 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit               | später                       | Entwurf     |
 | 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist                | zweite Stadt                 | Entwurf     |
 | 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                            | erste verliehene Münze       | Entwurf     |
 | 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                        | Punkt 43 / Punkt 23          | Entwurf     |
-| 45  | Die Lehre im eigenen Betrieb: Ertrag, Tempo, ab welchem Alter                          | zusammen mit Punkt 34        | Entwurf     |
+| 45  | Die Lehre im eigenen Betrieb — **entschieden: ab zwölf, halbes Lerntempo**             | zusammen mit Punkt 34        | entschieden |
 | 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                           | Punkt 34                     | Entwurf     |
 | 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                   | Punkte 23, 39, 43            | Entwurf     |
 | 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                     | Zuwanderung (Punkt 41)       | Entwurf     |
@@ -53,9 +53,9 @@ offenen, nach Nummer sortiert.
 | 87  | Ein Sparziel, das ins Leere führt — **behoben mit 5.106**, die Versteigerung offen     | dem nächsten Messlauf        | teilweise   |
 | 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick              | laufend                      | Befund      |
 | 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                  | Punkte 15, 34, 115           | teilweise   |
-| 90  | Die NPC-Entscheidung hat kein Gedächtnis — kein Absatz, kein Preis, keine Streuung     | Punkte 76, 16                | Entwurf     |
+| 90  | Die NPC-Entscheidung hat kein Gedächtnis — **zuerst das Verkaufsgedächtnis**           | Punkte 76, 16                | entschieden |
 | 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen       | laufend                      | teilweise   |
-| 92  | Der Verwalter arbeitet ohne Ende — und übt immer dasselbe Handwerk                     | Punkte 70, 40                | Befund      |
+| 92  | Der Verwalter arbeitet ohne Ende — **entschieden: nur für Essen und Erhalt**           | Punkte 70, 40                | entschieden |
 | 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück                         | Punkt 31                     | Befund      |
 | 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten    | Punkte 89, 16                | Befund      |
 | 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                     | Punkt 100                    | teilweise   |
@@ -370,6 +370,17 @@ Zu entscheiden ist die **Schwelle und was bei ihrem Verlust geschieht**:
 - **Wie sieht man es?** Ein Betrieb, der nichts produziert, weil eine Bedingung fehlt,
   muss das sagen — sonst sucht ein Spieler den Fehler bei sich.
 
+**Entschieden am 11.10.2026:**
+
+- **Die Schwelle ist Stufe 5.** Ein Meister soll einer sein (75 Übungen von null). Das ist
+  bewusst streng; ob ein Erbe sie mit der Lehre ab zwölf und halbem Lerntempo bis zur
+  Volljährigkeit erreicht, zeigt der Messlauf zum Bau — reicht es nicht, steht der Betrieb
+  eben still, bis er so weit ist oder einen Meister einstellt.
+- **Beim Tod des Meisters steht der Betrieb still**, ohne Frist: keine Herstellung, bis der
+  Erbe die Stufe hat oder einen Meister anstellt. Das Gebäude verfällt nur im üblichen Tempo.
+- **NPCs nach derselben Regel**, und **die Betriebsseite sagt, woran es hängt.**
+- **Gebaut zusammen mit der Lehre** (Punkt 45).
+
 ### 35. Der Bauherr als Beruf
 
 **Die Richtung steht** (`KONZEPT.md`, Abschnitt 4): Wer nicht selbst Holz und Stein
@@ -618,6 +629,17 @@ Zu entscheiden ist das Verhältnis von Ertrag und Lernen:
   niedrigem Lohn und hohem Lerngewinn — und damit ein Geschäft zwischen zwei Häusern, das
   dem Spiel guttäte. Es setzt allerdings voraus, dass die Eltern zustimmen, und berührt
   damit dieselbe Frage wie die Adoption (Punkt 38).
+
+**Entschieden am 11.10.2026: der Vorschlag oben.**
+
+- **Ertrag nach Können** wie bei jedem anderen — keine eigene Regel, nur die Erlaubnis.
+- **Lernen halb so schnell** wie in einer Lehrstunde, dafür ohne Lehrgeld.
+- **Ab zwölf**, dieselbe Grenze wie für jede Arbeit (Punkt 84).
+- **Schule und Werkstatt teilen sich die Aktionspunkte**, auch an verschiedenen Tagen.
+- **NPC-Eltern** entscheiden nach ihren Achsen: Fleiß und Ehrgeiz dafür, Gier dagegen.
+- **Vorerst nur eigene Kinder.**
+
+Gebaut wird es zusammen mit Punkt 34 — die Pflicht nicht ohne den Weg dorthin.
 
 ### 46. Zünfte
 
@@ -1135,6 +1157,10 @@ Zustand je Stück heißt eine Zeile je Stück — bei Brot wäre das absurd, bei
 richtig. Vermutlich läuft es auf eine Trennung hinaus: Verbrauchsgüter bleiben eine Menge,
 Ausrüstung wird einzeln geführt. Diese Entscheidung fällt spätestens mit der ersten Ware,
 die länger hält als ein Bissen.
+
+**Entschieden am 11.10.2026: am Gebrauch.** Ein Werkzeug nutzt sich je Schicht ab, Kleidung je
+Winter, eine Waffe je Kampf. Dafür wird **Ausrüstung einzeln geführt**, Verbrauchsgüter
+bleiben eine Menge. Gebaut wird das mit der ersten Ware, die länger hält als ein Bissen.
 
 ### 23. Räuber als Beruf
 
@@ -1839,6 +1865,10 @@ und Punkt 89 (unbediente Nachfrage) und ist deshalb der erste Kandidat. Die Prei
 ist die größere Arbeit und gehört hinter Punkt 15, weil sie ohne Verwendungen nichts zu
 bewerten hat.
 
+**Entschieden am 11.10.2026: zuerst das Verkaufsgedächtnis.** Es trägt Punkt 76 und die
+unbediente Nachfrage aus Punkt 89 gleich mit. Die Preisbildung folgt danach und bleibt
+hinter Punkt 15.
+
 ### 91. Der Takt ist nicht atomar — erste Hälfte behoben (5.73)
 
 **Befund vom 23.08.2026.** `schlagen()` stellt zuerst die Weltuhr (`advanceWorld` schreibt
@@ -1903,6 +1933,13 @@ sind es nicht:
 Lohnarbeit über das hinaus, was Essen und Instandhaltung kosten; oder ein Anteil der
 Punkte, der ungenutzt verfällt. „Erhalten ja, entscheiden nein" ist der richtige Satz — er
 sollte nur auch für den Geldbeutel gelten.
+
+**Entschieden am 11.10.2026:** Ein Verwalter arbeitet für Lohn nur so weit, wie Essen und
+Instandhaltung es verlangen — dann ruht er. „Erhalten ja, entscheiden nein" gilt auch für den
+Geldbeutel: Wer zurückkommt, findet sein Haus und seinen Hunger versorgt, aber keinen Schatz.
+**Umzusetzen** in `decideCaretakerAction`: Lohnarbeit nur, solange das Geld unter Rücklage
+plus fälliger Instandhaltung liegt. Die zweite Hälfte des Befunds (immer dasselbe Handwerk)
+bleibt offen.
 
 ### 94. Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück
 
