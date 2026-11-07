@@ -6,6 +6,7 @@ import { Character } from '$lib/db/model/character';
 import { Building } from '$lib/db/model/building';
 import { Dynasty } from '$lib/db/model/dynasty';
 import { Plot } from '$lib/db/model/plot';
+import { BuildingStock, ShopOffer } from '$lib/db/model/shop';
 import { User } from '$lib/db/model/user';
 import { World } from '$lib/db/model/world';
 import { WORLD_ID } from '$lib/db/attributes/world.attributes';
@@ -13,6 +14,7 @@ import { findStartRegionId, seedWorld } from '$lib/db/seed';
 import * as npcService from '$lib/server/service/npcService';
 import { ABSENCE_AFTER_TICKS } from '$lib/game/npc.logic';
 import { yearsToTicks } from '$lib/game/time';
+import { getItemTemplate } from '$lib/model/itemTemplate';
 
 /**
  * Phase 5.5 — läuft ein Charakter weiter, den gerade niemand spielt?
@@ -129,6 +131,44 @@ describe('Der verwaiste Charakter im Takt', () => {
 		await npcService.actForNpcs(JETZT);
 
 		expect((await stand(erbe)).HomeBuildingId).toBe(geerbt);
+	});
+
+	it('hält den Laden offen und verkauft das Betriebslager zum Katalogpreis', async () => {
+		const id = await spieler('Zimmerin', {
+			satiety: 100,
+			lastSeenTick: JETZT - ABSENCE_AFTER_TICKS,
+			money: 900
+		});
+		const plotId = randomUUID();
+		await Plot.create({
+			id: plotId,
+			address: 'Sägewerkgasse 1',
+			type: 'BUILDING_LAND',
+			RegionId: stadtId,
+			ownerType: 'CHARACTER',
+			OwnerCharacterId: id
+		});
+		const zimmerei = randomUUID();
+		await Building.create({
+			id: zimmerei,
+			name: 'Zimmerei',
+			optionId: 9,
+			condition: 100,
+			lastConditionTick: JETZT,
+			PlotId: plotId,
+			ownerType: 'CHARACTER',
+			OwnerCharacterId: id
+		});
+		await BuildingStock.create({ BuildingId: zimmerei, itemId: 'PLANK', quantity: 56 });
+
+		// Erst ein Dach, das geht vor: Ein Obdachloser zieht im ersten Takt um.
+		await npcService.actForNpcs(JETZT);
+		expect((await stand(id)).HomeBuildingId).not.toBeNull();
+		await npcService.actForNpcs(JETZT);
+
+		const schild = await ShopOffer.findOne({ where: { SellerCharacterId: id, itemId: 'PLANK' } });
+		expect(schild?.dataValues.quantity).toBe(56);
+		expect(schild?.dataValues.pricePerUnit).toBe(getItemTemplate('PLANK')?.basePrice);
 	});
 
 	it('nimmt ihm keine Entscheidungen ab', async () => {

@@ -1991,6 +1991,13 @@ ein Vorhaben, und das fasst der Spieler. Fällt der Tagelohn weg, fragt der Verw
 Hierarchie ein zweites Mal ohne ihn — so kommt er zum Renovieren, das sonst hinter dem
 Sparen stand. Ungemessen: wie oft Verwalter in der laufenden Welt überhaupt greifen.
 
+**Erweitert mit 0.7.1:** Der Verwalter verkauft, was im Betrieb liegt, zum Katalogpreis. Er
+stellt nichts her und bedient keinen Marktstand. Anlass war Grünau am 07.11.2026: Die einzige
+Zimmerei gehörte `testt`, der seit Tick 5650 fort war, und ihre 56 Bretter kamen nie an den
+Markt. Damit stand auch die Instandsetzung still (Punkt 98). Erledigt ist die Frage damit
+nicht: Was der Verwalter verkauft, wird nicht nachproduziert. Ist das Lager leer, fehlt die
+Zimmerei wieder, solange der Spieler fort bleibt.
+
 **Offen bleibt die zweite Hälfte** (immer dasselbe Handwerk).
 
 ### 94. Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück
@@ -2086,6 +2093,11 @@ und die Chronik schlägt den Namen im Gebäude nach — herausgekommen ist **„
 Ruine verfallen"**. Der Kommentar an der Stelle warnte seit jeher davor („ein Haus, das
 spurlos verschwindet, ist keine Geschichte"), nur reichte die Kennung dafür nicht. Jetzt
 steht der Name in der Zeile selbst.
+
+**Befund vom 07.11.2026 in Grünau:** Zustand der Betriebe zwischen 25 und 82 Prozent, die
+einzige Mühle bei 51, seit über 480 Ticks ohne Instandsetzung. Es gab keine Bretter am Markt,
+weil die einzige Zimmerei einem abwesenden Spieler gehörte (0.7.1, Punkt 92). Ob die Besitzer
+mit Bretter am Markt auch reparieren, ist offen: Mehrere haben keine Münze.
 
 **Was die Zahlen dann sagen, ist noch offen** — dieser Eintrag hält nur fest, dass sie ab
 jetzt da sind. Die Frage dahinter (brennt das Handwerk ab, oder entsteht es nie?) gehört zu
@@ -2407,7 +2419,8 @@ ab, aber auch den Unternehmer, den der Satz meint. Zwei Dinge fehlen dafür:
   kannten viele Stadtrechte. Das wäre eine Gesetzesart für den Bürgermeister und gehört zu
   Punkt 50 (Bauordnung).
 
-**Dazu eine Lücke, die beides berührt:** Grund lässt sich nicht wieder abgeben. Wer zu
+**Dazu eine Lücke, die beides berührt:** Grund lässt sich nicht wieder abgeben. In Grünau
+waren am 07.11.2026 20 von 52 privaten Grundstücken unbebaut, und auf jedes läuft Grundsteuer. Wer zu
 viel hat, kann ihn weder verkaufen noch der Stadt zurückgeben.
 
 ## Aus dem alten Phasenplan

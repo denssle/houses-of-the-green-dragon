@@ -971,6 +971,7 @@ async function lageAufnehmen(
 			leaseAvailable: freieFlaeche !== undefined,
 			ownStockToSell:
 				(zuVerkaufen?.quantity ?? 0) + (marktplatz ? (ueberschuss?.quantity ?? 0) : 0),
+			workshopStockToSell: zuVerkaufen?.quantity ?? 0,
 			canCraft: kannHerstellenJetzt,
 			inputPrice: zutatAngebot?.pricePerUnit ?? null,
 			// **Nur, wenn es überhaupt etwas zu kaufen gibt.** Als feste Konstante war der

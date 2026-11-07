@@ -48,6 +48,7 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		hasLease: false,
 		leaseAvailable: false,
 		ownStockToSell: 0,
+		workshopStockToSell: 0,
 		ownConstruction: false,
 		upgradeMaterialMissing: false,
 		upgradeMaterialPrice: null,
@@ -692,6 +693,7 @@ describe('Was ein NPC tut', () => {
 				ownsWorkshop: false,
 				canCraft: false,
 				ownStockToSell: 0,
+				workshopStockToSell: 0,
 				money: 10
 			});
 
@@ -707,6 +709,7 @@ describe('Was ein NPC tut', () => {
 				ownsWorkshop: true,
 				canCraft: false,
 				ownStockToSell: 0,
+				workshopStockToSell: 0,
 				money: 10
 			});
 

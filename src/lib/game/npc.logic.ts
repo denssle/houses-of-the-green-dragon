@@ -128,6 +128,12 @@ export interface NpcState {
 	leaseAvailable: boolean;
 	/** Liegen im eigenen Betrieb Waren, die noch niemand anbietet? */
 	ownStockToSell: number;
+	/**
+	 * Was davon im eigenen Betrieb liegt und noch kein Schild hat (0.7.1) — ohne die Ware, die
+	 * jemand aus der eigenen Kammer auf den Marktplatz trüge. Das eine ist der Laden, das
+	 * andere die Habe, und nur den Laden hält ein Verwalter offen.
+	 */
+	workshopStockToSell: number;
 	/** Reichen die Zutaten für einen Durchgang? */
 	canCraft: boolean;
 	/**
@@ -504,6 +510,13 @@ export function idleReason(state: NpcState): IdleReason {
  * Essen, arbeiten, unter ein Dach ziehen, Material kaufen und renovieren bleiben. Das
  * Dach gehört dazu, weil ein Obdachloser sich nicht erholt und keine Kinder bekommt —
  * ihn draußen stehen zu lassen wäre keine Zurückhaltung, sondern Vernachlässigung.
+ *
+ * **Und er hält den Laden offen** (0.7.1). In Grünau gehörte die einzige Zimmerei einem
+ * Spieler, der seit über 1200 Ticks fort war. 56 Bretter lagen in ihrem Lager, am Markt gab
+ * es keines, und ohne Bretter repariert und baut niemand: Die einzige Mühle ging auf die
+ * Ruine zu. Der Verwalter verkauft deshalb, was im Betrieb liegt, zum Katalogpreis. Er
+ * stellt nichts her und setzt keinen Preis fest; der Erlös ist auf das begrenzt, was schon
+ * dalag, und bleibt damit weit von dem Schatz entfernt, den Punkt 92 ausschließt.
  */
 /**
  * Ab wann ein Charakter als verwaist gilt.
@@ -548,6 +561,11 @@ export function caretakerNeed(state: NpcState): number {
 	return ruecklage + material;
 }
 
+/** Liegt im Betrieb etwas, das ein Verwalter ans Schild hängen kann? */
+function ladenOffen(state: NpcState): boolean {
+	return state.workshopStockToSell > 0 && state.actionPoints > 0;
+}
+
 export function decideCaretakerAction(state: NpcState): NpcAction {
 	const gewuenscht: NpcAction = decideNpcAction(state);
 	const lohnNoetig: boolean =
@@ -562,9 +580,15 @@ export function decideCaretakerAction(state: NpcState): NpcAction {
 		// Ohne den Tagelohn bliebe vielleicht Zeit für das Haus: Die Hierarchie stellt das
 		// Sparen vor das Renovieren, und für den Verwalter gibt es kein Sparen mehr.
 		const ohneLohn: NpcAction = decideNpcAction({ ...state, workAvailable: false });
-		return CARETAKER_ACTIONS.includes(ohneLohn) ? ohneLohn : 'IDLE';
+		if (CARETAKER_ACTIONS.includes(ohneLohn)) return ohneLohn;
+		return ladenOffen(state) ? 'SELL' : 'IDLE';
 	}
 	if (CARETAKER_ACTIONS.includes(gewuenscht)) return gewuenscht;
+
+	// **Nicht über die Hierarchie:** Dort steht das Verkaufen weit hinten, und jedes Vorhaben
+	// davor, das dem Verwalter nicht zusteht, hätte es verdeckt. Ein eigener Schritt hält es
+	// außerdem vom Marktstand fern, an dem die Hierarchie auch die Habe verkaufen würde.
+	if (ladenOffen(state)) return 'SELL';
 
 	// Was die Hierarchie sonst vorschlägt, ist eine Entscheidung — und die steht dem
 	// Verwalter nicht zu. Stattdessen wird gearbeitet, aber nur, solange es nötig ist.

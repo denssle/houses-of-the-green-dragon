@@ -57,6 +57,7 @@ function lage(werte: Partial<NpcState> = {}): NpcState {
 		hasLease: false,
 		leaseAvailable: false,
 		ownStockToSell: 0,
+		workshopStockToSell: 0,
 		ownConstruction: false,
 		upgradeMaterialMissing: false,
 		upgradeMaterialPrice: null,
@@ -189,6 +190,57 @@ describe('Der abwesende Spieler', () => {
 			for (const verboten of ['COURT', 'BUY_PLOT', 'BUILD', 'BUILD_HOME', 'TAKE_JOB', 'VOTE']) {
 				expect(CARETAKER_ACTIONS).not.toContain(verboten);
 			}
+		});
+
+		it('verkauft das Betriebslager, auch wenn die Hierarchie etwas anderes vorhat', () => {
+			const wohlhabend = lage({
+				money: 900,
+				satiety: SATIETY_MAX,
+				workAvailable: false,
+				ownStockToSell: 56,
+				workshopStockToSell: 56
+			});
+
+			expect(decideCaretakerAction(wohlhabend)).toBe('SELL');
+			expect(decideCaretakerAction({ ...wohlhabend, money: 900, workAvailable: true })).toBe(
+				'SELL'
+			);
+		});
+
+		it('isst zuerst und verkauft danach', () => {
+			const hungrig = lage({
+				satiety: 5,
+				food: 2,
+				ownStockToSell: 56,
+				workshopStockToSell: 56
+			});
+
+			expect(decideCaretakerAction(hungrig)).toBe('EAT');
+		});
+
+		it('trägt die eigene Habe nicht auf den Marktstand', () => {
+			const mitHabe = lage({
+				money: 900,
+				satiety: SATIETY_MAX,
+				workAvailable: false,
+				ownStockToSell: 12,
+				workshopStockToSell: 0
+			});
+
+			expect(decideCaretakerAction(mitHabe)).toBe('IDLE');
+		});
+
+		it('verkauft nichts ohne Kraft', () => {
+			const erschoepft = lage({
+				money: 900,
+				satiety: SATIETY_MAX,
+				workAvailable: false,
+				actionPoints: 0,
+				ownStockToSell: 56,
+				workshopStockToSell: 56
+			});
+
+			expect(decideCaretakerAction(erschoepft)).toBe('IDLE');
 		});
 
 		it('bleibt untätig, wenn es nichts zu erhalten gibt', () => {
