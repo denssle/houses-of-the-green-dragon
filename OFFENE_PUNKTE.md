@@ -54,7 +54,6 @@ offenen, nach Nummer sortiert.
 | 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen                   | —                          | teilweise   |
 | 92  | Der Verwalter arbeitet ohne Ende — **Lohngrenze gebaut mit 0.6.2**, Monokultur offen               | —                          | teilweise   |
 | 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten                | —                          | Befund      |
-| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                                 | —                          | teilweise   |
 | 114 | Der Zuzug fragt nach Gebäuden, nicht nach Bedarf                                                   | 115                        | Befund      |
 | 115 | Wer nichts absetzt, sattelt nicht um — **5.98 und 5.99 gebaut, Schritt 4 offen**                   | 117                        | teilweise   |
 | 117 | Wer Grund hat, soll ihn nutzen — oder dafür zahlen                                                 | —                          | Entwurf     |
@@ -72,8 +71,8 @@ ist eine Frage der Lust und nicht der Reihenfolge.
 
 **Jederzeit, für sich** — klein, keine Voraussetzung, gut für einen Abend:
 122 (Steuer-Messlauf zur Hungersnot), 121 (Geburten bei Saat 86), 92 (Rest: immer dasselbe
-Handwerk), 91 (Tick-Vermerk), 98, 61, 101 (Bürgerseite), 64 (Seiten je Gebäude). Erledigt am
-07.11.2026: 87, 88, 94, 105.
+Handwerk), 91 (Tick-Vermerk), 98, 61, 64 (Seiten je Gebäude). Erledigt am
+07.11.2026: 87, 88, 94, 105; am 08.11.2026: 101.
 
 **Handwerk:** **34 + 45** (Meisterpflicht und Lehre, ein Schritt) → 46 (Zünfte) — und
 89 (ein Betrieb je Handwerk) hängt an 34. Daneben 24 (Schule), weil Lehre und Schule sich
@@ -1958,157 +1957,6 @@ mit Bretter am Markt auch reparieren, ist offen: Mehrere haben keine Münze.
 **Was die Zahlen dann sagen, ist noch offen** — dieser Eintrag hält nur fest, dass sie ab
 jetzt da sind. Die Frage dahinter (brennt das Handwerk ab, oder entsteht es nie?) gehört zu
 Punkt 103 und wird am nächsten vollen Lauf entschieden, nicht hier.
-
-### 101. Das Kassenbuch — jede Bewegung mit einem Grund — gebaut mit 5.77
-
-**Aufgenommen am 29.08.2026, aus der Arbeit an Punkt 100.** Der Messbericht kennt seit
-5.72 eine Bilanz über die ganze Welt: Bestand am Anfang, Bestand am Ende, Zufluss von
-außen, und als Rest das, was unterwegs vernichtet wurde. Sie kommt ohne Umbau aus, weil
-sie auf einer Identität beruht — alles Geld der Lebenden plus die Stadtkasse, und wachsen
-kann das nur durch Zuzug.
-
-**Was sie nicht kann, ist die Frage, die zählt: _wobei_.** Kornspeicher, Standgeld, Zehnt,
-Pacht, Einzugsgeld, Grundstücksverkauf und Versteigerungserlös fließen in dieselbe Kasse;
-Tagelohn, Sold und der eigene Werkzeugkasten des Bürgermeisters fließen aus derselben
-heraus. Der Bericht sieht davon eine einzige Zahl. Solange das so ist, lässt sich nicht
-sagen, ob der größte Posten das Brot ist, die Steuer oder ein Amtsinhaber, der zum
-dreifachen Preis selbst renoviert — und genau daran hängt jede Entscheidung in Punkt 100.
-
-**Zu bauen ist ein Kassenbuch:** jede Bewegung der Stadtkasse mit einem Grund. Heute
-geschieht das an **siebzehn Stellen** in zehn Diensten, alle nach einem von zwei Mustern:
-
-```ts
-await Region.increment('treasury', { by: betrag, where: { id: regionId }, transaction: t });
-await stadt.update({ treasury: kasse - kosten }, { transaction: t });
-```
-
-Sie gehören durch einen Aufruf ersetzt, der beides tut — buchen und begründen:
-
-| Zufluss          | woher                                    |
-| ---------------- | ---------------------------------------- |
-| `GRANARY`        | `needService.buyFromGranary`             |
-| `PROPERTY_TAX`   | `lawService.collectPropertyTax`          |
-| `TITHE`          | `productionService.harvest`              |
-| `STALL_FEE`      | `tradeService`, `employmentService`      |
-| `PLOT_SALE`      | `plotService`                            |
-| `LEASE_FEE`      | `productionService.leasePlot`            |
-| `SETTLEMENT_FEE` | `migrationService`                       |
-| `SCHOOL_FEE`     | `schoolService`                          |
-| `AUCTION`        | `auctionService`                         |
-| `ESCHEAT`        | `lifecycleService` (erbenloser Nachlass) |
-
-| Abfluss         | wohin — und ob jemand es bekommt            |
-| --------------- | ------------------------------------------- |
-| `WAGE`          | an einen Bürger (`REPAIR_FOR_HIRE`, Wache)  |
-| `STIPEND`       | an den Amtsinhaber                          |
-| `PUBLIC_REPAIR` | **an niemanden** — `renovatePublicBuilding` |
-| `PUBLIC_BUILD`  | **an niemanden** — `buildPublicBuilding`    |
-| `DEVELOPMENT`   | **an niemanden** — `developLand`            |
-
-**Die letzte Spalte ist der eigentliche Grund für diesen Punkt.** Drei der fünf Ausgaben
-haben keinen Empfänger; das Geld verschwindet aus der Welt. Ob das ein Randposten ist oder
-der Hauptposten, weiß heute niemand — und es sind genau die drei Handlungen, die ein
-Bürgermeister mit voller Kasse als Erstes tut.
-
-**Wo es hingehört:** ein eigenes Modul, das die Bewegung ausführt und mitschreibt, damit
-die Buchung nicht neben der Zahlung stehen kann. Ob mitgeschrieben wird, ist eine Frage des
-Betriebs: Im Messlauf im Speicher, auf dem Server entweder gar nicht oder als Zeile im Log
-— eine Tabelle je Münzbewegung wäre die teuerste Schreiblast des Spiels und für eine
-Auskunft, die man alle paar Wochen braucht, nicht zu rechtfertigen.
-
-**Und dasselbe gilt für die Bürger.** Was ein Einwohner einnimmt und ausgibt, ist ebenso
-unbekannt — der Bericht zeigt nur den Stand am Ende. Ein zweites Buch je Charakter wäre
-teuer; billiger und für die Balancing-Fragen ausreichend wäre, im Messlauf die **Summen je
-Handlungsart** mitzuführen: was `BUY_FOOD` gekostet und was `WORK` eingebracht hat. Die
-Handlungen werden ohnehin schon gezählt (`byAction`) — es fehlen nur die Münzen daneben.
-
-**Warum es sich lohnt, obwohl es nichts am Spiel ändert:** In dieser Phase kam jeder
-belastbare Befund aus einer Aufschlüsselung und keiner aus einer Vermutung. `idleReason`
-hat den stillstehenden Kreis gezeigt (Punkt 63), die Todesursache hat aus „die Bevölkerung
-sinkt" in einem einzigen Lauf „sie verhungert" gemacht (5.71), und drei Vermutungen über
-den Arbeitsmarkt haben in derselben Zeit nichts getroffen. Wer nicht misst, rät — und rät
-im Zweifel dreimal.
-
-**Gebaut mit 5.77.** `treasuryService` ist die einzige Tür zur Stadtkasse: `einnehmen` und
-`ausgeben` führen die Bewegung aus **und** schreiben sie mit, je Grund als Summe im
-Speicher. Die siebzehn Stellen in zehn Diensten sind darauf umgestellt, und keine rührt
-`treasury` mehr selbst an.
-
-- **Elf Zuflüsse** (`GRANARY`, `PROPERTY_TAX`, `TITHE`, `STALL_FEE`, `SALES_TAX`,
-  `PLOT_SALE`, `LEASE_FEE`, `SETTLEMENT_FEE`, `SCHOOL_FEE`, `AUCTION`, `ESCHEAT`) und
-  **fünf Abflüsse** (`WAGE`, `STIPEND`, `PUBLIC_REPAIR`, `PUBLIC_BUILD`, `DEVELOPMENT`).
-- **Bei jeder Ausgabe steht, ob jemand das Geld bekommt** (`hatEmpfaenger`). Die Summe der
-  empfängerlosen ist der Teil des vernichteten Geldes, den die **Stadt** verbrennt.
-- **Der Grund ist der des Spiels, nicht der des Dienstes:** `TITHE` kommt aus zwei
-  Diensten — der eigenen Ernte und der des Knechts —, und für die Frage „wovon lebt die
-  Stadt" ist das derselbe Posten.
-- **`increment` statt gelesenem `update`:** Mehrere der abgelösten Stellen lasen die
-  Kasse, rechneten und schrieben zurück; das ist nur unter einer Sperre richtig, und ob
-  eine gehalten wurde, musste man je Stelle nachsehen. Ein Schritt um einen Betrag ist es
-  immer.
-
-**Warum ein Modul und keine Konvention:** Eine Regel „bitte auch mitschreiben" hält, bis
-sie das erste Mal jemand vergisst — und dann ist das Buch nicht falsch, sondern unbemerkt
-unvollständig, was schlimmer ist, weil man ihm trotzdem glaubt. Deshalb prüft
-`treasuryService.spec.ts` nicht nur die Buchung, sondern ruft einen **echten Dienst** auf
-und vergleicht danach Kasse und Buch.
-
-**Die Probe ist eingebaut.** Die Bilanz aus 5.72 beruht auf einer Identität über die ganze
-Welt, das Buch auf siebzehn einzelnen Buchungen — zwei unabhängige Wege. Im ersten Lauf
-(300 Ticks, Saat 86) sagten beide dieselbe Zahl: „Vernichtet 480" und „480 an niemanden".
-Sie müssen sich **nicht** immer decken: Was ein Bürger beim Renovieren oder Ausbauen ins
-Nichts zahlt, steht in der Bilanz und nicht im Buch. Die Differenz ist genau das, was
-Punkt 102 noch offen hat.
-
-**Und der erste Befund kam sofort:** Von den 480 vernichteten Münzen jenes Laufs ist
-**alles** `DEVELOPMENT` — die Erschließung. Weder `PUBLIC_BUILD` noch `PUBLIC_REPAIR`
-tauchen auf. Die Vermutung in Punkt 102, der öffentliche Bau sei der nächste große Posten,
-war also falsch: Es ist das Erschließen von Bauland.
-
-**Was das Buch im ersten vollen Lauf gezeigt hat** (05.09.2026, 2000 Ticks, Saat 86 —
-Handlung für Handlung identisch mit dem Lauf davor, das Werkzeug verändert also nichts):
-
-| Eingenommen 9170 |      | Ausgegeben 9191, davon **1430 an niemanden** |      |
-| ---------------- | ---: | -------------------------------------------- | ---: |
-| `GRANARY`        | 4768 | `WAGE` → an Bürger                           | 5813 |
-| `PROPERTY_TAX`   | 1098 | `STIPEND` → an Bürger                        | 1948 |
-| `TITHE`          | 1060 | `DEVELOPMENT` → aus der Welt                 | 1080 |
-| `PLOT_SALE`      |  960 | `PUBLIC_BUILD` → aus der Welt                |  350 |
-| `SETTLEMENT_FEE` |  517 |                                              |      |
-| `ESCHEAT`        |  440 |                                              |      |
-| `AUCTION`        |  245 |                                              |      |
-| `LEASE_FEE`      |   60 |                                              |      |
-| `STALL_FEE`      |   22 |                                              |      |
-
-Drei Befunde daraus, und alle drei widersprechen einer bisherigen Annahme:
-
-- **Die Stadt lebt vom Kornspeicher**, nicht von der Steuer: `GRANARY` ist über die Hälfte
-  aller Einnahmen, mehr als Grundsteuer, Zehnt und Grundstücksverkauf zusammen. Damit ist
-  die Krücke aus 4.6b nicht nur die Konkurrenz jedes Bäckers (Punkt 85), sondern die halbe
-  Stadtkasse — wer sie verteuert oder abschafft, entzieht der Stadt ihr Einkommen.
-- **Der Rückweg zu den Bürgern ist viel breiter als gedacht.** Punkt 100 schätzte ihn auf
-  1,25 Münzen je Tick; `WAGE` und `STIPEND` zusammen sind 7761 über 2000 Ticks, also 3,9.
-- **`PUBLIC_REPAIR` kommt gar nicht vor.** In vierzig Spieljahren hat kein Bürgermeister
-  ein öffentliches Gebäude instand gesetzt — Punkt 98 mit einer harten Zahl.
-
-**Und die Differenz zur Bilanz ist selbst ein Befund.** Vernichtet wurden 3782 Münzen,
-davon 1430 durch die Stadt; die restlichen **2352 haben Bürger verbrannt** — beim
-Renovieren und Ausbauen auf eigene Rechnung. Das war bis hierher unsichtbar und ist jetzt
-beziffert: Es ist **mehr, als die ganze Stadt vernichtet**, und damit der größte
-verbliebene Posten von Punkt 102.
-
-**Eine Lehre aus 5.79, weil sie beinahe zu einem falschen Befund geführt hätte:** Als das
-Instandsetzen mit 5.78 aufhörte, Geld zu kosten, fiel die Buchung weg — der **Grund**
-`PUBLIC_REPAIR` blieb aber in der Liste stehen. Ein Posten, den nichts mehr bucht, ist im
-Bericht nicht als Lücke zu erkennen: Er erscheint einfach nicht, und das liest sich wie
-„ist nie vorgekommen". Genau so wurde es einmal gelesen. **Buchung und Zahlung fallen
-zusammen — auch beim Abschaffen.**
-
-**Was offen bleibt: die Bürgerseite.** Was ein Einwohner einnimmt und ausgibt, ist
-weiterhin unbekannt — der Bericht zeigt nur den Stand am Ende. Der Vorschlag von oben gilt
-unverändert: im Messlauf die Summen je Handlungsart mitführen, was `BUY_FOOD` gekostet und
-was `WORK` eingebracht hat. Das ist ein eigener Schritt, weil es die NPC-Schleife berührt
-und die schon einmal an ihrer Abfragezahl gelitten hat (Punkt 67).
 
 ### 122. Die Hungersnot von Grünau — die Steuer als Ursache ist offen
 

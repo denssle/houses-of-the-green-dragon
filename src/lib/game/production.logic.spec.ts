@@ -71,7 +71,9 @@ describe('Herstellen', () => {
 		it('scheitert ohne Zutaten', () => {
 			expect(produce(KRAEFTIG, MAHLEN, { GRAIN: 2 }, NEU, 'WINTER')).toEqual({
 				ok: false,
-				reason: 'NOT_IN_STOCK'
+				reason: 'NOT_IN_STOCK',
+				// **Und was fehlt** (0.8.3), damit das Log mehr sagt als „nicht vorrätig“.
+				missing: [{ itemId: 'GRAIN', quantity: 1 }]
 			});
 		});
 

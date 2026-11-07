@@ -5,7 +5,9 @@ import {
 	caretakerNeed,
 	decideCaretakerAction,
 	decideNpcAction,
+	idleDetail,
 	isUnattended,
+	savingsGoal,
 	type NpcState
 } from '$lib/game/npc.logic';
 import { PERSONALITY_AXES, type Personality } from '$lib/game/personality.logic';
@@ -61,6 +63,9 @@ function lage(werte: Partial<NpcState> = {}): NpcState {
 		emptyPlots: 0,
 		plotTaxDueSoon: 0,
 		landReserve: Number.POSITIVE_INFINITY,
+		materialMissingItem: null,
+		workshopMaterialMissingItem: null,
+		workshopGapName: null,
 		ownConstruction: false,
 		upgradeMaterialMissing: false,
 		upgradeMaterialPrice: null,
@@ -291,6 +296,40 @@ describe('Leeren Grund aufgeben (0.8.0)', () => {
 		expect(CARETAKER_ACTIONS).not.toContain('GIVE_UP_PLOT');
 		expect(decideCaretakerAction(lage({ ...knapp, workAvailable: false }))).not.toBe(
 			'GIVE_UP_PLOT'
+		);
+	});
+});
+
+describe('idleDetail (0.8.3)', () => {
+	it('nennt Vorhaben und fehlende Ware, wenn ein Ziel unerreichbar ist', () => {
+		const zustand = lage({
+			isMarried: true,
+			ownsHome: false,
+			homePrice: 100,
+			materialMissing: true,
+			materialPrice: null,
+			materialMissingItem: 'PLANK'
+		});
+
+		expect(idleDetail(zustand, 'GOAL_UNREACHABLE')).toBe('Haus: PLANK nicht am Markt');
+	});
+
+	it('nennt beim Sparen, wofür', () => {
+		const zustand = lage({
+			isMarried: true,
+			ownsHome: false,
+			homePrice: 100,
+			materialMissing: true,
+			materialPrice: 6
+		});
+
+		expect(idleDetail(zustand, 'STILL_SAVING')).toBe('Baumaterial fürs Haus');
+		expect(savingsGoal(zustand)).toEqual({ art: 'Baumaterial fürs Haus', preis: 6 });
+	});
+
+	it('sagt bei der Zufriedenheit, warum nichts vorhaben', () => {
+		expect(idleDetail(lage({ isMarried: false, ownsWorkshop: true }), 'CONTENT')).toBe(
+			'ledig, hat eine Werkstatt'
 		);
 	});
 });

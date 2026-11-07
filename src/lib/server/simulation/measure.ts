@@ -212,6 +212,9 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	const handlungen: Partial<Record<NpcAction, number>> = {};
 	const fehlschlaege: Record<string, number> = {};
 	const muessiggang: Partial<Record<IdleReason, number>> = {};
+	// **Woran genau, und wohin das Geld der Bürger geht** (0.8.3, Punkt 101).
+	const muessiggangGenau: Record<string, number> = {};
+	const geldJeHandlung: Record<string, { ein: number; aus: number }> = {};
 	const chronik = { geburten: 0, tode: 0, zuzug: 0, braende: 0, steuer: 0, ausgefallen: 0 };
 	// **Woran gestorben wird** (5.71). Ohne diese Trennung stand im Bericht eine Zahl, die
 	// zwei Dinge zusammenwarf: eine Stadt, die altert, und eine, die verhungert. Bei der
@@ -357,6 +360,14 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		for (const [was, wieoft] of Object.entries(stunde.npcs.byIdleReason)) {
 			muessiggang[was as IdleReason] = (muessiggang[was as IdleReason] ?? 0) + wieoft;
 		}
+		for (const [was, wieoft] of Object.entries(stunde.npcs.byIdleDetail)) {
+			muessiggangGenau[was] = (muessiggangGenau[was] ?? 0) + wieoft;
+		}
+		for (const [was, posten] of Object.entries(stunde.npcs.byMoney)) {
+			const summe = (geldJeHandlung[was] ??= { ein: 0, aus: 0 });
+			summe.ein += posten.ein;
+			summe.aus += posten.aus;
+		}
 
 		chronik.geburten += stunde.family.births.length;
 		chronik.tode += stunde.deaths.length;
@@ -490,6 +501,18 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 
 	zeilen.push('', '=== WARUM MÜSSIGGANG ===');
 	zeilen.push(...verteilung(muessiggang as Record<string, number>));
+
+	zeilen.push('', '=== WORAN GENAU ===');
+	zeilen.push(...verteilung(muessiggangGenau));
+
+	zeilen.push('', '=== GELD JE HANDLUNG ===');
+	// **Die Bürgerseite des Kassenbuchs** (0.8.3, Punkt 101): was jede Handlungsart den
+	// Handelnden eingebracht und gekostet hat, sortiert nach dem, was sie bewegt.
+	zeilen.push(
+		...Object.entries(geldJeHandlung)
+			.sort((a, b) => b[1].ein + b[1].aus - (a[1].ein + a[1].aus))
+			.map(([was, posten]) => `  ${was}: +${posten.ein} / −${posten.aus}`)
+	);
 
 	zeilen.push('', '=== UND WEN ES BETRIFFT ===');
 	// **Die Aufschlüsselung, nicht die Diagnose** (Punkt 93). Rohe Schalter, gezählt: Wer

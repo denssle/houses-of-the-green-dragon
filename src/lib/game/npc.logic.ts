@@ -130,6 +130,12 @@ export interface NpcState {
 	 * Was beim nahen Steuertermin fällig wird, null, wenn er noch fern ist (0.8.0, Punkt 117).
 	 */
 	plotTaxDueSoon: number;
+	/** Welche Ware dem Haus fehlt (0.8.3, nur für die Diagnose). */
+	materialMissingItem: string | null;
+	/** Welche Ware der Werkstatt fehlt (0.8.3, nur für die Diagnose). */
+	workshopMaterialMissingItem: string | null;
+	/** Welches Handwerk fehlt (0.8.3, nur für die Diagnose). */
+	workshopGapName: string | null;
 	/**
 	 * Was nach einem Kauf auf Vorrat übrig bleiben muss (`landReserve`, 0.8.2): drei Jahre
 	 * Grundsteuer, mindestens ein zweiter Grundstückspreis.
@@ -268,7 +274,7 @@ export function desiredReserve(personality: Personality, foodPrice: number): num
  * Unternehmen vor. Wer nichts vorhat — der Genügsame ohne Ehrgeiz, der Verheiratete mit
  * eigenem Haus —, spart auch nicht; er arbeitet bis zur Rücklage und lebt sein Leben.
  */
-export function savingsTarget(state: NpcState): number | null {
+export function savingsGoal(state: NpcState): SavingsGoal | null {
 	if (!state.isAdult) return null;
 
 	// Ein Dach für die Familie — dieselbe Bedingung wie in `eigenesDach`.
@@ -278,7 +284,7 @@ export function savingsTarget(state: NpcState): number | null {
 		// Hauspreis, verdingte sich ein Bauherr mit vollem Lager um hundert Münzen, die er
 		// nie ausgeben wird — und seine eigene Baustelle bliebe liegen.
 		if (!state.materialMissing) {
-			return state.hasFreePlot ? null : state.plotPrice;
+			return state.hasFreePlot ? null : ziel('Grundstück fürs Haus', state.plotPrice);
 		}
 		// **Ein Ziel, das man nicht kaufen kann, ist kein Ziel.** Fehlt das Baumaterial und
 		// bietet es niemand an, war das Sparen hier zu Ende: `materialPrice` ist `null`,
@@ -291,7 +297,7 @@ export function savingsTarget(state: NpcState): number | null {
 		// Holz findet, hat immer noch einen zweiten Weg: selbst eine Werkstatt aufmachen.
 		// Und das ist keine Ausweichhandlung, sondern die Lösung — die billigste fehlende
 		// ist die Zimmerei, und die stellt genau die Bretter her, an denen es scheitert.
-		if (state.materialPrice !== null) return state.materialPrice;
+		if (state.materialPrice !== null) return ziel('Baumaterial fürs Haus', state.materialPrice);
 	}
 
 	// **Und ein volles Haus spart auf den Anbau** (5.30). Dieselbe Bedingung wie in
@@ -302,7 +308,9 @@ export function savingsTarget(state: NpcState): number | null {
 		// hier weiter der Ausbaupreis, spränge einer mit vollem Holzlager weiter arbeiten
 		// für Münzen, die er nie ausgibt — derselbe Fehler wie beim Bauen (5.76).
 		if (state.homeUpgradePrice !== null) {
-			return state.upgradeMaterialMissing ? state.upgradeMaterialPrice : null;
+			return state.upgradeMaterialMissing
+				? ziel('Material für den Hausausbau', state.upgradeMaterialPrice)
+				: null;
 		}
 	}
 
@@ -312,14 +320,16 @@ export function savingsTarget(state: NpcState): number | null {
 	// **Und nur, wenn sie zu bauen ist** (Punkt 87): Bis hierher sparte einer auf den Boden,
 	// ohne zu fragen, ob danach etwas darauf steht — und kaufte ihn auch.
 	if (!state.ownsWorkshop && isEnterprising(state.personality) && werkstattErreichbar(state)) {
-		if (!state.hasFreePlot) return state.plotPrice;
+		if (!state.hasFreePlot) return ziel('Grundstück für die Werkstatt', state.plotPrice);
 		// **Der Preis des Werkstattmaterials, nicht der des Hausmaterials** (5.62). Bis
 		// dahin stand hier `materialPrice`: die Bretter für die Kate, während es an
 		// Quadern für die Mühle fehlte. Wer auf die falsche Zahl spart, hört zu früh auf.
 		//
 		// Und ist es beisammen, wird **gebaut statt gespart** (5.76): Die Werkstatt selbst
 		// kostet keine Münze mehr.
-		return state.workshopMaterialMissing ? state.workshopMaterialPrice : null;
+		return state.workshopMaterialMissing
+			? ziel('Material für die Werkstatt', state.workshopMaterialPrice)
+			: null;
 	}
 
 	// **Und der Betrieb braucht Nachschub.** Wer eine Werkstatt hat, aber keine Fläche,
@@ -332,8 +342,8 @@ export function savingsTarget(state: NpcState): number | null {
 	// Weg — und für die zweite Stufe einer Kette der einzige, weil Mehl auf keinem Feld
 	// wächst.
 	if (state.ownsWorkshop && !state.canCraft) {
-		if (state.inputPrice !== null) return state.inputPrice;
-		if (!state.hasLease && state.leaseAvailable) return state.leaseFee;
+		if (state.inputPrice !== null) return ziel('Zutat für den Betrieb', state.inputPrice);
+		if (!state.hasLease && state.leaseAvailable) return ziel('Pacht', state.leaseFee);
 	}
 
 	// **Und wer sie zu nutzen weiß, spart auf die größere** (5.30). Der letzte Punkt der
@@ -347,11 +357,34 @@ export function savingsTarget(state: NpcState): number | null {
 	// keine Laune — die zweite ohne die erste ist ein Rückschritt, und ein gemessener.
 	if (state.ownsWorkshop && state.canCraft && isEnterprising(state.personality)) {
 		if (state.workshopUpgradePrice !== null) {
-			return state.upgradeMaterialMissing ? state.upgradeMaterialPrice : null;
+			return state.upgradeMaterialMissing
+				? ziel('Material für den Werkstattausbau', state.upgradeMaterialPrice)
+				: null;
 		}
 	}
 
 	return null;
+}
+
+/** Was ein Sparziel ist: wofür, und wie viel (0.8.3). */
+export interface SavingsGoal {
+	art: string;
+	preis: number;
+}
+
+function ziel(art: string, preis: number | null): SavingsGoal | null {
+	return preis === null ? null : { art, preis };
+}
+
+/**
+ * Worauf einer spart, als Zahl — `savingsGoal` ohne den Namen.
+ *
+ * **Eine Quelle für beides** (0.8.3): Die Diagnose fragt, *wofür* gespart wird, die
+ * Entscheidung nur, *wie viel*. Stünde das Wofür in einer zweiten Funktion, liefen die beiden
+ * auseinander, und genau davor warnt `idleReason`.
+ */
+export function savingsTarget(state: NpcState): number | null {
+	return savingsGoal(state)?.preis ?? null;
 }
 
 /**
@@ -510,6 +543,59 @@ export function idleReason(state: NpcState): IdleReason {
 		return state.workAvailable && !state.hasJob ? 'STILL_SAVING' : 'NO_WORK';
 	}
 	return 'CONTENT';
+}
+
+/**
+ * **Was hinter einem Müßiggangsgrund steht** (0.8.3). `idleReason` sagt, dass einer nichts tut;
+ * hier steht, woran es hängt: Bei `GOAL_UNREACHABLE` welches Vorhaben und welche Ware, beim
+ * Sparen wofür, bei der Zufriedenheit, warum er nichts vorhat. Gezählt wird das im Log und im
+ * Messlauf, damit niemand den Grund erraten muss.
+ *
+ * **Abgeleitet aus denselben Bedingungen wie `idleReason`** und nicht daneben gestellt: Laufen
+ * Diagnose und Entscheidung auseinander, ist die Auskunft schlimmer als keine.
+ */
+export function idleDetail(state: NpcState, grund: IdleReason): string {
+	switch (grund) {
+		case 'GOAL_UNREACHABLE': {
+			const teile: string[] = [];
+			if (
+				state.isMarried &&
+				!state.ownsHome &&
+				state.homePrice !== null &&
+				state.materialMissing &&
+				state.materialPrice === null
+			) {
+				teile.push(`Haus: ${state.materialMissingItem ?? '?'} nicht am Markt`);
+			}
+			if (
+				!state.ownsWorkshop &&
+				isEnterprising(state.personality) &&
+				state.workshopPrice !== null &&
+				state.workshopMaterialMissing &&
+				state.workshopMaterialPrice === null
+			) {
+				teile.push(
+					`Werkstatt ${state.workshopGapName ?? '?'}: ` +
+						`${state.workshopMaterialMissingItem ?? '?'} nicht am Markt`
+				);
+			}
+			return teile.length > 0 ? teile.join(' + ') : 'unbekannt';
+		}
+		case 'STILL_SAVING':
+		case 'NO_WORK':
+			return savingsGoal(state)?.art ?? 'unbekannt';
+		case 'CONTENT': {
+			const stand: string = state.isMarried ? 'verheiratet' : 'ledig';
+			if (state.ownsWorkshop) return `${stand}, hat eine Werkstatt`;
+			if (!isEnterprising(state.personality)) return `${stand}, nicht unternehmungslustig`;
+			if (state.workshopPrice === null) return `${stand}, kein Handwerk fehlt`;
+			// **Der Rest mit seinen Schaltern** (0.8.3): Im ersten Lauf waren das 1681 Fälle, zu
+			// viele für eine Restklasse. Die Schalter sagen, was zu einer Regel fehlt.
+			return `${stand}, sonstiges [${stateFlags(state).join(' ')}]`;
+		}
+		default:
+			return grund;
+	}
 }
 
 /**

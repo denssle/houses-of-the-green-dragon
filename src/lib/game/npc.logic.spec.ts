@@ -52,6 +52,9 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		emptyPlots: 0,
 		plotTaxDueSoon: 0,
 		landReserve: Number.POSITIVE_INFINITY,
+		materialMissingItem: null,
+		workshopMaterialMissingItem: null,
+		workshopGapName: null,
 		ownConstruction: false,
 		upgradeMaterialMissing: false,
 		upgradeMaterialPrice: null,
@@ -710,6 +713,9 @@ describe('Was ein NPC tut', () => {
 				emptyPlots: 0,
 				plotTaxDueSoon: 0,
 				landReserve: Number.POSITIVE_INFINITY,
+				materialMissingItem: null,
+				workshopMaterialMissingItem: null,
+				workshopGapName: null,
 				money: 10
 			});
 
@@ -729,6 +735,9 @@ describe('Was ein NPC tut', () => {
 				emptyPlots: 0,
 				plotTaxDueSoon: 0,
 				landReserve: Number.POSITIVE_INFINITY,
+				materialMissingItem: null,
+				workshopMaterialMissingItem: null,
+				workshopGapName: null,
 				money: 10
 			});
 

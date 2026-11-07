@@ -18,6 +18,7 @@ import {
 	stateFlags,
 	type Stufe,
 	type IdleReason,
+	idleDetail,
 	idleReason,
 	isUnattended,
 	type NpcAction,
@@ -113,6 +114,17 @@ export interface NpcTick {
 	byFailure: Record<string, number>;
 	/** Warum die Untätigen untätig waren. */
 	byIdleReason: Partial<Record<IdleReason, number>>;
+	/**
+	 * **Und woran genau** (0.8.3): `GOAL_UNREACHABLE: Werkstatt Mühle: BLOCK nicht am Markt`.
+	 * Der Grund allein sagte, dass etwas hängt, aber nicht was.
+	 */
+	byIdleDetail: Record<string, number>;
+	/**
+	 * **Was jede Handlungsart an Geld bewegt** (0.8.3, Punkt 101): eingenommen und ausgegeben,
+	 * gemessen um die eigene Handlung herum. Was einer als Verkäufer bei der Handlung eines
+	 * anderen einnimmt, steht bei dessen Kauf als Ausgabe, nicht hier als Einnahme.
+	 */
+	byMoney: Record<string, { ein: number; aus: number }>;
 }
 
 /**
@@ -171,6 +183,8 @@ export async function actForNpcs(
 	const gezaehlt: Partial<Record<NpcAction, number>> = {};
 	const gescheitert: Record<string, number> = {};
 	const gruende: Partial<Record<IdleReason, number>> = {};
+	const einzelheiten: Record<string, number> = {};
+	const geld: Record<string, { ein: number; aus: number }> = {};
 	let gehandelt = 0;
 
 	const buchen = (ergebnis: Ausgang): void => {
@@ -182,6 +196,18 @@ export async function actForNpcs(
 		}
 		if (ergebnis.idleReason) {
 			gruende[ergebnis.idleReason] = (gruende[ergebnis.idleReason] ?? 0) + 1;
+			const schluessel = `${ergebnis.idleReason}: ${ergebnis.idleDetail ?? 'unbekannt'}`;
+			einzelheiten[schluessel] = (einzelheiten[schluessel] ?? 0) + 1;
+		}
+		if (ergebnis.moneyDelta) {
+			const posten = (geld[ergebnis.action] ??= { ein: 0, aus: 0 });
+			if (ergebnis.moneyDelta > 0) posten.ein += ergebnis.moneyDelta;
+			else posten.aus -= ergebnis.moneyDelta;
+		}
+		if (ergebnis.moneyBetween) {
+			const posten = (geld[ZWISCHEN_DEN_ZUEGEN] ??= { ein: 0, aus: 0 });
+			if (ergebnis.moneyBetween > 0) posten.ein += ergebnis.moneyBetween;
+			else posten.aus -= ergebnis.moneyBetween;
 		}
 	};
 
@@ -209,7 +235,9 @@ export async function actForNpcs(
 		acted: gehandelt,
 		byAction: gezaehlt,
 		byFailure: gescheitert,
-		byIdleReason: gruende
+		byIdleReason: gruende,
+		byIdleDetail: einzelheiten,
+		byMoney: geld
 	};
 }
 
@@ -238,6 +266,9 @@ export async function actForNpcs(
  */
 export const AUSNAHME = 'UNKNOWN/EXCEPTION';
 
+/** Der Posten für alles, was einem ohne eigenen Zug zufließt oder abgeht (0.8.3). */
+export const ZWISCHEN_DEN_ZUEGEN = 'zwischen den Zügen';
+
 async function einzeln(
 	schritt: (characterId: string, tick: number, unattended?: boolean) => Promise<Ausgang>,
 	characterId: string,
@@ -258,7 +289,20 @@ export interface Ausgang {
 	/** Der Grund, an dem die Handlung scheiterte — nichts heißt: sie ging durch. */
 	failure?: string;
 	idleReason?: IdleReason;
+	idleDetail?: string;
+	/** Wie sich sein Geld durch die eigene Handlung verändert hat (0.8.3). */
+	moneyDelta?: number;
+	/** Wie es sich seit seinem letzten Zug verändert hat, ohne eigenes Zutun (0.8.3). */
+	moneyBetween?: number;
 }
+
+/**
+ * Sein Geld nach dem letzten eigenen Zug — die Grundlage für „zwischen den Zügen“.
+ *
+ * Im Speicher wie das Kassenbuch: Nach einem Neustart fehlt der erste Vergleich, und das ist
+ * richtig so, denn was in der Zwischenzeit geschah, weiß niemand.
+ */
+const geldNachLetztemZug = new Map<string, number>();
 
 /**
  * Einen Charakter entscheiden und handeln lassen.
@@ -284,6 +328,18 @@ export async function ausfuehren(
 		: decideNpcActionWithStage(lage.state);
 
 	const ergebnis: Ausgang = await handelnd(handlung, npcId, tick, lage, verwaltet);
+	// **Eine Abfrage mehr je Einwohner und Tick** (0.8.3, Punkt 101), bewusst: Wohin das Geld
+	// der Bürger geht, war bis hierher die größte Lücke im Bild der Wirtschaft.
+	const nachher = await Character.findByPk(npcId, { attributes: ['money'] });
+	const geldNachher: number = nachher?.dataValues.money ?? lage.money;
+	const bewegt: number = geldNachher - lage.money;
+	if (bewegt !== 0) ergebnis.moneyDelta = bewegt;
+	// **Und was zwischen zwei eigenen Zügen geschah** (0.8.3): Verkäufe an andere, Lohn, den er
+	// als Arbeitgeber zahlte, Steuer, Sold, Erbe. Ohne diese Zeile sah man nur die Käufer,
+	// nie die Verkäufer, und das Geld schien zu verschwinden.
+	const vorher: number | undefined = geldNachLetztemZug.get(npcId);
+	if (vorher !== undefined && lage.money !== vorher) ergebnis.moneyBetween = lage.money - vorher;
+	geldNachLetztemZug.set(npcId, geldNachher);
 
 	// **Der Protokollant** (5.88, Punkt 111). Er steht hier und nicht in `actForNpcs`,
 	// weil hier alles beisammen ist: der Zustand, aus dem entschieden wurde, die Stufe,
@@ -363,9 +419,19 @@ async function handelnd(
 	 * ohne Grund vom Dienst. Er heißt dann `NOT_ATTEMPTED`, denn eine Handlung, die
 	 * gewählt, aber nicht ausgeführt wurde, ist der stillste Fehler von allen.
 	 */
-	const buch = (action: NpcAction, ergebnis?: { ok: boolean; reason?: string }): Ausgang => {
+	const buch = (
+		action: NpcAction,
+		ergebnis?: { ok: boolean; reason?: string; missing?: { itemId: string }[] }
+	): Ausgang => {
 		if (ergebnis === undefined) return { action, failure: 'NOT_ATTEMPTED' };
-		return ergebnis.ok ? { action } : { action, failure: ergebnis.reason ?? 'UNKNOWN' };
+		if (ergebnis.ok) return { action };
+		// **Was fehlte und wer nicht zahlen konnte, steht mit im Schlüssel** (0.8.3):
+		// `CRAFT/NOT_IN_STOCK:FLOUR`, `WORK/EMPLOYER_BROKE:Bäckerei`.
+		let grund: string = ergebnis.reason ?? 'UNKNOWN';
+		const waren: string[] = (ergebnis.missing ?? []).map((posten) => posten.itemId);
+		if (waren.length > 0) grund += `:${waren.join('+')}`;
+		if (grund === 'EMPLOYER_BROKE') grund += `:${lage.employerName ?? 'Stadtkasse'}`;
+		return { action, failure: grund };
 	};
 
 	switch (handlung) {
@@ -668,7 +734,11 @@ async function handelnd(
 		case 'IDLE':
 			// **Der einzige Fall, in dem der Grund interessant ist.** Ein Verwalteter zählt
 			// nicht mit: Seine engeren Befugnisse sind der Grund, und den kennen wir.
-			return { action: 'IDLE', idleReason: verwaltet ? undefined : idleReason(lage.state) };
+			if (verwaltet) return { action: 'IDLE' };
+			{
+				const grund: IdleReason = idleReason(lage.state);
+				return { action: 'IDLE', idleReason: grund, idleDetail: idleDetail(lage.state, grund) };
+			}
 	}
 }
 
@@ -701,6 +771,7 @@ async function lageAufnehmen(
 			workshopOptionId?: number;
 			freePlotId?: string;
 			emptyPlotId?: string;
+			employerName?: string;
 			leaseId?: string;
 			leasableId?: string;
 			sellable?: { itemId: string; quantity: number; inInventory: number };
@@ -969,6 +1040,8 @@ async function lageAufnehmen(
 		// schon — und die Entscheidung selbst rührt ihn nicht an.
 		name: werte.firstName,
 		money: werte.money,
+		// Wer ihm den Lohn schuldet, wenn er ihn nicht zahlen kann (0.8.3, nur fürs Log).
+		employerName: stelle?.buildingName,
 		regionId: werte.RegionId,
 		brotQuelle,
 		cheapestBread: await billigstes('BREAD'),
@@ -1017,6 +1090,9 @@ async function lageAufnehmen(
 			hasFreePlot: grundstuecke.some((flaeche) => !flaeche.hasBuilding),
 			emptyPlots: leereGrundstuecke.length,
 			plotTaxDueSoon: steuerNaht,
+			materialMissingItem: fehltMaterial?.itemId ?? null,
+			workshopMaterialMissingItem: fehltWerkstattMaterial?.itemId ?? null,
+			workshopGapName: werkstattVorlage?.initialName ?? null,
 			landReserve: landReserve(
 				await grundsteuersatz(werte.RegionId, tick),
 				grundstuecke.length + 1,

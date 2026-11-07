@@ -66,7 +66,7 @@ export function levelFactor(level: number): number {
 
 export type ProductionOutcome =
 	| { ok: true; actionPoints: number; produced: number }
-	| { ok: false; reason: ActionFailureReason };
+	| { ok: false; reason: ActionFailureReason; missing?: { itemId: string; quantity: number }[] };
 
 /**
  * Wie viel ein Durchgang bringt.
@@ -114,7 +114,12 @@ export function produce(
 	}
 	for (const zutat of recipe.input) {
 		if ((stock[zutat.itemId] ?? 0) < zutat.quantity) {
-			return { ok: false, reason: 'NOT_IN_STOCK' };
+			// **Was fehlt, steht dabei** (0.8.3): Sonst heißt es im Log nur „nicht vorrätig“.
+			return {
+				ok: false,
+				reason: 'NOT_IN_STOCK',
+				missing: [{ itemId: zutat.itemId, quantity: zutat.quantity - (stock[zutat.itemId] ?? 0) }]
+			};
 		}
 	}
 

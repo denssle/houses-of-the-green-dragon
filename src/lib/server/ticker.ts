@@ -100,6 +100,22 @@ function berichten(stunde: WorldTick): void {
 	if (Object.keys(stunde.npcs.byIdleReason).length > 0) {
 		console.info('Warum die anderen nichts taten:', stunde.npcs.byIdleReason);
 	}
+	// **Und woran genau** (0.8.3): welches Vorhaben, welche Ware, welches Sparziel.
+	if (Object.keys(stunde.npcs.byIdleDetail).length > 0) {
+		console.info('Woran genau:', stunde.npcs.byIdleDetail);
+	}
+	// **Wohin das Geld der Bürger ging** (0.8.3, Punkt 101), je Handlungsart.
+	if (Object.keys(stunde.npcs.byMoney).length > 0) {
+		console.info(
+			'Geld je Handlung:',
+			Object.fromEntries(
+				Object.entries(stunde.npcs.byMoney).map(([was, posten]) => [
+					was,
+					`+${posten.ein} / -${posten.aus}`
+				])
+			)
+		);
+	}
 
 	// Was ein NPC beschlossen hat und dann doch nicht konnte. Meist leer — und wenn nicht,
 	// ist es der interessanteste Teil des Protokolls: Ein Entschluss, der jeden Tick aufs
