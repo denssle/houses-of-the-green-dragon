@@ -6,63 +6,67 @@ vollen Abschnitt, wie er dort stand. Die Nummern sind dieselben: Wo im Code oder
 
 Ausgelagert am 04.10.2026, als das Erledigte vierzig Prozent der Liste ausmachte.
 
-| #   | Punkt                                                                                              | Fällig vor | Art       |
-| --- | -------------------------------------------------------------------------------------------------- | ---------- | --------- |
-| 14  | Startbedingungen für neue Spieler — **entschieden mit 5.6**                                        | —          | erledigt  |
-| 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                                | —          | erledigt  |
-| 26  | Datensicherung per Cron, einmal wiederhergestellt — **erledigt mit 5.8**                           | —          | erledigt  |
-| 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen                  | —          | erledigt  |
-| 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                                            | —          | erledigt  |
-| 36  | Gebäude und Betriebe benennen — **erledigt mit 5.2**                                               | —          | erledigt  |
-| 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum                      | —          | erledigt  |
-| 40  | Der abwesende Spieler — **erledigt mit 5.5**, zwei Restfragen                                      | —          | erledigt  |
-| 42  | Kindern einen Namen geben — **erledigt mit 5.2**                                                   | —          | erledigt  |
-| 48  | Was beim Tod aus den Zurückbleibenden wird — **erledigt mit 5.1**                                  | —          | erledigt  |
-| 52  | Der Lebenslauf — **erledigt mit 5.3**                                                              | —          | erledigt  |
-| 53  | Zwei Knöpfe namens „Arbeiten" — **erledigt mit 5.31**                                              | —          | erledigt  |
-| 54  | Ein Test, der würfelt — **erledigt mit 5.55**                                                      | —          | erledigt  |
-| 55  | Die Stadt kommt nicht in Gang — **erledigt mit 5.11**, ein Rest bleibt                             | —          | erledigt  |
-| 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt — **erledigt mit 5.11**                     | —          | erledigt  |
-| 57  | Der Takt der Welt steht nirgends — **erledigt mit 5.53**                                           | —          | erledigt  |
-| 58  | Wege, die nur beschrieben und nicht verlinkt sind — **erledigt mit 5.52**                          | —          | erledigt  |
-| 59  | Aktionen, die scheitern müssen — **erledigt mit 5.54** (Bauseite)                                  | —          | erledigt  |
-| 60  | Listen ohne Ordnung, Wahlen ohne Termin — **erledigt mit 5.52**                                    | —          | erledigt  |
-| 62  | Geburts- und Errichtungsdatum — **erledigt mit 5.52**                                              | —          | erledigt  |
-| 63  | Der geschlossene Kreis — **erledigt mit 5.16**                                                     | —          | erledigt  |
-| 65  | Der Zehnt erreicht die Felder nicht — **behoben (5.24), festgehalten (5.51)**                      | —          | erledigt  |
-| 66  | Wo Geld aus dem Nichts kam — **Zehnt geschlossen mit 5.83**; Raubgut offen (Punkt 23)              | —          | erledigt  |
-| 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt                      | —          | erledigt  |
-| 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                                  | —          | erledigt  |
-| 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                                             | —          | erledigt  |
-| 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                                  | —          | erledigt  |
-| 74  | Der Auftrag an Tagelöhner — **erledigt mit 5.27 und 5.78**; offen bleibt der Ausbau                | —          | erledigt  |
-| 76  | Niemand kann sich einen Ausbau leisten — 86 Münzen gegen 340                                       | —          | überholt  |
-| 78  | Werben kennt kein Alter — **behoben mit 5.41**                                                     | —          | erledigt  |
-| 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                               | —          | erledigt  |
-| 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                                 | —          | erledigt  |
-| 81  | Fremde Häuser haben keine Seite — **erledigt mit 5.46**                                            | —          | erledigt  |
-| 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                                          | —          | erledigt  |
-| 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**                          | —          | erledigt  |
-| 84  | Sehr junge Kinder können für Lohn arbeiten — **erledigt mit 0.6.0**, Kinder leben aus dem Haushalt | —          | erledigt  |
-| 86  | Die städtische Schmiede sperrte die Eisenkette — **behoben mit 5.65**                              | —          | erledigt  |
-| 93  | `GOAL_UNREACHABLE` — kein Bauland; **die Schwelle fiel mit 5.92**, Gegenprobe offen                | —          | erledigt  |
-| 95  | Die Werkzeuge maßen einen anderen Takt als den, der läuft — **behoben mit 5.69**                   | —          | erledigt  |
-| 96  | Die Stadtkasse ohne Einnahme — **gebaut mit 5.71**, fiskalisch wirksam; siehe 100                  | —          | erledigt  |
-| 97  | `VOTE` ohne Bürgerrecht — **behoben mit 5.72**; das Bürgerrecht selbst ist Punkt 49                | —          | erledigt  |
-| 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen                       | —          | erledigt  |
-| 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote                       | —          | überholt  |
-| 102 | Jeder Bau verbrennt seinen Preis — **erledigt (5.93)**: nichts verschwindet mehr                   | —          | erledigt  |
-| 103 | Startreihenfolge — **Mechanismus gefunden, behoben mit 5.84** (die Pachtwahl)                      | —          | erledigt  |
-| 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu               | —          | erledigt  |
-| 106 | Ein Bauauftrag, den niemand bezahlen kann — **behoben mit 5.81**                                   | —          | erledigt  |
-| 107 | Die Grundsteuer brachte ein Viertel — **hinfällig**: Streuung, kein Fehler                         | —          | hinfällig |
-| 108 | Bilanz und Kassenbuch gehen auseinander — **erledigt mit 5.83**, die Bilanz geht auf               | —          | erledigt  |
-| 109 | Der Zehnt trifft nur die erste Stufe — **so gewollt, entschieden am 11.10.2026**                   | —          | erledigt  |
-| 110 | Die Werkstattwahl schickt jeden in dieselbe Sackgasse — **behoben mit 5.87**                       | —          | erledigt  |
-| 111 | Warum einer nichts tut, stand nirgends — **Werkzeug gebaut mit 5.88**                              | —          | erledigt  |
-| 112 | Ein Betrieb im Umland stand außerhalb des Steuerrechts — **behoben (5.94)**                        | —          | erledigt  |
-| 113 | Eine Versteigerung, bei der niemand bieten darf — **behoben mit 5.97, 5.100, 5.101**               | —          | erledigt  |
-| 116 | Wie viele Menschen eine Bäckerei satt macht — **erledigt mit 0.5.111**                             | —          | erledigt  |
+| #   | Punkt                                                                                                    | Fällig vor | Art       |
+| --- | -------------------------------------------------------------------------------------------------------- | ---------- | --------- |
+| 14  | Startbedingungen für neue Spieler — **entschieden mit 5.6**                                              | —          | erledigt  |
+| 25  | End-to-End-Test (Playwright) — **erledigt mit 5.7**                                                      | —          | erledigt  |
+| 26  | Datensicherung per Cron, einmal wiederhergestellt — **erledigt mit 5.8**                                 | —          | erledigt  |
+| 27  | Impressum, Datenschutz, Nutzungsbedingungen — **erledigt mit 5.9**, Prüfung offen                        | —          | erledigt  |
+| 28  | Kontolöschung als Anonymisierung — **erledigt mit 5.9**                                                  | —          | erledigt  |
+| 36  | Gebäude und Betriebe benennen — **erledigt mit 5.2**                                                     | —          | erledigt  |
+| 37  | Gebäude verkaufen — **war längst gebaut**, der Punkt beruhte auf einem Irrtum                            | —          | erledigt  |
+| 40  | Der abwesende Spieler — **erledigt mit 5.5**, zwei Restfragen                                            | —          | erledigt  |
+| 42  | Kindern einen Namen geben — **erledigt mit 5.2**                                                         | —          | erledigt  |
+| 48  | Was beim Tod aus den Zurückbleibenden wird — **erledigt mit 5.1**                                        | —          | erledigt  |
+| 52  | Der Lebenslauf — **erledigt mit 5.3**                                                                    | —          | erledigt  |
+| 53  | Zwei Knöpfe namens „Arbeiten" — **erledigt mit 5.31**                                                    | —          | erledigt  |
+| 54  | Ein Test, der würfelt — **erledigt mit 5.55**                                                            | —          | erledigt  |
+| 55  | Die Stadt kommt nicht in Gang — **erledigt mit 5.11**, ein Rest bleibt                                   | —          | erledigt  |
+| 56  | Der Wirtschaftstest prüft eine Welt, die es nicht gibt — **erledigt mit 5.11**                           | —          | erledigt  |
+| 57  | Der Takt der Welt steht nirgends — **erledigt mit 5.53**                                                 | —          | erledigt  |
+| 58  | Wege, die nur beschrieben und nicht verlinkt sind — **erledigt mit 5.52**                                | —          | erledigt  |
+| 59  | Aktionen, die scheitern müssen — **erledigt mit 5.54** (Bauseite)                                        | —          | erledigt  |
+| 60  | Listen ohne Ordnung, Wahlen ohne Termin — **erledigt mit 5.52**                                          | —          | erledigt  |
+| 62  | Geburts- und Errichtungsdatum — **erledigt mit 5.52**                                                    | —          | erledigt  |
+| 63  | Der geschlossene Kreis — **erledigt mit 5.16**                                                           | —          | erledigt  |
+| 65  | Der Zehnt erreicht die Felder nicht — **behoben (5.24), festgehalten (5.51)**                            | —          | erledigt  |
+| 66  | Wo Geld aus dem Nichts kam — **Zehnt geschlossen mit 5.83**; Raubgut offen (Punkt 23)                    | —          | erledigt  |
+| 68  | Das Standgeld — **behoben mit 5.20**; offen bleibt, woher die Nachfrage kommt                            | —          | erledigt  |
+| 69  | Der Hof verfällt zur Ruine — **behoben mit 5.23**                                                        | —          | erledigt  |
+| 71  | Zuzug: neue Seelen von außerhalb — **gebaut mit 5.24**                                                   | —          | erledigt  |
+| 72  | Ware liegt, wo sie entstand — **gelöst mit 5.25**                                                        | —          | erledigt  |
+| 74  | Der Auftrag an Tagelöhner — **erledigt mit 5.27 und 5.78**; offen bleibt der Ausbau                      | —          | erledigt  |
+| 76  | Niemand kann sich einen Ausbau leisten — 86 Münzen gegen 340                                             | —          | überholt  |
+| 78  | Werben kennt kein Alter — **behoben mit 5.41**                                                           | —          | erledigt  |
+| 79  | Erbenloser Besitz bleibt bei der Stadt liegen — **behoben mit 5.42**                                     | —          | erledigt  |
+| 80  | Von der Grundstücksliste kein Weg zum Haus — **erledigt mit 5.43**                                       | —          | erledigt  |
+| 81  | Fremde Häuser haben keine Seite — **erledigt mit 5.46**                                                  | —          | erledigt  |
+| 82  | Kammer oder Inventar — **entschieden mit 5.45**: Inventar                                                | —          | erledigt  |
+| 83  | Die Stadtseite trennt nicht, was der Stadt gehört — **erledigt mit 5.44**                                | —          | erledigt  |
+| 84  | Sehr junge Kinder können für Lohn arbeiten — **erledigt mit 0.6.0**, Kinder leben aus dem Haushalt       | —          | erledigt  |
+| 86  | Die städtische Schmiede sperrte die Eisenkette — **behoben mit 5.65**                                    | —          | erledigt  |
+| 87  | Ein Sparziel, das ins Leere führt — **behoben mit 5.106, 0.8.1 und 0.8.2** (Vorrat, wer ihn halten kann) | —          | erledigt  |
+| 88  | Die Zugreihenfolge ist ein stiller Vorteil — **behoben mit 0.8.1**                                       | —          | erledigt  |
+| 93  | `GOAL_UNREACHABLE` — kein Bauland; **die Schwelle fiel mit 5.92**, Gegenprobe offen                      | —          | erledigt  |
+| 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück — **behoben mit 0.8.1**                   | —          | erledigt  |
+| 95  | Die Werkzeuge maßen einen anderen Takt als den, der läuft — **behoben mit 5.69**                         | —          | erledigt  |
+| 96  | Die Stadtkasse ohne Einnahme — **gebaut mit 5.71**, fiskalisch wirksam; siehe 100                        | —          | erledigt  |
+| 97  | `VOTE` ohne Bürgerrecht — **behoben mit 5.72**; das Bürgerrecht selbst ist Punkt 49                      | —          | erledigt  |
+| 99  | Zwei Höfe auf derselben Pachtfläche — **behoben mit 5.70**; Altbestand offen                             | —          | erledigt  |
+| 100 | Die Stadt verhungert an ihrer eigenen Steuer — 4 von 5 Toten sind Hungertote                             | —          | überholt  |
+| 102 | Jeder Bau verbrennt seinen Preis — **erledigt (5.93)**: nichts verschwindet mehr                         | —          | erledigt  |
+| 103 | Startreihenfolge — **Mechanismus gefunden, behoben mit 5.84** (die Pachtwahl)                            | —          | erledigt  |
+| 104 | Die städtische Krücke besetzte den Beruf — **behoben mit 5.75**; kein Schmied zog zu                     | —          | erledigt  |
+| 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält — **behoben mit 0.8.1**              | —          | erledigt  |
+| 106 | Ein Bauauftrag, den niemand bezahlen kann — **behoben mit 5.81**                                         | —          | erledigt  |
+| 107 | Die Grundsteuer brachte ein Viertel — **hinfällig**: Streuung, kein Fehler                               | —          | hinfällig |
+| 108 | Bilanz und Kassenbuch gehen auseinander — **erledigt mit 5.83**, die Bilanz geht auf                     | —          | erledigt  |
+| 109 | Der Zehnt trifft nur die erste Stufe — **so gewollt, entschieden am 11.10.2026**                         | —          | erledigt  |
+| 110 | Die Werkstattwahl schickt jeden in dieselbe Sackgasse — **behoben mit 5.87**                             | —          | erledigt  |
+| 111 | Warum einer nichts tut, stand nirgends — **Werkzeug gebaut mit 5.88**                                    | —          | erledigt  |
+| 112 | Ein Betrieb im Umland stand außerhalb des Steuerrechts — **behoben (5.94)**                              | —          | erledigt  |
+| 113 | Eine Versteigerung, bei der niemand bieten darf — **behoben mit 5.97, 5.100, 5.101**                     | —          | erledigt  |
+| 116 | Wie viele Menschen eine Bäckerei satt macht — **erledigt mit 0.5.111**                                   | —          | erledigt  |
 
 **Gestrichene Nummern.** Zehn Punkte sind erledigt und samt Abschnitt aus der Liste
 gefallen — Code und Text verweisen aber weiter auf sie, denn die Kommentare stammen aus der
@@ -1295,6 +1299,131 @@ wenn zurzeit etwas anderes zuerst greift —, aber es verschiebt die Reihenfolge
 (Bauland, das gekauft und nie bebaut wird) und die Frage, wer Land erschließt, wenn die
 Stadtkasse leer ist, stehen jetzt vor der Wirtschaftskette.**
 
+### 87. Ein Sparziel, das ins Leere führt
+
+**Befund vom 23.08.2026.** Derselbe Fehler wie in Punkt 55 und 63, eine Ebene höher — und
+diesmal verdeckt ihn ausgerechnet die Diagnose, die dafür gebaut wurde.
+
+In `savingsTarget` (`npc.logic.ts`) steht:
+
+```ts
+if (!state.ownsWorkshop && isEnterprising(state.personality)) {
+	if (!state.hasFreePlot) return state.plotPrice; // ← kein Blick auf workshopPrice
+	if (state.workshopMaterialMissing) return state.workshopMaterialPrice;
+	return state.workshopPrice;
+}
+```
+
+**Gespart wird auf das Grundstück, ohne zu prüfen, ob die Werkstatt darauf erreichbar
+ist.** `entfaltung` kauft es dann auch: `BUY_PLOT` verlangt `plotPrice`, aber nicht
+`workshopPrice`. Ein unternehmungslustiger NPC erwirbt also Bauland, das er nie bebaut —
+und stellt danach fest, dass es nicht weitergeht.
+
+**Zweierlei macht das teuer:**
+
+- **Bauland ist endlich.** Der Weltaufbau legt zwölf Parzellen an, vier davon trägt die
+  Stadt. Jeder gestrandete Unternehmer bindet eine, dauerhaft — es gibt keinen Weg zurück.
+- **Die Diagnose meldet den gesunden Fall.** Vor dem Kauf ist `savingsTarget` ≠ `null`,
+  also steht dort `STILL_SAVING`. Erst _nach_ dem vergeblichen Kauf springt `idleReason` auf
+  `GOAL_UNREACHABLE`. Die Prüfung aus 4.17 greift beim Nachfolgefall eine Stufe zu spät —
+  und `STILL_SAVING` war der häufigste Müßiggangsgrund des letzten Messlaufs (3603).
+
+**Zu tun ist beides zusammen:** die Bedingung um das erreichbare Vorhaben ergänzen (wer
+keine Werkstatt bauen kann, spart auch nicht auf den Boden dafür) und `willBauen` in
+`idleReason` an dieselbe Bedingung hängen. Laufen die beiden auseinander, ist die Auskunft
+schlimmer als keine — genau das steht in `npc.logic` schon als Warnung.
+
+**Zusammenhang mit Punkt 86:** Heute tritt der Fall über die gesperrte Eisenkette ein. Ist
+die behoben, bleibt er für den Tag, an dem alle Werkstätten stehen (Punkt 89) — dann trifft
+er jeden neuen Unternehmungslustigen.
+
+**Nachgesehen am 04.10.2026: weiter offen, aber leise.** Die Stelle in `savingsTarget` ist
+unverändert. Ihre Wirkung ist klein geworden: `GOAL_UNREACHABLE` steht im Lauf auf 5.101
+bei 240. Seit 5.100 bietet in Versteigerungen nur, wer bauen will — aber ob „eine
+Werkstatt bauen" erreichbar ist, fragt auch dort niemand.
+
+**Gebaut mit 5.106 (11.10.2026).** `werkstattErreichbar` in `npc.logic.ts`: Es fehlt eine
+Werkstatt, und ihr Material ist da oder am Markt. Daran hängen jetzt alle drei Stellen —
+`savingsTarget` spart nur noch auf Boden für eine Werkstatt, die zu bauen ist, `entfaltung`
+kauft ihn nur dann, und `idleReason` will nur bauen, wem eine Werkstatt fehlt. Die
+Versteigerung (`bauabsicht`) fragt weiterhin nicht danach; ihr fehlt der NPC-Zustand.
+
+**Erste Messung** (Saat 86, 2000 Ticks, vorher gegen nachher): `BUY_PLOT` 11 → 8,
+`GOAL_UNREACHABLE` 2348 → 2493. `STILL_SAVING` kam schon vorher nicht vor — die
+Fehldiagnose aus dem Befund gibt es in dieser Form nicht mehr. **Aber die Lohnarbeit
+halbiert sich** (`WORK` 7018 → 3483): Wer auf Boden für eine unerreichbare Werkstatt
+sparte, baute nie, arbeitete aber. Ohne Sparziel hört er an der Rücklage auf. Am Ende 58
+statt 63 Lebende, Stadtkasse 365 statt 1122, Grundsteuer 1445 statt 2177; dafür kein
+Hungertoter, 10 Bäckereien und 6 Mühlen statt 8 und 13. Ob die schwächere Stadt Muster oder Zufall ist, sagt eine Saat nicht.
+
+**Gegengemessen mit zwei weiteren Saaten (11.10.2026):** je 2000 Ticks, vorher (`949c0cc`)
+gegen nachher (`e115f4e`).
+
+|                    | 86 vorher | nachher | 7 vorher | nachher | 42 vorher | nachher |
+| ------------------ | --------: | ------: | -------: | ------: | --------: | ------: |
+| Lebende am Ende    |        63 |      58 |       34 |  **46** |        34 |  **43** |
+| Tode (Not)         |     8 (1) |   9 (0) |    9 (3) |  12 (2) |    16 (7) |   8 (1) |
+| Grundsteuer        |      2177 |    1445 |     4408 |    2506 |      3806 |    1703 |
+| Stadtkasse am Ende |      1122 |     365 |      149 |     992 |      2204 |    1072 |
+| `WORK`             |      7018 |    3483 |     4573 |    4659 |      4417 |    2425 |
+| `BUY_PLOT`         |        11 |       8 |       13 |       7 |         7 |       7 |
+| `GOAL_UNREACHABLE` |      2348 |    2493 |      306 |    2933 |       515 |    3307 |
+
+- **Die schwächere Stadt war Zufall.** In den beiden anderen Läufen leben am Ende deutlich
+  _mehr_ Menschen, und Hungertote gibt es in allen dreien weniger (1 → 0, 3 → 2, 7 → 1).
+- **Die halbierte Lohnarbeit ist eine Neigung, kein Gesetz**: zwei von drei Läufen.
+- **Durchgehend ist nur eines: Die Grundsteuer sinkt um ein bis zwei Drittel.**
+  Naheliegend, aber ungemessen: Es wird weniger Boden gehortet, der nie bebaut wird. Ob die
+  Stadtkasse das auf Dauer trägt, ist eine Frage für Punkt 16 — am Ende stand sie in allen
+  Läufen im Plus.
+- **Die Diagnose sagt jetzt, was ist**: `GOAL_UNREACHABLE` versechs- bis verzehnfacht sich
+  bei 7 und 42. Diese Unternehmungslustigen gab es vorher auch; sie liefen unter anderem
+  Namen.
+
+**Geschlossen mit 0.8.1, gelockert mit 0.8.2:** `bauabsicht` fragt `werkstattErreichbarFuer`. Wer
+die Werkstatt nicht bauen kann, darf seit 0.8.2 trotzdem auf Vorrat kaufen, zum Festpreis wie in
+der Versteigerung, dort aber nur mit niedrigem Gebot. Bedingung ist, dass danach drei Jahre
+Grundsteuer auf seinen ganzen Boden übrig bleiben, mindestens aber ein zweiter Grundstückspreis
+(`landReserve`). Entschieden am 07.11.2026: Billigen Grund kaufen und darauf sparen ist
+vernünftig, nur halten können muss man ihn. Bis dahin bot für Bauland, wem Haus oder Werkstatt
+fehlte, ohne zu fragen, ob die Werkstatt erreichbar ist. Dafür braucht der Dienst den
+NPC-Zustand oder wenigstens `werkstattErreichbar` als eigene Abfrage.
+
+### 88. Die Zugreihenfolge ist ein stiller Vorteil
+
+**Behoben mit 0.8.1:** `actForNpcs` mischt die Einwohner je Tick, geseedet aus der Tickzahl. Derselbe
+Lauf gibt dasselbe Ergebnis, aber niemand steht mehr Tick für Tick vorn. Offen bleibt die Frage
+nach gleichwertigen Optionen innerhalb einer Entscheidung (Punkt 90).
+
+**Befund vom 23.08.2026.** `actForNpcs` holt die Einwohner ohne `order`:
+
+```ts
+const npcs = await Character.findAll({ where: { deathTick: null, role: 'NPC' } });
+
+for (const npc of npcs) {
+	buchen(await ausfuehren(npc.dataValues.id, tick));
+}
+```
+
+Die Datenbank liefert eine **stabile** Folge — SQLite nach `rowid`, MariaDB nach dem
+Primärschlüssel. Also handelt Tick für Tick derselbe NPC zuerst, über Jahrzehnte hinweg.
+
+**Was daran hängt, ist knapp und wird nur einmal vergeben:** das billigste Brot am Markt,
+der eine Reparaturauftrag, das letzte freie Grundstück, die offene Stelle. Wer vorne steht,
+bekommt es jedes Mal. Über 600 Ticks ist das keine Rundung, sondern eine Bevorzugung, die
+niemand beschlossen hat und die kein Test bemerkt.
+
+Verstärkt wird es dadurch, dass alle **dieselbe** Wahl treffen: `freierArbeitsplatz`
+sortiert für jeden gleich, `fehlendeWerkstatt` nennt jedem dieselbe Lücke,
+`naechsterPartner` nimmt global die höchste Zuneigung. Acht NPCs entscheiden sich für
+denselben Bau; sieben kommen zu spät, und ihre Fehlschläge stehen als Rauschen in
+`byFailure`, obwohl Arbeit da war.
+
+**Zu bauen ist eine Mischung je Tick** — geseedet aus der Tickzahl, damit Messläufe
+wiederholbar bleiben (Punkt 54). Das ist eine Zeile. Die zweite, größere Frage ist, ob
+gleichwertige Optionen innerhalb einer Entscheidung gestreut werden sollen; die gehört zu
+Punkt 90.
+
 ### 93. `GOAL_UNREACHABLE` deckt 85 Prozent des Müßiggangs
 
 **Befund vom 27.08.2026.** In drei Messläufen über 1500 Ticks mit derselben Saat 86 steht
@@ -1468,6 +1597,36 @@ Erschließung auf einmal betrieben.
 **Geschlossen am 04.10.2026 — die Gegenprobe ist gemacht.** Im Lauf über 2000 Ticks auf
 5.101 (Saat 86) steht `GOAL_UNREACHABLE` bei **240**, gegen 15 279 im August. Bauland ist
 kein Engpass mehr: Es wird erschlossen, versteigert und bebaut (Punkt 113).
+
+### 94. Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück
+
+**Behoben mit 0.8.1,** ohne neue Spalte: Fasst das Inventar die Ware nicht, kommt sie in ein eigenes
+Haus, das sie annimmt, Wohnhaus und Hof vor dem Handwerk. Erst wenn es keines gibt, bleibt das
+Schild hängen. Woher die Ware kam, merkt sich das Angebot weiterhin nicht; mit Punkt 31 wird das
+wieder eine Frage.
+
+**Befund vom 27.08.2026, entstanden mit 5.67.** Seit die Ernte am Markt verkäuflich ist,
+kann ein Angebot aus einem **Gebäudelager** stammen — `placeOffer` nimmt die Ware über
+`consumeOwned` aus Inventar und Häusern. `withdrawOffer` legt sie aber immer ins
+**Inventar** zurück:
+
+```ts
+if (!(await needService.changeStock(sellerId, itemId, quantity, t))) {
+	return { ok: false, reason: 'INVENTORY_FULL' } as const;
+}
+```
+
+Wer zweitausend Stämme aus dem Hof anbietet, bekommt sie nicht in die Kammer zurück — das
+Schild bleibt hängen. Das Verhalten selbst ist richtig und seit 5.33 bewusst so (Ware
+verschwinden zu lassen wäre schlimmer), nur ist der Rückweg jetzt enger als der Hinweg.
+
+**Für NPCs belanglos** — sie ziehen nichts zurück. Für einen Spieler ist es eine
+Einschränkung, die er nicht kommen sieht.
+
+**Zu bauen wäre**, sich zu merken, woher die Ware kam, und sie dorthin zurückzulegen. Das
+ist eine Spalte am `ShopOffer` und ein Zweig in `withdrawOffer`. Solange Entfernungen
+nichts kosten, ist der Lagerort ohnehin eine Frage der Buchung; mit Punkt 31 (der Karte)
+wird daraus eine mit Gewicht, und dann gehört diese Stelle ohnehin angefasst.
 
 ### 95. Die Werkzeuge maßen einen anderen Takt als den, der läuft — behoben (5.69)
 
@@ -2409,6 +2568,68 @@ das es ohne Schmiede nicht gibt. Für einen NPC **ohne** einschlägiges Können 
 Deadlock bestehen; er spart weiter auf die billigste fehlende Werkstatt und kommt nie an.
 Ob die Kette damit wirklich anspringt, muss ein Messlauf zeigen — dies ist die erste
 Änderung dieser Sitzung, von der ich das nicht vorher behaupten will.
+
+### 105. Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält
+
+**Behoben mit 0.8.1** auf dem kleinsten Weg aus der Liste unten: Unterkunft und Waisenhaus tragen
+`ageless`, verfallen nicht und brennen nicht.
+
+**Angemerkt am 29.08.2026**, aus der Frage, ob eine ausgestorbene Stadt sich wieder füllt.
+Die Antwort ist ja — mit einer Ecke, die erst auffällt, wenn sie eintritt.
+
+**Der Zuzug prüft ausdrücklich nur städtischen Wohnraum:**
+
+```ts
+if (haus.ownerType === 'CITY' && platz !== null && platz > 0) return true;
+```
+
+Das ist richtig so — ein Ankömmling soll nicht in fremdes Erbe einziehen —, bedeutet aber:
+In Grünau hängt der ganze Zuzug an **einem** Gebäude, der Städtischen Unterkunft mit
+zwanzig Plätzen. (Was der Stadt aus erbenlosem Nachlass zufällt, zählt vorübergehend mit,
+solange es nicht versteigert ist — Punkt 79. Verlassen sollte man sich darauf nicht.)
+
+**Und dieses Gebäude verfällt wie jedes andere**, um 0,1 Zustandspunkte je Tick. Instand
+hält es entweder der Bürgermeister — den es nur gibt, wenn jemand lebt und gewählt wurde —
+oder ein Tagelöhner für Lohn, der ebenfalls leben muss. **Stirbt die Stadt vollständig aus,
+repariert sie niemand mehr.**
+
+Von voller Güte bis zur Ruine sind es `YEARS_TO_RUIN` = 20 Spieljahre, also tausend Ticks —
+**rund sechs Wochen Echtzeit**. Fällt die Unterkunft, gibt `freierWohnraum` dauerhaft
+`false` zurück, und es kommt nie wieder jemand an. Die Welt wäre dann nicht leer, sondern
+**endgültig** leer: kein Weg zurück außer von Hand in der Datenbank.
+
+**Das Zeitfenster ist großzügig, und genau das ist das Unbehagen.** Bei einer
+Ankunftswahrscheinlichkeit von einem Prozent je Tick kommt im Schnitt alle hundert Ticks
+jemand an, also etwa alle vier Realtage; er findet Arbeit, richtet die Unterkunft her, und
+die Stadt erholt sich. Praktisch ist sie damit kaum kaputtzukriegen — aber nicht durch
+Konstruktion, sondern durch das Verhältnis zweier Zahlen, die niemand aufeinander abgestimmt
+hat. Wer `YEARS_TO_RUIN` senkt oder `ARRIVAL_CHANCE_PER_TICK` (beides sind Kandidaten fürs
+Balancing, Punkt 16), kann die Welt unbeabsichtigt unwiederbringlich machen.
+
+**Denkbare Antworten**, von der kleinsten zur größten:
+
+- **Die Unterkunft verfällt nicht.** Sie ist die Krücke aus 3.3 und kein Bauwerk mit
+  Schicksal; ein Obdach, das die Stadt jedem stellt, sollte nicht am Fleiß ihrer Einwohner
+  hängen. Eine Ausnahme in `zustandVon` oder ein Feld an der Vorlage.
+- **Die Stadt baut sie nach.** `fehlenderBau` kennt schon den Begriff „was der Stadt
+  fehlt"; eine Stadt ohne Obdach hätte damit die dringlichste Baustelle überhaupt. Setzt
+  aber einen Bürgermeister voraus — hilft also gerade im Ernstfall nicht.
+- **Ankommen ohne Dach erlauben.** Am ehrlichsten zur Welt (wer ankommt und nichts findet,
+  schläft im Freien) und am härtesten: Obdachlosigkeit heißt keine Erholung und keine
+  Kinder. Als alleinige Rettung zu wenig, als Ergänzung stimmig.
+
+**Was daran kein Fehler ist:** Dass mit den Einwohnern auch ihre Häuser erlöschen, ist
+gewollt — eine Dynastie, die ausstirbt, ist ein Ereignis mit Chronikeintrag und kein
+Zurücksetzen. Verloren ginge nicht die Einwohnerzahl, sondern die Geschichte der
+Gründerfamilien seit 1.6. Das ist ein Grund, die Stadt nicht leichtfertig sterben zu
+lassen, aber kein Grund, den Tod zu verhindern.
+
+**Entschärft mit 5.78, wenn auch nicht aufgehoben.** Instandsetzen kostet seither keine
+Münze mehr, sondern Aktionspunkte — und damit fällt die schlimmste Verkettung weg: Bis
+dahin scheiterte das Herrichten an einer leeren Stadtkasse, also ausgerechnet in der Lage,
+in der die Stadt es am nötigsten hat. Ein Bürgermeister ohne eine Münze kann die Unterkunft
+jetzt selbst herrichten. **Was bleibt, ist der Fall ohne Menschen:** Stirbt die Stadt
+vollständig aus, gibt es auch niemanden mehr, der Aktionspunkte hat.
 
 ### 106. Ein Bauauftrag, den niemand bezahlen kann — behoben mit 5.81
 

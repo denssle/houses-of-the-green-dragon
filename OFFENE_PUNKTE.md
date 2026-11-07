@@ -13,59 +13,56 @@ Text verweisen weiter auf „Punkt 63" und Co., und die Messungen darin sind der
 vieles, was heute im Code steht. Die Nummern bleiben, wo sie sind; hier stehen nur die
 offenen, nach Nummer sortiert.
 
-| #   | Punkt                                                                                             | Baut auf                   | Art         |
-| --- | ------------------------------------------------------------------------------------------------- | -------------------------- | ----------- |
-| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                                           | —                          | Entwurf     |
-| 6   | Kämpfe und Verletzungen                                                                           | —                          | Entwurf     |
-| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                                 | 6, 32                      | Entwurf     |
-| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                                          | laufend                    | Entwurf     |
-| 15  | Weltinhalte: Berufe, Waren und Rezepte                                                            | laufend                    | Entwurf     |
-| 16  | Balancing im engeren Sinn                                                                         | laufend                    | laufend     |
-| 20  | Verschleiß von Gegenständen — **entschieden: am Gebrauch, Ausrüstung einzeln**                    | 77                         | entschieden |
-| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**                | 6, 44, 47                  | Entwurf     |
-| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                               | 45                         | Entwurf     |
-| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                            | laufend                    | Entwurf     |
-| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                                   | —                          | Entwurf     |
-| 32  | Die Ämter — **Zuschnitt entschieden**: zwei Wahlen, drei Ernennungen                              | —                          | entschieden |
-| 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen              | 90                         | Entwurf     |
-| 34  | Wer einen Handwerksbetrieb führen darf — **entschieden: Stufe 5, Stillstand beim Tod**            | —                          | entschieden |
-| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                            | 118                        | Entwurf     |
-| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                                 | —                          | Entwurf     |
-| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit                          | — (Stadtreligion: 49, 119) | Entwurf     |
-| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist                           | 31, 119                    | Entwurf     |
-| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                                       | 44, 118                    | Entwurf     |
-| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                                   | 32                         | Entwurf     |
-| 45  | Die Lehre im eigenen Betrieb — **entschieden: ab zwölf, halbes Lerntempo**                        | —                          | entschieden |
-| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                                      | 34, 45                     | Entwurf     |
-| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                              | —                          | Entwurf     |
-| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                                | 41, 119                    | Entwurf     |
-| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten                 | 49, 120                    | Entwurf     |
-| 51  | Mitgift, Testament und Stiftung                                                                   | 38, 77                     | Entwurf     |
-| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                             | —                          | Entwurf     |
-| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                                      | —                          | Entwurf     |
-| 67  | Die NPC-Schleife ist zu teuer geworden — **halbiert mit 5.105, zurückgestellt**                   | —                          | Befund      |
-| 70  | Niemand lernt ein Handwerk, das es nicht gibt — **Mahlen eigenständig seit 5.96**                 | 115                        | teilweise   |
-| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                                           | 90                         | Entwurf     |
-| 75  | Die Testläufe dauern zu lange — **Alltag 17 s, volle Suite gut zwei Minuten**                     | 67                         | teilweise   |
-| 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                                 | —                          | Entwurf     |
-| 85  | Der Kornspeicher backt aus dem Nichts — **live noch da (0.5.105), Abriss in Etappe B**            | live: Mühle, Bäckerei      | teilweise   |
-| 87  | Ein Sparziel, das ins Leere führt — **ganz behoben mit 0.8.1** (auch die Versteigerung)           | —                          | teilweise   |
-| 88  | Die Zugreihenfolge ist ein stiller Vorteil — dieselbe Reihe in jedem Tick — **behoben mit 0.8.1** | —                          | Befund      |
-| 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                             | 34                         | teilweise   |
-| 90  | Die NPC-Entscheidung hat kein Gedächtnis — **zuerst das Verkaufsgedächtnis**                      | —                          | entschieden |
-| 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen                  | —                          | teilweise   |
-| 92  | Der Verwalter arbeitet ohne Ende — **Lohngrenze gebaut mit 0.6.2**, Monokultur offen              | —                          | teilweise   |
-| 94  | Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück — **behoben mit 0.8.1**            | —                          | Befund      |
-| 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten               | —                          | Befund      |
-| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                                | —                          | teilweise   |
-| 105 | Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält — **behoben mit 0.8.1**       | —                          | Befund      |
-| 114 | Der Zuzug fragt nach Gebäuden, nicht nach Bedarf                                                  | 115                        | Befund      |
-| 115 | Wer nichts absetzt, sattelt nicht um — **5.98 und 5.99 gebaut, Schritt 4 offen**                  | 117                        | teilweise   |
-| 117 | Wer Grund hat, soll ihn nutzen — oder dafür zahlen                                                | —                          | Entwurf     |
-| 118 | Verträge zwischen Charakteren — eine Form für Auftrag, Kredit und Lehrvertrag                     | —                          | Entwurf     |
-| 119 | Die zweite Stadt — alles Regionsblinde wird regionsfähig                                          | 31                         | Entwurf     |
-| 120 | Fernhandel — Lieferungen mit Ankunft, Preisunterschiede zwischen Städten                          | 41, 119                    | Entwurf     |
-| 121 | Weniger Geburten bei Saat 86 seit 0.5.111 — Zufall oder Mechanismus?                              | —                          | Befund      |
+| #   | Punkt                                                                                              | Baut auf                   | Art         |
+| --- | -------------------------------------------------------------------------------------------------- | -------------------------- | ----------- |
+| 5   | Krankheiten: Ursachen, Verlauf, Heilung                                                            | —                          | Entwurf     |
+| 6   | Kämpfe und Verletzungen                                                                            | —                          | Entwurf     |
+| 7   | NPC-Gewichte für Mut, Ehrgeiz und Verträglichkeit                                                  | 6, 32                      | Entwurf     |
+| 12  | Weitere öffentliche Gebäude, ihr Ausbau und ihre Wirkung                                           | laufend                    | Entwurf     |
+| 15  | Weltinhalte: Berufe, Waren und Rezepte                                                             | laufend                    | Entwurf     |
+| 16  | Balancing im engeren Sinn                                                                          | laufend                    | laufend     |
+| 20  | Verschleiß von Gegenständen — **entschieden: am Gebrauch, Ausrüstung einzeln**                     | 77                         | entschieden |
+| 23  | Räuber als Beruf: Bande, Überfälle, Einbrüche — **Überfälle brauchen einen Täter**                 | 6, 44, 47                  | Entwurf     |
+| 24  | NPC-Eltern und die Schule: wer sein Kind hinschickt                                                | 45                         | Entwurf     |
+| 30  | Was NPCs noch nicht tun: Wohnhäuser, Anstellungen, Ausbau, Renovierung                             | laufend                    | Entwurf     |
+| 31  | Die Karte als Sechseckraster — Umbau von `regionLink` auf Lagen                                    | —                          | Entwurf     |
+| 32  | Die Ämter — **Zuschnitt entschieden**: zwei Wahlen, drei Ernennungen                               | —                          | entschieden |
+| 33  | Lohn: Aushang und Verhandlung — Entlassen gebaut mit 5.31, Frist und Abfindung offen               | 90                         | Entwurf     |
+| 34  | Wer einen Handwerksbetrieb führen darf — **entschieden: Stufe 5, Stillstand beim Tod**             | —                          | entschieden |
+| 35  | Der Bauherr als Beruf: bauen lassen statt selbst bauen                                             | 118                        | Entwurf     |
+| 38  | Adoption: was sie kostet, wer zustimmt, wer abgegeben werden darf                                  | —                          | Entwurf     |
+| 39  | Religion, Kirche und Feste: Zuschlag, Verteilung, Wechsel, Kirchenstreit                           | — (Stadtreligion: 49, 119) | Entwurf     |
+| 41  | Reisen: was Anwesenheit verlangt, was eine Reise kostet, wer noch reist                            | 31, 119                    | Entwurf     |
+| 43  | Geldverleih: Zins, Zahlungsunfähigkeit, Schulden im Erbfall                                        | 44, 118                    | Entwurf     |
+| 44  | Der Schuldturm: Haft als Zustand, Dauer, Auslösung, wer richtet                                    | 32                         | Entwurf     |
+| 45  | Die Lehre im eigenen Betrieb — **entschieden: ab zwölf, halbes Lerntempo**                         | —                          | entschieden |
+| 46  | Zünfte: Mitgliedschaft, Meisterwürde, Preise, Zutritt, Kasse                                       | 34, 45                     | Entwurf     |
+| 47  | Ansehen und Ruf: woraus er entsteht, was er bewirkt, wie er abklingt                               | —                          | Entwurf     |
+| 49  | Bürgerrecht und Stand: Dauer des Erwerbs, Wohnsitzwechsel, Verlust                                 | 41, 119                    | Entwurf     |
+| 50  | Zoll, Bannrechte, Bauordnung und das Bürgerrecht für Auswärtige als Gesetzesarten                  | 49, 120                    | Entwurf     |
+| 51  | Mitgift, Testament und Stiftung                                                                    | 38, 77                     | Entwurf     |
+| 61  | Wer ledig ist, baut nie etwas — Werben blockiert die Entfaltungsstufe                              | —                          | Entwurf     |
+| 64  | Jedes Gebäude und jede Pachtfläche braucht eine eigene Seite                                       | —                          | Entwurf     |
+| 67  | Die NPC-Schleife ist zu teuer geworden — **halbiert mit 5.105, zurückgestellt**                    | —                          | Befund      |
+| 70  | Niemand lernt ein Handwerk, das es nicht gibt — **Mahlen eigenständig seit 5.96**                  | 115                        | teilweise   |
+| 73  | NPCs kaufen nur nach dem Preis, nicht nach dem Menschen                                            | 90                         | Entwurf     |
+| 75  | Die Testläufe dauern zu lange — **Alltag 17 s, volle Suite gut zwei Minuten**                      | 67                         | teilweise   |
+| 77  | Was das Inventar noch nicht kann: Gewicht, Einzelstücke, Vererben                                  | —                          | Entwurf     |
+| 85  | Der Kornspeicher backt aus dem Nichts — **live noch da (0.5.105), Abriss in Etappe B**             | live: Mühle, Bäckerei      | teilweise   |
+| 89  | Ein Betrieb je Handwerk, für immer — **für Nahrung behoben mit 5.95**                              | 34                         | teilweise   |
+| 90  | Die NPC-Entscheidung hat kein Gedächtnis — **zuerst das Verkaufsgedächtnis**                       | —                          | entschieden |
+| 91  | Der Takt ist nicht atomar — **NPC-Ausnahmen behoben (5.73)**; Tick-Vermerk offen                   | —                          | teilweise   |
+| 92  | Der Verwalter arbeitet ohne Ende — **Lohngrenze gebaut mit 0.6.2**, Monokultur offen               | —                          | teilweise   |
+| 98  | Renoviert wird fast nie — und ein Brand kann die Stadt ihr einziges Handwerk kosten                | —                          | Befund      |
+| 101 | Das Kassenbuch — **gebaut mit 5.77**; die Bürgerseite bleibt offen                                 | —                          | teilweise   |
+| 114 | Der Zuzug fragt nach Gebäuden, nicht nach Bedarf                                                   | 115                        | Befund      |
+| 115 | Wer nichts absetzt, sattelt nicht um — **5.98 und 5.99 gebaut, Schritt 4 offen**                   | 117                        | teilweise   |
+| 117 | Wer Grund hat, soll ihn nutzen — oder dafür zahlen                                                 | —                          | Entwurf     |
+| 118 | Verträge zwischen Charakteren — eine Form für Auftrag, Kredit und Lehrvertrag                      | —                          | Entwurf     |
+| 119 | Die zweite Stadt — alles Regionsblinde wird regionsfähig                                           | 31                         | Entwurf     |
+| 120 | Fernhandel — Lieferungen mit Ankunft, Preisunterschiede zwischen Städten                           | 41, 119                    | Entwurf     |
+| 121 | Weniger Geburten bei Saat 86 seit 0.5.111 — Zufall oder Mechanismus?                               | —                          | Befund      |
+| 122 | Die Hungersnot von Grünau — **Waisen und Stellen behoben mit 0.7.0**, die Steuer als Ursache offen | —                          | Befund      |
 
 ## Die Bauordnung
 
@@ -74,9 +71,9 @@ dem davor auf, zwischen den Strängen gibt es kaum Abhängigkeiten. Welcher Stra
 ist eine Frage der Lust und nicht der Reihenfolge.
 
 **Jederzeit, für sich** — klein, keine Voraussetzung, gut für einen Abend:
-121 (Geburten bei Saat 86), 92 (Rest: immer dasselbe Handwerk), 88 (Zugreihenfolge),
-94 (Angebot zurück ins Lager), 91 (Tick-Vermerk), 87 (Rest: Versteigerung), 105, 98, 61,
-101 (Bürgerseite), 64 (Seiten je Gebäude).
+122 (Steuer-Messlauf zur Hungersnot), 121 (Geburten bei Saat 86), 92 (Rest: immer dasselbe
+Handwerk), 91 (Tick-Vermerk), 98, 61, 101 (Bürgerseite), 64 (Seiten je Gebäude). Erledigt am
+07.11.2026: 87, 88, 94, 105.
 
 **Handwerk:** **34 + 45** (Meisterpflicht und Lehre, ein Schritt) → 46 (Zünfte) — und
 89 (ein Betrieb je Handwerk) hängt an 34. Daneben 24 (Schule), weil Lehre und Schule sich
@@ -1719,131 +1716,6 @@ auf dem Uberspace. Nach dem Deploy: 30 Lebende wie zuvor, Tick 6173.
 `scripts/gruenau-sql.sh`: eine Mühle und eine Bäckerei in Bürgerhand und Brot am Markt.
 Dann wird die Rücknahme (`abae0f8`) zurückgenommen, als eigene Version.
 
-### 87. Ein Sparziel, das ins Leere führt
-
-**Befund vom 23.08.2026.** Derselbe Fehler wie in Punkt 55 und 63, eine Ebene höher — und
-diesmal verdeckt ihn ausgerechnet die Diagnose, die dafür gebaut wurde.
-
-In `savingsTarget` (`npc.logic.ts`) steht:
-
-```ts
-if (!state.ownsWorkshop && isEnterprising(state.personality)) {
-	if (!state.hasFreePlot) return state.plotPrice; // ← kein Blick auf workshopPrice
-	if (state.workshopMaterialMissing) return state.workshopMaterialPrice;
-	return state.workshopPrice;
-}
-```
-
-**Gespart wird auf das Grundstück, ohne zu prüfen, ob die Werkstatt darauf erreichbar
-ist.** `entfaltung` kauft es dann auch: `BUY_PLOT` verlangt `plotPrice`, aber nicht
-`workshopPrice`. Ein unternehmungslustiger NPC erwirbt also Bauland, das er nie bebaut —
-und stellt danach fest, dass es nicht weitergeht.
-
-**Zweierlei macht das teuer:**
-
-- **Bauland ist endlich.** Der Weltaufbau legt zwölf Parzellen an, vier davon trägt die
-  Stadt. Jeder gestrandete Unternehmer bindet eine, dauerhaft — es gibt keinen Weg zurück.
-- **Die Diagnose meldet den gesunden Fall.** Vor dem Kauf ist `savingsTarget` ≠ `null`,
-  also steht dort `STILL_SAVING`. Erst _nach_ dem vergeblichen Kauf springt `idleReason` auf
-  `GOAL_UNREACHABLE`. Die Prüfung aus 4.17 greift beim Nachfolgefall eine Stufe zu spät —
-  und `STILL_SAVING` war der häufigste Müßiggangsgrund des letzten Messlaufs (3603).
-
-**Zu tun ist beides zusammen:** die Bedingung um das erreichbare Vorhaben ergänzen (wer
-keine Werkstatt bauen kann, spart auch nicht auf den Boden dafür) und `willBauen` in
-`idleReason` an dieselbe Bedingung hängen. Laufen die beiden auseinander, ist die Auskunft
-schlimmer als keine — genau das steht in `npc.logic` schon als Warnung.
-
-**Zusammenhang mit Punkt 86:** Heute tritt der Fall über die gesperrte Eisenkette ein. Ist
-die behoben, bleibt er für den Tag, an dem alle Werkstätten stehen (Punkt 89) — dann trifft
-er jeden neuen Unternehmungslustigen.
-
-**Nachgesehen am 04.10.2026: weiter offen, aber leise.** Die Stelle in `savingsTarget` ist
-unverändert. Ihre Wirkung ist klein geworden: `GOAL_UNREACHABLE` steht im Lauf auf 5.101
-bei 240. Seit 5.100 bietet in Versteigerungen nur, wer bauen will — aber ob „eine
-Werkstatt bauen" erreichbar ist, fragt auch dort niemand.
-
-**Gebaut mit 5.106 (11.10.2026).** `werkstattErreichbar` in `npc.logic.ts`: Es fehlt eine
-Werkstatt, und ihr Material ist da oder am Markt. Daran hängen jetzt alle drei Stellen —
-`savingsTarget` spart nur noch auf Boden für eine Werkstatt, die zu bauen ist, `entfaltung`
-kauft ihn nur dann, und `idleReason` will nur bauen, wem eine Werkstatt fehlt. Die
-Versteigerung (`bauabsicht`) fragt weiterhin nicht danach; ihr fehlt der NPC-Zustand.
-
-**Erste Messung** (Saat 86, 2000 Ticks, vorher gegen nachher): `BUY_PLOT` 11 → 8,
-`GOAL_UNREACHABLE` 2348 → 2493. `STILL_SAVING` kam schon vorher nicht vor — die
-Fehldiagnose aus dem Befund gibt es in dieser Form nicht mehr. **Aber die Lohnarbeit
-halbiert sich** (`WORK` 7018 → 3483): Wer auf Boden für eine unerreichbare Werkstatt
-sparte, baute nie, arbeitete aber. Ohne Sparziel hört er an der Rücklage auf. Am Ende 58
-statt 63 Lebende, Stadtkasse 365 statt 1122, Grundsteuer 1445 statt 2177; dafür kein
-Hungertoter, 10 Bäckereien und 6 Mühlen statt 8 und 13. Ob die schwächere Stadt Muster oder Zufall ist, sagt eine Saat nicht.
-
-**Gegengemessen mit zwei weiteren Saaten (11.10.2026):** je 2000 Ticks, vorher (`949c0cc`)
-gegen nachher (`e115f4e`).
-
-|                    | 86 vorher | nachher | 7 vorher | nachher | 42 vorher | nachher |
-| ------------------ | --------: | ------: | -------: | ------: | --------: | ------: |
-| Lebende am Ende    |        63 |      58 |       34 |  **46** |        34 |  **43** |
-| Tode (Not)         |     8 (1) |   9 (0) |    9 (3) |  12 (2) |    16 (7) |   8 (1) |
-| Grundsteuer        |      2177 |    1445 |     4408 |    2506 |      3806 |    1703 |
-| Stadtkasse am Ende |      1122 |     365 |      149 |     992 |      2204 |    1072 |
-| `WORK`             |      7018 |    3483 |     4573 |    4659 |      4417 |    2425 |
-| `BUY_PLOT`         |        11 |       8 |       13 |       7 |         7 |       7 |
-| `GOAL_UNREACHABLE` |      2348 |    2493 |      306 |    2933 |       515 |    3307 |
-
-- **Die schwächere Stadt war Zufall.** In den beiden anderen Läufen leben am Ende deutlich
-  _mehr_ Menschen, und Hungertote gibt es in allen dreien weniger (1 → 0, 3 → 2, 7 → 1).
-- **Die halbierte Lohnarbeit ist eine Neigung, kein Gesetz**: zwei von drei Läufen.
-- **Durchgehend ist nur eines: Die Grundsteuer sinkt um ein bis zwei Drittel.**
-  Naheliegend, aber ungemessen: Es wird weniger Boden gehortet, der nie bebaut wird. Ob die
-  Stadtkasse das auf Dauer trägt, ist eine Frage für Punkt 16 — am Ende stand sie in allen
-  Läufen im Plus.
-- **Die Diagnose sagt jetzt, was ist**: `GOAL_UNREACHABLE` versechs- bis verzehnfacht sich
-  bei 7 und 42. Diese Unternehmungslustigen gab es vorher auch; sie liefen unter anderem
-  Namen.
-
-**Geschlossen mit 0.8.1, gelockert mit 0.8.2:** `bauabsicht` fragt `werkstattErreichbarFuer`. Wer
-die Werkstatt nicht bauen kann, darf seit 0.8.2 trotzdem auf Vorrat kaufen, zum Festpreis wie in
-der Versteigerung, dort aber nur mit niedrigem Gebot. Bedingung ist, dass danach drei Jahre
-Grundsteuer auf seinen ganzen Boden übrig bleiben, mindestens aber ein zweiter Grundstückspreis
-(`landReserve`). Entschieden am 07.11.2026: Billigen Grund kaufen und darauf sparen ist
-vernünftig, nur halten können muss man ihn. Bis dahin bot für Bauland, wem Haus oder Werkstatt
-fehlte, ohne zu fragen, ob die Werkstatt erreichbar ist. Dafür braucht der Dienst den
-NPC-Zustand oder wenigstens `werkstattErreichbar` als eigene Abfrage.
-
-### 88. Die Zugreihenfolge ist ein stiller Vorteil
-
-**Behoben mit 0.8.1:** `actForNpcs` mischt die Einwohner je Tick, geseedet aus der Tickzahl. Derselbe
-Lauf gibt dasselbe Ergebnis, aber niemand steht mehr Tick für Tick vorn. Offen bleibt die Frage
-nach gleichwertigen Optionen innerhalb einer Entscheidung (Punkt 90).
-
-**Befund vom 23.08.2026.** `actForNpcs` holt die Einwohner ohne `order`:
-
-```ts
-const npcs = await Character.findAll({ where: { deathTick: null, role: 'NPC' } });
-
-for (const npc of npcs) {
-	buchen(await ausfuehren(npc.dataValues.id, tick));
-}
-```
-
-Die Datenbank liefert eine **stabile** Folge — SQLite nach `rowid`, MariaDB nach dem
-Primärschlüssel. Also handelt Tick für Tick derselbe NPC zuerst, über Jahrzehnte hinweg.
-
-**Was daran hängt, ist knapp und wird nur einmal vergeben:** das billigste Brot am Markt,
-der eine Reparaturauftrag, das letzte freie Grundstück, die offene Stelle. Wer vorne steht,
-bekommt es jedes Mal. Über 600 Ticks ist das keine Rundung, sondern eine Bevorzugung, die
-niemand beschlossen hat und die kein Test bemerkt.
-
-Verstärkt wird es dadurch, dass alle **dieselbe** Wahl treffen: `freierArbeitsplatz`
-sortiert für jeden gleich, `fehlendeWerkstatt` nennt jedem dieselbe Lücke,
-`naechsterPartner` nimmt global die höchste Zuneigung. Acht NPCs entscheiden sich für
-denselben Bau; sieben kommen zu spät, und ihre Fehlschläge stehen als Rauschen in
-`byFailure`, obwohl Arbeit da war.
-
-**Zu bauen ist eine Mischung je Tick** — geseedet aus der Tickzahl, damit Messläufe
-wiederholbar bleiben (Punkt 54). Das ist eine Zeile. Die zweite, größere Frage ist, ob
-gleichwertige Optionen innerhalb einer Entscheidung gestreut werden sollen; die gehört zu
-Punkt 90.
-
 ### 89. Ein Betrieb je Handwerk, für immer
 
 **Befund vom 23.08.2026.** `fehlendeWerkstatt` baut, was noch nicht steht — und nur das.
@@ -2008,36 +1880,6 @@ nicht: Was der Verwalter verkauft, wird nicht nachproduziert. Ist das Lager leer
 Zimmerei wieder, solange der Spieler fort bleibt.
 
 **Offen bleibt die zweite Hälfte** (immer dasselbe Handwerk).
-
-### 94. Ein zurückgezogenes Marktangebot findet nicht ins Lager zurück
-
-**Behoben mit 0.8.1,** ohne neue Spalte: Fasst das Inventar die Ware nicht, kommt sie in ein eigenes
-Haus, das sie annimmt, Wohnhaus und Hof vor dem Handwerk. Erst wenn es keines gibt, bleibt das
-Schild hängen. Woher die Ware kam, merkt sich das Angebot weiterhin nicht; mit Punkt 31 wird das
-wieder eine Frage.
-
-**Befund vom 27.08.2026, entstanden mit 5.67.** Seit die Ernte am Markt verkäuflich ist,
-kann ein Angebot aus einem **Gebäudelager** stammen — `placeOffer` nimmt die Ware über
-`consumeOwned` aus Inventar und Häusern. `withdrawOffer` legt sie aber immer ins
-**Inventar** zurück:
-
-```ts
-if (!(await needService.changeStock(sellerId, itemId, quantity, t))) {
-	return { ok: false, reason: 'INVENTORY_FULL' } as const;
-}
-```
-
-Wer zweitausend Stämme aus dem Hof anbietet, bekommt sie nicht in die Kammer zurück — das
-Schild bleibt hängen. Das Verhalten selbst ist richtig und seit 5.33 bewusst so (Ware
-verschwinden zu lassen wäre schlimmer), nur ist der Rückweg jetzt enger als der Hinweg.
-
-**Für NPCs belanglos** — sie ziehen nichts zurück. Für einen Spieler ist es eine
-Einschränkung, die er nicht kommen sieht.
-
-**Zu bauen wäre**, sich zu merken, woher die Ware kam, und sie dorthin zurückzulegen. Das
-ist eine Spalte am `ShopOffer` und ein Zweig in `withdrawOffer`. Solange Entfernungen
-nichts kosten, ist der Lagerort ohnehin eine Frage der Buchung; mit Punkt 31 (der Karte)
-wird daraus eine mit Gewicht, und dann gehört diese Stelle ohnehin angefasst.
 
 ### 98. Renoviert wird fast nie, und ein Brand kann eine Stadt um ihr Handwerk bringen
 
@@ -2268,67 +2110,30 @@ unverändert: im Messlauf die Summen je Handlungsart mitführen, was `BUY_FOOD` 
 was `WORK` eingebracht hat. Das ist ein eigener Schritt, weil es die NPC-Schleife berührt
 und die schon einmal an ihrer Abfragezahl gelitten hat (Punkt 67).
 
-### 105. Die Wiederbevölkerung hängt an einem Haus, das niemand instand hält
+### 122. Die Hungersnot von Grünau — die Steuer als Ursache ist offen
 
-**Behoben mit 0.8.1** auf dem kleinsten Weg aus der Liste unten: Unterkunft und Waisenhaus tragen
-`ageless`, verfallen nicht und brennen nicht.
+**Nicht zu verwechseln mit Punkt 100** (`ERLEDIGTE_PUNKTE.md`), „Die Stadt verhungert an ihrer
+eigenen Steuer“: Der war ein Befund aus dem Messlauf und ist erledigt. Dieser hier ist in der
+laufenden Welt eingetreten.
 
-**Angemerkt am 29.08.2026**, aus der Frage, ob eine ausgestorbene Stadt sich wieder füllt.
-Die Antwort ist ja — mit einer Ecke, die erst auffällt, wenn sie eintritt.
+**Befund vom 07.11.2026**, Tick 6871: 18 Hungertote ab Tick 6490, die Einwohnerzahl fiel
+rechnerisch von 37 auf 27. Im Tageslog fehlen der 15., 17. und 18.10.; warum, ist nicht geklärt.
 
-**Der Zuzug prüft ausdrücklich nur städtischen Wohnraum:**
+**Behoben mit 0.7.0:** Waisen hatten niemanden, der für sie sorgte (alle vier toten Kinder),
+und Tote behielten ihre Stelle (sieben von elf Verträgen).
 
-```ts
-if (haus.ownerType === 'CITY' && platz !== null && platz > 0) return true;
-```
+**Offen, und das ist die Ursache selbst:** Die Grundsteuer zog in drei Terminen 2141 Münzen
+ein (Tick 6311 bis 6411), nachdem die NPCs rund 55 Grundstücke für 8 bis 20 Münzen ersteigert
+hatten. Danach stieg `EMPLOYER_BROKE` von rund 20 auf bis zu 155 am Tag, und die Essvorgänge
+brachen ein. Die Stadtkasse hielt am 07.11. 2110 Münzen, alle NPCs zusammen 1072. Belegt sind
+Zeitfolge und Beträge, nicht die Bargeldstände von damals.
 
-Das ist richtig so — ein Ankömmling soll nicht in fremdes Erbe einziehen —, bedeutet aber:
-In Grünau hängt der ganze Zuzug an **einem** Gebäude, der Städtischen Unterkunft mit
-zwanzig Plätzen. (Was der Stadt aus erbenlosem Nachlass zufällt, zählt vorübergehend mit,
-solange es nicht versteigert ist — Punkt 79. Verlassen sollte man sich darauf nicht.)
+**Zu messen, bevor jemand eingreift:** ein Messlauf, ob die Stadt ohne die Steuerspitze auch
+verhungert wäre. Denkbare Eingriffe: NPCs rechnen die Steuer vor dem Landkauf ein, oder der
+Bürgermeister senkt bei hohen Ausfällen schneller als um eine Münze im Jahr.
 
-**Und dieses Gebäude verfällt wie jedes andere**, um 0,1 Zustandspunkte je Tick. Instand
-hält es entweder der Bürgermeister — den es nur gibt, wenn jemand lebt und gewählt wurde —
-oder ein Tagelöhner für Lohn, der ebenfalls leben muss. **Stirbt die Stadt vollständig aus,
-repariert sie niemand mehr.**
-
-Von voller Güte bis zur Ruine sind es `YEARS_TO_RUIN` = 20 Spieljahre, also tausend Ticks —
-**rund sechs Wochen Echtzeit**. Fällt die Unterkunft, gibt `freierWohnraum` dauerhaft
-`false` zurück, und es kommt nie wieder jemand an. Die Welt wäre dann nicht leer, sondern
-**endgültig** leer: kein Weg zurück außer von Hand in der Datenbank.
-
-**Das Zeitfenster ist großzügig, und genau das ist das Unbehagen.** Bei einer
-Ankunftswahrscheinlichkeit von einem Prozent je Tick kommt im Schnitt alle hundert Ticks
-jemand an, also etwa alle vier Realtage; er findet Arbeit, richtet die Unterkunft her, und
-die Stadt erholt sich. Praktisch ist sie damit kaum kaputtzukriegen — aber nicht durch
-Konstruktion, sondern durch das Verhältnis zweier Zahlen, die niemand aufeinander abgestimmt
-hat. Wer `YEARS_TO_RUIN` senkt oder `ARRIVAL_CHANCE_PER_TICK` (beides sind Kandidaten fürs
-Balancing, Punkt 16), kann die Welt unbeabsichtigt unwiederbringlich machen.
-
-**Denkbare Antworten**, von der kleinsten zur größten:
-
-- **Die Unterkunft verfällt nicht.** Sie ist die Krücke aus 3.3 und kein Bauwerk mit
-  Schicksal; ein Obdach, das die Stadt jedem stellt, sollte nicht am Fleiß ihrer Einwohner
-  hängen. Eine Ausnahme in `zustandVon` oder ein Feld an der Vorlage.
-- **Die Stadt baut sie nach.** `fehlenderBau` kennt schon den Begriff „was der Stadt
-  fehlt"; eine Stadt ohne Obdach hätte damit die dringlichste Baustelle überhaupt. Setzt
-  aber einen Bürgermeister voraus — hilft also gerade im Ernstfall nicht.
-- **Ankommen ohne Dach erlauben.** Am ehrlichsten zur Welt (wer ankommt und nichts findet,
-  schläft im Freien) und am härtesten: Obdachlosigkeit heißt keine Erholung und keine
-  Kinder. Als alleinige Rettung zu wenig, als Ergänzung stimmig.
-
-**Was daran kein Fehler ist:** Dass mit den Einwohnern auch ihre Häuser erlöschen, ist
-gewollt — eine Dynastie, die ausstirbt, ist ein Ereignis mit Chronikeintrag und kein
-Zurücksetzen. Verloren ginge nicht die Einwohnerzahl, sondern die Geschichte der
-Gründerfamilien seit 1.6. Das ist ein Grund, die Stadt nicht leichtfertig sterben zu
-lassen, aber kein Grund, den Tod zu verhindern.
-
-**Entschärft mit 5.78, wenn auch nicht aufgehoben.** Instandsetzen kostet seither keine
-Münze mehr, sondern Aktionspunkte — und damit fällt die schlimmste Verkettung weg: Bis
-dahin scheiterte das Herrichten an einer leeren Stadtkasse, also ausgerechnet in der Lage,
-in der die Stadt es am nötigsten hat. Ein Bürgermeister ohne eine Münze kann die Unterkunft
-jetzt selbst herrichten. **Was bleibt, ist der Fall ohne Menschen:** Stirbt die Stadt
-vollständig aus, gibt es auch niemanden mehr, der Aktionspunkte hat.
+**Zu beobachten nach dem Deploy:** Das Waisenhaus lebt vom Brot am Markt, und dort lagen am
+07.11. nur zwei Laibe. Die Zeile `Waisen ohne Versorgung` im Log zeigt, wenn das nicht reicht.
 
 ## Die Wirtschaft — Stand 04.10.2026
 
@@ -2506,24 +2311,3 @@ fließt, seit weniger Mühlen gebaut werden —, ist eine Vermutung und keine Me
 scheitern die Paare, die keine Kinder bekommen — Ehe, Dach, Platz, Geld? `MEASURE_TRACE`
 auf ein Paar aus 86 und die Zahlen je 250 Ticks im Bericht reichen dafür. Und: eine vierte
 und fünfte Saat, um zu sehen, ob 86 die Ausnahme ist.
-
-## Die Hungersnot von Grünau (Oktober 2026)
-
-**Befund vom 07.11.2026**, Tick 6871: 18 Hungertote ab Tick 6490, die Einwohnerzahl fiel
-rechnerisch von 37 auf 27. Im Tageslog fehlen der 15., 17. und 18.10.; warum, ist nicht geklärt.
-
-**Behoben mit 0.7.0:** Waisen hatten niemanden, der für sie sorgte (alle vier toten Kinder),
-und Tote behielten ihre Stelle (sieben von elf Verträgen).
-
-**Offen, und das ist die Ursache selbst:** Die Grundsteuer zog in drei Terminen 2141 Münzen
-ein (Tick 6311 bis 6411), nachdem die NPCs rund 55 Grundstücke für 8 bis 20 Münzen ersteigert
-hatten. Danach stieg `EMPLOYER_BROKE` von rund 20 auf bis zu 155 am Tag, und die Essvorgänge
-brachen ein. Die Stadtkasse hielt am 07.11. 2110 Münzen, alle NPCs zusammen 1072. Belegt sind
-Zeitfolge und Beträge, nicht die Bargeldstände von damals.
-
-**Zu messen, bevor jemand eingreift:** ein Messlauf, ob die Stadt ohne die Steuerspitze auch
-verhungert wäre. Denkbare Eingriffe: NPCs rechnen die Steuer vor dem Landkauf ein, oder der
-Bürgermeister senkt bei hohen Ausfällen schneller als um eine Münze im Jahr.
-
-**Zu beobachten nach dem Deploy:** Das Waisenhaus lebt vom Brot am Markt, und dort lagen am
-07.11. nur zwei Laibe. Die Zeile `Waisen ohne Versorgung` im Log zeigt, wenn das nicht reicht.
