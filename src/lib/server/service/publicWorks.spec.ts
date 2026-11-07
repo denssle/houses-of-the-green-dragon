@@ -1,3 +1,4 @@
+import { WAISENHAUS_OPTION_ID } from '$lib/game/guardianship.logic';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { sequelize } from '$lib/db/sequelize';
@@ -143,10 +144,22 @@ describe('Öffentliche Bauten', () => {
 		it('trifft auch die Häuser der Stadt', async () => {
 			// Bis 4.7c waren sie ausgenommen — es gab niemanden, der sie hätte herrichten
 			// können.
-			const id = await stadtgrund(3);
+			const id = await stadtgrund(0);
 			await weltzeit(JETZT + VERFALLEN);
 
 			expect((await buildingService.getBuilding(id))?.condition).toBe(CONDITION_MAX / 4);
+		});
+
+		it('verschont die Auffangnetze: Unterkunft und Waisenhaus verfallen nicht (0.8.0)', async () => {
+			// Hinge die Unterkunft am Fleiß der Einwohner, endete eine ausgestorbene Stadt
+			// endgültig: Ohne städtischen Wohnraum kommt niemand mehr an (Punkt 105).
+			const unterkunft = await stadtgrund(3, { condition: 100 });
+			const waisenhaus = await stadtgrund(WAISENHAUS_OPTION_ID, { condition: 100 });
+			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN * 2));
+
+			expect((await buildingService.getBuilding(unterkunft))?.condition).toBe(CONDITION_MAX);
+			expect((await buildingService.getBuilding(waisenhaus))?.condition).toBe(CONDITION_MAX);
+			expect(await buildingService.freierWohnraum(unterkunft)).toBeGreaterThan(0);
 		});
 
 		it('lässt sie aber nicht einstürzen', async () => {
@@ -160,7 +173,7 @@ describe('Öffentliche Bauten', () => {
 
 	describe('herrichten', () => {
 		it('darf nur der Amtsinhaber, und die Stadt zahlt', async () => {
-			const id = await stadtgrund(3);
+			const id = await stadtgrund(0);
 			const buergermeister = await person('Amtsperson');
 			const buerger = await person('Bürger');
 			await insAmt(buergermeister);
@@ -222,7 +235,7 @@ describe('Öffentliche Bauten', () => {
 			// wenn es am nötigsten ist. Eine verarmte Stadt sah ihre öffentlichen Bauten
 			// verfallen und konnte nichts dagegen tun. Jetzt kann ihr Bürgermeister die
 			// Ärmel hochkrempeln; das trifft auch die Sorge aus Punkt 105.
-			const id = await stadtgrund(3);
+			const id = await stadtgrund(0);
 			const buergermeister = await person('Amtsperson');
 			await insAmt(buergermeister);
 			await Region.update({ treasury: 0 }, { where: { id: stadtId } });
@@ -237,7 +250,7 @@ describe('Öffentliche Bauten', () => {
 		it('lässt ein NPC im Amt von selbst herrichten', async () => {
 			// Ohne das verfiele jede Stadt, in der gerade kein Spieler regiert — und das
 			// ist der Normalfall.
-			const id = await stadtgrund(3);
+			const id = await stadtgrund(0);
 			const npc = await person('Amtsperson', { role: 'NPC' });
 			await insAmt(npc);
 			await weltzeit(JETZT + STARK_VERFALLEN);
@@ -252,7 +265,7 @@ describe('Öffentliche Bauten', () => {
 		});
 
 		it('lässt einen Spieler im Amt selbst entscheiden', async () => {
-			const id = await stadtgrund(3);
+			const id = await stadtgrund(0);
 			const spieler = await person('Amtsperson');
 			await insAmt(spieler);
 			await weltzeit(JETZT + VERFALLEN);

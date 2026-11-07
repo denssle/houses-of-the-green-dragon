@@ -70,6 +70,12 @@ export interface BuildingTemplate {
 	 * glaubt, und in der Bauliste des Spielers stünde ein Haus, das man nicht baut.
 	 */
 	type: 'PUBLIC' | 'RESIDENCE' | 'CRAFT' | 'EXTRACTION';
+	/**
+	 * Verfällt nicht und brennt nicht (0.8.0, Punkt 105). Für die Auffangnetze der Stadt:
+	 * Hinge die Unterkunft am Fleiß ihrer Einwohner, endete eine ausgestorbene Stadt nach
+	 * zwanzig Spieljahren endgültig, denn ohne städtischen Wohnraum kommt niemand mehr an.
+	 */
+	ageless?: boolean;
 	limited: boolean;
 	limitedTo: number;
 	/**

@@ -486,6 +486,19 @@ export async function placeOffer(
 }
 
 /** Ein Angebot zurückziehen — die Ware geht dahin zurück, wo sie herkam. */
+/** Das erste eigene Haus, das die Ware annimmt — Wohnhaus und Hof vor dem Handwerk. */
+async function zuruecklegenIn(characterId: string, itemId: string): Promise<string | undefined> {
+	const eigene = await buildingService.getBuildingsOfCharacter(characterId);
+	const passend = eigene.filter((haus) => {
+		const vorlage = buildingService.getBuildingOption(haus.optionId);
+		const waren: string[] | null = vorlage ? acceptedGoods(vorlage) : [];
+		return waren === null || waren.includes(itemId);
+	});
+	const offen = (haus: { optionId: number }): boolean =>
+		acceptedGoods(buildingService.getBuildingOption(haus.optionId)!) === null;
+	return (passend.find(offen) ?? passend[0])?.id;
+}
+
 export async function withdrawOffer(sellerId: string, offerId: string): Promise<TradeResult> {
 	return sequelize.transaction(async (t: Transaction) => {
 		const angebot = await ShopOffer.findByPk(offerId, { transaction: t, lock: t.LOCK.UPDATE });
@@ -505,15 +518,18 @@ export async function withdrawOffer(sellerId: string, offerId: string): Promise<
 			// **Das Angebot bleibt hängen, wenn das Inventar nicht reicht** (5.33). Ware
 			// verschwinden zu lassen wäre schlimmer als ein Preisschild, das noch einen Tag
 			// länger hängt — und der Ausweg steht daneben: erst etwas einlagern oder essen.
-			if (
-				!(await needService.changeStock(
-					sellerId,
-					angebot.dataValues.itemId,
-					angebot.dataValues.quantity,
-					t
-				))
-			) {
-				return { ok: false, reason: 'INVENTORY_FULL' } as const;
+			//
+			// **Und dann ins eigene Haus** (0.8.0, Punkt 94). Seit 5.67 kann die Ware aus einem
+			// Lager stammen, zurück führte aber nur der Weg ins Inventar: Wer zweitausend
+			// Stämme aus dem Hof anbot, bekam das Schild nicht mehr ab. Wohin genau, merkt sich
+			// das Angebot nicht; ein Haus, das die Ware annimmt, tut es, solange Entfernungen
+			// nichts kosten.
+			const itemId: string = angebot.dataValues.itemId;
+			const menge: number = angebot.dataValues.quantity;
+			if (!(await needService.changeStock(sellerId, itemId, menge, t))) {
+				const lager = await zuruecklegenIn(sellerId, itemId);
+				if (!lager) return { ok: false, reason: 'INVENTORY_FULL' } as const;
+				await changeBuildingStock(lager, itemId, menge, t);
 			}
 		}
 

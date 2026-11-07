@@ -1,4 +1,5 @@
 import { garmentYearsLeft } from '$lib/game/attire.logic';
+import { acceptedGoods } from '$lib/game/building.logic';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import * as buildingService from '$lib/server/service/buildingService';
@@ -49,7 +50,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 			(await buildingService.getBuildingsOfCharacter(character.id)).map(async (haus) => ({
 				id: haus.id,
 				name: haus.name,
-				stock: await tradeService.getBuildingStock(haus.id)
+				stock: await tradeService.getBuildingStock(haus.id),
+				// Was dort hineindarf (0.8.0): In eine Zimmerei gehört Holz, kein Brot.
+				accepts: (() => {
+					const vorlage = buildingService.getBuildingOption(haus.optionId);
+					return vorlage ? acceptedGoods(vorlage) : [];
+				})()
 			}))
 		)
 	};

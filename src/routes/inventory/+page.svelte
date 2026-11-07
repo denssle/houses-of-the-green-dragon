@@ -60,6 +60,9 @@
 	{:else}
 		<ul>
 			{#each data.stock as posten (posten.itemId)}
+				{@const ziele = data.buildings.filter(
+					(haus) => haus.accepts === null || haus.accepts.includes(posten.itemId)
+				)}
 				<li>
 					{posten.quantity} × {posten.name}
 					{#if posten.nourishment}
@@ -83,7 +86,7 @@
 						ist Einlagern die Antwort auf ein volles Inventar. Wer kein Haus hat, sieht
 						hier nichts — für den ist die Antwort ein Haus.
 					-->
-					{#if data.buildings.length > 0}
+					{#if ziele.length > 0}
 						<form method="POST" action="?/store" use:enhance>
 							<input type="hidden" name="itemId" value={posten.itemId} />
 							<input
@@ -95,7 +98,7 @@
 								aria-label="Wie viel {posten.name}"
 							/>
 							<select name="buildingId" aria-label="Wohin mit {posten.name}">
-								{#each data.buildings as haus (haus.id)}
+								{#each ziele as haus (haus.id)}
 									<option value={haus.id}>{haus.name}</option>
 								{/each}
 							</select>

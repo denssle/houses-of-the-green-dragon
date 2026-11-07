@@ -511,7 +511,7 @@ async function npcsBietenLassen(
 	for (const npc of npcs) {
 		const werte = npc.dataValues;
 		if (ageInYears(werte.birthTick, tick) < AGE_OF_MAJORITY) continue;
-		const interesse: BidInterest = await interesseAn(werte.id, vorlage, knapp);
+		const interesse: BidInterest = await interesseAn(werte.id, vorlage, knapp, regionId);
 		limits.push({ bidderId: werte.id, limit: npcBidLimit(werte.money, interesse) });
 	}
 
@@ -545,7 +545,7 @@ async function npcsBietenLassen(
  * und Leute einstellt, kommt in der Entscheidungslogik nicht vor. Sobald es ihn gibt,
  * gehört er hierher.
  */
-async function bauabsicht(characterId: string): Promise<BidInterest> {
+async function bauabsicht(characterId: string, regionId: string): Promise<BidInterest> {
 	const grund = await Plot.findAll({
 		where: { OwnerCharacterId: characterId, type: 'BUILDING_LAND' },
 		attributes: ['id']
@@ -558,7 +558,16 @@ async function bauabsicht(characterId: string): Promise<BidInterest> {
 	const eigene = await buildingService.getBuildingsOfCharacter(characterId);
 	const hat = (typ: string): boolean =>
 		eigene.some((eigenes) => buildingService.getBuildingOption(eigenes.optionId)?.type === typ);
-	return hat('RESIDENCE') && hat('CRAFT') ? 'NONE' : 'MEDIUM';
+	if (!hat('RESIDENCE')) return 'MEDIUM';
+	if (hat('CRAFT')) return 'NONE';
+
+	// **Und die Werkstatt muss erreichbar sein** (0.8.0, Punkt 87). Wer Boden für einen Betrieb
+	// ersteigert, den er nie bauen kann, bindet einen Platz und zahlt Jahr für Jahr Steuer
+	// darauf. `npc.logic` fragt das seit 5.106 vor dem Kauf zum Festpreis; hier fehlte es.
+	//
+	// Dynamisch geladen, weil `npcService` diesen Dienst selbst einbindet.
+	const { werkstattErreichbarFuer } = await import('$lib/server/service/npcService');
+	return (await werkstattErreichbarFuer(characterId, regionId)) ? 'MEDIUM' : 'NONE';
 }
 
 /**
@@ -577,9 +586,10 @@ async function bauabsicht(characterId: string): Promise<BidInterest> {
 async function interesseAn(
 	characterId: string,
 	vorlage: BuildingTemplate | undefined,
-	knapp: boolean
+	knapp: boolean,
+	regionId: string
 ): Promise<BidInterest> {
-	if (!vorlage) return bauabsicht(characterId);
+	if (!vorlage) return bauabsicht(characterId, regionId);
 
 	if (vorlage.type === 'CRAFT') {
 		if (vorlage.skill && (await skillService.getLevel(characterId, vorlage.skill)) > 0) {

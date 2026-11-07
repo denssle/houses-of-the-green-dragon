@@ -88,6 +88,7 @@ export function getBuildingOptions(): BuildingTemplate[] {
 				'Hier wachsen die Kinder auf, die niemanden mehr haben. Die Stadt zahlt ihr Brot.',
 			limited: true,
 			limitedTo: 1,
+			ageless: true,
 
 			levels: [{ price: 0, name: 'Waisenhaus', orphanPlaces: WAISENHAUS_PLAETZE }]
 		},
@@ -103,6 +104,9 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			// betrifft — Rathaus, Marktplatz, später die Mauer.
 			limited: false,
 			limitedTo: 0,
+			// **Verfällt nicht** (0.8.0, Punkt 105): Am Zuzug hängt, ob eine Stadt wieder
+			// lebt, und der Zuzug hängt an diesem Haus.
+			ageless: true,
 
 			// Aus dem Konzept: Wer sein Haus verliert, braucht einen Ort, an dem es
 			// weitergeht. Ohne ein Auffangnetz wäre Obdachlosigkeit eine Sackgasse — und
@@ -574,7 +578,8 @@ function zustandVon(
 	instanz: Model<BuildingAttributes, BuildingCreationAttributes>,
 	tick: number
 ): number {
-	if (getBuildingOption(instanz.dataValues.optionId)?.type === 'EXTRACTION') return CONDITION_MAX;
+	const vorlage = getBuildingOption(instanz.dataValues.optionId);
+	if (vorlage?.type === 'EXTRACTION' || vorlage?.ageless) return CONDITION_MAX;
 
 	return currentCondition(instanz.dataValues.condition, instanz.dataValues.lastConditionTick, tick);
 }

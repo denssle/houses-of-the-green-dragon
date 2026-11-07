@@ -1,4 +1,5 @@
-﻿import { garmentIntact } from '$lib/game/attire.logic';
+import { seededRoll } from '$lib/game/testRoll';
+import { garmentIntact } from '$lib/game/attire.logic';
 import { CAMPAIGN_TICKS, isSettled, npcChoice } from '$lib/game/election.logic';
 import * as householdService from '$lib/server/service/householdService';
 import { Op } from 'sequelize';
@@ -113,6 +114,17 @@ export interface NpcTick {
 	byIdleReason: Partial<Record<IdleReason, number>>;
 }
 
+/** Fisher-Yates mit dem Würfel aus `testRoll`, geseedet aus der Tickzahl. */
+function mischen<T>(liste: T[], tick: number): T[] {
+	const wuerfel = seededRoll(tick);
+	const ergebnis: T[] = [...liste];
+	for (let i = ergebnis.length - 1; i > 0; i--) {
+		const j: number = Math.floor(wuerfel() * (i + 1));
+		[ergebnis[i], ergebnis[j]] = [ergebnis[j], ergebnis[i]];
+	}
+	return ergebnis;
+}
+
 export async function actForNpcs(
 	tick: number,
 	/**
@@ -129,9 +141,15 @@ export async function actForNpcs(
 		unattended?: boolean
 	) => Promise<Ausgang> = ausfuehren
 ): Promise<NpcTick> {
-	const npcs = await Character.findAll({
-		where: { deathTick: null, role: 'NPC' }
-	});
+	// **Gemischt, und zwar je Tick anders** (0.8.0, Punkt 88). Die Datenbank liefert eine
+	// stabile Folge, und wer vorn stand, bekam Tick für Tick das billigste Brot, den einen
+	// Auftrag und das letzte Grundstück. Gemischt wird aus der Tickzahl, damit derselbe Lauf
+	// dasselbe Ergebnis gibt (Punkt 54); sortiert wird vorher, damit die Ausgangsfolge nicht
+	// an der Datenbank hängt.
+	const npcs = mischen(
+		await Character.findAll({ where: { deathTick: null, role: 'NPC' }, order: [['id', 'ASC']] }),
+		tick
+	);
 
 	const gezaehlt: Partial<Record<NpcAction, number>> = {};
 	const gescheitert: Record<string, number> = {};
@@ -1737,6 +1755,31 @@ async function fehlendeRezeptZutat(
 		}
 	}
 	return beste;
+}
+
+/**
+ * **Kann er eine Werkstatt bauen?** Dieselbe Frage wie `werkstattErreichbar` in `npc.logic`,
+ * für die Versteigerung gestellt, der der Zustand eines NPCs fehlt (0.8.0, Punkt 87): Es
+ * fehlt ein Handwerk, und sein Material liegt bei ihm oder am Markt.
+ */
+export async function werkstattErreichbarFuer(
+	characterId: string,
+	regionId: string
+): Promise<boolean> {
+	const haeuser = await buildingService.getBuildingsInRegion(regionId);
+	const luecke = await fehlendeWerkstatt(haeuser, characterId, regionId);
+	if (!luecke) return false;
+
+	const vorlage = buildingService.getBuildingOption(luecke.optionId);
+	if (!vorlage) return false;
+	const bedarf: MaterialNeed[] = vorlage.recipes?.some((rezept) =>
+		producesBuildingMaterial(rezept.outputItemId)
+	)
+		? []
+		: materialFor(levelOf(vorlage, 1).price, vorlage.type);
+
+	const fehlt = await fehlendesMaterial(() => tradeService.getOwnedStock(characterId), bedarf);
+	return !fehlt || (await tradeService.cheapestOffer(regionId, fehlt.itemId)) !== undefined;
 }
 
 async function fehlendesMaterial(

@@ -61,7 +61,11 @@ async function fire(
 	roll: () => number
 ): Promise<HazardReport | undefined> {
 	const gebaeude = await buildingService.getBuildingsInRegion(regionId);
-	const ziele: Target<string>[] = gebaeude.map((haus) => ({ ref: haus.id, worth: haus.condition }));
+	// **Die Auffangnetze brennen nicht** (0.8.0, Punkt 105): Ein Brand ohne Wirkung wäre eine
+	// Chronikzeile, die lügt, und mit Wirkung bräche er die Zusage, dass sie nie verfallen.
+	const ziele: Target<string>[] = gebaeude
+		.filter((haus) => !buildingService.getBuildingOption(haus.optionId)?.ageless)
+		.map((haus) => ({ ref: haus.id, worth: haus.condition }));
 
 	const getroffenId = pickTarget(ziele, roll());
 	if (!getroffenId) return undefined;
