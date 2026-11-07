@@ -2419,8 +2419,13 @@ ab, aber auch den Unternehmer, den der Satz meint. Zwei Dinge fehlen dafür:
   kannten viele Stadtrechte. Das wäre eine Gesetzesart für den Bürgermeister und gehört zu
   Punkt 50 (Bauordnung).
 
-**Dazu eine Lücke, die beides berührt:** Grund lässt sich nicht wieder abgeben. In Grünau
-waren am 07.11.2026 20 von 52 privaten Grundstücken unbebaut, und auf jedes läuft Grundsteuer. Wer zu
+**Die Lücke, die beides berührte, ist mit 0.8.0 geschlossen:** Grund ließ sich nicht wieder
+abgeben. In Grünau waren am 07.11.2026 20 von 52 privaten Grundstücken unbebaut, und auf jedes
+lief Grundsteuer. Jetzt gibt ein NPC leeren Grund bis fünf Ticks vor dem Steuertermin auf, wenn
+er die Schuld nicht zahlen kann, Spieler können es jederzeit. Der Boden fällt ohne Entschädigung
+an die Stadt und kommt unter den Hammer. Das spät gelegte Fenster verhindert, dass jemand
+Land ersteigert, abgibt und wieder ersteigert. Ungemessen, ob es die Hungerlage spürbar lindert.
+Verwalter geben nichts auf, das bleibt dem Spieler vorbehalten. Wer zu
 viel hat, kann ihn weder verkaufen noch der Stadt zurückgeben.
 
 ## Aus dem alten Phasenplan

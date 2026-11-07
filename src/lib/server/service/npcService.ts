@@ -509,6 +509,12 @@ async function handelnd(
 			return buch('BUY_PLOT', frei[0] ? await plotService.buyPlot(frei[0].id, npcId) : undefined);
 		}
 
+		case 'GIVE_UP_PLOT':
+			return buch(
+				'GIVE_UP_PLOT',
+				lage.emptyPlotId ? await plotService.giveUpPlot(npcId, lage.emptyPlotId) : undefined
+			);
+
 		case 'BUY_INPUT': {
 			// Genau so viel, wie ein Durchgang braucht — nicht das ganze Angebot. Ein Bäcker,
 			// der das Mehl der Stadt aufkauft, nimmt es dem nächsten weg und bindet sein
@@ -659,6 +665,7 @@ async function lageAufnehmen(
 			workshopId?: string;
 			workshopOptionId?: number;
 			freePlotId?: string;
+			emptyPlotId?: string;
 			leaseId?: string;
 			leasableId?: string;
 			sellable?: { itemId: string; quantity: number; inInventory: number };
@@ -738,6 +745,12 @@ async function lageAufnehmen(
 		(haus) => buildingService.getBuildingOption(haus.optionId)?.type === 'CRAFT'
 	);
 	const grundstuecke = await plotService.getPlotsOfCharacter(npcId);
+	const leereGrundstuecke = grundstuecke.filter((flaeche) => !flaeche.hasBuilding);
+	// Nur für den, den es betrifft: Wer keinen leeren Grund hat, kostet keine Abfrage (Punkt 67).
+	const steuerNaht: number =
+		leereGrundstuecke.length > 0
+			? await lawService.plotTaxSoon(werte.RegionId, grundstuecke.length, tick)
+			: 0;
 	const freiesBauland: boolean = await plotService.hasFreeBuildingLand(werte.RegionId);
 	const flaechen = await productionService.getAreas(npcId);
 	const eigenePacht = flaechen.find((flaeche) => flaeche.leasedByMe);
@@ -967,6 +980,8 @@ async function lageAufnehmen(
 			// Die fünfte Stufe (4.13).
 			ownsWorkshop: werkstatt !== undefined,
 			hasFreePlot: grundstuecke.some((flaeche) => !flaeche.hasBuilding),
+			emptyPlots: leereGrundstuecke.length,
+			plotTaxDueSoon: steuerNaht,
 			hasLease: eigenePacht !== undefined,
 			leaseAvailable: freieFlaeche !== undefined,
 			ownStockToSell:
@@ -1034,6 +1049,7 @@ async function lageAufnehmen(
 		leaseId: eigenePacht?.plotId,
 		leasableId: freieFlaeche?.plotId,
 		sellable: zuVerkaufen,
+		emptyPlotId: leereGrundstuecke[0]?.id,
 		cheapestGarment: gewand,
 		cheapestTonic: trank
 	};

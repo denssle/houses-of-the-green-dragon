@@ -44,6 +44,7 @@ export const EVENT_KINDS = [
 	// ganzes Leben umspannen — und stand bis 5.3 nirgends.
 	'MOVED_IN',
 	'PLOT_BOUGHT',
+	'PLOT_GIVEN_UP',
 	// **Wer von außerhalb kommt** (5.24). Ein Fremder, der ankommt, ist ein Ereignis: Nach
 	// fünf Generationen heißt sonst jeder Müller oder Schmied, und niemand sähe, woher das
 	// Handwerk kam, das die Stadt plötzlich hat.

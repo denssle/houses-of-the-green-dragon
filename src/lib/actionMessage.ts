@@ -34,6 +34,7 @@ const SAETZE: Record<ActionFailureReason, string> = {
 	NOTHING_TO_DO: 'Daran gibt es nichts zu tun.',
 	MAX_LEVEL: 'Weiter lässt sich hier nicht ausbauen.',
 	NOT_FOR_SALE: 'Das steht nicht zum Verkauf.',
+	WRONG_GOODS: 'Das hat in diesem Betrieb nichts zu suchen.',
 	ALREADY_OWNED: 'Das gehört dir bereits.',
 	NOTHING_TO_LEARN: 'Bei ihm oder ihr ist nichts mehr zu lernen.',
 	TEACHER_TOO_TIRED: 'Der Meister hat heute keine Zeit mehr.',

@@ -15,6 +15,7 @@ import {
 	enactedSince,
 	LAW_KINDS,
 	type LawKind,
+	plotTaxDueSoon,
 	propertyTaxFor
 } from '$lib/game/law.logic';
 import { OFFICES, type Office } from '$lib/game/election.logic';
@@ -65,6 +66,18 @@ export async function rate(regionId: string, kind: LawKind, t?: Transaction): Pr
 export async function rateAge(regionId: string, kind: LawKind, tick: number): Promise<number> {
 	const seit: number | null = enactedSince(await erlasse(regionId), kind);
 	return seit === null ? Infinity : tick - seit;
+}
+
+/** Was jemand beim nächsten Steuertermin schuldet, wenn der kurz bevorsteht (0.8.0). */
+export async function plotTaxSoon(
+	regionId: string,
+	plotCount: number,
+	tick: number
+): Promise<number> {
+	const stadt = await Region.findByPk(regionId, { attributes: ['lastTaxTick'] });
+	const zuletzt: number | null = stadt?.dataValues.lastTaxTick ?? null;
+	if (plotTaxDueSoon(plotCount, 1, zuletzt, tick) === 0) return 0;
+	return plotTaxDueSoon(plotCount, await rate(regionId, 'PROPERTY_TAX'), zuletzt, tick);
 }
 
 /** Alle geltenden Sätze auf einmal — für die Gesetzestafel. */

@@ -195,6 +195,43 @@ export async function buyPlot(plotId: string, characterId: string): Promise<BuyR
 export type PlotTradeResult = { ok: true } | { ok: false; reason: ActionFailureReason };
 
 /**
+ * Leeren Grund aufgeben (0.8.0, Punkt 117).
+ *
+ * **Bis hierher gab es keinen Weg zurück:** Wer zu viel Land hatte, zahlte dafür Jahr für
+ * Jahr, auch wenn er es nie bebaute. Das Grundstück fällt nun an die Stadt, ohne Entschädigung,
+ * und geht denselben Weg wie ein Nachlass: `escheatedTick` bringt es unter den Hammer.
+ * Historisch nicht fern, viele Stadtrechte kannten den Heimfall bei Brachliegen.
+ *
+ * Bebautes bleibt: Ein Haus steht nicht auf herrenlosem Boden.
+ */
+export async function giveUpPlot(characterId: string, plotId: string): Promise<PlotTradeResult> {
+	const tick: number = await worldService.currentTick();
+
+	return sequelize.transaction(async (t: Transaction) => {
+		const grundstück = await PlotModel.findByPk(plotId, { transaction: t, lock: t.LOCK.UPDATE });
+		if (!grundstück || grundstück.dataValues.OwnerCharacterId !== characterId) {
+			return { ok: false, reason: 'PLOT_NOT_OWNED' } as const;
+		}
+		if ((await BuildingModel.count({ where: { PlotId: plotId }, transaction: t })) > 0) {
+			return { ok: false, reason: 'PLOT_ALREADY_BUILT' } as const;
+		}
+
+		await grundstück.update(
+			{ ownerType: 'CITY', OwnerCharacterId: null, forSalePrice: null, escheatedTick: tick },
+			{ transaction: t }
+		);
+		await chronicleService.record(
+			'PLOT_GIVEN_UP',
+			grundstück.dataValues.RegionId,
+			tick,
+			{ subjectId: characterId, detail: grundstück.dataValues.address },
+			t
+		);
+		return { ok: true } as const;
+	});
+}
+
+/**
  * Ein Preisschild an ein eigenes Grundstück hängen — oder es mit `null` abnehmen.
  *
  * Verkaufen heißt, einen Preis zu setzen: kein Auktionswesen, passend zum

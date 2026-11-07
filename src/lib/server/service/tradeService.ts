@@ -8,6 +8,7 @@ import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
 import * as treasuryService from '$lib/server/service/treasuryService';
 import { BuildingStock, ShopOffer } from '$lib/db/model/shop';
+import { acceptedGoods } from '$lib/game/building.logic';
 import { buy, offer as offerLogic, type ShopKind, shopKindFor } from '$lib/game/trade.logic';
 import { getItemTemplate } from '$lib/model/itemTemplate';
 import * as buildingService from '$lib/server/service/buildingService';
@@ -95,6 +96,11 @@ export async function moveToStock(
 		return { ok: false, reason: 'PLOT_NOT_OWNED' };
 	}
 
+	// Herausnehmen geht immer: Was schon im Lager liegt, soll dort nicht festsitzen.
+	if (quantity > 0 && !(await nimmtAuf(buildingId, itemId))) {
+		return { ok: false, reason: 'WRONG_GOODS' };
+	}
+
 	return sequelize.transaction(async (t: Transaction) => {
 		// Einlegen: erst aus dem Inventar nehmen, dann ins Lager. Auslagern andersherum.
 		if (quantity > 0) {
@@ -150,6 +156,90 @@ export async function changeBuildingStock(
 		{ transaction: t }
 	);
 	return true;
+}
+
+/** Nimmt dieses Haus die Ware an (`acceptedGoods`)? */
+async function nimmtAuf(buildingId: string, itemId: string): Promise<boolean> {
+	const haus = await buildingService.getBuilding(buildingId);
+	const vorlage = haus ? buildingService.getBuildingOption(haus.optionId) : undefined;
+	if (!vorlage) return false;
+	const waren: string[] | null = acceptedGoods(vorlage);
+	return waren === null || waren.includes(itemId);
+}
+
+/**
+ * Ware von einem eigenen Haus ins andere bringen (0.8.0).
+ *
+ * **Bis hierher führte der Weg nur über das Inventar**, und das fasst wenig. Das Holz der
+ * Ernte liegt auf dem Hof, die Zimmerei bot aber nur an, was einer bei sich trug. Hergestellt
+ * wird schon seit 5.25 aus allem, was einem gehört; hier geht es darum, die Ware dort
+ * liegen zu haben, wo man sie sehen und verkaufen will.
+ *
+ * Kostet nichts: Wie die Herstellung aus fernen Lagern kennt auch dieser Weg keine Entfernung.
+ */
+export async function moveBetweenBuildings(
+	characterId: string,
+	fromBuildingId: string,
+	toBuildingId: string,
+	itemId: string,
+	quantity: number
+): Promise<TradeResult> {
+	if (!Number.isInteger(quantity) || quantity < 1 || fromBuildingId === toBuildingId) {
+		return { ok: false, reason: 'NOTHING_TO_DO' };
+	}
+
+	const [von, nach] = await Promise.all([alsLaden(fromBuildingId), alsLaden(toBuildingId)]);
+	if (von?.ownerCharacterId !== characterId || nach?.ownerCharacterId !== characterId) {
+		return { ok: false, reason: 'PLOT_NOT_OWNED' };
+	}
+	if (!(await nimmtAuf(toBuildingId, itemId))) return { ok: false, reason: 'WRONG_GOODS' };
+
+	return sequelize.transaction(async (t: Transaction) => {
+		if (!(await changeBuildingStock(fromBuildingId, itemId, -quantity, t))) {
+			return { ok: false, reason: 'NOT_IN_STOCK' } as const;
+		}
+		await changeBuildingStock(toBuildingId, itemId, quantity, t);
+		return { ok: true } as const;
+	});
+}
+
+export interface StockElsewhere {
+	buildingId: string;
+	buildingName: string;
+	itemId: string;
+	name: string;
+	quantity: number;
+}
+
+/**
+ * Was in den anderen eigenen Häusern liegt und dieser Betrieb gebrauchen kann (0.8.0).
+ *
+ * Nur für Handwerksbetriebe: Bei allem anderen gibt es keine Antwort darauf, was es braucht.
+ */
+export async function getStockElsewhere(
+	characterId: string,
+	buildingId: string
+): Promise<StockElsewhere[]> {
+	const hier = await buildingService.getBuilding(buildingId);
+	const vorlage = hier ? buildingService.getBuildingOption(hier.optionId) : undefined;
+	const waren: string[] | null = vorlage ? acceptedGoods(vorlage) : null;
+	if (waren === null) return [];
+
+	const treffer: StockElsewhere[] = [];
+	for (const haus of await buildingService.getBuildingsOfCharacter(characterId)) {
+		if (haus.id === buildingId) continue;
+		for (const posten of await getBuildingStock(haus.id)) {
+			if (!waren.includes(posten.itemId)) continue;
+			treffer.push({
+				buildingId: haus.id,
+				buildingName: haus.name,
+				itemId: posten.itemId,
+				name: posten.name,
+				quantity: posten.quantity
+			});
+		}
+	}
+	return treffer;
 }
 
 /**

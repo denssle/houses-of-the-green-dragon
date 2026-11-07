@@ -130,6 +130,23 @@ export function storageAt(template: BuildingTemplate, level: number, condition: 
 	return Math.floor(grundwert * outputFactor(condition));
 }
 
+/**
+ * Was ein Betrieb einlagert (0.8.0): was er verarbeitet und was er herstellt.
+ *
+ * In einer Zimmerei liegt Holz, kein Brot. Die Liste folgt den Rezepten, sie muss also nicht
+ * gepflegt werden. `null` heißt: Hier gibt es keine Beschränkung. Das gilt für alles, was
+ * kein Handwerk ist. Ein Wohnhaus nimmt, was man hineinträgt, und ein Hof kennt sein
+ * Rezept nicht, weil es am Boden hängt.
+ */
+export function acceptedGoods(template: BuildingTemplate): string[] | null {
+	if (template.type !== 'CRAFT') return null;
+	const waren: string[] = (template.recipes ?? []).flatMap((rezept) => [
+		...rezept.input.map((zutat) => zutat.itemId),
+		rezept.outputItemId
+	]);
+	return [...new Set(waren)];
+}
+
 /** Was der Betrieb auf dieser Stufe zahlt, gemindert um den Zustand. */
 export function wageAt(template: BuildingTemplate, level: number, condition: number): number {
 	const grundlohn: number = levelOf(template, level).wagePerActionPoint ?? 0;

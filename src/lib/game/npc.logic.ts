@@ -38,6 +38,8 @@ export const NPC_ACTIONS = [
 	'DRINK_TONIC',
 	// Seit 4.13 die fünfte Stufe: etwas Eigenes aufbauen (Punkt 29).
 	'BUY_PLOT',
+	// Seit 0.8.0 der Rückweg: leeren Grund abgeben, den man nicht mehr tragen kann.
+	'GIVE_UP_PLOT',
 	'BUILD',
 	'LEASE',
 	'HARVEST',
@@ -122,6 +124,12 @@ export interface NpcState {
 	ownsWorkshop: boolean;
 	/** Hat er ein unbebautes eigenes Grundstück? */
 	hasFreePlot: boolean;
+	/** Wie viele eigene Grundstücke leer stehen (0.8.0). */
+	emptyPlots: number;
+	/**
+	 * Was beim nahen Steuertermin fällig wird, null, wenn er noch fern ist (0.8.0, Punkt 117).
+	 */
+	plotTaxDueSoon: number;
 	/** Pachtet er eine Abbaufläche? */
 	hasLease: boolean;
 	/** Steht eine Fläche zur Pacht frei? */
@@ -644,6 +652,13 @@ function sparziel(state: NpcState): number {
  * morgen, das Dach die Kinder von übermorgen (ohne Wohnraum keine Geburt, siehe 4.4).
  */
 function sicherheit(state: NpcState): NpcAction | undefined {
+	// **Wer die Steuer nicht tragen kann, gibt leeren Grund auf** (0.8.0, Punkt 117). Steht
+	// vor allem, was Geld ausgibt: In Grünau lagen im November 20 von 52 Grundstücken brach,
+	// und der Termin nahm ihren Besitzern, was sie für Brot und Bretter gebraucht hätten.
+	if (state.isAdult && state.emptyPlots > 0 && state.money < state.plotTaxDueSoon) {
+		return 'GIVE_UP_PLOT';
+	}
+
 	// Eine feste Stelle nehmen, wenn sie mehr bringt als die Tagelöhnerei. Kostet nichts
 	// und wirkt ab der nächsten Schicht — deshalb vor dem Arbeiten.
 	if (!state.hasJob && state.betterJobAvailable && state.isAdult) return 'TAKE_JOB';

@@ -176,6 +176,21 @@
 	</form>
 {/if}
 
+{#if data.harvest}
+	<section>
+		<h3>Ernten</h3>
+		{#if data.harvest.inSeason}
+			<form method="POST" action="?/harvest" use:enhance>
+				<input type="hidden" name="plotId" value={data.harvest.plotId} />
+				<button type="submit">{data.harvest.yields} ernten ({data.harvest.cost} AP)</button>
+			</form>
+			<p><small>Die Ernte kommt ins Lager dieses Hofs.</small></p>
+		{:else}
+			<p><i>Jetzt wächst hier nichts.</i></p>
+		{/if}
+	</section>
+{/if}
+
 {#if data.recipes.length > 0}
 	<section>
 		<h3>Herstellen</h3>
@@ -320,7 +335,24 @@
 				{/each}
 			</ul>
 		{/if}
-		{#each data.myStock as posten (posten.itemId)}
+		{#each data.stockElsewhere as posten (`${posten.buildingId}-${posten.itemId}`)}
+			<form method="POST" action="?/stockFrom" use:enhance>
+				<input type="hidden" name="itemId" value={posten.itemId} />
+				<input type="hidden" name="fromBuildingId" value={posten.buildingId} />
+				<label>
+					{posten.name} aus {posten.buildingName} holen ({posten.quantity} dort)
+					<input
+						type="number"
+						name="quantity"
+						min="1"
+						max={posten.quantity}
+						value={posten.quantity}
+					/>
+				</label>
+				<button type="submit">Herüberholen</button>
+			</form>
+		{/each}
+		{#each data.storable as posten (posten.itemId)}
 			<form method="POST" action="?/stockIn" use:enhance>
 				<input type="hidden" name="itemId" value={posten.itemId} />
 				<label>

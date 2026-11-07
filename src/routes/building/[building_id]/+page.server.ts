@@ -22,6 +22,7 @@ import * as lifecycleService from '$lib/server/service/lifecycleService';
 import * as schoolService from '$lib/server/service/schoolService';
 import type { SkillType } from '$lib/game/skill.logic';
 import {
+	acceptedGoods,
 	CONDITION_MAX,
 	renovationMaterial,
 	upgradeMaterial,
@@ -88,6 +89,29 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			? await officeData(locals.currentCharacter.regionId, locals.currentCharacter.id)
 			: undefined;
 
+	const nimmtNur: string[] | null = option ? acceptedGoods(option) : null;
+	const lagerbar = (
+		locals.currentCharacter ? await needService.getStock(locals.currentCharacter.id) : []
+	).filter((posten) => nimmtNur === null || nimmtNur.includes(posten.itemId));
+
+	const pacht =
+		gehoertMir && option?.type === 'EXTRACTION' && locals.currentCharacter
+			? (await productionService.getAreas(locals.currentCharacter.id)).find(
+					(flaeche) => flaeche.plotId === building.plotId && flaeche.leasedByMe
+				)
+			: undefined;
+	const ernteRezept = pacht ? productionService.harvestRecipe(pacht.resourceType) : undefined;
+	const jahreszeit = seasonOf(await worldService.currentTick());
+	const ernte =
+		pacht && ernteRezept
+			? {
+					plotId: pacht.plotId,
+					yields: getItemTemplate(ernteRezept.outputItemId)?.name ?? ernteRezept.outputItemId,
+					cost: ernteRezept.actionPointCost,
+					inSeason: !ernteRezept.seasons || ernteRezept.seasons.includes(jahreszeit)
+				}
+			: undefined;
+
 	return {
 		building,
 		amt,
@@ -134,6 +158,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		// Jedes Handelshaus ist zugleich Verkaufsstelle — Lager und Preisschilder gehoeren
 		// deshalb auf die Gebaeudeseite und nicht in eine eigene Ecke.
 		stock: await tradeService.getBuildingStock(params.building_id),
+		// **Was hier hineindarf, und was davon schon anderswo im eigenen Besitz liegt** (0.8.0).
+		storable: lagerbar,
+		stockElsewhere: gehoertMir
+			? await tradeService.getStockElsewhere(locals.currentCharacter!.id, params.building_id)
+			: [],
+		// **Der Hof sagt, was er erntet** (0.8.0). Bis hierher stand der Knopf nur im Umland, und
+		// auf der Hofseite sah es aus, als ginge es gar nicht.
+		harvest: ernte,
 		offers: await tradeService.getOffersAt(params.building_id, locals.currentCharacter?.id),
 		myStock: locals.currentCharacter ? await needService.getStock(locals.currentCharacter.id) : [],
 		// **Wie voll das Inventar ist, dort wo umgelagert wird** (5.34). Ohne die Zahl
@@ -499,6 +531,40 @@ export const actions = {
 		return {
 			message: `${ergebnis.produced} ${getItemTemplate(ergebnis.itemId)?.name ?? ''} hergestellt.`
 		};
+	},
+
+	harvest: async ({ request, locals }) => {
+		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
+		const plotId = (await request.formData()).get('plotId')?.toString();
+		if (!plotId) return fail(400, { message: 'Welche Fläche?' });
+
+		const ergebnis = await productionService.harvest(locals.currentCharacter.id, plotId);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return {
+			message:
+				`${ergebnis.produced} ${getItemTemplate(ergebnis.itemId)?.name ?? ''} geerntet` +
+				(ergebnis.tithe ? ` — ${ergebnis.tithe} als Zehnt an die Stadt.` : '.')
+		};
+	},
+
+	/** Ware aus einem anderen eigenen Haus herüberholen (0.8.0). */
+	stockFrom: async ({ request, params, locals }) => {
+		if (!locals.currentCharacter) return fail(401, { message: 'Nicht angemeldet' });
+		const data = await request.formData();
+		const itemId = data.get('itemId')?.toString();
+		const vonId = data.get('fromBuildingId')?.toString();
+		const menge = Number(data.get('quantity') ?? 0);
+		if (!itemId || !vonId) return fail(400, { message: 'Was denn woher?' });
+
+		const ergebnis = await tradeService.moveBetweenBuildings(
+			locals.currentCharacter.id,
+			vonId,
+			params.building_id,
+			itemId,
+			menge
+		);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: `${menge} herübergeholt.` };
 	},
 
 	stockIn: async ({ request, params, locals }) => {

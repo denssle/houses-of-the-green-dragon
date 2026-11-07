@@ -41,6 +41,10 @@
 							/>
 							<button type="submit">Zum Verkauf stellen</button>
 						</form>
+						<form method="POST" action="?/giveUp" use:enhance>
+							<input type="hidden" name="plotId" value={plot.id} />
+							<button type="submit">Aufgeben (ohne Entschädigung)</button>
+						</form>
 					{/if}
 				</li>
 			{/each}

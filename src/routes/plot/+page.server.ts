@@ -75,6 +75,19 @@ export const actions = {
 		};
 	},
 
+	giveUp: async ({ request, locals }) => {
+		const character = locals.currentCharacter;
+		if (!character) return fail(401, { message: 'Kein Charakter, der aufgeben könnte' });
+
+		const data = await request.formData();
+		const plotId = data.get('plotId')?.toString();
+		if (!plotId) return fail(400, { message: 'Kein Grundstück gewählt' });
+
+		const ergebnis = await plotService.giveUpPlot(character.id, plotId);
+		if (!ergebnis.ok) return fail(400, { message: actionMessage(ergebnis.reason) });
+		return { message: 'Das Grundstück ist an die Stadt zurückgefallen.' };
+	},
+
 	buyFrom: async ({ request, locals }) => {
 		const character = locals.currentCharacter;
 		if (!character) return fail(401, { message: 'Kein Charakter, der kaufen könnte' });

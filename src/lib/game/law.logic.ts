@@ -1,3 +1,4 @@
+import { TICKS_PER_YEAR } from '$lib/game/time';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 
 /**
@@ -194,6 +195,34 @@ export function canEnact(
 export function taxOn(amount: number, percent: number): number {
 	if (amount <= 0 || percent <= 0) return 0;
 	return Math.floor((amount * percent) / 100);
+}
+
+/**
+ * So viele Ticks vor dem Steuertermin gibt auf, wer nicht zahlen kann (0.8.0, Punkt 117).
+ *
+ * **Bewusst spät.** Wer Land sofort zurückgäbe, sobald das Geld fehlt, ersteigerte es bei
+ * der nächsten Gelegenheit wieder und gäbe es erneut ab, und jede Runde trüge seine Münzen
+ * in die Stadtkasse. So bleibt das ganze Jahr, um zu bauen oder zu verdienen, und aufgegeben
+ * wird nur, was der Termin wirklich verlangt. Fünf Ticks reichen, denn ein NPC gibt je Tick
+ * ein Grundstück ab; mehr als fünf leere hatte in Grünau niemand.
+ */
+export const GIVE_UP_PLOT_BEFORE_TAX_TICKS = 5;
+
+/**
+ * Was ein Besitzer beim nächsten Termin schuldet, sofern der kurz bevorsteht, sonst null.
+ *
+ * Solange noch nie erhoben wurde, gibt es keinen Termin und also keine Schuld.
+ */
+export function plotTaxDueSoon(
+	plotCount: number,
+	ratePerPlot: number,
+	lastTaxTick: number | null,
+	tick: number
+): number {
+	if (lastTaxTick === null) return 0;
+	const bisDahin: number = lastTaxTick + TICKS_PER_YEAR - tick;
+	if (bisDahin > GIVE_UP_PLOT_BEFORE_TAX_TICKS) return 0;
+	return propertyTaxFor(plotCount, ratePerPlot);
 }
 
 /** Was ein Besitzer je Spieljahr für seine Grundstücke schuldet. */

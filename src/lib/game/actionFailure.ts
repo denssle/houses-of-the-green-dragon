@@ -49,4 +49,6 @@ export type ActionFailureReason =
 	| 'OUT_OF_BOUNDS'
 	// Was noch im Bau ist, wird nicht bewohnt, bewirtschaftet oder ausgebaut (5.76).
 	| 'UNDER_CONSTRUCTION'
-	| 'BID_TOO_LOW';
+	| 'BID_TOO_LOW'
+	// Ein Betrieb lagert, was er verarbeitet oder herstellt (0.8.0).
+	| 'WRONG_GOODS';

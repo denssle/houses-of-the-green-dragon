@@ -175,6 +175,8 @@ function satz(entry: ChronicleLine): string {
 			return entry.detail
 				? `${wer} ist in der Stadt angekommen — ${fach(entry.detail)} ist sein Handwerk.`
 				: `${wer} ist in der Stadt angekommen.`;
+		case 'PLOT_GIVEN_UP':
+			return `${wer} hat das Grundstück ${entry.detail ?? 'unbekannt'} aufgegeben.`;
 		case 'PLOT_BOUGHT':
 			// `detail` trägt die Lage: Ein Grundstück hat keinen Namen, nur eine Adresse, und
 			// die steht in der Plot-Zeile und nicht am Gebäude.

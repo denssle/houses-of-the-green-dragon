@@ -58,6 +58,8 @@ function lage(werte: Partial<NpcState> = {}): NpcState {
 		leaseAvailable: false,
 		ownStockToSell: 0,
 		workshopStockToSell: 0,
+		emptyPlots: 0,
+		plotTaxDueSoon: 0,
 		ownConstruction: false,
 		upgradeMaterialMissing: false,
 		upgradeMaterialPrice: null,
@@ -248,5 +250,46 @@ describe('Der abwesende Spieler', () => {
 
 			expect(decideCaretakerAction(nichtsZuTun)).toBe('IDLE');
 		});
+	});
+});
+
+describe('Leeren Grund aufgeben (0.8.0)', () => {
+	const knapp = {
+		money: 10,
+		emptyPlots: 2,
+		plotTaxDueSoon: 40,
+		isAdult: true,
+		satiety: SATIETY_MAX
+	};
+
+	it('gibt auf, wer die nahe Steuer nicht zahlen kann', () => {
+		expect(decideNpcAction(lage(knapp))).toBe('GIVE_UP_PLOT');
+	});
+
+	it('behält den Grund, solange der Termin fern ist', () => {
+		expect(decideNpcAction(lage({ ...knapp, plotTaxDueSoon: 0 }))).not.toBe('GIVE_UP_PLOT');
+	});
+
+	it('behält ihn auch, wer zahlen kann', () => {
+		expect(decideNpcAction(lage({ ...knapp, money: 40 }))).not.toBe('GIVE_UP_PLOT');
+	});
+
+	it('hat ohne leeren Grund nichts aufzugeben', () => {
+		expect(decideNpcAction(lage({ ...knapp, emptyPlots: 0 }))).not.toBe('GIVE_UP_PLOT');
+	});
+
+	it('überlässt das Aufgeben bei Kindern dem Erwachsenwerden', () => {
+		expect(decideNpcAction(lage({ ...knapp, isAdult: false }))).not.toBe('GIVE_UP_PLOT');
+	});
+
+	it('geht nach dem Essen, nicht davor', () => {
+		expect(decideNpcAction(lage({ ...knapp, satiety: 5, food: 1 }))).toBe('EAT');
+	});
+
+	it('steht dem Verwalter nicht zu', () => {
+		expect(CARETAKER_ACTIONS).not.toContain('GIVE_UP_PLOT');
+		expect(decideCaretakerAction(lage({ ...knapp, workAvailable: false }))).not.toBe(
+			'GIVE_UP_PLOT'
+		);
 	});
 });
