@@ -95,7 +95,9 @@ export const KASSENABFLUESSE = [
 	/** Lohn an einen Bürger — Tagelohn an städtischen Bauten, Sold der Wache. */
 	'WAGE',
 	/** Die Aufwandsentschädigung an einen Amtsinhaber (4.7b). */
-	'STIPEND'
+	'STIPEND',
+	/** Brot für die Waisen, gezahlt an den, der es verkauft hat (0.7.0). */
+	'ORPHAN_CARE'
 ] as const;
 
 export type Kassenzufluss = (typeof KASSENZUFLUESSE)[number];

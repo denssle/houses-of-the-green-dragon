@@ -34,6 +34,7 @@ export interface CharacterAttributes {
 	fatherId: string | null;
 	spouseId: string | null;
 	heirId: string | null;
+	guardianId: string | null;
 	pregnantSinceTick: number | null;
 	pregnantByFatherId: string | null;
 	proposedToId: string | null;
@@ -76,6 +77,7 @@ export type CharacterCreationAttributes = Optional<
 	| 'fatherId'
 	| 'spouseId'
 	| 'heirId'
+	| 'guardianId'
 	| 'pregnantSinceTick'
 	| 'pregnantByFatherId'
 	| 'proposedToId'

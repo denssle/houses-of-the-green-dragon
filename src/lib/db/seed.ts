@@ -1,3 +1,4 @@
+import { WAISENHAUS_OPTION_ID } from '$lib/game/guardianship.logic';
 import { randomUUID } from 'node:crypto';
 import { randomPersonality } from '$lib/game/personality.logic';
 import { FOUNDER_PROVISIONS, SATIETY_MAX } from '$lib/game/need.logic';
@@ -80,7 +81,8 @@ const STADTGEBAEUDE = [
 	{ optionId: 0, name: 'Rathaus', adresse: 'Am Markt 1' },
 	{ optionId: 2, name: 'Städtische Schmiede', adresse: 'Am Markt 2' },
 	{ optionId: 3, name: 'Städtische Unterkunft', adresse: 'Am Markt 3' },
-	{ optionId: 6, name: 'Marktplatz', adresse: 'Am Markt 4' }
+	{ optionId: 6, name: 'Marktplatz', adresse: 'Am Markt 4' },
+	{ optionId: WAISENHAUS_OPTION_ID, name: 'Städtisches Waisenhaus', adresse: 'Gerbergasse 1' }
 ] as const;
 
 /**

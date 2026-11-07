@@ -8,6 +8,7 @@ import * as lifecycleService from '$lib/server/service/lifecycleService';
 import * as mayorService from '$lib/server/service/mayorService';
 import * as migrationService from '$lib/server/service/migrationService';
 import * as npcService from '$lib/server/service/npcService';
+import * as orphanService from '$lib/server/service/orphanService';
 import type { Arrival } from '$lib/server/service/migrationService';
 import type { AuctionTick } from '$lib/server/service/auctionService';
 import type { Death } from '$lib/server/service/lifecycleService';
@@ -16,6 +17,7 @@ import type { FamilyTick } from '$lib/server/service/familyService';
 import type { GovernanceReport } from '$lib/server/service/mayorService';
 import type { HazardReport } from '$lib/server/service/hazardService';
 import type { NpcTick } from '$lib/server/service/npcService';
+import type { OrphanCare } from '$lib/server/service/orphanService';
 import type { Stipend, TaxRun } from '$lib/server/service/lawService';
 import { findStartRegionId } from '$lib/db/seed';
 
@@ -48,6 +50,8 @@ import { findStartRegionId } from '$lib/db/seed';
  *   essen dürfen, ehe der Würfel über ihn entscheidet.
  * - **Die Steuer kommt vor dem Sold** — die Kasse füllt sich erst und zahlt dann; bei
  *   knapper Kasse fällt der Sold aus, statt Schulden zu machen.
+ * - **Die Waisen kommen nach der Steuer und vor dem Sterben** — die Stadt zahlt ihr Brot aus
+ *   der gefüllten Kasse, und ein Kind soll essen dürfen, ehe der Würfel fällt.
  * - **Das Unglück kommt nach dem Handeln** — niemandem soll die Werkstatt abbrennen, in
  *   der er in derselben Stunde noch arbeiten wollte.
  */
@@ -62,6 +66,7 @@ export interface WorldTick {
 	governed?: GovernanceReport;
 	tax?: TaxRun;
 	stipends: Stipend[];
+	orphans: OrphanCare;
 	hazard?: HazardReport;
 	deaths: Death[];
 }
@@ -101,6 +106,7 @@ export async function tickWorld(tick: number, options: WorldTickOptions = {}): P
 
 	const tax = await lawService.collectPropertyTax(stadtId, tick);
 	const stipends = await lawService.payOfficeStipends(stadtId);
+	const orphans = await orphanService.careForOrphans(stadtId, tick);
 
 	const hazard = await hazardService.strike(stadtId, tick, roll);
 	const deaths = await lifecycleService.reapTheDead(tick, roll);
@@ -116,6 +122,7 @@ export async function tickWorld(tick: number, options: WorldTickOptions = {}): P
 		governed,
 		tax,
 		stipends,
+		orphans,
 		hazard,
 		deaths
 	};

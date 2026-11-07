@@ -49,6 +49,14 @@ export interface BuildingLevel {
 	 * beim Kraftvorrat: Zwischen zwanzig Fremden hat niemand eine Truhe, die ihm gehört.
 	 */
 	storage?: number;
+	/**
+	 * Wie viele Waisen hier leben können (0.7.0).
+	 *
+	 * **Bewusst nicht `residents`.** Alles, was nach Wohnraum sucht, fragt danach: der
+	 * Obdachlose, der Zuzug, die Eheleute. Mit `residents` zögen dort Erwachsene ein und
+	 * nähmen den Kindern die Plätze weg.
+	 */
+	orphanPlaces?: number;
 }
 
 export interface BuildingTemplate {

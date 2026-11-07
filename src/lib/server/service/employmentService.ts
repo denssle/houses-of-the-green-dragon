@@ -284,7 +284,7 @@ export async function takeJob(
  * bisher niemand. Der Unterschied gehört mit hinein: Wer geht, ist eine andere Geschichte
  * als wer gehen muss, und wessen Betrieb unter ihm zur Ruine wurde, eine dritte.
  */
-export type EndOfJob = 'QUIT' | 'DISMISSED' | 'GONE';
+export type EndOfJob = 'QUIT' | 'DISMISSED' | 'GONE' | 'DEATH';
 
 /**
  * Kündigen — von beiden Seiten dieselbe Handlung.

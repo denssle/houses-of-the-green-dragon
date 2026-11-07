@@ -717,9 +717,11 @@ async function lageAufnehmen(
 	// isst, was die Eltern — oder die Erwachsenen im selben Haus — in der Kammer haben. Hat es
 	// gar keinen Haushalt, darf es weiter für sein Brot arbeiten: Sonst verhungerte eine
 	// Waise allein im Haus zwangsläufig, und das wäre eine Härte ohne Ausweg.
-	const haushalt = isOfWorkingAge(werte.birthTick, tick)
-		? undefined
-		: await householdService.haushaltVon(werte, tick);
+	//
+	// **Ein Mündel bis zur Volljährigkeit** (0.7.0): Mit zwölf hat es zwar das Arbeitsalter,
+	// aber noch keine Eltern, die ihm vorlegen, und keine feste Stelle.
+	const lebtVomHaushalt: boolean = !isOfWorkingAge(werte.birthTick, tick) || !!werte.guardianId;
+	const haushalt = lebtVomHaushalt ? await householdService.haushaltVon(werte, tick) : undefined;
 	const eigenesBrot: number = vorrat.find((posten) => posten.itemId === 'BREAD')?.quantity ?? 0;
 	const brotQuelle: string | undefined =
 		haushalt && eigenesBrot === 0 ? haushalt.brotBei : undefined;
@@ -1739,7 +1741,7 @@ async function fehlendesMaterial(
 }
 
 /**
- * Hat er ein Kind unter zwölf, das hungert, und liegt in dessen Haushalt kein Brot
+ * Hat er ein Kind unter zwölf oder ein Mündel, das hungert, und liegt in dessen Haushalt kein Brot
  * (0.6.0, Punkt 84)? Dann ist es an ihm, welches zu besorgen.
  *
  * Eine Abfrage für die meisten: Wer keine kleinen Kinder hat, ist nach ihr fertig.
@@ -1748,8 +1750,15 @@ async function hungerndesKind(npcId: string, tick: number): Promise<boolean> {
 	const kinder = await Character.findAll({
 		where: {
 			deathTick: null,
-			[Op.or]: [{ motherId: npcId }, { fatherId: npcId }],
-			birthTick: { [Op.gt]: tick - yearsToTicks(AGE_OF_WORK) }
+			[Op.or]: [
+				{
+					[Op.or]: [{ motherId: npcId }, { fatherId: npcId }],
+					birthTick: { [Op.gt]: tick - yearsToTicks(AGE_OF_WORK) }
+				},
+				// **Wer eine Waise aufnimmt, sorgt für sie wie für ein eigenes Kind** (0.7.0), und
+				// zwar bis zur Volljährigkeit; mit ihr endet die Vormundschaft von selbst.
+				{ guardianId: npcId }
+			]
 		}
 	});
 	for (const kind of kinder) {

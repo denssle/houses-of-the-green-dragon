@@ -39,6 +39,9 @@ export const Character: ModelStatic<Model<CharacterAttributes, CharacterCreation
 			// Der benannte Erbe. Leer heisst nicht erblos, sondern unbenannt — dann greift
 			// die gesetzliche Reihenfolge (siehe inheritance.logic.ts).
 			heirId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
+			// Wer für eine Waise sorgt (0.7.0). Leer heißt nicht ungeschützt: Kinder mit lebenden
+			// Eltern brauchen niemanden, und im Waisenhaus sorgt die Stadt.
+			guardianId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
 			// Schwangerschaft: seit wann und von wem. Zwei Spalten statt einer Tabelle, weil
 			// es je Frau hoechstens eine zugleich gibt — und weil die Geburt sie wieder leert.
 			pregnantSinceTick: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },

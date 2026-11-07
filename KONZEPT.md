@@ -229,9 +229,14 @@ im eigenen Betrieb nutzt dieselbe Zwölf.
 
 **Wer jünger ist, lebt aus dem Haushalt** (gebaut mit 0.6.0). Ein Kind unter zwölf isst aus
 der Kammer seiner Eltern, und wenn dort nichts ist, kaufen die Eltern nach — notfalls von
-dem, was sie dafür erarbeiten. Kinder kosten damit, was sie kosten sollen. Nur ein Kind
-ganz ohne Haushalt darf weiter selbst für sein Brot arbeiten; sonst verhungerte eine Waise
-allein im Haus zwangsläufig.
+dem, was sie dafür erarbeiten. Kinder kosten damit, was sie kosten sollen.
+
+**Waisen kommen zur Familie, sonst sorgt die Stadt** (gebaut mit 0.7.0). Wer unter sechzehn
+ist und keine lebenden Eltern hat, kommt zum nächsten Verwandten mit einem Dach und freiem
+Platz: Großeltern, Geschwister, Onkel und Tanten, zuletzt das eigene Haus. Der Vormund sorgt
+für das Kind wie für sein eigenes. Findet sich niemand, oder hat der Vormund nichts zu essen,
+kommt es ins Waisenhaus, und die Stadt kauft das Brot dafür am Markt. Nur ein Kind, für das
+auch dort kein Platz ist, darf selbst für sein Brot arbeiten.
 
 **Vermacht wird über den Erben hinaus.** Neben der Benennung des Erben soll ein
 **Testament** stehen: einzelne Beträge an einzelne Personen, an die Zunft, an eine Kirche.

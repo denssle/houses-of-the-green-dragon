@@ -139,7 +139,12 @@ function satz(entry: ChronicleLine): string {
 			// die bleibt der Satz, der vorher für alle galt.
 			if (entry.detail === 'DISMISSED') return `${wer} wurde aus ${haus} entlassen.`;
 			if (entry.detail === 'QUIT') return `${wer} hat die Stelle in ${haus} gekündigt.`;
+			if (entry.detail === 'DEATH') return `${wer} ist gestorben, die Stelle in ${haus} ist frei.`;
 			return `${wer} arbeitet nicht mehr in ${haus}.`;
+		case 'GUARDIAN_TAKEN':
+			return `${wen} hat ${wer} bei sich aufgenommen.`;
+		case 'ORPHAN_ADMITTED':
+			return `${wer} ist ins Waisenhaus gekommen.`;
 		case 'RAID':
 			// Was geraubt wurde, sagt `detail`: eine Ware, „Münzen" oder die Stadtkasse.
 			if (entry.detail === 'TREASURY') {

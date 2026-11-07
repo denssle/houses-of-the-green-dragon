@@ -27,6 +27,9 @@ export const EVENT_KINDS = [
 	'BUILDING_RUINED',
 	'JOB_TAKEN',
 	'JOB_ENDED',
+	// Wer eine Waise aufnimmt und wohin sie kommt, wenn es niemand tut (0.7.0).
+	'GUARDIAN_TAKEN',
+	'ORPHAN_ADMITTED',
 	'SCHOOL_ATTENDED',
 	'RAID',
 	'FIRE',

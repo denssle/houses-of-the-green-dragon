@@ -6,6 +6,7 @@ import { Building } from '$lib/db/model/building';
 import { ShopOffer } from '$lib/db/model/shop';
 import { Character } from '$lib/db/model/character';
 import { Dynasty } from '$lib/db/model/dynasty';
+import { Employment } from '$lib/db/model/employment';
 import { Plot } from '$lib/db/model/plot';
 import * as treasuryService from '$lib/server/service/treasuryService';
 import { chooseHeir, type Child, splitEstate } from '$lib/game/inheritance.logic';
@@ -146,6 +147,24 @@ export async function die(
 		// vorher weder vererbt noch der Stadt zugeschlagen werden. Stünde es weiter unten,
 		// ginge der Hof erst an den Erben und verschwände ihm dann unter den Händen.
 		await productionService.releaseLeases(characterId, t);
+
+		// **Die Stelle wird frei** (0.7.0). Bis hierher blieb der Vertrag stehen, und ein
+		// Toter hielt die Stelle besetzt: In Grünau traf das im November sieben von elf
+		// Verträgen, darunter die einzige Stelle der Mühle.
+		const stelle = await Employment.findOne({
+			where: { EmployeeCharacterId: characterId },
+			transaction: t
+		});
+		if (stelle) {
+			await stelle.destroy({ transaction: t });
+			await chronicleService.record(
+				'JOB_ENDED',
+				tot.dataValues.RegionId,
+				tick,
+				{ subjectId: characterId, buildingId: stelle.dataValues.BuildingId, detail: 'DEATH' },
+				t
+			);
+		}
 
 		if (hinterbliebener) {
 			// **Die Ehe endet mit dem Tod.** Bis hierher blieb `spouseId` auf einen Toten

@@ -2471,3 +2471,24 @@ fließt, seit weniger Mühlen gebaut werden —, ist eine Vermutung und keine Me
 scheitern die Paare, die keine Kinder bekommen — Ehe, Dach, Platz, Geld? `MEASURE_TRACE`
 auf ein Paar aus 86 und die Zahlen je 250 Ticks im Bericht reichen dafür. Und: eine vierte
 und fünfte Saat, um zu sehen, ob 86 die Ausnahme ist.
+
+## Die Hungersnot von Grünau (Oktober 2026)
+
+**Befund vom 07.11.2026**, Tick 6871: 18 Hungertote ab Tick 6490, die Einwohnerzahl fiel
+rechnerisch von 37 auf 27. Im Tageslog fehlen der 15., 17. und 18.10.; warum, ist nicht geklärt.
+
+**Behoben mit 0.7.0:** Waisen hatten niemanden, der für sie sorgte (alle vier toten Kinder),
+und Tote behielten ihre Stelle (sieben von elf Verträgen).
+
+**Offen, und das ist die Ursache selbst:** Die Grundsteuer zog in drei Terminen 2141 Münzen
+ein (Tick 6311 bis 6411), nachdem die NPCs rund 55 Grundstücke für 8 bis 20 Münzen ersteigert
+hatten. Danach stieg `EMPLOYER_BROKE` von rund 20 auf bis zu 155 am Tag, und die Essvorgänge
+brachen ein. Die Stadtkasse hielt am 07.11. 2110 Münzen, alle NPCs zusammen 1072. Belegt sind
+Zeitfolge und Beträge, nicht die Bargeldstände von damals.
+
+**Zu messen, bevor jemand eingreift:** ein Messlauf, ob die Stadt ohne die Steuerspitze auch
+verhungert wäre. Denkbare Eingriffe: NPCs rechnen die Steuer vor dem Landkauf ein, oder der
+Bürgermeister senkt bei hohen Ausfällen schneller als um eine Münze im Jahr.
+
+**Zu beobachten nach dem Deploy:** Das Waisenhaus lebt vom Brot am Markt, und dort lagen am
+07.11. nur zwei Laibe. Die Zeile `Waisen ohne Versorgung` im Log zeigt, wenn das nicht reicht.

@@ -1,3 +1,4 @@
+import { WAISENHAUS_OPTION_ID, WAISENHAUS_PLAETZE } from '$lib/game/guardianship.logic';
 import * as chronicleService from '$lib/server/service/chronicleService';
 import type { ActionFailureReason } from '$lib/game/actionFailure';
 import { randomUUID } from 'node:crypto';
@@ -78,6 +79,17 @@ export function getBuildingOptions(): BuildingTemplate[] {
 			limitedTo: 1,
 
 			levels: [{ price: 0, name: 'Rathaus' }]
+		},
+		{
+			optionId: WAISENHAUS_OPTION_ID,
+			initialName: 'Waisenhaus',
+			type: 'PUBLIC',
+			description:
+				'Hier wachsen die Kinder auf, die niemanden mehr haben. Die Stadt zahlt ihr Brot.',
+			limited: true,
+			limitedTo: 1,
+
+			levels: [{ price: 0, name: 'Waisenhaus', orphanPlaces: WAISENHAUS_PLAETZE }]
 		},
 		{
 			optionId: 3,

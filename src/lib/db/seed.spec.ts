@@ -61,10 +61,10 @@ describe('Weltaufbau', () => {
 		const abbau = await Plot.findAll({ where: { type: 'RESOURCE' } });
 
 		expect(bauland).toHaveLength(12);
-		// Acht nie vergeben — wer bauen will, muss erst eines erwerben. Die vier übrigen
-		// trägt die Stadt selbst: Rathaus, Schmiede, Unterkunft und Marktplatz.
-		expect(bauland.filter((p) => p.dataValues.ownerType === 'NONE')).toHaveLength(8);
-		expect(bauland.filter((p) => p.dataValues.ownerType === 'CITY')).toHaveLength(4);
+		// Sieben nie vergeben — wer bauen will, muss erst eines erwerben. Die fünf übrigen
+		// trägt die Stadt selbst: Rathaus, Schmiede, Unterkunft, Marktplatz und Waisenhaus.
+		expect(bauland.filter((p) => p.dataValues.ownerType === 'NONE')).toHaveLength(7);
+		expect(bauland.filter((p) => p.dataValues.ownerType === 'CITY')).toHaveLength(5);
 		// Umland gehört der Stadt und wird verpachtet, nicht verkauft.
 		expect(abbau.every((p) => p.dataValues.ownerType === 'CITY')).toBe(true);
 		expect(abbau.map((p) => p.dataValues.resourceType).sort()).toEqual([
@@ -88,9 +88,10 @@ describe('Weltaufbau', () => {
 			'Marktplatz',
 			'Rathaus',
 			'Städtische Schmiede',
-			'Städtische Unterkunft'
+			'Städtische Unterkunft',
+			'Städtisches Waisenhaus'
 		]);
-		// Alle vier stehen auf einem Grundstück — sie belegen knappen Platz wie jedes andere
+		// Alle fünf stehen auf einem Grundstück — sie belegen knappen Platz wie jedes andere
 		// Haus auch.
 		expect(städtisch.every((b) => b.dataValues.PlotId !== null)).toBe(true);
 	});

@@ -1,6 +1,8 @@
 import { Op } from 'sequelize';
+import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Inventory } from '$lib/db/model/inventory';
+import { WAISENHAUS_OPTION_ID } from '$lib/game/guardianship.logic';
 import { AGE_OF_MAJORITY, isOfWorkingAge, yearsToTicks } from '$lib/game/time';
 
 /**
@@ -15,7 +17,7 @@ import { AGE_OF_MAJORITY, isOfWorkingAge, yearsToTicks } from '$lib/game/time';
  */
 
 export interface Haushalt {
-	/** Wer es versorgt: zuerst die lebenden Eltern, dann die Erwachsenen im selben Haus. */
+	/** Wer es versorgt: zuerst Eltern und Vormund, dann die Erwachsenen im selben Haus. */
 	leute: string[];
 	/** Bei wem Brot in der Kammer liegt — der Erste in der Reihe. */
 	brotBei?: string;
@@ -24,19 +26,22 @@ export interface Haushalt {
 }
 
 /**
- * Wer ein Kind versorgt — **zuerst die lebenden Eltern, dann die Erwachsenen im selben
- * Haus**, ein älteres Geschwister, ein Großelternteil. `leute` leer heißt: Niemand ist da.
+ * Wer ein Kind versorgt — **zuerst die lebenden Eltern oder der Vormund, dann die Erwachsenen
+ * im selben Haus**, ein älteres Geschwister, ein Großelternteil. `leute` leer heißt: Niemand ist da.
  */
 export async function haushaltVon(
 	kind: {
 		id: string;
 		motherId: string | null;
 		fatherId: string | null;
+		guardianId: string | null;
 		HomeBuildingId: string | null;
 	},
 	tick: number
 ): Promise<Haushalt> {
-	const eltern: string[] = [kind.motherId, kind.fatherId].filter((id): id is string => id !== null);
+	const eltern: string[] = [kind.motherId, kind.fatherId, kind.guardianId].filter(
+		(id): id is string => id !== null
+	);
 	const wer = [];
 	if (eltern.length > 0) wer.push({ id: { [Op.in]: eltern } });
 	if (kind.HomeBuildingId) {
@@ -80,10 +85,16 @@ export async function darfArbeiten(
 		birthTick: number;
 		motherId: string | null;
 		fatherId: string | null;
+		guardianId: string | null;
 		HomeBuildingId: string | null;
 	},
 	tick: number
 ): Promise<boolean> {
 	if (isOfWorkingAge(person.birthTick, tick)) return true;
-	return (await haushaltVon(person, tick)).leute.length === 0;
+	if ((await haushaltVon(person, tick)).leute.length > 0) return false;
+
+	// **Im Waisenhaus lebt niemand allein** (0.7.0): Dort sorgt die Stadt.
+	if (person.HomeBuildingId === null) return true;
+	const dach = await Building.findByPk(person.HomeBuildingId, { attributes: ['optionId'] });
+	return dach?.dataValues.optionId !== WAISENHAUS_OPTION_ID;
 }

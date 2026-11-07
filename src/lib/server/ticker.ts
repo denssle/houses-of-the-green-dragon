@@ -168,6 +168,26 @@ function berichten(stunde: WorldTick): void {
 		}
 	}
 
+	for (const fall of stunde.orphans.fostered) {
+		console.info(`Waise ${fall.child} kommt bei ${fall.guardian} unter.`);
+	}
+	if (stunde.orphans.admitted.length > 0) {
+		console.info(`${stunde.orphans.admitted.length} Waisen ins Waisenhaus aufgenommen.`);
+	}
+	if (stunde.orphans.bought > 0) {
+		console.info(
+			`Die Stadt kaufte ${stunde.orphans.bought} Brote für die Waisen (${stunde.orphans.spent} Muenzen).`
+		);
+	}
+	// **Was nicht geklappt hat, zuerst sichtbar machen:** Ein hungerndes Kind im Waisenhaus
+	// heißt, dass am Markt kein Brot lag oder die Kasse leer war.
+	if (stunde.orphans.unfed > 0 || stunde.orphans.unplaced > 0) {
+		console.warn(
+			`Waisen ohne Versorgung: ${stunde.orphans.unfed} ohne Brot, ` +
+				`${stunde.orphans.unplaced} ohne Platz.`
+		);
+	}
+
 	if (stunde.hazard) {
 		console.info(`Brand in ${stunde.hazard.what} — Zustand um ${stunde.hazard.value} gefallen.`);
 	}

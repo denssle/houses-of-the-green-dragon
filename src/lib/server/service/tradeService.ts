@@ -5,6 +5,7 @@ import { sequelize } from '$lib/db/sequelize';
 import { Building } from '$lib/db/model/building';
 import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
+import { Region } from '$lib/db/model/region';
 import * as treasuryService from '$lib/server/service/treasuryService';
 import { BuildingStock, ShopOffer } from '$lib/db/model/shop';
 import { buy, offer as offerLogic, type ShopKind, shopKindFor } from '$lib/game/trade.logic';
@@ -492,6 +493,66 @@ export async function buyFromOffer(
 		}
 		return { ok: true } as const;
 	});
+}
+
+/**
+ * Die Stadt kauft Nahrung für ein Haus — aus der Kasse, zum billigsten Angebot (0.7.0).
+ *
+ * **Keine Handelssteuer:** Sie ginge aus der Kasse in dieselbe Kasse. Das Geld kommt beim
+ * Verkäufer an und damit in der Stadt: Ein Bäcker, dem das Waisenhaus Brot abkauft, kann
+ * wieder Korn und Löhne zahlen.
+ *
+ * Gekauft wird, was die Kasse hergibt. Ist sie leer oder der Markt, bleibt es bei weniger;
+ * das sieht der Aufrufer am Ergebnis.
+ */
+export async function cityBuysFood(
+	regionId: string,
+	buildingId: string,
+	itemId: string,
+	wanted: number
+): Promise<{ bought: number; spent: number }> {
+	let bought: number = 0;
+	let spent: number = 0;
+
+	while (bought < wanted) {
+		const billigstes = await cheapestOffer(regionId, itemId);
+		if (!billigstes) break;
+
+		const menge: number = await sequelize.transaction(async (t: Transaction) => {
+			const angebot = await ShopOffer.findByPk(billigstes.id, {
+				transaction: t,
+				lock: t.LOCK.UPDATE
+			});
+			if (!angebot) return 0;
+
+			const stadt = await Region.findByPk(regionId, { transaction: t, lock: t.LOCK.UPDATE });
+			const preis: number = angebot.dataValues.pricePerUnit;
+			const leistbar: number =
+				preis > 0 ? Math.floor((stadt?.dataValues.treasury ?? 0) / preis) : 0;
+			const stueck: number = Math.min(wanted - bought, angebot.dataValues.quantity, leistbar);
+			if (stueck <= 0) return 0;
+
+			await changeBuildingStock(buildingId, itemId, stueck, t);
+			await treasuryService.ausgeben(regionId, stueck * preis, 'ORPHAN_CARE', t);
+			await Character.increment('money', {
+				by: stueck * preis,
+				where: { id: angebot.dataValues.SellerCharacterId },
+				transaction: t
+			});
+			if (stueck === angebot.dataValues.quantity) await angebot.destroy({ transaction: t });
+			else {
+				await angebot.update(
+					{ quantity: angebot.dataValues.quantity - stueck },
+					{ transaction: t }
+				);
+			}
+			spent += stueck * preis;
+			return stueck;
+		});
+		if (menge === 0) break;
+		bought += menge;
+	}
+	return { bought, spent };
 }
 
 // --- Anzeigen ------------------------------------------------------------------------
