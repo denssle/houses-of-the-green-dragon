@@ -1,14 +1,14 @@
 {
 	"name": "houses-of-the-green-dragon",
 	"private": true,
-	"version": "0.6.3",
+	"version": "0.6.4",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
 		"start": "node build",
-		"start-server": "PORT=5174 ORIGIN=https://enzlor.uber.space node --env-file=.env build",
+		"start-server": "PORT=5174 ORIGIN=https://enzlor.uber.space SHUTDOWN_TIMEOUT=5 node --env-file=.env build",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",

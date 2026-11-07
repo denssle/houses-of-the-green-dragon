@@ -75,7 +75,13 @@ kill_server() {
 		kill -- -"$server_pid" 2>/dev/null || true
 		pkill -P "$server_pid" 2>/dev/null || true
 		kill "$server_pid" 2>/dev/null || true
-		wait "$server_pid" 2>/dev/null || true
+		# Bewusst kein `wait`: npm wartet auf node, und ein Prozess, der nicht endet, ließe
+		# den Test bis zum Zeitlimit des Jobs hängen, statt den Grund zu nennen.
+		local attempt
+		for attempt in $(seq 1 20); do
+			kill -0 "$server_pid" 2>/dev/null || break
+			sleep 1
+		done
 		server_pid=""
 	fi
 	pkill -f "node --env-file=.env build" 2>/dev/null || true
@@ -84,6 +90,7 @@ kill_server() {
 stop_server() {
 	kill_server
 	wait_for_port_free
+	wait_for_process_gone
 }
 
 # Wartet, bis auf Port 5174 nichts mehr antwortet. Bewusst `curl` OHNE --fail: Ein
@@ -98,6 +105,22 @@ wait_for_port_free() {
 		sleep 1
 	done
 	fail "Port 5174 ist noch belegt — der vorherige Serverprozess läuft weiter"
+}
+
+# Der Port allein beweist nichts: adapter-node schließt ihn bei SIGTERM sofort, und bis
+# 0.6.3 lief der Prozess danach ohne HTTP-Server weiter, weil der Takt die Event-Loop am
+# Leben hielt. Der Supervisor zeigte RUNNING, der Webserver lieferte 502 (Ausfall bis
+# 07.11.2026, vermutlich seit 22.10.). `kill_server` schickt ein SIGTERM; das muss zum Beenden reichen.
+wait_for_process_gone() {
+	local attempt
+	for attempt in $(seq 1 20); do
+		if ! pgrep -f "node --env-file=.env build" > /dev/null 2>&1; then
+			return 0
+		fi
+		sleep 1
+	done
+	pkill -KILL -f "node --env-file=.env build" 2>/dev/null || true
+	fail "Der Prozess läuft nach SIGTERM weiter — er lauscht nicht mehr, endet aber auch nicht"
 }
 
 # Wartet auf HTTP 200. Bricht sofort ab, wenn der Prozess schon gestorben ist — sonst

@@ -5,6 +5,7 @@ import * as userService from '$lib/server/service/userService';
 import type { User } from '$lib/model/user';
 import { startDB } from '$lib/db/db';
 import { startTicker } from '$lib/server/ticker';
+import { endenWennHttpEndet } from '$lib/server/shutdown';
 
 // Top-Level-await mit Absicht: Ohne Datenbank — oder mit gescheiterter Migration — soll
 // der Server gar nicht erst hochkommen, statt scheinbar zu laufen und auf jedem Request
@@ -14,6 +15,10 @@ await startDB();
 // Erst danach: Die Welt läuft weiter, auch wenn niemand angemeldet ist — aber nur, wenn
 // es eine Welt gibt.
 startTicker();
+
+// Der Takt hält die Event-Loop am Leben. Ohne diese Zeile überlebt der Prozess ein SIGTERM
+// ohne HTTP-Server, und das sieht von außen gesund aus.
+endenWennHttpEndet();
 
 /**
  * Was ohne Anmeldung offensteht.

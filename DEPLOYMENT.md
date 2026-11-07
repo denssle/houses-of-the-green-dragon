@@ -175,6 +175,12 @@ nicht erreichbar ist oder eine Migration aussteht, und nennt im Erfolgsfall Dial
 Stand der Weltuhr. Bleibt `currentTick` über Stunden stehen, läuft der Takt nicht — dann
 ist der Prozess zwar da, aber die Welt steht still.
 
+`.github/workflows/uptime.yml` fragt `/api/health` alle 15 Minuten von außen ab; schlägt
+der Lauf fehl, schickt GitHub eine Mail. Der Supervisor allein genügt dafür nicht: Im
+Herbst 2026 überlebte der Prozess ohne HTTP-Server (vermutlich ein SIGTERM am 22.10.) und
+blieb RUNNING, während der Webserver 502 lieferte. Seit 0.6.4 endet er mit dem HTTP-Server, und
+`supervisord.log` zeigt ihn dann als `exited`, im Log steht `HTTP-Server geschlossen`.
+
 ## Datensicherung
 
 Der Deploy legt vor jedem Einspielen einen Dump unter `~/backups/houses/` ab und hält

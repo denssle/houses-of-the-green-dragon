@@ -21,24 +21,31 @@ const NACHSEHEN_ALLE_MS = 60 * 1000;
 
 let laufend: NodeJS.Timeout | undefined;
 
+/** Was gerade rechnet. Beim Herunterfahren soll keine Stunde mittendrin abreißen. */
+const inArbeit = new Set<Promise<void>>();
+
 export function startTicker(): void {
 	// Der Dev-Server lädt Servermodule bei Änderungen neu; ohne diese Sperre liefen
 	// mehrere Intervalle nebeneinander und die Welt bekäme mehrere Herzschläge.
 	if (laufend) return;
 
-	laufend = setInterval(() => {
-		void schlagen();
-	}, NACHSEHEN_ALLE_MS);
+	laufend = setInterval(schlagenUndMerken, NACHSEHEN_ALLE_MS);
 
 	// Beim Start einmal sofort: Nach einem Neustart soll die Uhr nicht erst eine Minute
 	// falsch gehen.
-	void schlagen();
+	schlagenUndMerken();
 }
 
-export function stopTicker(): void {
-	if (!laufend) return;
+/** Hält den Takt an und wartet, bis der laufende Durchgang fertig ist. */
+export async function stopTicker(): Promise<void> {
 	clearInterval(laufend);
 	laufend = undefined;
+	await Promise.allSettled(inArbeit);
+}
+
+function schlagenUndMerken(): void {
+	const schlag: Promise<void> = schlagen().finally(() => inArbeit.delete(schlag));
+	inArbeit.add(schlag);
 }
 
 async function schlagen(): Promise<void> {

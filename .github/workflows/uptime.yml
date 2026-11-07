@@ -1,0 +1,45 @@
+# Verfügbarkeits-Check: Fragt alle 15 Minuten /api/health in Produktion ab.
+#
+# Warum: Bis zum 07.11.2026 lieferte die Seite 502, vermutlich seit dem 22.10., ohne dass
+# es jemandem auffiel. Schlägt dieser Lauf fehl, schickt GitHub eine Mail an den, der den Zeitplan
+# zuletzt geändert hat (Einstellung "Actions" unter github.com/settings/notifications).
+#
+# /api/health prüft Datenbank, Migrationen und Weltuhr und antwortet sonst mit 503. Verlangt
+# wird ausdrücklich Status 200 UND "status":"ok" im Body: Ohne Sitzung leitet fast jeder
+# andere Pfad auf die Anmeldung um, und eine Umleitung sagte hier gar nichts. Drei Versuche
+# mit Pause, damit ein einzelner Aussetzer (Neustart beim Deploy, Netz) keinen Alarm auslöst.
+#
+# Grenzen: GitHub startet Zeitpläne teils mit Verspätung, und in einem Repo ohne Aktivität
+# werden sie nach 60 Tagen abgeschaltet (GitHub meldet das vorher per Mail). Der Lauf kostet
+# nichts, solange das Repo öffentlich ist.
+name: Uptime-Check
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  health:
+    name: /api/health in Produktion
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Health-Endpunkt abfragen
+        run: |
+          url='https://enzlor.uber.space/houses/api/health'
+          for attempt in 1 2 3; do
+            rm -f body.json
+            code=$(curl --silent --show-error --max-time 20 --output body.json --write-out '%{http_code}' "$url" || true)
+            if [ "$code" = "200" ] && grep -q '"status":"ok"' body.json; then
+              cat body.json
+              echo
+              exit 0
+            fi
+            echo "Versuch ${attempt} fehlgeschlagen (HTTP ${code:-keine Antwort}): $(head -c 200 body.json 2>/dev/null)"
+            [ "$attempt" -lt 3 ] && sleep 30
+          done
+          echo "::error::${url} antwortet nicht mit 200 – Produktion prüfen (supervisorctl status houses)"
+          exit 1
