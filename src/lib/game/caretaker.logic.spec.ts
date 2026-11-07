@@ -60,6 +60,7 @@ function lage(werte: Partial<NpcState> = {}): NpcState {
 		workshopStockToSell: 0,
 		emptyPlots: 0,
 		plotTaxDueSoon: 0,
+		landReserve: Number.POSITIVE_INFINITY,
 		ownConstruction: false,
 		upgradeMaterialMissing: false,
 		upgradeMaterialPrice: null,

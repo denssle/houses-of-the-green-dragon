@@ -225,6 +225,26 @@ export function plotTaxDueSoon(
 	return propertyTaxFor(plotCount, ratePerPlot);
 }
 
+/**
+ * Wie viele Jahre Grundsteuer übrig bleiben müssen, wer Land auf Vorrat kauft (0.8.2, Punkt 87).
+ *
+ * **Vorrat ja, aber nur, wer ihn halten kann.** Billigen Grund kaufen und darauf sparen ist
+ * vernünftig; Grünau ist im Oktober 2026 aber genau daran verhungert, dass rund 55 billig
+ * ersteigerte Grundstücke Steuer fraßen. Drei Jahre lassen einem Vorrat Zeit, zu einem Bau
+ * zu werden, ehe der Steuertermin den Besitzer zur Rückgabe zwingt (0.8.0).
+ */
+export const LAND_RESERVE_YEARS = 3;
+
+/**
+ * Was einer nach dem Kauf noch haben muss, um Land auf Vorrat zu halten: drei Jahre Steuer
+ * auf alles, was ihm dann gehört — **und mindestens den Preis eines zweiten Grundstücks**.
+ * Ohne diese Untergrenze kaufte in einer Stadt ohne Grundsteuer jeder auf Vorrat, und der
+ * Boden wäre so gebunden wie vor 5.106.
+ */
+export function landReserve(ratePerPlot: number, plotsAfter: number, plotPrice: number): number {
+	return Math.max(LAND_RESERVE_YEARS * propertyTaxFor(plotsAfter, ratePerPlot), plotPrice);
+}
+
 /** Was ein Besitzer je Spieljahr für seine Grundstücke schuldet. */
 export function propertyTaxFor(plotCount: number, ratePerPlot: number): number {
 	if (plotCount <= 0 || ratePerPlot <= 0) return 0;

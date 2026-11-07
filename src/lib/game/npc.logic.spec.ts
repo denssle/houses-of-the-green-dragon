@@ -51,6 +51,7 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		workshopStockToSell: 0,
 		emptyPlots: 0,
 		plotTaxDueSoon: 0,
+		landReserve: Number.POSITIVE_INFINITY,
 		ownConstruction: false,
 		upgradeMaterialMissing: false,
 		upgradeMaterialPrice: null,
@@ -344,6 +345,16 @@ describe('Was ein NPC tut', () => {
 
 			it('und hat nichts vor, wenn es nichts zu bauen gibt', () => {
 				expect(idleReason(gruender(nichtsZuBauen))).toBe('CONTENT');
+			});
+
+			it('kauft auf Vorrat, wer ihn halten kann, und spart nicht darauf (0.8.2)', () => {
+				// 76 Münzen, Rücklage 36, Grundstück 40: Es bleibt nichts übrig.
+				expect(decideNpcAction(gruender({ ...ohneMaterial, landReserve: 40 }))).not.toBe(
+					'BUY_PLOT'
+				);
+				const wohlhabend = gruender({ ...ohneMaterial, money: 36 + 40 + 40, landReserve: 40 });
+				expect(decideNpcAction(wohlhabend)).toBe('BUY_PLOT');
+				expect(savingsTarget(wohlhabend)).toBeNull();
 			});
 
 			it('kauft aber, sobald das Material am Markt ist', () => {
@@ -698,6 +709,7 @@ describe('Was ein NPC tut', () => {
 				workshopStockToSell: 0,
 				emptyPlots: 0,
 				plotTaxDueSoon: 0,
+				landReserve: Number.POSITIVE_INFINITY,
 				money: 10
 			});
 
@@ -716,6 +728,7 @@ describe('Was ein NPC tut', () => {
 				workshopStockToSell: 0,
 				emptyPlots: 0,
 				plotTaxDueSoon: 0,
+				landReserve: Number.POSITIVE_INFINITY,
 				money: 10
 			});
 

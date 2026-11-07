@@ -1,3 +1,4 @@
+import { landReserve } from '$lib/game/law.logic';
 import { seededRoll } from '$lib/game/testRoll';
 import { garmentIntact } from '$lib/game/attire.logic';
 import { CAMPAIGN_TICKS, isSettled, npcChoice } from '$lib/game/election.logic';
@@ -112,6 +113,22 @@ export interface NpcTick {
 	byFailure: Record<string, number>;
 	/** Warum die Untätigen untätig waren. */
 	byIdleReason: Partial<Record<IdleReason, number>>;
+}
+
+/**
+ * Der Grundsteuersatz, einmal je Tick und Stadt (Punkt 67): Die Lage jedes Einwohners fragt
+ * danach, und innerhalb eines Ticks ändert er sich nur durch eine Amtshandlung, die erst
+ * nach den Einwohnern kommt.
+ */
+const satzJeTick = new Map<string, number>();
+async function grundsteuersatz(regionId: string, tick: number): Promise<number> {
+	const schluessel = `${regionId}@${tick}`;
+	const bekannt = satzJeTick.get(schluessel);
+	if (bekannt !== undefined) return bekannt;
+	const satz: number = await lawService.rate(regionId, 'PROPERTY_TAX');
+	satzJeTick.clear();
+	satzJeTick.set(schluessel, satz);
+	return satz;
 }
 
 /** Fisher-Yates mit dem Würfel aus `testRoll`, geseedet aus der Tickzahl. */
@@ -1000,6 +1017,11 @@ async function lageAufnehmen(
 			hasFreePlot: grundstuecke.some((flaeche) => !flaeche.hasBuilding),
 			emptyPlots: leereGrundstuecke.length,
 			plotTaxDueSoon: steuerNaht,
+			landReserve: landReserve(
+				await grundsteuersatz(werte.RegionId, tick),
+				grundstuecke.length + 1,
+				PLOT_PRICE
+			),
 			hasLease: eigenePacht !== undefined,
 			leaseAvailable: freieFlaeche !== undefined,
 			ownStockToSell:

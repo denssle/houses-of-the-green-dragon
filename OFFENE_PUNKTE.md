@@ -1800,7 +1800,12 @@ gegen nachher (`e115f4e`).
   bei 7 und 42. Diese Unternehmungslustigen gab es vorher auch; sie liefen unter anderem
   Namen.
 
-**Geschlossen mit 0.8.1:** `bauabsicht` fragt `werkstattErreichbarFuer`. Bis dahin bot für Bauland, wem Haus oder Werkstatt
+**Geschlossen mit 0.8.1, gelockert mit 0.8.2:** `bauabsicht` fragt `werkstattErreichbarFuer`. Wer
+die Werkstatt nicht bauen kann, darf seit 0.8.2 trotzdem auf Vorrat kaufen, zum Festpreis wie in
+der Versteigerung, dort aber nur mit niedrigem Gebot. Bedingung ist, dass danach drei Jahre
+Grundsteuer auf seinen ganzen Boden übrig bleiben, mindestens aber ein zweiter Grundstückspreis
+(`landReserve`). Entschieden am 07.11.2026: Billigen Grund kaufen und darauf sparen ist
+vernünftig, nur halten können muss man ihn. Bis dahin bot für Bauland, wem Haus oder Werkstatt
 fehlte, ohne zu fragen, ob die Werkstatt erreichbar ist. Dafür braucht der Dienst den
 NPC-Zustand oder wenigstens `werkstattErreichbar` als eigene Abfrage.
 

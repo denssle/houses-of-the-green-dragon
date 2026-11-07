@@ -26,11 +26,14 @@ import {
 } from '$lib/game/auction.logic';
 import { Building } from '$lib/db/model/building';
 import { AGE_OF_MAJORITY, ageInYears, TICKS_PER_YEAR } from '$lib/game/time';
+import { landReserve } from '$lib/game/law.logic';
+import { PLOT_PRICE } from '$lib/game/economy';
 import type { BuildingTemplate } from '$lib/model/buildingTemplate';
 import * as buildingService from '$lib/server/service/buildingService';
 import * as characterService from '$lib/server/service/characterService';
 import * as chronicleService from '$lib/server/service/chronicleService';
 import * as electionService from '$lib/server/service/electionService';
+import * as lawService from '$lib/server/service/lawService';
 import * as nameService from '$lib/server/service/nameService';
 import * as skillService from '$lib/server/service/skillService';
 import * as supplyService from '$lib/server/service/supplyService';
@@ -561,13 +564,19 @@ async function bauabsicht(characterId: string, regionId: string): Promise<BidInt
 	if (!hat('RESIDENCE')) return 'MEDIUM';
 	if (hat('CRAFT')) return 'NONE';
 
-	// **Und die Werkstatt muss erreichbar sein** (0.8.0, Punkt 87). Wer Boden für einen Betrieb
-	// ersteigert, den er nie bauen kann, bindet einen Platz und zahlt Jahr für Jahr Steuer
-	// darauf. `npc.logic` fragt das seit 5.106 vor dem Kauf zum Festpreis; hier fehlte es.
+	// **Für eine Werkstatt, die er bauen kann, bietet er normal** (0.8.0, Punkt 87).
 	//
 	// Dynamisch geladen, weil `npcService` diesen Dienst selbst einbindet.
 	const { werkstattErreichbarFuer } = await import('$lib/server/service/npcService');
-	return (await werkstattErreichbarFuer(characterId, regionId)) ? 'MEDIUM' : 'NONE';
+	if (await werkstattErreichbarFuer(characterId, regionId)) return 'MEDIUM';
+
+	// **Sonst auf Vorrat, und nur niedrig** (0.8.2) — wenn er nach dem Gebot noch hält, was
+	// `landReserve` verlangt. Dieselbe Regel wie beim Kauf zum Festpreis in `npc.logic`.
+	const person = await Character.findByPk(characterId, { attributes: ['money'] });
+	const geld: number = person?.dataValues.money ?? 0;
+	const satz: number = await lawService.rate(regionId, 'PROPERTY_TAX');
+	const nachDemGebot: number = geld - npcBidLimit(geld, 'LOW');
+	return nachDemGebot >= landReserve(satz, grund.length + 1, PLOT_PRICE) ? 'LOW' : 'NONE';
 }
 
 /**

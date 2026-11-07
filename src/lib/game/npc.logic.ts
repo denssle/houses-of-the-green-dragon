@@ -130,6 +130,11 @@ export interface NpcState {
 	 * Was beim nahen Steuertermin fällig wird, null, wenn er noch fern ist (0.8.0, Punkt 117).
 	 */
 	plotTaxDueSoon: number;
+	/**
+	 * Was nach einem Kauf auf Vorrat übrig bleiben muss (`landReserve`, 0.8.2): drei Jahre
+	 * Grundsteuer, mindestens ein zweiter Grundstückspreis.
+	 */
+	landReserve: number;
 	/** Pachtet er eine Abbaufläche? */
 	hasLease: boolean;
 	/** Steht eine Fläche zur Pacht frei? */
@@ -948,7 +953,11 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 		state.plotPrice !== null &&
 		uebrig >= state.plotPrice &&
 		isEnterprising(state.personality) &&
-		werkstattErreichbar(state)
+		// **Für eine Werkstatt, die er bauen kann — oder auf Vorrat, wenn er ihn halten kann**
+		// (0.8.2, Punkt 87). Wer sie heute nicht bauen kann, aber genug übrig hat, kauft den
+		// Boden trotzdem und spart darauf. Gespart wird darauf nicht: Ein Vorrat ist, was man
+		// sich nebenher leistet, kein Ziel.
+		(werkstattErreichbar(state) || uebrig - state.plotPrice >= state.landReserve)
 	) {
 		return 'BUY_PLOT';
 	}
