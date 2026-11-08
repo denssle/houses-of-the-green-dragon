@@ -47,6 +47,7 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		hasFreePlot: false,
 		hasLease: false,
 		leaseAvailable: false,
+		surveyAvailable: false,
 		ownStockToSell: 0,
 		workshopStockToSell: 0,
 		emptyPlots: 0,
@@ -919,5 +920,56 @@ describe('Was ein NPC tut', () => {
 
 			expect(idleReason(ohneArbeit)).toBe('NO_WORK');
 		});
+	});
+});
+
+describe('Wer Grund braucht, hilft ihn erschließen (0.9.1, Punkt 124)', () => {
+	const unternehmend = anlagen({ ambition: 100, diligence: 100 });
+	/** Unternehmungslustig, ohne Werkstatt und ohne Grund — und es gibt keinen zu kaufen. */
+	const gruender = (werte: Partial<NpcState> = {}): NpcState =>
+		zufrieden({
+			personality: unternehmend,
+			ownsWorkshop: false,
+			hasFreePlot: false,
+			workshopPrice: 100,
+			plotPrice: null,
+			surveyAvailable: true,
+			...werte
+		});
+
+	it('arbeitet an der Erschließung, statt untätig auf Bauland zu warten', () => {
+		expect(decideNpcAction(gruender())).toBe('SURVEY');
+	});
+
+	it('wartet weiter, wenn gerade nichts erschlossen wird', () => {
+		expect(decideNpcAction(gruender({ surveyAvailable: false }))).not.toBe('SURVEY');
+	});
+
+	it('kauft lieber, wenn es Grund zu kaufen gibt', () => {
+		expect(decideNpcAction(gruender({ plotPrice: 40 }))).not.toBe('SURVEY');
+	});
+
+	it('lässt es ohne Kraft bleiben', () => {
+		expect(decideNpcAction(gruender({ actionPoints: 0 }))).not.toBe('SURVEY');
+	});
+
+	it('hilft auch für das Haus der Familie', () => {
+		const familie = zufrieden({
+			isMarried: true,
+			ownsHome: false,
+			homePrice: 100,
+			materialMissing: false,
+			hasFreePlot: false,
+			plotPrice: null,
+			surveyAvailable: true
+		});
+		expect(decideNpcAction(familie)).toBe('SURVEY');
+	});
+
+	it('und lässt den, der nichts vorhat, in Ruhe', () => {
+		// Nicht unternehmungslustig, eigenes Haus: braucht keinen Grund.
+		expect(decideNpcAction(zufrieden({ surveyAvailable: true, plotPrice: null }))).not.toBe(
+			'SURVEY'
+		);
 	});
 });

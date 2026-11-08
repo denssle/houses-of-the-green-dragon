@@ -489,6 +489,25 @@ async function handelnd(
 		if (grund === 'EMPLOYER_BROKE') grund += `:${lage.employerName ?? 'Stadtkasse'}`;
 		return { action, failure: grund };
 	};
+	/**
+	 * **Und womit die Kammer voll ist** (0.9.1): `BUY_MATERIAL/INVENTORY_FULL` stand im ersten
+	 * Lauf mit `SURVEY` 1268 Mal im Bericht, und ohne den Inhalt war nicht zu sagen, ob die
+	 * Kammer zu klein ist oder mit etwas anderem vollsteht. Kostet eine Abfrage, nur hier.
+	 */
+	const buchMitKammer = async (
+		action: NpcAction,
+		ergebnis?: { ok: boolean; reason?: string; missing?: { itemId: string }[] }
+	): Promise<Ausgang> => {
+		const ausgang: Ausgang = buch(action, ergebnis);
+		if (ausgang.failure !== 'INVENTORY_FULL') return ausgang;
+		const kammer = (await needService.getStock(npcId)).sort((a, b) => b.quantity - a.quantity);
+		const belegt: number = kammer.reduce((summe, p) => summe + p.quantity, 0);
+		ausgang.failure += `:${belegt}=${kammer
+			.slice(0, 2)
+			.map((p) => p.itemId)
+			.join('+')}`;
+		return ausgang;
+	};
 
 	switch (handlung) {
 		case 'EAT':
@@ -544,6 +563,14 @@ async function handelnd(
 				lage.workplaceId
 					? await buildingActionService.doBuildingAction('REPAIR_FOR_HIRE', npcId, lage.workplaceId)
 					: undefined
+			);
+
+		// **Mitarbeiten an der Erschließung, auf deren Boden er wartet** (0.9.1, Punkt 124).
+		// Dieselbe Schicht wie die eines Tagelöhners, mit demselben Lohn.
+		case 'SURVEY':
+			return buch(
+				'SURVEY',
+				lage.surveySiteId ? await auctionService.surveyForHire(npcId, lage.surveySiteId) : undefined
 			);
 
 		case 'MOVE_IN':
@@ -695,7 +722,7 @@ async function handelnd(
 
 			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
 			const wieviel: number = Math.min(lage.missingMaterialCount, angebot.quantity, bezahlbar);
-			return buch(
+			return buchMitKammer(
 				'BUY_MATERIAL',
 				wieviel > 0 ? await tradeService.buyFromOffer(npcId, angebot.id, wieviel) : undefined
 			);
@@ -708,7 +735,7 @@ async function handelnd(
 
 			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
 			const wieviel: number = Math.min(lage.workshopMaterialCount, angebot.quantity, bezahlbar);
-			return buch(
+			return buchMitKammer(
 				'BUY_WORKSHOP_MATERIAL',
 				wieviel > 0 ? await tradeService.buyFromOffer(npcId, angebot.id, wieviel) : undefined
 			);
@@ -722,7 +749,7 @@ async function handelnd(
 
 			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
 			const wieviel: number = Math.min(lage.upgradeMaterialCount, angebot.quantity, bezahlbar);
-			return buch(
+			return buchMitKammer(
 				'BUY_UPGRADE_MATERIAL',
 				wieviel > 0 ? await tradeService.buyFromOffer(npcId, angebot.id, wieviel) : undefined
 			);
@@ -808,6 +835,7 @@ async function lageAufnehmen(
 			workplaceId?: string;
 			/** Die Erschließung, an der er arbeiten würde — statt an einem Haus (5.92). */
 			surveyPlotId?: string;
+			surveySiteId?: string;
 			homeId?: string;
 			matchId?: string;
 			jobId?: string;
@@ -1095,7 +1123,15 @@ async function lageAufnehmen(
 		: await freierWohnplatz(werte.RegionId, npcId);
 	const partner = werte.spouseId ? undefined : await naechsterPartner(npc.dataValues, tick);
 
+	// **Eine Erschließung zum Mitarbeiten** (0.9.1, Punkt 124) — nur für den, der keinen
+	// Bauplatz hat und keinen kaufen kann; alle anderen kostet das keine Abfrage.
+	const erschliessung: string | undefined =
+		!freiesBauland && !grundstuecke.some((flaeche) => !flaeche.hasBuilding)
+			? await zahlbareBaustelle(werte.RegionId, await nachschlag.koennen('CONSTRUCTION'))
+			: undefined;
+
 	return {
+		surveySiteId: erschliessung,
 		// **Am Kornspeicherpreis gerechnet, nicht am Grundpreis** — denn dorthin führt
 		// diese Zahl. Seit dem Aufschlag (Punkt 85) sind das zwei verschiedene, und wer
 		// mit der kleineren rechnet, bestellt fünf Laibe und bekommt `NOT_ENOUGH_MONEY`.
@@ -1167,6 +1203,7 @@ async function lageAufnehmen(
 			),
 			hasLease: eigenePacht !== undefined,
 			leaseAvailable: freieFlaeche !== undefined,
+			surveyAvailable: erschliessung !== undefined,
 			ownStockToSell:
 				(zuVerkaufen?.quantity ?? 0) + (marktplatz ? (ueberschuss?.quantity ?? 0) : 0),
 			workshopStockToSell: zuVerkaufen?.quantity ?? 0,

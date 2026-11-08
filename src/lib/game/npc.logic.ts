@@ -3,6 +3,7 @@ import { COURT_ACTION_POINT_COST } from '$lib/game/family.logic';
 import type { Personality } from '$lib/game/personality.logic';
 import { SATIETY_COMFORTABLE, SATIETY_WEAKENED } from '$lib/game/need.logic';
 import { RENOVATION_ACTION_POINT_COST } from '$lib/game/building.logic';
+import { REPAIR_ACTION_POINT_COST } from '$lib/game/buildingAction.logic';
 
 /**
  * Was ein NPC als Nächstes tut.
@@ -40,6 +41,8 @@ export const NPC_ACTIONS = [
 	'BUY_PLOT',
 	// Seit 0.8.0 der Rückweg: leeren Grund abgeben, den man nicht mehr tragen kann.
 	'GIVE_UP_PLOT',
+	// Seit 0.9.1: wer Grund braucht und keinen findet, hilft ihn erschließen (Punkt 124).
+	'SURVEY',
 	'BUILD',
 	'LEASE',
 	'HARVEST',
@@ -145,6 +148,11 @@ export interface NpcState {
 	hasLease: boolean;
 	/** Steht eine Fläche zur Pacht frei? */
 	leaseAvailable: boolean;
+	/**
+	 * **Läuft eine Erschließung, an der er gegen Lohn mitarbeiten kann** (0.9.1, Punkt 124)?
+	 * Nur gefragt für den, der Grund braucht und keinen zu kaufen findet.
+	 */
+	surveyAvailable: boolean;
 	/** Liegen im eigenen Betrieb Waren, die noch niemand anbietet? */
 	ownStockToSell: number;
 	/**
@@ -474,6 +482,7 @@ export function stateFlags(state: NpcState): string[] {
 	if (state.leaseAvailable) flags.push('pacht_frei');
 	if (state.ownStockToSell > 0) flags.push('ware_da');
 	if (state.hasFreePlot) flags.push('bauplatz');
+	if (state.surveyAvailable) flags.push('erschließung');
 	if (state.ownsHome) flags.push('eigenes_dach');
 	if (isEnterprising(state.personality)) flags.push('unternehmend');
 	if (state.money >= desiredReserve(state.personality, state.foodPrice))
@@ -1082,7 +1091,30 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 		return 'BUY_PLOT';
 	}
 
+	// **Und wo es keinen gibt, hilft er ihn schaffen** (0.9.1, Punkt 124). Bis hierher stand
+	// ein Unternehmungslustiger mit Geld und ohne Grund einfach da: Arbeiten ging er nicht,
+	// weil er über seinem Sparziel lag, und gerade deshalb leistete er auch keine der
+	// Erschließungsschichten, auf die er wartete. Im Messlauf (Saat 86, 600 Ticks) kamen so
+	// 31 Schichten zusammen, während 1360 Mal jemand auf Bauland wartete.
+	if (hilftErschliessen(state)) return 'SURVEY';
+
 	return undefined;
+}
+
+/**
+ * **Wer Grund braucht, keinen kaufen kann und an einer Erschließung mitarbeiten könnte**
+ * (0.9.1, Punkt 124) — für ein Haus der Familie oder für die eigene Werkstatt.
+ *
+ * Er wird dafür bezahlt wie jeder Tagelöhner: Das ist keine Fron, sondern Lohnarbeit an der
+ * Stelle, an der sie ihm selbst am meisten nützt.
+ */
+function hilftErschliessen(state: NpcState): boolean {
+	if (!state.isAdult || state.actionPoints < REPAIR_ACTION_POINT_COST) return false;
+	if (!state.surveyAvailable || state.plotPrice !== null || state.hasFreePlot) return false;
+	const fuersHaus: boolean = state.isMarried && !state.ownsHome && state.homePrice !== null;
+	const fuerDieWerkstatt: boolean =
+		!state.ownsWorkshop && state.workshopPrice !== null && isEnterprising(state.personality);
+	return fuersHaus || fuerDieWerkstatt;
 }
 
 /**
@@ -1221,6 +1253,8 @@ function eigenesDach(state: NpcState): NpcAction | undefined {
 			: undefined;
 	}
 	if (!state.hasFreePlot) {
+		// **Kein Grund zu haben? Dann mit anpacken** (0.9.1, Punkt 124).
+		if (hilftErschliessen(state)) return 'SURVEY';
 		return state.plotPrice !== null && uebrig >= state.plotPrice ? 'BUY_PLOT' : undefined;
 	}
 	// **Material und Grundstück genügen** (5.76, Punkt 102). Bis dahin stand hier noch

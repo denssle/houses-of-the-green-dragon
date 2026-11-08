@@ -62,7 +62,7 @@ offenen, nach Nummer sortiert.
 | 120 | Fernhandel — Lieferungen mit Ankunft, Preisunterschiede zwischen Städten                           | 41, 119                    | Entwurf     |
 | 121 | Weniger Geburten bei Saat 86 seit 0.5.111 — Zufall oder Mechanismus?                               | —                          | Befund      |
 | 122 | Die Hungersnot von Grünau — **Waisen und Stellen behoben mit 0.7.0**, die Steuer als Ursache offen | —                          | Befund      |
-| 124 | Bauland entsteht zu langsam — eine Erschließung braucht den ganzen Lauf                            | —                          | Befund      |
+| 124 | Bauland entsteht zu langsam — **Mitarbeit an der Erschließung gebaut mit 0.9.1**                   | —                          | teilweise   |
 | 125 | Familien ziehen zu — **gebaut mit 0.9.0**; jetzt fehlen ledige Männer                              | —                          | teilweise   |
 
 ## Die Bauordnung
@@ -2240,6 +2240,36 @@ Wer auf Bauland wartet, liegt über seiner Rücklage und sucht keinen. Noch nich
 **Mögliche Hebel**, zu entscheiden: Wer Land will, hilft beim Erschließen (eine Handlung in
 der Entfaltung); der Bürgermeister legt selbst Hand an wie beim Instandsetzen (5.78);
 weniger Schichten je Parzelle; mehr als eine Baustelle, wenn die Nachfrage da ist.
+
+**Gebaut mit 0.9.1: Wer Grund braucht, hilft ihn erschließen.** Der Mechanismus stand im
+Code: Eine Erschließungsschicht leistete nur, wer `WORK` wählte, und arbeiten ging nur, wer
+unter seinem Sparziel lag. Wer auf Bauland wartete, hatte aber gar keines — es gab ja nichts
+zu kaufen. Neu ist die Handlung `SURVEY`: Wer für das Haus seiner Familie oder seine
+Werkstatt Grund braucht, keinen kaufen kann und eine bezahlbare Erschließung findet,
+arbeitet dort für den Tagelohn. Gefragt wird nur, wer weder Bauplatz hat noch einen kaufen
+kann; alle anderen kostet es keine Abfrage.
+
+| 1000 Ticks             | Saat 86, 0.9.0 | Saat 86, 0.9.1 | Saat 1, 0.9.0 | Saat 1, 0.9.1 |
+| ---------------------- | -------------: | -------------: | ------------: | ------------: |
+| Häuser                 |             29 |         **54** |            32 |        **43** |
+| Lebende                |             45 |             47 |            37 |            37 |
+| Geburten               |             12 |             12 |            10 |            11 |
+| Erschließungsschichten |              ? |            962 |             ? |           636 |
+| Parzellen fertig       |              ? |         **48** |             ? |        **31** |
+| Stadtkasse am Ende     |           1006 |         **74** |           873 |           760 |
+
+Zum Vergleich: In 600 Ticks unter 0.8.5 waren es 31 Schichten und eine Parzelle. „Kein
+Bauland zu haben“ fiel bei Saat 86 von rund 1360 (600 Ticks) auf 24 (1000 Ticks).
+
+**Was offen bleibt:**
+
+- **Mehr Häuser, nicht mehr Menschen.** Der Engpass hat sich verschoben — vermutlich zum
+  Heiratsmarkt (Punkt 125).
+- **Die Kasse.** Bei Saat 86 stehen 3932 Münzen Erschließungslohn 1941 aus Versteigerungen
+  gegenüber; am Ende liegen 74 in der Kasse, und aus ihr kommt auch das Waisenbrot.
+- **`BUY_MATERIAL/INVENTORY_FULL`** stand im selben Lauf 1268 Mal im Bericht. Seit 0.9.1
+  nennt der Schlüssel den Inhalt der Kammer: **Sie ist voller Brot** (17 bis 20 Laibe bei 20
+  Plätzen), und für Bretter ist kein Platz. Woher das Brot kommt, ist noch offen.
 
 ### 125. Familien ziehen zu — und wer allein kommt, folgt dem Heiratsmarkt
 
