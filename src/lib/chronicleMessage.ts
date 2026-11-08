@@ -173,7 +173,7 @@ function satz(entry: ChronicleLine): string {
 			// Brot geben könnte. `detail` trägt die Fertigkeit als Kennung; den Namen dazu
 			// weiß `SKILL_NAMES`.
 			return entry.detail
-				? `${wer} ist in der Stadt angekommen — ${fach(entry.detail)} ist sein Handwerk.`
+				? `${wer} ist in der Stadt angekommen und bringt ein Handwerk mit: ${fach(entry.detail)}.`
 				: `${wer} ist in der Stadt angekommen.`;
 		case 'PLOT_GIVEN_UP':
 			return `${wer} hat das Grundstück ${entry.detail ?? 'unbekannt'} aufgegeben.`;

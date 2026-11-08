@@ -63,6 +63,7 @@ offenen, nach Nummer sortiert.
 | 121 | Weniger Geburten bei Saat 86 seit 0.5.111 — Zufall oder Mechanismus?                               | —                          | Befund      |
 | 122 | Die Hungersnot von Grünau — **Waisen und Stellen behoben mit 0.7.0**, die Steuer als Ursache offen | —                          | Befund      |
 | 124 | Bauland entsteht zu langsam — eine Erschließung braucht den ganzen Lauf                            | —                          | Befund      |
+| 125 | Familien ziehen zu — **gebaut mit 0.9.0**; jetzt fehlen ledige Männer                              | —                          | teilweise   |
 
 ## Die Bauordnung
 
@@ -2239,3 +2240,42 @@ Wer auf Bauland wartet, liegt über seiner Rücklage und sucht keinen. Noch nich
 **Mögliche Hebel**, zu entscheiden: Wer Land will, hilft beim Erschließen (eine Handlung in
 der Entfaltung); der Bürgermeister legt selbst Hand an wie beim Instandsetzen (5.78);
 weniger Schichten je Parzelle; mehr als eine Baustelle, wenn die Nachfrage da ist.
+
+### 125. Familien ziehen zu — und wer allein kommt, folgt dem Heiratsmarkt
+
+**Anlass, 08.11.2026:** Grünau hatte keine einzige ledige erwachsene Frau mehr. Von 22
+Zuzügen waren 14 Männer und 8 Frauen — ein Münzwurf, der schiefging. Jede der acht hat
+geheiratet, vier Männer blieben ledig. Geburten hängen an Frauen.
+
+**Gebaut mit 0.9.0:**
+
+- **Haushaltsformen** (`planHousehold`): allein 50 %, Paar 20 %, Familie mit ein bis drei
+  Kindern 20 %, Großfamilie mit ein oder zwei Großeltern 10 %. Passt der Haushalt nicht in
+  die freien Betten, schrumpft er. Eine Familie gründet ein Haus; Ehe und Abstammung sind
+  gesetzt (der Vater ist Kind der Großeltern), damit Erbe und Vormundschaft greifen. Jeder
+  Erwachsene bringt Geld und ein Handwerk mit, möglichst ein anderes als der Partner;
+  Kinder ziehen sofort in die Unterkunft. Ehrgeiz und Fleiß fest nur für die Eltern.
+- **Wer allein kommt, folgt dem Heiratsmarkt** (`arrivalGender`): Chance auf eine Frau =
+  (ledige Männer + 1) / (alle Ledigen + 2).
+- **Gemessen** im Abschnitt `=== ZUZUG UND HEIRATSMARKT ===`: Ankünfte je Form, Köpfe,
+  ledige Erwachsene im Mittel, Ticks mit einseitigem Heiratsmarkt.
+- Nebenbei: Die Chronik schrieb bei jeder Ankunft „ist **sein** Handwerk“, auch bei Frauen.
+
+**Vorher/nachher, 1000 Ticks:**
+
+|                            | Saat 86 alt | Saat 86 neu | Saat 1 alt | Saat 1 neu |
+| -------------------------- | ----------: | ----------: | ---------: | ---------: |
+| Lebende am Ende            |          31 |      **45** |         25 |     **37** |
+| Geburten                   |          11 |          12 |          5 |         10 |
+| Zuzug (Köpfe)              |          14 |          26 |         12 |         19 |
+| Frauen-Ticks ledig (18–45) |          75 |         988 |         54 |       1610 |
+
+**Was offen ist: Jetzt kippt der Heiratsmarkt nach der anderen Seite.** Im Mittel warten
+1,0 bis 1,6 ledige Frauen auf 0,1 ledige Männer; 614 bzw. 875 Ticks lang gab es keinen
+ledigen Mann, während eine Frau wartete. Die Regel für den Einzelnen gleicht das aus — aber
+nur 4 von 17 Ankünften kamen allein (erwartet die Hälfte; am Würfel liegt es nicht, ein
+Probelauf über fünf Millionen Würfe ergab 49,7 %). Und mitgebrachte Töchter werden
+erwachsen, ohne dass jemand für sie mitkommt.
+
+**Mögliche Hebel:** Bei einseitigem Heiratsmarkt öfter einen Einzelnen schicken; oder die
+Form selbst nach dem Bedarf richten. Erst mit mehr Saaten nachmessen, ob 4 von 17 Pech war.

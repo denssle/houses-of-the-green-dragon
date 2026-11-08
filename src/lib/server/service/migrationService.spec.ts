@@ -17,6 +17,7 @@ import * as chronicleService from '$lib/server/service/chronicleService';
 import * as migrationService from '$lib/server/service/migrationService';
 import { canVote, isSettled, CITIZENSHIP_AFTER_YEARS } from '$lib/game/election.logic';
 import { yearsToTicks } from '$lib/game/time';
+import { arrivalGender } from '$lib/game/migration.logic';
 
 /**
  * Zuzug (5.24, Punkt 71).
@@ -131,6 +132,91 @@ describe('Zuzug', () => {
 		expect(ankunft).toBeDefined();
 		// Das Handwerk gehört in den Eintrag: Es ist der Grund, warum die Ankunft zählt.
 		expect(ankunft?.detail).toBe(angekommen!.skill);
+	});
+
+	describe('als Familie (0.9.0)', () => {
+		/** Ein Würfel: erst die gegebenen Werte, danach 0.5. */
+		const folge =
+			(...werte: number[]) =>
+			() =>
+				werte.length > 0 ? werte.shift()! : 0.5;
+
+		it('kommt mit drei Generationen, verheiratet und verwandt, unter einem Haus', async () => {
+			// Kommt (0), Großfamilie (0.95), drei Kinder (0.99), zwei Großeltern (0.99).
+			const ankunft = (await migrationService.admitNewcomers(
+				stadtId,
+				JETZT,
+				folge(0, 0.95, 0.99, 0.99)
+			))!;
+
+			expect(ankunft.form).toBe('GROSSFAMILIE');
+			expect(ankunft.members).toHaveLength(7);
+
+			const leute = await Character.findAll({
+				where: { id: ankunft.members.map((m) => m.characterId) }
+			});
+			const rolle = (r: string) =>
+				leute.find(
+					(p) => p.dataValues.id === ankunft.members.find((m) => m.rolle === r)!.characterId
+				)!.dataValues;
+			const vater = rolle('HAUPT');
+			const mutter = rolle('PARTNER');
+			const opa = rolle('GROSSVATER');
+			const oma = rolle('GROSSMUTTER');
+
+			// Ein Haus für alle.
+			expect(new Set(leute.map((p) => p.dataValues.DynastyId)).size).toBe(1);
+			// Verheiratet, beide Paare.
+			expect(vater.spouseId).toBe(mutter.id);
+			expect(mutter.spouseId).toBe(vater.id);
+			expect(opa.spouseId).toBe(oma.id);
+			// Der Vater ist das Kind der Großeltern — damit greifen Erbe und Vormundschaft.
+			expect(vater.fatherId).toBe(opa.id);
+			expect(vater.motherId).toBe(oma.id);
+
+			const kinder = leute.filter((p) => p.dataValues.fatherId === vater.id);
+			expect(kinder).toHaveLength(3);
+			for (const kind of kinder) {
+				expect(kind.dataValues.motherId).toBe(mutter.id);
+				// Kinder ziehen sofort mit ein und bringen kein eigenes Handwerk mit.
+				expect(kind.dataValues.HomeBuildingId).not.toBeNull();
+				expect(kind.dataValues.money).toBe(0);
+				expect(await Skill.count({ where: { CharacterId: kind.dataValues.id } })).toBe(0);
+			}
+			// Jeder Erwachsene bringt ein Handwerk mit.
+			for (const erwachsen of [vater, mutter, opa, oma]) {
+				expect(await Skill.count({ where: { CharacterId: erwachsen.id } })).toBe(1);
+			}
+		});
+
+		it('schickt eine Frau, wenn ledige Männer warten und keine Frau', async () => {
+			// Zwei ledige Männer im passenden Alter.
+			for (const name of ['Ledig1', 'Ledig2']) {
+				await Character.create({
+					id: randomUUID(),
+					firstName: name,
+					role: 'NPC',
+					gender: 'MALE',
+					birthTick: JETZT - yearsToTicks(30),
+					lastTickProcessed: JETZT,
+					satiety: 100,
+					lastNeedTick: JETZT,
+					actionPoints: 0,
+					money: 0,
+					RegionId: stadtId,
+					arrivedTick: JETZT - 1
+				});
+			}
+			const ledige = await migrationService.ledigeErwachsene(stadtId, JETZT);
+			expect(ledige.maenner).toBeGreaterThan(ledige.frauen);
+			// Allein (0.1), Geschlecht 0.7: unter der Frauenchance, falls die Männer überwiegen.
+			const ankunft = (await migrationService.admitNewcomers(stadtId, JETZT, folge(0, 0.1, 0.7)))!;
+			const person = (await Character.findByPk(ankunft.characterId))!.dataValues;
+
+			expect(ankunft.form).toBe('ALLEIN');
+			// Derselbe Wurf, dieselben Ledigen — die Ankunft folgt dem Heiratsmarkt.
+			expect(person.gender).toBe(arrivalGender(ledige.maenner, ledige.frauen, 0.7));
+		});
 	});
 
 	it('lässt niemanden kommen, wo kein Bett frei ist', async () => {

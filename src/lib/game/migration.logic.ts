@@ -173,3 +173,157 @@ export function skillToBring(
 	const auswahl = fehlend.length > 0 ? fehlend : allSkills;
 	return auswahl[Math.min(auswahl.length - 1, Math.floor(roll * auswahl.length))];
 }
+
+/**
+ * **Wer allein kommt, kommt dorthin, wo er Anschluss findet** (0.9.0).
+ *
+ * Bis 0.8.6 war das Geschlecht ein Münzwurf. In Grünau kamen so 14 Männer und 8 Frauen,
+ * jede der acht hat geheiratet — und vier Männer blieben ledig, während die Stadt keine
+ * einzige ledige Frau mehr hatte. Geburten hängen an Frauen, nicht an Männern.
+ *
+ * Die Chance auf eine Frau ist deshalb der Anteil der ledigen Männer an allen Ledigen,
+ * geglättet um je einen: ohne Ledige 50:50, bei vier ledigen Männern und keiner Frau 5 zu 6.
+ */
+export function arrivalGender(
+	ledigeMaenner: number,
+	ledigeFrauen: number,
+	roll: number
+): 'FEMALE' | 'MALE' {
+	const frauChance: number = (ledigeMaenner + 1) / (ledigeMaenner + ledigeFrauen + 2);
+	return roll < frauChance ? 'FEMALE' : 'MALE';
+}
+
+/** In welcher Gestalt jemand ankommt (0.9.0). */
+export type Haushaltsform = 'ALLEIN' | 'PAAR' | 'FAMILIE' | 'GROSSFAMILIE';
+
+/**
+ * **Nicht jeder kommt allein** (0.9.0). Paare, Familien mit Kindern, und manchmal drei
+ * Generationen auf einem Wagen — so zog man um. Die Hälfte kommt weiter allein, weil der
+ * Einzelne das Handwerk bringt, das fehlt, und weil eine Stadt, die nur Familien bekommt,
+ * keinen Heiratsmarkt mehr hat.
+ */
+export const HAUSHALT_GEWICHTE: Readonly<Record<Haushaltsform, number>> = {
+	ALLEIN: 0.5,
+	PAAR: 0.2,
+	FAMILIE: 0.2,
+	GROSSFAMILIE: 0.1
+};
+
+export const KINDER_MIN = 1;
+export const KINDER_MAX = 3;
+/** Wie alt ein mitgebrachtes Kind höchstens ist — darüber kommt es als Erwachsener. */
+export const KIND_ALTER_MAX = 12;
+/** Wie viel älter als der Vater seine Eltern sind. */
+export const GENERATION_MIN = 20;
+export const GENERATION_MAX = 28;
+
+export type Rolle = 'HAUPT' | 'PARTNER' | 'KIND' | 'GROSSVATER' | 'GROSSMUTTER';
+
+export interface Ankoemmling {
+	rolle: Rolle;
+	geschlecht: 'FEMALE' | 'MALE';
+	alter: number;
+}
+
+/**
+ * Wer zusammen ankommt (0.9.0) — Rollen, Geschlecht und Alter, nichts weiter.
+ *
+ * **Es kommt nur, wer ein Bett findet.** Passt der gewürfelte Haushalt nicht in die freien
+ * Betten, schrumpft er: erst weniger Kinder, dann weniger Großeltern, dann eine kleinere
+ * Form. Wer ankommt und nichts findet, zieht weiter — dieselbe Regel wie für den Einzelnen.
+ *
+ * In einer Familie ist der Hauptzuzügler der Mann und die Partnerin seine Frau; die
+ * Großeltern sind seine Eltern. Für die Linie ist das gleich, denn alle tragen ein Haus.
+ */
+export function planHousehold(
+	roll: () => number,
+	freieBetten: number,
+	ledige: { maenner: number; frauen: number }
+): Ankoemmling[] {
+	const spanne = (min: number, max: number): number => min + Math.floor(roll() * (max - min + 1));
+
+	let form: Haushaltsform = 'ALLEIN';
+	const wurf: number = roll();
+	let summe = 0;
+	for (const [kandidat, gewicht] of Object.entries(HAUSHALT_GEWICHTE) as [
+		Haushaltsform,
+		number
+	][]) {
+		summe += gewicht;
+		if (wurf < summe) {
+			form = kandidat;
+			break;
+		}
+	}
+
+	let kinder: number =
+		form === 'FAMILIE' || form === 'GROSSFAMILIE' ? spanne(KINDER_MIN, KINDER_MAX) : 0;
+	let grosseltern: number = form === 'GROSSFAMILIE' ? spanne(1, 2) : 0;
+	const erwachsene = (): number => (form === 'ALLEIN' ? 1 : 2);
+
+	// Schrumpfen, bis der Haushalt passt.
+	while (erwachsene() + kinder + grosseltern > freieBetten) {
+		if (kinder > KINDER_MIN) kinder--;
+		else if (grosseltern > 0) grosseltern--;
+		else if (kinder > 0) kinder--;
+		else if (form !== 'ALLEIN') form = 'ALLEIN';
+		else return [];
+	}
+	if (form === 'GROSSFAMILIE' && grosseltern === 0) form = kinder > 0 ? 'FAMILIE' : 'PAAR';
+	if (form === 'FAMILIE' && kinder === 0) form = 'PAAR';
+
+	if (form === 'ALLEIN') {
+		return [
+			{
+				rolle: 'HAUPT',
+				geschlecht: arrivalGender(ledige.maenner, ledige.frauen, roll()),
+				alter: spanne(ARRIVAL_AGE_MIN, ARRIVAL_AGE_MAX)
+			}
+		];
+	}
+
+	// Eltern alt genug für ihr ältestes Kind: mindestens zwei Jahre über der Mündigkeit
+	// bei der Geburt.
+	const vater: number = spanne(ARRIVAL_AGE_MIN, ARRIVAL_AGE_MAX);
+	const mutter: number = Math.max(
+		ARRIVAL_AGE_MIN,
+		Math.min(ARRIVAL_AGE_MAX, vater + spanne(-4, 2))
+	);
+	const leute: Ankoemmling[] = [
+		{ rolle: 'HAUPT', geschlecht: 'MALE', alter: vater },
+		{ rolle: 'PARTNER', geschlecht: 'FEMALE', alter: mutter }
+	];
+	const juengster: number = Math.min(vater, mutter);
+	const kindHoechstens: number = Math.max(0, Math.min(KIND_ALTER_MAX, juengster - ARRIVAL_AGE_MIN));
+	for (let i = 0; i < kinder; i++) {
+		leute.push({
+			rolle: 'KIND',
+			geschlecht: roll() < 0.5 ? 'FEMALE' : 'MALE',
+			alter: spanne(0, kindHoechstens)
+		});
+	}
+	if (grosseltern > 0) {
+		const opa: number = vater + spanne(GENERATION_MIN, GENERATION_MAX);
+		if (grosseltern === 2) {
+			leute.push({ rolle: 'GROSSVATER', geschlecht: 'MALE', alter: opa });
+			leute.push({ rolle: 'GROSSMUTTER', geschlecht: 'FEMALE', alter: opa + spanne(-4, 1) });
+		} else {
+			// Eine verwitwete Großmutter oder ein Großvater.
+			const frau: boolean = roll() < 0.5;
+			leute.push({
+				rolle: frau ? 'GROSSMUTTER' : 'GROSSVATER',
+				geschlecht: frau ? 'FEMALE' : 'MALE',
+				alter: opa
+			});
+		}
+	}
+	return leute;
+}
+
+/** Welche Form ein geplanter Haushalt hat — für Chronik, Log und Messung. */
+export function formOf(leute: readonly Ankoemmling[]): Haushaltsform {
+	if (leute.some((l) => l.rolle === 'GROSSVATER' || l.rolle === 'GROSSMUTTER'))
+		return 'GROSSFAMILIE';
+	if (leute.some((l) => l.rolle === 'KIND')) return 'FAMILIE';
+	return leute.length >= 2 ? 'PAAR' : 'ALLEIN';
+}

@@ -139,9 +139,17 @@ function berichten(stunde: WorldTick): void {
 	}
 
 	if (stunde.arrival) {
+		const ankunft = stunde.arrival;
+		// **Eine Familie als Familie** (0.9.0): wer mitkam, mit Rolle und Alter.
+		const mit: string =
+			ankunft.members.length > 1
+				? ` (${ankunft.form}: ` +
+					ankunft.members.map((m) => `${m.name} ${m.rolle} ${m.alter}`).join(', ') +
+					')'
+				: '';
 		console.info(
-			`${stunde.arrival.name} ${stunde.arrival.house} ist angekommen — ` +
-				`${stunde.arrival.skill}, ${stunde.arrival.money} Muenzen.`
+			`${ankunft.name} ${ankunft.house} ist angekommen — ` +
+				`${ankunft.skill}, ${ankunft.money} Muenzen${mit}.`
 		);
 	}
 

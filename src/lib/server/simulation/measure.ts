@@ -23,10 +23,11 @@ import {
 } from '$lib/server/service/treasuryService';
 import { tickWorld } from '$lib/server/worldTick';
 import { FERTILE_FROM_AGE, FERTILE_TO_AGE } from '$lib/game/family.logic';
-import { ageInYears } from '$lib/game/time';
+import { AGE_OF_MAJORITY, ageInYears } from '$lib/game/time';
 import { PFAND_DECKUNG, protokollieren } from '$lib/server/service/npcService';
 import * as electionService from '$lib/server/service/electionService';
 import * as plotService from '$lib/server/service/plotService';
+import { ledigeErwachsene } from '$lib/server/service/migrationService';
 import * as auctionService from '$lib/server/service/auctionService';
 import { DEVELOPMENT_SHIFTS_PER_PLOT } from '$lib/game/auction.logic';
 
@@ -234,6 +235,14 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		wahlenMitSieger: 0
 	};
 	const amtshandlungen: Record<string, number> = {};
+	/** **Wie sie ankamen** (0.9.0): allein, als Paar, Familie, Großfamilie — und wer. */
+	const zuzugFormen: Record<string, number> = {};
+	const zuzugKoepfe: Record<string, number> = {};
+	/**
+	 * **Der Heiratsmarkt** (0.9.0). In Grünau gab es keine einzige ledige Frau mehr, während
+	 * vier Männer warteten — und davon stand im Bericht nichts. Gezählt in Ticks.
+	 */
+	const heiratsmarkt = { maennerTicks: 0, frauenTicks: 0, ohneFrauMitMann: 0, ohneMannMitFrau: 0 };
 	/** **Der Kreditbedarf** (0.8.6, Punkt 43) — gäbe es eine Leihstube, hätte sie Kunden? */
 	const kreditbedarf: Record<
 		string,
@@ -389,6 +398,12 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 			frauenGesamt[lage]++;
 		}
 
+		const ledig = await ledigeErwachsene(stadtId, start + i);
+		heiratsmarkt.maennerTicks += ledig.maenner;
+		heiratsmarkt.frauenTicks += ledig.frauen;
+		if (ledig.frauen === 0 && ledig.maenner > 0) heiratsmarkt.ohneFrauMitMann++;
+		if (ledig.maenner === 0 && ledig.frauen > 0) heiratsmarkt.ohneMannMitFrau++;
+
 		const stunde = await tickWorld(start + i, { roll: wuerfel, regionId: stadtId });
 
 		for (const [was, wieoft] of Object.entries(stunde.npcs.byAction)) {
@@ -429,21 +444,34 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 			todesursachen[fall.cause] = (todesursachen[fall.cause] ?? 0) + 1;
 		}
 		if (stunde.arrival) {
-			chronik.zuzug++;
-			bilanz.zuzug += stunde.arrival.money;
-			if (startgeld !== undefined) {
-				// Derselbe Betrag für den Zugezogenen — sonst wäre die Frage nach zwanzig
-				// Ticks wieder die alte, nur mit einer reicheren Gründergeneration.
-				const angekommen = await Character.findByPk(stunde.arrival.characterId);
-				if (angekommen) {
-					const dazu: number = Math.max(0, startgeld - angekommen.dataValues.money);
-					bilanz.geschenkt += dazu;
-					await angekommen.update({ money: angekommen.dataValues.money + dazu });
-				}
+			// **Gezählt werden Köpfe, nicht Wagen** (0.9.0) — und je Form, wie sie kamen.
+			chronik.zuzug += stunde.arrival.members.length;
+			zuzugFormen[stunde.arrival.form] = (zuzugFormen[stunde.arrival.form] ?? 0) + 1;
+			for (const kopf of stunde.arrival.members) {
+				const gruppe: string =
+					kopf.alter < AGE_OF_MAJORITY
+						? 'Kinder'
+						: kopf.rolle === 'GROSSVATER' || kopf.rolle === 'GROSSMUTTER'
+							? 'Großeltern'
+							: 'Erwachsene';
+				zuzugKoepfe[gruppe] = (zuzugKoepfe[gruppe] ?? 0) + 1;
 			}
-			// Derselbe Vorrat für den Zugezogenen, aus demselben Grund.
-			if (startvorrat !== undefined) {
-				versorgt += await brotGeben(stunde.arrival.characterId, startvorrat);
+			bilanz.zuzug += stunde.arrival.money;
+			for (const kopf of stunde.arrival.members) {
+				if (startgeld !== undefined) {
+					// Derselbe Betrag für den Zugezogenen — sonst wäre die Frage nach zwanzig
+					// Ticks wieder die alte, nur mit einer reicheren Gründergeneration.
+					const angekommen = await Character.findByPk(kopf.characterId);
+					if (angekommen) {
+						const dazu: number = Math.max(0, startgeld - angekommen.dataValues.money);
+						bilanz.geschenkt += dazu;
+						await angekommen.update({ money: angekommen.dataValues.money + dazu });
+					}
+				}
+				// Derselbe Vorrat für den Zugezogenen, aus demselben Grund.
+				if (startvorrat !== undefined) {
+					versorgt += await brotGeben(kopf.characterId, startvorrat);
+				}
 			}
 		}
 		// **Sold, Steuer und Amtsausgaben zählt seit 5.77 das Kassenbuch** — und zwar
@@ -557,6 +585,22 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		...(startvorrat === undefined
 			? []
 			: [`  Startvorrat ${startvorrat} Laibe je Kopf — ${versorgt} verteilt (ein Werkzeug)`]),
+		'',
+		'=== ZUZUG UND HEIRATSMARKT ===',
+		`  Ankünfte je Form: ${
+			Object.entries(zuzugFormen)
+				.map(([f, n]) => `${f} ${n}`)
+				.join(', ') || 'keine'
+		}`,
+		`  Köpfe: ${
+			Object.entries(zuzugKoepfe)
+				.map(([g, n]) => `${g} ${n}`)
+				.join(', ') || 'keine'
+		}`,
+		`  Ledige Erwachsene im Mittel: Männer ${(heiratsmarkt.maennerTicks / Math.max(1, ticks)).toFixed(1)}, ` +
+			`Frauen ${(heiratsmarkt.frauenTicks / Math.max(1, ticks)).toFixed(1)}`,
+		`  Ticks ohne ledige Frau, während ein lediger Mann wartete: ${heiratsmarkt.ohneFrauMitMann}; ` +
+			`umgekehrt: ${heiratsmarkt.ohneMannMitFrau}`,
 		'',
 		'=== KREDITBEDARF ===',
 		`  Wer aufs Geld wartete (Einwohner × Tick), davon mit Pfand ≥ ${PFAND_DECKUNG * 100} % der Lücke:`,

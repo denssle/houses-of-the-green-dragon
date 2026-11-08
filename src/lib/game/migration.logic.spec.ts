@@ -1,12 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import {
+	ARRIVAL_AGE_MIN,
 	ARRIVAL_CHANCE_PER_TICK,
 	ARRIVAL_MONEY_MAX,
 	ARRIVAL_MONEY_MIN,
+	arrivalGender,
 	arrivalGifts,
+	formOf,
+	GENERATION_MIN,
+	KIND_ALTER_MAX,
+	planHousehold,
 	skillToBring,
 	someoneArrives
 } from '$lib/game/migration.logic';
+import { seededRoll } from '$lib/game/testRoll';
 import { SKILL_TYPES } from '$lib/game/skill.logic';
 
 /**
@@ -92,5 +99,78 @@ describe('Wer ankommt', () => {
 	it('greift auch beim höchsten Wurf nicht daneben', () => {
 		// Ein Wurf von exakt 1 würde ohne die Deckelung hinter das letzte Element zeigen.
 		expect(skillToBring(SKILL_TYPES, [], 1)).toBe(SKILL_TYPES[SKILL_TYPES.length - 1]);
+	});
+});
+
+describe('arrivalGender (0.9.0)', () => {
+	it('würfelt 50:50, wenn niemand ledig ist', () => {
+		expect(arrivalGender(0, 0, 0.49)).toBe('FEMALE');
+		expect(arrivalGender(0, 0, 0.51)).toBe('MALE');
+	});
+
+	it('schickt eher eine Frau, wenn ledige Männer warten', () => {
+		// Vier Männer, keine Frau: 5 zu 6.
+		expect(arrivalGender(4, 0, 0.8)).toBe('FEMALE');
+		expect(arrivalGender(4, 0, 0.84)).toBe('MALE');
+	});
+
+	it('und eher einen Mann im umgekehrten Fall', () => {
+		expect(arrivalGender(0, 4, 0.2)).toBe('MALE');
+	});
+});
+
+describe('planHousehold (0.9.0)', () => {
+	/** Ein Würfel, der die gegebenen Werte der Reihe nach liefert, danach 0.5. */
+	const folge =
+		(...werte: number[]) =>
+		() =>
+			werte.length > 0 ? werte.shift()! : 0.5;
+	const ledige = { maenner: 0, frauen: 0 };
+
+	it('bringt eine Großfamilie mit drei Generationen', () => {
+		// Form 0.95 → GROSSFAMILIE, drei Kinder (0.99), zwei Großeltern (0.99).
+		const leute = planHousehold(folge(0.95, 0.99, 0.99), 20, ledige);
+
+		expect(formOf(leute)).toBe('GROSSFAMILIE');
+		expect(leute.filter((l) => l.rolle === 'KIND')).toHaveLength(3);
+		expect(leute.filter((l) => l.rolle === 'GROSSVATER' || l.rolle === 'GROSSMUTTER')).toHaveLength(
+			2
+		);
+		const vater = leute.find((l) => l.rolle === 'HAUPT')!;
+		const opa = leute.find((l) => l.rolle === 'GROSSVATER')!;
+		expect(opa.alter - vater.alter).toBeGreaterThanOrEqual(GENERATION_MIN);
+	});
+
+	it('macht Eltern alt genug für ihre Kinder', () => {
+		for (let i = 0; i < 200; i++) {
+			const leute = planHousehold(seededRoll(i), 20, ledige);
+			const eltern = leute.filter((l) => l.rolle === 'HAUPT' || l.rolle === 'PARTNER');
+			for (const kind of leute.filter((l) => l.rolle === 'KIND')) {
+				for (const elter of eltern) {
+					expect(elter.alter - kind.alter).toBeGreaterThanOrEqual(ARRIVAL_AGE_MIN);
+				}
+				expect(kind.alter).toBeLessThanOrEqual(KIND_ALTER_MAX);
+			}
+		}
+	});
+
+	it('schrumpft auf die freien Betten', () => {
+		const leute = planHousehold(folge(0.95, 0.99, 0.99), 3, ledige);
+		expect(leute).toHaveLength(3);
+		expect(formOf(leute)).toBe('FAMILIE');
+
+		const einer = planHousehold(folge(0.95, 0.99, 0.99), 1, ledige);
+		expect(einer).toHaveLength(1);
+		expect(formOf(einer)).toBe('ALLEIN');
+	});
+
+	it('bringt niemanden ohne Bett', () => {
+		expect(planHousehold(folge(0.1), 0, ledige)).toEqual([]);
+	});
+
+	it('lässt den Einzelnen nach dem Heiratsmarkt wählen', () => {
+		// Form 0.1 → ALLEIN, Geschlecht 0.8 bei vier ledigen Männern → Frau.
+		const [einzeln] = planHousehold(folge(0.1, 0.8), 20, { maenner: 4, frauen: 0 });
+		expect(einzeln.geschlecht).toBe('FEMALE');
 	});
 });
