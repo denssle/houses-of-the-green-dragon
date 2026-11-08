@@ -589,6 +589,12 @@ export function idleDetail(state: NpcState, grund: IdleReason): string {
 			if (state.ownsWorkshop) return `${stand}, hat eine Werkstatt`;
 			if (!isEnterprising(state.personality)) return `${stand}, nicht unternehmungslustig`;
 			if (state.workshopPrice === null) return `${stand}, kein Handwerk fehlt`;
+			// **Woran die Werkstatt hängt** (0.8.4) — dieselben Bedingungen wie in `entfaltung`,
+			// in derselben Reihenfolge. Im zweiten Lauf standen hier noch über 1300 Fälle als
+			// „sonstiges", und alle hatten weder Werkstatt noch Bauplatz.
+			const werkstattHaken: string | undefined = werkstattHakt(state);
+			if (werkstattHaken)
+				return `${stand}, Werkstatt ${state.workshopGapName ?? '?'}: ${werkstattHaken}`;
 			// **Der Rest mit seinen Schaltern** (0.8.3): Im ersten Lauf waren das 1681 Fälle, zu
 			// viele für eine Restklasse. Die Schalter sagen, was zu einer Regel fehlt.
 			return `${stand}, sonstiges [${stateFlags(state).join(' ')}]`;
@@ -596,6 +602,34 @@ export function idleDetail(state: NpcState, grund: IdleReason): string {
 		default:
 			return grund;
 	}
+}
+
+/**
+ * Warum ein Unternehmungslustiger ohne Werkstatt nicht an ihr baut — als kurze Angabe für
+ * `idleDetail` (0.8.4). Spiegelt die Schritte `BUY_WORKSHOP_MATERIAL`, `BUILD` und
+ * `BUY_PLOT` aus `entfaltung`; `undefined`, wenn keiner davon klemmt.
+ */
+function werkstattHakt(state: NpcState): string | undefined {
+	const uebrig: number = state.money - desiredReserve(state.personality, state.foodPrice);
+	if (state.hasFreePlot) {
+		if (!state.workshopMaterialMissing) return undefined;
+		if (state.workshopMaterialPrice === null) {
+			return `${state.workshopMaterialMissingItem ?? '?'} nicht am Markt`;
+		}
+		return uebrig >= state.workshopMaterialPrice
+			? undefined
+			: `${state.workshopMaterialMissingItem ?? '?'} zu teuer`;
+	}
+	if (state.plotPrice === null) return 'kein Bauland zu haben';
+	if (uebrig < state.plotPrice) return 'Grundstück zu teuer';
+	if (werkstattErreichbar(state)) return undefined;
+	if (uebrig - state.plotPrice >= state.landReserve) return undefined;
+	// Weder baubar noch auf Vorrat haltbar — sagen, woran es am Bau hinge.
+	const fehlt: string =
+		state.workshopMaterialMissing && state.workshopMaterialPrice === null
+			? `${state.workshopMaterialMissingItem ?? '?'} nicht am Markt`
+			: 'nicht baubar';
+	return `${fehlt}, Rücklage reicht nicht für Land auf Vorrat`;
 }
 
 /**

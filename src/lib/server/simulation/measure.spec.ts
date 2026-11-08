@@ -36,6 +36,8 @@ describe('Das Messwerkzeug', () => {
 		// **Woran genau, und wohin das Geld geht** (0.8.3, Punkt 101).
 		expect(text).toContain('=== WORAN GENAU ===');
 		expect(text).toContain('=== GELD JE HANDLUNG ===');
+		expect(text).toContain('=== DAS AMT ===');
+		expect(text).toContain('Erschließung lief in');
 		expect(text).toContain('Geld bei Leuten:');
 
 		// Der Zwischenstand kommt nach `every` Ticks — hier also genau einmal.

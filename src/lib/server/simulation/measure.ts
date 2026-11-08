@@ -25,6 +25,10 @@ import { tickWorld } from '$lib/server/worldTick';
 import { FERTILE_FROM_AGE, FERTILE_TO_AGE } from '$lib/game/family.logic';
 import { ageInYears } from '$lib/game/time';
 import { protokollieren } from '$lib/server/service/npcService';
+import * as electionService from '$lib/server/service/electionService';
+import * as plotService from '$lib/server/service/plotService';
+import * as auctionService from '$lib/server/service/auctionService';
+import { DEVELOPMENT_SHIFTS_PER_PLOT } from '$lib/game/auction.logic';
 
 /**
  * Eine Welt laufen lassen und aufschreiben, was passiert.
@@ -216,6 +220,31 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	const muessiggangGenau: Record<string, number> = {};
 	const geldJeHandlung: Record<string, { ein: number; aus: number }> = {};
 	const chronik = { geburten: 0, tode: 0, zuzug: 0, braende: 0, steuer: 0, ausgefallen: 0 };
+	/**
+	 * **Das Amt** (0.8.4). Bis hierher sagte der Bericht nichts darüber, ob überhaupt jemand
+	 * regiert und was er tut — und dann ließ sich nicht unterscheiden, ob kein Bauland
+	 * entsteht, weil niemand im Amt ist, oder weil der Amtsinhaber meint, es gebe noch welches.
+	 */
+	const amt = {
+		ohneInhaber: 0,
+		spieler: 0,
+		npc: 0,
+		wahlenEroeffnet: 0,
+		wahlenOhneSieger: 0,
+		wahlenMitSieger: 0
+	};
+	const amtshandlungen: Record<string, number> = {};
+	/** Wie oft Bürger und Amt das Land verschieden sahen (0.8.4). */
+	const land = {
+		buergerOhneBauland: 0,
+		amtSiehtFreiesLand: 0,
+		beidesLeer: 0,
+		erschliessungLief: 0,
+		schichten: 0,
+		fertig: 0
+	};
+	/** Schichtstand je Baustelle beim letzten Blick — für die geleisteten Schichten. */
+	const schichtstand = new Map<string, number>();
 	// **Woran gestorben wird** (5.71). Ohne diese Trennung stand im Bericht eine Zahl, die
 	// zwei Dinge zusammenwarf: eine Stadt, die altert, und eine, die verhungert. Bei der
 	// Grundsteuer aus Punkt 96 war genau das die offene Frage.
@@ -407,6 +436,43 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		chronik.steuer += stunde.tax?.collected ?? 0;
 		chronik.ausgefallen += stunde.tax?.shortfall ?? 0;
 
+		const inhaber = await electionService.getHolder(stadtId);
+		if (!inhaber) amt.ohneInhaber++;
+		else {
+			const person = await Character.findByPk(inhaber.characterId, { attributes: ['role'] });
+			if (person?.dataValues.role === 'NPC') amt.npc++;
+			else amt.spieler++;
+		}
+		if (stunde.election.opened) amt.wahlenEroeffnet++;
+		if (stunde.election.closed) {
+			if (stunde.election.closed.winner) amt.wahlenMitSieger++;
+			else amt.wahlenOhneSieger++;
+		}
+		if (stunde.governed) {
+			const was: string =
+				stunde.governed.action + (stunde.governed.detail ? ` (${stunde.governed.detail})` : '');
+			amtshandlungen[was] = (amtshandlungen[was] ?? 0) + 1;
+		}
+		// **Wie schnell erschlossen wird** (0.8.4): Schichten aus dem Zuwachs je Baustelle,
+		// eine verschwundene Baustelle ist fertig geworden.
+		const baustellen = await auctionService.getDevelopments(stadtId);
+		if (baustellen.length > 0) land.erschliessungLief++;
+		const jetzt = new Map(baustellen.map((b) => [b.id, b.shifts]));
+		for (const [id, vorher] of schichtstand) {
+			if (!jetzt.has(id)) {
+				land.schichten += DEVELOPMENT_SHIFTS_PER_PLOT - vorher;
+				land.fertig++;
+			}
+		}
+		for (const [id, nun] of jetzt) land.schichten += nun - (schichtstand.get(id) ?? 0);
+		schichtstand.clear();
+		for (const [id, nun] of jetzt) schichtstand.set(id, nun);
+		if (!(await plotService.hasFreeBuildingLand(stadtId))) {
+			land.buergerOhneBauland++;
+			if ((await buildingService.getFreeCityPlots(stadtId)).length > 0) land.amtSiehtFreiesLand++;
+			else land.beidesLeer++;
+		}
+
 		await World.update({ currentTick: start + i + 1 }, { where: { id: WORLD_ID } });
 
 		if ((i + 1) % every === 0) {
@@ -466,6 +532,18 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		...(startvorrat === undefined
 			? []
 			: [`  Startvorrat ${startvorrat} Laibe je Kopf — ${versorgt} verteilt (ein Werkzeug)`]),
+		'',
+		'=== DAS AMT ===',
+		`  Ticks mit NPC im Amt ${amt.npc}, mit Spieler ${amt.spieler}, ohne Inhaber ${amt.ohneInhaber}`,
+		`  Wahlen eröffnet ${amt.wahlenEroeffnet}, mit Sieger ${amt.wahlenMitSieger}, ohne ${amt.wahlenOhneSieger}`,
+		`  Ticks ohne kaufbares Bauland ${land.buergerOhneBauland}: davon sah das Amt noch freies ` +
+			`Land ${land.amtSiehtFreiesLand}, beides leer ${land.beidesLeer}`,
+		`  Erschließung lief in ${land.erschliessungLief} Ticks, ${land.schichten} Schichten geleistet, ` +
+			`${land.fertig} Parzellen fertig (je ${DEVELOPMENT_SHIFTS_PER_PLOT} Schichten)`,
+		'  Amtshandlungen:',
+		...Object.entries(amtshandlungen)
+			.sort(([, a], [, b]) => b - a)
+			.map(([was, wieoft]) => `    ${was}: ${wieoft}`),
 		'',
 		'=== DIE KASSE ===',
 		...(await bilanzzeilen(stadtId, bestandVorher, bilanz)),

@@ -62,6 +62,7 @@ offenen, nach Nummer sortiert.
 | 120 | Fernhandel — Lieferungen mit Ankunft, Preisunterschiede zwischen Städten                           | 41, 119                    | Entwurf     |
 | 121 | Weniger Geburten bei Saat 86 seit 0.5.111 — Zufall oder Mechanismus?                               | —                          | Befund      |
 | 122 | Die Hungersnot von Grünau — **Waisen und Stellen behoben mit 0.7.0**, die Steuer als Ursache offen | —                          | Befund      |
+| 124 | Bauland entsteht zu langsam — eine Erschließung braucht den ganzen Lauf                            | —                          | Befund      |
 
 ## Die Bauordnung
 
@@ -2167,3 +2168,33 @@ einem Mechanismus sucht.
 scheitern die Paare, die keine Kinder bekommen — Ehe, Dach, Platz, Geld? `MEASURE_TRACE`
 auf ein Paar aus 86 und die Zahlen je 250 Ticks im Bericht reichen dafür. Und: eine vierte
 und fünfte Saat, um zu sehen, ob 86 die Ausnahme ist.
+
+### 124. Bauland entsteht zu langsam — eine Erschließung braucht den ganzen Lauf
+
+**Befund vom 08.11.2026**, Saat 86, 600 Ticks, 0.8.5. Die Restklasse „sonstiges“ aus 0.8.3
+löst sich vollständig in einen Grund auf: **Es gibt kein Bauland.** Rund 1360 Mal stand ein
+Unternehmungslustiger mit Geld über der Rücklage ohne Werkstatt da, weil kein Grundstück zu
+haben war — 353 Mal davon für eine **Bäckerei**.
+
+| Saat 86, 600 Ticks                 | Wert |
+| ---------------------------------- | ---: |
+| Ticks ohne kaufbares Bauland       |  548 |
+| davon sah das Amt noch freies Land |    0 |
+| Ticks mit NPC im Amt               |  550 |
+| Amtshandlungen insgesamt           |    7 |
+| davon `DEVELOP_LAND`               |    1 |
+| Erschließung lief                  |  548 |
+| Schichten geleistet                |   31 |
+| Parzellen fertig (je 20 Schichten) |    1 |
+
+**Amt und Bürger sehen dasselbe** — die Vermutung, der Bürgermeister zähle Stadtflächen
+mit, die niemand kaufen kann, ist widerlegt. Der Engpass ist die **Erschließung selbst**:
+eine Schicht alle 18 Ticks. Der Bürgermeister wartet regelgerecht, bis sie fertig ist
+(„eine Baustelle nach der anderen“, 5.92), und tut in der Zeit fast nichts.
+
+**Vermutlich, weil die Falschen arbeiten sollen:** Die Schichten leistet, wer Lohn sucht.
+Wer auf Bauland wartet, liegt über seiner Rücklage und sucht keinen. Noch nicht gemessen.
+
+**Mögliche Hebel**, zu entscheiden: Wer Land will, hilft beim Erschließen (eine Handlung in
+der Entfaltung); der Bürgermeister legt selbst Hand an wie beim Instandsetzen (5.78);
+weniger Schichten je Parzelle; mehr als eine Baustelle, wenn die Nachfrage da ist.

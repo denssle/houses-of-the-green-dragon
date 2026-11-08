@@ -327,6 +327,45 @@ describe('idleDetail (0.8.3)', () => {
 		expect(savingsGoal(zustand)).toEqual({ art: 'Baumaterial fürs Haus', preis: 6 });
 	});
 
+	describe('woran die Werkstatt eines Unternehmungslustigen hängt (0.8.4)', () => {
+		const unternehmend = { ...anlagen(), ambition: 100, diligence: 100 };
+		const ohneWerkstatt = (werte: Partial<NpcState>): NpcState =>
+			lage({
+				isMarried: true,
+				personality: unternehmend,
+				ownsWorkshop: false,
+				hasFreePlot: false,
+				workshopPrice: 100,
+				workshopGapName: 'Mühle',
+				...werte
+			});
+
+		it('kein Bauland', () => {
+			expect(idleDetail(ohneWerkstatt({ plotPrice: null }), 'CONTENT')).toBe(
+				'verheiratet, Werkstatt Mühle: kein Bauland zu haben'
+			);
+		});
+
+		it('Grundstück zu teuer', () => {
+			expect(idleDetail(ohneWerkstatt({ plotPrice: 5000 }), 'CONTENT')).toBe(
+				'verheiratet, Werkstatt Mühle: Grundstück zu teuer'
+			);
+		});
+
+		it('nicht baubar und keine Rücklage für Land auf Vorrat', () => {
+			const zustand = ohneWerkstatt({
+				plotPrice: 40,
+				workshopMaterialMissing: true,
+				workshopMaterialPrice: null,
+				workshopMaterialMissingItem: 'IRON',
+				landReserve: Number.POSITIVE_INFINITY
+			});
+			expect(idleDetail(zustand, 'CONTENT')).toBe(
+				'verheiratet, Werkstatt Mühle: IRON nicht am Markt, Rücklage reicht nicht für Land auf Vorrat'
+			);
+		});
+	});
+
 	it('sagt bei der Zufriedenheit, warum nichts vorhaben', () => {
 		expect(idleDetail(lage({ isMarried: false, ownsWorkshop: true }), 'CONTENT')).toBe(
 			'ledig, hat eine Werkstatt'
