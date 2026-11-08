@@ -149,6 +149,12 @@ export interface NpcState {
 	/** Steht eine Fläche zur Pacht frei? */
 	leaseAvailable: boolean;
 	/**
+	 * **Wie viel noch in seine Kammer passt** (0.9.2). Material wird ins Inventar gekauft; wer
+	 * keinen Platz hat, scheiterte bis hierher Tick für Tick an `INVENTORY_FULL` — jeder
+	 * Zuzügler kam mit zwanzig Laiben bei zwanzig Plätzen an.
+	 */
+	inventoryFree: number;
+	/**
 	 * **Läuft eine Erschließung, an der er gegen Lohn mitarbeiten kann** (0.9.1, Punkt 124)?
 	 * Nur gefragt für den, der Grund braucht und keinen zu kaufen findet.
 	 */
@@ -881,7 +887,8 @@ function sicherheit(state: NpcState): NpcAction | undefined {
 		if (state.materialMissing) {
 			// Material besorgen kostet Geld, aber keine Kraft — es liegt bereit, wenn die
 			// Punkte zusammen sind. Deshalb steht der Kauf vor der Schwelle, nicht dahinter.
-			if (state.materialPrice !== null && uebrig >= state.materialPrice) return 'BUY_MATERIAL';
+			if (state.materialPrice !== null && uebrig >= state.materialPrice && kammerFrei(state))
+				return 'BUY_MATERIAL';
 		} else if (state.actionPoints >= RENOVATION_ACTION_POINT_COST && uebrig >= state.repairCost) {
 			return 'RENOVATE';
 		}
@@ -946,7 +953,8 @@ function ansehen(state: NpcState): NpcAction | undefined {
 		state.garmentInStock === 0 &&
 		state.garmentPrice !== null &&
 		uebrig >= state.garmentPrice &&
-		state.personality.sociability > -50
+		state.personality.sociability > -50 &&
+		kammerFrei(state)
 	) {
 		return 'BUY_GARMENT';
 	}
@@ -956,7 +964,8 @@ function ansehen(state: NpcState): NpcAction | undefined {
 		state.tonicInStock === 0 &&
 		state.tonicPrice !== null &&
 		uebrig >= state.tonicPrice &&
-		(state.hasJob || state.workAvailable)
+		(state.hasJob || state.workAvailable) &&
+		kammerFrei(state)
 	) {
 		return 'BUY_TONIC';
 	}
@@ -1013,7 +1022,11 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 			// Der Ausbau selbst kostet seither keine Münze und keine Kraft mehr, sondern
 			// Bretter und eine Baustelle.
 			if (state.upgradeMaterialMissing) {
-				if (state.upgradeMaterialPrice !== null && uebrigFuerAusbau >= state.upgradeMaterialPrice) {
+				if (
+					state.upgradeMaterialPrice !== null &&
+					uebrigFuerAusbau >= state.upgradeMaterialPrice &&
+					kammerFrei(state)
+				) {
 					return 'BUY_UPGRADE_MATERIAL';
 				}
 			} else {
@@ -1035,7 +1048,7 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 	// Zutat fehlt, und sie am Markt findet, holt sie sich dort — das ist zugleich die
 	// Nachfrage, von der die Stufe davor lebt.
 	if (state.ownsWorkshop && !state.canCraft && state.inputPrice !== null) {
-		if (uebrig >= state.inputPrice) return 'BUY_INPUT';
+		if (uebrig >= state.inputPrice && kammerFrei(state)) return 'BUY_INPUT';
 	}
 
 	// Eine Fläche pachten, wenn der eigene Betrieb Rohstoff braucht.
@@ -1053,7 +1066,8 @@ function entfaltung(state: NpcState): NpcAction | undefined {
 		state.workshopMaterialMissing &&
 		state.workshopMaterialPrice !== null &&
 		uebrig >= state.workshopMaterialPrice &&
-		isEnterprising(state.personality)
+		isEnterprising(state.personality) &&
+		kammerFrei(state)
 	) {
 		return 'BUY_WORKSHOP_MATERIAL';
 	}
@@ -1108,6 +1122,14 @@ function entfaltung(state: NpcState): NpcAction | undefined {
  * Er wird dafür bezahlt wie jeder Tagelöhner: Das ist keine Fron, sondern Lohnarbeit an der
  * Stelle, an der sie ihm selbst am meisten nützt.
  */
+/**
+ * Passt noch etwas in seine Kammer? Ohne Platz kein Kauf (0.9.2) — Material, Gewand, Trank
+ * und Zutaten gehen alle ins Inventar, und jeder dieser Käufe scheiterte sonst Tick für Tick.
+ */
+function kammerFrei(state: NpcState): boolean {
+	return state.inventoryFree > 0;
+}
+
 function hilftErschliessen(state: NpcState): boolean {
 	if (!state.isAdult || state.actionPoints < REPAIR_ACTION_POINT_COST) return false;
 	if (!state.surveyAvailable || state.plotPrice !== null || state.hasFreePlot) return false;
@@ -1217,7 +1239,11 @@ function eigenesDach(state: NpcState): NpcAction | undefined {
 		const uebrig: number = state.money - desiredReserve(state.personality, state.foodPrice);
 		if (state.homeUpgradePrice !== null) {
 			if (state.upgradeMaterialMissing) {
-				if (state.upgradeMaterialPrice !== null && uebrig >= state.upgradeMaterialPrice) {
+				if (
+					state.upgradeMaterialPrice !== null &&
+					uebrig >= state.upgradeMaterialPrice &&
+					kammerFrei(state)
+				) {
 					return 'BUY_UPGRADE_MATERIAL';
 				}
 			} else {
@@ -1248,7 +1274,7 @@ function eigenesDach(state: NpcState): NpcAction | undefined {
 	const uebrig: number = state.money - desiredReserve(state.personality, state.foodPrice);
 
 	if (state.materialMissing) {
-		return state.materialPrice !== null && uebrig >= state.materialPrice
+		return state.materialPrice !== null && uebrig >= state.materialPrice && kammerFrei(state)
 			? 'BUY_MATERIAL'
 			: undefined;
 	}

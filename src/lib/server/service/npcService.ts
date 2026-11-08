@@ -1,3 +1,4 @@
+import { inventoryCapacity } from '$lib/game/inventory.logic';
 import { landReserve } from '$lib/game/law.logic';
 import { seededRoll } from '$lib/game/testRoll';
 import { garmentIntact } from '$lib/game/attire.logic';
@@ -707,7 +708,12 @@ async function handelnd(
 			if (!angebot) return buch('BUY_INPUT', undefined);
 
 			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
-			const wieviel: number = Math.min(lage.missingInputCount, angebot.quantity, bezahlbar);
+			const wieviel: number = Math.min(
+				lage.missingInputCount,
+				angebot.quantity,
+				bezahlbar,
+				lage.state.inventoryFree
+			);
 			return buch(
 				'BUY_INPUT',
 				wieviel > 0 ? await tradeService.buyFromOffer(npcId, angebot.id, wieviel) : undefined
@@ -721,7 +727,12 @@ async function handelnd(
 			if (!angebot) return buch('BUY_MATERIAL', undefined);
 
 			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
-			const wieviel: number = Math.min(lage.missingMaterialCount, angebot.quantity, bezahlbar);
+			const wieviel: number = Math.min(
+				lage.missingMaterialCount,
+				angebot.quantity,
+				bezahlbar,
+				lage.state.inventoryFree
+			);
 			return buchMitKammer(
 				'BUY_MATERIAL',
 				wieviel > 0 ? await tradeService.buyFromOffer(npcId, angebot.id, wieviel) : undefined
@@ -734,7 +745,12 @@ async function handelnd(
 			if (!angebot) return buch('BUY_WORKSHOP_MATERIAL', undefined);
 
 			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
-			const wieviel: number = Math.min(lage.workshopMaterialCount, angebot.quantity, bezahlbar);
+			const wieviel: number = Math.min(
+				lage.workshopMaterialCount,
+				angebot.quantity,
+				bezahlbar,
+				lage.state.inventoryFree
+			);
 			return buchMitKammer(
 				'BUY_WORKSHOP_MATERIAL',
 				wieviel > 0 ? await tradeService.buyFromOffer(npcId, angebot.id, wieviel) : undefined
@@ -748,7 +764,12 @@ async function handelnd(
 			if (!angebot) return buch('BUY_UPGRADE_MATERIAL', undefined);
 
 			const bezahlbar: number = Math.floor(lage.money / angebot.pricePerUnit);
-			const wieviel: number = Math.min(lage.upgradeMaterialCount, angebot.quantity, bezahlbar);
+			const wieviel: number = Math.min(
+				lage.upgradeMaterialCount,
+				angebot.quantity,
+				bezahlbar,
+				lage.state.inventoryFree
+			);
 			return buchMitKammer(
 				'BUY_UPGRADE_MATERIAL',
 				wieviel > 0 ? await tradeService.buyFromOffer(npcId, angebot.id, wieviel) : undefined
@@ -909,6 +930,10 @@ async function lageAufnehmen(
 	const { besitz, billigstes } = nachschlag;
 
 	const vorrat = await needService.getStock(npcId);
+	// **Wie viel noch in seine Kammer passt** (0.9.2): Material wird ins Inventar gekauft.
+	const kammerFrei: number =
+		inventoryCapacity(await buildingService.storageAtHome(werte.HomeBuildingId, tick)) -
+		vorrat.reduce((summe, posten) => summe + posten.quantity, 0);
 	const essbar: number = vorrat
 		.filter((posten) => posten.nourishment)
 		.reduce((summe, posten) => summe + posten.quantity, 0);
@@ -1204,6 +1229,7 @@ async function lageAufnehmen(
 			hasLease: eigenePacht !== undefined,
 			leaseAvailable: freieFlaeche !== undefined,
 			surveyAvailable: erschliessung !== undefined,
+			inventoryFree: Math.max(0, kammerFrei),
 			ownStockToSell:
 				(zuVerkaufen?.quantity ?? 0) + (marktplatz ? (ueberschuss?.quantity ?? 0) : 0),
 			workshopStockToSell: zuVerkaufen?.quantity ?? 0,

@@ -48,6 +48,7 @@ function zufrieden(werte: Partial<NpcState> = {}): NpcState {
 		hasLease: false,
 		leaseAvailable: false,
 		surveyAvailable: false,
+		inventoryFree: 100,
 		ownStockToSell: 0,
 		workshopStockToSell: 0,
 		emptyPlots: 0,
@@ -971,5 +972,37 @@ describe('Wer Grund braucht, hilft ihn erschließen (0.9.1, Punkt 124)', () => {
 		expect(decideNpcAction(zufrieden({ surveyAvailable: true, plotPrice: null }))).not.toBe(
 			'SURVEY'
 		);
+	});
+});
+
+describe('Material nur, wenn es in die Kammer passt (0.9.2)', () => {
+	// Verheiratet, ohne Haus, das Material fehlt und liegt am Markt.
+	const bauherr = (inventoryFree: number): NpcState =>
+		zufrieden({
+			isMarried: true,
+			ownsHome: false,
+			homePrice: 100,
+			materialMissing: true,
+			materialPrice: 6,
+			inventoryFree
+		});
+
+	it('kauft Bretter, solange Platz ist', () => {
+		expect(decideNpcAction(bauherr(5))).toBe('BUY_MATERIAL');
+	});
+
+	it('versucht es nicht mit voller Kammer', () => {
+		// Vorher: zwanzig Laibe Wegzehrung bei zwanzig Plätzen, und Tick für Tick
+		// `BUY_MATERIAL/INVENTORY_FULL`.
+		expect(decideNpcAction(bauherr(0))).not.toBe('BUY_MATERIAL');
+	});
+});
+
+describe('Auch Gewand und Trank nur mit Platz (0.9.2)', () => {
+	it('kauft kein Gewand mit voller Kammer', () => {
+		const nackt = (inventoryFree: number): NpcState =>
+			zufrieden({ wearsGarment: false, garmentInStock: 0, garmentPrice: 5, inventoryFree });
+		expect(decideNpcAction(nackt(3))).toBe('BUY_GARMENT');
+		expect(decideNpcAction(nackt(0))).not.toBe('BUY_GARMENT');
 	});
 });

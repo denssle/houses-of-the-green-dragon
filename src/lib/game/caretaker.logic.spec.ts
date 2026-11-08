@@ -59,6 +59,7 @@ function lage(werte: Partial<NpcState> = {}): NpcState {
 		hasLease: false,
 		leaseAvailable: false,
 		surveyAvailable: false,
+		inventoryFree: 100,
 		ownStockToSell: 0,
 		workshopStockToSell: 0,
 		emptyPlots: 0,
