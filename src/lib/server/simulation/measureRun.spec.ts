@@ -1,4 +1,4 @@
-import { describe, it } from 'vitest';
+import { describe, it, vi } from 'vitest';
 import { writeFileSync } from 'node:fs';
 import '$lib/db/db';
 import { measure } from '$lib/server/simulation/measure';
@@ -54,6 +54,27 @@ const startgeld: number | undefined =
  */
 const startvorrat: number | undefined =
 	process.env.MEASURE_FOOD === undefined ? undefined : Number(process.env.MEASURE_FOOD);
+
+/**
+ * **Mit Saat auch die Ids aus dem Zähler** (0.8.4).
+ *
+ * Die Dienste vergeben Ids mit `randomUUID()`, und die kommen nicht aus dem Saat-Würfel.
+ * Das wäre egal, wenn keine Abfrage nach ihnen ordnete — aber jede, die über einen Index
+ * läuft oder ausdrücklich nach `id` sortiert, liefert ihre Zeilen in UUID-Folge. Zwei Läufe
+ * mit derselben Saat gingen deshalb nach ein paar hundert Ticks auseinander, und ein
+ * Vorher-Nachher-Vergleich maß den Zufall mit. Im Messlauf zählen die Ids deshalb hoch;
+ * das Spiel selbst bleibt bei echten UUIDs.
+ */
+vi.mock('node:crypto', async (original) => {
+	const echt = await original<typeof import('node:crypto')>();
+	if (process.env.MEASURE_SEED === undefined) return echt;
+	let zaehler = 0;
+	const randomUUID = (): `${string}-${string}-${string}-${string}-${string}` => {
+		const hex: string = (++zaehler).toString(16).padStart(12, '0');
+		return `00000000-0000-4000-8000-${hex}`;
+	};
+	return { ...echt, default: { ...echt, randomUUID }, randomUUID };
+});
 
 describe('Messlauf', () => {
 	it.runIf(ticks > 0)(

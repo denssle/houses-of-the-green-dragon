@@ -173,12 +173,14 @@ export async function actForNpcs(
 	// **Gemischt, und zwar je Tick anders** (0.8.0, Punkt 88). Die Datenbank liefert eine
 	// stabile Folge, und wer vorn stand, bekam Tick für Tick das billigste Brot, den einen
 	// Auftrag und das letzte Grundstück. Gemischt wird aus der Tickzahl, damit derselbe Lauf
-	// dasselbe Ergebnis gibt (Punkt 54); sortiert wird vorher, damit die Ausgangsfolge nicht
-	// an der Datenbank hängt.
-	const npcs = mischen(
-		await Character.findAll({ where: { deathTick: null, role: 'NPC' }, order: [['id', 'ASC']] }),
-		tick
-	);
+	// dasselbe Ergebnis gibt (Punkt 54).
+	//
+	// **Nicht nach `id` sortieren** (0.8.4). Mit 0.8.1 stand hier `order: [['id', 'ASC']]`,
+	// damit die Ausgangsfolge nicht an der Datenbank hängt. Die Ids sind aber `randomUUID()`:
+	// Die Folge hätte am Zufall gehangen statt an der Saat. Die Datenbank liefert ohnehin
+	// stabil (SQLite in Einfügereihenfolge, InnoDB nach Primärschlüssel), und im Messlauf
+	// zählen die Ids seither hoch (`measureRun.spec`).
+	const npcs = mischen(await Character.findAll({ where: { deathTick: null, role: 'NPC' } }), tick);
 
 	const gezaehlt: Partial<Record<NpcAction, number>> = {};
 	const gescheitert: Record<string, number> = {};
@@ -967,7 +969,12 @@ async function lageAufnehmen(
 	const werkstattBaustoff = fehltWerkstattMaterial
 		? await billigstes(fehltWerkstattMaterial.itemId)
 		: undefined;
-	const stelleFrei = werkstatt ? await employmentService.hasUnofferedPosition(werkstatt) : false;
+	// **Im Rohbau wird niemand eingestellt** (0.8.4) — `offerJob` lehnt mit
+	// `UNDER_CONSTRUCTION` ab, und bis dahin versuchte der Bauherr es jeden Tick aufs Neue.
+	const stelleFrei =
+		werkstatt && !isUnderConstruction(werkstatt)
+			? await employmentService.hasUnofferedPosition(werkstatt)
+			: false;
 	// In einem Rohbau steht keine Werkbank — er zählt als eigene Werkstatt (sonst baute
 	// sein Besitzer eine zweite), aber herstellen lässt sich darin nichts.
 	const kannHerstellenJetzt =

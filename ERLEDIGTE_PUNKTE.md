@@ -3499,3 +3499,30 @@ Eine Mühle auf etwa zwei Bäckereien, stabil über die Zeit (bei Saat 86 nach T
 neue mehr), Mehl und Brot am Ende beide am Markt. Die Backrate blieb unangetastet. **Offen
 geblieben ist eine Beobachtung, die als Punkt 121 weiterläuft:** Saat 86 hat mit beiden
 Varianten deutlich weniger Geburten.
+
+### 123. Dieselbe Saat, zwei verschiedene Städte — behoben mit 0.8.4
+
+**Gefunden am 08.11.2026**, als ein Fehlschlag aus dem 0.8.3-Lauf nachgestellt werden sollte:
+`BUILD_HOME/NOT_IN_STOCK:PLANK` stand dort 173-mal, im Lauf danach mit derselben Saat gar
+nicht. Zwei Läufe mit Saat 86 über 400 Ticks liefen ab Tick 250 auseinander — in Steuer,
+Kassenbuch, Handlungen und Angeboten.
+
+**Ursache:** Alle Ids kommen aus `randomUUID()` (`node:crypto`), nicht aus dem Saat-Würfel.
+Jede Abfrage, die in Id-Folge liefert — ausdrücklich sortiert oder über einen Index —, holt
+damit echten Zufall in den Lauf. Mit 0.8.1 kam ein besonders wirksamer Fall dazu:
+`actForNpcs` sortierte die Einwohner vor dem Mischen nach `id`, und damit hing die ganze
+Zugfolge an den UUIDs.
+
+**Behoben:** Im Messlauf mit `MEASURE_SEED` ersetzt `measureRun.spec` `randomUUID` durch
+einen Zähler; das Spiel selbst behält echte UUIDs. Die Sortierung in `actForNpcs` ist
+wieder draußen. Nachweis: 2 × 400 Ticks Saat 86, Bericht bitgleich.
+
+**Was daraus folgt:** Vergleiche gleicher Saat vor 0.8.4 haben den Zufall womöglich mit
+gemessen (siehe Nachtrag bei Punkt 121). Und der Bretter-Fehlschlag oben ließ sich in fünf
+festen Läufen (Saat 1–4, 86) nicht wieder erzeugen; er bleibt eine Beobachtung, bis er
+wieder auftaucht.
+
+**Im selben Schritt:** `OFFER_JOB/UNDER_CONSTRUCTION` — wer eine Werkstatt im Rohbau
+besaß, schrieb Tick für Tick eine Stelle aus, die `offerJob` ablehnte. `canOfferJob` ist
+für Rohbauten jetzt falsch. Saat 2, 600 Ticks: 34 Fehlschläge vorher, 0 nachher, der übrige
+Bericht unverändert.

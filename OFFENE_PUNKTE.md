@@ -2155,6 +2155,14 @@ Lager und mehr Brot am Markt; wer Kinder will, braucht nach `npc.logic` Rücklag
 Ob sich an der Rücklage junger Paare etwas verschoben hat — weil weniger Lohn in der Kette
 fließt, seit weniger Mühlen gebaut werden —, ist eine Vermutung und keine Messung.
 
+**Nachtrag vom 08.11.2026 — erst neu messen, dann deuten.** Zwei Läufe mit derselben Saat
+waren bis 0.8.4 nicht zwingend gleich: Die Ids kamen aus `randomUUID()` statt aus dem
+Saat-Würfel, und jede Abfrage, die in Id-Folge liefert, brachte so echten Zufall in den
+Lauf (nachgewiesen: 2 × 400 Ticks Saat 86 gingen ab Tick 250 auseinander). Seit 0.8.4
+zählen die Ids im Messlauf hoch, und die Läufe sind bitgleich. Wie viel von der Tabelle
+oben Zufall dieser Art war, ist offen — sie gehört mit 0.8.4 wiederholt, ehe jemand nach
+einem Mechanismus sucht.
+
 **Zu klären, bevor jemand eingreift:** Wann im Lauf gehen die Geburten auseinander? Woran
 scheitern die Paare, die keine Kinder bekommen — Ehe, Dach, Platz, Geld? `MEASURE_TRACE`
 auf ein Paar aus 86 und die Zahlen je 250 Ticks im Bericht reichen dafür. Und: eine vierte
