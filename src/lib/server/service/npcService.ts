@@ -14,7 +14,9 @@ import { Plot } from '$lib/db/model/plot';
 import {
 	decideCaretakerAction,
 	decideNpcActionWithStage,
+	desiredReserve,
 	eatingThreshold,
+	savingsGoal,
 	stateFlags,
 	type Stufe,
 	type IdleReason,
@@ -125,6 +127,8 @@ export interface NpcTick {
 	 * anderen einnimmt, steht bei dessen Kauf als Ausgabe, nicht hier als Einnahme.
 	 */
 	byMoney: Record<string, { ein: number; aus: number }>;
+	/** **Wer Geld bräuchte und was er dafür verpfänden könnte** (0.8.6). */
+	byCredit: Record<string, KreditBedarf>;
 }
 
 /**
@@ -187,9 +191,27 @@ export async function actForNpcs(
 	const gruende: Partial<Record<IdleReason, number>> = {};
 	const einzelheiten: Record<string, number> = {};
 	const geld: Record<string, { ein: number; aus: number }> = {};
+	const kredit: Record<string, KreditBedarf> = {};
 	let gehandelt = 0;
 
-	const buchen = (ergebnis: Ausgang): void => {
+	const buchen = (ergebnis: Ausgang, wer: string): void => {
+		if (ergebnis.credit) {
+			const { art, luecke, pfandwert } = ergebnis.credit;
+			const posten = (kredit[art] ??= {
+				faelle: 0,
+				mitPfand: 0,
+				luecke: 0,
+				lueckeMitPfand: 0,
+				koepfe: []
+			});
+			posten.faelle++;
+			posten.luecke += luecke;
+			if (pfandwert >= luecke * PFAND_DECKUNG) {
+				posten.mitPfand++;
+				posten.lueckeMitPfand += luecke;
+			}
+			if (!posten.koepfe.includes(wer)) posten.koepfe.push(wer);
+		}
 		gezaehlt[ergebnis.action] = (gezaehlt[ergebnis.action] ?? 0) + 1;
 		if (ergebnis.action !== 'IDLE') gehandelt++;
 		if (ergebnis.failure) {
@@ -215,7 +237,7 @@ export async function actForNpcs(
 
 	for (const npc of npcs) {
 		const ergebnis = await einzeln(schritt, npc.dataValues.id, tick);
-		if (ergebnis) buchen(ergebnis);
+		if (ergebnis) buchen(ergebnis, npc.dataValues.id);
 		else gescheitert[AUSNAHME] = (gescheitert[AUSNAHME] ?? 0) + 1;
 	}
 
@@ -229,7 +251,7 @@ export async function actForNpcs(
 	for (const charakter of verwaist) {
 		if (!isUnattended(charakter.dataValues.lastSeenTick, tick)) continue;
 		const ergebnis = await einzeln(schritt, charakter.dataValues.id, tick, true);
-		if (ergebnis) buchen(ergebnis);
+		if (ergebnis) buchen(ergebnis, charakter.dataValues.id);
 		else gescheitert[AUSNAHME] = (gescheitert[AUSNAHME] ?? 0) + 1;
 	}
 
@@ -239,7 +261,8 @@ export async function actForNpcs(
 		byFailure: gescheitert,
 		byIdleReason: gruende,
 		byIdleDetail: einzelheiten,
-		byMoney: geld
+		byMoney: geld,
+		byCredit: kredit
 	};
 }
 
@@ -296,6 +319,36 @@ export interface Ausgang {
 	moneyDelta?: number;
 	/** Wie es sich seit seinem letzten Zug verändert hat, ohne eigenes Zutun (0.8.3). */
 	moneyBetween?: number;
+	/** Wofür ihm Geld fehlt und was er als Pfand hätte (0.8.6) — siehe `KreditBedarf`. */
+	credit?: { art: string; luecke: number; pfandwert: number };
+}
+
+/**
+ * **Wie viel ein Pfand decken muss** (0.8.6). Eine Leihstube verlangt mehr Sicherheit, als
+ * sie verleiht — der Messzähler fragt deshalb, ob der Pfandwert die Lücke anderthalbfach
+ * deckt. Gesetzt für die Messung, nicht für ein Spiel, das es noch nicht gibt.
+ */
+export const PFAND_DECKUNG = 1.5;
+
+/**
+ * **Der Kreditbedarf** (0.8.6, Punkt 43), je Vorhaben summiert.
+ *
+ * Gezählt wird, ehe es eine Leihstube gibt, ob sie Kunden hätte: wer auf ein bezifferbares
+ * Ziel spart und es mit dem Geld über seiner Rücklage nicht erreicht, und wessen
+ * Arbeitgeber den Lohn nicht zahlen konnte. Jeweils mit der Lücke und dem, was sich pfänden
+ * ließe — ohne Pfand gibt es keinen Kredit.
+ */
+export interface KreditBedarf {
+	/** Wie oft (Einwohner × Tick) jemand an dieser Stelle aufs Geld wartete. */
+	faelle: number;
+	/** Davon mit einem Pfand, das die Lücke anderthalbfach deckt. */
+	mitPfand: number;
+	/** Summe der Lücken über alle Fälle. */
+	luecke: number;
+	/** Summe der Lücken, die gedeckt wären. */
+	lueckeMitPfand: number;
+	/** Wer (Ids) — für die Zahl der Köpfe über einen ganzen Lauf. */
+	koepfe: string[];
 }
 
 /**
@@ -342,6 +395,7 @@ export async function ausfuehren(
 	const vorher: number | undefined = geldNachLetztemZug.get(npcId);
 	if (vorher !== undefined && lage.money !== vorher) ergebnis.moneyBetween = lage.money - vorher;
 	geldNachLetztemZug.set(npcId, geldNachher);
+	ergebnis.credit = await kreditbedarf(lage, ergebnis, tick);
 
 	// **Der Protokollant** (5.88, Punkt 111). Er steht hier und nicht in `actForNpcs`,
 	// weil hier alles beisammen ist: der Zustand, aus dem entschieden wurde, die Stufe,
@@ -774,6 +828,9 @@ async function lageAufnehmen(
 			freePlotId?: string;
 			emptyPlotId?: string;
 			employerName?: string;
+			employerBuildingId?: string;
+			employerWage?: number;
+			pfandwert: number;
 			leaseId?: string;
 			leasableId?: string;
 			sellable?: { itemId: string; quantity: number; inInventory: number };
@@ -1049,6 +1106,9 @@ async function lageAufnehmen(
 		money: werte.money,
 		// Wer ihm den Lohn schuldet, wenn er ihn nicht zahlen kann (0.8.3, nur fürs Log).
 		employerName: stelle?.buildingName,
+		employerBuildingId: stelle?.buildingId,
+		employerWage: stelle?.wage,
+		pfandwert: pfandwert(grundstuecke.length, eigene),
 		regionId: werte.RegionId,
 		brotQuelle,
 		cheapestBread: await billigstes('BREAD'),
@@ -1885,6 +1945,67 @@ export async function werkstattErreichbarFuer(
 
 	const fehlt = await fehlendesMaterial(() => tradeService.getOwnedStock(characterId), bedarf);
 	return !fehlt || (await tradeService.cheapestOffer(regionId, fehlt.itemId)) !== undefined;
+}
+
+/**
+ * **Was sich pfänden ließe** (0.8.6): jedes Grundstück zum Grundstückspreis, dazu jedes fertige
+ * Gebäude zum Preis seiner Stufe. Ein Rohbau zählt nur als Boden — halb gebaut ist kein Pfand,
+ * das ein Verleiher nehmen würde. Auch das Wohnhaus zählt (entschieden am 08.11.2026: wer es
+ * verliert, lebt wieder in der Unterkunft).
+ */
+function pfandwert(
+	grundstuecke: number,
+	gebaeude: { optionId: number; level: number; underConstruction: boolean }[]
+): number {
+	let wert: number = grundstuecke * PLOT_PRICE;
+	for (const haus of gebaeude) {
+		if (isUnderConstruction(haus)) continue;
+		const vorlage = buildingService.getBuildingOption(haus.optionId);
+		if (vorlage) wert += levelOf(vorlage, haus.level).price;
+	}
+	return wert;
+}
+
+/** Der Pfandwert eines anderen — des Arbeitgebers, der nicht zahlen konnte (0.8.6). */
+async function pfandwertVon(characterId: string, tick: number): Promise<number> {
+	const grundstuecke = await plotService.getPlotsOfCharacter(characterId);
+	const gebaeude = await buildingService.getBuildingsOfCharacter(characterId, tick);
+	return pfandwert(grundstuecke.length, gebaeude);
+}
+
+/**
+ * Wofür ihm in diesem Zug Geld fehlte (0.8.6) — oder seinem Arbeitgeber.
+ *
+ * **Zwei Fälle, die eine Leihstube lösen könnte.** Der eine spart auf etwas Bezifferbares
+ * (`savingsGoal`) und hat nicht genug über der Rücklage. Der andere ging zur Arbeit, und der
+ * Betrieb konnte nicht zahlen — dann zählt der Arbeitgeber, mit dem Lohn als Lücke und
+ * seinem Pfand. Kostet nur dort eine Abfrage, wo ein Lohn ausfiel.
+ */
+async function kreditbedarf(
+	lage: NonNullable<Awaited<ReturnType<typeof lageAufnehmen>>>,
+	ergebnis: Ausgang,
+	tick: number
+): Promise<Ausgang['credit']> {
+	if (ergebnis.failure?.startsWith('EMPLOYER_BROKE') && lage.employerBuildingId) {
+		const betrieb = await Building.findByPk(lage.employerBuildingId, {
+			attributes: ['OwnerCharacterId']
+		});
+		const inhaber: string | null | undefined = betrieb?.dataValues.OwnerCharacterId;
+		// Ein städtischer Betrieb leiht nicht bei einer Leihstube.
+		if (!inhaber) return undefined;
+		return {
+			art: `Lohn: ${lage.employerName ?? 'Betrieb'}`,
+			luecke: Math.max(1, lage.employerWage ?? 1),
+			pfandwert: await pfandwertVon(inhaber, tick)
+		};
+	}
+
+	const ziel = savingsGoal(lage.state);
+	if (!ziel) return undefined;
+	const uebrig: number =
+		lage.state.money - desiredReserve(lage.state.personality, lage.state.foodPrice);
+	if (uebrig >= ziel.preis) return undefined;
+	return { art: ziel.art, luecke: ziel.preis - Math.max(0, uebrig), pfandwert: lage.pfandwert };
 }
 
 async function fehlendesMaterial(

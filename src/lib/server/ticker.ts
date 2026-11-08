@@ -117,6 +117,20 @@ function berichten(stunde: WorldTick): void {
 		);
 	}
 
+	// **Wer Geld bräuchte und es verpfänden könnte** (0.8.6, Punkt 43): je Vorhaben die Zahl
+	// der Wartenden, wie viele davon ein Pfand hätten, und die mittlere Lücke.
+	if (Object.keys(stunde.npcs.byCredit).length > 0) {
+		console.info(
+			'Kreditbedarf:',
+			Object.fromEntries(
+				Object.entries(stunde.npcs.byCredit).map(([art, k]) => [
+					art,
+					`${k.faelle} (mit Pfand ${k.mitPfand}), Lücke Ø ${Math.round(k.luecke / k.faelle)}`
+				])
+			)
+		);
+	}
+
 	// Was ein NPC beschlossen hat und dann doch nicht konnte. Meist leer — und wenn nicht,
 	// ist es der interessanteste Teil des Protokolls: Ein Entschluss, der jeden Tick aufs
 	// Neue scheitert, ist eine Schleife, die niemand sieht.

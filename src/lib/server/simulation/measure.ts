@@ -24,7 +24,7 @@ import {
 import { tickWorld } from '$lib/server/worldTick';
 import { FERTILE_FROM_AGE, FERTILE_TO_AGE } from '$lib/game/family.logic';
 import { ageInYears } from '$lib/game/time';
-import { protokollieren } from '$lib/server/service/npcService';
+import { PFAND_DECKUNG, protokollieren } from '$lib/server/service/npcService';
 import * as electionService from '$lib/server/service/electionService';
 import * as plotService from '$lib/server/service/plotService';
 import * as auctionService from '$lib/server/service/auctionService';
@@ -234,6 +234,17 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		wahlenMitSieger: 0
 	};
 	const amtshandlungen: Record<string, number> = {};
+	/** **Der Kreditbedarf** (0.8.6, Punkt 43) — gäbe es eine Leihstube, hätte sie Kunden? */
+	const kreditbedarf: Record<
+		string,
+		{
+			faelle: number;
+			mitPfand: number;
+			luecke: number;
+			lueckeMitPfand: number;
+			koepfe: Set<string>;
+		}
+	> = {};
 	/** Wie oft Bürger und Amt das Land verschieden sahen (0.8.4). */
 	const land = {
 		buergerOhneBauland: 0,
@@ -392,6 +403,20 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		for (const [was, wieoft] of Object.entries(stunde.npcs.byIdleDetail)) {
 			muessiggangGenau[was] = (muessiggangGenau[was] ?? 0) + wieoft;
 		}
+		for (const [art, posten] of Object.entries(stunde.npcs.byCredit)) {
+			const summe = (kreditbedarf[art] ??= {
+				faelle: 0,
+				mitPfand: 0,
+				luecke: 0,
+				lueckeMitPfand: 0,
+				koepfe: new Set()
+			});
+			summe.faelle += posten.faelle;
+			summe.mitPfand += posten.mitPfand;
+			summe.luecke += posten.luecke;
+			summe.lueckeMitPfand += posten.lueckeMitPfand;
+			for (const kopf of posten.koepfe) summe.koepfe.add(kopf);
+		}
 		for (const [was, posten] of Object.entries(stunde.npcs.byMoney)) {
 			const summe = (geldJeHandlung[was] ??= { ein: 0, aus: 0 });
 			summe.ein += posten.ein;
@@ -532,6 +557,17 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		...(startvorrat === undefined
 			? []
 			: [`  Startvorrat ${startvorrat} Laibe je Kopf — ${versorgt} verteilt (ein Werkzeug)`]),
+		'',
+		'=== KREDITBEDARF ===',
+		`  Wer aufs Geld wartete (Einwohner × Tick), davon mit Pfand ≥ ${PFAND_DECKUNG * 100} % der Lücke:`,
+		...Object.entries(kreditbedarf)
+			.sort(([, a], [, b]) => b.faelle - a.faelle)
+			.map(
+				([art, k]) =>
+					`  ${art}: ${k.faelle} Fälle, ${k.koepfe.size} Köpfe, Lücke Ø ${Math.round(k.luecke / k.faelle)}` +
+					` — mit Pfand ${k.mitPfand}` +
+					(k.mitPfand > 0 ? ` (Lücke Ø ${Math.round(k.lueckeMitPfand / k.mitPfand)})` : '')
+			),
 		'',
 		'=== DAS AMT ===',
 		`  Ticks mit NPC im Amt ${amt.npc}, mit Spieler ${amt.spieler}, ohne Inhaber ${amt.ohneInhaber}`,

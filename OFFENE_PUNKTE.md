@@ -623,6 +623,47 @@ Dazu kommt:
 - **Sieht man, wer verschuldet ist?** Ein Haus, dessen Lage man einschätzen kann, ist ein
   Haus, mit dem man verhandeln kann. Ganz offen wäre zu viel, ganz verborgen zu wenig.
 
+**Entschieden am 08.11.2026:**
+
+- **Kein Kredit ohne Pfand.** Wer nichts hat, bleibt bei Unterkunft, Waisenhaus und Tagelohn.
+- **Das Wohnhaus darf gepfändet werden** — wer es verliert, lebt wieder in der städtischen
+  Unterkunft.
+- **Die Leihstube ist privat.** Wie vergeben wird, ist noch offen; vorgeschlagen ist ein
+  Aushang wie im Laden („bis 1000 Münzen, 10 %, 50 Ticks, Pfand ≥ 150 %“), den annimmt, wer
+  die Regeln erfüllt — gefiltert über Pfand, Ausfälle beim selben Verleiher und, beim
+  NPC-Verleiher, Zuneigung. Keine Verhandlung, weil der Verleiher dafür da sein müsste.
+- **Erst gemessen, dann gebaut.**
+
+**Gemessen mit 0.8.6** (`=== KREDITBEDARF ===`, 600 Ticks je Saat). Gezählt wird, wer auf ein
+bezifferbares Ziel spart und es über seiner Rücklage nicht erreicht, und jeder Lohn, den ein
+privater Arbeitgeber nicht zahlen konnte — jeweils mit Lücke und Pfandwert (Grundstücke zum
+Grundstückspreis, fertige Gebäude zum Preis ihrer Stufe). „Mit Pfand“ heißt: deckt die
+Lücke anderthalbfach.
+
+| Vorhaben                     | Saat 86 | Saat 1 | Saat 2 | Saat 3 | Lücke Ø | mit Pfand |
+| ---------------------------- | ------: | -----: | -----: | -----: | ------: | --------- |
+| Baumaterial fürs Haus        |      16 |      3 |    489 |    529 |     5–6 | fast alle |
+| Grundstück fürs Haus         |      87 |     85 |    120 |     84 |   32–37 | selten    |
+| Grundstück für die Werkstatt |      15 |     37 |    216 |      — |   22–27 | nie       |
+| Pacht                        |      49 |     56 |     23 |     40 |   12–17 | alle      |
+| Lohn (privater Arbeitgeber)  |      63 |    150 |     58 |     25 |       3 | alle      |
+| Material Werkstattausbau     |     184 |      1 |     40 |      — |       6 | alle      |
+
+Fälle = Einwohner × Tick. Dahinter stehen je Zeile nur ein bis sieben Köpfe.
+
+**Was daraus folgt:**
+
+- **Die Lücken sind winzig** — drei bis vierzig Münzen. Eine Leihstube für „1000 Münzen“ hätte
+  in diesen Städten keinen Kunden.
+- **Wer ein Pfand hat, dem fehlen Kleinbeträge über lange Zeit.** Bei Saat 2 und 3 warten zwei
+  bis vier Leute mit Grundstück rund 250 Ticks lang auf sechs Münzen für Bretter. Das ist eher
+  ein Befund über Arbeit als über Kredit: Wer sechs Münzen nicht verdient, hat keine Arbeit.
+- **Wer nichts hat, ist der Neuling vor dem Grundstück** — und genau den bedient eine
+  Leihstube mit Pfand nicht. Das ist gewollt, aber man sollte wissen, dass er der häufigste
+  Fall ohne Pfand ist.
+- **Der pleite Arbeitgeber hätte immer ein Pfand.** Ein Kredit über den Lohn verschiebt die
+  Pleite aber nur, solange der Betrieb über Bedarf herstellt (353 Quader, die niemand kauft).
+
 _Fertig, wenn:_ Jemand hat sich verschuldet, gebaut, und es hat sich gelohnt — oder eben nicht. (aus dem alten Phasenplan)
 
 ### 44. Der Schuldturm
