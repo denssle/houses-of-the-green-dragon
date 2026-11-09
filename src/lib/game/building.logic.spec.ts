@@ -4,6 +4,7 @@ import {
 	missingToBuild,
 	currentCondition,
 	isRuin,
+	ruinTick,
 	outputFactor,
 	purchase,
 	renovate,
@@ -85,6 +86,40 @@ describe('Gebäude', () => {
 
 		it('fällt nicht unter null', () => {
 			expect(currentCondition(10, 0, yearsToTicks(100))).toBe(0);
+		});
+	});
+
+	/**
+	 * Wann ein Haus einstürzte (0.9.3). Bis dahin stand in der Chronik der Tick der letzten
+	 * Buchung — in Grünau lag die Schmiede damit tausend Ticks vor ihrem Einsturz.
+	 */
+	describe('der Tick des Einsturzes', () => {
+		it('ist der erste Tick, an dem der Zustand null ist', () => {
+			const tick: number = ruinTick(CONDITION_MAX, 5291, 99_999);
+
+			expect(tick).toBe(5291 + yearsToTicks(YEARS_TO_RUIN));
+			expect(isRuin(currentCondition(CONDITION_MAX, 5291, tick))).toBe(true);
+			expect(isRuin(currentCondition(CONDITION_MAX, 5291, tick - 1))).toBe(false);
+		});
+
+		it('trifft auch krumme Zustände auf den Tick genau', () => {
+			for (const zustand of [0.05, 1, 33.3, 49.15, 68.97, 99.99]) {
+				const tick: number = ruinTick(zustand, 100, 99_999);
+
+				expect(isRuin(currentCondition(zustand, 100, tick))).toBe(true);
+				expect(isRuin(currentCondition(zustand, 100, tick - 1))).toBe(false);
+			}
+		});
+
+		it('liegt nie in der Zukunft', () => {
+			// Wer lädt, findet die Ruine erst, wenn sie eine ist — aber ein Aufruf mit
+			// einem Zustand über null darf trotzdem keinen kommenden Tick eintragen.
+			expect(ruinTick(CONDITION_MAX, 0, 10)).toBe(10);
+		});
+
+		it('ist der Tick der Buchung, wenn schon sie bei null stand', () => {
+			// Ein Brand, der alles nimmt, bucht null — eingestürzt ist es dann sofort.
+			expect(ruinTick(0, 700, 900)).toBe(700);
 		});
 	});
 

@@ -18,6 +18,7 @@ import {
 	currentCondition,
 	isUnderConstruction,
 	isRuin,
+	ruinTick,
 	type MaterialNeed,
 	materialFor,
 	missingMaterial,
@@ -548,7 +549,7 @@ async function mitZustand(
 		!isUnderConstruction(instanz.dataValues) &&
 		instanz.dataValues.ownerType !== 'CITY'
 	) {
-		await zurRuineWerden(instanz);
+		await zurRuineWerden(instanz, tick);
 		return null;
 	}
 	return { ...convertToBuilding(instanz.dataValues), condition: Math.round(zustand) };
@@ -592,7 +593,8 @@ function zustandVon(
  * Dach da; ihre Zeile bleibt, nur das Zuhause ist keines mehr.
  */
 async function zurRuineWerden(
-	instanz: Model<BuildingAttributes, BuildingCreationAttributes>
+	instanz: Model<BuildingAttributes, BuildingCreationAttributes>,
+	tick: number
 ): Promise<void> {
 	await sequelize.transaction(async (t: Transaction) => {
 		// Ausdrücklich und nicht über den Fremdschlüssel: `ON DELETE SET NULL` gilt nur,
@@ -616,7 +618,10 @@ async function zurRuineWerden(
 		await chronicleService.record(
 			'BUILDING_RUINED',
 			grundstueck?.dataValues.RegionId ?? null,
-			instanz.dataValues.lastConditionTick,
+			// **Wann es einstürzte, nicht wann zuletzt jemand Hand anlegte** (0.9.3). Bis
+			// dahin stand hier `lastConditionTick` — der Anfang des Verfalls statt sein Ende,
+			// in Grünau bis zu tausend Ticks zu früh.
+			ruinTick(instanz.dataValues.condition, instanz.dataValues.lastConditionTick, tick),
 			{
 				buildingId: instanz.dataValues.id,
 				subjectId: instanz.dataValues.OwnerCharacterId,

@@ -628,6 +628,21 @@ describe('Gebäude über die Zeit', () => {
 			expect(verfall!.detail).toBe('Zimmerei');
 		});
 
+		it('trägt den Einsturz ein, nicht den Beginn des Verfalls', async () => {
+			// Bis 0.9.2 stand hier `lastConditionTick`, und in Grünau lag die Schmiede damit
+			// tausend Ticks vor ihrem Einsturz. Bemerkt wird er hier mit fünf Jahren
+			// Verspätung — wie beim Haus eines Toten, das niemand lädt.
+			const besitzer = await person('Besitzer');
+			await haus(besitzer);
+			await weltzeit(JETZT + yearsToTicks(YEARS_TO_RUIN + 5));
+			await buildingService.getBuildingsOfCharacter(besitzer);
+
+			const seins = await chronicleService.getChronicle({ characterId: besitzer });
+			const verfall = seins.find((eintrag) => eintrag.kind === 'BUILDING_RUINED');
+
+			expect(verfall!.tick).toBe(JETZT + yearsToTicks(YEARS_TO_RUIN));
+		});
+
 		it('greift auch, wenn nur die Liste geladen wird', async () => {
 			// Sonst hinge es vom Zufall ab, wann ein Haus zusammenfällt.
 			const besitzer = await person('Besitzer');

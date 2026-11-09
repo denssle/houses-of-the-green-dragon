@@ -86,6 +86,33 @@ export function currentCondition(
 	return Math.max(0, storedCondition - verstrichen * CONDITION_LOSS_PER_TICK);
 }
 
+/**
+ * Der Tick, an dem der Zustand null erreicht hat — höchstens der aktuelle.
+ *
+ * **Für die Chronik** (0.9.3). Der Verfall wird nicht gebucht, sondern beim Laden
+ * nachgerechnet; bis 0.9.2 trug der Eintrag deshalb `lastConditionTick`, den Tick der
+ * letzten Buchung, also den **Beginn** des Verfalls. In Grünau stand die Schmiede so mit
+ * Tick 5291 in der Chronik, eingestürzt ist sie bei 6291. Der aktuelle Tick allein
+ * genügt aber auch nicht: Das Haus eines Toten lädt womöglich lange niemand, und dann
+ * stünde der Einsturz dort, wo ihn zufällig jemand bemerkt.
+ */
+export function ruinTick(
+	storedCondition: number,
+	lastConditionTick: number,
+	currentTick: number
+): number {
+	let tick: number =
+		lastConditionTick + Math.max(0, Math.ceil(storedCondition / CONDITION_LOSS_PER_TICK));
+	// Gegen Rundung in beide Richtungen: der erste Tick, an dem `currentCondition` null sagt.
+	while (
+		tick > lastConditionTick &&
+		currentCondition(storedCondition, lastConditionTick, tick - 1) <= 0
+	)
+		tick--;
+	while (currentCondition(storedCondition, lastConditionTick, tick) > 0) tick++;
+	return Math.min(tick, currentTick);
+}
+
 /** Am Ende des Verfalls steht die Ruine: Das Haus ist weg, das Grundstück bleibt. */
 export function isRuin(condition: number): boolean {
 	return condition <= 0;
