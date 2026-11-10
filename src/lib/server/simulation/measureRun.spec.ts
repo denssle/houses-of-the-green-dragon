@@ -56,6 +56,26 @@ const startvorrat: number | undefined =
 	process.env.MEASURE_FOOD === undefined ? undefined : Number(process.env.MEASURE_FOOD);
 
 /**
+ * **`MEASURE_FROM=pfad/zum/dump.sql.gz`** setzt eine Sicherung der laufenden Welt fort,
+ * statt eine frische zu bauen (0.9.4, Punkt 122). Dazu die Gegenläufe:
+ *
+ *     MEASURE_LAW=PROPERTY_TAX=0          ein Gesetz festhalten (mehrere mit Komma)
+ *     MEASURE_RENOVATE=Schmiede           Gebäude beim Start instand setzen (mehrere mit Komma)
+ */
+const ausDump: string | undefined = process.env.MEASURE_FROM;
+const gesetze: Record<string, number> | undefined = process.env.MEASURE_LAW
+	? Object.fromEntries(
+			process.env.MEASURE_LAW.split(',').map((paar) => {
+				const [art, wert] = paar.split('=');
+				return [art.trim(), Number(wert)];
+			})
+		)
+	: undefined;
+const instandsetzen: string[] | undefined = process.env.MEASURE_RENOVATE?.split(',').map((name) =>
+	name.trim()
+);
+
+/**
  * **Mit Saat auch die Ids aus dem Zähler** (0.8.4).
  *
  * Die Dienste vergeben Ids mit `randomUUID()`, und die kommen nicht aus dem Saat-Würfel.
@@ -80,7 +100,17 @@ describe('Messlauf', () => {
 	it.runIf(ticks > 0)(
 		`läuft ${ticks} Ticks und schreibt den Bericht`,
 		async () => {
-			const bericht = await measure({ ticks, every, saat, verfolge, startgeld, startvorrat });
+			const bericht = await measure({
+				ticks,
+				every,
+				saat,
+				verfolge,
+				startgeld,
+				startvorrat,
+				ausDump,
+				gesetze,
+				instandsetzen
+			});
 			const text: string = bericht.lines.join('\n');
 
 			writeFileSync(process.env.MEASURE_OUT ?? 'messung.txt', text, 'utf8');

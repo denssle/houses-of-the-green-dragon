@@ -30,6 +30,11 @@ import * as plotService from '$lib/server/service/plotService';
 import { ledigeErwachsene } from '$lib/server/service/migrationService';
 import * as auctionService from '$lib/server/service/auctionService';
 import { DEVELOPMENT_SHIFTS_PER_PLOT } from '$lib/game/auction.logic';
+import { Op } from 'sequelize';
+import { Law } from '$lib/db/model/law';
+import { CONDITION_MAX } from '$lib/game/building.logic';
+import type { LawKind } from '$lib/game/law.logic';
+import { ladeDump } from '$lib/server/simulation/ausDump';
 
 /**
  * Eine Welt laufen lassen und aufschreiben, was passiert.
@@ -104,7 +109,38 @@ export interface MeasureOptions {
 	 * Ein Werkzeug, kein Weltinhalt — was eine Welt mitbekommt, ist Punkt 14.
 	 */
 	startvorrat?: number;
+	/**
+	 * **Eine Sicherung statt einer frischen Welt** (0.9.4, Punkt 122): Pfad zu einem
+	 * MariaDB-Dump, gezippt oder nicht. Der Lauf setzt dort fort, wo die Sicherung stand —
+	 * siehe `ausDump.ts`. `seed` gilt dann nicht.
+	 */
+	ausDump?: string;
+	/**
+	 * **Ein Gesetz festhalten** (0.9.4), etwa `{ PROPERTY_TAX: 0 }` — für den Gegenlauf
+	 * „was wäre ohne die Steuer gewesen". Eingetragen als Erlass mit einem Tick, den kein
+	 * echter je überholt; der Bürgermeister kann dagegen nichts ausrichten. Ein Eingriff in
+	 * die Welt, und deshalb steht er im Kopf des Berichts.
+	 */
+	gesetze?: Partial<Record<LawKind, number>>;
+	/**
+	 * **Gebäude beim Start instand setzen** (0.9.4), nach Namen — etwa `['Schmiede']` für
+	 * den Gegenlauf „was wäre, wenn sie nicht eingestürzt wäre". Nur private Gebäude; ein
+	 * städtisches stürzt ohnehin nicht ein.
+	 */
+	instandsetzen?: string[];
 }
+
+/** Der Tick, den ein festgehaltenes Gesetz trägt — jünger als jeder echte Erlass. */
+const FESTGEHALTEN = 2_000_000_000;
+
+/**
+ * Ab welchem Tick die Chronik zu diesem Lauf gehört (0.9.4).
+ *
+ * Bei einer frischen Welt ist das gleichgültig, die Chronik beginnt mit ihr. Eine geladene
+ * Sicherung bringt aber ihre ganze Vorgeschichte mit, und ohne diese Grenze stünden im
+ * Bericht die Brände und Ruinen der letzten Monate.
+ */
+let messbeginn = 0;
 
 export interface Measurement {
 	lines: string[];
@@ -210,9 +246,41 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 
 	const wuerfel: () => number = saat === undefined ? Math.random : seededRoll(saat);
 
-	await sequelize.sync();
-	if (seed) await seedWorld(wuerfel);
+	if (options.ausDump !== undefined) {
+		const geladen = await ladeDump(sequelize, options.ausDump);
+		zeilen.push(
+			`=== AUS DER SICHERUNG ${options.ausDump} ===`,
+			`  Stand ${geladen.stand}, nachgezogen: ${geladen.nachgezogen.join(', ') || 'nichts'}`,
+			''
+		);
+	} else {
+		await sequelize.sync();
+		if (seed) await seedWorld(wuerfel);
+	}
 	const stadtId: string = await findStartRegionId();
+	const anfang: number = (await World.findByPk(WORLD_ID))!.dataValues.currentTick;
+	messbeginn = anfang;
+
+	const eingriffe: string[] = [];
+	for (const [art, wert] of Object.entries(options.gesetze ?? {})) {
+		await Law.create({
+			id: `messlauf-${art}`,
+			RegionId: stadtId,
+			kind: art as LawKind,
+			value: wert,
+			enactedTick: FESTGEHALTEN,
+			EnactedByCharacterId: null
+		});
+		eingriffe.push(`${art} festgehalten auf ${wert}`);
+	}
+	for (const name of options.instandsetzen ?? []) {
+		const [anzahl] = await Building.update(
+			{ condition: CONDITION_MAX, lastConditionTick: anfang },
+			{ where: { name, ownerType: 'CHARACTER' } }
+		);
+		eingriffe.push(`${name} instand gesetzt (${anzahl}×)`);
+	}
+	if (eingriffe.length > 0) zeilen.push(`=== EINGRIFFE ===`, ...eingriffe.map((e) => `  ${e}`), '');
 
 	const handlungen: Partial<Record<NpcAction, number>> = {};
 	const fehlschlaege: Record<string, number> = {};
@@ -644,7 +712,9 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	zeilen.push(`  Brände ${chronik.braende}, davon:`);
 	zeilen.push(...verteilung(braendeNach).map((zeile) => `  ${zeile}`));
 	const ruinen: Record<string, number> = {};
-	for (const zeile of await Event.findAll({ where: { kind: 'BUILDING_RUINED' } })) {
+	for (const zeile of await Event.findAll({
+		where: { kind: 'BUILDING_RUINED', tick: { [Op.gte]: messbeginn } }
+	})) {
 		const was: string = zeile.dataValues.detail ?? 'unbekannt';
 		ruinen[was] = (ruinen[was] ?? 0) + 1;
 	}
@@ -744,7 +814,7 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
  * aus der Sold und Steuer seit 5.77 nur noch im Kassenbuch stehen.
  */
 async function ereignisse(kind: EventKind): Promise<number> {
-	return Event.count({ where: { kind } });
+	return Event.count({ where: { kind, tick: { [Op.gte]: messbeginn } } });
 }
 
 /**
@@ -754,7 +824,10 @@ async function ereignisse(kind: EventKind): Promise<number> {
  * wäre keine Auskunft, sondern ein Rätsel.
  */
 async function ereignissumme(kind: EventKind): Promise<number> {
-	const zeilen = await Event.findAll({ where: { kind }, attributes: ['value'] });
+	const zeilen = await Event.findAll({
+		where: { kind, tick: { [Op.gte]: messbeginn } },
+		attributes: ['value']
+	});
 	return zeilen.reduce((summe, zeile) => summe + (zeile.dataValues.value ?? 0), 0);
 }
 

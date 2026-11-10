@@ -61,7 +61,7 @@ offenen, nach Nummer sortiert.
 | 119 | Die zweite Stadt — alles Regionsblinde wird regionsfähig                                           | 31                         | Entwurf     |
 | 120 | Fernhandel — Lieferungen mit Ankunft, Preisunterschiede zwischen Städten                           | 41, 119                    | Entwurf     |
 | 121 | Weniger Geburten bei Saat 86 seit 0.5.111 — Zufall oder Mechanismus?                               | —                          | Befund      |
-| 122 | Die Hungersnot von Grünau — **Waisen und Stellen behoben mit 0.7.0**, die Steuer als Ursache offen | —                          | Befund      |
+| 122 | Die Hungersnot von Grünau — **die Steuer ist die Ursache (gemessen in 0.9.4)**, Eingriff ist offen | —                          | Befund      |
 | 124 | Bauland entsteht zu langsam — **Mitarbeit gebaut mit 0.9.1**; die Kasse trägt es knapp             | —                          | teilweise   |
 | 125 | Familien ziehen zu — **gebaut mit 0.9.0**; jetzt fehlen ledige Männer                              | —                          | teilweise   |
 
@@ -2001,7 +2001,7 @@ mit Bretter am Markt auch reparieren, ist offen: Mehrere haben keine Münze.
 jetzt da sind. Die Frage dahinter (brennt das Handwerk ab, oder entsteht es nie?) gehört zu
 Punkt 103 und wird am nächsten vollen Lauf entschieden, nicht hier.
 
-### 122. Die Hungersnot von Grünau — die Steuer als Ursache ist offen
+### 122. Die Hungersnot von Grünau — die Steuer ist die Ursache, der Eingriff ist offen
 
 **Nicht zu verwechseln mit Punkt 100** (`ERLEDIGTE_PUNKTE.md`), „Die Stadt verhungert an ihrer
 eigenen Steuer“: Der war ein Befund aus dem Messlauf und ist erledigt. Dieser hier ist in der
@@ -2019,9 +2019,33 @@ hatten. Danach stieg `EMPLOYER_BROKE` von rund 20 auf bis zu 155 am Tag, und die
 brachen ein. Die Stadtkasse hielt am 07.11. 2110 Münzen, alle NPCs zusammen 1072. Belegt sind
 Zeitfolge und Beträge, nicht die Bargeldstände von damals.
 
-**Zu messen, bevor jemand eingreift:** ein Messlauf, ob die Stadt ohne die Steuerspitze auch
-verhungert wäre. Denkbare Eingriffe: NPCs rechnen die Steuer vor dem Landkauf ein, oder der
-Bürgermeister senkt bei hohen Ausfällen schneller als um eine Münze im Jahr.
+**Gemessen am 10.11.2026, mit 0.9.4: Die Steuer ist die Ursache, die Schmiede nicht.** Ein
+Messlauf mit Saat brachte keine Hungersnot, also lief Grünau selbst noch einmal: aus der
+Sicherung vom 11.10.2026 (`vor-deploy-20261011-173940.sql.gz`, Tick 6222 — vor dem Einsturz
+der Schmiede bei 6291 und vor der Auktionswelle ab 6304), 580 Ticks, je drei Saaten, mit dem
+Code von 0.9.4 (`MEASURE_FROM`, `MEASURE_LAW`, `MEASURE_RENOVATE`):
+
+| Variante         | Hungertote (Saat 1/2/3) | Zuzug | Lebende am Ende | Geld der Leute am Ende | Stadtkasse am Ende |
+| ---------------- | ----------------------: | ----: | --------------- | ---------------------- | ------------------ |
+| Grundlauf        |          **18** (7/8/3) |    30 | 42 / 34 / 40    | 1536–2848              | 1825–2999          |
+| Grundsteuer 0    |           **2** (0/1/1) |    35 | 53 / 49 / 42    | 4138–5495              | 4–406              |
+| Schmiede instand |        **26** (6/10/10) |     6 | 34 / 33 / 34    | 1338–1542              | 1574–1907          |
+| beides           |           **1** (0/1/0) |    27 | 51 / 41 / 38    | 2812–5712              | 145–751            |
+
+- **Der Nachbau trifft:** Live starben zwischen 6222 und 6801 19 Menschen, 11 davon unter
+  fünfzig; die Welle begann bei 6550. Der Grundlauf zeigt dieselbe Welle zur selben Zeit —
+  **mit dem heutigen Code**. 0.7.0 hat die Waisen gerettet, nicht die Stadt.
+- **Das Geld bleibt in der Kasse.** Mit Steuer zieht die Stadt in 580 Ticks 4000 bis 5500
+  Münzen ein, 1000 bis 1800 weitere sind nicht eintreibbar, und die Kasse gibt nichts davon
+  zurück. Ohne Steuer behalten die Leute das Doppelte.
+- **Die Schmiede instand zu halten macht es schlimmer**, und der Zuzug bricht ein (6 statt 30).
+  Vermutet, nicht belegt: Die Ruine gab Grund frei, darauf entstand Neues, und daran hängt der
+  Zuzug (Punkt 114).
+
+**Offen:** Wo die Grenze liegt — ob ein niedriger Satz trägt oder ob die Kasse das Geld
+schlicht hortet. Danach richtet sich der Eingriff: NPCs rechnen die Steuer vor dem Landkauf
+ein, der Bürgermeister senkt bei hohen Ausfällen schneller, oder die Stadt gibt ihre Kasse
+wieder aus (Löhne, Bauten).
 
 **Zu beobachten nach dem Deploy:** Das Waisenhaus lebt vom Brot am Markt, und dort lagen am
 07.11. nur zwei Laibe. Die Zeile `Waisen ohne Versorgung` im Log zeigt, wenn das nicht reicht.
