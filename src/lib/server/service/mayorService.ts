@@ -178,6 +178,7 @@ export async function governAsNpcMayor(
 		rates: await saetze(regionId),
 		taxBase: await bemessungsgrundlage(regionId),
 		rateAgeInTicks: await satzalter(regionId, tick),
+		taxShortfallShare: await steuerausfall(regionId),
 		stipend: await lawService.rate(regionId, 'OFFICE_STIPEND'),
 		stipendAgeInTicks: await lawService.rateAge(regionId, 'OFFICE_STIPEND', tick)
 	};
@@ -275,6 +276,20 @@ async function saetze(regionId: string): Promise<Record<NpcMayorLaw, number>> {
 		NpcMayorLaw,
 		number
 	>;
+}
+
+/**
+ * Welcher Anteil der Grundsteuer beim letzten Termin nicht einzutreiben war (0.10.0).
+ *
+ * `null`, solange kein Termin etwas geschuldet hat — dann gibt es nichts zu beurteilen.
+ */
+async function steuerausfall(regionId: string): Promise<number | null> {
+	const stadt = await Region.findByPk(regionId, {
+		attributes: ['lastTaxDue', 'lastTaxShortfall']
+	});
+	const geschuldet: number | null = stadt?.dataValues.lastTaxDue ?? null;
+	if (geschuldet === null || geschuldet <= 0) return null;
+	return (stadt?.dataValues.lastTaxShortfall ?? 0) / geschuldet;
 }
 
 /**

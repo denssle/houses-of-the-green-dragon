@@ -198,7 +198,12 @@ export async function collectPropertyTax(
 
 	const satz: number = await rate(regionId, 'PROPERTY_TAX');
 	await stadt.update({ lastTaxTick: tick });
-	if (satz <= 0) return undefined;
+	if (satz <= 0) {
+		// Nichts geschuldet ist kein knappes Jahr — aber auch keines, das etwas über die
+		// Zahlungskraft sagt. Der Bürgermeister entscheidet dann nach der Kasse.
+		await stadt.update({ lastTaxDue: null, lastTaxShortfall: null });
+		return undefined;
+	}
 
 	const grundstuecke = await Plot.findAll({
 		where: { RegionId: regionId, ownerType: 'CHARACTER', OwnerCharacterId: { [Op.ne]: null } }
@@ -234,6 +239,12 @@ export async function collectPropertyTax(
 	}
 
 	await treasuryService.einnehmen(regionId, eingenommen, 'PROPERTY_TAX');
+	// **Für den Bürgermeister** (0.10.0, Punkt 122): Ohne diese beiden Zahlen sah er nur die
+	// Kasse und erhöhte weiter, während ein Viertel der Schuld schon nicht zu holen war.
+	await stadt.update({
+		lastTaxDue: eingenommen + ausgefallen,
+		lastTaxShortfall: ausgefallen
+	});
 
 	return { collected: eingenommen, payers: zahlende, shortfall: ausgefallen };
 }

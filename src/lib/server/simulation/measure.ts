@@ -35,6 +35,7 @@ import { Law } from '$lib/db/model/law';
 import { CONDITION_MAX } from '$lib/game/building.logic';
 import type { LawKind } from '$lib/game/law.logic';
 import { ladeDump } from '$lib/server/simulation/ausDump';
+import * as lawService from '$lib/server/service/lawService';
 
 /**
  * Eine Welt laufen lassen und aufschreiben, was passiert.
@@ -607,6 +608,19 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 			);
 			zeilen.push(`    Frauen-Ticks im Alter: ${frauenZeile(frauenFenster)}`);
 			frauenFenster = leer();
+			// **Was das Amt an den Steuern tut** (0.10.0, Punkt 122). Ohne diese Zeile ließ
+			// sich nicht sagen, ob die neue Regel überhaupt senkt — nur, dass weiter gehungert
+			// wurde.
+			const stadt = (await Region.findByPk(stadtId))!.dataValues;
+			const ausfallAnteil: string =
+				stadt.lastTaxDue && stadt.lastTaxDue > 0
+					? `${Math.round((100 * (stadt.lastTaxShortfall ?? 0)) / stadt.lastTaxDue)} %`
+					: '–';
+			zeilen.push(
+				`    Grundsteuer ${await lawService.rate(stadtId, 'PROPERTY_TAX')}, ` +
+					`Zehnt ${await lawService.rate(stadtId, 'TITHE')} %, ` +
+					`Ausfall beim letzten Termin ${ausfallAnteil}`
+			);
 			zeilen.push(
 				`    ${haeuser
 					.map(

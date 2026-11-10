@@ -208,6 +208,19 @@ describe('Gesetze gegen die Datenbank', () => {
 			expect(await geld(arm)).toBe(0);
 		});
 
+		it('merkt sich, was geschuldet war und was nicht zu holen war', async () => {
+			// Für den Bürgermeister (0.10.0, Punkt 122): Ohne diese beiden Zahlen sah er nur
+			// die Kasse und erhöhte weiter, während die Stadt nicht mehr zahlen konnte.
+			await satzSetzen(20);
+			await grundstueck(await person('Arme', { money: 7 }));
+			await lawService.collectPropertyTax(stadtId, JETZT);
+			await lawService.collectPropertyTax(stadtId, JETZT + TICKS_PER_YEAR);
+
+			const stadt = await Region.findByPk(stadtId);
+			expect(stadt?.dataValues.lastTaxDue).toBe(20);
+			expect(stadt?.dataValues.lastTaxShortfall).toBe(13);
+		});
+
 		it('lässt Tote und die Stadt selbst aus', async () => {
 			await satzSetzen(5);
 			const tot = await person('Verstorbene', { deathTick: JETZT - 1 });

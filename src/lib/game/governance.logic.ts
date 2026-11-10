@@ -94,6 +94,15 @@ export interface CityState {
 	 */
 	rateAgeInTicks: Record<NpcMayorLaw, number>;
 	/**
+	 * **Was beim letzten Grundsteuertermin nicht einzutreiben war**, als Anteil der Schuld
+	 * (0.10.0, Punkt 122) — `null`, solange noch nie etwas geschuldet wurde.
+	 *
+	 * Bis dahin sah das Amt nur die eigene Kasse. Im Oktober 2026 stand sie in Grünau bei
+	 * zwanzig Münzen, also erhöhte der Bürgermeister Jahr für Jahr, von 15 auf 19 — während
+	 * ein Viertel der Schuld schon nicht mehr zu holen war und die Stadt verhungerte.
+	 */
+	taxShortfallShare: number | null;
+	/**
 	 * Was die Stadt dem Amtsinhaber je Tick zahlt — **ihr größter stetiger Abfluss** und
 	 * der einzige, an dem er selbst drehen kann.
 	 *
@@ -157,6 +166,30 @@ export const TAX_RAISE_STEP = 5;
  * Stadt ausgepresst.
  */
 export const TAX_RAISE_STEP_COIN = 1;
+
+/**
+ * **Ab welchem Ausfall die Grundsteuer sinkt** (0.10.0, Punkt 122): Wenn mehr als ein
+ * Zehntel der Schuld nicht einzutreiben war, ist das kein säumiger Einzelner mehr, sondern
+ * ein knappes Jahr. Dann wird nachgelassen, ganz gleich, wie die Kasse steht — Steuernachlass
+ * in Notjahren kannten viele Städte, und der Gegenlauf aus der Sicherung vom 11.10.2026 hat
+ * gezeigt, was ohne ihn geschieht: 18 Hungertote bei steigender Steuer, 2 bei fünf Münzen.
+ */
+export const TAX_RELIEF_SHORTFALL = 0.1;
+
+/**
+ * **Bis zu welchem Ausfall ein Jahr als fett gilt** (0.10.0): Nur wenn praktisch alle
+ * zahlen konnten, darf die Grundsteuer steigen. Dazwischen bleibt sie, wo sie ist.
+ */
+export const TAX_FAT_YEAR_SHORTFALL = 0.02;
+
+/**
+ * Der Satz nach einem knappen Jahr: **ungefähr das, was die Leute zahlen konnten.** Wer bei
+ * 19 Münzen ein Viertel schuldig blieb, landet bei 14 — und nicht, wie bis 0.9.4, ein
+ * Spieljahr später bei 18. Mindestens eine Münze weniger, nie unter das Minimum.
+ */
+export function relievedTax(satz: number, ausfall: number, minimum: number): number {
+	return Math.max(minimum, Math.min(satz - 1, Math.floor(satz * (1 - ausfall))));
+}
 
 export function taxStep(kind: NpcMayorLaw): number {
 	return LAW_RULES[kind].unit === 'COIN' ? TAX_RAISE_STEP_COIN : TAX_RAISE_STEP;
@@ -271,6 +304,24 @@ export interface TaxChange {
  */
 export function nextTaxChange(state: CityState): TaxChange | undefined {
 	const ruecklage: number = treasuryReserve(state.developmentCost);
+	const ausfall: number | null = state.taxShortfallShare;
+
+	// **Erst die Bürger, dann die Kasse** (0.10.0, Punkt 122). Ein knappes Jahr senkt die
+	// Grundsteuer, auch wenn die Kasse leer ist — und in einem knappen Jahr wird keine
+	// Steuer erhöht, auch nicht der Zehnt: Der trifft die Ernte, und an der hängt das Brot.
+	if (ausfall !== null && ausfall > TAX_RELIEF_SHORTFALL) {
+		const satz: number = state.rates.PROPERTY_TAX;
+		const minimum: number = LAW_RULES.PROPERTY_TAX.min;
+		const darf: boolean =
+			state.taxBase.PROPERTY_TAX > 0 &&
+			state.rateAgeInTicks.PROPERTY_TAX >= TAX_EFFECT_DELAY.PROPERTY_TAX;
+		if (darf && satz > minimum) {
+			return { kind: 'PROPERTY_TAX', value: relievedTax(satz, ausfall, minimum) };
+		}
+		return undefined;
+	}
+	const fett: boolean = ausfall === null || ausfall <= TAX_FAT_YEAR_SHORTFALL;
+
 	const knapp: boolean = state.treasury < ruecklage;
 	const ueppig: boolean = state.treasury > ruecklage * 4;
 	if (!knapp && !ueppig) return undefined;
@@ -284,6 +335,9 @@ export function nextTaxChange(state: CityState): TaxChange | undefined {
 		const satz: number = state.rates[kind];
 		const schritt: number = taxStep(kind);
 
+		// Erhöht wird nur nach einem fetten Jahr — wer schon jetzt nicht ganz zahlen
+		// konnte, zahlt mehr erst recht nicht, und der Zehnt ist dafür kein Ausweg.
+		if (knapp && !fett) continue;
 		if (knapp && satz < grenzen.max) {
 			return { kind, value: Math.min(grenzen.max, satz + schritt) };
 		}

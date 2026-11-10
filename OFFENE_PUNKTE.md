@@ -61,9 +61,11 @@ offenen, nach Nummer sortiert.
 | 119 | Die zweite Stadt — alles Regionsblinde wird regionsfähig                                           | 31                         | Entwurf     |
 | 120 | Fernhandel — Lieferungen mit Ankunft, Preisunterschiede zwischen Städten                           | 41, 119                    | Entwurf     |
 | 121 | Weniger Geburten bei Saat 86 seit 0.5.111 — Zufall oder Mechanismus?                               | —                          | Befund      |
-| 122 | Die Hungersnot von Grünau — **die Steuer ist die Ursache (gemessen in 0.9.4)**, Eingriff ist offen | —                          | Befund      |
+| 122 | Die Hungersnot von Grünau — **Steuerregel seit 0.10.0**; die Kasse hortet, die Armenspeisung offen | —                          | Befund      |
 | 124 | Bauland entsteht zu langsam — **Mitarbeit gebaut mit 0.9.1**; die Kasse trägt es knapp             | —                          | teilweise   |
 | 125 | Familien ziehen zu — **gebaut mit 0.9.0**; jetzt fehlen ledige Männer                              | —                          | teilweise   |
+| 126 | Zufriedenheit am Charakter — Grundlage für Amt, Wahl, Kündigen und Wegzug                          | 122                        | Entwurf     |
+| 127 | Wegziehen: wer lange unzufrieden ist, verlässt die Stadt — Haus, Grund und Familie                 | 126                        | Entwurf     |
 
 ## Die Bauordnung
 
@@ -72,7 +74,7 @@ dem davor auf, zwischen den Strängen gibt es kaum Abhängigkeiten. Welcher Stra
 ist eine Frage der Lust und nicht der Reihenfolge.
 
 **Jederzeit, für sich** — klein, keine Voraussetzung, gut für einen Abend:
-122 (Steuer-Messlauf zur Hungersnot), 121 (Geburten bei Saat 86), 92 (Rest: immer dasselbe
+122 (Armenspeisung gegen die hortende Kasse), 121 (Geburten bei Saat 86), 92 (Rest: immer dasselbe
 Handwerk), 91 (Tick-Vermerk), 98, 61, 64 (Seiten je Gebäude). Erledigt am
 07.11.2026: 87, 88, 94, 105; am 08.11.2026: 101.
 
@@ -2001,7 +2003,7 @@ mit Bretter am Markt auch reparieren, ist offen: Mehrere haben keine Münze.
 jetzt da sind. Die Frage dahinter (brennt das Handwerk ab, oder entsteht es nie?) gehört zu
 Punkt 103 und wird am nächsten vollen Lauf entschieden, nicht hier.
 
-### 122. Die Hungersnot von Grünau — die Steuer ist die Ursache, der Eingriff ist offen
+### 122. Die Hungersnot von Grünau — die Steuer stößt sie an, die Kasse hält sie fest
 
 **Nicht zu verwechseln mit Punkt 100** (`ERLEDIGTE_PUNKTE.md`), „Die Stadt verhungert an ihrer
 eigenen Steuer“: Der war ein Befund aus dem Messlauf und ist erledigt. Dieser hier ist in der
@@ -2042,10 +2044,28 @@ Code von 0.9.4 (`MEASURE_FROM`, `MEASURE_LAW`, `MEASURE_RENOVATE`):
   Vermutet, nicht belegt: Die Ruine gab Grund frei, darauf entstand Neues, und daran hängt der
   Zuzug (Punkt 114).
 
-**Offen:** Wo die Grenze liegt — ob ein niedriger Satz trägt oder ob die Kasse das Geld
-schlicht hortet. Danach richtet sich der Eingriff: NPCs rechnen die Steuer vor dem Landkauf
-ein, der Bürgermeister senkt bei hohen Ausfällen schneller, oder die Stadt gibt ihre Kasse
-wieder aus (Löhne, Bauten).
+**Die Grenze liegt zwischen 5 und 10 Münzen** (gleicher Lauf, Satz festgehalten): bei 5
+zusammen 2 Hungertote (1/0/1), bei 10 schon 21 (7/9/5).
+
+**Gebaut mit 0.10.0: Der Bürgermeister sieht den Ausfall.** Die Stadt merkt sich beim Termin,
+was geschuldet und was nicht einzutreiben war (`lastTaxDue`, `lastTaxShortfall`). Mehr als
+ein Zehntel Ausfall ist ein knappes Jahr: Die Grundsteuer sinkt auf ungefähr das, was gezahlt
+werden konnte (`relievedTax`, etwa 19 → 14), und erhöht wird nichts, auch nicht der Zehnt.
+Erhöht wird nur nach einem fetten Jahr (höchstens 2 % Ausfall) und nur bei knapper Kasse.
+
+**Das hilft, reicht aber nicht:** 13 Hungertote statt 18 (6/4/3). Der Verlauf zeigt warum —
+die Regel senkt, sobald der Ausfall steigt, von 13 auf 2 Münzen in vier Jahren. Aber der
+Ausfall bleibt bei 15 bis 27 %, auch bei zwei Münzen: Es gibt Leute, die gar kein Geld mehr
+haben. **Das Geld liegt in der Kasse.** Bei Tick 450 (Saat 1) hielt sie 2630 Münzen, alle
+Bürger zusammen 2541 — die Stadt besaß die Hälfte des Geldes der Welt, und gestorben wurde, als
+sie am vollsten war. Ohne Steuer stand sie bei 0 bis 400. Ausgegeben wird sie nur für Löhne und
+das Amtsgehalt.
+
+**Offen, und als Nächstes dran: Die Kasse muss zurückgeben.** Vorgesehen ist eine
+Armenspeisung — die Stadt kauft bei voller Kasse Brot am Markt und verteilt es an Hungernde.
+Historisch belegt (Almosen, Spital), trifft genau die, die es brauchen, und das Geld landet bei
+Bäcker und Bauer statt im Kasten. Danach Punkt 126: Mit einer Zufriedenheit sieht der
+Bürgermeister mehr als den Ausfall.
 
 **Zu beobachten nach dem Deploy:** Das Waisenhaus lebt vom Brot am Markt, und dort lagen am
 07.11. nur zwei Laibe. Die Zeile `Waisen ohne Versorgung` im Log zeigt, wenn das nicht reicht.
@@ -2352,3 +2372,42 @@ erwachsen, ohne dass jemand für sie mitkommt.
 
 **Mögliche Hebel:** Bei einseitigem Heiratsmarkt öfter einen Einzelnen schicken; oder die
 Form selbst nach dem Bedarf richten. Erst mit mehr Saaten nachmessen, ob 4 von 17 Pech war.
+
+## Zufriedenheit
+
+### 126. Zufriedenheit am Charakter
+
+**Anlass, 10.11.2026 (Punkt 122):** Der Bürgermeister sah nur seine Kasse und erhöhte die
+Steuer, während die Stadt verhungerte. Ein Steuerausfall ist ein Hinweis, aber kein Maß dafür,
+wie es den Leuten geht. Und gewählt wird bisher allein nach Zuneigung (`npcService`, `VOTE`):
+Was ein Amtsinhaber im Amt tut, spielt für seine Wiederwahl keine Rolle.
+
+**Die Idee:** Ein Wert am Charakter, abgeleitet aus der Bedürfnishierarchie, die es seit 5.88
+gibt (Überleben, Sicherheit, Zugehörigkeit, Ansehen, Entfaltung) — wer nur ums Überleben
+kämpft, ist unzufrieden, wer bei Entfaltung ist, nicht. Dazu Abzüge für Lasten, die man
+spürt: Hunger, eine Steuer, die einen großen Teil des Geldes nimmt, keine Arbeit. **Träge**,
+wie die Zuneigung: Ein hungriger Tag treibt niemanden fort, ein hungriges Jahr schon.
+
+**Wer ihn nutzt, je ein eigener Schritt:**
+
+- **Der Bürgermeister** liest die Stimmung der Stadt und senkt Steuern, ehe gestorben wird.
+- **Die Wahl:** Unzufriedenheit belastet die Zuneigung zum Amtsinhaber — dann hat ein
+  ehrgeiziger Bürgermeister einen Grund für Steuergeschenke, gerade vor der Wahl. Gehört zu
+  Punkt 47 (Ruf aus Taten, hier aus der Amtsführung). Die Wahl allein reicht als Bremse nicht:
+  Sie kommt alle fünf Jahre, die Hungerwelle von 2026 war in fünf Jahren durch.
+- **Kündigen:** Wer unzufrieden ist und anderswo eine Stelle sieht, geht. Bisher kann nur der
+  Arbeitgeber das Verhältnis beenden. Gehört zu Punkt 33.
+- **Wegziehen:** Punkt 127.
+
+**Zuerst messen:** Im ersten Schritt steht der Wert nur im Messbericht, damit sich prüfen
+lässt, ob er zeigt, was er soll, ehe etwas an ihm hängt.
+
+### 127. Wegziehen
+
+**Die Stadt wächst bisher nur und schrumpft nur durch den Tod.** Wer lange sehr unzufrieden
+ist, soll gehen können — dann verliert eine schlecht geführte Stadt ihre Leute, und eine gut
+geführte zieht sie an. Damit hinge auch der Zuzug nicht mehr allein an Gebäuden (Punkt 114).
+
+**Zu entscheiden:** Was mit Haus, Grund und Werkstatt geschieht (Verkauf, Heimfall, Erbe wie
+beim Tod?), wer mitgeht (Ehepartner, Kinder, Mündel), was Bindung ausmacht (Familie, Grund,
+Amt halten fest) und ob Weggezogene zurückkehren können.

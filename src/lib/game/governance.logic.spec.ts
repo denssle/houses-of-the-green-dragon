@@ -5,6 +5,9 @@ import {
 	GREED_TO_KEEP_STIPEND,
 	nextStipendChange,
 	nextTaxChange,
+	relievedTax,
+	TAX_FAT_YEAR_SHORTFALL,
+	TAX_RELIEF_SHORTFALL,
 	STIPEND_EFFECT_DELAY,
 	TAX_RAISE_STEP,
 	TAX_RAISE_STEP_COIN,
@@ -43,6 +46,8 @@ function ruhig(werte: Partial<CityState> = {}): CityState {
 		taxBase: { PROPERTY_TAX: 11, TITHE: 1 },
 		// Nie etwas erlassen: Der Rückfallwert gilt seit Anbeginn, jede Frist ist abgelaufen.
 		rateAgeInTicks: { PROPERTY_TAX: Infinity, TITHE: Infinity },
+		// Noch kein Steuertermin — das Amt entscheidet nach der Kasse.
+		taxShortfallShare: null,
 		stipend: LAW_RULES.OFFICE_STIPEND.fallback,
 		stipendAgeInTicks: Infinity,
 		...werte
@@ -304,6 +309,90 @@ describe('Was ein Bürgermeister tut', () => {
 
 			expect(nextTaxChange(frisch)).toBeUndefined();
 			expect(decideMayorAction(frisch)).toBe('NOTHING');
+		});
+
+		/**
+		 * **Erst die Bürger, dann die Kasse** (0.10.0, Punkt 122). Im Oktober 2026 erhöhte der
+		 * Bürgermeister von Grünau die Grundsteuer Jahr für Jahr, weil die Kasse leer war —
+		 * während ein Viertel der Schuld schon nicht mehr einzutreiben war. Der Gegenlauf aus
+		 * der Sicherung zeigte 18 Hungertote bei steigender Steuer und 2 bei fünf Münzen.
+		 */
+		describe('nach knappen und fetten Jahren', () => {
+			it('senkt nach einem knappen Jahr, auch wenn die Kasse leer ist', () => {
+				const grünau = ruhig({
+					treasury: 20,
+					rates: { PROPERTY_TAX: 19, TITHE: LAW_RULES.TITHE.fallback },
+					taxShortfallShare: 0.25
+				});
+
+				expect(nextTaxChange(grünau)).toEqual({ kind: 'PROPERTY_TAX', value: 14 });
+			});
+
+			it('senkt kräftig, ungefähr auf das, was die Leute zahlen konnten', () => {
+				expect(relievedTax(19, 0.25, 0)).toBe(14);
+				expect(relievedTax(10, 0.5, 0)).toBe(5);
+				// Mindestens eine Münze, nie unter das Minimum.
+				expect(relievedTax(3, 0.11, 0)).toBe(2);
+				expect(relievedTax(1, 0.9, 0)).toBe(0);
+			});
+
+			it('erhöht in einem knappen Jahr gar nichts, auch nicht den Zehnt', () => {
+				// Der Zehnt trifft die Ernte, und an der hängt das Brot.
+				const knapp = ruhig({
+					treasury: 0,
+					rates: { PROPERTY_TAX: 0, TITHE: LAW_RULES.TITHE.fallback },
+					taxShortfallShare: 0.5
+				});
+
+				expect(nextTaxChange(knapp)).toBeUndefined();
+			});
+
+			it('wartet auch nach einem knappen Jahr, bis die letzte Senkung gewirkt hat', () => {
+				const eben = ruhig({
+					treasury: 0,
+					rates: { PROPERTY_TAX: 14, TITHE: LAW_RULES.TITHE.fallback },
+					rateAgeInTicks: { PROPERTY_TAX: TICKS_PER_YEAR - 1, TITHE: Infinity },
+					taxShortfallShare: 0.25
+				});
+
+				expect(nextTaxChange(eben)).toBeUndefined();
+			});
+
+			it('hält still, wenn ein paar wenige nicht zahlen konnten', () => {
+				const mittel = ruhig({
+					treasury: 0,
+					rates: { PROPERTY_TAX: 8, TITHE: LAW_RULES.TITHE.fallback },
+					taxShortfallShare: (TAX_FAT_YEAR_SHORTFALL + TAX_RELIEF_SHORTFALL) / 2
+				});
+
+				expect(nextTaxChange(mittel)).toBeUndefined();
+			});
+
+			it('erhöht nach einem fetten Jahr, wenn die Kasse es braucht', () => {
+				const fett = ruhig({
+					treasury: 0,
+					rates: { PROPERTY_TAX: 8, TITHE: LAW_RULES.TITHE.fallback },
+					taxShortfallShare: 0
+				});
+
+				expect(nextTaxChange(fett)).toEqual({
+					kind: 'PROPERTY_TAX',
+					value: 8 + TAX_RAISE_STEP_COIN
+				});
+			});
+
+			it('und senkt nach einem fetten Jahr weiter, wenn die Kasse hortet', () => {
+				const reich = ruhig({
+					treasury: treasuryReserve(ERSCHLIESSUNG) * 5,
+					rates: { PROPERTY_TAX: 8, TITHE: LAW_RULES.TITHE.fallback },
+					taxShortfallShare: 0
+				});
+
+				expect(nextTaxChange(reich)).toEqual({
+					kind: 'PROPERTY_TAX',
+					value: 8 - TAX_RAISE_STEP_COIN
+				});
+			});
 		});
 
 		it('springt in Münzen anders als in Anteilen', () => {
