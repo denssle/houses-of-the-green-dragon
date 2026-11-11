@@ -9,7 +9,8 @@ import {
 	NPC_MAYOR_LAWS,
 	nextStipendChange,
 	nextTaxChange,
-	type NpcMayorLaw
+	type NpcMayorLaw,
+	treasuryReserve
 } from '$lib/game/governance.logic';
 import { LAW_RULES } from '$lib/game/law.logic';
 import { developmentWageBill } from '$lib/game/auction.logic';
@@ -28,6 +29,14 @@ import { developmentWageBill } from '$lib/game/auction.logic';
  * trotzdem in die Lage ein, weil die **Rücklage** an ihr hängt.
  */
 const GRUNDSTUECKE_JE_ERSCHLIESSUNG = 2;
+
+/**
+ * Was die Stadt in der Kasse behalten will — dieselbe Rücklage, nach der das Amt Steuern
+ * und Entschädigung bemisst. Die Armenspeisung (0.11.0) gibt nur aus, was darüber liegt.
+ */
+export function stadtRuecklage(): number {
+	return treasuryReserve(developmentWageBill(GRUNDSTUECKE_JE_ERSCHLIESSUNG));
+}
 import { isUnderConstruction } from '$lib/game/building.logic';
 import * as auctionService from '$lib/server/service/auctionService';
 import * as buildingService from '$lib/server/service/buildingService';

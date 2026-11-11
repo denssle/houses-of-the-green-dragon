@@ -7,6 +7,7 @@ import { Character } from '$lib/db/model/character';
 import { Plot } from '$lib/db/model/plot';
 import { Region } from '$lib/db/model/region';
 import * as treasuryService from '$lib/server/service/treasuryService';
+import type { Kassenabfluss } from '$lib/server/service/treasuryService';
 import { BuildingStock, ShopOffer } from '$lib/db/model/shop';
 import { acceptedGoods } from '$lib/game/building.logic';
 import { buy, offer as offerLogic, type ShopKind, shopKindFor } from '$lib/game/trade.logic';
@@ -610,12 +611,17 @@ export async function buyFromOffer(
  *
  * Gekauft wird, was die Kasse hergibt. Ist sie leer oder der Markt, bleibt es bei weniger;
  * das sieht der Aufrufer am Ergebnis.
+ *
+ * **Seit 0.11.0 auch für die Armenspeisung** — mit eigenem Posten im Kassenbuch und einer
+ * Obergrenze: Sie darf nur ausgeben, was über der Rücklage liegt.
  */
 export async function cityBuysFood(
 	regionId: string,
 	buildingId: string,
 	itemId: string,
-	wanted: number
+	wanted: number,
+	grund: Kassenabfluss = 'ORPHAN_CARE',
+	budget: number = Infinity
 ): Promise<{ bought: number; spent: number }> {
 	let bought: number = 0;
 	let spent: number = 0;
@@ -633,13 +639,13 @@ export async function cityBuysFood(
 
 			const stadt = await Region.findByPk(regionId, { transaction: t, lock: t.LOCK.UPDATE });
 			const preis: number = angebot.dataValues.pricePerUnit;
-			const leistbar: number =
-				preis > 0 ? Math.floor((stadt?.dataValues.treasury ?? 0) / preis) : 0;
+			const verfuegbar: number = Math.min(stadt?.dataValues.treasury ?? 0, budget - spent);
+			const leistbar: number = preis > 0 ? Math.floor(verfuegbar / preis) : 0;
 			const stueck: number = Math.min(wanted - bought, angebot.dataValues.quantity, leistbar);
 			if (stueck <= 0) return 0;
 
 			await changeBuildingStock(buildingId, itemId, stueck, t);
-			await treasuryService.ausgeben(regionId, stueck * preis, 'ORPHAN_CARE', t);
+			await treasuryService.ausgeben(regionId, stueck * preis, grund, t);
 			await Character.increment('money', {
 				by: stueck * preis,
 				where: { id: angebot.dataValues.SellerCharacterId },

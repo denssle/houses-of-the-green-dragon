@@ -92,7 +92,9 @@ describe('Das Kassenbuch', () => {
 		// **`DEVELOPMENT` (5.92) und `PUBLIC_BUILD` (5.93) sind aus demselben Grund
 		// gefallen** (Punkt 102): Erschließen und öffentliches Bauen kosten seither Arbeit
 		// statt Münzen, und was die Stadt dafür zahlt, ist Lohn — also `WAGE`.
-		expect(treasuryService.KASSENABFLUESSE).toEqual(['WAGE', 'STIPEND', 'ORPHAN_CARE']);
+		//
+		// `ALMS` kam mit 0.11.0 dazu — gebucht von der Armenspeisung (`almsService`).
+		expect(treasuryService.KASSENABFLUESSE).toEqual(['WAGE', 'STIPEND', 'ORPHAN_CARE', 'ALMS']);
 	});
 
 	it('bucht nichts, wo nichts fließt', async () => {

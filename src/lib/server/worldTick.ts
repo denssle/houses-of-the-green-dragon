@@ -9,6 +9,8 @@ import * as mayorService from '$lib/server/service/mayorService';
 import * as migrationService from '$lib/server/service/migrationService';
 import * as npcService from '$lib/server/service/npcService';
 import * as orphanService from '$lib/server/service/orphanService';
+import * as almsService from '$lib/server/service/almsService';
+import type { AlmsReport } from '$lib/server/service/almsService';
 import type { Arrival } from '$lib/server/service/migrationService';
 import type { AuctionTick } from '$lib/server/service/auctionService';
 import type { Death } from '$lib/server/service/lifecycleService';
@@ -67,6 +69,8 @@ export interface WorldTick {
 	tax?: TaxRun;
 	stipends: Stipend[];
 	orphans: OrphanCare;
+	/** Die Armenspeisung (0.11.0, Punkt 122). */
+	alms: AlmsReport;
 	hazard?: HazardReport;
 	deaths: Death[];
 }
@@ -107,6 +111,7 @@ export async function tickWorld(tick: number, options: WorldTickOptions = {}): P
 	const tax = await lawService.collectPropertyTax(stadtId, tick);
 	const stipends = await lawService.payOfficeStipends(stadtId);
 	const orphans = await orphanService.careForOrphans(stadtId, tick);
+	const alms = await almsService.feedThePoor(stadtId, tick);
 
 	const hazard = await hazardService.strike(stadtId, tick, roll);
 	const deaths = await lifecycleService.reapTheDead(tick, roll);
@@ -123,6 +128,7 @@ export async function tickWorld(tick: number, options: WorldTickOptions = {}): P
 		tax,
 		stipends,
 		orphans,
+		alms,
 		hazard,
 		deaths
 	};

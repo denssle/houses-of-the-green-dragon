@@ -97,7 +97,9 @@ export const KASSENABFLUESSE = [
 	/** Die Aufwandsentschädigung an einen Amtsinhaber (4.7b). */
 	'STIPEND',
 	/** Brot für die Waisen, gezahlt an den, der es verkauft hat (0.7.0). */
-	'ORPHAN_CARE'
+	'ORPHAN_CARE',
+	/** Die Armenspeisung: Brot für Hungernde ohne Geld, gezahlt an den Verkäufer (0.11.0). */
+	'ALMS'
 ] as const;
 
 export type Kassenzufluss = (typeof KASSENZUFLUESSE)[number];

@@ -6,6 +6,7 @@ import {
 	nextStipendChange,
 	nextTaxChange,
 	relievedTax,
+	surplusTax,
 	TAX_FAT_YEAR_SHORTFALL,
 	TAX_RELIEF_SHORTFALL,
 	STIPEND_EFFECT_DELAY,
@@ -239,10 +240,19 @@ describe('Was ein Bürgermeister tut', () => {
 				rates: { PROPERTY_TAX: 4, TITHE: LAW_RULES.TITHE.fallback }
 			});
 
-			expect(nextTaxChange(reich)).toEqual({
-				kind: 'PROPERTY_TAX',
-				value: 4 - TAX_RAISE_STEP_COIN
-			});
+			// Seit 0.11.0 im Verhältnis zum Überschuss: Die Kasse hält das Zweieinhalbfache
+			// ihres Ziels, also bleiben zwei Fünftel des Satzes.
+			expect(nextTaxChange(reich)).toEqual({ kind: 'PROPERTY_TAX', value: 1 });
+		});
+
+		it('senkt im Verhältnis zum Überschuss, nicht um eine Münze im Jahr', () => {
+			// Grünau im Nachbau: 2000 Münzen in der Kasse bei einem Ziel von 480.
+			expect(surplusTax(16, 2000, 480, 1, 0)).toBe(3);
+			// Knapp über dem Ziel: mindestens ein Schritt.
+			expect(surplusTax(10, 500, 480, 1, 0)).toBe(9);
+			// Der Zehnt in ganzen Schritten zu fünf Prozent.
+			expect(surplusTax(30, 1440, 480, 5, 0)).toBe(10);
+			expect(surplusTax(1, 5000, 480, 1, 0)).toBe(0);
 		});
 
 		it('bleibt im Mittelfeld, wo sie ist', () => {
@@ -388,10 +398,7 @@ describe('Was ein Bürgermeister tut', () => {
 					taxShortfallShare: 0
 				});
 
-				expect(nextTaxChange(reich)).toEqual({
-					kind: 'PROPERTY_TAX',
-					value: 8 - TAX_RAISE_STEP_COIN
-				});
+				expect(nextTaxChange(reich)).toEqual({ kind: 'PROPERTY_TAX', value: 3 });
 			});
 		});
 

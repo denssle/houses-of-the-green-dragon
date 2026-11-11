@@ -183,6 +183,35 @@ export const TAX_RELIEF_SHORTFALL = 0.1;
 export const TAX_FAT_YEAR_SHORTFALL = 0.02;
 
 /**
+ * **Wie viel eine Stadt halten soll: das Doppelte der Rücklage, nicht mehr** (0.11.0, Punkt 122).
+ *
+ * Eine Stadt ist kein Geschäft, ihr Ziel ist kein Gewinn. Bis 0.10.0 senkte das Amt erst ab
+ * dem Vierfachen und dann um eine Münze im Jahr — im Nachbau von Grünau sammelte die Kasse so
+ * in elf Spieljahren gut 1500 Münzen Überschuss an, ein Viertel mehr, als sie ausgab, und das
+ * Geld fehlte Bäckern, Müllern und Bauern für Löhne und Einkauf, bis kein Brot mehr gebacken
+ * wurde. Ohne Grundsteuer war der Haushalt ausgeglichen (4531 ein, 4407 aus) und die Stadt
+ * gesund.
+ */
+export const TREASURY_TARGET_FACTOR = 2;
+
+/**
+ * Der Satz bei voller Kasse: **im Verhältnis zum Überschuss.** Hält die Kasse das Fünffache
+ * des Ziels, bleibt ein Fünftel des Satzes — die Einnahmen schrumpfen ungefähr auf das, was
+ * gebraucht wird. Mindestens ein Schritt weniger, nie unter das Minimum; beim Zehnt in
+ * ganzen Schritten (fünf Prozent).
+ */
+export function surplusTax(
+	satz: number,
+	kasse: number,
+	ziel: number,
+	schritt: number,
+	minimum: number
+): number {
+	const anteilig: number = Math.floor((satz * ziel) / kasse / schritt) * schritt;
+	return Math.max(minimum, Math.min(satz - schritt, anteilig));
+}
+
+/**
  * Der Satz nach einem knappen Jahr: **ungefähr das, was die Leute zahlen konnten.** Wer bei
  * 19 Münzen ein Viertel schuldig blieb, landet bei 14 — und nicht, wie bis 0.9.4, ein
  * Spieljahr später bei 18. Mindestens eine Münze weniger, nie unter das Minimum.
@@ -323,7 +352,8 @@ export function nextTaxChange(state: CityState): TaxChange | undefined {
 	const fett: boolean = ausfall === null || ausfall <= TAX_FAT_YEAR_SHORTFALL;
 
 	const knapp: boolean = state.treasury < ruecklage;
-	const ueppig: boolean = state.treasury > ruecklage * 4;
+	const ziel: number = ruecklage * TREASURY_TARGET_FACTOR;
+	const ueppig: boolean = state.treasury > ziel;
 	if (!knapp && !ueppig) return undefined;
 
 	const hebel = NPC_MAYOR_LAWS.filter(
@@ -342,7 +372,7 @@ export function nextTaxChange(state: CityState): TaxChange | undefined {
 			return { kind, value: Math.min(grenzen.max, satz + schritt) };
 		}
 		if (ueppig && satz > grenzen.min) {
-			return { kind, value: Math.max(grenzen.min, satz - schritt) };
+			return { kind, value: surplusTax(satz, state.treasury, ziel, schritt, grenzen.min) };
 		}
 	}
 	return undefined;

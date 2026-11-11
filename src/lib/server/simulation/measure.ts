@@ -290,6 +290,8 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 	const muessiggangGenau: Record<string, number> = {};
 	const geldJeHandlung: Record<string, { ein: number; aus: number }> = {};
 	const chronik = { geburten: 0, tode: 0, zuzug: 0, braende: 0, steuer: 0, ausgefallen: 0 };
+	/** **Was die Kasse an Hungernde zurückgab** (0.11.0, Punkt 122). */
+	const armenspeisung = { mahlzeiten: 0, leer: 0, ausgegeben: 0, armengeld: 0, bedacht: 0 };
 	/**
 	 * **Das Amt** (0.8.4). Bis hierher sagte der Bericht nichts darüber, ob überhaupt jemand
 	 * regiert und was er tut — und dann ließ sich nicht unterscheiden, ob kein Bauland
@@ -557,6 +559,11 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 		}
 		chronik.steuer += stunde.tax?.collected ?? 0;
 		chronik.ausgefallen += stunde.tax?.shortfall ?? 0;
+		armenspeisung.mahlzeiten += stunde.alms.meals;
+		armenspeisung.leer += stunde.alms.unfed;
+		armenspeisung.ausgegeben += stunde.alms.spent;
+		armenspeisung.armengeld += stunde.alms.paid;
+		armenspeisung.bedacht += stunde.alms.relieved;
 
 		const inhaber = await electionService.getHolder(stadtId);
 		if (!inhaber) amt.ohneInhaber++;
@@ -649,6 +656,9 @@ export async function measure(options: MeasureOptions): Promise<Measurement> {
 			`${todeNach(todesursachen)}, Zuzug ${chronik.zuzug}, Brände ${chronik.braende}`,
 		`  Frauen-Ticks im Alter: ${frauenZeile(frauenGesamt)}`,
 		`  Grundsteuer eingenommen ${chronik.steuer}, nicht eintreibbar ${chronik.ausgefallen}`,
+		`  Armenspeisung: ${armenspeisung.mahlzeiten} Mahlzeiten für ${armenspeisung.ausgegeben} Münzen, ` +
+			`Armengeld ${armenspeisung.bedacht}× für ${armenspeisung.armengeld} Münzen, ` +
+			`${armenspeisung.leer}× leer ausgegangen`,
 		// **Was die Erschließung wirklich tut** (5.92, Punkt 102). Seit sie Arbeit ist statt
 		// eines Preises, sagt das Kassenbuch nichts mehr über sie: Ihr Lohn steht unter
 		// `WAGE`, zusammen mit jedem anderen Handschlag. Ohne diese Zeile wäre aus dem

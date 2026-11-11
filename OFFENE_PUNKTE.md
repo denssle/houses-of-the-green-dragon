@@ -61,7 +61,7 @@ offenen, nach Nummer sortiert.
 | 119 | Die zweite Stadt — alles Regionsblinde wird regionsfähig                                           | 31                         | Entwurf     |
 | 120 | Fernhandel — Lieferungen mit Ankunft, Preisunterschiede zwischen Städten                           | 41, 119                    | Entwurf     |
 | 121 | Weniger Geburten bei Saat 86 seit 0.5.111 — Zufall oder Mechanismus?                               | —                          | Befund      |
-| 122 | Die Hungersnot von Grünau — **Steuerregel seit 0.10.0**; die Kasse hortet, die Armenspeisung offen | —                          | Befund      |
+| 122 | Die Hungersnot von Grünau — **behoben mit 0.11.0**: 0 statt 18 Hungertote; offen: das Zehnt-Pendel | —                          | Befund      |
 | 124 | Bauland entsteht zu langsam — **Mitarbeit gebaut mit 0.9.1**; die Kasse trägt es knapp             | —                          | teilweise   |
 | 125 | Familien ziehen zu — **gebaut mit 0.9.0**; jetzt fehlen ledige Männer                              | —                          | teilweise   |
 | 126 | Zufriedenheit am Charakter — Grundlage für Amt, Wahl, Kündigen und Wegzug                          | 122                        | Entwurf     |
@@ -2003,7 +2003,7 @@ mit Bretter am Markt auch reparieren, ist offen: Mehrere haben keine Münze.
 jetzt da sind. Die Frage dahinter (brennt das Handwerk ab, oder entsteht es nie?) gehört zu
 Punkt 103 und wird am nächsten vollen Lauf entschieden, nicht hier.
 
-### 122. Die Hungersnot von Grünau — die Steuer stößt sie an, die Kasse hält sie fest
+### 122. Die Hungersnot von Grünau — behoben mit 0.11.0, der Zehnt springt noch
 
 **Nicht zu verwechseln mit Punkt 100** (`ERLEDIGTE_PUNKTE.md`), „Die Stadt verhungert an ihrer
 eigenen Steuer“: Der war ein Befund aus dem Messlauf und ist erledigt. Dieser hier ist in der
@@ -2061,11 +2061,39 @@ Bürger zusammen 2541 — die Stadt besaß die Hälfte des Geldes der Welt, und 
 sie am vollsten war. Ohne Steuer stand sie bei 0 bis 400. Ausgegeben wird sie nur für Löhne und
 das Amtsgehalt.
 
-**Offen, und als Nächstes dran: Die Kasse muss zurückgeben.** Vorgesehen ist eine
-Armenspeisung — die Stadt kauft bei voller Kasse Brot am Markt und verteilt es an Hungernde.
-Historisch belegt (Almosen, Spital), trifft genau die, die es brauchen, und das Geld landet bei
-Bäcker und Bauer statt im Kasten. Danach Punkt 126: Mit einer Zufriedenheit sieht der
-Bürgermeister mehr als den Ausfall.
+**Die Armenspeisung allein half kaum** (11 statt 13 Hungertote): Über tausendmal ging sie leer
+aus, obwohl die Kasse voll war — **es gab kein Brot zu kaufen.** Die Steuer hatte Bäckern,
+Müllern und Bauern das Geld für Lohn und Mehl genommen (Saat 2: 170-mal hergestellt statt 1027,
+`EMPLOYER_BROKE:Bäckerei` 192 statt 28), und am Ende lag kein Laib am Markt. Das Kassenbuch
+zeigte den Grund: Die gesunde Stadt ohne Grundsteuer hatte einen ausgeglichenen Haushalt (4531
+ein, 4407 aus), die kranke ein Viertel Überschuss (7912 ein, 6234 aus).
+
+**Gebaut mit 0.11.0 — eine Stadt will keinen Gewinn:**
+
+- **Das Haushaltsziel** (`TREASURY_TARGET_FACTOR`, `surplusTax`): Die Kasse soll höchstens das
+  Doppelte der Rücklage halten. Darüber sinkt die Steuer im Verhältnis zum Überschuss statt um
+  eine Münze im Jahr — 2000 in der Kasse bei einem Ziel von 480 senken 16 auf 3.
+- **Die Armenspeisung** (`almsService`, Posten `ALMS`): Wer geschwächt ist, nichts daheim hat
+  und sich kein Brot leisten kann, wird in der Unterkunft gespeist — mit Brot, das die Stadt am
+  Markt kauft. Liegt keines aus, gibt es **Armengeld** für drei Laibe; bei Kindern an den, der
+  sie versorgt. Nur aus dem, was über der Rücklage liegt; wer danach Geld für Brot hat, ist
+  nicht mehr bedürftig.
+
+**Ergebnis im Nachbau** (gleiche Sicherung, gleiche Saaten): **0 Hungertote** (0/0/0) statt 18.
+Die Kasse blieb meist bei 800 bis 1200 statt 2000 bis 3000, die Leute behielten 3200 bis 5400
+statt 1500 bis 2800, und am Ende lebten 46 bis 53 statt 34 bis 42. Das Armengeld wurde kaum
+gebraucht (33 Auszahlungen, 396 Münzen) — die Arbeit macht das Haushaltsziel, das Armengeld
+fängt den Rest.
+
+**Offen: Der Zehnt springt.** Er darf in jedem Tick um fünf Prozent steigen (`TAX_EFFECT_DELAY`
+ist für ihn null, weil er bei jeder Ernte greift). In Saat 1 stand er bei null und stieg, als die
+Kasse am Ende unter die Rücklage fiel, binnen weniger Ticks auf 30 %. Für die Bauern ist das ein
+Schlag, den das Haushaltsziel danach wieder wegnimmt — ein Pendel statt einer Regel.
+
+**Ebenfalls offen:** Die Läufe brauchten 1400 statt 1000 Sekunden. Es lebten deutlich mehr
+Leute; wie viel die Armenspeisung selbst kostet, ist nicht getrennt gemessen (Punkt 67).
+
+Danach Punkt 126: Mit einer Zufriedenheit sieht der Bürgermeister mehr als den Ausfall.
 
 **Zu beobachten nach dem Deploy:** Das Waisenhaus lebt vom Brot am Markt, und dort lagen am
 07.11. nur zwei Laibe. Die Zeile `Waisen ohne Versorgung` im Log zeigt, wenn das nicht reicht.
@@ -2395,6 +2423,10 @@ wie die Zuneigung: Ein hungriger Tag treibt niemanden fort, ein hungriges Jahr s
   ehrgeiziger Bürgermeister einen Grund für Steuergeschenke, gerade vor der Wahl. Gehört zu
   Punkt 47 (Ruf aus Taten, hier aus der Amtsführung). Die Wahl allein reicht als Bremse nicht:
   Sie kommt alle fünf Jahre, die Hungerwelle von 2026 war in fünf Jahren durch.
+  **Auch Auszahlungen zählen** (Wunsch vom 10.11.2026): Armenspeisung und Armengeld aus
+  0.11.0 sollen die Beliebtheit des Amtsinhabers heben — wer in der Not hilft, wird
+  wiedergewählt. Das ist zugleich die Bremse gegen das Horten: Eine volle Kasse bringt keine
+  Stimmen, eine, die in der Not gibt, schon.
 - **Kündigen:** Wer unzufrieden ist und anderswo eine Stelle sieht, geht. Bisher kann nur der
   Arbeitgeber das Verhältnis beenden. Gehört zu Punkt 33.
 - **Wegziehen:** Punkt 127.
