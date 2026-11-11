@@ -15,10 +15,19 @@
 #
 # Die krumme Minute mit Absicht: Zur vollen Stunde laufen auf einem geteilten Host die
 # Aufgaben aller Nutzer gleichzeitig.
+#
+# **Die Zeile ohne das Kommentarzeichen eintragen.** Von August bis zum 11.11.2026 stand
+# sie genau so in der Crontab, wie sie hier steht — mit `#` davor. Es gab in der Zeit eine
+# einzige tägliche Sicherung, einen Probelauf von Hand, und niemand merkte es, weil der
+# Dump vor jedem Deploy die Lücke verdeckte. Nachsehen: `crontab -l` und
+# `tail ~/logs/backup.log` — fehlt das Log, ist die Sicherung nie gelaufen.
 
 set -euo pipefail
 
-DB="${HOUSES_DB:-${USER}_houses}"
+# **Nicht `$USER` allein** (0.11.1): Cron setzt verlässlich nur `LOGNAME` und `HOME`. In einer
+# leeren Umgebung brach das Skript mit „USER: unbound variable" ab, bevor es irgendetwas
+# sicherte.
+DB="${HOUSES_DB:-${USER:-${LOGNAME:-$(id -un)}}_houses}"
 ZIEL="${HOUSES_BACKUP_DIR:-$HOME/backups/houses}"
 # Wie viele tägliche Sicherungen liegen bleiben. Vierzehn wie beim Deploy-Dump: lang
 # genug, dass ein Schaden auffällt, kurz genug für den Plattenplatz.
